@@ -4,7 +4,7 @@ By: **Morteza Zakeri**†
 
 † Ph.D. Student, Iran University of Science and Technology, Tehran, Iran (m-zakeri@live.com).
 
-Version 0.1.0 (8 November 2020) ├ [PDF](./pdfs/project_proposal_v1z.pdf)
+Version 0.1.0 (8 November 2020) ├ Download [PDF](./pdfs/project_proposal_v1z.pdf) version
 
 
 **Abstract—** Software refactoring is performed by changing the software structure without modifying its external behavior. Many software quality attributes can be enhanced through the source code refactoring, such as reusability, flexibility, understandability, and testability. Refactoring engines are tools that automate the application of refactorings: first, the user chooses a refactoring to apply, then the engine checks if the transformation is safe, and if so, transforms the program. Refactoring engines are a key component of modern Integrated Development Environments (IDEs), and programmers rely on them to perform refactorings. In this project, an open-source software toolkit for refactoring Java source codes, namely CodART, will be developed. ANTLR parser generator is used to create and modify the program syntax-tree and produce the refactored version of the program. To the best of our knowledge, CodART is the first open-source refactoring toolkit based on ANTLR.
@@ -12,7 +12,7 @@ Version 0.1.0 (8 November 2020) ├ [PDF](./pdfs/project_proposal_v1z.pdf)
 **Index Terms:** Software refactoring, refactoring engine, search-based refactoring, ANTLR, Java.
 
 ## 1 Introduction
-**R**efactoring is a behavior-preserving program transformation that improves the design of a program. Refactoring engines are tools that automate the application of refactorings. The programmer need only select which refactoring to apply, and the engine will automatically check the *preconditions* and apply the transformations across the entire program if the preconditions are satisfied. Refactoring is gaining popularity, as evidenced by the inclusion of refactoring engines in modern IDEs such as IntelliJ IDEA[^1] , Eclipse[^2], or NetBeans[^3] for Java.
+**R**efactoring is a behavior-preserving program transformation that improves the design of a program. Refactoring engines are tools that automate the application of refactorings. The programmer need only select which refactoring to apply, and the engine will automatically check the *preconditions* and apply the transformations across the entire program if the preconditions are satisfied. Refactoring is gaining popularity, as evidenced by the inclusion of refactoring engines in modern IDEs such as [IntelliJ IDEA](https://www.jetbrains.com/idea/), [Eclipse](http://www.eclipse.org), or [NetBeans](http://www.netbeans.org) for Java.
 
 Considering the *EncapsulateField* refactoring as an illustrative example. This refactoring replaces all references to a field with accesses through setter and getter methods. The *EncapsulateField* refactoring takes as input the name of the field to encapsulate and the names of the new getter and setter methods. It performs the following transformations:
 
@@ -147,7 +147,7 @@ Refactorings are applied to software systems listed in Table 2. Datasets may cha
 
 Students must form groups of up to three persons, and each group must implement several refactoring operations. The exact list of refactoring will be assigned to each group subsequently. The refactoring operations in Table 1 may update during the semester. 
 
-As an example of refactoring automation, we have implemented the EncapsulateField refactoring, illustrated in Figure 1. A naïve implementation is available on the project official Github page at [https://m-zakeri.github.io/CodART](https://m-zakeri.github.io/CodART). In addition, 26 refactoring operations in Table 1 have been implemented by MultiRefactor[^4] [7] based on RECODER[^5], three of them have been implemented by JDeodrant [8], and other operations have been automated in  [3], [6]. RECODER extracts a model of the code that can be used to analyze and modify the code before the changes are applied and written to file. The tool takes Java source code as input and will output the modified source code to a specified folder. The input must be fully compilable and must be accompanied by any necessary library files as compressed jar files.
+As an example of refactoring automation, we have implemented the EncapsulateField refactoring, illustrated in Figure 1. A naïve implementation is available on the project official Github page at [https://m-zakeri.github.io/CodART](https://m-zakeri.github.io/CodART). In addition, 26 refactoring operations in Table 1 have been implemented by [MultiRefactor](https://github.com/mmohan01/MultiRefactor) [7] based on [RECODER](http://sourceforge.net/projects/recoder), three of them have been implemented by JDeodrant [8], and other operations have been automated in  [3], [6]. RECODER extracts a model of the code that can be used to analyze and modify the code before the changes are applied and written to file. The tool takes Java source code as input and will output the modified source code to a specified folder. The input must be fully compilable and must be accompanied by any necessary library files as compressed jar files.
 
 ### 4.5	Grading policy
 
@@ -169,7 +169,7 @@ Table 3 shows the grading policy. Grading policy may change in the future.
 Software refactoring is used to reduce the costs and risks of software evolution. Automated software refactoring tools can reduce risks caused by manual refactoring, improve efficiency, and reduce software refactoring difficulties. Researchers have made great efforts to research how to implement and improve automated software refactoring tools. However, the results of automated refactoring tools often deviate from the intentions of the implementer. The goal of this project is to propose an open-source refactoring engine and toolkit that can automatically find the best refactoring sequence required for a given software and apply this sequence. Since the tool is work based on compiler principles, it is reliable to be used in practice and has many benefits for software developer companies. Students who participate in the project will learn compiler techniques such as lexing, parsing, source code analysis, and source code transformation. They also learn about software refactoring, search-based software engineering, optimization, software quality, and object-orient metrics. 
 
 ### Conflict of interest
-The project is supported by the IUST Reverse Engineering Research Laboratory[^6]. Interested students may continue working on this project to fulfill their final bachelor and master thesis or their internship.
+The project is supported by the (IUST Reverse Engineering Research Laboratory)[http://reverse.iust.ac.ir]. Interested students may continue working on this project to fulfill their final bachelor and master thesis or their internship.
 
 
 ## References
@@ -191,12 +191,6 @@ The project is supported by the IUST Reverse Engineering Research Laboratory[^6]
 [8]	N. Tsantalis, T. Chaikalis, and A. Chatzigeorgiou, “Ten years of JDeodorant: lessons learned from the hunt for smells,” in 2018 IEEE 25th International Conference on Software Analysis, Evolution and Reengineering (SANER), 2018, pp. 4–14.
 
 
-
-
-#### Read more
-For any question please contact me `m-zakeri@live.com`
-
-
 #### Related links
 
 [IUST compiler course official webpage](http://parsa.iust.ac.ir/courses/compilers/)
@@ -208,17 +202,19 @@ ANTLR slides: PART 2: [Getting started in Java](http://parsa.iust.ac.ir/download
 ANTLR slides: PART 3: [Getting started in C#](http://parsa.iust.ac.ir/download_center/courses_material/compilers/slides/ANTLR_part3_getting_started_in_CSharp.pdf)
 
 
-#### Footnotes
+#### Endnotes
 
-[^1] [https://www.jetbrains.com/idea/](https://www.jetbrains.com/idea/)
+[1] [https://www.jetbrains.com/idea/](https://www.jetbrains.com/idea/)
 
-[^2] [http://www.eclipse.org](http://www.eclipse.org)
+[2] [http://www.eclipse.org](http://www.eclipse.org)
 
-[^3] [http://www.netbeans.org](http://www.netbeans.org)
+[3] [http://www.netbeans.org](http://www.netbeans.org)
 
-[^4] [https://github.com/mmohan01/MultiRefactor](https://github.com/mmohan01/MultiRefactor) 
+[4] [https://github.com/mmohan01/MultiRefactor](https://github.com/mmohan01/MultiRefactor) 
 
-[^5] [http://sourceforge.net/projects/recoder](http://sourceforge.net/projects/recoder) 
+[5] [http://sourceforge.net/projects/recoder](http://sourceforge.net/projects/recoder) 
 
-[^6] [http://reverse.iust.ac.ir](http://reverse.iust.ac.ir) 
+[6] [http://reverse.iust.ac.ir](http://reverse.iust.ac.ir) 
 
+#### FAQ
+For any question please contact `m-zakeri@live.com`
