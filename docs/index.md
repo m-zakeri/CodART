@@ -1,4 +1,4 @@
-# Source Code Automated Refactoring Toolkit (CodART)
+# Automated Source Code Refactoring Toolkit (CodART)
 
 By: **Morteza Zakeri**†
 

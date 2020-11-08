@@ -1,5 +1,5 @@
 theme: jekyll-theme-minimal
-title: "IUST Compilers"
-description: "Sample projects in compiler course"
+title: "IUST CodART"
+description: "Automated Source Code Refactoring Toolkit"
 logo: "./figs/logo.png"
 show_downloads: "true"
