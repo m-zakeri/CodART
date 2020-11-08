@@ -1,0 +1,5 @@
+theme: jekyll-theme-minimal
+title: "IUST Compilers"
+description: "Sample projects in compiler course"
+logo: "./figs/logo.png"
+show_downloads: "true"
