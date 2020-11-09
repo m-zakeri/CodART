@@ -1,5 +1,6 @@
 """
-Main script for grammer Java9_v2 (version 2)
+Main script for grammar Java9_v2 (version 2)
+A driver code to evaluate simple automated refactoring
 
 @author: Morteza Zakeri, (http://webpages.iust.ac.ir/morteza_zakeri/)
 @date: 20201107
@@ -37,7 +38,6 @@ def main(args):
     print('Input stream:')
     print(stream)
 
-
     # Step 2: Create an instance of AssignmentStLexer
     lexer = Java9_v2Lexer(stream)
     # Step 3: Convert the input source into a list of tokens
@@ -57,8 +57,6 @@ def main(args):
 
     with open('A.refactored.java', mode='w', newline='') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
-
-
 
 
 if __name__ == '__main__':

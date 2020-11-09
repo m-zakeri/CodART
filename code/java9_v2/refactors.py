@@ -1,6 +1,10 @@
 """
 The scripts implements different refactoring operations
 
+-Changelog:
+-- v1.0.0
+--- Add EncapsulateField refactoring
+
 
 """
 __version__ = '0.1.0'
