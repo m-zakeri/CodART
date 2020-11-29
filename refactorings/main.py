@@ -1,34 +1,10 @@
-"""
-Main script for grammar Java9_v2 (version 2)
-A driver code to evaluate simple automated refactoring
-
-@author: Morteza Zakeri, (http://webpages.iust.ac.ir/morteza_zakeri/)
-@date: 20201107
-
-- Compiler generator:   ANTRL4.x
-- Target language(s):   Python3.x,
-
-
--Changelog:
--- v4.2
---- Add name for grammar rules extensions
---- Remove Java attributes from grammar file.
-
-- Course website:   http://parsa.iust.ac.ir/courses/compilers/
-- Laboratory website:   http://reverse.iust.ac.ir/
-
-"""
-
-__version__ = '0.1.0'
-__author__ = 'Morteza'
+import argparse
 
 from antlr4 import *
 
-from code.java9_v2.gen.Java9_v2Lexer import Java9_v2Lexer
-from code.java9_v2.gen.Java9_v2Parser import Java9_v2Parser
-from code.java9_v2.refactors import EncapsulateFiledRefactoringListener
-
-import argparse
+from refactorings.encapsulate_field import EncapsulateFiledRefactoringListener
+from refactorings.gen.Java9_v2Lexer import Java9_v2Lexer
+from refactorings.gen.Java9_v2Parser import Java9_v2Parser
 
 
 def main(args):
@@ -55,7 +31,7 @@ def main(args):
     print('Compiler result:')
     print(my_listener.token_stream_rewriter.getDefaultText())
 
-    with open('A.refactored.java', mode='w', newline='') as f:
+    with open('./gen/input.refactored.java', mode='w', newline='') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
 
 
@@ -63,6 +39,6 @@ if __name__ == '__main__':
     argparser = argparse.ArgumentParser()
     argparser.add_argument(
         '-n', '--file',
-        help='Input source', default=r'A.java')
+        help='Input source', default=r'./gen/input.java')
     args = argparser.parse_args()
     main(args)

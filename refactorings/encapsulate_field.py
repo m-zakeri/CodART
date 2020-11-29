@@ -1,22 +1,8 @@
-"""
-The scripts implements different refactoring operations
-
--Changelog:
--- v1.0.0
---- Add EncapsulateField refactoring
-
-
-"""
-__version__ = '0.1.0'
-__author__ = 'Morteza'
-
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
-from code.java9_v2.gen.Java9_v2Lexer import Java9_v2Lexer
-from code.java9_v2.gen.Java9_v2Parser import Java9_v2Parser
-from code.java9_v2.gen.Java9_v2Listener import Java9_v2Listener
-from code.java9_v2.gen.Java9_v2Visitor import Java9_v2Visitor
+from refactorings.gen.Java9_v2Parser import Java9_v2Parser
+from refactorings.gen.Java9_v2Listener import Java9_v2Listener
 
 
 class EncapsulateFiledRefactoringListener(Java9_v2Listener):
@@ -24,6 +10,7 @@ class EncapsulateFiledRefactoringListener(Java9_v2Listener):
     To implement the encapsulate filed refactored
     Encapsulate field: Make a public field private and provide accessors
     """
+
     def __init__(self, common_token_stream: CommonTokenStream = None,
                  field_identifier: str = None):
         """
@@ -85,3 +72,4 @@ class EncapsulateFiledRefactoringListener(Java9_v2Listener):
         self.token_stream_rewriter.replaceRange(from_idx=hidden[0].tokenIndex,
                                                 to_idx=hidden[-1].tokenIndex,
                                                 text='/*After refactoring (Refactored version)*/\n')
+
