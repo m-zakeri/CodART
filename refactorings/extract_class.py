@@ -80,18 +80,19 @@ class ExtractClassRecognizerListener(Java9_v2Listener):
         for class_ in S:
             # print('class_', class_.nodes.data())
             class_fields = [node for node in class_.nodes if class_.in_degree(node) == 0]
-            class_methods = [(class_.nodes[node]['method_name'], node) for node in class_.nodes if class_.in_degree(node) > 0]
+            class_methods = [(class_.nodes[node]['method_name'], node) for node in class_.nodes if
+                             class_.in_degree(node) > 0]
             print('class_fields', class_fields)
             print('class_methods', class_methods)
-            print('-'*10)
+            print('-' * 10)
 
-# Enter a parse tree produced by Java9_v2Parser#normalClassDeclaration.
+    # Enter a parse tree produced by Java9_v2Parser#normalClassDeclaration.
     def enterNormalClassDeclaration(self, ctx: Java9_v2Parser.NormalClassDeclarationContext):
         if ctx.identifier().getText() != self.class_identifier:
             return
         self.enter_class = True
 
-# Exit a parse tree produced by Java9_v2Parser#normalClassDeclaration.
+    # Exit a parse tree produced by Java9_v2Parser#normalClassDeclaration.
     def exitNormalClassDeclaration(self, ctx: Java9_v2Parser.NormalClassDeclarationContext):
         self.enter_class = False
         print("----------------------------")
@@ -144,4 +145,76 @@ class ExtractClassRecognizerListener(Java9_v2Listener):
 class ExtractClassRefactoringListener(Java9_v2Listener):
     """
     To implement extract class refactoring based on its actors.
+    Creates a new class and move fields and methods from the old class to the new one
     """
+
+    def __init__(
+            self, common_token_stream: CommonTokenStream = None,
+            source_class: str = None, new_class: str = None,
+            moved_fields=None, moved_methods=None):
+        if moved_methods is None:
+            self.moved_methods = []
+        else:
+            self.moved_methods = moved_methods
+        if moved_fields is None:
+            self.moved_fields = []
+        else:
+            self.moved_fields = moved_fields
+
+        if common_token_stream is None:
+            raise ValueError('common_token_stream is None')
+        else:
+            self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
+
+        if source_class is None:
+            raise ValueError("source_class is None")
+        else:
+            self.source_class = source_class
+        if new_class is None:
+            raise ValueError("new_class is None")
+        else:
+            self.new_class = new_class
+
+        self.is_source_class = False
+        self.detected_field = None
+        self.detected_method = None
+        self.code = ""
+
+    def enterNormalClassDeclaration(self, ctx:Java9_v2Parser.NormalClassDeclarationContext):
+        class_identifier = ctx.identifier().getText()
+        if class_identifier == self.source_class:
+            self.is_source_class = True
+            self.code += f"class {self.new_class}\n" + "{\n"
+        else:
+            self.is_source_class = False
+
+    def exitNormalClassDeclaration(self, ctx:Java9_v2Parser.NormalClassDeclarationContext):
+        if self.is_source_class:
+            print(self.code)
+            self.is_source_class = False
+
+    def enterVariableDeclaratorId(self, ctx:Java9_v2Parser.VariableDeclaratorIdContext):
+        if not self.is_source_class:
+            return None
+        field_identifier = ctx.identifier().getText()
+        if field_identifier in self.moved_fields:
+            print("Field Detected", field_identifier)
+            print("CTX", ctx.getText())
+            self.detected_field = field_identifier
+
+    def exitFieldDeclaration(self, ctx:Java9_v2Parser.FieldDeclarationContext):
+        if not self.is_source_class:
+            return None
+        if self.detected_field in ctx.variableDeclaratorList().getText().split(","):
+            modifier = ctx.fieldModifier(0).getText()
+            field_type = ctx.unannType().getText()
+            self.code += f"\t{modifier} {field_type} {self.detected_field};\n"
+
+    def enterMethodDeclarator(self, ctx:Java9_v2Parser.MethodDeclaratorContext):
+        if not self.is_source_class:
+            return None
+        method_identifier = ctx.identifier().getText()
+        if method_identifier in self.moved_methods:
+            print("Method Detected", method_identifier)
+            print("CTX", ctx.getText())
+
