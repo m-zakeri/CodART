@@ -19,12 +19,9 @@ from refactorings.gen.Java9_v2Visitor import Java9_v2Visitor
 import visualization.graph_visualization
 
 
-class ExtractClassRefactoringListener(Java9_v2Listener):
+class ExtractClassRecognizerListener(Java9_v2Listener):
     """
-    To implement the extract class refactoring
-    Encapsulate field: Make a public field private and provide accessors
-    a stream of tokens is sent to the listener, to build an object token_stream_rewriter
-    field addresses the field of the class, tobe encapsulated.
+    To detect whether class needs refactoring or not.
     """
 
     def __init__(self, common_token_stream: CommonTokenStream = None,
@@ -142,3 +139,9 @@ class ExtractClassRefactoringListener(Java9_v2Listener):
             return
         if not current_method in self.field_dict[variable_name]:
             self.field_dict[variable_name].append(current_method)
+
+
+class ExtractClassRefactoringListener(Java9_v2Listener):
+    """
+    To implement extract class refactoring based on its actors.
+    """

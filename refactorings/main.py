@@ -3,7 +3,7 @@ import argparse
 from antlr4 import *
 
 from refactorings.encapsulate_field import EncapsulateFiledRefactoringListener
-from refactorings.extract_class import ExtractClassRefactoringListener, FindUsagesListener
+from refactorings.extract_class import ExtractClassRecognizerListener
 from refactorings.gen.Java9_v2Lexer import Java9_v2Lexer
 from refactorings.gen.Java9_v2Parser import Java9_v2Parser
 
@@ -23,18 +23,17 @@ def main(args):
     # Step 5: Create parse tree
     parse_tree = parser.compilationUnit()
     # Step 6: Create an instance of AssignmentStListener
-    my_listener = ExtractClassRefactoringListener(common_token_stream=token_stream, class_identifier='A')
-    find_usages = FindUsagesListener(initial_class=my_listener.class_identifier, common_token_stream=token_stream)
+    my_listener = ExtractClassRecognizerListener(common_token_stream=token_stream, class_identifier='A')
     walker = ParseTreeWalker()
     # walker.walk(t=parse_tree, listener=my_listener)
     # print(my_listener.field_dict)
-    walker.walk(t=parse_tree, listener=find_usages)
+    walker.walk(t=parse_tree, listener=my_listener)
 
     print('Compiler result:')
-    print(find_usages.token_stream_rewriter.getDefaultText())
+    print(my_listener.token_stream_rewriter.getDefaultText())
 
     with open('input.refactored.java', mode='w', newline='') as f:
-        f.write(find_usages.token_stream_rewriter.getDefaultText())
+        f.write(my_listener.token_stream_rewriter.getDefaultText())
 
 
 if __name__ == '__main__':
