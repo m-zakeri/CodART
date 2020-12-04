@@ -1,36 +1,29 @@
 /* Before refactoring (Original version) */
 class A
 {
-    public int f; /* public field */
-    public int g;
-    public float k;
-    public float t;
+    public int f; /* printF , printF, */
+    public int g; /* printF, printG */
+    public string h; /* printH */
 
-    void m(int i)
+    // Method 1
+    void printF(int i)
     {
-        // works on f,k
         this.f = i * this.f;
-        this.k = 67 + this.f;
     }
 
-    int m2(float j)
-    {
-        // works on t,g
-        this.g = j*2 ;
-        this.t = this.g * 3;
-    }
-}
-
-class B
-{
-    public B()
-    {
-        A instance = new A();
-        instance.m2(2.3);
+    // Method 2
+    void printF(float i){
+        this.f = (int) (i * this.f);
+        this.g = (int) (i * this.g);
     }
 
-    void j()
-    {
-        new C1().m2(3.5);
+    // Method 3
+    void printG(){
+        print(this.g);
+    }
+
+    // Method 4
+    void printH(){
+        print(this.h);
     }
 }
