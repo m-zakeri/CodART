@@ -3,7 +3,7 @@ class A
 {
     public int f; /* printF , printF, */
     public int g; /* printF, printG */
-    public string h, l; /* printH */
+    public string h; /* printH */
 
     // Method 1
     void printF(int i)
