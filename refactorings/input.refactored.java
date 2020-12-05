@@ -27,3 +27,15 @@ class A
         print(this.h);
     }
 }
+
+class B 
+{
+    public int n; /* printF , printF, */
+
+    //Method 1*
+    void printN(int i)
+    {
+        this.n = i * this.n;
+    }
+
+}

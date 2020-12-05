@@ -44,9 +44,9 @@ class ExtractClassRefactoringListener(Java9_v2Listener):
         self.method_name = []  #
         self.method_no = 0
 
-    # Groups methods in terms of their dependncies on the class attributes and one another
+    # Groups methods in terms of their dependencies on the class attributes and one another
     def split_class(self):
-        # 1- move the dictionay of fields into a new dictionary of methods operating on fields
+        # 1- move the dictionary of fields into a new dictionary of methods operating on fields
         method_dict = {}
         for key, value in self.field_dict.items():
             for method in value:
