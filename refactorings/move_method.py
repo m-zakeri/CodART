@@ -197,7 +197,8 @@ class MoveMethodRefactoringListener(Java9_v2Listener):
 
     def exitOrdinaryCompilation(self, ctx: Java9_v2Parser.OrdinaryCompilationContext):
         print("Finished Processing...")
-        self.token_stream_rewriter.insertAfter(
+        self.token_stream_rewriter.insertBefore(
+            program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
             index=ctx.stop.tokenIndex,
             text=self.code
         )

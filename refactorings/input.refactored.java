@@ -36,7 +36,7 @@ class B
         this.n = i * this.n;
     }
 
-}
+
 
 // Method moved to class B  by CodART
 	public int g;
@@ -44,3 +44,4 @@ class B
 	void printG(){
         print(this.g);
     }
+}
