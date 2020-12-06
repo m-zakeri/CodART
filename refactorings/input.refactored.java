@@ -2,7 +2,7 @@
 class A
 {
     public int f; /* printF , printF, */
-    public int g; /* printF, printG */
+     /* printF, printG */
     public string h; /* printH */
 
     // Method 1
@@ -18,9 +18,7 @@ class A
     }
 
     // Method 3
-    void printG(){
-        print(this.g);
-    }
+    
 
     // Method 4
     void printH(){
@@ -38,4 +36,14 @@ class B
         this.n = i * this.n;
     }
 
+}
+
+// Method moved to class B  by CodART
+void ['printG']
+{
+	public int g;
+
+	void printG(){
+        print(this.g);
+    }
 }

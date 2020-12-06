@@ -3,7 +3,7 @@ import argparse
 from antlr4 import *
 
 from refactorings.encapsulate_field import EncapsulateFiledRefactoringListener
-# from refactorings.extract_class import ExtractClassRefactoringListener
+from refactorings.extract_class import ExtractClassRefactoringListener
 from refactorings.move_method import MoveMethodRefactoringListener
 from refactorings.gen.Java9_v2Lexer import Java9_v2Lexer
 from refactorings.gen.Java9_v2Parser import Java9_v2Parser
@@ -24,9 +24,13 @@ def main(args):
     # Step 5: Create parse tree
     parse_tree = parser.compilationUnit()
     # Step 6: Create an instance of AssignmentStListener
-    # my_listener = ExtractClassRefactoringListener(common_token_stream=token_stream, class_identifier='A')
+    # my_listener = ExtractClassRefactoringListener(
+    #     common_token_stream=token_stream, source_class='A', new_class='ANew',
+    #     moved_methods=['printH'], moved_fields=['h']
+    # )
     my_listener = MoveMethodRefactoringListener(common_token_stream=token_stream, source_class_identifier='A',
-                                                target_class_identifier='B', method_identifier='printG')
+                                                target_class_identifier='B', method_identifier=['printG'],
+                                                moved_fields=['g'])
     walker = ParseTreeWalker()
     walker.walk(t=parse_tree, listener=my_listener)
 
