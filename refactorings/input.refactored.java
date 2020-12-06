@@ -39,11 +39,8 @@ class B
 }
 
 // Method moved to class B  by CodART
-void ['printG']
-{
 	public int g;
 
 	void printG(){
         print(this.g);
     }
-}

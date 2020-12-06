@@ -187,14 +187,12 @@ class MoveMethodRefactoringListener(Java9_v2Listener):
             self.is_source_class = True
             self.code += self.NEW_LINE * 2
             self.code += f"// Method moved to class {self.target_class_identifier}  by CodART" + self.NEW_LINE
-            self.code += f"void {self.method_identifier}{self.NEW_LINE}" + "{" + self.NEW_LINE
         else:
             self.is_source_class = False
 
     # Exit a parse tree produced by Java9_v2Parser#normalClassDeclaration.
     def exitNormalClassDeclaration(self, ctx: Java9_v2Parser.NormalClassDeclarationContext):
         if self.is_source_class:
-            self.code += "}"
             self.is_source_class = False
 
     def exitOrdinaryCompilation(self, ctx: Java9_v2Parser.OrdinaryCompilationContext):
