@@ -267,6 +267,7 @@ class MoveMethodNewTreeRecognizerListener(Java9_v2Listener, MoveMethodRefactorin
     # Rewrite the saved methods in the target class
     def __init__(self, move_method_refactoring_listener):
         self.is_target_class = move_method_refactoring_listener.is_target_class
+        self.is_source_class = move_method_refactoring_listener.is_source_class
         self.code = move_method_refactoring_listener.code
         self.token_stream = move_method_refactoring_listener.common_token_stream
         if move_method_refactoring_listener.common_token_stream is not None:
