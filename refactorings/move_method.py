@@ -195,13 +195,13 @@ class MoveMethodRefactoringListener(Java9_v2Listener):
         if self.is_source_class:
             self.is_source_class = False
 
-    def exitOrdinaryCompilation(self, ctx: Java9_v2Parser.OrdinaryCompilationContext):
-        print("Finished Processing...")
-        self.token_stream_rewriter.insertBefore(
-            program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-            index=ctx.stop.tokenIndex,
-            text=self.code
-        )
+    # def exitOrdinaryCompilation(self, ctx: Java9_v2Parser.OrdinaryCompilationContext):
+    #     print("Finished Processing...")
+    #     self.token_stream_rewriter.insertBefore(
+    #         program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+    #         index=ctx.stop.tokenIndex,
+    #         text=self.code
+    #     )
 
     def enterVariableDeclaratorId(self, ctx: Java9_v2Parser.VariableDeclaratorIdContext):
         if not self.is_source_class:
@@ -261,3 +261,33 @@ class MoveMethodRefactoringListener(Java9_v2Listener):
                 to_idx=stop_index
             )
             self.detected_method = None
+
+
+class MoveMethodNewTreeRecognizerListener(Java9_v2Listener, MoveMethodRefactoringListener):
+    # Rewrite the saved methods in the target class
+    def __init__(self, move_method_refactoring_listener):
+        self.is_target_class = move_method_refactoring_listener.is_target_class
+        self.code = move_method_refactoring_listener.code
+        self.token_stream = move_method_refactoring_listener.common_token_stream
+        if move_method_refactoring_listener.common_token_stream is not None:
+            self.token_stream_rewriter = TokenStreamRewriter(move_method_refactoring_listener.common_token_stream)
+        else:
+            raise TypeError('common_token_stream is None')
+
+    def enterNormalClassDeclaration(self, ctx: Java9_v2Parser.NormalClassDeclarationContext):
+        print("Refactoring started, please wait...")
+        class_identifier = ctx.identifier().getText()
+        if class_identifier == self.target_class_identifier:
+            self.is_target_class = True
+            print("Finished Processing...")
+            self.token_stream_rewriter.insertAfter(
+                program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                index=ctx.stop.tokenIndex,
+                text=self.code)
+        else:
+            self.is_target_class = False
+
+        # Exit a parse tree produced by Java9_v2Parser#normalClassDeclaration.
+    def exitNormalClassDeclaration(self, ctx: Java9_v2Parser.NormalClassDeclarationContext):
+        if self.is_target_class:
+            self.is_target_class = False
