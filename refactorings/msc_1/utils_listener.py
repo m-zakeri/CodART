@@ -14,12 +14,13 @@ class UtilsListener(Java9Listener):
 
     def enterNormalClassDeclaration(self, ctx:Java9Parser.NormalClassDeclarationContext):
         print(ctx.identifier().getText())
-        if self.current_class_identifier is None:
+        if self.current_class_identifier is None and self.nest_count == 0:
             self.current_class_identifier = ctx.identifier().getText()
         else:
+            if self.nest_count == 0:
+                self.current_class_identifier_temp = self.current_class_identifier
+                self.current_class_identifier = None
             self.nest_count += 1
-            self.current_class_identifier_temp = self.current_class_identifier
-            self.current_class_identifier = None
 
     def exitNormalClassDeclaration(self, ctx:Java9Parser.NormalClassDeclarationContext):
         if self.current_class_identifier is not None:
