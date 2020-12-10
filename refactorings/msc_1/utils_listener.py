@@ -23,11 +23,10 @@ class UtilsListener(Java9Listener):
             self.nest_count += 1
 
     def exitNormalClassDeclaration(self, ctx:Java9Parser.NormalClassDeclarationContext):
-        if self.current_class_identifier is not None:
-            if self.nest_count > 0:
-                self.nest_count -= 1
-                if self.nest_count == 0:
-                    self.current_class_identifier = self.current_class_identifier_temp
-                    self.current_class_identifier_temp = None
-            else:
+        if self.nest_count > 0:
+            self.nest_count -= 1
+            if self.nest_count == 0:
+                self.current_class_identifier = self.current_class_identifier_temp
+                self.current_class_identifier_temp = None
+        elif self.current_class_identifier is not None:
                 self.current_class_identifier = None
