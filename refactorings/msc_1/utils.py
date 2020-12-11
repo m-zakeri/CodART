@@ -1,6 +1,9 @@
 from antlr4 import *
-from antlr4_java9.Java9Lexer import Java9Lexer
-from utils_listener import *
+
+from refactorings.msc_1.antlr4_java9.Java9Lexer import Java9Lexer
+from refactorings.msc_1.antlr4_java9.Java9Parser import Java9Parser
+from refactorings.msc_1.utils_listener import UtilsListener, Program
+
 
 def get_program(source_files: list):
     program = Program()
