@@ -1,6 +1,8 @@
 from antlr4 import *
 from antlr4_java9.Java9Lexer import Java9Lexer
 from utils_listener import UtilsListener, Java9Parser
+from utils import get_program
+
 
 def main():
     # Test
@@ -19,5 +21,11 @@ def main():
         for method_name in _class.methods:
             print(_class.methods[method_name])
 
+def testutil():
+    mylist = ["tests/utils_test.java"]
+    get_program(mylist)
 if __name__ == "__main__":
     main()
+
+if __name__ == "__testutil__":
+    testutil()
