@@ -14,32 +14,63 @@ class Package:
     def __str__(self):
         return str(self.name) + " " + str(self.classes)
 
+"""
+Note that begin is inclusive and end is exclusive.
+"""
+class TokensInfo:
+    def __init__(self, token_stream: CommonTokenStream, begin: int, end: int):
+        self.token_stream = token_stream
+        self.begin = begin
+        self.end = end
+
 class Class:
-    def __init__(self):
+    def __init__(self,
+                 name: str = None,
+                 parser_context: Java9Parser.NormalClassDeclarationContext = None,
+                 tokens_info: TokensInfo = None):
         self.modifiers = []
-        self.name = None
+        self.name = name
         self.fields = {}
         self.methods = {}
+        self.parser_context = parser_context
+        self.tokens_info = tokens_info
+    def set_source_filename(self, filename):
+        self.source_filename = filename
+        for method in self.methods:
+            method.source_filename = filename
     def __str__(self):
         return str(self.modifiers) +  " " + str(self.name) + " " + str(self.fields) \
             + " " + str(self.methods)
 
 class Field:
-    def __init__(self):
+    def __init__(self,
+                 datatype: str = None,
+                 name: str = None,
+                 parser_context: Java9Parser.NormalClassDeclarationContext = None,
+                 tokens_info: TokensInfo = None):
         self.modifiers = []
-        self.datatype = None
-        self.name = None
+        self.datatype = datatype
+        self.name = name
+        self.parser_context = parser_context
+        self.tokens_info = tokens_info
     def __str__(self):
         return str(self.modifiers) +  " " + str(self.datatype) + " " + str(self.name)
 
 class Method:
-    def __init__(self):
+    def __init__(self,
+                 returntype: str = None,
+                 name: str = None,
+                 body_text: str = None,
+                 parser_context: Java9Parser.NormalClassDeclarationContext = None,
+                 tokens_info: TokensInfo = None):
         self.modifiers = []
         self.returntype = None
         self.name = None
         self.parameters = []
         self.body_text = None
         self.body_content = [] # TODO Design
+        self.parser_context = parser_context
+        self.tokens_info = tokens_info
     def __str__(self):
         return str(self.modifiers) +  " " + str(self.returntype) + " " + str(self.name) \
             + str(tuple(self.parameters))
@@ -55,12 +86,18 @@ class UtilsListener(Java9Listener):
 
         self.current_method_identifier = None
 
+    @staticmethod
+    def make_tokens_info(ctx):
+        return TokensInfo(
+            ctx.parser.getTokenStream(),
+            ctx.start.tokenIndex,
+            ctx.stop.tokenIndex + 1
+        )
+
     def enterPackageDeclaration(self, ctx:Java9Parser.PackageDeclarationContext):
-        print(ctx.packageName().getText())
         self.package.name = ctx.packageName().getText()
 
     def enterNormalClassDeclaration(self, ctx:Java9Parser.NormalClassDeclarationContext):
-        print(ctx.identifier().getText())
         if self.current_class_identifier is None and self.nest_count == 0:
             self.current_class_identifier = ctx.identifier().getText()
 
@@ -68,6 +105,8 @@ class UtilsListener(Java9Listener):
             for modifier in ctx.getChildren(lambda x: type(x) == Java9Parser.ClassModifierContext):
                 current_class.modifiers.append(modifier.getText())
             current_class.name = self.current_class_identifier
+            current_class.parser_context = ctx
+            current_class.tokens_info = self.make_tokens_info(ctx)
             self.package.classes[current_class.name] = current_class
 
         else:
@@ -95,16 +134,22 @@ class UtilsListener(Java9Listener):
                 method.modifiers.append(modifier.getText())
             method.returntype = method_header.result().getText()
             method.name = self.current_method_identifier
+            method.parser_context = ctx
+            method.tokens_info = self.make_tokens_info(ctx)
 
             self.package.classes[self.current_class_identifier].methods[method.name] = method
 
     def enterFormalParameter(self, ctx:Java9Parser.FormalParameterContext):
-        # TODO
-        pass
+        if self.current_class_identifier is not None and self.current_method_identifier is not None:
+            method = self.package.classes[self.current_class_identifier].methods[self.current_method_identifier]
+            method.parameters.append(
+                (ctx.unannType().getText(), ctx.variableDeclaratorId().identifier().getText())
+            )
 
     def enterMethodBody(self, ctx:Java9Parser.MethodBodyContext):
-        # TODO
-        pass
+        if self.current_class_identifier is not None and self.current_method_identifier is not None:
+            # TODO
+            pass
 
     def exitMethodDeclaration(self, ctx:Java9Parser.MethodDeclarationContext):
         self.current_method_identifier = None
