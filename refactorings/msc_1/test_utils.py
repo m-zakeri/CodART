@@ -4,9 +4,10 @@ from utils_listener import UtilsListener, Java9Parser
 from utils import get_program
 
 
-def main():
+def test_utils_listener():
     # Test
-    stream = FileStream("tests/utils_test.java", encoding='utf8')
+    #stream = FileStream("tests/utils_test.java", encoding='utf8')
+    stream = FileStream("antlr4_java9/Test.java", encoding='utf8')
     lexer = Java9Lexer(stream)
     token_stream = CommonTokenStream(lexer)
     parser = Java9Parser(token_stream)
@@ -21,11 +22,19 @@ def main():
         for method_name in _class.methods:
             print(_class.methods[method_name])
 
-def testutil():
+def test_utils():
     mylist = ["tests/utils_test.java"]
-    get_program(mylist)
-if __name__ == "__main__":
-    main()
+    program = get_program(mylist)
+    print(program)
+    for package_name in program.packages:
+        package = program.packages[package_name]
+        print(package)
+        for class_name in package.classes:
+            _class = package.classes[class_name]
+            print(_class)
+            for method_name in _class.methods:
+                print(_class.methods[method_name])
 
-if __name__ == "__testutil__":
-    testutil()
+if __name__ == "__main__":
+    #test_utils_listener()
+    test_utils()
