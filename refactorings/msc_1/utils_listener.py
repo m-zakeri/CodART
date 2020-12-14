@@ -2,51 +2,58 @@ from antlr4_java9.Java9Parser import *
 from antlr4_java9.Java9Listener import *
 
 class Program:
-    packages = {}
+    def __init__(self):
+        self.packages = {}
     def __str__(self):
         return str(self.packages)
 
 class Package:
-    name = None
-    classes = {}
+    def __init__(self):
+        self.name = None
+        self.classes = {}
     def __str__(self):
         return str(self.name) + " " + str(self.classes)
 
 class Class:
-    modifiers = []
-    name = None
-    fields = {}
-    methods = {}
+    def __init__(self):
+        self.modifiers = []
+        self.name = None
+        self.fields = {}
+        self.methods = {}
     def __str__(self):
         return str(self.modifiers) +  " " + str(self.name) + " " + str(self.fields) \
             + " " + str(self.methods)
 
 class Field:
-    modifiers = []
-    datatype = None
-    name = None
+    def __init__(self):
+        self.modifiers = []
+        self.datatype = None
+        self.name = None
     def __str__(self):
         return str(self.modifiers) +  " " + str(self.datatype) + " " + str(self.name)
 
 class Method:
-    modifiers = []
-    returntype = None
-    name = None
-    parameters = []
-    body_text = None
-    body_content = [] # TODO Design
+    def __init__(self):
+        self.modifiers = []
+        self.returntype = None
+        self.name = None
+        self.parameters = []
+        self.body_text = None
+        self.body_content = [] # TODO Design
     def __str__(self):
         return str(self.modifiers) +  " " + str(self.returntype) + " " + str(self.name) \
             + str(tuple(self.parameters))
 
 class UtilsListener(Java9Listener):
-    package = Package()
 
-    current_class_identifier = None
-    current_class_identifier_temp = None
-    nest_count = 0
+    def __init__(self):
+        self.package = Package()
 
-    current_method_identifier = None
+        self.current_class_identifier = None
+        self.current_class_identifier_temp = None
+        self.nest_count = 0
+
+        self.current_method_identifier = None
 
     def enterPackageDeclaration(self, ctx:Java9Parser.PackageDeclarationContext):
         print(ctx.packageName().getText())
