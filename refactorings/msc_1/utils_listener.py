@@ -34,10 +34,6 @@ class Class:
         self.methods = {}
         self.parser_context = parser_context
         self.tokens_info = tokens_info
-    def set_source_filename(self, filename):
-        self.source_filename = filename
-        for method in self.methods:
-            method.source_filename = filename
     def __str__(self):
         return str(self.modifiers) +  " " + str(self.name) + " " + str(self.fields) \
             + " " + str(self.methods)
