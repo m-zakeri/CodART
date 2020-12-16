@@ -14,19 +14,17 @@ class Package:
     def __str__(self):
         return str(self.name) + " " + str(self.classes)
 
-"""
-Note that begin is inclusive and end is exclusive.
-"""
 class TokensInfo:
+    """Note that begin is inclusive and end is exclusive."""
+
     def __init__(self, token_stream: CommonTokenStream, begin: int, end: int):
         self.token_stream = token_stream
         self.begin = begin
         self.end = end
 
-"""
-The base class for those elements that are extracted from a single file
-"""
 class SingleFileElement:
+    """The base class for those elements that are extracted from a single file"""
+
     def __init__(self, parser_context):
         self.parser_context = parser_context
 
