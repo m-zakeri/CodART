@@ -23,42 +23,51 @@ class TokensInfo: # TODO: redesign to only depend on ctx and have a separate fun
         self.begin = begin
         self.end = end
 
-class Class:
+"""
+The base class for those elements that are extracted from a single file
+"""
+class SingleFileElement:
+    def __init__(self, parser_context):
+        self.parser_context = parser_context
+
+    def get_tokens_info(self) -> TokensInfo:
+        return TokensInfo(
+            self.parser_context.parser.getTokenStream(),
+            self.parser_context.start.tokenIndex,
+            self.parser_context.stop.tokenIndex + 1
+        )
+
+class Class(SingleFileElement):
     def __init__(self,
                  name: str = None,
-                 parser_context: Java9Parser.NormalClassDeclarationContext = None,
-                 tokens_info: TokensInfo = None):
+                 parser_context: Java9Parser.NormalClassDeclarationContext = None):
         self.modifiers = []
         self.name = name
         self.fields = {}
         self.methods = {}
         self.parser_context = parser_context
-        self.tokens_info = tokens_info
     def __str__(self):
         return str(self.modifiers) +  " " + str(self.name) + " " + str(self.fields) \
             + " " + str(self.methods)
 
-class Field:
+class Field(SingleFileElement):
     def __init__(self,
                  datatype: str = None,
                  name: str = None,
-                 parser_context: Java9Parser.NormalClassDeclarationContext = None,
-                 tokens_info: TokensInfo = None):
+                 parser_context: Java9Parser.NormalClassDeclarationContext = None):
         self.modifiers = []
         self.datatype = datatype
         self.name = name
         self.parser_context = parser_context
-        self.tokens_info = tokens_info
     def __str__(self):
         return str(self.modifiers) +  " " + str(self.datatype) + " " + str(self.name)
 
-class Method:
+class Method(SingleFileElement):
     def __init__(self,
                  returntype: str = None,
                  name: str = None,
                  body_text: str = None,
-                 parser_context: Java9Parser.NormalClassDeclarationContext = None,
-                 tokens_info: TokensInfo = None):
+                 parser_context: Java9Parser.NormalClassDeclarationContext = None):
         self.modifiers = []
         self.returntype = None
         self.name = None
@@ -66,7 +75,6 @@ class Method:
         self.body_text = None
         self.body_content = [] # TODO Design
         self.parser_context = parser_context
-        self.tokens_info = tokens_info
     def __str__(self):
         return str(self.modifiers) +  " " + str(self.returntype) + " " + str(self.name) \
             + str(tuple(self.parameters))
@@ -82,14 +90,6 @@ class UtilsListener(Java9Listener):
 
         self.current_method_identifier = None
 
-    @staticmethod
-    def make_tokens_info(ctx):
-        return TokensInfo(
-            ctx.parser.getTokenStream(),
-            ctx.start.tokenIndex,
-            ctx.stop.tokenIndex + 1
-        )
-
     def enterPackageDeclaration(self, ctx:Java9Parser.PackageDeclarationContext):
         self.package.name = ctx.packageName().getText()
 
@@ -102,7 +102,6 @@ class UtilsListener(Java9Listener):
                 current_class.modifiers.append(modifier.getText())
             current_class.name = self.current_class_identifier
             current_class.parser_context = ctx
-            current_class.tokens_info = self.make_tokens_info(ctx)
             self.package.classes[current_class.name] = current_class
 
         else:
@@ -131,7 +130,6 @@ class UtilsListener(Java9Listener):
             method.returntype = method_header.result().getText()
             method.name = self.current_method_identifier
             method.parser_context = ctx
-            method.tokens_info = self.make_tokens_info(ctx)
 
             self.package.classes[self.current_class_identifier].methods[method.name] = method
 
