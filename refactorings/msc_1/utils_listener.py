@@ -17,7 +17,7 @@ class Package:
 """
 Note that begin is inclusive and end is exclusive.
 """
-class TokensInfo: # TODO: redesign to only depend on ctx and have a separate func here
+class TokensInfo:
     def __init__(self, token_stream: CommonTokenStream, begin: int, end: int):
         self.token_stream = token_stream
         self.begin = begin
