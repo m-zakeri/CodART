@@ -45,17 +45,25 @@ class SingleFileElement:
 class Class(SingleFileElement):
     def __init__(self,
                  name: str = None,
+                 super_class_name: str = None,
                  parser_context: Java9Parser.NormalClassDeclarationContext = None,
                  filename: str = None):
         self.modifiers = []
         self.name = name
+        self.superclass_name = None
+        self.superinterface_names = []
         self.fields = {}
         self.methods = {}
         self.parser_context = parser_context
         self.filename = filename
     def __str__(self):
-        return str(self.modifiers) +  " " + str(self.name) + " " + str(self.fields) \
+        return str(self.modifiers) +  " " + str(self.name) \
+            + ((" extends " + str(self.superclass_name)) if self.superclass_name is not None else "") \
+            + ((" implements " + str(self.superinterface_names)) if len(self.superinterface_names) > 0 else "") \
+            + " " + str(self.fields) \
             + " " + str(self.methods)
+
+# TODO Add Interface
 
 class Field(SingleFileElement):
     def __init__(self,
@@ -138,6 +146,16 @@ class UtilsListener(Java9Listener):
                 self.current_class_identifier_temp = self.current_class_identifier
                 self.current_class_identifier = None
             self.nest_count += 1
+
+    def enterSuperclass(self, ctx:Java9Parser.SuperclassContext):
+        if self.current_class_identifier is not None:
+            self.package.classes[self.current_class_identifier].superclass_name = ctx.classType().getText()
+
+    def enterSuperinterfaces(self, ctx:Java9Parser.SuperinterfacesContext):
+        if self.current_class_identifier is not None:
+            _class = self.package.classes[self.current_class_identifier]
+            for interface_type in ctx.interfaceTypeList().getChildren(lambda x: type(x) == Java9Parser.InterfaceTypeContext):
+                _class.superinterface_names.append(interface_type.getText())
 
     def exitNormalClassDeclaration(self, ctx:Java9Parser.NormalClassDeclarationContext):
         if self.nest_count > 0:
