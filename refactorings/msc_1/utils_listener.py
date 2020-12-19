@@ -60,6 +60,7 @@ class Field(SingleFileElement):
         self.modifiers = []
         self.datatype = datatype
         self.name = name
+        self.neighbor_names = []
         self.parser_context = parser_context
         self.filename = filename
     def __str__(self):
@@ -77,12 +78,23 @@ class Method(SingleFileElement):
         self.name = None
         self.parameters = []
         self.body_text = None
-        self.body_content = [] # TODO Design
+        self.body_expression_names = []
         self.parser_context = parser_context
         self.filename = filename
     def __str__(self):
         return str(self.modifiers) +  " " + str(self.returntype) + " " + str(self.name) \
             + str(tuple(self.parameters))
+
+class ExpressionName(SingleFileElement):
+    def __init__(self,
+                 text: str = None,
+                 parser_context: Java9Parser.NormalClassDeclarationContext = None,
+                 filename: str = None):
+        self.text = text
+        self.parser_context = parser_context
+        self.filename = filename
+    def __str__(self):
+        return str(self.text)
 
 class UtilsListener(Java9Listener):
 
@@ -94,6 +106,10 @@ class UtilsListener(Java9Listener):
         self.nest_count = 0
 
         self.current_method_identifier = None
+        self.current_method = None
+
+        self.current_field_decl = None
+        self.current_field_ids = None
 
         self.filename = filename
 
@@ -139,18 +155,52 @@ class UtilsListener(Java9Listener):
             method.parser_context = ctx
 
             self.package.classes[self.current_class_identifier].methods[method.name] = method
+            self.current_method = method
 
     def enterFormalParameter(self, ctx:Java9Parser.FormalParameterContext):
-        if self.current_class_identifier is not None and self.current_method_identifier is not None:
-            method = self.package.classes[self.current_class_identifier].methods[self.current_method_identifier]
-            method.parameters.append(
+        if self.current_method is not None:
+            self.current_method.parameters.append(
                 (ctx.unannType().getText(), ctx.variableDeclaratorId().identifier().getText())
             )
 
     def enterMethodBody(self, ctx:Java9Parser.MethodBodyContext):
-        if self.current_class_identifier is not None and self.current_method_identifier is not None:
-            print(ctx.getText())
+        if self.current_method is not None:
+            self.current_method.body_text = ctx.getText()
             pass
+
+    def enterExpressionName(self, ctx:Java9Parser.ExpressionNameContext):
+        if self.current_method is not None:
+            self.current_method.body_expression_names.append(
+                ExpressionName(text=ctx.getText(), parser_context=ctx, filename=self.filename)
+            )
 
     def exitMethodDeclaration(self, ctx:Java9Parser.MethodDeclarationContext):
         self.current_method_identifier = None
+        self.current_method = None
+
+    def enterFieldDeclaration(self, ctx:Java9Parser.FieldDeclarationContext):
+        if self.current_class_identifier is not None:
+            modifiers = []
+            for modifier in ctx.getChildren(lambda x: type(x) == Java9Parser.FieldModifierContext):
+                modifiers.append(modifier.getText())
+            datatype = ctx.unannType().getText()
+            self.current_field_decl = (modifiers, datatype, ctx)
+            self.current_field_ids = []
+
+    def enterVariableDeclarator(self, ctx:Java9Parser.VariableDeclaratorContext):
+        if self.current_field_decl is not None:
+            self.current_field_ids.append(ctx.variableDeclaratorId().identifier().getText())
+
+    def exitFieldDeclaration(self, ctx:Java9Parser.FieldDeclarationContext):
+        if self.current_class_identifier is not None:
+            for field_id in self.current_field_ids:
+                field = Field(
+                    parser_context=self.current_field_decl[2],
+                    filename=self.filename
+                )
+                field.modifiers = self.current_field_decl[0]
+                field.datatype = self.current_field_decl[1]
+                field.name = field_id
+                field.neighbor_names = [ x for x in self.current_field_ids if x != field_id ]
+                self.package.classes[self.current_class_identifier].fields[field.name] = field
+            self.current_field_decl = None
