@@ -29,12 +29,19 @@ class SingleFileElement:
         self.parser_context = parser_context
         self.filename = filename
 
+    def get_token_stream(self) -> CommonTokenStream:
+        self.parser_context.parser.getTokenStream()
+
     def get_tokens_info(self) -> TokensInfo:
         return TokensInfo(
             self.parser_context.parser.getTokenStream(),
             self.parser_context.start.tokenIndex,
             self.parser_context.stop.tokenIndex + 1
         )
+
+    def replace(self, text: str):
+        # TODO
+        pass
 
 class Class(SingleFileElement):
     def __init__(self,

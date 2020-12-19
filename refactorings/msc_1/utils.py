@@ -24,3 +24,8 @@ def get_program(source_files: list):
                 program.packages[listener.package.name].append(classes_name)
 
     return program
+
+def write_changes(single_file_elements: list, filename_mapping):
+    """gets a list of SingleFileElement objects and a function that maps the filenames to new filenames to write"""
+
+    # TODO
