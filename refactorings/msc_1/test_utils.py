@@ -24,7 +24,7 @@ def test_utils_listener():
         for method_name in _class.methods:
             print(_class.methods[method_name])
 
-def test_utils():
+def test_utils_get_program():
     mylist = ["tests/utils_test.java"]
     program = get_program(mylist)
     print(program)
@@ -41,4 +41,4 @@ def test_utils():
 
 if __name__ == "__main__":
     #test_utils_listener()
-    test_utils()
+    test_utils_get_program()
