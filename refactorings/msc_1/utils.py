@@ -7,13 +7,13 @@ from utils_listener import UtilsListener, Program
 
 def get_program(source_files: list):
     program = Program()
-    for file in source_files:
-        stream = FileStream(file, encoding='utf8')
+    for filename in source_files:
+        stream = FileStream(filename, encoding='utf8')
         lexer = Java9Lexer(stream)
         token_stream = CommonTokenStream(lexer)
         parser = Java9Parser(token_stream)
         tree = parser.compilationUnit()
-        listener = UtilsListener()
+        listener = UtilsListener(filename)
         walker = ParseTreeWalker()
         walker.walk(listener, tree)
 

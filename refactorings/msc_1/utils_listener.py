@@ -25,8 +25,9 @@ class TokensInfo:
 class SingleFileElement:
     """The base class for those elements that are extracted from a single file"""
 
-    def __init__(self, parser_context):
+    def __init__(self, parser_context, filename: str = None):
         self.parser_context = parser_context
+        self.filename = filename
 
     def get_tokens_info(self) -> TokensInfo:
         return TokensInfo(
@@ -38,12 +39,14 @@ class SingleFileElement:
 class Class(SingleFileElement):
     def __init__(self,
                  name: str = None,
-                 parser_context: Java9Parser.NormalClassDeclarationContext = None):
+                 parser_context: Java9Parser.NormalClassDeclarationContext = None,
+                 filename: str = None):
         self.modifiers = []
         self.name = name
         self.fields = {}
         self.methods = {}
         self.parser_context = parser_context
+        self.filename = filename
     def __str__(self):
         return str(self.modifiers) +  " " + str(self.name) + " " + str(self.fields) \
             + " " + str(self.methods)
@@ -52,11 +55,13 @@ class Field(SingleFileElement):
     def __init__(self,
                  datatype: str = None,
                  name: str = None,
-                 parser_context: Java9Parser.NormalClassDeclarationContext = None):
+                 parser_context: Java9Parser.NormalClassDeclarationContext = None,
+                 filename: str = None):
         self.modifiers = []
         self.datatype = datatype
         self.name = name
         self.parser_context = parser_context
+        self.filename = filename
     def __str__(self):
         return str(self.modifiers) +  " " + str(self.datatype) + " " + str(self.name)
 
@@ -65,7 +70,8 @@ class Method(SingleFileElement):
                  returntype: str = None,
                  name: str = None,
                  body_text: str = None,
-                 parser_context: Java9Parser.NormalClassDeclarationContext = None):
+                 parser_context: Java9Parser.NormalClassDeclarationContext = None,
+                 filename: str = None):
         self.modifiers = []
         self.returntype = None
         self.name = None
@@ -73,13 +79,14 @@ class Method(SingleFileElement):
         self.body_text = None
         self.body_content = [] # TODO Design
         self.parser_context = parser_context
+        self.filename = filename
     def __str__(self):
         return str(self.modifiers) +  " " + str(self.returntype) + " " + str(self.name) \
             + str(tuple(self.parameters))
 
 class UtilsListener(Java9Listener):
 
-    def __init__(self):
+    def __init__(self, filename):
         self.package = Package()
 
         self.current_class_identifier = None
@@ -88,6 +95,8 @@ class UtilsListener(Java9Listener):
 
         self.current_method_identifier = None
 
+        self.filename = filename
+
     def enterPackageDeclaration(self, ctx:Java9Parser.PackageDeclarationContext):
         self.package.name = ctx.packageName().getText()
 
@@ -95,7 +104,7 @@ class UtilsListener(Java9Listener):
         if self.current_class_identifier is None and self.nest_count == 0:
             self.current_class_identifier = ctx.identifier().getText()
 
-            current_class = Class()
+            current_class = Class(filename=self.filename)
             for modifier in ctx.getChildren(lambda x: type(x) == Java9Parser.ClassModifierContext):
                 current_class.modifiers.append(modifier.getText())
             current_class.name = self.current_class_identifier
@@ -122,7 +131,7 @@ class UtilsListener(Java9Listener):
             method_header = ctx.methodHeader()
             self.current_method_identifier = method_header.methodDeclarator().identifier().getText()
 
-            method = Method()
+            method = Method(filename=self.filename)
             for modifier in ctx.getChildren(lambda x: type(x) == Java9Parser.MethodModifierContext):
                 method.modifiers.append(modifier.getText())
             method.returntype = method_header.result().getText()
@@ -140,7 +149,7 @@ class UtilsListener(Java9Listener):
 
     def enterMethodBody(self, ctx:Java9Parser.MethodBodyContext):
         if self.current_class_identifier is not None and self.current_method_identifier is not None:
-            # TODO
+            print(ctx.getText())
             pass
 
     def exitMethodDeclaration(self, ctx:Java9Parser.MethodDeclarationContext):
