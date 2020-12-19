@@ -15,12 +15,17 @@ class Package:
         return str(self.name) + " " + str(self.classes)
 
 class TokensInfo:
-    """Note that begin is inclusive and end is exclusive."""
+    """Note that start and stop are inclusive."""
 
-    def __init__(self, token_stream: CommonTokenStream, begin: int, end: int):
-        self.token_stream = token_stream
-        self.begin = begin
-        self.end = end
+    def __init__(self, parser_context = None):
+        if parser_context is not None:
+            self.token_stream: CommonTokenStream = parser_context.parser.getTokenStream()
+            self.start: int = parser_context.start.tokenIndex
+            self.stop: int = parser_context.stop.tokenIndex
+        else:
+            self.token_stream: CommonTokenStream = None
+            self.start: int = None
+            self.stop: int = None
 
 class SingleFileElement:
     """The base class for those elements that are extracted from a single file"""
@@ -34,14 +39,8 @@ class SingleFileElement:
 
     def get_tokens_info(self) -> TokensInfo:
         return TokensInfo(
-            self.parser_context.parser.getTokenStream(),
-            self.parser_context.start.tokenIndex,
-            self.parser_context.stop.tokenIndex + 1
+            self.parser_context
         )
-
-    def replace(self, text: str):
-        # TODO
-        pass
 
 class Class(SingleFileElement):
     def __init__(self,
