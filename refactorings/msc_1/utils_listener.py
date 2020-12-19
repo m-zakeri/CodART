@@ -63,6 +63,8 @@ class Class(SingleFileElement):
             + " " + str(self.fields) \
             + " " + str(self.methods)
 
+# TODO Add Interface
+
 class Field(SingleFileElement):
     def __init__(self,
                  datatype: str = None,
