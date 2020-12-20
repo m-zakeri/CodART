@@ -2,6 +2,8 @@ from antlr4 import *
 from antlr4_java9.Java9Lexer import Java9Lexer
 from utils_listener import UtilsListener, Java9Parser
 from utils import get_program
+from move_method import move_method
+from pullup_method import pullup_method
 
 
 def test_utils_listener():
@@ -24,8 +26,9 @@ def test_utils_listener():
         for method_name in _class.methods:
             print(_class.methods[method_name])
 
-def test_utils_get_program():
+def test_utils():
     mylist = ["tests/utils_test.java"]
+    movemethods = move_method(mylist)
     program = get_program(mylist)
     print(program)
     for package_name in program.packages:
@@ -34,11 +37,25 @@ def test_utils_get_program():
         for class_name in package.classes:
             _class = package.classes[class_name]
             print(_class)
-            for field_name in _class.fields:
-                print(_class.fields[field_name])
             for method_name in _class.methods:
+                method = _class.methods[method_name]
                 print(_class.methods[method_name])
+                for _param in method.parameters:
+                 print(_param[0])
+    for key in movemethods:
+        n=movemethods[key]
+        print("......")
+        print(key)
+        print(n)
+
+def pullup_methods():
+    mylist = ["tests/utils_test.java"]
+    pullupmethods=pullup_method(mylist)
+    for key in pullupmethods:
+      print(key)
+      print(pullupmethods[key])
 
 if __name__ == "__main__":
     #test_utils_listener()
-    test_utils_get_program()
+    #test_utils()
+    pullup_methods()

@@ -5,8 +5,7 @@ from antlr4_java9.Java9Parser import Java9Parser
 from utils_listener import UtilsListener, Program
 from utils import get_program
 
-def move_method():
-    mylist = ["tests/utils_test.java"]
+def move_method(mylist : list):
     program = get_program(mylist)
     movemethods={}
      #print(program)

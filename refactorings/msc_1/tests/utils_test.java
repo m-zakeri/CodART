@@ -1,17 +1,38 @@
-package tests.utils_test;
+
 
 public class Test1
 {
     private int a;
     private float b;
 
-    public void A(int a)
+    public class Class1
+    {
+        public int a;
+        public void b()
+        {
+            //
+        }
+    }
+
+    public void A(int a,Test2 b)
     {
         this.a = a;
     }
 
-    public void B(float value)
+    public void B(float value,Test3 c)
     {
         b = value;
+    }
+}
+public class Test2 extends Test1{
+    public void c()
+    {
+        v=1;
+    }
+    public void bv(){
+    }
+}
+public class Test3 extends Test1{
+public void bv(){
     }
 }
