@@ -1,8 +1,7 @@
-from antlr4 import *
+from antlr4 import FileStream, ParseTreeWalker
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
 from antlr4_java9.Java9Lexer import Java9Lexer
-from antlr4_java9.Java9Parser import Java9Parser
 from utils_listener import *
 
 
