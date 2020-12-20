@@ -6,7 +6,7 @@ from antlr4_java9.Java9Parser import Java9Parser
 from utils_listener import *
 
 
-def get_program(source_files: list):
+def get_program(source_files: list) -> Program:
     program = Program()
     for filename in source_files:
         stream = FileStream(filename, encoding='utf8')
