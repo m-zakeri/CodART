@@ -21,7 +21,7 @@ def get_program(source_files: list) -> Program:
             program.packages[listener.package.name] = listener.package
         else:
             for classes_name in listener.package.classes:
-                program.packages[listener.package.name].append(classes_name)
+                program.packages[listener.package.name].classes[classes_name]=listener.package.classes[classes_name]
 
     return program
 
