@@ -35,7 +35,7 @@ class SingleFileElement:
         self.filename = filename
 
     def get_token_stream(self) -> CommonTokenStream:
-        self.parser_context.parser.getTokenStream()
+        return self.parser_context.parser.getTokenStream()
 
     def get_tokens_info(self) -> TokensInfo:
         return TokensInfo(
