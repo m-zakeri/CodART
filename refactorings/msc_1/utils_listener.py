@@ -95,6 +95,7 @@ class Method(SingleFileElement):
         self.body_expression_names = []
         self.parser_context = parser_context
         self.filename = filename
+        self.method_invocations = []
     def __str__(self):
         return str(self.modifiers) +  " " + str(self.returntype) + " " + str(self.name) \
             + str(tuple(self.parameters))
@@ -181,6 +182,7 @@ class UtilsListener(Java9Listener):
             self.package.classes[self.current_class_identifier].methods[method.name] = method
             self.current_method = method
 
+
     def enterFormalParameter(self, ctx:Java9Parser.FormalParameterContext):
         if self.current_method is not None:
             self.current_method.parameters.append(
@@ -201,6 +203,12 @@ class UtilsListener(Java9Listener):
     def exitMethodDeclaration(self, ctx:Java9Parser.MethodDeclarationContext):
         self.current_method_identifier = None
         self.current_method = None
+
+    def enterMethodInvocation(self, ctx:Java9Parser.MethodInvocationContext):
+        if self.current_method is not None:
+            for typename in ctx.getChildren(lambda x: type(x) == Java9Parser.TypeNameContext):
+                self.current_method.method_invocations.append(typename.getText())
+
 
     def enterFieldDeclaration(self, ctx:Java9Parser.FieldDeclarationContext):
         if self.current_class_identifier is not None:
