@@ -1,5 +1,5 @@
-from antlr4_java9.Java9Parser import *
-from antlr4_java9.Java9Listener import *
+from antlr4_java9.Java9Parser import Java9Parser, CommonTokenStream
+from antlr4_java9.Java9Listener import Java9Listener
 
 class Program:
     def __init__(self):
