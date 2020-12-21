@@ -5,7 +5,7 @@ def pullup_field(source_filenames: list,
                  package_name: str,
                  superclass_name: str,
                  field_name: str,
-                 filename_mapping = lambda x: x + ".refactored.java") -> bool:
+                 filename_mapping = lambda x: (x[:-5] if x.endswith(".java") else x) + ".re.java") -> bool:
 
     program = utils.get_program(source_filenames)
     if package_name not in program.packages \
@@ -45,7 +45,7 @@ def pullup_field(source_filenames: list,
 
 if __name__ == "__main__":
     # test
-    if pullup_field(["tests/pullup_field_test1.java"], "pullup_field_test", "A", "a"):
+    if pullup_field(["tests/pullup_field_test1.java", "tests/pullup_field_test2.java"], "pullup_field_test", "A", "a"):
         print("Success!")
     else:
         print("Cannot refactor.")
