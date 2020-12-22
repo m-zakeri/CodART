@@ -78,6 +78,7 @@ class Class(SingleFileElement):
     def __init__(self,
                  name: str = None,
                  super_class_name: str = None,
+                 package_name: str = None,
                  parser_context: Java9Parser.NormalClassDeclarationContext = None,
                  filename: str = None):
         self.modifiers = []
@@ -86,6 +87,7 @@ class Class(SingleFileElement):
         self.superinterface_names = []
         self.fields = {}
         self.methods = {}
+        self.package_name = package_name
         self.parser_context = parser_context
         self.filename = filename
     def __str__(self):
@@ -102,6 +104,8 @@ class Field(SingleFileElement):
                  datatype: str = None,
                  name: str = None,
                  initializer: str = None,
+                 package_name: str = None,
+                 class_name: str = None,
                  parser_context: Java9Parser.NormalClassDeclarationContext = None,
                  filename: str = None):
         self.modifiers = []
@@ -111,6 +115,8 @@ class Field(SingleFileElement):
         self.neighbor_names = []
         self.all_variable_declarator_contexts = []
         self.index_in_variable_declarators: int = None
+        self.package_name = package_name
+        self.class_name = class_name
         self.parser_context = parser_context
         self.filename = filename
     def __str__(self):
@@ -121,6 +127,8 @@ class Method(SingleFileElement):
                  returntype: str = None,
                  name: str = None,
                  body_text: str = None,
+                 package_name: str = None,
+                 class_name: str = None,
                  parser_context: Java9Parser.NormalClassDeclarationContext = None,
                  filename: str = None):
         self.modifiers = []
@@ -129,6 +137,8 @@ class Method(SingleFileElement):
         self.parameters = []
         self.body_text = None
         self.body_method_invocations = []
+        self.package_name = package_name
+        self.class_name = class_name
         self.parser_context = parser_context
         self.filename = filename
     def __str__(self):
@@ -173,11 +183,14 @@ class UtilsListener(Java9Listener):
         if self.current_class_identifier is None and self.nest_count == 0:
             self.current_class_identifier = ctx.identifier().getText()
 
-            current_class = Class(filename=self.filename)
+            current_class = Class(
+                package_name=self.package.name,
+                parser_context=ctx,
+                filename=self.filename
+            )
             for modifier in ctx.getChildren(lambda x: type(x) == Java9Parser.ClassModifierContext):
                 current_class.modifiers.append(modifier.getText())
             current_class.name = self.current_class_identifier
-            current_class.parser_context = ctx
             self.package.classes[current_class.name] = current_class
 
         else:
@@ -210,12 +223,16 @@ class UtilsListener(Java9Listener):
             method_header = ctx.methodHeader()
             self.current_method_identifier = method_header.methodDeclarator().identifier().getText()
 
-            method = Method(filename=self.filename)
+            method = Method(
+                package_name=self.package.name,
+                class_name=self.current_class_identifier,
+                parser_context=ctx,
+                filename=self.filename
+            )
             for modifier in ctx.getChildren(lambda x: type(x) == Java9Parser.MethodModifierContext):
                 method.modifiers.append(modifier.getText())
             method.returntype = method_header.result().getText()
             method.name = self.current_method_identifier
-            method.parser_context = ctx
 
             self.package.classes[self.current_class_identifier].methods[method.name] = method
             self.current_method = method
@@ -276,6 +293,8 @@ class UtilsListener(Java9Listener):
                 field_init = self.current_field_inits[i]
                 var_ctx = self.current_field_var_ctxs[i]
                 field = Field(
+                    package_name=self.package.name,
+                    class_name=self.current_class_identifier,
                     parser_context=self.current_field_decl[2],
                     filename=self.filename
                 )
