@@ -2,7 +2,7 @@ package pullup_field_test1;
 
 class A
 {
-	protected int a;
+	protected int[] a;
     public A() {}
 }
 
@@ -13,5 +13,5 @@ class B extends A
 
 class C extends A
 {
-    int b, c;
+    int[] b, c;
 }

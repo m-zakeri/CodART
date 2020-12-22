@@ -101,11 +101,13 @@ class Field(SingleFileElement):
     def __init__(self,
                  datatype: str = None,
                  name: str = None,
+                 initializer: str = None,
                  parser_context: Java9Parser.NormalClassDeclarationContext = None,
                  filename: str = None):
         self.modifiers = []
         self.datatype = datatype
         self.name = name
+        self.initializer = initializer
         self.neighbor_names = []
         self.all_variable_declarator_contexts = []
         self.index_in_variable_declarators: int = None
@@ -158,6 +160,8 @@ class UtilsListener(Java9Listener):
 
         self.current_field_decl = None
         self.current_field_ids = None
+        self.current_field_dims = None
+        self.current_field_inits = None
         self.current_field_var_ctxs = None
 
         self.filename = filename
@@ -245,25 +249,40 @@ class UtilsListener(Java9Listener):
             datatype = ctx.unannType().getText()
             self.current_field_decl = (modifiers, datatype, ctx)
             self.current_field_ids = []
+            self.current_field_dims = []
+            self.current_field_inits = []
             self.current_field_var_ctxs = []
 
     def enterVariableDeclarator(self, ctx:Java9Parser.VariableDeclaratorContext):
         if self.current_field_decl is not None:
             self.current_field_ids.append(ctx.variableDeclaratorId().identifier().getText())
+            dims = ""
+            dims_ctx = ctx.variableDeclaratorId().dims()
+            if dims_ctx is not None:
+                dims = dims_ctx.getText()
+            self.current_field_dims.append(dims)
+            init = None
+            init_ctx = ctx.variableInitializer()
+            if init_ctx is not None:
+                init = init_ctx.getText()
+            self.current_field_inits.append(init)
             self.current_field_var_ctxs.append(ctx)
 
     def exitFieldDeclaration(self, ctx:Java9Parser.FieldDeclarationContext):
         if self.current_class_identifier is not None:
             for i in range(len(self.current_field_ids)):
                 field_id = self.current_field_ids[i]
+                dims = self.current_field_dims[i]
+                field_init = self.current_field_inits[i]
                 var_ctx = self.current_field_var_ctxs[i]
                 field = Field(
                     parser_context=self.current_field_decl[2],
                     filename=self.filename
                 )
                 field.modifiers = self.current_field_decl[0]
-                field.datatype = self.current_field_decl[1]
+                field.datatype = self.current_field_decl[1] + dims
                 field.name = field_id
+                field.initializer = field_init
                 field.neighbor_names = [ x for x in self.current_field_ids if x != field_id ]
                 field.all_variable_declarator_contexts = self.current_field_var_ctxs
                 field.index_in_variable_declarators = i

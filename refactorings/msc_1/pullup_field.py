@@ -15,7 +15,6 @@ def pullup_field(source_filenames: list,
 
     superclass: utils_listener.Class = program.packages[package_name].classes[superclass_name]
     superclass_body_start = utils_listener.TokensInfo(superclass.parser_context.classBody())
-    print(superclass_body_start.start)
     superclass_body_start.stop = superclass_body_start.start # Start and stop both point to the '{'
 
     fields_to_remove = []

@@ -7,10 +7,10 @@ class A
 
 class B extends A
 {
-    int a, b, c, d;
+    int a[], b, c, d;
 }
 
 class C extends A
 {
-    int b, a, c;
+    int[] b, a, c;
 }
