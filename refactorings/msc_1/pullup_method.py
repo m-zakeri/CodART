@@ -2,8 +2,9 @@ from antlr4 import *
 
 from antlr4_java9.Java9Lexer import Java9Lexer
 from antlr4_java9.Java9Parser import Java9Parser
-from utils_listener import UtilsListener, Program
+from utils_listener import UtilsListener, Program,TokensInfo
 from utils import get_program
+
 
 def pullup_method(mylist : list):
 
@@ -28,7 +29,14 @@ def pullup_method(mylist : list):
                  for _method in c.methods:
                     method=c.methods[_method]
                     if method.name not in methodsofclass:
-                     methodsofclass.append(method.name)
+                      methodsofclass.append(method.name)
                     else:
-                        pullupmethods[_class.superclass_name]=[method.name]
-    return pullupmethods
+                      pullupmethods[_class.superclass_name]=[method]
+    for key in pullupmethods:
+      methods=pullupmethods[key]
+      for _method in methods:
+       tolkens_info=TokensInfo(method.parser_context)
+
+
+
+      return pullupmethods
