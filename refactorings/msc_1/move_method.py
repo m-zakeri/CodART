@@ -1,4 +1,4 @@
-from utils_listener import TokensInfo
+from utils_listener import TokensInfo,SingleFileElement
 from utils import Rewriter
 from utils import get_program
 
@@ -25,15 +25,18 @@ def move_method_refactoring(source_filenames: list, package_name: str, class_nam
                     Rewriter_.apply()
                     i=i+1
     class_tokens_info = TokensInfo(_targetclass.parser_context)
-    Rewriter_.insert_before(tokens_info=class_tokens_info,text=_method.parser_context.getText())
+    singlefileelement = SingleFileElement(_method.parser_context,_sourceclass.filename)
+    strofmethod = singlefileelement.get_text_from_file()
+    #print(strofmethod)
+    Rewriter_.insert_before(tokens_info=class_tokens_info,text=strofmethod)
     Rewriter_.replace(tokens_info,"")
     Rewriter_.apply()
-    print(_sourceclass)
-    print(_targetclass)
-    print(_method)
-    print(_method.parser_context.start)
-    print(_method.parser_context.stop)
-mylist = ["tests/Test.java","tests/sourceclass.java","tests/targetclass.java"]
+    #print(_sourceclass)
+    #print(_targetclass)
+    #print(_method)
+    #print(_method.parser_context.start)
+    #print(_method.parser_context.stop)
+mylist = ["tests/move_method/Test.java","tests/move_method/sourceclass.java","tests/move_method/targetclass.java"]
 move_method_refactoring(mylist,"tests.utils_test2","sourceclass","d","targetclass")
 
 
