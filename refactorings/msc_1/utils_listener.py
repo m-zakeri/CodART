@@ -72,7 +72,7 @@ class SingleFileElement:
         file = open(filename, 'r')
         text = file.read()
         file.close()
-        return text[self.get_first_symbol():self.get_last_symbol() + 1]
+        return text[self.get_first_symbol().start:self.get_last_symbol().stop + 1]
 
 class Class(SingleFileElement):
     def __init__(self,
