@@ -51,7 +51,8 @@ class Rewriter:
 
     def insert_after(self, tokens_info: TokensInfo, text: str):
         self.get_token_stream_rewriter(tokens_info.token_stream).insertAfter(tokens_info.stop, text)
-
+    def insert_before(self, tokens_info: TokensInfo, text: str):
+        self.get_token_stream_rewriter(tokens_info.token_stream).insertBeforeIndex(tokens_info.stop,text)
     def apply(self):
         for token_stream in self.token_streams:
             (old_filename, token_stream_rewriter, new_filename) = self.token_streams[token_stream]
