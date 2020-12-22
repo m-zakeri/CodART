@@ -124,7 +124,7 @@ class Method(SingleFileElement):
         self.name = None
         self.parameters = []
         self.body_text = None
-        self.body_method_invocations = []
+        self.body_method_invocations = {}
         self.parser_context = parser_context
         self.filename = filename
     def __str__(self):
@@ -230,9 +230,13 @@ class UtilsListener(Java9Listener):
 
     def enterMethodInvocation(self, ctx:Java9Parser.MethodInvocationContext):
         if self.current_method is not None:
-            for typename in ctx.getChildren(lambda x: type(x) == Java9Parser.TypeNameContext):
-                self.current_method.body_method_invocations.append(typename)
-
+          #for typename in ctx.getChildren(lambda x: type(x) == Java9Parser.TypeNameContext):
+               # self.current_method.body_method_invocations.append(typename)
+          if ctx.typeName().identifier() not in self.current_method.body_method_invocations:
+              self.current_method.body_method_invocations[ctx.typeName().identifier()] = [ctx.identifier().getText()]
+          else:
+              self.current_method.body_method_invocations[ctx.typeName().identifier()].append(
+                  ctx.identifier().getText())
 
     def enterFieldDeclaration(self, ctx:Java9Parser.FieldDeclarationContext):
         if self.current_class_identifier is not None:
