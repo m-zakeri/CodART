@@ -45,7 +45,7 @@ def pullup_field(source_filenames: list,
 
 if __name__ == "__main__":
     # test
-    if pullup_field(["tests/pullup_field_test1.java", "tests/pullup_field_test2.java"], "pullup_field_test1", "A", "a"):
+    if pullup_field(["tests/pullup_field/test1.java", "tests/pullup_field/test2.java"], "pullup_field_test1", "A", "a"):
         print("Success!")
     else:
         print("Cannot refactor.")
