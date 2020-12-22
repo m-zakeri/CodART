@@ -1,3 +1,7 @@
+import antlr4
+from antlr4.Token import CommonToken
+import antlr4.tree
+
 from antlr4_java9.Java9Parser import Java9Parser, CommonTokenStream
 from antlr4_java9.Java9Listener import Java9Listener
 
@@ -41,6 +45,34 @@ class SingleFileElement:
         return TokensInfo(
             self.parser_context
         )
+
+    def get_first_symbol(self) -> CommonToken:
+        first_terminal = self.parser_context
+        while not isinstance(first_terminal, antlr4.tree.Tree.TerminalNode):
+            first_terminal = first_terminal.getChild(0)
+        return first_terminal.getSymbol()
+
+    def get_last_symbol(self) -> CommonToken:
+        last_terminal = self.parser_context
+        while not isinstance(last_terminal, antlr4.tree.Tree.TerminalNode):
+            last_terminal = last_terminal.getChild(last_terminal.getChildCount() - 1)
+        return last_terminal.getSymbol()
+
+    def get_file_position_range(self) -> str:
+        return (
+            self.get_first_symbol().start,
+            self.get_last_symbol().stop
+        )
+
+    def get_text_from_file(self, filename = None) -> str:
+        if filename is None:
+            filename = self.filename
+        if filename is None:
+            return None
+        file = open(filename, 'r')
+        text = file.read()
+        file.close()
+        return text[self.get_first_symbol():self.get_last_symbol() + 1]
 
 class Class(SingleFileElement):
     def __init__(self,
