@@ -34,5 +34,8 @@ public class Test2 extends Test1{
 }
 public class Test3 extends Test1{
 public void bv(){
+  int a=1;
+  Test2 t2 = new Test2();
+  Test2
     }
 }
