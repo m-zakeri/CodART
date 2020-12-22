@@ -7,10 +7,10 @@ class A
 
 class B extends A
 {
-    int a;
+    int a, b, c, d;
 }
 
 class C extends A
 {
-    int a;
+    int b, a, c;
 }

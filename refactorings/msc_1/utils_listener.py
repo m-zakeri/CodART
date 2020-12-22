@@ -107,6 +107,8 @@ class Field(SingleFileElement):
         self.datatype = datatype
         self.name = name
         self.neighbor_names = []
+        self.all_variable_declarator_contexts = []
+        self.index_in_variable_declarators: int = None
         self.parser_context = parser_context
         self.filename = filename
     def __str__(self):
@@ -156,6 +158,7 @@ class UtilsListener(Java9Listener):
 
         self.current_field_decl = None
         self.current_field_ids = None
+        self.current_field_var_ctxs = None
 
         self.filename = filename
 
@@ -242,14 +245,18 @@ class UtilsListener(Java9Listener):
             datatype = ctx.unannType().getText()
             self.current_field_decl = (modifiers, datatype, ctx)
             self.current_field_ids = []
+            self.current_field_var_ctxs = []
 
     def enterVariableDeclarator(self, ctx:Java9Parser.VariableDeclaratorContext):
         if self.current_field_decl is not None:
             self.current_field_ids.append(ctx.variableDeclaratorId().identifier().getText())
+            self.current_field_var_ctxs.append(ctx)
 
     def exitFieldDeclaration(self, ctx:Java9Parser.FieldDeclarationContext):
         if self.current_class_identifier is not None:
-            for field_id in self.current_field_ids:
+            for i in range(len(self.current_field_ids)):
+                field_id = self.current_field_ids[i]
+                var_ctx = self.current_field_var_ctxs[i]
                 field = Field(
                     parser_context=self.current_field_decl[2],
                     filename=self.filename
@@ -258,5 +265,7 @@ class UtilsListener(Java9Listener):
                 field.datatype = self.current_field_decl[1]
                 field.name = field_id
                 field.neighbor_names = [ x for x in self.current_field_ids if x != field_id ]
+                field.all_variable_declarator_contexts = self.current_field_var_ctxs
+                field.index_in_variable_declarators = i
                 self.package.classes[self.current_class_identifier].fields[field.name] = field
             self.current_field_decl = None
