@@ -55,6 +55,33 @@ def pullup_field(source_filenames: list,
                 to_remove.start = utils_listener.TokensInfo(var_ctxs[i - 1]).stop + 1 # Include the ',' before it
                 rewriter.replace(to_remove, "")
 
+        # Add initializer to class constructor if initializer exists in field declaration
+        if field.initializer is not None:
+            _class: utils_listener.Class = program.packages[field.package_name].classes[field.class_name]
+            initializer_statement = (field.name
+                                    + " = "
+                                    + ("new " + field.datatype + " " if field.initializer.startswith('{') else "")
+                                    + field.initializer
+                                    + ";")
+            has_contructor = False
+            for class_body_decl in _class.parser_context.classBody().getChildren():
+                if class_body_decl.getText() in ['{', '}']:
+                    continue
+                constructor = class_body_decl.constructorDeclaration()
+                if constructor is not None:
+                    body = constructor.constructorBody() # Start token = '{'
+                    body_start = utils_listener.TokensInfo(body)
+                    body_start.stop = body_start.start # Start and stop both point to the '{'
+                    rewriter.insert_after(body_start, "\n\t\t" + initializer_statement)
+                    has_contructor = True
+            if not has_contructor:
+                body = _class.parser_context.classBody()
+                body_start = utils_listener.TokensInfo(body)
+                body_start.stop = body_start.start # Start and stop both point to the '{'
+                rewriter.insert_after(body_start,
+                    "\n\t" + _class.name + "() { " + initializer_statement + " }"
+                )
+
     rewriter.apply()
     return True
 
