@@ -7,7 +7,7 @@ public class sourceclass
 
   public void d(){
 
-  int a=3;
+  int g=0;
   }
 
  }
