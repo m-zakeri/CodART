@@ -145,17 +145,6 @@ class Method(SingleFileElement):
         return str(self.modifiers) +  " " + str(self.returntype) + " " + str(self.name) \
             + str(tuple(self.parameters))
 
-class ExpressionName(SingleFileElement):
-    def __init__(self,
-                 text: str = None,
-                 parser_context: Java9Parser.NormalClassDeclarationContext = None,
-                 filename: str = None):
-        self.text = text
-        self.parser_context = parser_context
-        self.filename = filename
-    def __str__(self):
-        return str(self.text)
-
 class UtilsListener(Java9Listener):
 
     def __init__(self, filename):
