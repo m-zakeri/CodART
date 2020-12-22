@@ -1,9 +1,9 @@
 
 package tests.utils_test2;
-public class Test1
+public class Test
 {
   public void h(){
-  sourcclass.d();
+  sourceclass.d();
   sourceclass.d();
   }
 }
