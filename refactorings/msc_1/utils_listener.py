@@ -31,12 +31,21 @@ class TokensInfo:
             self.start: int = None
             self.stop: int = None
 
+class FileInfo:
+    def __init__(self, filename: str = None, package_name: str = None):
+        self.filename: str = None
+        self.package_name: str = None
+        self.all_imports = []
+        self.package_imports = []
+        self.class_imports = []
+
 class SingleFileElement:
     """The base class for those elements that are extracted from a single file"""
 
-    def __init__(self, parser_context, filename: str = None):
+    def __init__(self, parser_context, filename: str = None, _file_info: FileInfo = None):
         self.parser_context = parser_context
         self.filename = filename
+        self.file_info = _file_info
 
     def get_token_stream(self) -> CommonTokenStream:
         return self.parser_context.parser.getTokenStream()
@@ -77,13 +86,44 @@ class SingleFileElement:
 
         return text[self.get_first_symbol().start:self.get_last_symbol().stop+1]
 
+class ClassImport(SingleFileElement):
+    """import package_name.class_name;"""
+    def __init__(self,
+                 package_name: str = None,
+                 class_name: str = None,
+                 parser_context: Java9Parser.SingleTypeImportDeclarationContext = None,
+                 filename: str = None,
+                 file_info: FileInfo = None):
+        self.package_name = package_name
+        self.class_name = class_name
+        self.parser_context = parser_context
+        self.filename = filename
+        self.file_info = file_info
+    def __str__(self):
+        return "import " + str(self.package_name) + '.' + str(self.class_name)
+
+class PackageImport(SingleFileElement):
+    """import package_name.*;"""
+    def __init__(self,
+                 package_name: str = None,
+                 parser_context: Java9Parser.SingleTypeImportDeclarationContext = None,
+                 filename: str = None,
+                 file_info: FileInfo = None):
+        self.package_name = package_name
+        self.parser_context = parser_context
+        self.filename = filename
+        self.file_info = file_info
+    def __str__(self):
+        return "import " + str(self.package_name) + ".*"
+
 class Class(SingleFileElement):
     def __init__(self,
                  name: str = None,
                  super_class_name: str = None,
                  package_name: str = None,
                  parser_context: Java9Parser.NormalClassDeclarationContext = None,
-                 filename: str = None):
+                 filename: str = None,
+                 file_info: FileInfo = None):
         self.modifiers = []
         self.name = name
         self.superclass_name = None
@@ -93,6 +133,7 @@ class Class(SingleFileElement):
         self.package_name = package_name
         self.parser_context = parser_context
         self.filename = filename
+        self.file_info = file_info
     def __str__(self):
         return str(self.modifiers) +  " " + str(self.name) \
             + ((" extends " + str(self.superclass_name)) if self.superclass_name is not None else "") \
@@ -110,7 +151,8 @@ class Field(SingleFileElement):
                  package_name: str = None,
                  class_name: str = None,
                  parser_context: Java9Parser.NormalClassDeclarationContext = None,
-                 filename: str = None):
+                 filename: str = None,
+                 file_info: FileInfo = None):
         self.modifiers = []
         self.datatype = datatype
         self.name = name
@@ -122,6 +164,7 @@ class Field(SingleFileElement):
         self.class_name = class_name
         self.parser_context = parser_context
         self.filename = filename
+        self.file_info = file_info
     def __str__(self):
         return str(self.modifiers) +  " " + str(self.datatype) + " " + str(self.name)
 
@@ -133,7 +176,8 @@ class Method(SingleFileElement):
                  package_name: str = None,
                  class_name: str = None,
                  parser_context: Java9Parser.NormalClassDeclarationContext = None,
-                 filename: str = None):
+                 filename: str = None,
+                 file_info: FileInfo = None):
         self.modifiers = []
         self.returntype = None
         self.name = None
@@ -144,6 +188,7 @@ class Method(SingleFileElement):
         self.class_name = class_name
         self.parser_context = parser_context
         self.filename = filename
+        self.file_info = file_info
     def __str__(self):
         return str(self.modifiers) +  " " + str(self.returntype) + " " + str(self.name) \
             + str(tuple(self.parameters))
@@ -167,9 +212,44 @@ class UtilsListener(Java9Listener):
         self.current_field_var_ctxs = None
 
         self.filename = filename
+        self.file_info = FileInfo(filename=filename)
 
     def enterPackageDeclaration(self, ctx:Java9Parser.PackageDeclarationContext):
         self.package.name = ctx.packageName().getText()
+        self.file_info.package_name = self.package.name
+
+    def enterSingleTypeImportDeclaration(self, ctx:Java9Parser.SingleTypeImportDeclarationContext):
+        typename: Java9Parser.TypeNameContext = ctx.typeName()
+        p = None
+        if typename.packageOrTypeName() is not None:
+            p = typename.packageOrTypeName().getText()
+        c = typename.identifier().getText()
+        class_import = ClassImport(
+            package_name=p,
+            class_name=c,
+            parser_context=ctx,
+            filename=self.filename,
+            file_info=self.file_info
+        )
+        self.file_info.all_imports.append(class_import)
+        self.file_info.class_imports.append(class_import)
+
+    def enterTypeImportOnDemandDeclaration(self, ctx:Java9Parser.TypeImportOnDemandDeclarationContext):
+        p = ctx.packageOrTypeName().getText()
+        package_import = PackageImport(
+            package_name=p,
+            parser_context=ctx,
+            filename=self.filename,
+            file_info=self.file_info
+        )
+        self.file_info.all_imports.append(package_import)
+        self.file_info.package_imports.append(package_import)
+
+    def enterSingleStaticImportDeclaration(self, ctx:Java9Parser.SingleStaticImportDeclarationContext):
+        pass
+
+    def enterStaticImportOnDemandDeclaration(self, ctx:Java9Parser.StaticImportOnDemandDeclarationContext):
+        pass
 
     def enterNormalClassDeclaration(self, ctx:Java9Parser.NormalClassDeclarationContext):
         if self.current_class_identifier is None and self.nest_count == 0:
@@ -178,7 +258,8 @@ class UtilsListener(Java9Listener):
             current_class = Class(
                 package_name=self.package.name,
                 parser_context=ctx,
-                filename=self.filename
+                filename=self.filename,
+                file_info=self.file_info
             )
             for modifier in ctx.getChildren(lambda x: type(x) == Java9Parser.ClassModifierContext):
                 current_class.modifiers.append(modifier.getText())
@@ -219,7 +300,8 @@ class UtilsListener(Java9Listener):
                 package_name=self.package.name,
                 class_name=self.current_class_identifier,
                 parser_context=ctx,
-                filename=self.filename
+                filename=self.filename,
+                file_info=self.file_info
             )
             for modifier in ctx.getChildren(lambda x: type(x) == Java9Parser.MethodModifierContext):
                 method.modifiers.append(modifier.getText())
@@ -292,7 +374,8 @@ class UtilsListener(Java9Listener):
                     package_name=self.package.name,
                     class_name=self.current_class_identifier,
                     parser_context=self.current_field_decl[2],
-                    filename=self.filename
+                    filename=self.filename,
+                    file_info=self.file_info
                 )
                 field.modifiers = self.current_field_decl[0]
                 field.datatype = self.current_field_decl[1] + dims
