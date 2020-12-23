@@ -5,7 +5,7 @@ class D extends A
     
 }
 
-class E extends a
+class E extends A
 {
     int b;
 }

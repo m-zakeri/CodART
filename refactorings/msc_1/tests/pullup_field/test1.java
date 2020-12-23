@@ -7,10 +7,20 @@ class A
 
 class B extends A
 {
-    int a;
+    int a[] = null, b, c, d;
 }
 
 class C extends A
 {
-    int a;
+    int[] b, a = { 1, 2 }, c;
+
+    C()
+    {
+        b = null;
+    }
+
+    C(int d)
+    {
+        c = new int[1];
+    }
 }
