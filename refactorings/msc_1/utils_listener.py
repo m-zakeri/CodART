@@ -50,12 +50,14 @@ class SingleFileElement:
         first_terminal = self.parser_context
         while not isinstance(first_terminal, antlr4.tree.Tree.TerminalNode):
             first_terminal = first_terminal.getChild(0)
+
         return first_terminal.getSymbol()
 
     def get_last_symbol(self) -> CommonToken:
         last_terminal = self.parser_context
         while not isinstance(last_terminal, antlr4.tree.Tree.TerminalNode):
             last_terminal = last_terminal.getChild(last_terminal.getChildCount() - 1)
+
         return last_terminal.getSymbol()
 
     def get_file_position_range(self) -> str:
@@ -72,7 +74,8 @@ class SingleFileElement:
         file = open(filename, 'r')
         text = file.read()
         file.close()
-        return text[self.get_first_symbol().start:self.get_last_symbol().stop + 1]
+
+        return text[self.get_first_symbol().start:self.get_last_symbol().stop+1]
 
 class Class(SingleFileElement):
     def __init__(self,

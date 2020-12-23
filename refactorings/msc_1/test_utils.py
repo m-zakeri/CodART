@@ -1,9 +1,10 @@
 from antlr4 import *
 from antlr4_java9.Java9Lexer import Java9Lexer
 from utils_listener import UtilsListener, Java9Parser
+
+from refactorings.msc_1.pullup_method1 import pullup_method
+from refactorings.msc_1.tests.move_method.move_method1 import move_method
 from utils import get_program
-from move_method import move_method
-from pullup_method import pullup_method
 
 
 def test_utils_listener():
@@ -49,13 +50,19 @@ def test_utils():
         print(n)
 
 def pullup_methods():
-    mylist = ["tests/utils_test.java"]
-    pullupmethods=pullup_method(mylist)
+    mylist = ["tests/pullup_method/Test.java", "tests/pullup_method/sourceclass.java",
+              "tests/pullup_method/superclass.java"]
+    pullupmethods=pullup_method(mylist,"tests.utils_test2","superclass","b","sourceclass")
     for key in pullupmethods:
       print(key)
       print(pullupmethods[key])
+def test():
+    source_filenames = ["tests/move_method_test/source.java", "tests/move_method_test/target.java"]
+    program = get_program(source_filenames)
+    print(program.packages["tests.utils_test2"].classes["source"].methods["c"].get_text_from_file())
 
 if __name__ == "__main__":
     #test_utils_listener()
     #test_utils()
     pullup_methods()
+  #  test()

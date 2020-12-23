@@ -1,6 +1,4 @@
 package tests.utils_test2;
+public class t{
 
-public class Test5
-{
 }
-

@@ -1,3 +1,4 @@
+from antlr4.TokenStreamRewriter import TokenStreamRewriter
 from utils_listener import TokensInfo,SingleFileElement
 from utils import Rewriter
 from utils import get_program
@@ -15,28 +16,27 @@ def move_method_refactoring(source_filenames: list, package_name: str, class_nam
      for class_ in package.classes:
         _class = package.classes[class_]
         for method_ in _class.methods:
-            _method = _class.methods[method_]
-            i=0
-            for inv in _method.body_method_invocations:
-                invc = _method.body_method_invocations[i]
-                if(invc != None):
-                    inv_tokens_info = TokensInfo(invc)
-                    Rewriter_.replace(inv_tokens_info,target_class_name)
+            __method = _class.methods[method_]
+            for inv in __method.body_method_invocations:
+                invc = __method.body_method_invocations[inv]
+                if (invc[0] == method_name):
+                    inv_tokens_info = TokensInfo(inv)
+                    Rewriter_.replace(inv_tokens_info, target_class_name)
                     Rewriter_.apply()
-                    i=i+1
     class_tokens_info = TokensInfo(_targetclass.parser_context)
-    singlefileelement = SingleFileElement(_method.parser_context,_sourceclass.filename)
-    strofmethod = singlefileelement.get_text_from_file()
-    #print(strofmethod)
+    singlefileelement = SingleFileElement(_method.parser_context,_method.filename)
+    #strofmethod  =_method.get_text_from_file(_method.filename)
+    token_stream_rewriter = TokenStreamRewriter(singlefileelement.get_token_stream())
+    strofmethod =token_stream_rewriter.getText(program_name=token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                                                           start=tokens_info.start,
+                                                           stop=tokens_info.stop)
+  #  print(token_stream_rewriter.getText(program_name=token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                                                         #  start=tokens_info.start,
+                                                        #   stop=tokens_info.stop))
     Rewriter_.insert_before(tokens_info=class_tokens_info,text=strofmethod)
     Rewriter_.replace(tokens_info,"")
     Rewriter_.apply()
-    #print(_sourceclass)
-    #print(_targetclass)
-    #print(_method)
-    #print(_method.parser_context.start)
-    #print(_method.parser_context.stop)
-mylist = ["tests/move_method/Test.java","tests/move_method/sourceclass.java","tests/move_method/targetclass.java"]
-move_method_refactoring(mylist,"tests.utils_test2","sourceclass","d","targetclass")
+mylist = ["tests/move_method/s.java","tests/move_method/t.java","tests/move_method/test.java"]
+move_method_refactoring(mylist,"tests.utils_test2","s","c","t")
 
 

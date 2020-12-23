@@ -8,5 +8,7 @@ public class sourceclass extends superclass{
 
   int g=0;
   }
-
+public void b(){
+int g=0;
+}
  }
