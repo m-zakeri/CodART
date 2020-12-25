@@ -1,3 +1,15 @@
+"""
+To implement the encapsulate filed refactored
+Encapsulate field: Make a public field private and provide accessors
+
+
+"""
+
+
+__version__ = '0.1.0'
+__author__ = 'Morteza'
+
+
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
