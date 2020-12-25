@@ -1,8 +1,8 @@
 ![version](https://img.shields.io/badge/version-1.0.0-green)
 
-# Speedy madule
+# Speedy module
 
-Thanks to speedy ANTLR, CodART is now using C++ in the backend to parse JAVA source codes. 
+Thanks to Speedy Antlr Tool, CodART is now using C++ in the backend to parse JAVA source codes. 
 To use the speedy module, named `java9speady` first, you must build and install `java9speady` module using:
 
 `python setup.py install` with the right privileges.
@@ -22,3 +22,5 @@ For the `/grammars/Test.java` the following parsing times are observed on a Wind
 
 [ANTLR Plugin for Intellij IDE](../docs/figs/parsetime/antlr_intellij-plugin-v4.png)
 
+Please open an issue in case of any problem.
+Thanks, Morteza
