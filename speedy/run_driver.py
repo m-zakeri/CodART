@@ -1,3 +1,13 @@
+"""
+Benchmark driver for CodeART C++ backend
+
+"""
+
+
+__version__ = '0.2.0'
+__author__ = 'Morteza'
+
+
 import java9speedy
 from java9speedy.parser import sa_java9_v2
 

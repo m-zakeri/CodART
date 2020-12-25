@@ -1,8 +1,17 @@
+"""
+
+"""
+__version__ = '0.2.0'
+__author__ = 'Morteza'
+
+
 import sys
 import os
 import platform
 import fnmatch
 import setuptools
+
+
 
 target = platform.system().lower()
 PLATFORMS = {'windows', 'linux', 'darwin', 'cygwin'}
