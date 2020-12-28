@@ -30,6 +30,9 @@ class TokensInfo:
             self.token_stream: CommonTokenStream = None
             self.start: int = None
             self.stop: int = None
+    def get_token_index(self, tokens : list,start : int , stop : int):
+
+        return tokens[start:stop]
 
 class FileInfo:
     def __init__(self, filename: str = None, package_name: str = None):
@@ -189,6 +192,7 @@ class Method(SingleFileElement):
         self.parser_context = parser_context
         self.filename = filename
         self.file_info = file_info
+        self.formalparam_context = None
     def __str__(self):
         return str(self.modifiers) +  " " + str(self.returntype) + " " + str(self.name) \
             + str(tuple(self.parameters))
@@ -291,6 +295,9 @@ class UtilsListener(Java9Listener):
         elif self.current_class_identifier is not None:
                 self.current_class_identifier = None
 
+    def enterFormalParameterList(self, ctx: Java9Parser.FormalParameterListContext):
+        if self.current_method is not None:
+            self.current_method.formalparam_context = ctx
     def enterMethodDeclaration(self, ctx:Java9Parser.MethodDeclarationContext):
         if self.current_class_identifier is not None:
             method_header = ctx.methodHeader()
