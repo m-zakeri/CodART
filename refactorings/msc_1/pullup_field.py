@@ -98,13 +98,14 @@ def pullup_field(source_filenames: list,
     return True
 
 if __name__ == "__main__":
+    print("Testing pullup_field...")
     filenames = [
         "tests/pullup_field/test1.java",
         "tests/pullup_field/test2.java",
         "tests/pullup_field/test3.java",
         "tests/pullup_field/test4.java"
     ]
-    print("Testing pullup_field...")
+
     if pullup_field(filenames, "pullup_field_test1", "B", "a"):
         print("Success!")
     else:
