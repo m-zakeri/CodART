@@ -34,7 +34,8 @@ def pullup_field(source_filenames: list,
         p: utils_listener.Package = program.packages[pn]
         for cn in p.classes:
             c: utils_listener.Class = p.classes[cn]
-            if superclass_name == c.superclass_name \
+            if ((c.superclass_name == superclass_name and c.file_info.has_imported_class(package_name, superclass_name)) \
+                    or c.superclass_name == package_name + '.' + superclass_name) \
                     and field_name in c.fields \
                     and c.fields[field_name].datatype == datatype:
                 fields_to_remove.append(c.fields[field_name])
@@ -49,7 +50,7 @@ def pullup_field(source_filenames: list,
 
     rewriter = utils.Rewriter(program, filename_mapping)
 
-    rewriter.insert_after(superclass_body_start, "\n\t" + ("public " if is_public else "protected ") + datatype + " " + field_name + ";")
+    rewriter.insert_after(superclass_body_start, "\n    " + ("public " if is_public else "protected ") + datatype + " " + field_name + ";")
 
     for field in fields_to_remove:
         if len(field.neighbor_names) == 0:
@@ -83,22 +84,28 @@ def pullup_field(source_filenames: list,
                     body = constructor.constructorBody() # Start token = '{'
                     body_start = utils_listener.TokensInfo(body)
                     body_start.stop = body_start.start # Start and stop both point to the '{'
-                    rewriter.insert_after(body_start, "\n\t\t" + initializer_statement)
+                    rewriter.insert_after(body_start, "\n        " + initializer_statement)
                     has_contructor = True
             if not has_contructor:
                 body = _class.parser_context.classBody()
                 body_start = utils_listener.TokensInfo(body)
                 body_start.stop = body_start.start # Start and stop both point to the '{'
                 rewriter.insert_after(body_start,
-                    "\n\t" + _class.name + "() { " + initializer_statement + " }"
+                    "\n    " + _class.name + "() { " + initializer_statement + " }"
                 )
 
     rewriter.apply()
     return True
 
 if __name__ == "__main__":
+    filenames = [
+        "tests/pullup_field/test1.java",
+        "tests/pullup_field/test2.java",
+        "tests/pullup_field/test3.java",
+        "tests/pullup_field/test4.java"
+    ]
     print("Testing pullup_field...")
-    if pullup_field(["tests/pullup_field/test1.java", "tests/pullup_field/test2.java"], "pullup_field_test1", "B", "a"):
+    if pullup_field(filenames, "pullup_field_test1", "B", "a"):
         print("Success!")
     else:
         print("Cannot refactor.")

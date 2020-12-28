@@ -42,6 +42,8 @@ class FileInfo:
         self.package_imports = []
         self.class_imports = []
     def has_imported_class(self, package_name: str, class_name: str) -> bool:
+        if self.package_name == package_name:
+            return True
         return (
             any(lambda x: x.package_name == package_name for package_import in self.package_imports)
             or any(lambda x: x.package_name == package_name and x.class_name == class_name for class_import in self.class_imports)
