@@ -3,37 +3,48 @@ import utils
 
 def pullup_field(source_filenames: list,
                  package_name: str,
-                 superclass_name: str,
+                 class_name: str,
                  field_name: str,
                  filename_mapping = lambda x: (x[:-5] if x.endswith(".java") else x) + ".re.java") -> bool:
 
     program = utils.get_program(source_filenames)
+
     if package_name not in program.packages \
-            or superclass_name not in program.packages[package_name].classes \
-            or field_name in program.packages[package_name].classes[superclass_name].fields:
+            or class_name not in program.packages[package_name].classes \
+            or field_name not in program.packages[package_name].classes[class_name].fields:
         return False
+
+    _class: utils_listener.Class = program.packages[package_name].classes[class_name]
+    if _class.superclass_name is None:
+        return False
+
+    superclass_name = _class.superclass_name
 
     superclass: utils_listener.Class = program.packages[package_name].classes[superclass_name]
     superclass_body_start = utils_listener.TokensInfo(superclass.parser_context.classBody())
     superclass_body_start.stop = superclass_body_start.start # Start and stop both point to the '{'
+
+    if field_name in superclass.fields:
+        return False
+
+    datatype = _class.fields[field_name].datatype
 
     fields_to_remove = []
     for pn in program.packages:
         p: utils_listener.Package = program.packages[pn]
         for cn in p.classes:
             c: utils_listener.Class = p.classes[cn]
-            if superclass_name == c.superclass_name and field_name in c.fields:
+            if superclass_name == c.superclass_name \
+                    and field_name in c.fields \
+                    and c.fields[field_name].datatype == datatype:
                 fields_to_remove.append(c.fields[field_name])
 
     if len(fields_to_remove) == 0:
         return False
 
     is_public = False
-    datatype = fields_to_remove[0].datatype
     for field in fields_to_remove:
         field: utils_listener.Field = field
-        if field.datatype != datatype:
-            return False
         is_public = is_public or "public" in field.modifiers
 
     rewriter = utils.Rewriter(program, filename_mapping)
@@ -87,7 +98,7 @@ def pullup_field(source_filenames: list,
 
 if __name__ == "__main__":
     print("Testing pullup_field...")
-    if pullup_field(["tests/pullup_field/test1.java", "tests/pullup_field/test2.java"], "pullup_field_test1", "A", "a"):
+    if pullup_field(["tests/pullup_field/test1.java", "tests/pullup_field/test2.java"], "pullup_field_test1", "B", "a"):
         print("Success!")
     else:
         print("Cannot refactor.")
