@@ -41,6 +41,11 @@ class FileInfo:
         self.all_imports = []
         self.package_imports = []
         self.class_imports = []
+    def has_imported_class(self, package_name: str, class_name: str) -> bool:
+        return (
+            any(lambda x: x.package_name == package_name for package_import in self.package_imports)
+            or any(lambda x: x.package_name == package_name and x.class_name == class_name for class_import in self.class_imports)
+        )
 
 class SingleFileElement:
     """The base class for those elements that are extracted from a single file"""
