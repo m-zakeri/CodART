@@ -35,7 +35,7 @@ def pullup_field(source_filenames: list,
         for cn in p.classes:
             c: utils_listener.Class = p.classes[cn]
             if ((c.superclass_name == superclass_name and c.file_info.has_imported_class(package_name, superclass_name)) \
-                    or c.superclass_name == package_name + '.' + superclass_name) \
+                    or (package_name is not None and c.superclass_name == package_name + '.' + superclass_name)) \
                     and field_name in c.fields \
                     and c.fields[field_name].datatype == datatype:
                 fields_to_remove.append(c.fields[field_name])

@@ -21,7 +21,7 @@ def pushdown_field(source_filenames: list,
         for cn in p.classes:
             c: utils_listener.Class = p.classes[cn]
             if ((c.superclass_name == superclass_name and c.file_info.has_imported_class(package_name, superclass_name)) \
-                    or c.superclass_name == package_name + '.' + superclass_name):
+                    or (package_name is not None and c.superclass_name == package_name + '.' + superclass_name)):
                 if field_name in c.fields:
                     return False
                 else:
@@ -32,7 +32,7 @@ def pushdown_field(source_filenames: list,
             for fn in c.fields:
                 f: utils_listener.Field = c.fields[fn]
                 if (f.datatype == superclass_name and has_imported_superclass) \
-                        or f.datatype == (package_name + '.' + superclass_name):
+                        or (package_name is not None and f.datatype == (package_name + '.' + superclass_name)):
                     fields_of_superclass_type.append(f.name)
             for mn in c.methods:
                 m: utils_listener.Method = c.methods[mn]
