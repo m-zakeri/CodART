@@ -69,7 +69,7 @@ class SingleFileElement:
 
         return last_terminal.getSymbol()
 
-    def get_file_position_range(self) -> str:
+    def get_file_position_range(self) -> tuple:
         return (
             self.get_first_symbol().start,
             self.get_last_symbol().stop
@@ -179,11 +179,12 @@ class Method(SingleFileElement):
                  filename: str = None,
                  file_info: FileInfo = None):
         self.modifiers = []
-        self.returntype = None
-        self.name = None
+        self.returntype = returntype
+        self.name = name
         self.parameters = []
-        self.body_text = None
+        self.body_text = body_text
         self.body_method_invocations = {}
+        self.body_local_vars_and_expr_names = [] # Type: either LocalVariable or ExpressionName
         self.package_name = package_name
         self.class_name = class_name
         self.parser_context = parser_context
@@ -192,6 +193,15 @@ class Method(SingleFileElement):
     def __str__(self):
         return str(self.modifiers) +  " " + str(self.returntype) + " " + str(self.name) \
             + str(tuple(self.parameters))
+
+class LocalVariable:
+    def __init__(self, datatype: str = None, identifier: str = None):
+        self.datatype = datatype
+        self.identifier = identifier
+
+class ExpressionName:
+    def __init__(self, dot_separated_identifiers: list):
+        self.dot_separated_identifiers = dot_separated_identifiers
 
 class UtilsListener(Java9Listener):
 
@@ -204,6 +214,8 @@ class UtilsListener(Java9Listener):
 
         self.current_method_identifier = None
         self.current_method = None
+
+        self.current_local_var_type = None
 
         self.current_field_decl = None
         self.current_field_ids = None
@@ -336,6 +348,23 @@ class UtilsListener(Java9Listener):
                 self.current_method.body_method_invocations[ctx.typeName().identifier()].append(
                     ctx.identifier().getText())
 
+    def enterLocalVariableDeclaration(self, ctx:Java9Parser.LocalVariableDeclarationContext):
+        if self.current_method is not None:
+            self.current_local_var_type = ctx.unannType().getText()
+            # The rest in: enterVariableDeclarator
+
+    def exitLocalVariableDeclaration(self, ctx:Java9Parser.LocalVariableDeclarationContext):
+        self.current_local_var_type = None
+
+    def enterExpressionName(self, ctx:Java9Parser.ExpressionNameContext):
+        if self.current_method is not None:
+            names = [ctx.identifier().getText()]
+            c = ctx.ambiguousName()
+            while c is not None:
+                names.insert(0, c.identifier().getText())
+                c = c.ambiguousName()
+            self.current_method.body_local_vars_and_expr_names.append(ExpressionName(names))
+
     def enterFieldDeclaration(self, ctx:Java9Parser.FieldDeclarationContext):
         if self.current_class_identifier is not None:
             modifiers = []
@@ -362,6 +391,14 @@ class UtilsListener(Java9Listener):
                 init = init_ctx.getText()
             self.current_field_inits.append(init)
             self.current_field_var_ctxs.append(ctx)
+        if self.current_local_var_type is not None:
+            if self.current_method is not None:
+                dims = ""
+                if ctx.variableDeclaratorId().dims() is not None:
+                    dims = ctx.variableDeclaratorId().dims().getText()
+                self.current_method.body_local_vars_and_expr_names.append(
+                    LocalVariable(self.current_local_var_type + dims, ctx.variableDeclaratorId().identifier().getText())
+                )
 
     def exitFieldDeclaration(self, ctx:Java9Parser.FieldDeclarationContext):
         if self.current_class_identifier is not None:
