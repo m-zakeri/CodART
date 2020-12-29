@@ -2,9 +2,12 @@ package test;
 
 class U
 {
-    A a = A();
-    B b1 = B();
-    B b2 = B();
+    private Iab a = A();
+    private Iab b1 = B();
+    private B b2 = B();
+
+    private B c2;
+    private Iab c1;
 
     void func1()
     {
@@ -12,6 +15,9 @@ class U
         b1.a();
         b2.b();
         b2.c();
+
+        c1.b();
+        c2.c();
     }
 
     void func2()
@@ -19,5 +25,8 @@ class U
         B a;
         a.a();
         a.c();
+        Iab b;
+        b.b();
+        b.a();
     }
 }

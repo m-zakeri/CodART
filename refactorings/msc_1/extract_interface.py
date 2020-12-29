@@ -120,11 +120,17 @@ def extract_interface(source_filenames: list,
                 if len(f.neighbor_names) == 0:
                     rewriter.replace(utils_listener.TokensInfo(f.parser_context.unannType()), typename)
                 else:
-                    rewriter.replace(utils_listener.TokensInfo(f.all_variable_declarator_contexts[f.index_in_variable_declarators]), "")
-                    rewriter.insert_after(
-                        f.get_tokens_info(),
-                        "\n    " + typename + " " + f.name + (" = " + f.initializer + ";" if f.initializer is not None else ";")
-                    )
+                    if not any(nn in fields_of_interest for nn in f.neighbor_names):
+                        t = utils_listener.TokensInfo(f.all_variable_declarator_contexts[f.index_in_variable_declarators])
+                        if f.index_in_variable_declarators == 0:
+                            t.stop = utils_listener.TokensInfo(f.all_variable_declarator_contexts[f.index_in_variable_declarators + 1]).start - 1
+                        else:
+                            t.start = utils_listener.TokensInfo(f.all_variable_declarator_contexts[f.index_in_variable_declarators - 1]).start + 1
+                        rewriter.replace(t, "")
+                        rewriter.insert_after(
+                            f.get_tokens_info(),
+                            "\n    private " + typename + " " + f.name + (" = " + f.initializer + ";" if f.initializer is not None else ";")
+                        )
 
     # Create the interface
     interface_file_content = (
