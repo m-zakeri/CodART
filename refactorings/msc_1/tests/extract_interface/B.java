@@ -2,12 +2,12 @@ package test;
 
 class B
 {
-    int a(int p1, float p2)
+    public int a(int p1, float p2)
     {
         hello();
     }
 
-    void b()
+    private void b()
     {
         hi();
     }

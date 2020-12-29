@@ -9,7 +9,7 @@ class B implements Iab
     }
 
     @Override
-    public void b()
+    public  void b()
     {
         hi();
     }

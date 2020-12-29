@@ -30,16 +30,15 @@ def extract_interface(source_filenames: list,
     for class_name in class_names:
         c: utils_listener.Class = program.packages[package_name].classes[class_name]
         # Add implements to the class
-        if len(c.superinterface_names) == 0:
-            has_superinterface = False
-            if c.parser_context.superinterfaces() is not None:
-                t = utils_listener.TokensInfo(c.parser_context.superinterfaces())
-                has_superinterface = True
-            elif c.parser_context.superclass() is not None:
-                t = utils_listener.TokensInfo(c.parser_context.superclass())
-            else:
-                t = utils_listener.TokensInfo(c.parser_context.identifier())
-            rewriter.insert_after(t, (" implements " if not has_superinterface else " ") + interface_name)
+        has_superinterface = False
+        if c.parser_context.superinterfaces() is not None:
+            t = utils_listener.TokensInfo(c.parser_context.superinterfaces())
+            has_superinterface = True
+        elif c.parser_context.superclass() is not None:
+            t = utils_listener.TokensInfo(c.parser_context.superclass())
+        else:
+            t = utils_listener.TokensInfo(c.parser_context.identifier())
+        rewriter.insert_after(t, (", " if has_superinterface else " implements ") + interface_name)
         for method_name in method_names:
             m: utils_listener.Method = c.methods[method_name]
             # Check if the return types / parameter types are the same
