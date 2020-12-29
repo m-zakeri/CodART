@@ -1,6 +1,6 @@
 package pushdown_field_test1;
 
-class A
+public class A
 {
     
 }

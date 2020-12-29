@@ -10,6 +10,7 @@ def pushdown_field(source_filenames: list,
                    filename_mapping = lambda x: (x[:-5] if x.endswith(".java") else x) + ".re.java") -> bool:
 
     program = utils.get_program(source_filenames)
+
     if package_name not in program.packages \
             or superclass_name not in program.packages[package_name].classes \
             or field_name not in program.packages[package_name].classes[superclass_name].fields:
