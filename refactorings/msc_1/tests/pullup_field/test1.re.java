@@ -1,14 +1,14 @@
 package pullup_field_test1;
 
-class A
+public class A
 {
-	protected int[] a;
+    protected int[] a;
     public A() {}
 }
 
 class B extends A
 {
-	B() { a = null; }
+    B() { a = null; }
     int b, c, d;
 }
 
@@ -18,13 +18,13 @@ class C extends A
 
     C()
     {
-		a = new int[] {1,2};
+        a = new int[] {1,2};
         b = null;
     }
 
     C(int d)
     {
-		a = new int[] {1,2};
+        a = new int[] {1,2};
         c = new int[1];
     }
 }

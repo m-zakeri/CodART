@@ -1,18 +1,18 @@
-package pullup_field_test1;
+package pushdown_field_test1;
 
 public class A
 {
-    public A() {}
+    int a;
 }
 
 class B extends A
 {
-    int a[] = null, b, c, d;
+    int b, c, d;
 }
 
 class C extends A
 {
-    int[] b, a = { 1, 2 }, c;
+    int[] b, c;
 
     C()
     {

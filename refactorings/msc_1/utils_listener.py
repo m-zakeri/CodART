@@ -41,6 +41,19 @@ class FileInfo:
         self.all_imports = []
         self.package_imports = []
         self.class_imports = []
+    def has_imported_class(self, package_name: str, class_name: str) -> bool:
+        if self.package_name == package_name:
+            return True
+        return (
+            any(lambda x: x.package_name == package_name for package_import in self.package_imports)
+            or any(lambda x: x.package_name == package_name and x.class_name == class_name for class_import in self.class_imports)
+        )
+    def has_imported_package(self, package_name: str):
+        if self.package_name == package_name:
+            return True
+        return(
+            any(lambda x: x.package_name == package_name for package_import in self.package_imports)
+        )
 
 class SingleFileElement:
     """The base class for those elements that are extracted from a single file"""
@@ -153,7 +166,7 @@ class Field(SingleFileElement):
                  initializer: str = None,
                  package_name: str = None,
                  class_name: str = None,
-                 parser_context: Java9Parser.NormalClassDeclarationContext = None,
+                 parser_context: Java9Parser.FieldDeclarationContext = None,
                  filename: str = None,
                  file_info: FileInfo = None):
         self.modifiers = []
@@ -178,7 +191,7 @@ class Method(SingleFileElement):
                  body_text: str = None,
                  package_name: str = None,
                  class_name: str = None,
-                 parser_context: Java9Parser.NormalClassDeclarationContext = None,
+                 parser_context: Java9Parser.MethodDeclarationContext = None,
                  filename: str = None,
                  file_info: FileInfo = None):
         self.modifiers = []
@@ -187,7 +200,7 @@ class Method(SingleFileElement):
         self.parameters = []
         self.body_text = body_text
         self.body_method_invocations = {}
-        self.body_local_vars_and_expr_names = [] # Type: either LocalVariable or ExpressionName
+        self.body_local_vars_and_expr_names = [] # Type: either LocalVariable, ExpressionName or MethodInvocation
         self.package_name = package_name
         self.class_name = class_name
         self.parser_context = parser_context
@@ -202,13 +215,19 @@ class Method(SingleFileElement):
             + str(tuple(self.parameters))
 
 class LocalVariable:
-    def __init__(self, datatype: str = None, identifier: str = None):
+    def __init__(self, datatype: str = None, identifier: str = None, parser_context: Java9Parser.LocalVariableDeclarationContext = None):
         self.datatype = datatype
         self.identifier = identifier
+        self.parser_context = parser_context
 
 class ExpressionName:
     def __init__(self, dot_separated_identifiers: list):
         self.dot_separated_identifiers = dot_separated_identifiers
+
+class MethodInvocation:
+    def __init__(self, dot_separated_identifiers: list, parser_context: Java9Parser.MethodInvocationContext = None):
+        self.dot_separated_identifiers = dot_separated_identifiers
+        self.parser_context = parser_context
 
 class UtilsListener(Java9Listener):
 
@@ -223,6 +242,7 @@ class UtilsListener(Java9Listener):
         self.current_method = None
 
         self.current_local_var_type = None
+        self.current_local_var_ctx = None
 
         self.current_field_decl = None
         self.current_field_ids = None
@@ -373,6 +393,7 @@ class UtilsListener(Java9Listener):
     def enterLocalVariableDeclaration(self, ctx:Java9Parser.LocalVariableDeclarationContext):
         if self.current_method is not None:
             self.current_local_var_type = ctx.unannType().getText()
+            self.current_local_var_ctx = ctx
             # The rest in: enterVariableDeclarator
 
     def exitLocalVariableDeclaration(self, ctx:Java9Parser.LocalVariableDeclarationContext):
@@ -419,7 +440,7 @@ class UtilsListener(Java9Listener):
                 if ctx.variableDeclaratorId().dims() is not None:
                     dims = ctx.variableDeclaratorId().dims().getText()
                 self.current_method.body_local_vars_and_expr_names.append(
-                    LocalVariable(self.current_local_var_type + dims, ctx.variableDeclaratorId().identifier().getText())
+                    LocalVariable(self.current_local_var_type + dims, ctx.variableDeclaratorId().identifier().getText(), self.current_local_var_ctx)
                 )
 
     def exitFieldDeclaration(self, ctx:Java9Parser.FieldDeclarationContext):
