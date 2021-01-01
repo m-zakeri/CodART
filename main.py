@@ -15,10 +15,9 @@ import argparse
 
 from antlr4 import *
 
-from refactorings.encapsulate_field import EncapsulateFiledRefactoringListener
 from refactorings.extract_class import ExtractClassRefactoringListener
-from refactorings.gen.Java9_v2Lexer import Java9_v2Lexer
-from refactorings.gen.Java9_v2Parser import Java9_v2Parser
+from gen.java9 import Java9_v2Lexer
+from gen.java9.Java9_v2Parser import Java9_v2Parser
 
 from java9speedy.parser import sa_java9_v2
 

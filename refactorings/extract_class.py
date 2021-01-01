@@ -11,10 +11,8 @@ import networkx as nx
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
-from refactorings.gen.Java9_v2Lexer import Java9_v2Lexer
-from refactorings.gen.Java9_v2Parser import Java9_v2Parser
-from refactorings.gen.Java9_v2Listener import Java9_v2Listener
-from refactorings.gen.Java9_v2Visitor import Java9_v2Visitor
+from gen.java9.Java9_v2Parser import Java9_v2Parser
+from gen.java9 import Java9_v2Listener
 
 import visualization.graph_visualization
 
