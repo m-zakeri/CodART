@@ -150,6 +150,7 @@ class Class(SingleFileElement):
         self.parser_context = parser_context
         self.filename = filename
         self.file_info = file_info
+        self.body_context = None;
     def __str__(self):
         return str(self.modifiers) +  " " + str(self.name) \
             + ((" extends " + str(self.superclass_name)) if self.superclass_name is not None else "") \
@@ -320,6 +321,10 @@ class UtilsListener(Java9Listener):
             _class = self.package.classes[self.current_class_identifier]
             for interface_type in ctx.interfaceTypeList().getChildren(lambda x: type(x) == Java9Parser.InterfaceTypeContext):
                 _class.superinterface_names.append(interface_type.getText())
+
+    def enterClassBody(self, ctx:Java9Parser.ClassBodyContext):
+        if self.current_class_identifier is not None:
+            self.package.classes[self.current_class_identifier].body_context = ctx;
 
     def exitNormalClassDeclaration(self, ctx:Java9Parser.NormalClassDeclarationContext):
         if self.nest_count > 0:
