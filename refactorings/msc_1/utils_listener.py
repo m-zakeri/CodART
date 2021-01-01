@@ -194,6 +194,9 @@ class Method(SingleFileElement):
         self.filename = filename
         self.file_info = file_info
         self.formalparam_context = None
+        self.body_method_invocations_without_typename = {}
+        self.method_declaration_context = None
+
     def __str__(self):
         return str(self.modifiers) +  " " + str(self.returntype) + " " + str(self.name) \
             + str(tuple(self.parameters))
@@ -270,7 +273,7 @@ class UtilsListener(Java9Listener):
     def enterNormalClassDeclaration(self, ctx:Java9Parser.NormalClassDeclarationContext):
         if self.current_class_identifier is None and self.nest_count == 0:
             self.current_class_identifier = ctx.identifier().getText()
-
+            self.current_class_ctx = ctx.identifier()
             current_class = Class(
                 package_name=self.package.name,
                 parser_context=ctx,
@@ -330,6 +333,9 @@ class UtilsListener(Java9Listener):
             self.package.classes[self.current_class_identifier].methods[method.name] = method
             self.current_method = method
 
+    def enterMethodHeader(self, ctx:Java9Parser.MethodHeaderContext):
+        if self.current_method is not None:
+            self.current_method.method_declaration_context = ctx
     def enterFormalParameter(self, ctx:Java9Parser.FormalParameterContext):
         if self.current_method is not None:
             self.current_method.parameters.append(
@@ -346,14 +352,23 @@ class UtilsListener(Java9Listener):
         self.current_method = None
 
     def enterMethodInvocation(self, ctx:Java9Parser.MethodInvocationContext):
-        if self.current_method is not None:
+        if self.current_method is not None :
             #for typename in ctx.getChildren(lambda x: type(x) == Java9Parser.TypeNameContext):
             #    self.current_method.body_method_invocations.append(typename)
+         if ctx.typeName() != None:
             if ctx.typeName().identifier() not in self.current_method.body_method_invocations:
                 self.current_method.body_method_invocations[ctx.typeName().identifier()] = [ctx.identifier().getText()]
             else:
                 self.current_method.body_method_invocations[ctx.typeName().identifier()].append(
                     ctx.identifier().getText())
+         else:
+           if ctx.methodName() != None:
+             if self.current_class_ctx not in self.current_method.body_method_invocations_without_typename:
+                 self.current_method.body_method_invocations_without_typename[self.current_class_ctx] = [ctx.methodName().identifier()]
+             else:
+                 self.current_method.body_method_invocations_without_typename[self.current_class_ctx].append(
+                     ctx.methodName().identifier())
+
 
     def enterLocalVariableDeclaration(self, ctx:Java9Parser.LocalVariableDeclarationContext):
         if self.current_method is not None:
