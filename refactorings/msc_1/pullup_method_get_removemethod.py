@@ -1,13 +1,10 @@
-from utils_listener import TokensInfo
+from utils_listener import TokensInfo, Program
 
 from utils import get_program
 
 
-def pullup_method(mylist : list,packagename :str,superclassname : str,methodname:str,classname : str):
-    program = get_program(mylist)
+def get_removemethods(program: Program,packagename :str,superclassname : str,methodname:str,classname : str):
     extendedclass=[]
-    methodsofclass=[]
-    pullupmethods={}
     removemethods={}
 
     met = program.packages[packagename].classes[classname].methods[methodname]
@@ -24,7 +21,6 @@ def pullup_method(mylist : list,packagename :str,superclassname : str,methodname
 
             if _class.superclass_name == superclassname:
              extendedclass.append(_class)
-             removemethods[class_name]=[]
 
     i=0
     for d in extendedclass:
@@ -33,8 +29,12 @@ def pullup_method(mylist : list,packagename :str,superclassname : str,methodname
       for m in class_.methods:
          m_=class_.methods[m]
          if(m_.body_text == body_text_method and m_.returntype == returntypeofmethod and m_.parameters == parammethod and m_.name == nameofmethod):
-          removemethods[class_.name].append(m)
-      removemethods[classname].append(nameofmethod)
+             if class_.name not in  removemethods:
+                 removemethods[class_.name] = [m]
+             else:
+
+              removemethods[class_.name].append(m)
+      removemethods[classname]=[nameofmethod]
       return removemethods
 
 

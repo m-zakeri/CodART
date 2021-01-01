@@ -1,19 +1,29 @@
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 from utils_listener import TokensInfo,SingleFileElement
-
-from refactorings.msc_1.pullup_method1 import pullup_method
+from refactorings.msc_1.pullup_method_get_removemethod import  get_removemethods
 from utils import Rewriter
 from utils import get_program
 
 
 def pullup_method_refactoring(source_filenames: list, package_name: str, class_name: str, method_name: str, filename_mapping = lambda x: x + ".rewritten.java"):
-    program = get_program(source_filenames)
-
+    program = get_program(source_filenames)   #گرفتن پکیج های برنامه
     _sourceclass = program.packages[package_name].classes[class_name]
     target_class_name = _sourceclass.superclass_name
-    removemethod = pullup_method(source_filenames, package_name,target_class_name, method_name, class_name)
+
+    removemethod = get_removemethods(program, package_name,target_class_name, method_name, class_name)  #متد های مشابه در کلاس های دیگر
     _targetclass = program.packages[package_name].classes[target_class_name]
-    _method1 =program.packages[package_name].classes[class_name].methods[method_name]
+    _method_name = program.packages[package_name].classes[class_name].methods[method_name]
+    tokens_info = TokensInfo(_method_name.parser_context)
+    exps = tokens_info.get_token_index(tokens_info.token_stream.tokens, tokens_info.start, tokens_info.stop) #لیست متغیر های داخل بدنه کلاس که داخل متد استفاده شده اند
+
+     #if method use param of class body return false
+    for token in exps:
+        if token.text in _sourceclass.fields:
+            return False
+
+    if bool(_method_name.body_method_invocations_without_typename)==True:
+        return False
+
     Rewriter_= Rewriter(program,filename_mapping)
     for remove in removemethod:
      _methodd=removemethod[remove]
@@ -21,19 +31,18 @@ def pullup_method_refactoring(source_filenames: list, package_name: str, class_n
         break
      _methodds = _methodd[0]
      _method =program.packages[package_name].classes[remove].methods[_methodds]
-     tokens_info = TokensInfo(_method.parser_context)
+     _method_token_info = TokensInfo(_method.parser_context)
+     Rewriter_.replace(_method_token_info," ")
 
-     class_tokens_info = TokensInfo(_targetclass.parser_context)
-     singlefileelement = SingleFileElement(_method.parser_context, _method.filename)
-     # strofmethod  =_method.get_text_from_file(_method.filename)
-     token_stream_rewriter = TokenStreamRewriter(singlefileelement.get_token_stream())
-     strofmethod = token_stream_rewriter.getText(program_name=token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-                                                start=tokens_info.start,
+    class_tokens_info = TokensInfo(_targetclass.parser_context)
+    singlefileelement = SingleFileElement(_method_name.parser_context, _method_name.filename)
+    token_stream_rewriter = TokenStreamRewriter(singlefileelement.get_token_stream())
+    strofmethod = token_stream_rewriter.getText(program_name=token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                                            start=tokens_info.start,
                                                 stop=tokens_info.stop)
-    #print(strofmethod)
-     Rewriter_.insert_before(tokens_info=class_tokens_info,text=strofmethod)
-     Rewriter_.replace(tokens_info,"")
-     Rewriter_.apply()
+    Rewriter_.insert_before(tokens_info=class_tokens_info, text=strofmethod)
+    Rewriter_.apply()
+    #در کلاس های دیگر هر جا که از این متد استفاده شده باید اپدیت شود
     for package_name in program.packages:
         package = program.packages[package_name]
         for class_ in package.classes:
@@ -46,12 +55,14 @@ def pullup_method_refactoring(source_filenames: list, package_name: str, class_n
                         inv_tokens_info = TokensInfo(inv)
                         Rewriter_.replace(inv_tokens_info, target_class_name)
                         Rewriter_.apply()
-    #print(_sourceclass)
-    #print(_targetclass)
-    #print(_method)
-    #print(_method.parser_context.start)
-    #print(_method.parser_context.stop)
-mylist = ["tests/pullup_method/Test.java","tests/pullup_method/sourceclass.java","tests/pullup_method/superclass.java"]
-pullup_method_refactoring(mylist,"tests.utils_test2","sourceclass","b")
+    return True
 
+mylist = ["tests/pullup_method/sup.java","tests/pullup_method/ss.java"]
+
+if __name__ == "__main__":
+    print("Testing pullup_method...")
+    if pullup_method_refactoring(mylist,"org.argouml.uml.cognitive.critics","AbstractCrTooMany","setThreshold"):
+        print("Success!")
+    else:
+        print("Cannot refactor.")
 
