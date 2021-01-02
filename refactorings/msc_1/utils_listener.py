@@ -380,19 +380,25 @@ class UtilsListener(Java9Listener):
         if self.current_method is not None :
             #for typename in ctx.getChildren(lambda x: type(x) == Java9Parser.TypeNameContext):
             #    self.current_method.body_method_invocations.append(typename)
-         if ctx.typeName() != None:
-            if ctx.typeName().identifier() not in self.current_method.body_method_invocations:
-                self.current_method.body_method_invocations[ctx.typeName().identifier()] = [ctx.identifier().getText()]
+            if ctx.typeName() != None:
+                if ctx.typeName().identifier() not in self.current_method.body_method_invocations:
+                    self.current_method.body_method_invocations[ctx.typeName().identifier()] = [ctx.identifier().getText()]
+                else:
+                    self.current_method.body_method_invocations[ctx.typeName().identifier()].append(
+                        ctx.identifier().getText())
             else:
-                self.current_method.body_method_invocations[ctx.typeName().identifier()].append(
-                    ctx.identifier().getText())
-         else:
-           if ctx.methodName() != None:
-             if self.current_class_ctx not in self.current_method.body_method_invocations_without_typename:
-                 self.current_method.body_method_invocations_without_typename[self.current_class_ctx] = [ctx.methodName().identifier()]
-             else:
-                 self.current_method.body_method_invocations_without_typename[self.current_class_ctx].append(
-                     ctx.methodName().identifier())
+                if ctx.methodName() != None:
+                    if self.current_class_ctx not in self.current_method.body_method_invocations_without_typename:
+                        self.current_method.body_method_invocations_without_typename[self.current_class_ctx] = [ctx.methodName().identifier()]
+                else:
+                    self.current_method.body_method_invocations_without_typename[self.current_class_ctx].append(
+                        ctx.methodName().identifier())
+            #MethodInvocation
+            txt = ctx.getText()
+            ids = txt[:txt.find('(')].split('.')
+            self.current_method.body_local_vars_and_expr_names.append(
+                MethodInvocation(ids, ctx)
+            )
 
 
     def enterLocalVariableDeclaration(self, ctx:Java9Parser.LocalVariableDeclarationContext):
