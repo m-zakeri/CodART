@@ -156,6 +156,7 @@ def extract_interface(source_filenames: list,
     return True
 
 if __name__ == "__main__":
+    print("Testing extract_interface...")
     filenames = [
         "tests/extract_interface/A.java",
         "tests/extract_interface/B.java",
