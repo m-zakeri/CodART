@@ -44,13 +44,15 @@ def pullup_field(source_filenames: list,
         return False
 
     is_public = False
+    is_protected = True
     for field in fields_to_remove:
         field: utils_listener.Field = field
         is_public = is_public or "public" in field.modifiers
+        is_protected = is_protected and ("protected" in field.modifiers or "private" in field.modifiers)
 
     rewriter = utils.Rewriter(program, filename_mapping)
 
-    rewriter.insert_after(superclass_body_start, "\n    " + ("public " if is_public else "protected ") + datatype + " " + field_name + ";")
+    rewriter.insert_after(superclass_body_start, "\n    " + ("public " if is_public else ("protected " if is_protected else "")) + datatype + " " + field_name + ";")
 
     for field in fields_to_remove:
         if len(field.neighbor_names) == 0:

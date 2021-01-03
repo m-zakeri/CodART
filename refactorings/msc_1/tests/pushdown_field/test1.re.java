@@ -7,13 +7,13 @@ public class A
 
 class B extends A
 {
-    protected int a;
+    int a;
     int b, c, d;
 }
 
 class C extends A
 {
-    protected int a;
+    int a;
     int[] b, c;
 
     C()

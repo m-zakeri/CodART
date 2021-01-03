@@ -2,7 +2,7 @@ package pullup_field_test1;
 
 public class A
 {
-    protected int[] a;
+    int[] a;
     public A() {}
 }
 
