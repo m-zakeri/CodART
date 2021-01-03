@@ -17,6 +17,19 @@ def pushdown_field(source_filenames: list,
             or field_name not in program.packages[package_name].classes[superclass_name].fields:
         return False
 
+    superclass: utils_listener.Class = program.packages[package_name].classes[superclass_name]
+
+    for mn in superclass.methods:
+        m: utils_listener.Method = superclass.methods[mn]
+        for item in m.body_local_vars_and_expr_names:
+            if isinstance(item, utils_listener.ExpressionName):
+                if ((len(item.dot_separated_identifiers) == 1
+                            and item.dot_separated_identifiers[0] == field_name)
+                        or (len(item.dot_separated_identifiers) == 2
+                            and item.dot_separated_identifiers[0] == "this"
+                            and item.dot_separated_identifiers[1] == field_name)):
+                    return False
+
     #all_derived_classes = [] # Not needed
     other_derived_classes = []
     classes_to_add_to = []
@@ -73,7 +86,6 @@ def pushdown_field(source_filenames: list,
 
     rewriter = utils.Rewriter(program, filename_mapping)
 
-    superclass = program.packages[package_name].classes[superclass_name]
     field = superclass.fields[field_name]
     if len(field.neighbor_names) == 0:
         rewriter.replace(field.get_tokens_info(), "")
