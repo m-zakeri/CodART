@@ -134,7 +134,7 @@ def extract_interface(source_filenames: list,
 
     # Create the interface
     interface_file_content = (
-        "package " + package_name +"\n\n"
+        "package " + package_name +";\n\n"
         + "public interface " + interface_name + "\n"
         + "{\n"
     )
