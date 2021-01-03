@@ -390,9 +390,9 @@ class UtilsListener(Java9Listener):
                 if ctx.methodName() != None:
                     if self.current_class_ctx not in self.current_method.body_method_invocations_without_typename:
                         self.current_method.body_method_invocations_without_typename[self.current_class_ctx] = [ctx.methodName().identifier()]
-                else:
-                    self.current_method.body_method_invocations_without_typename[self.current_class_ctx].append(
-                        ctx.methodName().identifier())
+                    else:
+                        self.current_method.body_method_invocations_without_typename[self.current_class_ctx].append(
+                            ctx.methodName().identifier())
             #MethodInvocation
             txt = ctx.getText()
             ids = txt[:txt.find('(')].split('.')
