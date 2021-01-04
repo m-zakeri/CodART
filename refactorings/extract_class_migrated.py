@@ -13,11 +13,14 @@ from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
 from gen.java9.Java9_v2Parser import Java9_v2Parser
 from gen.java9 import Java9_v2Listener
+from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
+
+from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 import visualization.graph_visualization
 
 
-class ExtractClassRecognizerListener(Java9_v2Listener):
+class ExtractClassRecognizerListener(JavaParserLabeledListener):
     """
     To implement the extract class refactoring
     Encapsulate field: Make a public field private and provide accessors
@@ -142,7 +145,7 @@ class ExtractClassRecognizerListener(Java9_v2Listener):
             self.field_dict[variable_name].append(current_method)
 
 
-class ExtractClassRefactoringListener(Java9_v2Listener):
+class ExtractClassRefactoringListener(JavaParserLabeledListener):
     """
     To implement extract class refactoring based on its actors.
     Creates a new class and move fields and methods from the old class to the new one
@@ -182,9 +185,9 @@ class ExtractClassRefactoringListener(Java9_v2Listener):
         self.NEW_LINE = "\n"
         self.code = ""
 
-    def enterNormalClassDeclaration(self, ctx: Java9_v2Parser.NormalClassDeclarationContext):
+    def enterClassDeclaration(self, ctx:JavaParserLabeled.ClassDeclarationContext):
         print("Refactoring started, please wait...")
-        class_identifier = ctx.identifier().getText()
+        class_identifier = ctx.IDENTIFIER().getText()
         if class_identifier == self.source_class:
             self.is_source_class = True
             self.code += self.NEW_LINE * 2
@@ -193,60 +196,62 @@ class ExtractClassRefactoringListener(Java9_v2Listener):
         else:
             self.is_source_class = False
 
-    def exitNormalClassDeclaration(self, ctx: Java9_v2Parser.NormalClassDeclarationContext):
+    def exitClassDeclaration(self, ctx:JavaParserLabeled.ClassDeclarationContext):
         if self.is_source_class:
             self.code += "}"
             self.is_source_class = False
 
-    def exitOrdinaryCompilation(self, ctx: Java9_v2Parser.OrdinaryCompilationContext):
+    def exitCompilationUnit(self, ctx:JavaParserLabeled.CompilationUnitContext):
         print("Finished Processing...")
         self.token_stream_rewriter.insertAfter(
             index=ctx.stop.tokenIndex,
             text=self.code
         )
 
-    def enterVariableDeclaratorId(self, ctx: Java9_v2Parser.VariableDeclaratorIdContext):
+    def enterVariableDeclaratorId(self, ctx:JavaParserLabeled.VariableDeclaratorIdContext):
         if not self.is_source_class:
             return None
-        field_identifier = ctx.identifier().getText()
+        field_identifier = ctx.IDENTIFIER().getText()
         if field_identifier in self.moved_fields:
             self.detected_field = field_identifier
 
-    def exitFieldDeclaration(self, ctx: Java9_v2Parser.FieldDeclarationContext):
+    def exitFieldDeclaration(self, ctx:JavaParserLabeled.FieldDeclarationContext):
         if not self.is_source_class:
             return None
-        field_names = ctx.variableDeclaratorList().getText().split(",")
+        field_names = ctx.variableDeclarators().getText().split(",")
+        print("Here")
+        grand_parent_ctx = ctx.parentCtx.parentCtx
         if self.detected_field in field_names:
-            modifier = ctx.fieldModifier(0).getText()
-            field_type = ctx.unannType().getText()
+            modifier = grand_parent_ctx.modifier(0).getText()
+            field_type = ctx.typeType().getText()
             self.code += f"{self.TAB}{modifier} {field_type} {self.detected_field};{self.NEW_LINE}"
             # delete field from source class
             field_names.remove(self.detected_field)
             if field_names:
                 self.token_stream_rewriter.replaceRange(
-                    from_idx=ctx.start.tokenIndex,
-                    to_idx=ctx.stop.tokenIndex,
+                    from_idx=grand_parent_ctx.start.tokenIndex,
+                    to_idx=grand_parent_ctx.stop.tokenIndex,
                     text=f"{modifier} {field_type} {','.join(field_names)};"
                 )
             else:
                 self.token_stream_rewriter.delete(
                     program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-                    from_idx=ctx.start.tokenIndex,
-                    to_idx=ctx.stop.tokenIndex
+                    from_idx=grand_parent_ctx.start.tokenIndex,
+                    to_idx=grand_parent_ctx.stop.tokenIndex
                 )
             self.detected_field = None
 
-    def enterMethodDeclarator(self, ctx: Java9_v2Parser.MethodDeclaratorContext):
+    def enterMethodDeclaration(self, ctx:JavaParserLabeled.MethodDeclarationContext):
         if not self.is_source_class:
             return None
-        method_identifier = ctx.identifier().getText()
+        method_identifier = ctx.IDENTIFIER().getText()
         if method_identifier in self.moved_methods:
             self.detected_method = method_identifier
 
-    def exitMethodDeclaration(self, ctx: Java9_v2Parser.MethodDeclarationContext):
+    def exitMethodDeclaration(self, ctx:JavaParserLabeled.MethodDeclarationContext):
         if not self.is_source_class:
             return None
-        method_identifier = ctx.methodHeader().methodDeclarator().identifier().getText()
+        method_identifier = ctx.IDENTIFIER().getText()
         if self.detected_method == method_identifier:
             start_index = ctx.start.tokenIndex
             stop_index = ctx.stop.tokenIndex
