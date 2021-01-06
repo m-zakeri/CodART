@@ -1,9 +1,17 @@
 /* Before refactoring (Original version) */
+class A_New
+{
+	public string h;
+
+	void printH(){
+        print(this.h);
+    }
+}
+
 class A
 {
     public int f; /* printF , printF, */
     public int g; /* printF, printG */
-    public string h; /* printH */
 
     // Method 1
     void printF(int i)
@@ -22,8 +30,4 @@ class A
         print(this.g);
     }
 
-    // Method 4
-    void printH(){
-        print(this.h);
-    }
 }
