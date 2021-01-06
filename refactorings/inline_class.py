@@ -60,9 +60,12 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
         elif class_identifier == self.target_class:
             self.is_target_class = True
             self.is_source_class = False
+        else:
+            self.is_target_class = False
+            self.is_source_class = False
 
     def enterClassBody(self, ctx:JavaParserLabeled.ClassBodyContext):
-        if ctx.parentCtx.IDENTIFIER().getText() == self.source_class:
+        if self.is_source_class:
             self.code += self.token_stream_rewriter.getText(
                 program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
                 start=ctx.start.tokenIndex+1,
