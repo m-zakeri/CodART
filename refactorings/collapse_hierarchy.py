@@ -11,7 +11,6 @@ import networkx as nx
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
-
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
@@ -54,6 +53,7 @@ class CollapseHierarchyRefactoringListener(JavaParserLabeledListener):
         if class_identifier == self.source_class:
             self.is_source_class = True
             self.is_target_class = False
+            self.target_class = ctx.typeType().classOrInterfaceType().IDENTIFIER(0).getText()
         elif class_identifier == self.target_class:
             self.is_target_class = True
             self.is_source_class = False
@@ -61,16 +61,12 @@ class CollapseHierarchyRefactoringListener(JavaParserLabeledListener):
             self.is_target_class = False
             self.is_source_class = False
 
-    def enterClassOrInterfaceType(self, ctx:JavaParserLabeled.ClassOrInterfaceTypeContext):
-        if ctx.parentCtx.IDENTIFIER().getText() == self.source_class:
-            self.target_class = ctx.IDENTIFIER().getText()
-
-    def enterClassBody(self, ctx:JavaParserLabeled.ClassBodyContext):
+    def enterClassBody(self, ctx: JavaParserLabeled.ClassBodyContext):
         if self.is_source_class:
             self.code += self.token_stream_rewriter.getText(
                 program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-                start=ctx.start.tokenIndex+1,
-                stop=ctx.stop.tokenIndex-1
+                start=ctx.start.tokenIndex + 1,
+                stop=ctx.stop.tokenIndex - 1
             )
             self.token_stream_rewriter.delete(
                 program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
@@ -83,7 +79,7 @@ class CollapseHierarchyRefactoringListener(JavaParserLabeledListener):
     def exitClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
         if self.is_target_class:
             self.token_stream_rewriter.insertAfter(
-                index=ctx.stop.tokenIndex-1,
+                index=ctx.stop.tokenIndex - 1,
                 text=self.code
             )
 

@@ -1,5 +1,5 @@
 /* Before refactoring (Original version) */
-class A_NEW extends A
+class A_New extends A
 {
     public string h;
 
