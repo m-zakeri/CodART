@@ -6,13 +6,13 @@ class A
     public string h; /* printH */
 
     // Method 1
-    void printF(int i)
+    public static void printF(int i)
     {
         this.f = i * this.f;
     }
 
     // Method 2
-    void printF(float i){
+    public static void printF(float i){
         this.f = (int) (i * this.f);
         this.g = (int) (i * this.g);
     }
@@ -23,7 +23,7 @@ class A
     }
 
     // Method 4
-    void printH(){
+    public void printH(){
         print(this.h);
     }
 }
