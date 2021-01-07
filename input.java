@@ -3,7 +3,6 @@ class A
 {
     public int f; /* printF , printF, */
     public int g; /* printF, printG */
-    public string h; /* printH */
 
     // Method 1
     void printF(int i)
@@ -21,8 +20,12 @@ class A
     void printG(){
         print(this.g);
     }
+}
 
-    // Method 4
+class A_NEW extends A
+{
+    public string h;
+
     void printH(){
         print(this.h);
     }
