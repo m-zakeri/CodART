@@ -19,7 +19,7 @@ from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 import visualization.graph_visualization
 
 
-class InlineClassRefactoringListener(JavaParserLabeledListener):
+class CollapseHierarchyRefactoringListener(JavaParserLabeledListener):
     """
     To implement extract class refactoring based on its actors.
     Creates a new class and move fields and methods from the old class to the new one
@@ -62,7 +62,7 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
             self.is_source_class = False
 
     def enterClassOrInterfaceType(self, ctx:JavaParserLabeled.ClassOrInterfaceTypeContext):
-        if ctx.parentCtx.parentCtx.IDENTIFIER().getText() == self.source_class:
+        if ctx.parentCtx.IDENTIFIER().getText() == self.source_class:
             self.target_class = ctx.IDENTIFIER().getText()
 
     def enterClassBody(self, ctx:JavaParserLabeled.ClassBodyContext):
