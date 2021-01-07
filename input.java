@@ -1,4 +1,12 @@
 /* Before refactoring (Original version) */
+class A_NEW extends A
+{
+    public string h;
+
+    void printH(){
+        print(this.h);
+    }
+}
 class A
 {
     public int f; /* printF , printF, */
@@ -19,14 +27,5 @@ class A
     // Method 3
     void printG(){
         print(this.g);
-    }
-}
-
-class A_NEW extends A
-{
-    public string h;
-
-    void printH(){
-        print(this.h);
     }
 }
