@@ -377,7 +377,7 @@ class UtilsListener(JavaParserListener):
     def enterFormalParameter(self, ctx: JavaParser.FormalParameterContext):
         if self.current_method is not None:
             self.current_method.parameters.append(
-                (ctx.unannType().getText(), ctx.variableDeclaratorId().identifier().getText())
+                (ctx.typeType().getText(), ctx.variableDeclaratorId().IDENTIFIER().getText())
             )
 
 
@@ -392,7 +392,7 @@ class UtilsListener(JavaParserListener):
 
     # TODO: Update, hint: move things to the enterExpression inside "if ctx.methodCall() is not None:"
     #       Test rule "expression" with input "a.b.c().d()" or "a.b.c.d()" or "a().b" or "a.b = c.d()"!
-    def enterMethodCall(self, ctx: JavaParser.MethodCall0Context):
+    def enterMethodCall(self, ctx: JavaParser.MethodCallContext):
         if self.current_method is not None :
             if ctx.parentCtx.IDENTIFIER() != None:
                 if ctx.parentCtx.IDENTIFIER() not in self.current_method.body_method_invocations:
