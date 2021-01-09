@@ -310,7 +310,7 @@ class UtilsListener(JavaParserListener):
     def enterClassDeclaration(self, ctx:JavaParser.ClassDeclarationContext):
         if self.current_class_identifier is None and self.nest_count == 0:
             self.current_class_identifier = ctx.IDENTIFIER().getText()
-            self.current_class_ctx = ctx.identifier() # TODO: Update line
+            self.current_class_ctx = ctx.IDENTIFIER() # TODO: Update line
             current_class = Class(
                 package_name=self.package.name,
                 parser_context=ctx,
@@ -333,7 +333,7 @@ class UtilsListener(JavaParserListener):
             self.nest_count += 1
 
     # TODO: Update listener method
-    def enterClassBody(self, ctx:Java9Parser.ClassBodyContext):
+    def enterClassBody(self, ctx:JavaParser.ClassBodyContext):
         if self.current_class_identifier is not None:
             self.package.classes[self.current_class_identifier].body_context = ctx
 
@@ -347,7 +347,7 @@ class UtilsListener(JavaParserListener):
                 self.current_class_identifier = None
 
     # TODO: Update listener method
-    def enterFormalParameterList(self, ctx: Java9Parser.FormalParameterListContext):
+    def enterFormalParameterList(self, ctx: JavaParser.FormalParameterListContext):
         if self.current_method is not None:
             self.current_method.formalparam_context = ctx
 
@@ -370,17 +370,16 @@ class UtilsListener(JavaParserListener):
             self.package.classes[self.current_class_identifier].methods[method.name] = method
             self.current_method = method
 
-    # TODO: Update listener method
-    def enterMethodHeader(self, ctx:Java9Parser.MethodHeaderContext):
+    def enterFormalParameters(self, ctx: JavaParser.FormalParametersContext):
         if self.current_method is not None:
             self.current_method.method_declaration_context = ctx
 
-    # TODO: Update listener method
-    def enterFormalParameter(self, ctx:Java9Parser.FormalParameterContext):
+    def enterFormalParameter(self, ctx: JavaParser.FormalParameterContext):
         if self.current_method is not None:
             self.current_method.parameters.append(
                 (ctx.unannType().getText(), ctx.variableDeclaratorId().identifier().getText())
             )
+
 
     def enterMethodBody(self, ctx:JavaParser.MethodBodyContext):
         if self.current_method is not None:
@@ -393,29 +392,27 @@ class UtilsListener(JavaParserListener):
 
     # TODO: Update, hint: move things to the enterExpression inside "if ctx.methodCall() is not None:"
     #       Test rule "expression" with input "a.b.c().d()" or "a.b.c.d()" or "a().b" or "a.b = c.d()"!
-    def enterMethodInvocation(self, ctx:Java9Parser.MethodInvocationContext):
+    def enterMethodCall(self, ctx: JavaParser.MethodCall0Context):
         if self.current_method is not None :
-            #for typename in ctx.getChildren(lambda x: type(x) == Java9Parser.TypeNameContext):
-            #    self.current_method.body_method_invocations.append(typename)
-            if ctx.typeName() != None:
-                if ctx.typeName().identifier() not in self.current_method.body_method_invocations:
-                    self.current_method.body_method_invocations[ctx.typeName().identifier()] = [ctx.identifier().getText()]
+            if ctx.parentCtx.IDENTIFIER() != None:
+                if ctx.parentCtx.IDENTIFIER() not in self.current_method.body_method_invocations:
+                    self.current_method.body_method_invocations[ctx.parentCtx.IDENTIFIER()] = [ctx.IDENTIFIER().getText()]
                 else:
-                    self.current_method.body_method_invocations[ctx.typeName().identifier()].append(
-                        ctx.identifier().getText())
+                    self.current_method.body_method_invocations[ctx.parentCtx.IDENTIFIER()].append(
+                        ctx.IDENTIFIER().getText())
             else:
-                if ctx.methodName() != None:
+                if ctx.IDENTIFIER() != None:
                     if self.current_class_ctx not in self.current_method.body_method_invocations_without_typename:
-                        self.current_method.body_method_invocations_without_typename[self.current_class_ctx] = [ctx.methodName().identifier()]
+                        self.current_method.body_method_invocations_without_typename[self.current_class_ctx] = [ctx.IDENTIFIER().getText()]
                     else:
                         self.current_method.body_method_invocations_without_typename[self.current_class_ctx].append(
-                            ctx.methodName().identifier())
+                            ctx.IDENTIFIER().getText())
             #MethodInvocation
-            #txt = ctx.getText()
-            #ids = txt[:txt.find('(')].split('.')
-            #self.current_method.body_local_vars_and_expr_names.append(
-            #    MethodInvocation(ids, ctx)
-            #)
+            txt = ctx.getText()
+            ids = txt[:txt.find('(')].split('.')
+            self.current_method.body_local_vars_and_expr_names.append(
+                MethodInvocation(ids, ctx)
+            )
 
     def enterExpression(self, ctx:JavaParser.ExpressionContext):
         if self.current_method is not None:
