@@ -367,7 +367,7 @@ class UtilsListener(JavaParserListener):
             method.returntype = ctx.typeTypeOrVoid().getText()
             method.name = self.current_method_identifier
 
-            self.package.classes[self.current_class_identifier].methods[method.name] = method
+            self.package.classes[self.current_class_identifier].methods[str(method.name)] = method
             self.current_method = method
 
     def enterFormalParameters(self, ctx: JavaParser.FormalParametersContext):
@@ -403,10 +403,10 @@ class UtilsListener(JavaParserListener):
             else:
                 if ctx.IDENTIFIER() != None:
                     if self.current_class_ctx not in self.current_method.body_method_invocations_without_typename:
-                        self.current_method.body_method_invocations_without_typename[self.current_class_ctx] = [ctx.IDENTIFIER().getText()]
+                        self.current_method.body_method_invocations_without_typename[self.current_class_ctx] = [ctx]
                     else:
                         self.current_method.body_method_invocations_without_typename[self.current_class_ctx].append(
-                            ctx.IDENTIFIER().getText())
+                            ctx)
             #MethodInvocation
             txt = ctx.getText()
             ids = txt[:txt.find('(')].split('.')
