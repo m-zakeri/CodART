@@ -1,4 +1,4 @@
-import utils_listener
+import utils_listener_fast
 import utils
 
 def pullup_field(source_filenames: list,
@@ -14,14 +14,14 @@ def pullup_field(source_filenames: list,
             or field_name not in program.packages[package_name].classes[class_name].fields:
         return False
 
-    _class: utils_listener.Class = program.packages[package_name].classes[class_name]
+    _class: utils_listener_fast.Class = program.packages[package_name].classes[class_name]
     if _class.superclass_name is None:
         return False
 
     superclass_name = _class.superclass_name
 
-    superclass: utils_listener.Class = program.packages[package_name].classes[superclass_name]
-    superclass_body_start = utils_listener.TokensInfo(superclass.parser_context.classBody())
+    superclass: utils_listener_fast.Class = program.packages[package_name].classes[superclass_name]
+    superclass_body_start = utils_listener_fast.TokensInfo(superclass.parser_context.classBody())
     superclass_body_start.stop = superclass_body_start.start # Start and stop both point to the '{'
 
     if field_name in superclass.fields:
@@ -31,9 +31,9 @@ def pullup_field(source_filenames: list,
 
     fields_to_remove = []
     for pn in program.packages:
-        p: utils_listener.Package = program.packages[pn]
+        p: utils_listener_fast.Package = program.packages[pn]
         for cn in p.classes:
-            c: utils_listener.Class = p.classes[cn]
+            c: utils_listener_fast.Class = p.classes[cn]
             if ((c.superclass_name == superclass_name and c.file_info.has_imported_class(package_name, superclass_name)) \
                     or (package_name is not None and c.superclass_name == package_name + '.' + superclass_name)) \
                     and field_name in c.fields \
@@ -46,7 +46,7 @@ def pullup_field(source_filenames: list,
     is_public = False
     is_protected = True
     for field in fields_to_remove:
-        field: utils_listener.Field = field
+        field: utils_listener_fast.Field = field
         is_public = is_public or "public" in field.modifiers
         is_protected = is_protected and ("protected" in field.modifiers or "private" in field.modifiers)
 
@@ -61,17 +61,17 @@ def pullup_field(source_filenames: list,
             i = field.index_in_variable_declarators
             var_ctxs = field.all_variable_declarator_contexts
             if i == 0:
-                to_remove = utils_listener.TokensInfo(var_ctxs[i])
-                to_remove.stop = utils_listener.TokensInfo(var_ctxs[i + 1]).start - 1 # Include the ',' after it
+                to_remove = utils_listener_fast.TokensInfo(var_ctxs[i])
+                to_remove.stop = utils_listener_fast.TokensInfo(var_ctxs[i + 1]).start - 1 # Include the ',' after it
                 rewriter.replace(to_remove, "")
             else:
-                to_remove = utils_listener.TokensInfo(var_ctxs[i])
-                to_remove.start = utils_listener.TokensInfo(var_ctxs[i - 1]).stop + 1 # Include the ',' before it
+                to_remove = utils_listener_fast.TokensInfo(var_ctxs[i])
+                to_remove.start = utils_listener_fast.TokensInfo(var_ctxs[i - 1]).stop + 1 # Include the ',' before it
                 rewriter.replace(to_remove, "")
 
         # Add initializer to class constructor if initializer exists in field declaration
         if field.initializer is not None:
-            _class: utils_listener.Class = program.packages[field.package_name].classes[field.class_name]
+            _class: utils_listener_fast.Class = program.packages[field.package_name].classes[field.class_name]
             initializer_statement = (field.name
                                     + " = "
                                     + ("new " + field.datatype + " " if field.initializer.startswith('{') else "")
@@ -86,13 +86,13 @@ def pullup_field(source_filenames: list,
                     constructor = member_decl.constructorDeclaration()
                     if constructor is not None:
                         body = constructor.constructorBody # Start token = '{'
-                        body_start = utils_listener.TokensInfo(body)
+                        body_start = utils_listener_fast.TokensInfo(body)
                         body_start.stop = body_start.start # Start and stop both point to the '{'
                         rewriter.insert_after(body_start, "\n        " + initializer_statement)
                         has_contructor = True
             if not has_contructor:
                 body = _class.parser_context.classBody()
-                body_start = utils_listener.TokensInfo(body)
+                body_start = utils_listener_fast.TokensInfo(body)
                 body_start.stop = body_start.start # Start and stop both point to the '{'
                 rewriter.insert_after(body_start,
                     "\n    " + _class.name + "() { " + initializer_statement + " }"
