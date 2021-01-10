@@ -145,6 +145,7 @@ class Class(SingleFileElement):
                  filename: str = None,
                  file_info: FileInfo = None):
         self.modifiers = []
+        self.modifiers_parser_contexts = []
         self.name = name
         self.superclass_name = None
         self.superinterface_names = []
@@ -175,6 +176,7 @@ class Field(SingleFileElement):
                  filename: str = None,
                  file_info: FileInfo = None):
         self.modifiers = []
+        self.modifiers_parser_contexts = []
         self.datatype = datatype
         self.name = name
         self.initializer = initializer
@@ -200,6 +202,7 @@ class Method(SingleFileElement):
                  filename: str = None,
                  file_info: FileInfo = None):
         self.modifiers = []
+        self.modifiers_parser_contexts = []
         self.returntype = returntype
         self.name = name
         self.parameters = []
@@ -240,6 +243,7 @@ class UtilsListener(JavaParserListener):
         self.package = Package()
 
         self.last_modifiers = []
+        self.last_modifiers_contexts = []
 
         self.current_class_identifier = None
         self.current_class_identifier_temp = None
@@ -298,13 +302,17 @@ class UtilsListener(JavaParserListener):
 
     def enterTypeDeclaration(self, ctx:JavaParser.TypeDeclarationContext):
         self.last_modifiers.clear()
+        self.last_modifiers_contexts.clear()
         for modifier in ctx.getChildren(lambda x: type(x) == JavaParser.ClassOrInterfaceModifierContext):
             self.last_modifiers.append(modifier.getText())
+            self.last_modifiers_contexts.append(modifier)
 
     def enterClassBodyDeclaration(self, ctx:JavaParser.ClassBodyDeclarationContext):
         self.last_modifiers.clear()
+        self.last_modifiers_contexts.clear()
         for modifier in ctx.getChildren(lambda x: type(x) == JavaParser.ModifierContext):
             self.last_modifiers.append(modifier.getText())
+            self.last_modifiers_contexts.append(modifier)
 
 
     def enterClassDeclaration(self, ctx:JavaParser.ClassDeclarationContext):
@@ -318,6 +326,7 @@ class UtilsListener(JavaParserListener):
                 file_info=self.file_info
             )
             current_class.modifiers = self.last_modifiers.copy()
+            current_class.modifiers_parser_contexts = self.last_modifiers_contexts.copy()
             current_class.name = self.current_class_identifier
             if ctx.EXTENDS() is not None:
                 current_class.superclass_name = ctx.typeType().getText()
@@ -364,6 +373,7 @@ class UtilsListener(JavaParserListener):
                 file_info=self.file_info
             )
             method.modifiers = self.last_modifiers.copy()
+            method.modifiers_parser_contexts = self.last_modifiers_contexts.copy()
             method.returntype = ctx.typeTypeOrVoid().getText()
             method.name = self.current_method_identifier
 
@@ -445,8 +455,9 @@ class UtilsListener(JavaParserListener):
     def enterFieldDeclaration(self, ctx:JavaParser.FieldDeclarationContext):
         if self.current_class_identifier is not None:
             modifiers = self.last_modifiers.copy()
+            modifiers_contexts = self.last_modifiers_contexts.copy()
             datatype = ctx.typeType().getText()
-            self.current_field_decl = (modifiers, datatype, ctx)
+            self.current_field_decl = (modifiers, datatype, ctx, modifiers_contexts)
             self.current_field_ids = []
             self.current_field_dims = []
             self.current_field_inits = []
@@ -492,6 +503,7 @@ class UtilsListener(JavaParserListener):
                     file_info=self.file_info
                 )
                 field.modifiers = self.current_field_decl[0]
+                field.modifiers_parser_contexts = self.current_field_decl[3]
                 field.datatype = self.current_field_decl[1] + dims
                 field.name = field_id
                 field.initializer = field_init
