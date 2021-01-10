@@ -81,13 +81,15 @@ def pullup_field(source_filenames: list,
             for class_body_decl in _class.parser_context.classBody().getChildren():
                 if class_body_decl.getText() in ['{', '}']:
                     continue
-                constructor = class_body_decl.constructorDeclaration()
-                if constructor is not None:
-                    body = constructor.constructorBody() # Start token = '{'
-                    body_start = utils_listener.TokensInfo(body)
-                    body_start.stop = body_start.start # Start and stop both point to the '{'
-                    rewriter.insert_after(body_start, "\n        " + initializer_statement)
-                    has_contructor = True
+                member_decl = class_body_decl.memberDeclaration()
+                if member_decl is not None:
+                    constructor = member_decl.constructorDeclaration()
+                    if constructor is not None:
+                        body = constructor.constructorBody # Start token = '{'
+                        body_start = utils_listener.TokensInfo(body)
+                        body_start.stop = body_start.start # Start and stop both point to the '{'
+                        rewriter.insert_after(body_start, "\n        " + initializer_statement)
+                        has_contructor = True
             if not has_contructor:
                 body = _class.parser_context.classBody()
                 body_start = utils_listener.TokensInfo(body)
