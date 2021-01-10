@@ -1,4 +1,4 @@
-import utils_listener
+import utils_listener_fast
 import utils
 
 def extract_interface(source_filenames: list,
@@ -28,19 +28,23 @@ def extract_interface(source_filenames: list,
     rewriter = utils.Rewriter(program, filename_mapping)
 
     for class_name in class_names:
-        c: utils_listener.Class = program.packages[package_name].classes[class_name]
+        c: utils_listener_fast.Class = program.packages[package_name].classes[class_name]
         # Add implements to the class
         has_superinterface = False
-        if c.parser_context.superinterfaces() is not None:
-            t = utils_listener.TokensInfo(c.parser_context.superinterfaces())
+        if c.parser_context.IMPLEMENTS() is not None: # old: c.parser_context.superinterfaces()
+            t = utils_listener_fast.TokensInfo(c.parser_context.typeList()) # old: c.parser_context.superinterfaces()
             has_superinterface = True
-        elif c.parser_context.superclass() is not None:
-            t = utils_listener.TokensInfo(c.parser_context.superclass())
+        elif c.parser_context.EXTENDS() is not None: # old: c.parser_context.superclass()
+            t = utils_listener_fast.TokensInfo(c.parser_context.typeType()) # old: c.parser_context.superclass()
+        elif c.parser_context.typeParameters() is not None:
+            t = utils_listener_fast.TokensInfo(c.parser_context.typeParameters())
         else:
-            t = utils_listener.TokensInfo(c.parser_context.identifier())
+            # old: TokensInfo(c.parser_context.identifier())
+            t = utils_listener_fast.TokensInfo(c.parser_context)
+            t.stop = c.parser_context.IDENTIFIER().getSymbol().tokenIndex
         rewriter.insert_after(t, (", " if has_superinterface else " implements ") + interface_name)
         for method_name in method_names:
-            m: utils_listener.Method = c.methods[method_name]
+            m: utils_listener_fast.Method = c.methods[method_name]
             # Check if the return types / parameter types are the same
             # Or add to dictionary
             if method_name in method_returntypes:
@@ -55,25 +59,29 @@ def extract_interface(source_filenames: list,
                 method_returntypes[method_name] = m.returntype
                 method_parameters[method_name] = m.parameters
             # Manage method modifiers
+            if len(m.modifiers_parser_contexts) > 0:
+                t = utils_listener_fast.TokensInfo(m.modifiers_parser_contexts[0])
+            else:
+                t = m.get_tokens_info()
             rewriter.insert_before_start(
-                m.get_tokens_info(),
+                t, # old: m.get_tokens_info() # without requiring t
                 ("" if "@Override" in m.modifiers else "@Override\n    ")
                 + ("" if "public" in m.modifiers else "public ")
             )
             for i in range(len(m.modifiers)):
                 mm = m.modifiers[i]
                 if mm == "private" or mm == "protected":
-                    t = utils_listener.TokensInfo(m.parser_context.methodModifier(i))
+                    t = utils_listener_fast.TokensInfo(m.modifiers_parser_contexts[i]) # old: m.parser_context.methodModifier(i)
                     rewriter.replace(t, "")
 
     # Change variable types to the interface if only interface methods are used.
     for package_name in program.packages:
-        p: utils_listener.Package = program.packages[package_name]
+        p: utils_listener_fast.Package = program.packages[package_name]
         for class_name in p.classes:
-            c: utils_listener.Class = p.classes[class_name]
+            c: utils_listener_fast.Class = p.classes[class_name]
             fields_of_interest = {}
             for fn in c.fields:
-                f: utils_listener.Field = c.fields[fn]
+                f: utils_listener_fast.Field = c.fields[fn]
                 d = False
                 for cn in class_names:
                     if (f.datatype == cn and f.file_info.has_imported_class(package_name, cn)) \
@@ -83,16 +91,16 @@ def extract_interface(source_filenames: list,
                 if d and "private" in f.modifiers:
                     fields_of_interest[f.name] = f
             for method_name in c.methods:
-                m: utils_listener.Method = c.methods[method_name]
+                m: utils_listener_fast.Method = c.methods[method_name]
                 vars_of_interest = {}
                 for item in m.body_local_vars_and_expr_names:
-                    if isinstance(item, utils_listener.LocalVariable):
+                    if isinstance(item, utils_listener_fast.LocalVariable):
                         for cn in class_names:
                             if (item.datatype == cn and c.file_info.has_imported_class(package_name, cn)) \
                                     or (package_name is not None and item.datatype == package_name + '.' + cn):
                                 vars_of_interest[item.identifier] = item
                                 break
-                    if isinstance(item, utils_listener.MethodInvocation):
+                    if isinstance(item, utils_listener_fast.MethodInvocation):
                         if len(item.dot_separated_identifiers) == 2 or \
                                 (len(item.dot_separated_identifiers) == 3 and item.dot_separated_identifiers[0] == "this"):
                             if item.dot_separated_identifiers[-2] in vars_of_interest:
@@ -104,11 +112,13 @@ def extract_interface(source_filenames: list,
                 for var_name in vars_of_interest:
                     var = vars_of_interest[var_name]
                     if m.file_info.has_imported_package(package_name):
-                        rewriter.replace(utils_listener.TokensInfo(var.parser_context.unannType()), interface_name)
+                        # old: var.parser_context.unannType()
+                        rewriter.replace(utils_listener_fast.TokensInfo(var.parser_context.typeType()), interface_name)
                     else:
                         if package_name is None:
                             break
-                        rewriter.replace(utils_listener.TokensInfo(var.parser_context.unannType()), package_name + '.' + interface_name)
+                        # old: var.parser_context.unannType()
+                        rewriter.replace(utils_listener_fast.TokensInfo(var.parser_context.typeType()), package_name + '.' + interface_name)
             for field_name in fields_of_interest:
                 f = fields_of_interest[field_name]
                 if c.file_info.has_imported_package(package_name):
@@ -118,14 +128,14 @@ def extract_interface(source_filenames: list,
                         break
                     typename = package_name + '.' + interface_name
                 if len(f.neighbor_names) == 0:
-                    rewriter.replace(utils_listener.TokensInfo(f.parser_context.unannType()), typename)
+                    rewriter.replace(utils_listener_fast.TokensInfo(f.parser_context.typeType()), typename) # old: f.parser_context.unannType()
                 else:
                     if not any(nn in fields_of_interest for nn in f.neighbor_names):
-                        t = utils_listener.TokensInfo(f.all_variable_declarator_contexts[f.index_in_variable_declarators])
+                        t = utils_listener_fast.TokensInfo(f.all_variable_declarator_contexts[f.index_in_variable_declarators])
                         if f.index_in_variable_declarators == 0:
-                            t.stop = utils_listener.TokensInfo(f.all_variable_declarator_contexts[f.index_in_variable_declarators + 1]).start - 1
+                            t.stop = utils_listener_fast.TokensInfo(f.all_variable_declarator_contexts[f.index_in_variable_declarators + 1]).start - 1
                         else:
-                            t.start = utils_listener.TokensInfo(f.all_variable_declarator_contexts[f.index_in_variable_declarators - 1]).start + 1
+                            t.start = utils_listener_fast.TokensInfo(f.all_variable_declarator_contexts[f.index_in_variable_declarators - 1]).start + 1
                         rewriter.replace(t, "")
                         rewriter.insert_after(
                             f.get_tokens_info(),
