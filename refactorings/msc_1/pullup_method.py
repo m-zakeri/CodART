@@ -1,5 +1,5 @@
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
-from utils_listener import TokensInfo,SingleFileElement
+from utils_listener_fast import TokensInfo,SingleFileElement
 from refactorings.msc_1.pullup_method_get_removemethod import  get_removemethods
 from utils import Rewriter
 from utils import get_program
@@ -30,7 +30,7 @@ def pullup_method_refactoring(source_filenames: list, package_name: str, class_n
      if _methodd == None:
         break
      _methodds = _methodd[0]
-     _method =program.packages[package_name].classes[remove].methods[_methodds]
+     _method =program.packages[package_name].classes[remove].methods[str(_methodds)]
      _method_token_info = TokensInfo(_method.parser_context)
      Rewriter_.replace(_method_token_info," ")
 

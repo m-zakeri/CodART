@@ -1,7 +1,8 @@
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
-from utils_listener import TokensInfo,SingleFileElement
-from utils import Rewriter
-from utils import get_program
+
+from utils import get_program, Rewriter
+from utils_listener_fast import TokensInfo,SingleFileElement
+
 
 
 def move_method_refactoring(source_filenames: list, package_name: str, class_name: str, method_name: str,target_class_name : str, filename_mapping = lambda x: x + ".rewritten.java"):
@@ -83,13 +84,13 @@ def move_method_refactoring(source_filenames: list, package_name: str, class_nam
     Rewriter_.replace(tokens_info,"")
     Rewriter_.apply()
     return  True
-mylist = ["tests/move_method/s.java","tests/move_method/t.java","tests/move_method/test.java"]
+mylist = ["tests/move_method/s.java","tests/move_method/t.java"]
 
 
 
 if __name__ == "__main__":
     print("Testing move_method...")
-    if move_method_refactoring(mylist,"org.argouml.uml.cognitive.critics","a","f","t"):
+    if move_method_refactoring(mylist,"org.apache.xerces.util","AttributesProxy","getLength","AugmentationsImpl"):
         print("Success!")
     else:
         print("Cannot refactor.")
