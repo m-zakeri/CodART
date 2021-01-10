@@ -1,17 +1,18 @@
 from antlr4 import FileStream, ParseTreeWalker
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
-from antlr4_java9.Java9Lexer import Java9Lexer
-from utils_listener import *
+from antlr4_java_fast.JavaLexer import JavaLexer
+from antlr4_java_fast.JavaParser import JavaParser
+from utils_listener_fast import *
 
 
 def get_program(source_files: list) -> Program:
     program = Program()
     for filename in source_files:
         stream = FileStream(filename, encoding='utf8')
-        lexer = Java9Lexer(stream)
+        lexer = JavaLexer(stream)
         token_stream = CommonTokenStream(lexer)
-        parser = Java9Parser(token_stream)
+        parser = JavaParser(token_stream)
         tree = parser.compilationUnit()
         listener = UtilsListener(filename)
         walker = ParseTreeWalker()
