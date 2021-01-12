@@ -124,7 +124,7 @@ Refactorings are applied to software systems listed in Table 2. Datasets may cha
 
 |     System            	|     Release                     	|     Previous releases    	|     Domain                                                       	|     Reference        	|
 |-----------------------	|---------------------------------	|--------------------------	|------------------------------------------------------------------	|----------------------	|
-|    [Xerces-J](https://github.com/apache/xerces2-j)          |     v2.7.0                |   software packages for parsing XML                               |   [3], [6]
+|    [Xerces-J]           |     v2.7.0                                                    |   software packages for parsing XML                               |   [3], [6]
 
 |     Azureus           	|     v2.3.0.6                    	|                          	|     Java BitTorrent client for handling     multiple torrents    	|     [3]              	|
 |     ArgoUML           	|     v0.26 and v0.3              	|                          	|     UML tool for object-oriented design                          	|     [3]              	|
@@ -216,6 +216,9 @@ ANTLR slides: PART 3: [Getting started in C#](http://parsa.iust.ac.ir/download_c
 [5] [http://sourceforge.net/projects/recoder](http://sourceforge.net/projects/recoder) 
 
 [6] [http://reverse.iust.ac.ir](http://reverse.iust.ac.ir) 
+
+#### Download Links
+
 
 #### FAQ
 For any question please contact `m-zakeri@live.com`
