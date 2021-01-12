@@ -124,23 +124,22 @@ Refactorings are applied to software systems listed in Table 2. Datasets may cha
 
 |     System            	|     Release                     	|     Previous releases    	|     Domain                                                       	|     Reference        	|
 |-----------------------	|---------------------------------	|--------------------------	|------------------------------------------------------------------	|----------------------	|
-|    [Xerces-J]           |     v2.7.0                        |                           |   software packages for parsing XML                               |   [3], [6]
-|
-|     Azureus           	|     v2.3.0.6                    	|                          	|     Java BitTorrent client for handling     multiple torrents    	|     [3]              	|
-|     ArgoUML           	|     v0.26 and v0.3              	|                          	|     UML tool for object-oriented design                          	|     [3]              	|
-|     Apache Ant        	|     v1.5.0 and v1.7.0           	|                          	|     Java build tool and library                                  	|     [3]              	|
-|     GanttProject      	|     v1.10.2 and v1.11.1         	|                          	|     project management                                           	|     [3], [6], [5]    	|
-|     JHotDraw          	|     v6.1 and v6.0b1 and v5.3    	|                          	|     graphics tool                                                	|     [6], [5], [4]    	|
-|     JFreeChart        	|     v1.0.9                      	|                          	|     chart tool                                                   	|     [6]              	|
-|     Beaver            	|     v0.9.11 and v0.9.8          	|                          	|     parser generator                                             	|     [5], [4]         	|
-|     Apache XML-RPC    	|     v3.1.1                      	|                          	|     B2B communications                                           	|     [5], [4]         	|
-|     JRDF              	|     v0.3.4.3                    	|                          	|     semantic web (resource management)                           	|     [5]              	|
-|     XOM               	|     v1.2.1                      	|                          	|     XML tool                                                     	|     [5]              	|
-|     JSON              	|     v1.1                        	|                          	|     software packages for parsing JSON                           	|     [4]              	|
-|     JFlex             	|     v1.4.1                      	|                          	|     lexical analyzer generator                                   	|     [4]              	|
-|     Mango             	|     v                           	|                          	|                                                                  	|     [4]              	|
-|     Weka              	|     v3.9                        	|                          	|     data mining tool                                             	|     New              	|
-|     ANTLR             	|     v4.8.0                      	|                          	|     parser generator                                             	|     New              	|
+|     [Xerces-J]            |     v2.7.0                        |                           |   software packages for parsing XML                             |   [3], [6]
+|     [Azureus]             |     v2.3.0.6                      |                           |   Java BitTorrent client for handling multiple torrents         |     [3]             
+|     [ArgoUML]             |     v0.26 and v0.3                |                           |   UML tool for object-oriented design                          	|     [3]               
+|     [Apache Ant]        	|     v1.5.0 and v1.7.0           	|                          	|   Java build tool and library                                  	|     [3]              
+|     [GanttProject]      	|     v1.10.2 and v1.11.1         	|                          	|     project management                                          |     [3], [6], [5]    
+|     [JHotDraw]          	|     v6.1 and v6.0b1 and v5.3    	|                          	|     graphics tool                                               |     [6], [5], [4]    
+|     [JFreeChart]        	|     v1.0.9                      	|                          	|     chart tool                                                  |     [6]              
+|     [Beaver]            	|     v0.9.11 and v0.9.8          	|                          	|     parser generator                                            |     [5], [4]         
+|     [Apache XML-RPC]    	|     v3.1.1                      	|                          	|     B2B communications                                          |     [5], [4]         
+|     [JRDF]              	|     v0.3.4.3                    	|                          	|     semantic web (resource management)                          |     [5]              
+|     [XOM]               	|     v1.2.1                      	|                          	|     XML tool                                                    |     [5]              
+|     [JSON]              	|     v1.1                        	|                          	|     software packages for parsing JSON                          |     [4]              
+|     [JFlex]            	  |     v1.4.1                      	|                          	|     lexical analyzer generator                                  |     [4]              
+|     [Mango]             	|     v                           	|                          	|                                                                 |     [4]              
+|     [Weka]              	|     v3.9                        	|                          	|     data mining tool                                            |     New              
+|     [ANTLR]             	|     v4.8.0                      	|                          	|     parser generator                                            |     New              
 
 
 
