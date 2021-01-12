@@ -125,7 +125,7 @@ Refactorings are applied to software systems listed in Table 2. Datasets may cha
 |     System            	|     Release                     	|     Previous releases    	|     Domain                                                       	|     Reference        	|
 |-----------------------	|---------------------------------	|--------------------------	|------------------------------------------------------------------	|----------------------	|
 |    [Xerces-J]           |     v2.7.0                        |                           |   software packages for parsing XML                               |   [3], [6]
-
+|
 |     Azureus           	|     v2.3.0.6                    	|                          	|     Java BitTorrent client for handling     multiple torrents    	|     [3]              	|
 |     ArgoUML           	|     v0.26 and v0.3              	|                          	|     UML tool for object-oriented design                          	|     [3]              	|
 |     Apache Ant        	|     v1.5.0 and v1.7.0           	|                          	|     Java build tool and library                                  	|     [3]              	|
