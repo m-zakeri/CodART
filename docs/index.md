@@ -226,11 +226,11 @@ ANTLR slides: PART 3: [Getting started in C#](http://parsa.iust.ac.ir/download_c
 [JFreeChart](https://github.com/jfree/jfreechart)        	             
 [Beaver](https://github.com/svn2github/beaver-parser-generator-v09)            	         
 [Apache XML-RPC](https://ws.apache.org/xmlrpc/)   	        
-[JRDF]              	             
+[JRDF](http://jrdf.sourceforge.net/index.html)              	             
 [XOM](https://github.com/elharo/xom)               	            
 [JSON](https://github.com/stleary/JSON-java)              	             
 [JFlex](https://github.com/jflex-de/jflex)            	              
-[Mango]             	             
+[Mango](https://github.com/jfaster/mango)            	             
 [Weka](https://github.com/ohmrefresh/Weka-Android-3.9.1-SNAPSHOT)              	           
 [ANTLR](https://github.com/antlr/antlr4)             	            
 
