@@ -1,3 +1,5 @@
+import os
+
 from antlr4 import FileStream, ParseTreeWalker
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
@@ -25,6 +27,12 @@ def get_program(source_files: list) -> Program:
                 program.packages[listener.package.name].classes[classes_name]=listener.package.classes[classes_name]
 
     return program
+
+def get_filenames_in_dir(directory_name: str, filter = lambda x: x.endswith(".java")) -> list:
+    result = []
+    for (dirname, dirnames, filenames) in os.walk(directory_name):
+        result.extend([dirname + '/' + name for name in filenames if filter(name)])
+    return result
 
 class Rewriter:
     def __init__(self, program: Program, filename_mapping = lambda x: x + ".rewritten.java"):
