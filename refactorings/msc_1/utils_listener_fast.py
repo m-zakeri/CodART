@@ -411,7 +411,9 @@ class UtilsListener(JavaParserListener):
                     self.current_method.body_method_invocations[ctx.parentCtx.IDENTIFIER()].append(
                         ctx.IDENTIFIER().getText())
             else:
-                if ctx.IDENTIFIER() != None:
+                a=len(ctx.parentCtx.children)
+            if a==1:
+                if ctx.IDENTIFIER() != None :
                     if self.current_class_ctx not in self.current_method.body_method_invocations_without_typename:
                         self.current_method.body_method_invocations_without_typename[self.current_class_ctx] = [ctx]
                     else:
