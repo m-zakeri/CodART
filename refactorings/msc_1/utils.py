@@ -8,9 +8,11 @@ from antlr4_java_fast.JavaParser import JavaParser
 from utils_listener_fast import *
 
 
-def get_program(source_files: list) -> Program:
+def get_program(source_files: list, print_status = False) -> Program:
     program = Program()
     for filename in source_files:
+        if print_status:
+            print("Parsing " + filename)
         stream = FileStream(filename, encoding='utf8')
         lexer = JavaLexer(stream)
         token_stream = CommonTokenStream(lexer)
@@ -72,5 +74,9 @@ class Rewriter:
     def apply(self):
         for token_stream in self.token_streams:
             (old_filename, token_stream_rewriter, new_filename) = self.token_streams[token_stream]
+            path = new_filename.replace("\\", "/")
+            path = path[:path.rfind('/')]
+            if not os.path.exists(path):
+                os.makedirs(path)
             with open(new_filename, mode='w', newline='') as file:
                 file.write(token_stream_rewriter.getDefaultText())
