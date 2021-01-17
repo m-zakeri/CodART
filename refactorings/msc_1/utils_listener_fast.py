@@ -264,6 +264,8 @@ class UtilsListener(JavaParserListener):
         self.filename = filename
         self.file_info = FileInfo(filename=filename)
 
+        self.field_enter_count = 0
+
     def enterPackageDeclaration(self, ctx:JavaParser.PackageDeclarationContext):
         self.package.name = ctx.qualifiedName().getText()
         self.file_info.package_name = self.package.name
@@ -455,7 +457,8 @@ class UtilsListener(JavaParserListener):
         self.current_local_var_type = None
 
     def enterFieldDeclaration(self, ctx:JavaParser.FieldDeclarationContext):
-        if self.current_class_identifier is not None:
+        self.field_enter_count += 1
+        if self.current_class_identifier is not None and self.field_enter_count == 1:
             modifiers = self.last_modifiers.copy()
             modifiers_contexts = self.last_modifiers_contexts.copy()
             datatype = ctx.typeType().getText()
@@ -491,7 +494,8 @@ class UtilsListener(JavaParserListener):
                 )
 
     def exitFieldDeclaration(self, ctx:JavaParser.FieldDeclarationContext):
-        if self.current_class_identifier is not None:
+        self.field_enter_count -= 1
+        if self.current_class_identifier is not None and self.field_enter_count == 0:
             for i in range(len(self.current_field_ids)):
                 field_id = self.current_field_ids[i]
                 dims = self.current_field_dims[i]
