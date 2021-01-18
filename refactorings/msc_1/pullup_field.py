@@ -57,6 +57,9 @@ def pullup_field(source_filenames: list,
     for field in fields_to_remove:
         if len(field.neighbor_names) == 0:
             rewriter.replace(field.get_tokens_info(), "")
+            # Have to remove the modifiers too, because of the new grammar.
+            for mod_ctx in field.modifiers_parser_contexts:
+                rewriter.replace(utils_listener_fast.TokensInfo(mod_ctx), "")
         else:
             i = field.index_in_variable_declarators
             var_ctxs = field.all_variable_declarator_contexts

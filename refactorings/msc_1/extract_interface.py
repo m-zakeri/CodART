@@ -190,6 +190,12 @@ def test():
             print("A, B, " + third_class + ": Cannot refactor.")
 
 def test_ant():
+    """
+    target_files = [
+        "tests/apache-ant/main/org/apache/tools/ant/input/InputRequest.java",
+        "tests/apache-ant/main/org/apache/tools/ant/input/MultipleChoiceInputRequest.java"
+    ]
+    """
     ant_dir = "tests/apache-ant-1-7-0"
     print("Success!" if extract_interface(
         utils.get_filenames_in_dir(ant_dir),
