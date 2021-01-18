@@ -1,6 +1,6 @@
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
-from utils import get_program, Rewriter
+from utils import get_program, Rewriter,get_filenames_in_dir
 from utils_listener_fast import TokensInfo,SingleFileElement
 
 
@@ -8,6 +8,7 @@ from utils_listener_fast import TokensInfo,SingleFileElement
 def move_method_refactoring(source_filenames: list, package_name: str, class_name: str, method_name: str,target_class_name : str, filename_mapping = lambda x: x + ".rewritten.java"):
     program = get_program(source_filenames)
     static = 0
+   
     if class_name not in program.packages[package_name].classes or target_class_name not  in program.packages[package_name].classes or method_name not in program.packages[package_name].classes[class_name].methods:
         return  False
 
@@ -15,7 +16,7 @@ def move_method_refactoring(source_filenames: list, package_name: str, class_nam
     _targetclass = program.packages[package_name].classes[target_class_name]
     _method = program.packages[package_name].classes[class_name].methods[method_name]
 
-    Rewriter_ = Rewriter(program,filename_mapping)
+    Rewriter_ = Rewriter(program,lambda x:'tests/pullup_method/Real_Tests_temp/tools'+x)
     tokens_info = TokensInfo(_method.parser_context)  #tokens of ctx method
     param_tokens_info = TokensInfo(_method.formalparam_context)
     method_declaration_info = TokensInfo(_method.method_declaration_context)
@@ -31,20 +32,20 @@ def move_method_refactoring(source_filenames: list, package_name: str, class_nam
             if token.text in _sourceclass.fields:
                 exp.append(token.tokenIndex)
             #check that where this method is call
-    for package_name in program.packages:
-     package = program.packages[package_name]
+    for package_names in program.packages:
+     package = program.packages[package_names]
      for class_ in package.classes:
         _class = package.classes[class_]
         for method_ in _class.methods:
             __method = _class.methods[method_]
             for inv in __method.body_method_invocations:
                 invc = __method.body_method_invocations[inv]
-                if (invc[0] == method_name):
+                if (invc[0] == method_name & package_names ==package_name ):
                     inv_tokens_info = TokensInfo(inv)
                     if(static == 0):
                         class_token_info = TokensInfo(_class.body_context)
-                        Rewriter_.insert_after_start(class_token_info, class_name + " " + str.lower(
-                            class_name) + "=" + "new " + class_name + "();")
+                        Rewriter_.insert_after_start(class_token_info, target_class_name + " " + str.lower(
+                            target_class_name) + "=" + "new " + target_class_name + "();")
                         Rewriter_.apply()
                     Rewriter_.replace(inv_tokens_info, target_class_name)
                 Rewriter_.apply()
@@ -84,13 +85,14 @@ def move_method_refactoring(source_filenames: list, package_name: str, class_nam
     Rewriter_.replace(tokens_info,"")
     Rewriter_.apply()
     return  True
-mylist = ["tests/move_method/s.java","tests/move_method/t.java"]
+mylist1 = ["tests/move_method/Real_Tests/ComponentHelper.java","tests/move_method/Real_Tests/DefaultDefinitions.java"]
 
 
 
 if __name__ == "__main__":
+    mylist = get_filenames_in_dir('tests/pullup_method/Real_Tests/tools')
     print("Testing move_method...")
-    if move_method_refactoring(mylist,"org.apache.xerces.util","AttributesProxy","getLength","AugmentationsImpl"):
+    if move_method_refactoring(mylist1,"org.apache.tools.ant.filters","BaseFilterReader","skip","BaseParamFilterReader"):
         print("Success!")
     else:
         print("Cannot refactor.")

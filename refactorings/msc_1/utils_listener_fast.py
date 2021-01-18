@@ -370,7 +370,7 @@ class UtilsListener(JavaParserListener):
             method = Method(
                 package_name=self.package.name,
                 class_name=self.current_class_identifier,
-                parser_context=ctx,
+                parser_context=ctx.parentCtx.parentCtx,
                 filename=self.filename,
                 file_info=self.file_info
             )
