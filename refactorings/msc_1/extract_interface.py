@@ -1,3 +1,5 @@
+import os
+
 import utils_listener_fast
 import utils
 
@@ -9,7 +11,7 @@ def extract_interface(source_filenames: list,
                       interface_filename: str,
                       filename_mapping = lambda x: (x[:-5] if x.endswith(".java") else x) + ".re.java") -> bool:
 
-    program = utils.get_program(source_filenames)
+    program = utils.get_program(source_filenames, print_status=True)
 
     if package_name not in program.packages \
             or any(
@@ -158,6 +160,8 @@ def extract_interface(source_filenames: list,
         interface_file_content += ");\n"
     interface_file_content += "}\n"
 
+    if not os.path.exists(interface_filename[:interface_filename.rfind('/')]):
+        os.makedirs(interface_filename[:interface_filename.rfind('/')])
     file = open(interface_filename, "w+")
     file.write(interface_file_content)
     file.close()
@@ -165,7 +169,7 @@ def extract_interface(source_filenames: list,
     rewriter.apply()
     return True
 
-if __name__ == "__main__":
+def test():
     print("Testing extract_interface...")
     filenames = [
         "tests/extract_interface/A.java",
@@ -184,3 +188,18 @@ if __name__ == "__main__":
             print("A, B, " + third_class + ": Success!")
         else:
             print("A, B, " + third_class + ": Cannot refactor.")
+
+def test_ant():
+    ant_dir = "tests/apache-ant-1-7-0"
+    print("Success!" if extract_interface(
+        utils.get_filenames_in_dir(ant_dir),
+        "org.apache.tools.ant.input",
+        ["InputRequest", "MultipleChoiceInputRequest"],
+        [ "isInputValid" ],
+        "ExtractedInterface",
+        "tests/extract_interface_ant/ExtractedInterface.java",
+        lambda x: "tests/extract_interface_ant/" + x[len(ant_dir):]
+    ) else "Cannot refactor.")
+
+if __name__ == "__main__":
+    test()
