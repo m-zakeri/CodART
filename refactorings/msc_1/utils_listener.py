@@ -4,6 +4,8 @@ import antlr4.tree
 
 from antlr4_java9.Java9Parser import Java9Parser, CommonTokenStream
 from antlr4_java9.Java9Listener import Java9Listener
+from javaparsergen.javaLabeled.JavaParserLabeled import JavaParserLabeled
+from javaparsergen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 class Program:
     def __init__(self):
