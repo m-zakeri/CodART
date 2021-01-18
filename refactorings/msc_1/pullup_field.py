@@ -7,7 +7,7 @@ def pullup_field(source_filenames: list,
                  field_name: str,
                  filename_mapping = lambda x: (x[:-5] if x.endswith(".java") else x) + ".re.java") -> bool:
 
-    program = utils.get_program(source_filenames)
+    program = utils.get_program(source_filenames, print_status=True)
 
     if package_name not in program.packages \
             or class_name not in program.packages[package_name].classes \
@@ -57,6 +57,9 @@ def pullup_field(source_filenames: list,
     for field in fields_to_remove:
         if len(field.neighbor_names) == 0:
             rewriter.replace(field.get_tokens_info(), "")
+            # Have to remove the modifiers too, because of the new grammar.
+            for mod_ctx in field.modifiers_parser_contexts:
+                rewriter.replace(utils_listener_fast.TokensInfo(mod_ctx), "")
         else:
             i = field.index_in_variable_declarators
             var_ctxs = field.all_variable_declarator_contexts
@@ -101,7 +104,7 @@ def pullup_field(source_filenames: list,
     rewriter.apply()
     return True
 
-if __name__ == "__main__":
+def test():
     print("Testing pullup_field...")
     filenames = [
         "tests/pullup_field/test1.java",
@@ -114,3 +117,23 @@ if __name__ == "__main__":
         print("Success!")
     else:
         print("Cannot refactor.")
+
+def test_ant():
+    """
+    target_files = [
+        "tests/apache-ant/main/org/apache/tools/ant/types/ArchiveFileSet.java",
+        "tests/apache-ant/main/org/apache/tools/ant/types/TarFileSet.java",
+        "tests/apache-ant/main/org/apache/tools/ant/types/ZipFileSet.java"
+    ]
+    """
+    ant_dir = "tests/apache-ant-1-7-0"
+    print("Success!" if pullup_field(
+        utils.get_filenames_in_dir(ant_dir),
+        "org.apache.tools.ant.types",
+        "TarFileSet",
+        "userName",
+        lambda x: "tests/pullup_field_ant/" + x[len(ant_dir):]
+    ) else "Cannot refactor.")
+
+if __name__ == "__main__":
+    test()

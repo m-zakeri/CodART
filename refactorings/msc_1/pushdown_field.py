@@ -10,7 +10,7 @@ def pushdown_field(source_filenames: list,
                    class_names: list = [],
                    filename_mapping = lambda x: (x[:-5] if x.endswith(".java") else x) + ".re.java") -> bool:
 
-    program = utils.get_program(source_filenames)
+    program = utils.get_program(source_filenames, print_status=True)
 
     if package_name not in program.packages \
             or superclass_name not in program.packages[package_name].classes \
@@ -89,6 +89,9 @@ def pushdown_field(source_filenames: list,
     field = superclass.fields[field_name]
     if len(field.neighbor_names) == 0:
         rewriter.replace(field.get_tokens_info(), "")
+        # Have to remove the modifiers too, because of the new grammar.
+        for mod_ctx in field.modifiers_parser_contexts:
+            rewriter.replace(utils_listener_fast.TokensInfo(mod_ctx), "")
     else:
         i = field.index_in_variable_declarators
         var_ctxs = field.all_variable_declarator_contexts
@@ -114,7 +117,7 @@ def pushdown_field(source_filenames: list,
     rewriter.apply()
     return True
 
-if __name__ == "__main__":
+def test():
     print("Testing pushdown_field...")
     filenames = [
         "tests/pushdown_field/test1.java",
@@ -136,3 +139,24 @@ if __name__ == "__main__":
             print("1, 2, " + str(i + 1) + ": Success!")
         else:
             print("1, 2, " + str(i + 1) + ": Cannot refactor.")
+
+def test_ant():
+    """
+    target_files = [
+        "tests/apache-ant/main/org/apache/tools/ant/types/ArchiveFileSet.java",
+        "tests/apache-ant/main/org/apache/tools/ant/types/TarFileSet.java",
+        "tests/apache-ant/main/org/apache/tools/ant/types/ZipFileSet.java"
+    ]
+    """
+    ant_dir = "tests/apache-ant-1-7-0"
+    print("Success!" if pushdown_field(
+        utils.get_filenames_in_dir(ant_dir),
+        "org.apache.tools.ant.types",
+        "ArchiveFileSet",
+        "src",
+        [],
+        lambda x: "tests/pushdown_field_ant/" + x[len(ant_dir):]
+    ) else "Cannot refactor.")
+
+if __name__ == "__main__":
+    test()
