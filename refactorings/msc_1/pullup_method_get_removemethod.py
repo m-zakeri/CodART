@@ -1,6 +1,5 @@
-from utils_listener import TokensInfo, Program
+from utils_listener_fast import TokensInfo, Program
 
-from utils import get_program
 
 
 def get_removemethods(program: Program,packagename :str,superclassname : str,methodname:str,classname : str):

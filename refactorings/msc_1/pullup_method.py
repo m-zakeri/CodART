@@ -2,14 +2,14 @@ from antlr4.TokenStreamRewriter import TokenStreamRewriter
 from utils_listener_fast import TokensInfo,SingleFileElement
 from refactorings.msc_1.pullup_method_get_removemethod import  get_removemethods
 from utils import Rewriter
-from utils import get_program
+from utils import get_program,get_filenames_in_dir
 
 
 def pullup_method_refactoring(source_filenames: list, package_name: str, class_name: str, method_name: str, filename_mapping = lambda x: x + ".rewritten.java"):
     program = get_program(source_filenames)   #گرفتن پکیج های برنامه
     _sourceclass = program.packages[package_name].classes[class_name]
     target_class_name = _sourceclass.superclass_name
-
+    static = 0
     removemethod = get_removemethods(program, package_name,target_class_name, method_name, class_name)  #متد های مشابه در کلاس های دیگر
     _targetclass = program.packages[package_name].classes[target_class_name]
     _method_name = program.packages[package_name].classes[class_name].methods[method_name]
@@ -24,7 +24,7 @@ def pullup_method_refactoring(source_filenames: list, package_name: str, class_n
     if bool(_method_name.body_method_invocations_without_typename)==True:
         return False
 
-    Rewriter_= Rewriter(program,filename_mapping)
+    Rewriter_ = Rewriter(program,filename_mapping)
     for remove in removemethod:
      _methodd=removemethod[remove]
      if _methodd == None:
@@ -43,25 +43,31 @@ def pullup_method_refactoring(source_filenames: list, package_name: str, class_n
     Rewriter_.insert_before(tokens_info=class_tokens_info, text=strofmethod)
     Rewriter_.apply()
     #در کلاس های دیگر هر جا که از این متد استفاده شده باید اپدیت شود
-    for package_name in program.packages:
-        package = program.packages[package_name]
+    for package_names in program.packages:
+        package = program.packages[package_names]
         for class_ in package.classes:
             _class = package.classes[class_]
             for method_ in _class.methods:
                 __method = _class.methods[method_]
                 for inv in __method.body_method_invocations:
                     invc = __method.body_method_invocations[inv]
-                    if (invc[0] == method_name):
+                    if (invc[0] == method_name & package_names ==package_name ):
                         inv_tokens_info = TokensInfo(inv)
+                        if (static == 0):
+                            class_token_info = TokensInfo(_class.body_context)
+                            Rewriter_.insert_after_start(class_token_info, target_class_name + " " + str.lower(
+                                target_class_name) + "=" + "new " + target_class_name + "();")
+                            Rewriter_.apply()
                         Rewriter_.replace(inv_tokens_info, target_class_name)
                         Rewriter_.apply()
     return True
 
-mylist = ["tests/pullup_method/sup.java","tests/pullup_method/ss.java"]
+mylist1= ["tests/pullup_method/BaseFilterReader.java","tests/pullup_method/ClassConstants.java"]
 
 if __name__ == "__main__":
+    mylist = get_filenames_in_dir('tests/pullup_method/Real_Tests/tools')
     print("Testing pullup_method...")
-    if pullup_method_refactoring(mylist,"org.argouml.uml.cognitive.critics","AbstractCrTooMany","setThreshold"):
+    if pullup_method_refactoring(mylist1,"org.apache.tools.ant.filters","ClassConstants","chain"):
         print("Success!")
     else:
         print("Cannot refactor.")
