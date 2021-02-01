@@ -12,6 +12,7 @@ __author__ = 'Morteza'
 
 
 import argparse
+import os
 
 from antlr4 import *
 
@@ -22,34 +23,40 @@ from gen.java.JavaParser import JavaParser
 
 
 def main(args):
-    # Step 1: Load input source into stream
-    stream = FileStream(args.file, encoding='utf8')
-    # input_stream = StdinStream()
+    x = args.directory
+    z = [file for file in os.listdir(x) if '.java' in file]
+    for file in z:
+        # Step 1: Load input source into stream
+        stream = FileStream(x+'/'+file, encoding='utf8')
+        # input_stream = StdinStream()
 
-    # Step 2: Create an instance of AssignmentStLexer
-    lexer = JavaLexer(stream)
-    # Step 3: Convert the input source into a list of tokens
-    token_stream = CommonTokenStream(lexer)
-    # Step 4: Create an instance of the AssignmentStParser
-    parser = JavaParser(token_stream)
-    tree = parser.compilationUnit()
+        # Step 2: Create an instance of AssignmentStLexer
+        lexer = JavaLexer(stream)
+        # Step 3: Convert the input source into a list of tokens
+        token_stream = CommonTokenStream(lexer)
+        # Step 4: Create an instance of the AssignmentStParser
+        parser = JavaParser(token_stream)
+        tree = parser.compilationUnit()
 
-    # Step 6: Create an instance of AssignmentStListener
-    my_listener = CollapseHierarchyRefactoringListener(
-        common_token_stream=token_stream, source_class='A_New'
-    )
+        # Step 6: Create an instance of AssignmentStListener
+        my_listener = CollapseHierarchyRefactoringListener(
+            common_token_stream=token_stream, source_class='JSONPointerException'
+        )
 
-    walker = ParseTreeWalker()
-    walker.walk(t=tree, listener=my_listener)
+        walker = ParseTreeWalker()
+        walker.walk(t=tree, listener=my_listener)
+        if my_listener.is_source_class:
+            z = file
+            print(z)
 
-    with open('input.refactored.java', mode='w', newline='') as f:
-        f.write(my_listener.token_stream_rewriter.getDefaultText())
+        with open('testproject/refactored/'+file, mode='w+', newline='') as f:
+            f.write(my_listener.token_stream_rewriter.getDefaultText())
 
 
 if __name__ == '__main__':
     argparser = argparse.ArgumentParser()
     argparser.add_argument(
-        '-n', '--file',
-        help='Input source', default=r'./input.java')
+        '-d', '--directory',
+        help='Input source', default=r'testproject/input/src/main/java/org/json')
     args = argparser.parse_args()
     main(args)
