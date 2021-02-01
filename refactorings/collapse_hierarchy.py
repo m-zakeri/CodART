@@ -70,13 +70,17 @@ class CollapseHierarchyRefactoringListener(JavaParserLabeledListener):
 
     def exitClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
         if self.is_source_class:
-            l = self.source_class_data
             self.is_source_class = False
-        if self.is_target_class:
-            self.token_stream_rewriter.insertAfter(
-                index=ctx.stop.tokenIndex - 1,
-                text=self.code
+            self.token_stream_rewriter.delete(
+                program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                from_idx=ctx.parentCtx.classOrInterfaceModifier(0).start.tokenIndex,
+                to_idx=ctx.stop.tokenIndex
             )
+        # if self.is_target_class:
+        #     self.token_stream_rewriter.insertAfter(
+        #         index=ctx.stop.tokenIndex - 1,
+        #         text=self.code
+        #     )
 
     def enterClassBody(self, ctx: JavaParserLabeled.ClassBodyContext):
         if self.is_source_class:
@@ -122,17 +126,41 @@ class CollapseHierarchyRefactoringListener(JavaParserLabeledListener):
             for parameter in constructor_parameters:
                 constructor_text += parameter.typeType().getText() + ' '
                 constructor_text += parameter.variableDeclaratorId().getText() + ', '
-            constructor_text = constructor_text[:len(constructor_text)-2]
+            constructor_text = constructor_text[:len(constructor_text) - 2]
             constructor_text += ')\n{'
             constructor_text += self.token_stream_rewriter.getText(
                 program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-                start=ctx.block().start.tokenIndex+1,
-                stop=ctx.block().stop.tokenIndex-1
+                start=ctx.block().start.tokenIndex + 1,
+                stop=ctx.block().stop.tokenIndex - 1
             )
             constructor_text += '}\n'
-            self.source_class_data['constructors'].append(Constructor(name=self.source_class,
-                                                                      numberOfParameters=len(constructor_parameters),
-                                                                      text=constructor_text))
+            self.source_class_data['constructors'].append(ConstructorOrMethod(name=self.source_class,
+                                                                              numberOfParameters=len(
+                                                                                  constructor_parameters),
+                                                                              text=constructor_text))
+
+    def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
+        if self.is_source_class:
+            method_parameters = [ctx.formalParameters().formalParameterList().children[i] for i in
+                                 range(len(ctx.formalParameters().formalParameterList().children)) if i % 2 == 0]
+            method_text = ''
+            for modifier in ctx.parentCtx.parentCtx.modifier():
+                method_text += modifier.getText() + ' '
+            method_text += '('
+            for parameter in method_parameters:
+                method_text += parameter.typeType().getText() + ' '
+                method_text += parameter.variableDeclaratorId().getText() + ', '
+            method_text = method_text[:len(method_text) - 2]
+            method_text += ')\n{'
+            method_text += self.token_stream_rewriter.getText(
+                program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                start=ctx.methodBody().start.tokenIndex + 1,
+                stop=ctx.methodBody().stop.tokenIndex - 1
+            )
+            method_text += '}\n'
+            self.source_class_data['methods'].append(ConstructorOrMethod(name=self.source_class,
+                                                                         numberOfParameters=len(method_parameters),
+                                                                         text=method_text))
 
 
 class Field:
@@ -141,7 +169,7 @@ class Field:
         self.name = name
 
 
-class Constructor:
+class ConstructorOrMethod:
     def __init__(self, text: str = None, name: str = None, numberOfParameters: int = None):
         self.text = text
         self.name = name
