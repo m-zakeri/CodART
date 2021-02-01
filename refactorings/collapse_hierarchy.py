@@ -43,7 +43,7 @@ class CollapseHierarchyRefactoringListener(JavaParserLabeledListener):
         if source_class_data:
             self.source_class_data = source_class_data
         else:
-            self.source_class_data = {'fields': [], 'methods': []}
+            self.source_class_data = {'fields': [], 'methods': [], 'constructors': []}
 
         self.is_target_class = False
         self.is_source_class = False
@@ -101,7 +101,7 @@ class CollapseHierarchyRefactoringListener(JavaParserLabeledListener):
             field_text = ''
             for child in ctx.children:
                 if child.getText() == ';':
-                    field_text = field_text[:len(field_text)-1] + ';'
+                    field_text = field_text[:len(field_text) - 1] + ';'
                     break
                 field_text += child.getText() + ' '
             name = ctx.variableDeclarators().variableDeclarator(0).variableDeclaratorId().IDENTIFIER().getText()
@@ -111,8 +111,38 @@ class CollapseHierarchyRefactoringListener(JavaParserLabeledListener):
             field_text = modifier_text + field_text
             self.source_class_data['fields'].append(Field(name=name, text=field_text))
 
+    def enterConstructorDeclaration(self, ctx: JavaParserLabeled.ConstructorDeclarationContext):
+        if self.is_source_class:
+            constructor_parameters = [ctx.formalParameters().formalParameterList().children[i] for i in
+                                      range(len(ctx.formalParameters().formalParameterList().children)) if i % 2 == 0]
+            constructor_text = ''
+            for modifier in ctx.parentCtx.parentCtx.modifier():
+                constructor_text += modifier.getText() + ' '
+            constructor_text += '('
+            for parameter in constructor_parameters:
+                constructor_text += parameter.typeType().getText() + ' '
+                constructor_text += parameter.variableDeclaratorId().getText() + ', '
+            constructor_text = constructor_text[:len(constructor_text)-2]
+            constructor_text += ')\n{'
+            constructor_text += self.token_stream_rewriter.getText(
+                program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                start=ctx.block().start.tokenIndex+1,
+                stop=ctx.block().stop.tokenIndex-1
+            )
+            constructor_text += '}\n'
+            self.source_class_data['constructors'].append(Constructor(name=self.source_class,
+                                                                      numberOfParameters=len(constructor_parameters),
+                                                                      text=constructor_text))
+
 
 class Field:
     def __init__(self, text: str = None, name: str = None):
         self.text = text
         self.name = name
+
+
+class Constructor:
+    def __init__(self, text: str = None, name: str = None, numberOfParameters: int = None):
+        self.text = text
+        self.name = name
+        self.numberOfParameters = numberOfParameters
