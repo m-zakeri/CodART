@@ -26,7 +26,8 @@ class CollapseHierarchyRefactoringListener(JavaParserLabeledListener):
 
     def __init__(
             self, common_token_stream: CommonTokenStream = None,
-            source_class: str = None, destination_class: str = None, source_class_data: dict = None):
+            source_class: str = None, source_class_data: dict = None,
+            target_class: str = None, target_class_data: dict = None):
 
         if common_token_stream is None:
             raise ValueError('common_token_stream is None')
@@ -38,18 +39,21 @@ class CollapseHierarchyRefactoringListener(JavaParserLabeledListener):
         else:
             self.source_class = source_class
 
-        if destination_class:
-            self.destination_class = destination_class
         if source_class_data:
             self.source_class_data = source_class_data
         else:
             self.source_class_data = {'fields': [], 'methods': [], 'constructors': []}
+        if target_class:
+            self.target_class = target_class
+        else:
+            self.target_class = None
+        if target_class_data:
+            self.target_class_data = target_class_data
+        else:
+            self.target_class_data = {'fields': [], 'methods': [], 'constructors': []}
 
         self.is_target_class = False
         self.is_source_class = False
-        self.target_class = None
-        self.detected_field = None
-        self.detected_method = None
         self.TAB = "\t"
         self.NEW_LINE = "\n"
         self.code = ""
@@ -81,21 +85,6 @@ class CollapseHierarchyRefactoringListener(JavaParserLabeledListener):
         #         index=ctx.stop.tokenIndex - 1,
         #         text=self.code
         #     )
-
-    def enterClassBody(self, ctx: JavaParserLabeled.ClassBodyContext):
-        if self.is_source_class:
-            self.code += self.token_stream_rewriter.getText(
-                program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-                start=ctx.start.tokenIndex + 1,
-                stop=ctx.stop.tokenIndex - 1
-            )
-            self.token_stream_rewriter.delete(
-                program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-                from_idx=ctx.parentCtx.start.tokenIndex,
-                to_idx=ctx.parentCtx.stop.tokenIndex
-            )
-        else:
-            return None
 
     def exitCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
         print("Finished Processing...")
@@ -161,6 +150,36 @@ class CollapseHierarchyRefactoringListener(JavaParserLabeledListener):
             self.source_class_data['methods'].append(ConstructorOrMethod(name=self.source_class,
                                                                          numberOfParameters=len(method_parameters),
                                                                          text=method_text))
+
+    def enterCreatedName0(self, ctx: JavaParserLabeled.CreatedName0Context):
+        if ctx.IDENTIFIER(0).getText() == self.source_class and self.target_class:
+            self.token_stream_rewriter.replaceIndex(
+                index=ctx.start.tokenIndex,
+                text=self.target_class
+            )
+
+    def enterCreatedName1(self, ctx: JavaParserLabeled.CreatedName1Context):
+        if ctx.getText() == self.source_class and self.target_class:
+            self.token_stream_rewriter.replaceIndex(
+                index=ctx.start.tokenIndex,
+                text=self.target_class
+            )
+
+    def enterFormalParameter(self, ctx: JavaParserLabeled.FormalParameterContext):
+        class_type = ctx.typeType().classOrInterfaceType()
+        if class_type:
+            if class_type.IDENTIFIER(0).getText() == self.source_class and self.target_class:
+                self.token_stream_rewriter.replaceIndex(
+                    index=class_type.start.tokenIndex,
+                    text=self.target_class
+                )
+
+    def enterQualifiedName(self, ctx: JavaParserLabeled.QualifiedNameContext):
+        if ctx.IDENTIFIER(0).getText() == self.source_class and self.target_class:
+            self.token_stream_rewriter.replaceIndex(
+                index=ctx.start.tokenIndex,
+                text=self.target_class
+            )
 
 
 class Field:
