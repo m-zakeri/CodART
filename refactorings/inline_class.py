@@ -27,7 +27,7 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
 
     def __init__(
             self, common_token_stream: CommonTokenStream = None,
-            source_class: str = None, target_class: str = None):
+            source_class: str = None, target_class: str = None, source_class_data: dict = None):
 
         if common_token_stream is None:
             raise ValueError('common_token_stream is None')
@@ -42,6 +42,11 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
             raise ValueError("new_class is None")
         else:
             self.target_class = target_class
+        if source_class_data:
+            self.source_class_data = source_class_data
+        else:
+            self.source_class_data = {'fields': [], 'methods': []}
+
 
         self.is_target_class = False
         self.is_source_class = False
@@ -80,11 +85,32 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
             return None
 
     def exitClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
-        if self.is_target_class:
-            self.token_stream_rewriter.insertAfter(
-                index=ctx.stop.tokenIndex-1,
-                text=self.code
+        self.token_stream_rewriter.delete(
+            program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+            from_idx=ctx.parentCtx.classOrInterfaceModifier(0).start.tokenIndex,
+            to_idx=ctx.stop.tokenIndex
             )
 
     def exitCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
         print("Finished Processing...")
+
+    def enterFieldDeclaration(self, ctx: JavaParserLabeled.FieldDeclarationContext):
+        if self.is_source_class:
+            field_text = ''
+            for child in ctx.children:
+                if child.getText() == ';':
+                    field_text = field_text[:len(field_text)-1] + ';'
+                    break
+                field_text += child.getText() + ' '
+            name = ctx.variableDeclarators().variableDeclarator(0).variableDeclaratorId().IDENTIFIER().getText()
+            modifier_text = ''
+            for modifier in ctx.parentCtx.parentCtx.modifier():
+                modifier_text += modifier.getText() + ' '
+            field_text = modifier_text + field_text
+            self.source_class_data['fields'].append(Field(name=name, text=field_text))
+
+
+class Field:
+    def __init__(self, text: str = None, name: str = None):
+        self.text = text
+        self.name = name
