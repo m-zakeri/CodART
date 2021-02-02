@@ -10,7 +10,6 @@ The main module of CodART
 __version__ = '0.2.0'
 __author__ = 'Morteza'
 
-
 import argparse
 import os
 
@@ -21,18 +20,21 @@ from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 
 
-
 def main(args):
     x = args.directory
     z = [file for file in os.listdir(x) if '.java' in file]
     source_class_data = None
     target_class = None
     target_class_data = None
-    for i in range(3):
+    is_complete = False
+    for i in range(2):
         for file in z:
 
             # Step 1: Load input source into stream
-            stream = FileStream(x+'/'+file, encoding='utf8')
+            if i == 0:
+                stream = FileStream(x + '/' + file, encoding='utf8')
+            else:
+                stream = FileStream('testproject/refactored/' + '/' + file, encoding='utf8')
             # input_stream = StdinStream()
 
             # Step 2: Create an instance of AssignmentStLexer
@@ -48,7 +50,7 @@ def main(args):
             my_listener = CollapseHierarchyRefactoringListener(
                 common_token_stream=token_stream, source_class='JSONPointerException',
                 target_class=target_class, source_class_data=source_class_data,
-                target_class_data=target_class_data
+                target_class_data=target_class_data, is_complete=is_complete
             )
 
             walker = ParseTreeWalker()
@@ -56,8 +58,10 @@ def main(args):
             target_class = my_listener.target_class
             source_class_data = my_listener.source_class_data
             target_class_data = my_listener.target_class_data
-
-            with open('testproject/refactored/'+file, mode='w+', newline='') as f:
+            is_complete = my_listener.is_complete
+            if i == 1:
+                a = 10
+            with open('testproject/refactored/' + file, mode='w+', newline='') as f:
                 f.write(my_listener.token_stream_rewriter.getDefaultText())
 
 
