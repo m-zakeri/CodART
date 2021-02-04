@@ -27,3 +27,23 @@ class A
         print(this.h);
     }
 }
+
+
+class B{
+
+    public string instance;
+
+    public B(){
+        A a = new A(); // should change
+        this.instance = a.h;
+        this.c();
+        a.printH();
+    }
+
+    void c(){
+        A a = new A(); // should not change
+        int j = a.f;
+        // not refactoring is better than error
+        // a.printH();
+    }
+}

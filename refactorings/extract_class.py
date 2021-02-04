@@ -229,23 +229,7 @@ class ExtractClassRefactoringListener(JavaParserLabeledListener):
 
 
 class FindClassUsagesListener(JavaParserLabeledListener):
-    def __init__(self, common_token_stream: CommonTokenStream = None,
-                 source_class: str = None, new_class: str = None,
-                 moved_fields=None, moved_methods=None):
-        if moved_methods is None:
-            self.moved_methods = []
-        else:
-            self.moved_methods = moved_methods
-        if moved_fields is None:
-            self.moved_fields = []
-        else:
-            self.moved_fields = moved_fields
-
-        if common_token_stream is None:
-            raise ValueError("common_token_stream is None")
-        else:
-            self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
-
+    def __init__(self, source_class: str = None, new_class: str = None):
         if source_class is None:
             raise ValueError("source_class is None")
         else:
@@ -268,14 +252,10 @@ class FindClassUsagesListener(JavaParserLabeledListener):
         self.is_new_class = self.class_name == self.new_class
         self.is_source_class = self.class_name == self.source_class
         self.is_other_class = not (self.is_new_class or self.is_source_class)
-        
-    def enterMethodDeclaration(self, ctx:JavaParserLabeled.MethodDeclarationContext):
+
+    def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
         if self.is_other_class:
             self.method_name = ctx.IDENTIFIER().getText()
-
-    def exitClassDeclaration(self, ctx:JavaParserLabeled.ClassDeclarationContext):
-        if self.usages:
-            print(self.usages)
 
     def enterTypeType(self, ctx: JavaParserLabeled.TypeTypeContext):
         child = ctx.getChild(0)
@@ -292,6 +272,74 @@ class FindClassUsagesListener(JavaParserLabeledListener):
                     "inClass": self.class_name,
                     "inMethod": self.method_name
                 })
+
+
+class ChangeClassUsagesListener(JavaParserLabeledListener):
+    def __init__(self, common_token_stream: CommonTokenStream = None,
+                 source_class: str = None, new_class: str = None,
+                 moved_fields=None, moved_methods=None, usages=None):
+        if moved_methods is None:
+            self.moved_methods = []
+        else:
+            self.moved_methods = moved_methods
+        if moved_fields is None:
+            self.moved_fields = []
+        else:
+            self.moved_fields = moved_fields
+        if usages is None:
+            self.usages = []
+        else:
+            self.usages = usages
+
+        if common_token_stream is None:
+            raise ValueError("common_token_stream is None")
+        else:
+            self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
+
+        if source_class is None:
+            raise ValueError("source_class is None")
+        else:
+            self.source_class = source_class
+        if new_class is None:
+            raise ValueError("new_class is None")
+        else:
+            self.new_class = new_class
+
+        self.is_source_class = False
+        self.is_new_class = False
+        self.is_other_class = False
+        self.type = None
+        self.class_name = None
+        self.method_name = None
+        print(self.usages)
+
+    def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
+        self.class_name = ctx.IDENTIFIER().getText()
+        self.is_new_class = self.class_name == self.new_class
+        self.is_source_class = self.class_name == self.source_class
+        self.is_other_class = not (self.is_new_class or self.is_source_class)
+
+    def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
+        if self.is_other_class:
+            self.method_name = ctx.IDENTIFIER().getText()
+
+    def enterExpression1(self, ctx: JavaParserLabeled.Expression1Context):
+        # TODO: Complete this
+        if self.is_other_class:
+            children = ctx.children
+            if len(children) > 2:
+                if children[1].getText() == ".":
+                    usage_names = [usage["identifier"] for usage in self.usages]
+                    left_side = children[0].getText()
+                    right_side = ctx.IDENTIFIER()
+                    if left_side in usage_names:
+                        if right_side is not None:
+                            print(f"{right_side} is used attribute")
+                            if str(right_side) in self.moved_fields:
+                                print(f"Call Rename {self.source_class} --> {self.new_class}")
+                        else:
+                            right_side = ctx.methodCall().getText()
+                            print(f"{right_side} is used method")
 
 
 class ExtractClassAPI:
@@ -330,15 +378,24 @@ class ExtractClassAPI:
         token_stream = CommonTokenStream(lexer)
         parser = JavaParserLabeled(token_stream)
         tree = parser.compilationUnit()
-        listener = FindClassUsagesListener(
+        find_listener = FindClassUsagesListener(
+            source_class=self.source_class,
+            new_class=self.new_class,
+        )
+        self.walker.walk(
+            listener=find_listener,
+            t=tree
+        )
+        change_listener = ChangeClassUsagesListener(
             common_token_stream=token_stream,
             source_class=self.source_class,
             new_class=self.new_class,
+            moved_fields=self.moved_fields,
             moved_methods=self.moved_methods,
-            moved_fields=self.moved_fields
+            usages=find_listener.usages
         )
         self.walker.walk(
-            listener=listener,
+            listener=change_listener,
             t=tree
         )
         # print(listener.token_stream_rewriter.getDefaultText())
@@ -357,7 +414,7 @@ class ExtractClassAPI:
                 listener=listener,
                 t=self.tree
             )
-            # print(listener.token_stream_rewriter.getDefaultText())
+            print(listener.token_stream_rewriter.getDefaultText())
 
             print("=" * 50)
             self.find_usages(listener.token_stream_rewriter.getDefaultText())
@@ -368,6 +425,8 @@ class ExtractClassAPI:
         else:
             print("Can not refactor!")
 
+# TODO: Check J-dodorant
+
 
 if __name__ == "__main__":
     ExtractClassAPI(
@@ -375,6 +434,6 @@ if __name__ == "__main__":
         file_path="/home/ali/Documents/dev/CodART/input.java",
         source_class="A",
         new_class="APlus",
-        moved_fields=["h"],
+        moved_fields=["f"],
         moved_methods=["printH"]
     ).do_refactor()
