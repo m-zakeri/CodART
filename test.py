@@ -44,8 +44,6 @@ def main(args):
             # Step 4: Create an instance of the AssignmentStParser
             parser = JavaParserLabeled(token_stream)
             tree = parser.compilationUnit()
-            if file == 'JSONPointer.java':
-                a = 10
             # Step 6: Create an instance of AssignmentStListener
             my_listener = CollapseHierarchyRefactoringListener(
                 common_token_stream=token_stream, source_class='JSONPointerException',

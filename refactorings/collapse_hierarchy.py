@@ -280,3 +280,10 @@ class CollapseHierarchyRefactoringListener(JavaParserLabeledListener):
                 index=ctx.start.tokenIndex,
                 text=self.target_class
             )
+
+    def exitExpression0(self, ctx: JavaParserLabeled.Expression0Context):
+        if ctx.primary().getText() == self.source_class and self.target_class:
+            self.token_stream_rewriter.replaceIndex(
+                index=ctx.start.tokenIndex,
+                text=self.target_class
+            )

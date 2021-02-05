@@ -286,6 +286,7 @@ public class JSONPointer {
             for (String token : this.refTokens) {
                 rval.append('/').append(URLEncoder.encode(token, ENCODING));
             }
+            int b = JSONPointerException.Sum(2, 5);
             return rval.toString();
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
