@@ -214,18 +214,22 @@ class CollapseHierarchyRefactoringListener(JavaParserLabeledListener):
 
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
         if self.is_source_class or self.is_target_class:
-            method_parameters = [ctx.formalParameters().formalParameterList().children[i] for i in
-                                 range(len(ctx.formalParameters().formalParameterList().children)) if i % 2 == 0]
+            if ctx.formalParameters().formalParameterList():
+                method_parameters = [ctx.formalParameters().formalParameterList().children[i] for i in
+                                     range(len(ctx.formalParameters().formalParameterList().children)) if i % 2 == 0]
+            else:
+                method_parameters = []
             method_text = ''
             for modifier in ctx.parentCtx.parentCtx.modifier():
                 method_text += modifier.getText() + ' '
             method_text += ctx.typeTypeOrVoid().getText() + ' ' + ctx.IDENTIFIER().getText()
-            method_text += '('
+            method_text += ' ( '
             for parameter in method_parameters:
                 method_text += parameter.typeType().getText() + ' '
                 method_text += parameter.variableDeclaratorId().getText() + ', '
-            method_text = method_text[:len(method_text) - 2]
-            method_text += ')\n\t{'
+            if method_parameters:
+                method_text = method_text[:len(method_text) - 2]
+            method_text += ' )\n\t{'
             method_text += self.token_stream_rewriter.getText(
                 program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
                 start=ctx.methodBody().start.tokenIndex + 1,

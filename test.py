@@ -46,7 +46,7 @@ def main(args):
             tree = parser.compilationUnit()
             # Step 6: Create an instance of AssignmentStListener
             my_listener = CollapseHierarchyRefactoringListener(
-                common_token_stream=token_stream, source_class='JSONPointerException',
+                common_token_stream=token_stream, source_class='HTTPTokener',
                 target_class=target_class, source_class_data=source_class_data,
                 target_class_data=target_class_data, is_complete=is_complete
             )
