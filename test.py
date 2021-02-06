@@ -16,6 +16,9 @@ import os
 from antlr4 import *
 
 from refactorings.collapse_hierarchy import CollapseHierarchyRefactoringListener
+from refactorings.inline_class import InlineClassRefactoringListener
+from gen.java.JavaLexer import JavaLexer
+from gen.java.JavaParser import JavaParser
 from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 
