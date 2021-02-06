@@ -3,8 +3,8 @@ The scripts implements different refactoring operations
 
 
 """
-__version__ = '0.1.0'
-__author__ = 'Morteza'
+version = '0.1.0'
+author = 'Morteza'
 
 import networkx as nx
 
@@ -43,14 +43,12 @@ class MakeMethodStaticRefactoringListener(JavaParserLabeledListener):
             self.target_methods = target_methods
 
         self.is_target_class = False
-        self.detected_field = None
-        self.detected_method = None
+        self.detected_instance_of_target_class = []
         self.TAB = "\t"
         self.NEW_LINE = "\n"
         self.code = ""
 
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
-        print("Refactoring started, please wait...")
         class_identifier = ctx.IDENTIFIER().getText()
         if class_identifier == self.target_class:
             self.is_target_class = True
@@ -80,5 +78,21 @@ class MakeMethodStaticRefactoringListener(JavaParserLabeledListener):
                         text="static "
                     )
 
-    def exitCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
-        print("Finished Processing...")
+    def enterLocalVariableDeclaration(self, ctx:JavaParserLabeled.LocalVariableDeclarationContext):
+        if ctx.typeType().getText() == self.target_class:
+            self.detected_instance_of_target_class.append(ctx.variableDeclarators().variableDeclarator(0).variableDeclaratorId().IDENTIFIER().getText())
+            self.token_stream_rewriter.delete(
+                program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                from_idx=ctx.start.tokenIndex,
+                to_idx=ctx.stop.tokenIndex+1
+            )
+
+    def enterMethodCall0(self, ctx:JavaParserLabeled.MethodCall0Context):
+        if ctx.IDENTIFIER().getText() in self.target_methods:
+            if ctx.parentCtx.expression().getText() in self.detected_instance_of_target_class:
+                self.token_stream_rewriter.replace(
+                    program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                    from_idx=ctx.parentCtx.expression().start.tokenIndex,
+                    to_idx=ctx.parentCtx.expression().stop.tokenIndex,
+                    text=self.target_class
+                )
