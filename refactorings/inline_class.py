@@ -49,6 +49,10 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
             self.source_class_data = source_class_data
         else:
             self.source_class_data = {'fields': [], 'methods': [], 'constructors': []}
+        if target_class_data:
+            self.target_class_data = target_class_data
+        else:
+            self.target_class_data = {'fields': [], 'methods': [], 'constructors': []}
 
 
         self.is_complete = is_complete
