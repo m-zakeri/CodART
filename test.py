@@ -17,8 +17,6 @@ from antlr4 import *
 
 from refactorings.collapse_hierarchy import CollapseHierarchyRefactoringListener
 from refactorings.inline_class import InlineClassRefactoringListener
-from gen.java.JavaLexer import JavaLexer
-from gen.java.JavaParser import JavaParser
 from refactorings.make_method_static import MakeMethodStaticRefactoringListener
 from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
@@ -76,7 +74,12 @@ def main(args):
                 target_class_data = my_listener.target_class_data
                 is_complete = my_listener.is_complete
             elif refactoring_id == 'ms':
-                pass
+                my_listener = MakeMethodStaticRefactoringListener(
+                    common_token_stream=token_stream, target_class='JSONPointer',
+                    target_methods=['toURIFragment']
+                )
+                walker = ParseTreeWalker()
+                walker.walk(t=tree, listener=my_listener)
             else:
                 pass
             with open('testproject/refactored/' + file, mode='w+', newline='') as f:
