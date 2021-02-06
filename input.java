@@ -13,13 +13,13 @@ class A
     public int g; /* printF, printG */
 
     // Method 1
-    void printF(int i)
+    public void printF(int i)
     {
         this.f = i * this.f;
     }
 
     // Method 2
-    void printF(float i){
+    public void printF(float i){
         this.f = (int) (i * this.f);
         this.g = (int) (i * this.g);
     }
