@@ -18,6 +18,7 @@ from antlr4 import *
 from refactorings.collapse_hierarchy import CollapseHierarchyRefactoringListener
 from refactorings.inline_class import InlineClassRefactoringListener
 from refactorings.make_method_static import MakeMethodStaticRefactoringListener
+from refactorings.make_method_non_static import MakeMethodNonStaticRefactoringListener
 from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 
@@ -81,7 +82,10 @@ def main(args):
                 walker = ParseTreeWalker()
                 walker.walk(t=tree, listener=my_listener)
             else:
-                pass
+                my_listener = MakeMethodNonStaticRefactoringListener(
+                    common_token_stream=token_stream, target_class='JSONPointer',
+                    target_methods=['builder']
+                )
             with open('testproject/refactored/' + file, mode='w+', newline='') as f:
                 f.write(my_listener.token_stream_rewriter.getDefaultText())
 
