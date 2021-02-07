@@ -12,6 +12,7 @@ __author__ = 'Morteza'
 
 import argparse
 import os
+import time
 
 from antlr4 import *
 
@@ -31,6 +32,7 @@ def main(args):
     target_class = None
     target_class_data = None
     is_complete = False
+    print("Process started")
     for i in range(2):
         for file in input_java_files:
 
@@ -88,6 +90,7 @@ def main(args):
                 )
             with open('testproject/refactored/' + file, mode='w+', newline='') as f:
                 f.write(my_listener.token_stream_rewriter.getDefaultText())
+            print("/\\", end='')
 
 
 if __name__ == '__main__':
@@ -100,4 +103,6 @@ if __name__ == '__main__':
         help='i: inline class & c: collapse hierarchy & ms: make method static & mn: make method non static',
         default='c')
     args = argparser.parse_args()
+    start_time = time.time()
     main(args)
+    print(f"\n finished in {time.time() - start_time}'s")
