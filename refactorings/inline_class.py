@@ -11,7 +11,6 @@ import networkx as nx
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
-
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
@@ -54,11 +53,9 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
         else:
             self.target_class_data = {'fields': [], 'methods': [], 'constructors': []}
 
-
         self.is_complete = is_complete
         self.is_target_class = False
         self.is_source_class = False
-        self.target_class = None
         self.detected_field = None
         self.detected_method = None
         self.TAB = "\t"
@@ -66,19 +63,16 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
         self.code = ""
 
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
-        print("Refactoring started, please wait...")
         class_identifier = ctx.IDENTIFIER().getText()
         if class_identifier == self.source_class:
             self.is_source_class = True
             self.is_target_class = False
-            self.target_class = ctx.typeType().classOrInterfaceType().IDENTIFIER(0).getText()
         elif class_identifier == self.target_class:
             self.is_target_class = True
             self.is_source_class = False
         else:
             self.is_target_class = False
             self.is_source_class = False
-
 
     def exitClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
         if self.is_target_class and (self.source_class_data['fields'] or
@@ -126,10 +120,6 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
         else:
             return None
 
-    def exitCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
-        print("Finished Processing...")
-
-
     def enterFieldDeclaration(self, ctx: JavaParserLabeled.FieldDeclarationContext):
         if self.is_source_class or self.is_target_class:
             field_text = ''
@@ -150,17 +140,21 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
 
     def enterConstructorDeclaration(self, ctx: JavaParserLabeled.ConstructorDeclarationContext):
         if self.is_source_class or self.is_target_class:
-            constructor_parameters = [ctx.formalParameters().formalParameterList().children[i] for i in
-                                      range(len(ctx.formalParameters().formalParameterList().children)) if i % 2 == 0]
+            if ctx.formalParameters().formalParameterList():
+                constructor_parameters = [ctx.formalParameters().formalParameterList().children[i] for i in
+                                          range(len(ctx.formalParameters().formalParameterList().children)) if i % 2 == 0]
+            else:
+                constructor_parameters = []
             constructor_text = ''
             for modifier in ctx.parentCtx.parentCtx.modifier():
                 constructor_text += modifier.getText() + ' '
             constructor_text += ctx.IDENTIFIER().getText()
-            constructor_text += '('
+            constructor_text += ' ( '
             for parameter in constructor_parameters:
                 constructor_text += parameter.typeType().getText() + ' '
                 constructor_text += parameter.variableDeclaratorId().getText() + ', '
-            constructor_text = constructor_text[:len(constructor_text) - 2]
+            if constructor_parameters:
+                constructor_text = constructor_text[:len(constructor_text) - 2]
             constructor_text += ')\n\t{'
             constructor_text += self.token_stream_rewriter.getText(
                 program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
@@ -183,18 +177,21 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
 
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
         if self.is_source_class or self.is_target_class:
-            method_parameters = [ctx.formalParameters().formalParameterList().children[i] for i in
-                                 range(len(ctx.formalParameters().formalParameterList().children)) if i % 2 == 0]
+            if ctx.formalParameters().formalParameterList():
+                method_parameters = [ctx.formalParameters().formalParameterList().children[i] for i in
+                                     range(len(ctx.formalParameters().formalParameterList().children)) if i % 2 == 0]
+            else:
+                method_parameters = []
             method_text = ''
             for modifier in ctx.parentCtx.parentCtx.modifier():
                 method_text += modifier.getText() + ' '
             method_text += ctx.typeTypeOrVoid().getText() + ' ' + ctx.IDENTIFIER().getText()
-            method_text += '('
+            method_text += ' ( '
             for parameter in method_parameters:
                 method_text += parameter.typeType().getText() + ' '
                 method_text += parameter.variableDeclaratorId().getText() + ', '
-            method_text = method_text[:len(method_text) - 2]
-            method_text += ')\n{'
+            if method_parameters:
+                method_text = method_text[:len(method_text) - 2]
             method_text += ')\n\t{'
             method_text += self.token_stream_rewriter.getText(
                 program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
@@ -220,6 +217,55 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
                         for p in
                         method_parameters],
                     text=method_text))
+
+    def enterCreatedName0(self, ctx: JavaParserLabeled.CreatedName0Context):
+        if ctx.IDENTIFIER(0).getText() == self.source_class and self.target_class:
+            self.token_stream_rewriter.replaceIndex(
+                index=ctx.start.tokenIndex,
+                text=self.target_class
+            )
+
+    def enterCreatedName1(self, ctx: JavaParserLabeled.CreatedName1Context):
+        if ctx.getText() == self.source_class and self.target_class:
+            self.token_stream_rewriter.replaceIndex(
+                index=ctx.start.tokenIndex,
+                text=self.target_class
+            )
+
+    def enterFormalParameter(self, ctx: JavaParserLabeled.FormalParameterContext):
+        class_type = ctx.typeType().classOrInterfaceType()
+        if class_type:
+            if class_type.IDENTIFIER(0).getText() == self.source_class and self.target_class:
+                self.token_stream_rewriter.replaceIndex(
+                    index=class_type.start.tokenIndex,
+                    text=self.target_class
+                )
+
+    def enterQualifiedName(self, ctx: JavaParserLabeled.QualifiedNameContext):
+        if ctx.IDENTIFIER(0).getText() == self.source_class and self.target_class:
+            self.token_stream_rewriter.replaceIndex(
+                index=ctx.start.tokenIndex,
+                text=self.target_class
+            )
+
+    def exitExpression0(self, ctx: JavaParserLabeled.Expression0Context):
+        if ctx.primary().getText() == self.source_class and self.target_class:
+            self.token_stream_rewriter.replaceIndex(
+                index=ctx.start.tokenIndex,
+                text=self.target_class
+            )
+
+    def enterLocalVariableDeclaration(self, ctx: JavaParserLabeled.LocalVariableDeclarationContext):
+        if ctx.typeType().classOrInterfaceType():
+            if ctx.typeType().classOrInterfaceType().getText() == self.source_class and self.target_class:
+                self.token_stream_rewriter.replace(
+                    program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                    from_idx=ctx.typeType().start.tokenIndex,
+                    to_idx=ctx.typeType().stop.tokenIndex,
+                    text=self.target_class
+                )
+
+
 class Field:
     def __init__(self, text: str = None, name: str = None):
         self.text = text
