@@ -52,9 +52,10 @@ def merge_constructors(source_constructors: ConstructorOrMethod, target_construc
     for source_constructor in source_constructors:
         flag = True
         for target_constructor in target_constructors:
-            if source_constructor.name == target_constructor.name:
+            if source_constructor.name == target_constructor.name or 'super' in source_constructor.text:
                 if len(source_constructor.parameters) == len(
-                        target_constructor.parameters):  # check equality of two constructor
+                        target_constructor.parameters) \
+                        or 'super' in source_constructor.text:  # check equality of two constructor
                     flag = False
         if flag:
             final_constructors.append(source_constructor)
@@ -181,17 +182,24 @@ class CollapseHierarchyRefactoringListener(JavaParserLabeledListener):
 
     def enterConstructorDeclaration(self, ctx: JavaParserLabeled.ConstructorDeclarationContext):
         if self.is_source_class or self.is_target_class:
-            constructor_parameters = [ctx.formalParameters().formalParameterList().children[i] for i in
-                                      range(len(ctx.formalParameters().formalParameterList().children)) if i % 2 == 0]
+            if ctx.formalParameters().formalParameterList():
+                constructor_parameters = [ctx.formalParameters().formalParameterList().children[i] for i in
+                                          range(len(ctx.formalParameters().formalParameterList().children)) if i % 2 == 0]
+            else:
+                constructor_parameters = []
             constructor_text = ''
             for modifier in ctx.parentCtx.parentCtx.modifier():
                 constructor_text += modifier.getText() + ' '
-            constructor_text += ctx.IDENTIFIER().getText()
-            constructor_text += '('
+            if self.is_source_class:
+                constructor_text += self.target_class
+            else:
+                constructor_text += ctx.IDENTIFIER().getText()
+            constructor_text += ' ( '
             for parameter in constructor_parameters:
                 constructor_text += parameter.typeType().getText() + ' '
                 constructor_text += parameter.variableDeclaratorId().getText() + ', '
-            constructor_text = constructor_text[:len(constructor_text) - 2]
+            if constructor_parameters:
+                constructor_text = constructor_text[:len(constructor_text) - 2]
             constructor_text += ')\n\t{'
             constructor_text += self.token_stream_rewriter.getText(
                 program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
@@ -291,3 +299,13 @@ class CollapseHierarchyRefactoringListener(JavaParserLabeledListener):
                 index=ctx.start.tokenIndex,
                 text=self.target_class
             )
+
+    def enterLocalVariableDeclaration(self, ctx: JavaParserLabeled.LocalVariableDeclarationContext):
+        if ctx.typeType().classOrInterfaceType():
+            if ctx.typeType().classOrInterfaceType().getText() == self.source_class and self.target_class:
+                self.token_stream_rewriter.replace(
+                    program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                    from_idx=ctx.typeType().start.tokenIndex,
+                    to_idx=ctx.typeType().stop.tokenIndex,
+                    text=self.target_class
+                )
