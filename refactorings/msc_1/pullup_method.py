@@ -27,12 +27,11 @@ def pullup_method_refactoring(source_filenames: list, package_name: str, class_n
     Rewriter_ = Rewriter(program,filename_mapping)
     for remove in removemethod:
      _methodd=removemethod[remove]
-     if _methodd == None:
-        break
-     _methodds = _methodd[0]
-     _method =program.packages[package_name].classes[remove].methods[str(_methodds)]
-     _method_token_info = TokensInfo(_method.parser_context)
-     Rewriter_.replace(_method_token_info," ")
+     if _methodd != None:
+         _methodds = _methodd[0]
+         _method =program.packages[package_name].classes[remove].methods[str(_methodds)]
+         _method_token_info = TokensInfo(_method.parser_context)
+         Rewriter_.replace(_method_token_info," ")
 
     class_tokens_info = TokensInfo(_targetclass.parser_context)
     singlefileelement = SingleFileElement(_method_name.parser_context, _method_name.filename)

@@ -89,10 +89,11 @@ mylist1 = ["tests/move_method/Real_Tests/ComponentHelper.java","tests/move_metho
 
 
 
+
 if __name__ == "__main__":
     mylist = get_filenames_in_dir('tests/pullup_method/Real_Tests/tools')
     print("Testing move_method...")
-    if move_method_refactoring(mylist1,"org.apache.tools.ant.filters","BaseFilterReader","skip","BaseParamFilterReader"):
+    if move_method_refactoring(mylist,"org.apache.tools.ant.launch","Locator","getLocationURLs","Launcher"):
         print("Success!")
     else:
         print("Cannot refactor.")
