@@ -1,3 +1,4 @@
+
 """
 The scripts implements different refactoring operations
 
@@ -16,6 +17,19 @@ from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 import visualization.graph_visualization
+
+
+class Parameter:
+    def __init__(self, parameterType, name):
+        self.parameterType = parameterType
+        self.name = name
+
+
+class ConstructorOrMethod:
+    def __init__(self, text: str = None, name: str = None, parameters: Parameter = None):
+        self.text = text
+        self.name = name
+        self.parameters = parameters
 
 
 class MakeMethodNonStaticRefactoringListener(JavaParserLabeledListener):
@@ -37,11 +51,12 @@ class MakeMethodNonStaticRefactoringListener(JavaParserLabeledListener):
             raise ValueError("source_class is None")
         else:
             self.target_class = target_class
-        if target_methods is None or len(target_methods) ==0:
+        if target_methods is None or len(target_methods) == 0:
             raise ValueError("target method must have one method name")
         else:
             self.target_methods = target_methods
 
+        self.target_class_data = None
         self.is_target_class = False
         self.detected_field = None
         self.detected_method = None
@@ -50,18 +65,29 @@ class MakeMethodNonStaticRefactoringListener(JavaParserLabeledListener):
         self.code = ""
 
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
-        print("Refactoring started, please wait...")
         class_identifier = ctx.IDENTIFIER().getText()
         if class_identifier == self.target_class:
             self.is_target_class = True
+            self.target_class_data = {'constructors': []}
         else:
             self.is_target_class = False
 
     def exitClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
         if self.is_target_class:
+            have_default_constructor = False
+            for constructor in self.target_class_data['constructor']:
+                if len(constructor.parameters) == 0:
+                    have_default_constructor = True
+                    break
+            if not have_default_constructor:
+                self.token_stream_rewriter.insertBeforeIndex(
+                    index=ctx.stop.tokenIndex - 1,
+                    text=f'\n\t public {self.target_class_data["constructors"][0]} ()\n\t{{}}\n'
+                )
             self.is_target_class = False
 
-    def enterMethodDeclaration(self, ctx:JavaParserLabeled.MethodDeclarationContext):
+
+    def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
         if self.is_target_class:
             if ctx.IDENTIFIER().getText() in self.target_methods:
                 grand_parent_ctx = ctx.parentCtx.parentCtx
@@ -69,18 +95,49 @@ class MakeMethodNonStaticRefactoringListener(JavaParserLabeledListener):
                     if len(grand_parent_ctx.modifier()) == 2:
                         self.token_stream_rewriter.delete(
                             program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-                            from_idx=grand_parent_ctx.modifier(1).start.tokenIndex-1,
+                            from_idx=grand_parent_ctx.modifier(1).start.tokenIndex - 1,
                             to_idx=grand_parent_ctx.modifier(1).stop.tokenIndex
                         )
                     else:
                         if grand_parent_ctx.modifier(0).getText() == 'static':
                             self.token_stream_rewriter.delete(
                                 program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-                                from_idx=grand_parent_ctx.modifier(0).start.tokenIndex-1,
+                                from_idx=grand_parent_ctx.modifier(0).start.tokenIndex - 1,
                                 to_idx=grand_parent_ctx.modifier(0).stop.tokenIndex
                             )
                 else:
                     return None
 
-    def exitCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
-        print("Finished Processing...")
+    def enterConstructorDeclaration(self, ctx: JavaParserLabeled.ConstructorDeclarationContext):
+        if self.is_target_class:
+            if ctx.formalParameters().formalParameterList():
+                constructor_parameters = [ctx.formalParameters().formalParameterList().children[i] for i in
+                                          range(len(ctx.formalParameters().formalParameterList().children)) if
+                                          i % 2 == 0]
+            else:
+                constructor_parameters = []
+            constructor_text = ''
+            for modifier in ctx.parentCtx.parentCtx.modifier():
+                constructor_text += modifier.getText() + ' '
+                constructor_text += ctx.IDENTIFIER().getText()
+            constructor_text += ' ( '
+            for parameter in constructor_parameters:
+                constructor_text += parameter.typeType().getText() + ' '
+                constructor_text += parameter.variableDeclaratorId().getText() + ', '
+            if constructor_parameters:
+                constructor_text = constructor_text[:len(constructor_text) - 2]
+            constructor_text += ')\n\t{'
+            constructor_text += self.token_stream_rewriter.getText(
+                program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                start=ctx.block().start.tokenIndex + 1,
+                stop=ctx.block().stop.tokenIndex - 1
+            )
+            constructor_text += '}\n'
+            self.target_class_data['constructors'].append(ConstructorOrMethod(
+                name=self.target_class,
+                parameters=[Parameter(parameterType=p.typeType().getText(),
+
+                name=p.variableDeclaratorId().IDENTIFIER().getText())
+
+                for p in constructor_parameters],
+                text=constructor_text))
