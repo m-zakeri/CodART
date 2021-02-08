@@ -385,10 +385,6 @@ class UtilsListener(JavaParserListener):
             method.name = self.current_method_identifier
             method.is_constructor = False
 
-            method_key = method.name + '('
-            for param in method.parameters:
-                method_key += param
-
             # This is done on exit to collect params too, to support overloading.
             #self.package.classes[self.current_class_identifier].methods[method.name] = method
             self.current_method = method
@@ -412,13 +408,13 @@ class UtilsListener(JavaParserListener):
         if self.current_class_identifier is not None:
             if self.current_method is not None:
                 method = self.current_method
-                method_key = method.name + '('
+                method_key = ("" if method.name is None else method.name) + '('
                 is_first = True
                 for param in method.parameters:
                     if not is_first:
                         method_key += ','
                     is_first = False
-                    method_key += param
+                    method_key += param[0] # the type
                 method_key += ')'
                 self.package.classes[self.current_class_identifier].methods[method_key] = method
         self.current_method_identifier = None
@@ -445,10 +441,6 @@ class UtilsListener(JavaParserListener):
             method.name = None #self.current_method_identifier
             method.body_text = ctx.constructorBody.getText()
             method.is_constructor = True
-
-            method_key = method.name + '('
-            for param in method.parameters:
-                method_key += param
 
             # This is done on exit to collect params too, to support overloading.
             #self.package.classes[self.current_class_identifier].methods[method.name] = method
