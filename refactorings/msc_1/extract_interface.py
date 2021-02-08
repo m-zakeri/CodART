@@ -6,7 +6,7 @@ import utils
 def extract_interface(source_filenames: list,
                       package_name: str,
                       class_names: list,
-                      method_names: list,
+                      method_keys: list,
                       interface_name: str,
                       interface_filename: str,
                       filename_mapping = lambda x: (x[:-5] if x.endswith(".java") else x) + ".re.java") -> bool:
@@ -19,13 +19,16 @@ def extract_interface(source_filenames: list,
                     for class_name in class_names
             ) \
             or any(
-                method_name not in program.packages[package_name].classes[class_name].methods
-                    for class_name in class_names for method_name in method_names
+                method_key not in program.packages[package_name].classes[class_name].methods
+                    for class_name in class_names for method_key in method_keys
             ):
         return False
 
     method_returntypes = {}
     method_parameters = {}
+    method_names = []
+    for method_key in method_keys:
+        method_names.append(method_key[:method_key.find('(')])
 
     rewriter = utils.Rewriter(program, filename_mapping)
 
@@ -45,21 +48,21 @@ def extract_interface(source_filenames: list,
             t = utils_listener_fast.TokensInfo(c.parser_context)
             t.stop = c.parser_context.IDENTIFIER().getSymbol().tokenIndex
         rewriter.insert_after(t, (", " if has_superinterface else " implements ") + interface_name)
-        for method_name in method_names:
-            m: utils_listener_fast.Method = c.methods[method_name]
+        for method_key in method_keys:
+            m: utils_listener_fast.Method = c.methods[method_key]
             # Check if the return types / parameter types are the same
             # Or add to dictionary
-            if method_name in method_returntypes:
-                if method_returntypes[method_name] != m.returntype:
+            if method_key in method_returntypes:
+                if method_returntypes[method_key] != m.returntype:
                     return False
-                if len(method_parameters[method_name]) != len(m.parameters):
+                if len(method_parameters[method_key]) != len(m.parameters):
                     return False
                 for i in range(len(m.parameters)):
-                    if method_parameters[method_name][i][0] != m.parameters[i][0]:
+                    if method_parameters[method_key][i][0] != m.parameters[i][0]:
                         return False
             else:
-                method_returntypes[method_name] = m.returntype
-                method_parameters[method_name] = m.parameters
+                method_returntypes[method_key] = m.returntype
+                method_parameters[method_key] = m.parameters
             # Manage method modifiers
             if len(m.modifiers_parser_contexts) > 0:
                 t = utils_listener_fast.TokensInfo(m.modifiers_parser_contexts[0])
@@ -92,8 +95,8 @@ def extract_interface(source_filenames: list,
                         break
                 if d and "private" in f.modifiers:
                     fields_of_interest[f.name] = f
-            for method_name in c.methods:
-                m: utils_listener_fast.Method = c.methods[method_name]
+            for method_key in c.methods:
+                m: utils_listener_fast.Method = c.methods[method_key]
                 vars_of_interest = {}
                 for item in m.body_local_vars_and_expr_names:
                     if isinstance(item, utils_listener_fast.LocalVariable):
@@ -150,12 +153,13 @@ def extract_interface(source_filenames: list,
         + "public interface " + interface_name + "\n"
         + "{\n"
     )
-    for method_name in method_names:
-        interface_file_content += "    " + method_returntypes[method_name] + " " + method_name + "("
-        if len(method_parameters[method_name]) > 0:
-            interface_file_content += method_parameters[method_name][0][0] + " " + method_parameters[method_name][0][1]
-        for i in range(1, len(method_parameters[method_name])):
-            param = method_parameters[method_name][i]
+    for method_key in method_keys:
+        method_name = method_key[:method_key.find('(')]
+        interface_file_content += "    " + method_returntypes[method_key] + " " + method_name + "("
+        if len(method_parameters[method_key]) > 0:
+            interface_file_content += method_parameters[method_key][0][0] + " " + method_parameters[method_key][0][1]
+        for i in range(1, len(method_parameters[method_key])):
+            param = method_parameters[method_key][i]
             interface_file_content += ", " + param[0] + " " + param[1]
         interface_file_content += ");\n"
     interface_file_content += "}\n"
@@ -179,12 +183,12 @@ def test():
         "tests/extract_interface/E.java",
         "tests/extract_interface/U.java",
     ]
-    if extract_interface(filenames, "test", ["A", "B"], ["a", "b"], "Iab", "tests/extract_interface/Iab.re.java"):
+    if extract_interface(filenames, "test", ["A", "B"], ["a(int,float)", "b()"], "Iab", "tests/extract_interface/Iab.re.java"):
         print("A, B: Success!")
     else:
         print("A, B: Cannot refactor.")
     for third_class in ["C", "D", "E"]:
-        if extract_interface(filenames, "test", ["A", "B", third_class], ["a", "b"], "Iab", "tests/extract_interface/Iab.re.java"):
+        if extract_interface(filenames, "test", ["A", "B", third_class], ["a(int,float)", "b()"], "Iab", "tests/extract_interface/Iab.re.java"):
             print("A, B, " + third_class + ": Success!")
         else:
             print("A, B, " + third_class + ": Cannot refactor.")
@@ -201,7 +205,7 @@ def test_ant():
         utils.get_filenames_in_dir(ant_dir),
         "org.apache.tools.ant.input",
         ["InputRequest", "MultipleChoiceInputRequest"],
-        [ "isInputValid" ],
+        [ "isInputValid()" ],
         "ExtractedInterface",
         "tests/extract_interface_ant/ExtractedInterface.java",
         lambda x: "tests/extract_interface_ant/" + x[len(ant_dir):]

@@ -19,8 +19,8 @@ def pushdown_field(source_filenames: list,
 
     superclass: utils_listener_fast.Class = program.packages[package_name].classes[superclass_name]
 
-    for mn in superclass.methods:
-        m: utils_listener_fast.Method = superclass.methods[mn]
+    for mk in superclass.methods:
+        m: utils_listener_fast.Method = superclass.methods[mk]
         for item in m.body_local_vars_and_expr_names:
             if isinstance(item, utils_listener_fast.ExpressionName):
                 if ((len(item.dot_separated_identifiers) == 1
@@ -62,8 +62,8 @@ def pushdown_field(source_filenames: list,
                 if any((c.file_info.has_imported_class(o.package_name, o.name) and f.datatype == o.name)
                         or f.datatype == (o.package_name + '.' + o.name) for o in other_derived_classes):
                     fields_of_superclass_type_or_others.append(f.name)
-            for mn in c.methods:
-                m: utils_listener_fast.Method = c.methods[mn]
+            for mk in c.methods:
+                m: utils_listener_fast.Method = c.methods[mk]
                 local_vars_of_superclass_type_or_others = []
                 for item in m.body_local_vars_and_expr_names:
                     if isinstance(item, utils_listener_fast.LocalVariable):
