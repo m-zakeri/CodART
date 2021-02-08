@@ -408,17 +408,24 @@ class UtilsListener(JavaParserListener):
             self.current_method.body_text = ctx.getText()
             pass
 
-    def exitMethodDeclaration(self, ctx:JavaParser.MethodDeclarationContext):
+    def general_exit_method_decl(self):
         if self.current_class_identifier is not None:
             if self.current_method is not None:
                 method = self.current_method
                 method_key = method.name + '('
+                is_first = True
                 for param in method.parameters:
+                    if not is_first:
+                        method_key += ','
+                    is_first = False
                     method_key += param
                 method_key += ')'
                 self.package.classes[self.current_class_identifier].methods[method_key] = method
         self.current_method_identifier = None
         self.current_method = None
+
+    def exitMethodDeclaration(self, ctx:JavaParser.MethodDeclarationContext):
+        self.general_exit_method_decl()
 
 
     def enterConstructorDeclaration(self, ctx:JavaParser.ConstructorDeclarationContext):
@@ -449,16 +456,7 @@ class UtilsListener(JavaParserListener):
 
 
     def exitConstructorDeclaration(self, ctx:JavaParser.ConstructorDeclarationContext):
-        if self.current_class_identifier is not None:
-            if self.current_method is not None:
-                method = self.current_method
-                method_key = method.name + '('
-                for param in method.parameters:
-                    method_key += param
-                method_key += ')'
-                self.package.classes[self.current_class_identifier].methods[method_key] = method
-        self.current_method_identifier = None
-        self.current_method = None
+        self.general_exit_method_decl()
 
 
     def enterMethodCall(self, ctx: JavaParser.MethodCallContext):
