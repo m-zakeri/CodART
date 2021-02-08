@@ -156,14 +156,20 @@ class Class(SingleFileElement):
         self.filename = filename
         self.file_info = file_info
         self.body_context = None
+
+    def find_methods_with_name(self, name: str) -> list:
+        result = []
+        for mk in self.methods:
+            m = self.methods[mk]
+            if m.name == name:
+                result.append(m)
+
     def __str__(self):
         return str(self.modifiers) +  " " + str(self.name) \
             + ((" extends " + str(self.superclass_name)) if self.superclass_name is not None else "") \
             + ((" implements " + str(self.superinterface_names)) if len(self.superinterface_names) > 0 else "") \
             + " " + str(self.fields) \
             + " " + str(self.methods)
-
-# TODO Add Interface
 
 class Field(SingleFileElement):
     def __init__(self,
@@ -198,7 +204,7 @@ class Method(SingleFileElement):
                  body_text: str = None,
                  package_name: str = None,
                  class_name: str = None,
-                 parser_context: JavaParser.MethodDeclarationContext = None,
+                 parser_context = None,
                  filename: str = None,
                  file_info: FileInfo = None):
         self.modifiers = []
@@ -217,6 +223,7 @@ class Method(SingleFileElement):
         self.formalparam_context = None
         self.body_method_invocations_without_typename = {}
         self.method_declaration_context = None
+        self.is_constructor = False
 
     def __str__(self):
         return str(self.modifiers) +  " " + str(self.returntype) + " " + str(self.name) \
@@ -320,7 +327,7 @@ class UtilsListener(JavaParserListener):
     def enterClassDeclaration(self, ctx:JavaParser.ClassDeclarationContext):
         if self.current_class_identifier is None and self.nest_count == 0:
             self.current_class_identifier = ctx.IDENTIFIER().getText()
-            self.current_class_ctx = ctx.IDENTIFIER() # TODO: Update line
+            self.current_class_ctx = ctx.IDENTIFIER()
             current_class = Class(
                 package_name=self.package.name,
                 parser_context=ctx,
@@ -343,7 +350,6 @@ class UtilsListener(JavaParserListener):
                 self.current_class_identifier = None
             self.nest_count += 1
 
-    # TODO: Update listener method
     def enterClassBody(self, ctx:JavaParser.ClassBodyContext):
         if self.current_class_identifier is not None:
             self.package.classes[self.current_class_identifier].body_context = ctx
@@ -357,7 +363,6 @@ class UtilsListener(JavaParserListener):
         elif self.current_class_identifier is not None:
                 self.current_class_identifier = None
 
-    # TODO: Update listener method
     def enterFormalParameterList(self, ctx: JavaParser.FormalParameterListContext):
         if self.current_method is not None:
             self.current_method.formalparam_context = ctx
@@ -365,7 +370,7 @@ class UtilsListener(JavaParserListener):
     def enterMethodDeclaration(self, ctx:JavaParser.MethodDeclarationContext):
         if self.current_class_identifier is not None:
             #method_header = ctx.methodHeader()
-            self.current_method_identifier = ctx.IDENTIFIER()
+            self.current_method_identifier = ctx.IDENTIFIER().getText()
 
             method = Method(
                 package_name=self.package.name,
@@ -378,8 +383,14 @@ class UtilsListener(JavaParserListener):
             method.modifiers_parser_contexts = self.last_modifiers_contexts.copy()
             method.returntype = ctx.typeTypeOrVoid().getText()
             method.name = self.current_method_identifier
+            method.is_constructor = False
 
-            self.package.classes[self.current_class_identifier].methods[str(method.name)] = method
+            method_key = method.name + '('
+            for param in method.parameters:
+                method_key += param
+
+            # This is done on exit to collect params too, to support overloading.
+            #self.package.classes[self.current_class_identifier].methods[method.name] = method
             self.current_method = method
 
     def enterFormalParameters(self, ctx: JavaParser.FormalParametersContext):
@@ -392,18 +403,64 @@ class UtilsListener(JavaParserListener):
                 (ctx.typeType().getText(), ctx.variableDeclaratorId().IDENTIFIER().getText())
             )
 
-
     def enterMethodBody(self, ctx:JavaParser.MethodBodyContext):
         if self.current_method is not None:
             self.current_method.body_text = ctx.getText()
             pass
 
     def exitMethodDeclaration(self, ctx:JavaParser.MethodDeclarationContext):
+        if self.current_class_identifier is not None:
+            if self.current_method is not None:
+                method = self.current_method
+                method_key = method.name + '('
+                for param in method.parameters:
+                    method_key += param
+                method_key += ')'
+                self.package.classes[self.current_class_identifier].methods[method_key] = method
         self.current_method_identifier = None
         self.current_method = None
 
-    # TODO: Update, hint: move things to the enterExpression inside "if ctx.methodCall() is not None:"
-    #       Test rule "expression" with input "a.b.c().d()" or "a.b.c.d()" or "a().b" or "a.b = c.d()"!
+
+    def enterConstructorDeclaration(self, ctx:JavaParser.ConstructorDeclarationContext):
+        if self.current_class_identifier is not None:
+            self.current_method_identifier = ctx.IDENTIFIER().getText()
+
+            method = Method(
+                package_name=self.package.name,
+                class_name=self.current_class_identifier,
+                parser_context=ctx.parentCtx.parentCtx,
+                filename=self.filename,
+                file_info=self.file_info
+            )
+            method.modifiers = self.last_modifiers.copy()
+            method.modifiers_parser_contexts = self.last_modifiers_contexts.copy()
+            method.returntype = None
+            method.name = None #self.current_method_identifier
+            method.body_text = ctx.constructorBody.getText()
+            method.is_constructor = True
+
+            method_key = method.name + '('
+            for param in method.parameters:
+                method_key += param
+
+            # This is done on exit to collect params too, to support overloading.
+            #self.package.classes[self.current_class_identifier].methods[method.name] = method
+            self.current_method = method
+
+
+    def exitConstructorDeclaration(self, ctx:JavaParser.ConstructorDeclarationContext):
+        if self.current_class_identifier is not None:
+            if self.current_method is not None:
+                method = self.current_method
+                method_key = method.name + '('
+                for param in method.parameters:
+                    method_key += param
+                method_key += ')'
+                self.package.classes[self.current_class_identifier].methods[method_key] = method
+        self.current_method_identifier = None
+        self.current_method = None
+
+
     def enterMethodCall(self, ctx: JavaParser.MethodCallContext):
         if self.current_method is not None :
             if ctx.parentCtx.IDENTIFIER() != None:
@@ -431,8 +488,6 @@ class UtilsListener(JavaParserListener):
     def enterExpression(self, ctx:JavaParser.ExpressionContext):
         if self.current_method is not None:
             if ctx.methodCall() is not None:
-                # TODO: Add enterMethodInvocation logic here?
-                # body_local_vars_and_expr_names MethodInvocation
                 txt = ctx.getText()
                 ids = txt[:txt.find('(')].split('.')
                 self.current_method.body_local_vars_and_expr_names.append(
