@@ -1,7 +1,6 @@
 """
 The scripts implements different refactoring operations
 
-
 """
 version = '0.1.0'
 author = 'Morteza'
@@ -62,6 +61,8 @@ class MakeMethodStaticRefactoringListener(JavaParserLabeledListener):
     def enterMethodDeclaration(self, ctx:JavaParserLabeled.MethodDeclarationContext):
         if self.is_target_class:
             if ctx.IDENTIFIER().getText() in self.target_methods:
+                if 'this.' in ctx.getText():
+                    raise ValueError("this method can not refactore")
                 grand_parent_ctx = ctx.parentCtx.parentCtx
                 if grand_parent_ctx.modifier():
                     if len(grand_parent_ctx.modifier()) == 2:
