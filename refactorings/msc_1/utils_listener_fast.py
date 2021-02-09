@@ -19,6 +19,7 @@ class Package:
     def __init__(self):
         self.name = None
         self.classes = {}
+        self.package_ctx=None
     def __str__(self):
         return str(self.name) + " " + str(self.classes)
 
@@ -276,6 +277,7 @@ class UtilsListener(JavaParserListener):
     def enterPackageDeclaration(self, ctx:JavaParser.PackageDeclarationContext):
         self.package.name = ctx.qualifiedName().getText()
         self.file_info.package_name = self.package.name
+        self.package.package_ctx = ctx;
 
     def enterImportDeclaration(self, ctx:JavaParser.ImportDeclarationContext):
         if ctx.STATIC() is None:
