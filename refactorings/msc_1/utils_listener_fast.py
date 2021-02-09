@@ -164,6 +164,7 @@ class Class(SingleFileElement):
             m = self.methods[mk]
             if m.name == name:
                 result.append(m)
+        return result
 
     def __str__(self):
         return str(self.modifiers) +  " " + str(self.name) \
