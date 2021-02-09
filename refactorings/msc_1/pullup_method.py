@@ -5,14 +5,14 @@ from utils import Rewriter
 from utils import get_program,get_filenames_in_dir
 
 
-def pullup_method_refactoring(source_filenames: list, package_name: str, class_name: str, method_name: str, filename_mapping = lambda x: x + ".rewritten.java"):
+def pullup_method_refactoring(source_filenames: list, package_name: str, class_name: str, method_key: str, filename_mapping = lambda x: x + ".rewritten.java"):
     program = get_program(source_filenames)   #گرفتن پکیج های برنامه
     _sourceclass = program.packages[package_name].classes[class_name]
     target_class_name = _sourceclass.superclass_name
     static = 0
-    removemethod = get_removemethods(program, package_name,target_class_name, method_name, class_name)  #متد های مشابه در کلاس های دیگر
+    removemethod = get_removemethods(program, package_name,target_class_name, method_key, class_name)  #متد های مشابه در کلاس های دیگر
     _targetclass = program.packages[package_name].classes[target_class_name]
-    _method_name = program.packages[package_name].classes[class_name].methods[method_name]
+    _method_name = program.packages[package_name].classes[class_name].methods[method_key]
     tokens_info = TokensInfo(_method_name.parser_context)
     exps = tokens_info.get_token_index(tokens_info.token_stream.tokens, tokens_info.start, tokens_info.stop) #لیست متغیر های داخل بدنه کلاس که داخل متد استفاده شده اند
 
@@ -23,6 +23,8 @@ def pullup_method_refactoring(source_filenames: list, package_name: str, class_n
 
     if bool(_method_name.body_method_invocations_without_typename)==True:
         return False
+
+   
 
     Rewriter_ = Rewriter(program,filename_mapping)
     for remove in removemethod:
@@ -50,6 +52,7 @@ def pullup_method_refactoring(source_filenames: list, package_name: str, class_n
                 __method = _class.methods[method_]
                 for inv in __method.body_method_invocations:
                     invc = __method.body_method_invocations[inv]
+                    method_name = method_key[:method_key.find('(')]
                     if (invc[0] == method_name & package_names ==package_name ):
                         inv_tokens_info = TokensInfo(inv)
                         if (static == 0):
@@ -64,9 +67,9 @@ def pullup_method_refactoring(source_filenames: list, package_name: str, class_n
 mylist1= ["tests/pullup_method/BaseFilterReader.java","tests/pullup_method/ClassConstants.java"]
 
 if __name__ == "__main__":
-    mylist = get_filenames_in_dir('tests/pullup_method/Real_Tests/tools')
+    mylist = get_filenames_in_dir('tests/pullupmethod_test')
     print("Testing pullup_method...")
-    if pullup_method_refactoring(mylist1,"org.apache.tools.ant.filters","ClassConstants","chain"):
+    if pullup_method_refactoring(mylist,"ss","child","m(int,float)"):
         print("Success!")
     else:
         print("Cannot refactor.")

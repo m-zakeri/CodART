@@ -2,11 +2,11 @@ from utils_listener_fast import TokensInfo, Program
 
 
 
-def get_removemethods(program: Program,packagename :str,superclassname : str,methodname:str,classname : str):
+def get_removemethods(program: Program,packagename :str,superclassname : str,methodkey:str,classname : str):
     extendedclass=[]
     removemethods={}
 
-    met = program.packages[packagename].classes[classname].methods[methodname]
+    met = program.packages[packagename].classes[classname].methods[methodkey]
     body_text_method =met.body_text
     parammethod = met.parameters
     returntypeofmethod = met.returntype
@@ -23,17 +23,19 @@ def get_removemethods(program: Program,packagename :str,superclassname : str,met
 
     i=0
     for d in extendedclass:
-      class_=  extendedclass[i]
-      i+1
-      for m in class_.methods:
-         m_=class_.methods[m]
-         if(m_.body_text == body_text_method and m_.returntype == returntypeofmethod and m_.parameters == parammethod and m_.name == nameofmethod):
-             if class_.name not in  removemethods:
-                 removemethods[class_.name] = [m]
-             else:
-
-              removemethods[class_.name].append(m)
-      removemethods[classname]=[nameofmethod]
-      return removemethods
+        class_=  extendedclass[i]
+        i= i+1
+        for mk in class_.methods:
+             m_=class_.methods[mk]
+             m = mk[:mk.find('(')]
+             if(m_.body_text == body_text_method and m_.returntype == returntypeofmethod and m_.parameters == parammethod and m_.name == nameofmethod and m_.is_constructor == False):
+                 if class_.name not in  removemethods:
+                     removemethods[class_.name] = [methodkey]
+                 else:
+    
+                  removemethods[class_.name].append(methodkey)
+      #removemethods[classname]=[nameofmethod]
+    removemethods[classname]=[methodkey]
+    return removemethods
 
 
