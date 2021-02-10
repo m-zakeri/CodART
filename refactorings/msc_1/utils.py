@@ -74,8 +74,8 @@ class Rewriter:
     def apply(self):
         for token_stream in self.token_streams:
             (old_filename, token_stream_rewriter, new_filename) = self.token_streams[token_stream]
-            path = new_filename.replace("\\", "/")
-            path = path[:path.rfind('/')]
+            new_filename = new_filename.replace("\\", "/")
+            path = new_filename[:new_filename.rfind('/')]
             if not os.path.exists(path):
                 os.makedirs(path)
             with open(new_filename, mode='w', newline='') as file:
