@@ -15,7 +15,8 @@ def pullup_method_refactoring(source_filenames: list, package_name: str, class_n
     _method_name = program.packages[package_name].classes[class_name].methods[method_key]
     tokens_info = TokensInfo(_method_name.parser_context)
     exps = tokens_info.get_token_index(tokens_info.token_stream.tokens, tokens_info.start, tokens_info.stop) #لیست متغیر های داخل بدنه کلاس که داخل متد استفاده شده اند
-
+    if _method_name.is_constructor:
+        return  False
      #if method use param of class body return false
     for token in exps:
         if token.text in _sourceclass.fields:
