@@ -1,8 +1,6 @@
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
-
 from utils import get_program, Rewriter, get_filenames_in_dir
 from utils_listener_fast import TokensInfo, SingleFileElement
-
 
 def move_method_refactoring(source_filenames: list, package_name: str, class_name: str, method_key: str,
                             target_class_name: str,target_package_name:str, filename_mapping=lambda x: x + ".rewritten.java"):
@@ -17,13 +15,10 @@ def move_method_refactoring(source_filenames: list, package_name: str, class_nam
     _targetclass = program.packages[target_package_name].classes[target_class_name]
     _method = program.packages[package_name].classes[class_name].methods[method_key]
     
-    #if len(program.packages[package_name].classes[class_name].find_methods_with_name(
-          #  method_key[:method_key.find('(')])) > 1:
-        #return False
     if _method.is_constructor:
         return  False
     
-    Rewriter_ = Rewriter(program, lambda x: 'tests/movemethod_test' + x)
+    Rewriter_ = Rewriter(program, lambda x: 'Real_Test_refactorings/move_method_test_resault' + x)
     tokens_info = TokensInfo(_method.parser_context)  # tokens of ctx method
     param_tokens_info = TokensInfo(_method.formalparam_context)
     method_declaration_info = TokensInfo(_method.method_declaration_context)
@@ -54,7 +49,6 @@ def move_method_refactoring(source_filenames: list, package_name: str, class_nam
                             class_token_info = TokensInfo(_class.body_context)
                             Rewriter_.insert_after_start(class_token_info, target_class_name + " " + str.lower(
                                 target_class_name) + "=" + "new " + target_class_name + "();")
-                         
                             Rewriter_.apply()
                         Rewriter_.insert_before_start(class_token_info,
                                                       "import " + target_package_name + "." + target_class_name+";")
@@ -103,15 +97,13 @@ def move_method_refactoring(source_filenames: list, package_name: str, class_nam
     return True
 
 
-mylist1 = ["tests/move_method/Real_Tests/ComponentHelper.java", "tests/move_method/Real_Tests/DefaultDefinitions.java"]
-
 if __name__ == "__main__":
-    #mylist = get_filenames_in_dir('tests/pullup_method/Real_Tests/tools')
-    mylist = get_filenames_in_dir('tests/movemethod_test')
+    mylist = get_filenames_in_dir('Real_Test_refactorings/move_method_test_benchmarks/Weka')
+    #mylist = get_filenames_in_dir('tests/movemethod_test')
     print("Testing move_method...")
-    #if move_method_refactoring(mylist, "org.apache.tools.ant.filters", "BaseFilterReader", "skip(long)",
-                               #"BaseParamFilterReader","org.apache.tools.ant.filters"):
-    if move_method_refactoring(mylist, "ss", "source", "m(int)","target","sss"):
+    if move_method_refactoring(mylist, "com.googlecode.openbeans", "BeanDescriptor", "getCustomizerClass()",
+                               "EventSetDescriptor","com.googlecode.openbeans"):
+    #if move_method_refactoring(mylist, "ss", "source", "m(int)","target","sss"):
         print("Success!")
     else:
         print("Cannot refactor.")
