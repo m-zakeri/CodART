@@ -108,10 +108,10 @@ def pullup_field(source_filenames: list,
 def test():
     print("Testing pullup_field...")
     filenames = [
-        "tests/pullup_field/test1.java",
-        "tests/pullup_field/test2.java",
-        "tests/pullup_field/test3.java",
-        "tests/pullup_field/test4.java"
+        "../testproject/tests/pullup_field/test1.java",
+        "../testproject/tests/pullup_field/test2.java",
+        "../testproject/tests/pullup_field/test3.java",
+        "../testproject/tests/pullup_field/test4.java"
     ]
 
     if pullup_field(filenames, "pullup_field_test1", "B", "a"):
@@ -127,7 +127,7 @@ def test_ant():
         "tests/apache-ant/main/org/apache/tools/ant/types/ZipFileSet.java"
     ]
     """
-    ant_dir = "tests/apache-ant-1-7-0"
+    ant_dir = "../testproject/tests/apache-ant-1-7-0"
     print("Success!" if pullup_field(
         utils.get_filenames_in_dir(ant_dir),
         "org.apache.tools.ant.types",

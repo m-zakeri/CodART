@@ -119,13 +119,13 @@ def pushdown_field(source_filenames: list,
 def test():
     print("Testing pushdown_field...")
     filenames = [
-        "tests/pushdown_field/test1.java",
-        "tests/pushdown_field/test2.java",
-        "tests/pushdown_field/test3.java",
-        "tests/pushdown_field/test4.java",
-        "tests/pushdown_field/test5.java",
-        "tests/pushdown_field/test6.java",
-        "tests/pushdown_field/test7.java",
+        "../testproject/tests/pushdown_field/test1.java",
+        "../testproject/tests/pushdown_field/test2.java",
+        "../testproject/tests/pushdown_field/test3.java",
+        "../testproject/tests/pushdown_field/test4.java",
+        "../testproject/tests/pushdown_field/test5.java",
+        "../testproject/tests/pushdown_field/test6.java",
+        "../testproject/tests/pushdown_field/test7.java",
     ]
 
     if pushdown_field(filenames[:2], "pushdown_field_test1", "A", "a"):
@@ -147,7 +147,7 @@ def test_ant():
         "tests/apache-ant/main/org/apache/tools/ant/types/ZipFileSet.java"
     ]
     """
-    ant_dir = "tests/apache-ant-1-7-0"
+    ant_dir = "../testproject/tests/apache-ant-1-7-0"
     print("Success!" if pushdown_field(
         utils.get_filenames_in_dir(ant_dir),
         "org.apache.tools.ant.types",

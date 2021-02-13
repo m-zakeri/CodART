@@ -177,21 +177,21 @@ def extract_interface(source_filenames: list,
 def test():
     print("Testing extract_interface...")
     filenames = [
-        "tests/extract_interface/A.java",
-        "tests/extract_interface/B.java",
-        "tests/extract_interface/C.java",
-        "tests/extract_interface/D.java",
-        "tests/extract_interface/E.java",
-        "tests/extract_interface/U.java",
+        "../testproject/tests/extract_interface/A.java",
+        "../testproject/tests/extract_interface/B.java",
+        "../testproject/tests/extract_interface/C.java",
+        "../testproject/tests/extract_interface/D.java",
+        "../testproject/tests/extract_interface/E.java",
+        "../testproject/tests/extract_interface/U.java",
     ]
     if extract_interface(filenames, "test", ["A", "B"], ["a(int,float)", "b()"], "Iab",
-                         "tests/extract_interface/Iab.re.java"):
+                         "../testproject/tests/extract_interface/Iab.re.java"):
         print("A, B: Success!")
     else:
         print("A, B: Cannot refactor.")
     for third_class in ["C", "D", "E"]:
         if extract_interface(filenames, "test", ["A", "B", third_class], ["a(int,float)", "b()"], "Iab",
-                             "tests/extract_interface/Iab.re.java"):
+                             "../testproject/tests/extract_interface/Iab.re.java"):
             print("A, B, " + third_class + ": Success!")
         else:
             print("A, B, " + third_class + ": Cannot refactor.")
@@ -203,14 +203,14 @@ def test_ant():
         "tests/apache-ant/main/org/apache/tools/ant/input/MultipleChoiceInputRequest.java"
     ]
     """
-    ant_dir = "tests/apache-ant-1-7-0"
+    ant_dir = "../testproject/tests/apache-ant-1-7-0"
     print("Success!" if extract_interface(
         utils.get_filenames_in_dir(ant_dir),
         "org.apache.tools.ant.input",
         ["InputRequest", "MultipleChoiceInputRequest"],
         [ "isInputValid()" ],
         "ExtractedInterface",
-        "tests/extract_interface_ant/ExtractedInterface.java",
+        "../testproject/tests/extract_interface_ant/ExtractedInterface.java",
         lambda x: "tests/extract_interface_ant/" + x[len(ant_dir):]
     ) else "Cannot refactor.")
 

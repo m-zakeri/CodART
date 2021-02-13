@@ -65,7 +65,7 @@ def pullup_method_refactoring(source_filenames: list, package_name: str, class_n
                         Rewriter_.apply()
     return True
 
-mylist1= ["tests/pullup_method/BaseFilterReader.java","tests/pullup_method/ClassConstants.java"]
+mylist1= ["../testproject/tests/pullup_method/BaseFilterReader.java","../testproject/tests/pullup_method/ClassConstants.java"]
 
 if __name__ == "__main__":
     mylist = get_filenames_in_dir('tests/pullupmethod_test')
