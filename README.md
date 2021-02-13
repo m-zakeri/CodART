@@ -8,7 +8,7 @@ Source Code Automated Refactoring Toolkit (CodART) is a research project at [IUS
 Project contributors: 
 
 * Morteza ZAKERI, PhD student
-* Ali Ayati, BSc student 
+* Seyyed Ali Ayati, BSc student 
 * Mina Tahaei, BSc student 
 
 
