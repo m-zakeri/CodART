@@ -1,7 +1,7 @@
 import os
 
 import utils_listener_fast
-from refactorings import utils
+import utils
 
 
 def extract_interface(source_filenames: list,
