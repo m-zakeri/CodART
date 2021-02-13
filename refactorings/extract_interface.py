@@ -1,7 +1,8 @@
 import os
 
 import utils_listener_fast
-import utils
+from refactorings import utils
+
 
 def extract_interface(source_filenames: list,
                       package_name: str,
@@ -183,12 +184,14 @@ def test():
         "tests/extract_interface/E.java",
         "tests/extract_interface/U.java",
     ]
-    if extract_interface(filenames, "test", ["A", "B"], ["a(int,float)", "b()"], "Iab", "tests/extract_interface/Iab.re.java"):
+    if extract_interface(filenames, "test", ["A", "B"], ["a(int,float)", "b()"], "Iab",
+                         "tests/extract_interface/Iab.re.java"):
         print("A, B: Success!")
     else:
         print("A, B: Cannot refactor.")
     for third_class in ["C", "D", "E"]:
-        if extract_interface(filenames, "test", ["A", "B", third_class], ["a(int,float)", "b()"], "Iab", "tests/extract_interface/Iab.re.java"):
+        if extract_interface(filenames, "test", ["A", "B", third_class], ["a(int,float)", "b()"], "Iab",
+                             "tests/extract_interface/Iab.re.java"):
             print("A, B, " + third_class + ": Success!")
         else:
             print("A, B, " + third_class + ": Cannot refactor.")

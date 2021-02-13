@@ -1,7 +1,6 @@
-import os
-
 import utils_listener_fast
-import utils
+from refactorings import utils
+
 
 def pushdown_field(source_filenames: list,
                    package_name: str,

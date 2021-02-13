@@ -1,5 +1,6 @@
 import utils_listener_fast
-import utils
+from refactorings import utils
+
 
 def pullup_field(source_filenames: list,
                  package_name: str,

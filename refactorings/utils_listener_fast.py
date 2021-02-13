@@ -1,11 +1,13 @@
+import re  # regular expressions
+
 import antlr4
 from antlr4.Token import CommonToken
 import antlr4.tree
+from antlr4.CommonTokenStream import CommonTokenStream
 
-from antlr4_java9.Java9Parser import Java9Parser, CommonTokenStream
-from antlr4_java9.Java9Listener import Java9Listener
-from javaparsergen.javaLabeled.JavaParserLabeled import JavaParserLabeled
-from javaparsergen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
+from gen.java.JavaParser import JavaParser
+from gen.java.JavaParserListener import JavaParserListener
+
 
 class Program:
     def __init__(self):
@@ -17,6 +19,7 @@ class Package:
     def __init__(self):
         self.name = None
         self.classes = {}
+        self.package_ctx=None
     def __str__(self):
         return str(self.name) + " " + str(self.classes)
 
@@ -38,8 +41,8 @@ class TokensInfo:
 
 class FileInfo:
     def __init__(self, filename: str = None, package_name: str = None):
-        self.filename: str = None
-        self.package_name: str = None
+        self.filename: str = filename
+        self.package_name: str = package_name
         self.all_imports = []
         self.package_imports = []
         self.class_imports = []
@@ -109,7 +112,7 @@ class ClassImport(SingleFileElement):
     def __init__(self,
                  package_name: str = None,
                  class_name: str = None,
-                 parser_context: Java9Parser.SingleTypeImportDeclarationContext = None,
+                 parser_context: JavaParser.ImportDeclarationContext = None,
                  filename: str = None,
                  file_info: FileInfo = None):
         self.package_name = package_name
@@ -124,7 +127,7 @@ class PackageImport(SingleFileElement):
     """import package_name.*;"""
     def __init__(self,
                  package_name: str = None,
-                 parser_context: Java9Parser.SingleTypeImportDeclarationContext = None,
+                 parser_context: JavaParser.ImportDeclarationContext = None,
                  filename: str = None,
                  file_info: FileInfo = None):
         self.package_name = package_name
@@ -139,10 +142,11 @@ class Class(SingleFileElement):
                  name: str = None,
                  super_class_name: str = None,
                  package_name: str = None,
-                 parser_context: Java9Parser.NormalClassDeclarationContext = None,
+                 parser_context: JavaParser.ClassDeclarationContext = None,
                  filename: str = None,
                  file_info: FileInfo = None):
         self.modifiers = []
+        self.modifiers_parser_contexts = []
         self.name = name
         self.superclass_name = None
         self.superinterface_names = []
@@ -152,15 +156,22 @@ class Class(SingleFileElement):
         self.parser_context = parser_context
         self.filename = filename
         self.file_info = file_info
-        self.body_context = None;
+        self.body_context = None
+
+    def find_methods_with_name(self, name: str) -> list:
+        result = []
+        for mk in self.methods:
+            m = self.methods[mk]
+            if m.name == name:
+                result.append(m)
+        return result
+
     def __str__(self):
         return str(self.modifiers) +  " " + str(self.name) \
             + ((" extends " + str(self.superclass_name)) if self.superclass_name is not None else "") \
             + ((" implements " + str(self.superinterface_names)) if len(self.superinterface_names) > 0 else "") \
             + " " + str(self.fields) \
             + " " + str(self.methods)
-
-# TODO Add Interface
 
 class Field(SingleFileElement):
     def __init__(self,
@@ -169,10 +180,11 @@ class Field(SingleFileElement):
                  initializer: str = None,
                  package_name: str = None,
                  class_name: str = None,
-                 parser_context: Java9Parser.FieldDeclarationContext = None,
+                 parser_context: JavaParser.FieldDeclarationContext = None,
                  filename: str = None,
                  file_info: FileInfo = None):
         self.modifiers = []
+        self.modifiers_parser_contexts = []
         self.datatype = datatype
         self.name = name
         self.initializer = initializer
@@ -194,10 +206,11 @@ class Method(SingleFileElement):
                  body_text: str = None,
                  package_name: str = None,
                  class_name: str = None,
-                 parser_context: Java9Parser.MethodDeclarationContext = None,
+                 parser_context = None,
                  filename: str = None,
                  file_info: FileInfo = None):
         self.modifiers = []
+        self.modifiers_parser_contexts = []
         self.returntype = returntype
         self.name = name
         self.parameters = []
@@ -212,13 +225,14 @@ class Method(SingleFileElement):
         self.formalparam_context = None
         self.body_method_invocations_without_typename = {}
         self.method_declaration_context = None
+        self.is_constructor = False
 
     def __str__(self):
         return str(self.modifiers) +  " " + str(self.returntype) + " " + str(self.name) \
             + str(tuple(self.parameters))
 
 class LocalVariable:
-    def __init__(self, datatype: str = None, identifier: str = None, parser_context: Java9Parser.LocalVariableDeclarationContext = None):
+    def __init__(self, datatype: str = None, identifier: str = None, parser_context: JavaParser.LocalVariableDeclarationContext = None):
         self.datatype = datatype
         self.identifier = identifier
         self.parser_context = parser_context
@@ -228,14 +242,17 @@ class ExpressionName:
         self.dot_separated_identifiers = dot_separated_identifiers
 
 class MethodInvocation:
-    def __init__(self, dot_separated_identifiers: list, parser_context: Java9Parser.MethodInvocationContext = None):
+    def __init__(self, dot_separated_identifiers: list, parser_context: JavaParser.ExpressionContext = None):
         self.dot_separated_identifiers = dot_separated_identifiers
         self.parser_context = parser_context
 
-class UtilsListener(Java9Listener):
+class UtilsListener(JavaParserListener):
 
     def __init__(self, filename):
         self.package = Package()
+
+        self.last_modifiers = []
+        self.last_modifiers_contexts = []
 
         self.current_class_identifier = None
         self.current_class_identifier_temp = None
@@ -256,56 +273,78 @@ class UtilsListener(Java9Listener):
         self.filename = filename
         self.file_info = FileInfo(filename=filename)
 
-    def enterPackageDeclaration(self, ctx:Java9Parser.PackageDeclarationContext):
-        self.package.name = ctx.packageName().getText()
+        self.field_enter_count = 0
+
+    def enterPackageDeclaration(self, ctx:JavaParser.PackageDeclarationContext):
+        self.package.name = ctx.qualifiedName().getText()
         self.file_info.package_name = self.package.name
+        self.package.package_ctx = ctx;
 
-    def enterSingleTypeImportDeclaration(self, ctx:Java9Parser.SingleTypeImportDeclarationContext):
-        typename: Java9Parser.TypeNameContext = ctx.typeName()
-        p = None
-        if typename.packageOrTypeName() is not None:
-            p = typename.packageOrTypeName().getText()
-        c = typename.identifier().getText()
-        class_import = ClassImport(
-            package_name=p,
-            class_name=c,
-            parser_context=ctx,
-            filename=self.filename,
-            file_info=self.file_info
-        )
-        self.file_info.all_imports.append(class_import)
-        self.file_info.class_imports.append(class_import)
+    def enterImportDeclaration(self, ctx:JavaParser.ImportDeclarationContext):
+        if ctx.STATIC() is None:
+            name: str = ctx.qualifiedName().getText()
+            if ctx.getText().endswith(".*;"): # Package import
+                p = name
+                package_import = PackageImport(
+                    package_name=p,
+                    parser_context=ctx,
+                    filename=self.filename,
+                    file_info=self.file_info
+                )
+                self.file_info.all_imports.append(package_import)
+                self.file_info.package_imports.append(package_import)
+            else: # Class import
+                p = None
+                dot_i = name.rfind('.')
+                if dot_i != -1:
+                    p = name[:dot_i]
+                    c = name[dot_i + 1:]
+                else:
+                    c = name
+                class_import = ClassImport(
+                    package_name=p,
+                    class_name=c,
+                    parser_context=ctx,
+                    filename=self.filename,
+                    file_info=self.file_info
+                )
+                self.file_info.all_imports.append(class_import)
+                self.file_info.class_imports.append(class_import)
 
-    def enterTypeImportOnDemandDeclaration(self, ctx:Java9Parser.TypeImportOnDemandDeclarationContext):
-        p = ctx.packageOrTypeName().getText()
-        package_import = PackageImport(
-            package_name=p,
-            parser_context=ctx,
-            filename=self.filename,
-            file_info=self.file_info
-        )
-        self.file_info.all_imports.append(package_import)
-        self.file_info.package_imports.append(package_import)
 
-    def enterSingleStaticImportDeclaration(self, ctx:Java9Parser.SingleStaticImportDeclarationContext):
-        pass
+    def enterTypeDeclaration(self, ctx:JavaParser.TypeDeclarationContext):
+        self.last_modifiers.clear()
+        self.last_modifiers_contexts.clear()
+        for modifier in ctx.getChildren(lambda x: type(x) == JavaParser.ClassOrInterfaceModifierContext):
+            self.last_modifiers.append(modifier.getText())
+            self.last_modifiers_contexts.append(modifier)
 
-    def enterStaticImportOnDemandDeclaration(self, ctx:Java9Parser.StaticImportOnDemandDeclarationContext):
-        pass
+    def enterClassBodyDeclaration(self, ctx:JavaParser.ClassBodyDeclarationContext):
+        self.last_modifiers.clear()
+        self.last_modifiers_contexts.clear()
+        for modifier in ctx.getChildren(lambda x: type(x) == JavaParser.ModifierContext):
+            self.last_modifiers.append(modifier.getText())
+            self.last_modifiers_contexts.append(modifier)
 
-    def enterNormalClassDeclaration(self, ctx:Java9Parser.NormalClassDeclarationContext):
+
+    def enterClassDeclaration(self, ctx:JavaParser.ClassDeclarationContext):
         if self.current_class_identifier is None and self.nest_count == 0:
-            self.current_class_identifier = ctx.identifier().getText()
-            self.current_class_ctx = ctx.identifier()
+            self.current_class_identifier = ctx.IDENTIFIER().getText()
+            self.current_class_ctx = ctx.IDENTIFIER()
             current_class = Class(
                 package_name=self.package.name,
                 parser_context=ctx,
                 filename=self.filename,
                 file_info=self.file_info
             )
-            for modifier in ctx.getChildren(lambda x: type(x) == Java9Parser.ClassModifierContext):
-                current_class.modifiers.append(modifier.getText())
+            current_class.modifiers = self.last_modifiers.copy()
+            current_class.modifiers_parser_contexts = self.last_modifiers_contexts.copy()
             current_class.name = self.current_class_identifier
+            if ctx.EXTENDS() is not None:
+                current_class.superclass_name = ctx.typeType().getText()
+            if ctx.IMPLEMENTS() is not None:
+                for interface_type in ctx.typeList().getChildren(lambda x: type(x) == JavaParser.TypeTypeContext):
+                    current_class.superinterface_names.append(interface_type.getText())
             self.package.classes[current_class.name] = current_class
 
         else:
@@ -314,21 +353,11 @@ class UtilsListener(Java9Listener):
                 self.current_class_identifier = None
             self.nest_count += 1
 
-    def enterSuperclass(self, ctx:Java9Parser.SuperclassContext):
+    def enterClassBody(self, ctx:JavaParser.ClassBodyContext):
         if self.current_class_identifier is not None:
-            self.package.classes[self.current_class_identifier].superclass_name = ctx.classType().getText()
+            self.package.classes[self.current_class_identifier].body_context = ctx
 
-    def enterSuperinterfaces(self, ctx:Java9Parser.SuperinterfacesContext):
-        if self.current_class_identifier is not None:
-            _class = self.package.classes[self.current_class_identifier]
-            for interface_type in ctx.interfaceTypeList().getChildren(lambda x: type(x) == Java9Parser.InterfaceTypeContext):
-                _class.superinterface_names.append(interface_type.getText())
-
-    def enterClassBody(self, ctx:Java9Parser.ClassBodyContext):
-        if self.current_class_identifier is not None:
-            self.package.classes[self.current_class_identifier].body_context = ctx;
-
-    def exitNormalClassDeclaration(self, ctx:Java9Parser.NormalClassDeclarationContext):
+    def exitClassDeclaration(self, ctx:JavaParser.ClassDeclarationContext):
         if self.nest_count > 0:
             self.nest_count -= 1
             if self.nest_count == 0:
@@ -337,64 +366,111 @@ class UtilsListener(Java9Listener):
         elif self.current_class_identifier is not None:
                 self.current_class_identifier = None
 
-    def enterFormalParameterList(self, ctx: Java9Parser.FormalParameterListContext):
+    def enterFormalParameterList(self, ctx: JavaParser.FormalParameterListContext):
         if self.current_method is not None:
             self.current_method.formalparam_context = ctx
-    def enterMethodDeclaration(self, ctx:Java9Parser.MethodDeclarationContext):
+
+    def enterMethodDeclaration(self, ctx:JavaParser.MethodDeclarationContext):
         if self.current_class_identifier is not None:
-            method_header = ctx.methodHeader()
-            self.current_method_identifier = method_header.methodDeclarator().identifier().getText()
+            #method_header = ctx.methodHeader()
+            self.current_method_identifier = ctx.IDENTIFIER().getText()
 
             method = Method(
                 package_name=self.package.name,
                 class_name=self.current_class_identifier,
-                parser_context=ctx,
+                parser_context=ctx.parentCtx.parentCtx,
                 filename=self.filename,
                 file_info=self.file_info
             )
-            for modifier in ctx.getChildren(lambda x: type(x) == Java9Parser.MethodModifierContext):
-                method.modifiers.append(modifier.getText())
-            method.returntype = method_header.result().getText()
+            method.modifiers = self.last_modifiers.copy()
+            method.modifiers_parser_contexts = self.last_modifiers_contexts.copy()
+            method.returntype = ctx.typeTypeOrVoid().getText()
             method.name = self.current_method_identifier
+            method.is_constructor = False
 
-            self.package.classes[self.current_class_identifier].methods[method.name] = method
+            # This is done on exit to collect params too, to support overloading.
+            #self.package.classes[self.current_class_identifier].methods[method.name] = method
             self.current_method = method
 
-    def enterMethodHeader(self, ctx:Java9Parser.MethodHeaderContext):
+    def enterFormalParameters(self, ctx: JavaParser.FormalParametersContext):
         if self.current_method is not None:
             self.current_method.method_declaration_context = ctx
-    def enterFormalParameter(self, ctx:Java9Parser.FormalParameterContext):
+
+    def enterFormalParameter(self, ctx: JavaParser.FormalParameterContext):
         if self.current_method is not None:
             self.current_method.parameters.append(
-                (ctx.unannType().getText(), ctx.variableDeclaratorId().identifier().getText())
+                (ctx.typeType().getText(), ctx.variableDeclaratorId().IDENTIFIER().getText())
             )
 
-    def enterMethodBody(self, ctx:Java9Parser.MethodBodyContext):
+    def enterMethodBody(self, ctx:JavaParser.MethodBodyContext):
         if self.current_method is not None:
             self.current_method.body_text = ctx.getText()
             pass
 
-    def exitMethodDeclaration(self, ctx:Java9Parser.MethodDeclarationContext):
+    def general_exit_method_decl(self):
+        if self.current_class_identifier is not None:
+            if self.current_method is not None:
+                method = self.current_method
+                method_key = ("" if method.name is None else method.name) + '('
+                is_first = True
+                for param in method.parameters:
+                    if not is_first:
+                        method_key += ','
+                    is_first = False
+                    method_key += param[0] # the type
+                method_key += ')'
+                self.package.classes[self.current_class_identifier].methods[method_key] = method
         self.current_method_identifier = None
         self.current_method = None
 
-    def enterMethodInvocation(self, ctx:Java9Parser.MethodInvocationContext):
+    def exitMethodDeclaration(self, ctx:JavaParser.MethodDeclarationContext):
+        self.general_exit_method_decl()
+
+
+    def enterConstructorDeclaration(self, ctx:JavaParser.ConstructorDeclarationContext):
+        if self.current_class_identifier is not None:
+            self.current_method_identifier = ctx.IDENTIFIER().getText()
+
+            method = Method(
+                package_name=self.package.name,
+                class_name=self.current_class_identifier,
+                parser_context=ctx.parentCtx.parentCtx,
+                filename=self.filename,
+                file_info=self.file_info
+            )
+            method.modifiers = self.last_modifiers.copy()
+            method.modifiers_parser_contexts = self.last_modifiers_contexts.copy()
+            method.returntype = None
+            method.name = None #self.current_method_identifier
+            method.body_text = ctx.constructorBody.getText()
+            method.is_constructor = True
+
+            # This is done on exit to collect params too, to support overloading.
+            #self.package.classes[self.current_class_identifier].methods[method.name] = method
+            self.current_method = method
+
+
+    def exitConstructorDeclaration(self, ctx:JavaParser.ConstructorDeclarationContext):
+        self.general_exit_method_decl()
+
+
+    def enterMethodCall(self, ctx: JavaParser.MethodCallContext):
         if self.current_method is not None :
-            #for typename in ctx.getChildren(lambda x: type(x) == Java9Parser.TypeNameContext):
-            #    self.current_method.body_method_invocations.append(typename)
-            if ctx.typeName() != None:
-                if ctx.typeName().identifier() not in self.current_method.body_method_invocations:
-                    self.current_method.body_method_invocations[ctx.typeName().identifier()] = [ctx.identifier().getText()]
+            if ctx.parentCtx.IDENTIFIER() != None:
+                if ctx.parentCtx.IDENTIFIER() not in self.current_method.body_method_invocations:
+                    self.current_method.body_method_invocations[ctx.parentCtx.IDENTIFIER()] = [ctx.IDENTIFIER().getText()]
                 else:
-                    self.current_method.body_method_invocations[ctx.typeName().identifier()].append(
-                        ctx.identifier().getText())
+                    self.current_method.body_method_invocations[ctx.parentCtx.IDENTIFIER()].append(
+                        ctx.IDENTIFIER().getText())
             else:
-                if ctx.methodName() != None:
+                a=len(ctx.parentCtx.children)
+            if a==1:
+                if ctx.IDENTIFIER() != None :
                     if self.current_class_ctx not in self.current_method.body_method_invocations_without_typename:
-                        self.current_method.body_method_invocations_without_typename[self.current_class_ctx] = [ctx.methodName().identifier()]
+                        self.current_method.body_method_invocations_without_typename[self.current_class_ctx] = [ctx]
                     else:
                         self.current_method.body_method_invocations_without_typename[self.current_class_ctx].append(
-                            ctx.methodName().identifier())
+                            ctx)
             #MethodInvocation
             txt = ctx.getText()
             ids = txt[:txt.find('(')].split('.')
@@ -402,44 +478,52 @@ class UtilsListener(Java9Listener):
                 MethodInvocation(ids, ctx)
             )
 
-
-    def enterLocalVariableDeclaration(self, ctx:Java9Parser.LocalVariableDeclarationContext):
+    def enterExpression(self, ctx:JavaParser.ExpressionContext):
         if self.current_method is not None:
-            self.current_local_var_type = ctx.unannType().getText()
+            if ctx.methodCall() is not None:
+                txt = ctx.getText()
+                ids = txt[:txt.find('(')].split('.')
+                self.current_method.body_local_vars_and_expr_names.append(
+                    MethodInvocation(ids, ctx)
+                )
+            else:
+                names = ctx.getText().split('.')
+                should_add = True
+                for name in names:
+                    if not re.match("^[A-Za-z0-9_]*$", name):
+                        should_add = False
+                if should_add:
+                    self.current_method.body_local_vars_and_expr_names.append(ExpressionName(names))
+
+    def enterLocalVariableDeclaration(self, ctx:JavaParser.LocalVariableDeclarationContext):
+        if self.current_method is not None:
+            self.current_local_var_type = ctx.typeType().getText()
             self.current_local_var_ctx = ctx
             # The rest in: enterVariableDeclarator
 
-    def exitLocalVariableDeclaration(self, ctx:Java9Parser.LocalVariableDeclarationContext):
+    def exitLocalVariableDeclaration(self, ctx:JavaParser.LocalVariableDeclarationContext):
         self.current_local_var_type = None
 
-    def enterExpressionName(self, ctx:Java9Parser.ExpressionNameContext):
-        if self.current_method is not None:
-            names = [ctx.identifier().getText()]
-            c = ctx.ambiguousName()
-            while c is not None:
-                names.insert(0, c.identifier().getText())
-                c = c.ambiguousName()
-            self.current_method.body_local_vars_and_expr_names.append(ExpressionName(names))
-
-    def enterFieldDeclaration(self, ctx:Java9Parser.FieldDeclarationContext):
-        if self.current_class_identifier is not None:
-            modifiers = []
-            for modifier in ctx.getChildren(lambda x: type(x) == Java9Parser.FieldModifierContext):
-                modifiers.append(modifier.getText())
-            datatype = ctx.unannType().getText()
-            self.current_field_decl = (modifiers, datatype, ctx)
+    def enterFieldDeclaration(self, ctx:JavaParser.FieldDeclarationContext):
+        self.field_enter_count += 1
+        if self.current_class_identifier is not None and self.field_enter_count == 1:
+            modifiers = self.last_modifiers.copy()
+            modifiers_contexts = self.last_modifiers_contexts.copy()
+            datatype = ctx.typeType().getText()
+            self.current_field_decl = (modifiers, datatype, ctx, modifiers_contexts)
             self.current_field_ids = []
             self.current_field_dims = []
             self.current_field_inits = []
             self.current_field_var_ctxs = []
 
-    def enterVariableDeclarator(self, ctx:Java9Parser.VariableDeclaratorContext):
+    def enterVariableDeclarator(self, ctx:JavaParser.VariableDeclaratorContext):
+        dims = ""
+        v_id: str = ctx.variableDeclaratorId().getText()
+        dims_i = v_id.find('[')
+        if dims_i != -1:
+            dims = v_id[dims_i:]
         if self.current_field_decl is not None:
-            self.current_field_ids.append(ctx.variableDeclaratorId().identifier().getText())
-            dims = ""
-            dims_ctx = ctx.variableDeclaratorId().dims()
-            if dims_ctx is not None:
-                dims = dims_ctx.getText()
+            self.current_field_ids.append(ctx.variableDeclaratorId().IDENTIFIER().getText())
             self.current_field_dims.append(dims)
             init = None
             init_ctx = ctx.variableInitializer()
@@ -449,15 +533,17 @@ class UtilsListener(Java9Listener):
             self.current_field_var_ctxs.append(ctx)
         if self.current_local_var_type is not None:
             if self.current_method is not None:
-                dims = ""
-                if ctx.variableDeclaratorId().dims() is not None:
-                    dims = ctx.variableDeclaratorId().dims().getText()
                 self.current_method.body_local_vars_and_expr_names.append(
-                    LocalVariable(self.current_local_var_type + dims, ctx.variableDeclaratorId().identifier().getText(), self.current_local_var_ctx)
+                    LocalVariable(
+                        self.current_local_var_type + dims,
+                        ctx.variableDeclaratorId().IDENTIFIER().getText(),
+                        self.current_local_var_ctx
+                    )
                 )
 
-    def exitFieldDeclaration(self, ctx:Java9Parser.FieldDeclarationContext):
-        if self.current_class_identifier is not None:
+    def exitFieldDeclaration(self, ctx:JavaParser.FieldDeclarationContext):
+        self.field_enter_count -= 1
+        if self.current_class_identifier is not None and self.field_enter_count == 0:
             for i in range(len(self.current_field_ids)):
                 field_id = self.current_field_ids[i]
                 dims = self.current_field_dims[i]
@@ -471,6 +557,7 @@ class UtilsListener(Java9Listener):
                     file_info=self.file_info
                 )
                 field.modifiers = self.current_field_decl[0]
+                field.modifiers_parser_contexts = self.current_field_decl[3]
                 field.datatype = self.current_field_decl[1] + dims
                 field.name = field_id
                 field.initializer = field_init

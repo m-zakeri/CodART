@@ -3,8 +3,7 @@ import os
 from antlr4 import FileStream, ParseTreeWalker
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
-from antlr4_java_fast.JavaLexer import JavaLexer
-from antlr4_java_fast.JavaParser import JavaParser
+from gen.java.JavaLexer import JavaLexer
 from utils_listener_fast import *
 
 

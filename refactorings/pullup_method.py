@@ -1,8 +1,8 @@
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 from utils_listener_fast import TokensInfo,SingleFileElement
-from refactorings.msc_1.pullup_method_get_removemethod import  get_removemethods
-from utils import Rewriter
-from utils import get_program,get_filenames_in_dir
+from refactorings.pullup_method_get_removemethod import  get_removemethods
+from refactorings.utils import Rewriter
+from refactorings.utils import get_program,get_filenames_in_dir
 
 
 def pullup_method_refactoring(source_filenames: list, package_name: str, class_name: str, method_key: str, filename_mapping = lambda x: x + ".rewritten.java"):
