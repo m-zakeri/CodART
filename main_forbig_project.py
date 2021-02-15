@@ -289,8 +289,7 @@ if __name__ == '__main__':
     #     moved_fields="ID"
     # get_information(Root_path_project, source_class, moved_fields)
     #
-    Root_path_project = "/home/ali/Documents/compiler/Research/advanced_compiler_updated_projects/احسان اسماعیلی_" \
-                        "445389_assignsubmission_file_/refactoring_project_and_document/prg/testprobagation_java.udb"
+    Root_path_project = "/home/ali/Documents/compiler/Research/advanced_compiler_updated_projects/esmaili/refactoring_project_and_document/prg/JHotDraw7_0_6.udb"
     print(os.path.isfile(Root_path_project))
     mylist = list()
     db = und.open(Root_path_project)
@@ -298,7 +297,7 @@ if __name__ == '__main__':
     j = 0
     for cls in db.ents("class"):
         if (cls.contents() != ""):
-            j += 1;
+            j += 1
     print("len class:", j)
     print("len class cc:", len(db.ents("class")))
 

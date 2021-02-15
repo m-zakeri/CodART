@@ -1,4 +1,3 @@
-
 import os
 import errno
 import argparse
@@ -52,20 +51,21 @@ from refactorings.method_refactorings.RemoveMethod import RemoveMethodRefactorin
 
 class Main_Refactors_Action_for_big_project():
     def __init__(self):
-        self.x=2
-    def convert(self,set):
+        self.x = 2
+
+    def convert(self, set):
         return list(set)
 
-# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+    # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+    # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     def main_IncreaseFieldVisibility(self, Root_path_udb_project, source_class, field_name):
         roorpath = ""
         a_string = Root_path_udb_project
         new_string = a_string.replace(".udb", "")
 
-        roorpath = new_string + "\\"
+        roorpath = new_string + "/"
         print(roorpath)
-        file_list_include_file_name_that_edited=""
+        file_list_include_file_name_that_edited = ""
         # initialize with undrestand [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
         mainfile = ""
         file_list_to_be_propagate = set()
@@ -76,46 +76,49 @@ class Main_Refactors_Action_for_big_project():
                 print("==================================\nfield =", field.longname())
                 print(field.parent().parent().relname())
                 # get path file include this field.
-                if(field.parent().parent().relname() is not None):
+                if (field.parent().parent().relname() is not None):
                     mainfile = field.parent().parent().relname()
                 else:
                     for ref in field.refs("Definein"):
-                        mainfile=(ref.file().relname())
+                        mainfile = (ref.file().relname())
                 # get propagate class and their file
                 for ref in field.refs("Setby , Useby"):
                     if not (str(ref.ent()) == str(field.parent())
                             or str(ref.ent().parent()) == str(field.parent())):
-                            propagate_classes.add(str(ref.ent().parent()))
-                            file_list_to_be_propagate.add("src\\"+ref.file().relname())
+                        propagate_classes.add(str(ref.ent().parent()))
+                        file_list_to_be_propagate.add("src/" + ref.file().relname())
 
                 #     pr
         file_list_to_be_propagate = self.convert(file_list_to_be_propagate)
         propagate_classes = self.convert(propagate_classes)
 
         # [[[[[[[[[
-        flag_file_is_refatored=False
+        flag_file_is_refatored = False
         corpus = open(
             r"filename_status_database.txt", encoding="utf-8").read()
-        if (corpus.find("name:"+mainfile) == -1):
+        if corpus.find("name:" + mainfile) == -1:
             with open("filename_status_database.txt", mode='w', encoding="utf-8", newline='') as f:
-                f.write(corpus+"\nname:"+mainfile)
+                f.write(corpus + "\nname:" + mainfile)
                 f.flush()
                 os.fsync(f.fileno())
-            file_list_include_file_name_that_edited+=mainfile+"\n"
+            file_list_include_file_name_that_edited += mainfile + "\n"
         else:
             flag_file_is_refatored = True
             print("file already edited")
         # ]]]]]]]]
-        mainfile="src\\"+mainfile
-        mainfiletemp=mainfile
+        mainfile = "src/" + mainfile
+        mainfiletemp = mainfile
         #     ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
+        print("LOG 0:", mainfile)
         file_main = roorpath + mainfile
-        print(file_main)
+        print("LOG 1:", file_main)
+        print("LOG 2:", roorpath)
+
         argparser = argparse.ArgumentParser()
         # [[[
         if (flag_file_is_refatored):
             argparser.add_argument('-n', '--file', help='Input source',
-                                   default="files_refactored\\" + mainfiletemp)
+                                   default="files_refactored/" + mainfiletemp)
         else:
             argparser.add_argument('-n', '--file', help='Input source',
                                    default=file_main)
@@ -130,8 +133,9 @@ class Main_Refactors_Action_for_big_project():
         parser = JavaParser(token_stream)
         parser.getTokenStream()
         parse_tree = parser.compilationUnit()
-        my_listener = IncreaseFieldVisibilityRefactoringListener(common_token_stream=token_stream, source_class=source_class,
-                                                         field_name=field_name)
+        my_listener = IncreaseFieldVisibilityRefactoringListener(common_token_stream=token_stream,
+                                                                 source_class=source_class,
+                                                                 field_name=field_name)
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener)
 
@@ -142,31 +146,31 @@ class Main_Refactors_Action_for_big_project():
             except OSError as exc:  # Guard against race condition
                 if exc.errno != errno.EEXIST:
                     raise
-        print("file to be saved most be :","files_refactored/" + mainfile)
+        print("file to be saved most be :", "files_refactored/" + mainfile)
         with open("files_refactored/" + mainfile, mode='w', encoding="utf-8", newline='') as f:
             f.write(my_listener.token_stream_rewriter.getDefaultText())
             f.flush()
             os.fsync(f.fileno())
         # propagate start$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-        print("file_list_to_be_propagate:",file_list_to_be_propagate)
+        print("file_list_to_be_propagate:", file_list_to_be_propagate)
         for file in file_list_to_be_propagate:
             #
             flag_file_edited = False
             corpus = open(
                 r"filename_status_database.txt", encoding="utf-8").read()
-            if (corpus.find("name:"+file) == -1  ):
+            if (corpus.find("name:" + file) == -1):
 
                 with open("filename_status_database.txt", mode='w', encoding="utf-8", newline='') as f:
                     f.write(corpus + "\nname:" + file)
                     f.flush()
                     os.fsync(f.fileno())
-                file_list_include_file_name_that_edited+=file+"\n"
+                file_list_include_file_name_that_edited += file + "\n"
             else:
                 flag_file_edited = True
             #
             argparser = argparse.ArgumentParser()
             if (flag_file_edited):
-                argparser.add_argument('-n', '--file', help='Input source', default="files_refactored\\" + file)
+                argparser.add_argument('-n', '--file', help='Input source', default="files_refactored/" + file)
             else:
                 argparser.add_argument('-n', '--file', help='Input source', default=roorpath + file)
 
@@ -184,17 +188,17 @@ class Main_Refactors_Action_for_big_project():
 
             # get object
             my_listener_get_object = PropagationIncreaseFieldVisibility_GetObjects_RefactoringListener(token_stream,
-                                    source_class=source_class,propagated_class_name=propagate_classes)
+                                                                                                       source_class=source_class,
+                                                                                                       propagated_class_name=propagate_classes)
             walker = ParseTreeWalker()
             walker.walk(t=parse_tree, listener=my_listener_get_object)
 
-
             my_listener = PropagationIncreaseFieldVisibilityRefactoringListener(common_token_stream=token_stream,
-                                                                      using_field_name=field_name,object_name=my_listener_get_object.objects,
-                                                                      propagated_class_name=propagate_classes)
+                                                                                using_field_name=field_name,
+                                                                                object_name=my_listener_get_object.objects,
+                                                                                propagated_class_name=propagate_classes)
             walker = ParseTreeWalker()
             walker.walk(t=parse_tree, listener=my_listener)
-
 
             filename = "files_refactored/" + file
             if not os.path.exists(os.path.dirname(filename)):
@@ -203,13 +207,13 @@ class Main_Refactors_Action_for_big_project():
                 except OSError as exc:  # Guard against race condition
                     if exc.errno != errno.EEXIST:
                         raise
-            with open("files_refactored/" + file, mode='w', encoding="utf-8",newline='') as f:
+            with open("files_refactored/" + file, mode='w', encoding="utf-8", newline='') as f:
                 f.write(my_listener.token_stream_rewriter.getDefaultText())
                 f.flush()
                 os.fsync(f.fileno())
 
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    def main_ExtractSubclasse(self,Root_path_udb_project,source_class,moved_methods,moved_fields):
+    def main_ExtractSubclasse(self, Root_path_udb_project, source_class, moved_methods, moved_fields):
         roorpath = ""
         a_string = Root_path_udb_project
         new_string = a_string.replace(".udb", "")
@@ -259,9 +263,9 @@ class Main_Refactors_Action_for_big_project():
         # source_class: str = None, new_class: str = None,
         # moved_fields = None, moved_methods = None):
         my_listener = myExtractSubClassRefactoringListener(common_token_stream=token_stream,
-                                                                                 source_class=source_class
-                                                                 ,new_class=source_class+"extracted",
-                                                                 moved_fields=moved_fields,moved_methods=moved_methods)
+                                                           source_class=source_class
+                                                           , new_class=source_class + "extracted",
+                                                           moved_fields=moved_fields, moved_methods=moved_methods)
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener)
         filename = "files_refactored/" + father_path_file
@@ -275,7 +279,7 @@ class Main_Refactors_Action_for_big_project():
             f.write(my_listener.token_stream_rewriter.getDefaultText())
 
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    def main_Extractclasse(self,Root_path_udb_project,source_class,moved_methods,moved_fields):
+    def main_Extractclasse(self, Root_path_udb_project, source_class, moved_methods, moved_fields):
         roorpath = ""
         a_string = Root_path_udb_project
         new_string = a_string.replace(".udb", "")
@@ -325,9 +329,9 @@ class Main_Refactors_Action_for_big_project():
         # source_class: str = None, new_class: str = None,
         # moved_fields = None, moved_methods = None):
         my_listener = myExtractClassRefactoringListener(common_token_stream=token_stream,
-                                                                                 source_class=source_class
-                                                                 ,new_class=source_class+"extracted",
-                                                                 moved_fields=moved_fields,moved_methods=moved_methods)
+                                                        source_class=source_class
+                                                        , new_class=source_class + "extracted",
+                                                        moved_fields=moved_fields, moved_methods=moved_methods)
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener)
         filename = "files_refactored/" + father_path_file
@@ -339,8 +343,9 @@ class Main_Refactors_Action_for_big_project():
                     raise
         with open("files_refactored/" + father_path_file, mode='w', newline='') as f:
             f.write(my_listener.token_stream_rewriter.getDefaultText())
+
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    def main_CollapsHierarchy(self,Root_path_udb_project, childclass,fatherclass):
+    def main_CollapsHierarchy(self, Root_path_udb_project, childclass, fatherclass):
         roorpath = ""
         a_string = Root_path_udb_project
         new_string = a_string.replace(".udb", "")
@@ -371,7 +376,7 @@ class Main_Refactors_Action_for_big_project():
         file_list_to_be_propagate = self.convert(file_list_to_be_propagate)
         propagate_classes = self.convert(propagate_classes)
 
-    #     ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
+        #     ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
         print("mainfile:", child_path_file)
         #     ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
         file_main = roorpath + child_path_file
@@ -388,23 +393,23 @@ class Main_Refactors_Action_for_big_project():
         parser.getTokenStream()
         parse_tree = parser.compilationUnit()
         my_listenerfieldtext = CollapsHierarchyRefactoring_GetFieldText_Listener(common_token_stream=token_stream,
-                                                         child_class=childclass)
+                                                                                 child_class=childclass)
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listenerfieldtext)
-        fieldcode=my_listenerfieldtext.fieldcode
-        print("fieldcode ::",fieldcode)
+        fieldcode = my_listenerfieldtext.fieldcode
+        print("fieldcode ::", fieldcode)
 
         my_listener_method_text = CollapsHierarchyRefactoring_GetMethodText_Listener(common_token_stream=token_stream,
-                                                                        child_class=childclass)
+                                                                                     child_class=childclass)
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener_method_text)
-        methods_code=my_listener_method_text.methodcode
+        methods_code = my_listener_method_text.methodcode
 
-        print("methods_code:",methods_code)
+        print("methods_code:", methods_code)
 
-    #     remove child class
+        #     remove child class
         my_listener_remove_childclass = RemoveClassRefactoringListener(common_token_stream=token_stream,
-                                                                                     class_name=childclass)
+                                                                       class_name=childclass)
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener_remove_childclass)
         filename = "files_refactored/" + child_path_file
@@ -416,10 +421,10 @@ class Main_Refactors_Action_for_big_project():
                     raise
         with open("files_refactored/" + child_path_file, mode='w', newline='') as f:
             f.write(my_listener_remove_childclass.token_stream_rewriter.getDefaultText())
-    #     refactored begin#######################################
+        #     refactored begin#######################################
         file_main = roorpath + father_path_file
         argparser = argparse.ArgumentParser()
-        if(father_path_file==child_path_file):
+        if (father_path_file == child_path_file):
             argparser.add_argument('-n', '--file', help='Input source', default="files_refactored/" + child_path_file)
         else:
             argparser.add_argument('-n', '--file', help='Input source', default=file_main)
@@ -434,8 +439,10 @@ class Main_Refactors_Action_for_big_project():
         parser.getTokenStream()
         parse_tree = parser.compilationUnit()
         my_listenerrefactor_Action = CollapssHierarchyRefactoringListener(common_token_stream=token_stream
-                                    ,parent_class=fatherclass, child_class=childclass,
-                                    field_text=fieldcode,method_text=methods_code)
+                                                                          , parent_class=fatherclass,
+                                                                          child_class=childclass,
+                                                                          field_text=fieldcode,
+                                                                          method_text=methods_code)
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listenerrefactor_Action)
 
@@ -449,10 +456,10 @@ class Main_Refactors_Action_for_big_project():
         with open("files_refactored/" + father_path_file, mode='w', newline='') as f:
             f.write(my_listenerrefactor_Action.token_stream_rewriter.getDefaultText())
         # beging of propagate*********************************************************
-        print("file_list_to_be_propagate::::::::",file_list_to_be_propagate)
+        print("file_list_to_be_propagate::::::::", file_list_to_be_propagate)
         for file in file_list_to_be_propagate:
             argparser = argparse.ArgumentParser()
-            if (file in [child_path_file,father_path_file]):
+            if (file in [child_path_file, father_path_file]):
                 argparser.add_argument('-n', '--file', help='Input source', default="files_refactored/" + file)
             else:
                 argparser.add_argument('-n', '--file', help='Input source', default=roorpath + file)
@@ -468,9 +475,9 @@ class Main_Refactors_Action_for_big_project():
             parser.getTokenStream()
             parse_tree = parser.compilationUnit()
             my_listener_propagate = PropagationCollapssHierarchyListener(token_stream_rewriter=token_stream,
-                                                                               old_class_name=childclass,
-                                                                               new_class_name=fatherclass,
-                                                                               propagated_class_name=propagate_classes)
+                                                                         old_class_name=childclass,
+                                                                         new_class_name=fatherclass,
+                                                                         propagated_class_name=propagate_classes)
             walker = ParseTreeWalker()
             walker.walk(t=parse_tree, listener=my_listener_propagate)
 
@@ -483,6 +490,7 @@ class Main_Refactors_Action_for_big_project():
                         raise
             with open("files_refactored/" + file, mode='w', newline='') as f:
                 f.write(my_listener_propagate.token_stream_rewriter.getDefaultText())
+
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     def main_RemoveInterface(self, Root_path_udb_project, source_class):
         roorpath = ""
@@ -498,7 +506,7 @@ class Main_Refactors_Action_for_big_project():
                 print(cls.parent().relname())
                 mainfile = cls.parent().relname()
 
-        print("mainfile:",mainfile)
+        print("mainfile:", mainfile)
         #     ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
         file_main = roorpath + mainfile
         argparser = argparse.ArgumentParser()
@@ -514,7 +522,7 @@ class Main_Refactors_Action_for_big_project():
         parser.getTokenStream()
         parse_tree = parser.compilationUnit()
         my_listener = RemoveInterfaceRefactoringListener(common_token_stream=token_stream,
-                                                        interface_name=source_class)
+                                                         interface_name=source_class)
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener)
 
@@ -559,7 +567,7 @@ class Main_Refactors_Action_for_big_project():
         parser.getTokenStream()
         parse_tree = parser.compilationUnit()
         my_listener = RemoveClassRefactoringListener(common_token_stream=token_stream,
-                                                        class_name=source_class)
+                                                     class_name=source_class)
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener)
 
@@ -604,7 +612,7 @@ class Main_Refactors_Action_for_big_project():
         parser.getTokenStream()
         parse_tree = parser.compilationUnit()
         my_listener = MakeConcreteClassRefactoringListener(common_token_stream=token_stream,
-                                                        class_name=source_class)
+                                                           class_name=source_class)
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener)
 
@@ -649,7 +657,7 @@ class Main_Refactors_Action_for_big_project():
         parser.getTokenStream()
         parse_tree = parser.compilationUnit()
         my_listener = MakeNonFinalClassRefactoringListener(common_token_stream=token_stream,
-                                                        class_name=source_class)
+                                                           class_name=source_class)
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener)
 
@@ -664,7 +672,7 @@ class Main_Refactors_Action_for_big_project():
             f.write(my_listener.token_stream_rewriter.getDefaultText())
 
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    def main_MakeClassFinal(self,Root_path_udb_project, source_class):
+    def main_MakeClassFinal(self, Root_path_udb_project, source_class):
         roorpath = ""
         a_string = Root_path_udb_project
         new_string = a_string.replace(".udb", "")
@@ -694,7 +702,7 @@ class Main_Refactors_Action_for_big_project():
         parser.getTokenStream()
         parse_tree = parser.compilationUnit()
         my_listener = MakeFinalClassRefactoringListener(common_token_stream=token_stream,
-                                                      class_name=source_class)
+                                                        class_name=source_class)
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener)
 
@@ -707,8 +715,9 @@ class Main_Refactors_Action_for_big_project():
                     raise
         with open("files_refactored/" + mainfile, mode='w', newline='') as f:
             f.write(my_listener.token_stream_rewriter.getDefaultText())
+
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    def main_MakeAbstractClass(self,Root_path_udb_project, source_class):
+    def main_MakeAbstractClass(self, Root_path_udb_project, source_class):
         roorpath = ""
         a_string = Root_path_udb_project
         new_string = a_string.replace(".udb", "")
@@ -738,7 +747,7 @@ class Main_Refactors_Action_for_big_project():
         parser.getTokenStream()
         parse_tree = parser.compilationUnit()
         my_listener = MakeAbstractClassRefactoringListener(common_token_stream=token_stream,
-                                                      class_name=source_class)
+                                                           class_name=source_class)
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener)
 
@@ -751,6 +760,7 @@ class Main_Refactors_Action_for_big_project():
                     raise
         with open("files_refactored/" + mainfile, mode='w', newline='') as f:
             f.write(my_listener.token_stream_rewriter.getDefaultText())
+
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     def main_RemoveMethod(self, Root_path_udb_project, source_class, method_name):
         roorpath = ""
@@ -782,8 +792,8 @@ class Main_Refactors_Action_for_big_project():
         parser.getTokenStream()
         parse_tree = parser.compilationUnit()
         my_listener = RemoveMethodRefactoringListener(common_token_stream=token_stream,
-                                                                 source_class=source_class,
-                                                                 method_name=method_name)
+                                                      source_class=source_class,
+                                                      method_name=method_name)
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener)
 
@@ -796,6 +806,7 @@ class Main_Refactors_Action_for_big_project():
                     raise
         with open("files_refactored/" + mainfile, mode='w', newline='') as f:
             f.write(my_listener.token_stream_rewriter.getDefaultText())
+
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     def main_MakeMethodStatic(self, Root_path_udb_project, source_class, method_name):
         roorpath = ""
@@ -827,8 +838,8 @@ class Main_Refactors_Action_for_big_project():
         parser.getTokenStream()
         parse_tree = parser.compilationUnit()
         my_listener = MakeMethodStaticRefactoringListener(common_token_stream=token_stream,
-                                                                 source_class=source_class,
-                                                                 method_name=method_name)
+                                                          source_class=source_class,
+                                                          method_name=method_name)
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener)
 
@@ -841,6 +852,7 @@ class Main_Refactors_Action_for_big_project():
                     raise
         with open("files_refactored/" + mainfile, mode='w', newline='') as f:
             f.write(my_listener.token_stream_rewriter.getDefaultText())
+
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     def main_MakeMethodNonStatic(self, Root_path_udb_project, source_class, method_name):
         roorpath = ""
@@ -872,8 +884,8 @@ class Main_Refactors_Action_for_big_project():
         parser.getTokenStream()
         parse_tree = parser.compilationUnit()
         my_listener = MakeMethodNonStaticRefactoringListener(common_token_stream=token_stream,
-                                                                 source_class=source_class,
-                                                                 method_name=method_name)
+                                                             source_class=source_class,
+                                                             method_name=method_name)
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener)
 
@@ -886,6 +898,7 @@ class Main_Refactors_Action_for_big_project():
                     raise
         with open("files_refactored/" + mainfile, mode='w', newline='') as f:
             f.write(my_listener.token_stream_rewriter.getDefaultText())
+
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     def main_MakeMethodNONFinal(self, Root_path_udb_project, source_class, method_name):
         roorpath = ""
@@ -917,8 +930,8 @@ class Main_Refactors_Action_for_big_project():
         parser.getTokenStream()
         parse_tree = parser.compilationUnit()
         my_listener = MakeMethodNonFinalRefactoringListener(common_token_stream=token_stream,
-                                                                 source_class=source_class,
-                                                                 method_name=method_name)
+                                                            source_class=source_class,
+                                                            method_name=method_name)
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener)
 
@@ -931,6 +944,7 @@ class Main_Refactors_Action_for_big_project():
                     raise
         with open("files_refactored/" + mainfile, mode='w', newline='') as f:
             f.write(my_listener.token_stream_rewriter.getDefaultText())
+
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     def main_MakeMethodFinal(self, Root_path_udb_project, source_class, method_name):
         roorpath = ""
@@ -962,8 +976,8 @@ class Main_Refactors_Action_for_big_project():
         parser.getTokenStream()
         parse_tree = parser.compilationUnit()
         my_listener = MakeMethodFinalRefactoringListener(common_token_stream=token_stream,
-                                                                 source_class=source_class,
-                                                                 method_name=method_name)
+                                                         source_class=source_class,
+                                                         method_name=method_name)
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener)
 
@@ -976,6 +990,7 @@ class Main_Refactors_Action_for_big_project():
                     raise
         with open("files_refactored/" + mainfile, mode='w', newline='') as f:
             f.write(my_listener.token_stream_rewriter.getDefaultText())
+
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     def main_IncreaseMethodVisibility(self, Root_path_udb_project, source_class, method_name):
         roorpath = ""
@@ -1007,8 +1022,8 @@ class Main_Refactors_Action_for_big_project():
         parser.getTokenStream()
         parse_tree = parser.compilationUnit()
         my_listener = IncreaseMethodVisibilityRefactoringListener(common_token_stream=token_stream,
-                                                                 source_class=source_class,
-                                                                 method_name=method_name)
+                                                                  source_class=source_class,
+                                                                  method_name=method_name)
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener)
 
@@ -1021,7 +1036,8 @@ class Main_Refactors_Action_for_big_project():
                     raise
         with open("files_refactored/" + mainfile, mode='w', newline='') as f:
             f.write(my_listener.token_stream_rewriter.getDefaultText())
-    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     def main_DecreaseMethodVisibility(self, Root_path_udb_project, source_class, method_name):
         roorpath = ""
@@ -1053,8 +1069,8 @@ class Main_Refactors_Action_for_big_project():
         parser.getTokenStream()
         parse_tree = parser.compilationUnit()
         my_listener = DecreaseMethodVisibilityRefactoringListener(common_token_stream=token_stream,
-                                                                 source_class=source_class,
-                                                                 method_name=method_name)
+                                                                  source_class=source_class,
+                                                                  method_name=method_name)
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener)
 
@@ -1067,6 +1083,7 @@ class Main_Refactors_Action_for_big_project():
                     raise
         with open("files_refactored/" + mainfile, mode='w', newline='') as f:
             f.write(my_listener.token_stream_rewriter.getDefaultText())
+
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     def main_DecreaseFieldVisibility(self, Root_path_udb_project, source_class, field_name):
@@ -1113,8 +1130,8 @@ class Main_Refactors_Action_for_big_project():
                     raise
         with open("files_refactored/" + mainfile, mode='w', newline='') as f:
             f.write(my_listener.token_stream_rewriter.getDefaultText())
-    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     def main_Remove_Field(self, Root_path_udb_project, source_class, field_name):
@@ -1147,7 +1164,7 @@ class Main_Refactors_Action_for_big_project():
         parser.getTokenStream()
         parse_tree = parser.compilationUnit()
         my_listener = RemoveFieldRefactoringListener(common_token_stream=token_stream, source_class=source_class,
-                                                         field_name=field_name)
+                                                     field_name=field_name)
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener)
 
@@ -1161,8 +1178,8 @@ class Main_Refactors_Action_for_big_project():
         with open("files_refactored/" + mainfile, mode='w', newline='') as f:
             f.write(my_listener.token_stream_rewriter.getDefaultText())
 
-# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+    # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+    # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     def main_Make_Field_Static(self, Root_path_udb_project, source_class, field_name):
         roorpath = ""
         a_string = Root_path_udb_project
@@ -1178,7 +1195,7 @@ class Main_Refactors_Action_for_big_project():
                 print(cls.parent().relname())
                 mainfile = cls.parent().relname()
 
-    #     ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
+        #     ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
         file_main = roorpath + mainfile
         argparser = argparse.ArgumentParser()
         argparser.add_argument('-n', '--file', help='Input source', default=file_main)
@@ -1193,7 +1210,7 @@ class Main_Refactors_Action_for_big_project():
         parser.getTokenStream()
         parse_tree = parser.compilationUnit()
         my_listener = MakeFieldStaticRefactoringListener(common_token_stream=token_stream, source_class=source_class,
-                                                           field_name=field_name)
+                                                         field_name=field_name)
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener)
 
@@ -1207,8 +1224,8 @@ class Main_Refactors_Action_for_big_project():
         with open("files_refactored/" + mainfile, mode='w', newline='') as f:
             f.write(my_listener.token_stream_rewriter.getDefaultText())
 
-# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+    # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+    # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
     def main_Make_Field_Non_Static(self, Root_path_udb_project, source_class, field_name):
         roorpath = ""
         a_string = Root_path_udb_project
@@ -1224,7 +1241,7 @@ class Main_Refactors_Action_for_big_project():
                 print(cls.parent().relname())
                 mainfile = cls.parent().relname()
 
-    #     ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
+        #     ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
         file_main = roorpath + mainfile
         argparser = argparse.ArgumentParser()
         argparser.add_argument('-n', '--file', help='Input source', default=file_main)
@@ -1239,7 +1256,7 @@ class Main_Refactors_Action_for_big_project():
         parser.getTokenStream()
         parse_tree = parser.compilationUnit()
         my_listener = MakeFieldNonStaticRefactoringListener(common_token_stream=token_stream, source_class=source_class,
-                                                           field_name=field_name)
+                                                            field_name=field_name)
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener)
 
@@ -1253,9 +1270,9 @@ class Main_Refactors_Action_for_big_project():
         with open("files_refactored/" + mainfile, mode='w', newline='') as f:
             f.write(my_listener.token_stream_rewriter.getDefaultText())
 
-# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-    def main_Make_Field_Non_Final(self,Root_path_udb_project, source_class,field_name):
+    # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+    # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+    def main_Make_Field_Non_Final(self, Root_path_udb_project, source_class, field_name):
         roorpath = ""
         a_string = Root_path_udb_project
         new_string = a_string.replace(".udb", "")
@@ -1270,7 +1287,7 @@ class Main_Refactors_Action_for_big_project():
                 print(cls.parent().relname())
                 mainfile = cls.parent().relname()
 
-    #     ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
+        #     ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
         file_main = roorpath + mainfile
         argparser = argparse.ArgumentParser()
         argparser.add_argument('-n', '--file', help='Input source', default=file_main)
@@ -1285,6 +1302,53 @@ class Main_Refactors_Action_for_big_project():
         parser.getTokenStream()
         parse_tree = parser.compilationUnit()
         my_listener = MakeFieldNonFinalRefactoringListener(common_token_stream=token_stream, source_class=source_class,
+                                                           field_name=field_name)
+        walker = ParseTreeWalker()
+        walker.walk(t=parse_tree, listener=my_listener)
+
+        filename = "files_refactored/" + mainfile
+        if not os.path.exists(os.path.dirname(filename)):
+            try:
+                os.makedirs(os.path.dirname(filename))
+            except OSError as exc:  # Guard against race condition
+                if exc.errno != errno.EEXIST:
+                    raise
+        with open("files_refactored/" + mainfile, mode='w', newline='') as f:
+            f.write(my_listener.token_stream_rewriter.getDefaultText())
+
+    # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+    # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+    def main_Make_Field_Final(self, Root_path_udb_project, source_class, field_name):
+        roorpath = ""
+        a_string = Root_path_udb_project
+        new_string = a_string.replace(".udb", "")
+
+        roorpath = new_string + "//"
+        print(roorpath)
+        # initialize with undrestand [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
+        mainfile = ""
+        db = und.open(Root_path_udb_project)
+
+        for cls in db.ents("class"):
+            if (cls.longname() == source_class):
+                print(cls.parent().relname())
+                mainfile = cls.parent().relname()
+
+        #     ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
+        file_main = roorpath + mainfile
+        argparser = argparse.ArgumentParser()
+        argparser.add_argument('-n', '--file', help='Input source', default=file_main)
+        args = argparser.parse_args()
+        stream = FileStream(args.file, encoding='utf8')
+        # Step 2: Create an instance of AssignmentStLexer
+        lexer = JavaLexer(stream)
+        # Step 3: Convert the input source into a list of tokens
+        token_stream = CommonTokenStream(lexer)
+        # Step 4: Create an instance of the AssignmentStParser
+        parser = JavaParser(token_stream)
+        parser.getTokenStream()
+        parse_tree = parser.compilationUnit()
+        my_listener = MakeFieldFinalRefactoringListener(common_token_stream=token_stream, source_class=source_class,
                                                         field_name=field_name)
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener)
@@ -1299,55 +1363,9 @@ class Main_Refactors_Action_for_big_project():
         with open("files_refactored/" + mainfile, mode='w', newline='') as f:
             f.write(my_listener.token_stream_rewriter.getDefaultText())
 
-# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-    def main_Make_Field_Final(self,Root_path_udb_project, source_class,field_name):
-        roorpath = ""
-        a_string = Root_path_udb_project
-        new_string = a_string.replace(".udb", "")
-
-        roorpath = new_string + "//"
-        print(roorpath)
-        # initialize with undrestand [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
-        mainfile=""
-        db = und.open(Root_path_udb_project)
-
-        for cls in db.ents("class"):
-            if (cls.longname() == source_class):
-                print(cls.parent().relname())
-                mainfile=cls.parent().relname()
-
-    #     ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
-        file_main = roorpath + mainfile
-        argparser = argparse.ArgumentParser()
-        argparser.add_argument('-n', '--file', help='Input source', default=file_main)
-        args = argparser.parse_args()
-        stream = FileStream(args.file, encoding='utf8')
-        # Step 2: Create an instance of AssignmentStLexer
-        lexer = JavaLexer(stream)
-        # Step 3: Convert the input source into a list of tokens
-        token_stream = CommonTokenStream(lexer)
-        # Step 4: Create an instance of the AssignmentStParser
-        parser = JavaParser(token_stream)
-        parser.getTokenStream()
-        parse_tree = parser.compilationUnit()
-        my_listener=MakeFieldFinalRefactoringListener(common_token_stream=token_stream,source_class=source_class,field_name=field_name)
-        walker = ParseTreeWalker()
-        walker.walk(t=parse_tree, listener=my_listener)
-
-        filename = "files_refactored/" + mainfile
-        if not os.path.exists(os.path.dirname(filename)):
-            try:
-                os.makedirs(os.path.dirname(filename))
-            except OSError as exc:  # Guard against race condition
-                if exc.errno != errno.EEXIST:
-                    raise
-        with open("files_refactored/" + mainfile, mode='w', newline='') as f:
-            f.write(my_listener.token_stream_rewriter.getDefaultText())
-
-# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-    def main_movefileddown(self,Root_path_udb_project, source_class, moved_fields):
+    # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+    # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+    def main_movefileddown(self, Root_path_udb_project, source_class, moved_fields):
         roorpath = ""
         a_string = Root_path_udb_project
         new_string = a_string.replace(".udb", "")
@@ -1487,10 +1505,11 @@ class Main_Refactors_Action_for_big_project():
                         raise
             with open("files_refactored/" + file, mode='w', newline='') as f:
                 f.write(my_listener.token_stream_rewriter.getDefaultText())
-# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-    def main_MoveMethodDown(self,Root_path_udb_project, source_class, moved_methods):
+    # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+    # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+    def main_MoveMethodDown(self, Root_path_udb_project, source_class, moved_methods):
         a_string = Root_path_udb_project
         new_string = a_string.replace(".udb", "")
         roorpath = new_string + "//"
@@ -1628,9 +1647,10 @@ class Main_Refactors_Action_for_big_project():
                         raise
             with open("files_refactored/" + file, mode='w', newline='') as f:
                 f.write(my_listener.token_stream_rewriter.getDefaultText())
-# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-    def main_MoveMethodUp(self,Root_path_udb_project, children_class, moved_methods):
+
+    # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+    # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+    def main_MoveMethodUp(self, Root_path_udb_project, children_class, moved_methods):
         a_string = Root_path_udb_project
         new_string = a_string.replace(".udb", "")
         roorpath = new_string + "//"
@@ -1668,7 +1688,7 @@ class Main_Refactors_Action_for_big_project():
 
         # {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{ get text
         file_main = roorpath + mainfile
-        print("file_main:",file_main)
+        print("file_main:", file_main)
         argparser = argparse.ArgumentParser()
         argparser.add_argument('-n', '--file', help='Input source', default=file_main)
         args = argparser.parse_args()
@@ -1763,8 +1783,9 @@ class Main_Refactors_Action_for_big_project():
                         raise
             with open("files_refactored/" + file, mode='w', newline='') as f:
                 f.write(my_listener_propagate.token_stream_rewriter.getDefaultText())
+
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    def main_movefiledUp(self,Root_path_udb_project, children_class, moved_fields):
+    def main_movefiledUp(self, Root_path_udb_project, children_class, moved_fields):
         roorpath = ""
         a_string = Root_path_udb_project
         new_string = a_string.replace(".udb", "")
@@ -1919,7 +1940,6 @@ class Main_Refactors_Action_for_big_project():
                         raise
             with open("files_refactored/" + file, mode='w', newline='') as f:
                 f.write(my_listener.token_stream_rewriter.getDefaultText())
-
 
         # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
         # def main_movefiledUp(self, Root_path_udb_project, children_class, moved_fields):
