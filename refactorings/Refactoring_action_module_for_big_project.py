@@ -78,9 +78,11 @@ class Main_Refactors_Action_for_big_project():
                 # get path file include this field.
                 if (field.parent().parent().relname() is not None):
                     mainfile = field.parent().parent().relname()
+                    mainfile = '/'.join(mainfile.split('/')[2:])
                 else:
                     for ref in field.refs("Definein"):
                         mainfile = (ref.file().relname())
+                        mainfile = '/'.join(mainfile.split('/')[2:])
                 # get propagate class and their file
                 for ref in field.refs("Setby , Useby"):
                     if not (str(ref.ent()) == str(field.parent())
@@ -122,6 +124,8 @@ class Main_Refactors_Action_for_big_project():
         else:
             argparser.add_argument('-n', '--file', help='Input source',
                                    default=file_main)
+            print("LOG 6", file_main)
+
         # ]]]
         args = argparser.parse_args()
         stream = FileStream(args.file, encoding='utf8')
@@ -155,6 +159,8 @@ class Main_Refactors_Action_for_big_project():
         print("file_list_to_be_propagate:", file_list_to_be_propagate)
         for file in file_list_to_be_propagate:
             #
+            file = '/'.join(file.split('/')[2:])
+            print("LOG 5", file)
             flag_file_edited = False
             corpus = open(
                 r"filename_status_database.txt", encoding="utf-8").read()

@@ -289,6 +289,8 @@ if __name__ == '__main__':
     #     moved_fields="ID"
     # get_information(Root_path_project, source_class, moved_fields)
     #
+    # Path
+    # os.path
     Root_path_project = "/home/ali/Documents/compiler/Research/advanced_compiler_updated_projects/esmaili/refactoring_project_and_document/prg/JHotDraw7_0_6.udb"
     print(os.path.isfile(Root_path_project))
     mylist = list()
