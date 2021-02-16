@@ -1,0 +1,3 @@
+This file contains the list of Java files that were refracted, and if the Java file name was in this file, you must read it from the(files_refactord) folder.
+
+name:JHotDraw7_0_6/src/org/jhotdraw/draw/action/GroupAction.java
