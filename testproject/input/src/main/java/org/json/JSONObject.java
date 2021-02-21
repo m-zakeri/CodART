@@ -157,7 +157,7 @@ public class JSONObject {
      *  output to guarantee that we are always writing valid JSON. 
      */
     static final Pattern NUMBER_PATTERN = Pattern.compile("-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?");
-
+    //static int N = 5; //added for RemoveField test
     /**
      * The map where the JSONObject's properties are kept.
      */

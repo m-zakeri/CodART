@@ -5,10 +5,10 @@ from refactorings.extract_class.extract_class import *
 from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 
-source_class = 'A'
-new_class = 'ANew'
-moved_fields = ['h']
-moved_methods = ['printH']
+source_class = 'JSONPointer'
+new_class = 'JSONPointerNew'
+moved_fields = ['ENCODING']
+moved_methods = ['unescape']
 
 f_iteration_flag = False
 source_class_dirname = ''
@@ -106,5 +106,5 @@ def process_file(file):
 
 
 if __name__ == '__main__':
-    directory = '/home/ali/Documents/dev/CodART/'
+    directory = 'E:/git/CodART/testproject/input/src/main/java/org/json/'
     recursive_walk(directory)
