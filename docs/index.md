@@ -139,7 +139,7 @@ Refactorings are applied to software systems listed in Table 2. Datasets may cha
 |     [JFlex]            	  |     v1.4.1                      	|                          	|   lexical analyzer generator                                    |     [4]              
 |     [Mango]             	|     v                           	|                          	|                                                                 |     [4]              
 |     [Weka]              	|     v3.9                        	|                          	|   data mining tool                                              |     New              
-|     [ANTLR]             	|     v4.8.0                      	|                          	|   parser generator                                              |     New              
+|     [ANTLR]             	|     v4.8.0                      	|                          	|   parser generator tool                                         |     New              
 
 
 
