@@ -1,5 +1,6 @@
 /venv/
 /.idea/
+.idea
 __pycache__/
 testproject/input/src/main/java/org/json/*.class
 testproject/refactored/
