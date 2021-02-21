@@ -17,7 +17,7 @@ from refactorings.remove_field.remove_field import RemoveFieldRefactoringListene
 from gen.javaLabeled.JavaLexer import *
 from gen.javaLabeled.JavaParserLabeled import *
 
-directory = 'refactorings/test'
+directory = 'E:/git/CodART/testproject/input/src/main/java/org/json'
 
 
 def main(args):
@@ -39,8 +39,8 @@ def main(args):
     print("=====Create ParseTree Finished=====")
 
     # Step 6: Create an instance of AssignmentStListener
-    my_listener = RemoveFieldRefactoringListener(common_token_stream=token_stream, class_identifier='A',
-                                                 fieldname='g', filename=args.file)
+    my_listener = RemoveFieldRefactoringListener(common_token_stream=token_stream, class_identifier='JSONObject',
+                                                 fieldname='NUMBER_PATTERN', filename=args.file)
 
     # return
     walker = ParseTreeWalker()

@@ -9,7 +9,7 @@ from refactorings.replace_exception_with_test.replace_exception_with_test import
 from gen.javaLabeled.JavaLexer import *
 from gen.javaLabeled.JavaParserLabeled import *
 
-directory = 'refactorings/test'
+directory = 'E:/git/CodART/testproject/input/src/main/java/org/json/CDL.java'
 
 
 def main(args):
@@ -32,7 +32,7 @@ def main(args):
 
     # Step 6: Create an instance of AssignmentStListener
     my_listener = ReplaceExceptionWithTestClassRefactoringListener(common_token_stream=token_stream,
-                                                                   class_identifier='Main', filename=args.file)
+                                                                   class_identifier='CDL', filename=args.file)
 
     # return
     walker = ParseTreeWalker()
