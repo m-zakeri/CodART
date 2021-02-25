@@ -4,7 +4,7 @@ from antlr4 import FileStream, ParseTreeWalker
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
 from gen.java.JavaLexer import JavaLexer
-from utils_listener_fast import *
+from refactorings.utils.utils_listener_fast import *
 
 
 def get_program(source_files: list, print_status = False) -> Program:

@@ -1,4 +1,4 @@
-from utils_listener_fast import TokensInfo, Program
+from refactorings.utils.utils_listener_fast import Program
 
 
 

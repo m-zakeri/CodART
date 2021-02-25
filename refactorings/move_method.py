@@ -1,6 +1,6 @@
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
-from refactorings.utils import get_program, Rewriter, get_filenames_in_dir
-from utils_listener_fast import TokensInfo, SingleFileElement
+from refactorings.utils.utils2 import get_program, Rewriter, get_filenames_in_dir
+from refactorings.utils.utils_listener_fast import TokensInfo, SingleFileElement
 
 def move_method_refactoring(source_filenames: list, package_name: str, class_name: str, method_key: str,
                             target_class_name: str,target_package_name:str, filename_mapping=lambda x: x + ".rewritten.java"):

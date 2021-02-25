@@ -1,15 +1,13 @@
-import utils_listener_fast
-from refactorings import utils
+from refactorings.utils import utils_listener_fast, utils2
 
 
 def pullup_field(source_filenames: list,
                  package_name: str,
                  class_name: str,
                  field_name: str,
-                 filename_mapping = lambda x: (x[:-5] if x.endswith(".java") else x) + ".re.java") -> bool:
-
-    program = utils.get_program(source_filenames, print_status=True)
-
+                 filename_mapping=lambda x: (x[:-5] if x.endswith(".java") else x) + ".java") -> bool:
+    program = utils2.get_program(source_filenames, print_status=True)
+    print(program.packages)
     if package_name not in program.packages \
             or class_name not in program.packages[package_name].classes \
             or field_name not in program.packages[package_name].classes[class_name].fields:
@@ -23,7 +21,7 @@ def pullup_field(source_filenames: list,
 
     superclass: utils_listener_fast.Class = program.packages[package_name].classes[superclass_name]
     superclass_body_start = utils_listener_fast.TokensInfo(superclass.parser_context.classBody())
-    superclass_body_start.stop = superclass_body_start.start # Start and stop both point to the '{'
+    superclass_body_start.stop = superclass_body_start.start  # Start and stop both point to the '{'
 
     if field_name in superclass.fields:
         return False
@@ -36,7 +34,7 @@ def pullup_field(source_filenames: list,
         for cn in p.classes:
             c: utils_listener_fast.Class = p.classes[cn]
             if ((c.superclass_name == superclass_name and c.file_info.has_imported_class(package_name, superclass_name)) \
-                    or (package_name is not None and c.superclass_name == package_name + '.' + superclass_name)) \
+                or (package_name is not None and c.superclass_name == package_name + '.' + superclass_name)) \
                     and field_name in c.fields \
                     and c.fields[field_name].datatype == datatype:
                 fields_to_remove.append(c.fields[field_name])
@@ -51,9 +49,10 @@ def pullup_field(source_filenames: list,
         is_public = is_public or "public" in field.modifiers
         is_protected = is_protected and ("protected" in field.modifiers or "private" in field.modifiers)
 
-    rewriter = utils.Rewriter(program, filename_mapping)
+    rewriter = utils2.Rewriter(program, filename_mapping)
 
-    rewriter.insert_after(superclass_body_start, "\n    " + ("public " if is_public else ("protected " if is_protected else "")) + datatype + " " + field_name + ";")
+    rewriter.insert_after(superclass_body_start, "\n    " + (
+        "public " if is_public else ("protected " if is_protected else "")) + datatype + " " + field_name + ";")
 
     for field in fields_to_remove:
         if len(field.neighbor_names) == 0:
@@ -66,21 +65,21 @@ def pullup_field(source_filenames: list,
             var_ctxs = field.all_variable_declarator_contexts
             if i == 0:
                 to_remove = utils_listener_fast.TokensInfo(var_ctxs[i])
-                to_remove.stop = utils_listener_fast.TokensInfo(var_ctxs[i + 1]).start - 1 # Include the ',' after it
+                to_remove.stop = utils_listener_fast.TokensInfo(var_ctxs[i + 1]).start - 1  # Include the ',' after it
                 rewriter.replace(to_remove, "")
             else:
                 to_remove = utils_listener_fast.TokensInfo(var_ctxs[i])
-                to_remove.start = utils_listener_fast.TokensInfo(var_ctxs[i - 1]).stop + 1 # Include the ',' before it
+                to_remove.start = utils_listener_fast.TokensInfo(var_ctxs[i - 1]).stop + 1  # Include the ',' before it
                 rewriter.replace(to_remove, "")
 
         # Add initializer to class constructor if initializer exists in field declaration
         if field.initializer is not None:
             _class: utils_listener_fast.Class = program.packages[field.package_name].classes[field.class_name]
             initializer_statement = (field.name
-                                    + " = "
-                                    + ("new " + field.datatype + " " if field.initializer.startswith('{') else "")
-                                    + field.initializer
-                                    + ";")
+                                     + " = "
+                                     + ("new " + field.datatype + " " if field.initializer.startswith('{') else "")
+                                     + field.initializer
+                                     + ";")
             has_contructor = False
             for class_body_decl in _class.parser_context.classBody().getChildren():
                 if class_body_decl.getText() in ['{', '}']:
@@ -89,21 +88,22 @@ def pullup_field(source_filenames: list,
                 if member_decl is not None:
                     constructor = member_decl.constructorDeclaration()
                     if constructor is not None:
-                        body = constructor.constructorBody # Start token = '{'
+                        body = constructor.constructorBody  # Start token = '{'
                         body_start = utils_listener_fast.TokensInfo(body)
-                        body_start.stop = body_start.start # Start and stop both point to the '{'
+                        body_start.stop = body_start.start  # Start and stop both point to the '{'
                         rewriter.insert_after(body_start, "\n        " + initializer_statement)
                         has_contructor = True
             if not has_contructor:
                 body = _class.parser_context.classBody()
                 body_start = utils_listener_fast.TokensInfo(body)
-                body_start.stop = body_start.start # Start and stop both point to the '{'
+                body_start.stop = body_start.start  # Start and stop both point to the '{'
                 rewriter.insert_after(body_start,
-                    "\n    " + _class.name + "() { " + initializer_statement + " }"
-                )
+                                      "\n    " + _class.name + "() { " + initializer_statement + " }"
+                                      )
 
     rewriter.apply()
     return True
+
 
 def test():
     print("Testing pullup_field...")
@@ -119,6 +119,7 @@ def test():
     else:
         print("Cannot refactor.")
 
+
 def test_ant():
     """
     target_files = [
@@ -127,14 +128,15 @@ def test_ant():
         "tests/apache-ant/main/org/apache/tools/ant/types/ZipFileSet.java"
     ]
     """
-    ant_dir = "../testproject/tests/apache-ant-1-7-0"
+    ant_dir = "/home/ali/Desktop/code/TestProject/"
     print("Success!" if pullup_field(
-        utils.get_filenames_in_dir(ant_dir),
-        "org.apache.tools.ant.types",
-        "TarFileSet",
-        "userName",
-        lambda x: "tests/pullup_field_ant/" + x[len(ant_dir):]
+        utils2.get_filenames_in_dir(ant_dir),
+        "test_package",
+        "AppChild1",
+        "TEST",
+        # lambda x: "tests/pullup_field_ant/" + x[len(ant_dir):]
     ) else "Cannot refactor.")
 
+
 if __name__ == "__main__":
-    test()
+    test_ant()
