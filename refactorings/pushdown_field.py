@@ -1,5 +1,4 @@
-from refactorings.utils import utils_listener_fast
-from refactorings import utils
+from refactorings.utils import utils_listener_fast, utils2
 
 
 def pushdown_field(source_filenames: list,
@@ -7,9 +6,8 @@ def pushdown_field(source_filenames: list,
                    superclass_name: str,
                    field_name: str,
                    class_names: list = [],
-                   filename_mapping = lambda x: (x[:-5] if x.endswith(".java") else x) + ".re.java") -> bool:
-
-    program = utils.get_program(source_filenames, print_status=True)
+                   filename_mapping=lambda x: (x[:-5] if x.endswith(".java") else x) + ".java") -> bool:
+    program = utils2.get_program(source_filenames, print_status=True)
 
     if package_name not in program.packages \
             or superclass_name not in program.packages[package_name].classes \
@@ -23,13 +21,13 @@ def pushdown_field(source_filenames: list,
         for item in m.body_local_vars_and_expr_names:
             if isinstance(item, utils_listener_fast.ExpressionName):
                 if ((len(item.dot_separated_identifiers) == 1
-                            and item.dot_separated_identifiers[0] == field_name)
+                     and item.dot_separated_identifiers[0] == field_name)
                         or (len(item.dot_separated_identifiers) == 2
                             and item.dot_separated_identifiers[0] == "this"
                             and item.dot_separated_identifiers[1] == field_name)):
                     return False
 
-    #all_derived_classes = [] # Not needed
+    # all_derived_classes = [] # Not needed
     other_derived_classes = []
     classes_to_add_to = []
     for pn in program.packages:
@@ -38,7 +36,7 @@ def pushdown_field(source_filenames: list,
             c: utils_listener_fast.Class = p.classes[cn]
             if ((c.superclass_name == superclass_name and c.file_info.has_imported_class(package_name, superclass_name)) \
                     or (package_name is not None and c.superclass_name == package_name + '.' + superclass_name)):
-                #all_derived_classes.append(c)
+                # all_derived_classes.append(c)
                 if len(class_names) == 0 or cn in class_names:
                     if field_name in c.fields:
                         return False
@@ -59,7 +57,7 @@ def pushdown_field(source_filenames: list,
                         or (package_name is not None and f.datatype == (package_name + '.' + superclass_name)):
                     fields_of_superclass_type_or_others.append(f.name)
                 if any((c.file_info.has_imported_class(o.package_name, o.name) and f.datatype == o.name)
-                        or f.datatype == (o.package_name + '.' + o.name) for o in other_derived_classes):
+                       or f.datatype == (o.package_name + '.' + o.name) for o in other_derived_classes):
                     fields_of_superclass_type_or_others.append(f.name)
             for mk in c.methods:
                 m: utils_listener_fast.Method = c.methods[mk]
@@ -70,20 +68,22 @@ def pushdown_field(source_filenames: list,
                                 or item.datatype == (package_name + '.' + superclass_name):
                             local_vars_of_superclass_type_or_others.append(item.identifier)
                         if any((c.file_info.has_imported_class(o.package_name, o.name) and item.datatype == o.name)
-                                or item.datatype == (o.package_name + '.' + o.name) for o in other_derived_classes):
+                               or item.datatype == (o.package_name + '.' + o.name) for o in other_derived_classes):
                             local_vars_of_superclass_type_or_others.append(item.identifier)
                     elif isinstance(item, utils_listener_fast.ExpressionName):
                         if item.dot_separated_identifiers[-1] == field_name \
                                 and (
-                                    (len(item.dot_separated_identifiers) == 2)
-                                    or (len(item.dot_separated_identifiers) == 3 and item.dot_separated_identifiers[0] == "this")
-                                ) and (
-                                    (item.dot_separated_identifiers[-2] in local_vars_of_superclass_type_or_others and len(item.dot_separated_identifiers) == 2)
-                                    or item.dot_separated_identifiers[-2] in fields_of_superclass_type_or_others
-                                ):
+                                (len(item.dot_separated_identifiers) == 2)
+                                or (len(item.dot_separated_identifiers) == 3 and item.dot_separated_identifiers[
+                            0] == "this")
+                        ) and (
+                                (item.dot_separated_identifiers[-2] in local_vars_of_superclass_type_or_others and len(
+                                    item.dot_separated_identifiers) == 2)
+                                or item.dot_separated_identifiers[-2] in fields_of_superclass_type_or_others
+                        ):
                             return False
 
-    rewriter = utils.Rewriter(program, filename_mapping)
+    rewriter = utils2.Rewriter(program, filename_mapping)
 
     field = superclass.fields[field_name]
     if len(field.neighbor_names) == 0:
@@ -116,6 +116,7 @@ def pushdown_field(source_filenames: list,
     rewriter.apply()
     return True
 
+
 def test():
     print("Testing pushdown_field...")
     filenames = [
@@ -139,6 +140,7 @@ def test():
         else:
             print("1, 2, " + str(i + 1) + ": Cannot refactor.")
 
+
 def test_ant():
     """
     target_files = [
@@ -147,15 +149,16 @@ def test_ant():
         "tests/apache-ant/main/org/apache/tools/ant/types/ZipFileSet.java"
     ]
     """
-    ant_dir = "../testproject/tests/apache-ant-1-7-0"
+    ant_dir = "/home/ali/Desktop/code/TestProject/"
     print("Success!" if pushdown_field(
-        utils.get_filenames_in_dir(ant_dir),
-        "org.apache.tools.ant.types",
-        "ArchiveFileSet",
-        "src",
+        utils2.get_filenames_in_dir(ant_dir),
+        "test_package",
+        "App",
+        "push_down",
         [],
-        lambda x: "tests/pushdown_field_ant/" + x[len(ant_dir):]
+        # lambda x: "tests/pushdown_field_ant/" + x[len(ant_dir):]
     ) else "Cannot refactor.")
 
+
 if __name__ == "__main__":
-    test()
+    test_ant()
