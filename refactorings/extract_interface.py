@@ -1,7 +1,6 @@
 import os
 
-from refactorings.utils import utils_listener_fast
-import utils
+from refactorings.utils import utils_listener_fast, utils2
 
 
 def extract_interface(source_filenames: list,
@@ -10,19 +9,18 @@ def extract_interface(source_filenames: list,
                       method_keys: list,
                       interface_name: str,
                       interface_filename: str,
-                      filename_mapping = lambda x: (x[:-5] if x.endswith(".java") else x) + ".re.java") -> bool:
-
-    program = utils.get_program(source_filenames, print_status=True)
+                      filename_mapping=lambda x: (x[:-5] if x.endswith(".java") else x) + ".java") -> bool:
+    program = utils2.get_program(source_filenames, print_status=True)
 
     if package_name not in program.packages \
             or any(
-                class_name not in program.packages[package_name].classes
-                    for class_name in class_names
-            ) \
+        class_name not in program.packages[package_name].classes
+        for class_name in class_names
+    ) \
             or any(
-                method_key not in program.packages[package_name].classes[class_name].methods
-                    for class_name in class_names for method_key in method_keys
-            ):
+        method_key not in program.packages[package_name].classes[class_name].methods
+        for class_name in class_names for method_key in method_keys
+    ):
         return False
 
     method_returntypes = {}
@@ -31,17 +29,17 @@ def extract_interface(source_filenames: list,
     for method_key in method_keys:
         method_names.append(method_key[:method_key.find('(')])
 
-    rewriter = utils.Rewriter(program, filename_mapping)
+    rewriter = utils2.Rewriter(program, filename_mapping)
 
     for class_name in class_names:
         c: utils_listener_fast.Class = program.packages[package_name].classes[class_name]
         # Add implements to the class
         has_superinterface = False
-        if c.parser_context.IMPLEMENTS() is not None: # old: c.parser_context.superinterfaces()
-            t = utils_listener_fast.TokensInfo(c.parser_context.typeList()) # old: c.parser_context.superinterfaces()
+        if c.parser_context.IMPLEMENTS() is not None:  # old: c.parser_context.superinterfaces()
+            t = utils_listener_fast.TokensInfo(c.parser_context.typeList())  # old: c.parser_context.superinterfaces()
             has_superinterface = True
-        elif c.parser_context.EXTENDS() is not None: # old: c.parser_context.superclass()
-            t = utils_listener_fast.TokensInfo(c.parser_context.typeType()) # old: c.parser_context.superclass()
+        elif c.parser_context.EXTENDS() is not None:  # old: c.parser_context.superclass()
+            t = utils_listener_fast.TokensInfo(c.parser_context.typeType())  # old: c.parser_context.superclass()
         elif c.parser_context.typeParameters() is not None:
             t = utils_listener_fast.TokensInfo(c.parser_context.typeParameters())
         else:
@@ -70,14 +68,15 @@ def extract_interface(source_filenames: list,
             else:
                 t = m.get_tokens_info()
             rewriter.insert_before_start(
-                t, # old: m.get_tokens_info() # without requiring t
+                t,  # old: m.get_tokens_info() # without requiring t
                 ("" if "@Override" in m.modifiers else "@Override\n    ")
                 + ("" if "public" in m.modifiers else "public ")
             )
             for i in range(len(m.modifiers)):
                 mm = m.modifiers[i]
                 if mm == "private" or mm == "protected":
-                    t = utils_listener_fast.TokensInfo(m.modifiers_parser_contexts[i]) # old: m.parser_context.methodModifier(i)
+                    t = utils_listener_fast.TokensInfo(
+                        m.modifiers_parser_contexts[i])  # old: m.parser_context.methodModifier(i)
                     rewriter.replace(t, "")
 
     # Change variable types to the interface if only interface methods are used.
@@ -108,7 +107,8 @@ def extract_interface(source_filenames: list,
                                 break
                     if isinstance(item, utils_listener_fast.MethodInvocation):
                         if len(item.dot_separated_identifiers) == 2 or \
-                                (len(item.dot_separated_identifiers) == 3 and item.dot_separated_identifiers[0] == "this"):
+                                (len(item.dot_separated_identifiers) == 3 and item.dot_separated_identifiers[
+                                    0] == "this"):
                             if item.dot_separated_identifiers[-2] in vars_of_interest:
                                 if item.dot_separated_identifiers[-1] not in method_names:
                                     vars_of_interest.pop(item.dot_separated_identifiers[-2])
@@ -124,7 +124,8 @@ def extract_interface(source_filenames: list,
                         if package_name is None:
                             break
                         # old: var.parser_context.unannType()
-                        rewriter.replace(utils_listener_fast.TokensInfo(var.parser_context.typeType()), package_name + '.' + interface_name)
+                        rewriter.replace(utils_listener_fast.TokensInfo(var.parser_context.typeType()),
+                                         package_name + '.' + interface_name)
             for field_name in fields_of_interest:
                 f = fields_of_interest[field_name]
                 if c.file_info.has_imported_package(package_name):
@@ -134,25 +135,30 @@ def extract_interface(source_filenames: list,
                         break
                     typename = package_name + '.' + interface_name
                 if len(f.neighbor_names) == 0:
-                    rewriter.replace(utils_listener_fast.TokensInfo(f.parser_context.typeType()), typename) # old: f.parser_context.unannType()
+                    rewriter.replace(utils_listener_fast.TokensInfo(f.parser_context.typeType()),
+                                     typename)  # old: f.parser_context.unannType()
                 else:
                     if not any(nn in fields_of_interest for nn in f.neighbor_names):
-                        t = utils_listener_fast.TokensInfo(f.all_variable_declarator_contexts[f.index_in_variable_declarators])
+                        t = utils_listener_fast.TokensInfo(
+                            f.all_variable_declarator_contexts[f.index_in_variable_declarators])
                         if f.index_in_variable_declarators == 0:
-                            t.stop = utils_listener_fast.TokensInfo(f.all_variable_declarator_contexts[f.index_in_variable_declarators + 1]).start - 1
+                            t.stop = utils_listener_fast.TokensInfo(
+                                f.all_variable_declarator_contexts[f.index_in_variable_declarators + 1]).start - 1
                         else:
-                            t.start = utils_listener_fast.TokensInfo(f.all_variable_declarator_contexts[f.index_in_variable_declarators - 1]).start + 1
+                            t.start = utils_listener_fast.TokensInfo(
+                                f.all_variable_declarator_contexts[f.index_in_variable_declarators - 1]).start + 1
                         rewriter.replace(t, "")
                         rewriter.insert_after(
                             f.get_tokens_info(),
-                            "\n    private " + typename + " " + f.name + (" = " + f.initializer + ";" if f.initializer is not None else ";")
+                            "\n    private " + typename + " " + f.name + (
+                                " = " + f.initializer + ";" if f.initializer is not None else ";")
                         )
 
     # Create the interface
     interface_file_content = (
-        "package " + package_name +";\n\n"
-        + "public interface " + interface_name + "\n"
-        + "{\n"
+            "package " + package_name + ";\n\n"
+            + "public interface " + interface_name + "\n"
+            + "{\n"
     )
     for method_key in method_keys:
         method_name = method_key[:method_key.find('(')]
@@ -173,6 +179,7 @@ def extract_interface(source_filenames: list,
 
     rewriter.apply()
     return True
+
 
 def test():
     print("Testing extract_interface...")
@@ -196,6 +203,7 @@ def test():
         else:
             print("A, B, " + third_class + ": Cannot refactor.")
 
+
 def test_ant():
     """
     target_files = [
@@ -203,16 +211,17 @@ def test_ant():
         "tests/apache-ant/main/org/apache/tools/ant/input/MultipleChoiceInputRequest.java"
     ]
     """
-    ant_dir = "../testproject/tests/apache-ant-1-7-0"
+    ant_dir = "/home/ali/Desktop/code/TestProject/"
     print("Success!" if extract_interface(
-        utils.get_filenames_in_dir(ant_dir),
-        "org.apache.tools.ant.input",
-        ["InputRequest", "MultipleChoiceInputRequest"],
-        [ "isInputValid()" ],
+        utils2.get_filenames_in_dir(ant_dir),
+        "test_package",
+        ["AppChild1", "AppChild2"],
+        ["printTest()"],
         "ExtractedInterface",
-        "../testproject/tests/extract_interface_ant/ExtractedInterface.java",
-        lambda x: "tests/extract_interface_ant/" + x[len(ant_dir):]
+        "/home/ali/Desktop/code/TestProject/src/test_package/ExtractedInterface.java",
+        # lambda x: "tests/extract_interface_ant/" + x[len(ant_dir):]
     ) else "Cannot refactor.")
 
+
 if __name__ == "__main__":
-    test()
+    test_ant()
