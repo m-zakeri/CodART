@@ -27,6 +27,7 @@ Post Conditions:
 No specific Post Condition
 """
 
+
 class IncreaseFieldVisibilityRefactoringListener(JavaParserLabeledListener):
     def __init__(self, common_token_stream: CommonTokenStream = None, source_class=None, field_name: str = None):
         """
