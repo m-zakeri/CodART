@@ -24,6 +24,29 @@ mark the old method as deprecated. """
 class RenameMethodListener(JavaParserLabeledListener):
     def __init__(self, java_file_path, common_token_stream, scope_class_name, target_method_name, new_name,
                  reference=None):
+        """
+               The Main listener which parses the file based on the provided information,
+               using ANTLR parser generator and tokenization methods
+
+               Parameters
+               ----------
+               java_file_path : str
+                    Address path to the test/source file
+
+               scope_class_name : str
+                    Name of the class in which the refactoring has to be done
+
+               target_method_name : str
+                    Name of the method in which the refactoring has to be done
+
+               new_name : str
+                    The new name of the refactored method
+
+               Returns
+               ----------
+               No returns
+
+        """
         self.file_path = java_file_path
         self.token_stream = common_token_stream
         self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
@@ -82,6 +105,26 @@ class RenameMethodListener(JavaParserLabeledListener):
 
 def get_method_calls(udb_path, scope_class_name, new_name):
     # Open Database
+    """
+    Finds all of the refactored method calls in the database file
+    and returns all of the correct referencs
+
+    Parameters
+    ----------
+    udb_path : str
+        Address path to the database file
+
+    scope_class_name : str
+        Name of the class in which the refactoring has to be done
+
+    new_name : str
+        The new name of the refactored method
+
+    Returns
+    ----------
+      references
+
+    """
     if not os.path.exists(path=udb_path):
         raise ValueError("Database file does not exist!")
     db = understand.open(udb_path)
@@ -103,6 +146,28 @@ def get_method_calls(udb_path, scope_class_name, new_name):
 
 
 def rename_method(java_file_path, scope_class_name, target_method_name, new_name, reference=None):
+    """
+    Main Entry Point to the Listener and Tree Walker
+
+    Parameters
+    ----------
+      java_file_path : str
+        Address path to the test/source file
+
+      scope_class_name : str
+        Name of the class in which the refactoring has to be done
+
+      target_method_name : str
+        Name of the method in which the refactoring has to be done
+
+      new_name : str
+        The new name of the refactored method
+
+    Returns
+    ----------
+      No returns
+
+    """
     stream = FileStream(java_file_path)
     lexer = JavaLexer(stream)
     tokens = CommonTokenStream(lexer)
