@@ -3,9 +3,56 @@ from refactorings.utils.utils_listener_fast import TokensInfo, SingleFileElement
 from refactorings.pullup_method_get_removemethod import get_removemethods
 from refactorings.utils.utils2 import Rewriter, get_program, get_filenames_in_dir
 
+"""
+Introduction:
+
+When subclasses grow and get developed separately, your code may have methods that perform similar work.
+Pull up method refactoring removes the repetitive method from subclasses and moves it to a superclass.
+
+"""
+"""
+Pre and Post Conditions
+
+Pre Conditions:
+1. The source package, class and method should exist.
+
+2. If the method uses attributes and methods that are defined in the body of the classes, 
+   The refactoring should not be implemented.
+
+Post Conditions:
+
+No specific Post Condition
+"""
+
 
 def pullup_method_refactoring(source_filenames: list, package_name: str, class_name: str, method_key: str,
                               filename_mapping=lambda x: x):
+    """
+              The main function that does the process of pull up method refactoring.
+              Removes the necessary methods from the subclasses and moves them to a superclass.
+
+              Parameters
+              ----------
+              source_filenames: list
+                   A list of file names to be processed
+
+              package_name : str
+                   The name of the package in which the refactoring has to be done
+
+              class_name : str
+                   Name of the class in which the refactoring has to be done
+
+              method_key : str
+                   Name of the method which needs to be removed
+
+              filename_mapping : str
+                   Mapping the file's name to the correct format so that it can be processed
+
+              Returns
+              ----------
+              No returns
+
+       """
     program = get_program(source_filenames)  # getting the program packages
     _sourceclass = program.packages[package_name].classes[class_name]
     target_class_name = _sourceclass.superclass_name

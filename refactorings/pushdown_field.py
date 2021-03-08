@@ -33,32 +33,30 @@ def pushdown_field(source_filenames: list,
                    filename_mapping=lambda x: (x[:-5] if x.endswith(".java") else x) + ".java") -> bool:
     program = utils2.get_program(source_filenames, print_status=True)
     """
-           The main function that does the process of pull up field refactoring.
-           Adds the necessary fields to the subclasses and removes the from the superclass.
+              The main function that does the process of pull up field refactoring.
+              Adds the necessary fields to the subclasses and removes them from the superclass.
 
-           Parameters
-           ----------
-           source_filenames: list
-                A list of file names to be processed 
+              Parameters
+              ----------
+              source_filenames: list
+                 A list of file names to be processed 
 
-           package_name : str
-                The name of the package in which the refactoring has to be done
+              package_name : str
+                 The name of the package in which the refactoring has to be done
 
-           class_name : str
-                Name of the class in which the refactoring has to be done
+              class_name : str
+                 Name of the class in which the refactoring has to be done
 
-           field_name : str
-                Name of the field whose final status has to be changed
+              field_name : str
+                 Name of the field whose final status has to be changed
 
-           filename_mapping : str 
-                Mapping the file's name to the correct format so that it can be processed
+              filename_mapping : str 
+                 Mapping the file's name to the correct format so that it can be processed
 
-           Returns
-           ----------
-           No returns
-
-    """
-
+              Returns
+              ----------
+                No returns
+     """
     if package_name not in program.packages \
             or superclass_name not in program.packages[package_name].classes \
             or field_name not in program.packages[package_name].classes[superclass_name].fields:

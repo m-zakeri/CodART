@@ -32,7 +32,8 @@ def pullup_field(source_filenames: list,
     program = utils2.get_program(source_filenames, print_status=True)
     """
            The main function that does the process of pull up field refactoring.
-           Removes the repetitive fields from the subclasses and creates the superclass.
+           Removes the repetitive fields from the subclasses, creates the superclass,
+           and moves the fields to the superclass.
 
            Parameters
            ----------
