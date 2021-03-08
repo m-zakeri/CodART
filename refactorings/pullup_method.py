@@ -6,17 +6,17 @@ from refactorings.utils.utils2 import Rewriter, get_program, get_filenames_in_di
 
 def pullup_method_refactoring(source_filenames: list, package_name: str, class_name: str, method_key: str,
                               filename_mapping=lambda x: x):
-    program = get_program(source_filenames)  # گرفتن پکیج های برنامه
+    program = get_program(source_filenames)  # getting the program packages
     _sourceclass = program.packages[package_name].classes[class_name]
     target_class_name = _sourceclass.superclass_name
     static = 0
     removemethod = get_removemethods(program, package_name, target_class_name, method_key,
-                                     class_name)  # متد های مشابه در کلاس های دیگر
+                                     class_name)  # Similar methods in other classes
     _targetclass = program.packages[package_name].classes[target_class_name]
     _method_name = program.packages[package_name].classes[class_name].methods[method_key]
     tokens_info = TokensInfo(_method_name.parser_context)
     exps = tokens_info.get_token_index(tokens_info.token_stream.tokens, tokens_info.start,
-                                       tokens_info.stop)  # لیست متغیر های داخل بدنه کلاس که داخل متد استفاده شده اند
+                                       tokens_info.stop)  # list of class variables that are used in the method
     if _method_name.is_constructor:
         return False
     # if method use param of class body return false
@@ -44,7 +44,7 @@ def pullup_method_refactoring(source_filenames: list, package_name: str, class_n
                                                 stop=tokens_info.stop)
     Rewriter_.insert_before(tokens_info=class_tokens_info, text=strofmethod)
     Rewriter_.apply()
-    # در کلاس های دیگر هر جا که از این متد استفاده شده باید اپدیت شود
+    # The Method has to be updated anywhere else that it's used
     for package_names in program.packages:
         package = program.packages[package_names]
         for class_ in package.classes:
