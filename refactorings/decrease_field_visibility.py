@@ -10,12 +10,15 @@ from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 """
-Introduction
+Introduction:
+
 Decrease the visibility of a field from public to protected, protected to package or package to private.
 """
 """
 Pre and Post Conditions
+
 Pre Conditions:
+
 1. User must enter the field's name, and the source class's name for the refactoring
    in order to decrease the target field's visibility.
 

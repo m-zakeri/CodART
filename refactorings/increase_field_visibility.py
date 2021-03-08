@@ -14,11 +14,13 @@ from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 from refactorings.Refactoring_action_module_for_big_project import Main_Refactors_Action_for_big_project
 
 """
-Introduction
+Introduction:
+
 Increase the visibility of a field from private to package, package to protected or protected to public.
 """
 """
 Pre and Post Conditions
+
 Pre Conditions:
 1. User must enter the field's name, and the source class's name for the refactoring
    in order to increase the target field's visibility.

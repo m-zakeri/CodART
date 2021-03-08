@@ -10,6 +10,7 @@ from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 """
 Introduction:
+
 When the name of a method does not explain what the method does (method's functionality), it needs to be changed.
 """
 """
@@ -22,8 +23,8 @@ Pre Conditions:
 2. Check if the method exist, then rename it.
 
 Post Conditions:
-
 1. After refactoring, all the old method names in the project should be changed.
+
 """
 """
 See whether the method is defined in a superclass or subclass. If so, you must repeat all steps in these classes too.
