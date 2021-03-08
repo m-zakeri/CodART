@@ -16,12 +16,13 @@ When the name of a method does not explain what the method does (method's functi
 Pre and Post Conditions
 
 Pre Conditions:
-1. User must enter the existing method's name, The source class's name for the refactoring, and the new method name in order to rename.
+1. User must enter the existing method's name, The source class's name for the refactoring, and the new method name
+ in order to rename.
 
 2. Check if the method exist, then rename it.
 
 Post Conditions:
-1. After refactoring, all the old method names in the project should be changed.
+1. The value of this field should never be changed in the project
 """
 """
 See whether the method is defined in a superclass or subclass. If so, you must repeat all steps in these classes too.
