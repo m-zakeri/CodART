@@ -20,7 +20,8 @@ Pre Conditions:
 2. Check if the field exists, then make it final
 
 Post Conditions:
-1. After refactoring, all the old method names in the project should be changed.
+
+1. The value of this field should never be changed in the project
 """
 
 

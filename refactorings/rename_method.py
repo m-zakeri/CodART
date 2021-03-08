@@ -22,7 +22,8 @@ Pre Conditions:
 2. Check if the method exist, then rename it.
 
 Post Conditions:
-1. The value of this field should never be changed in the project
+
+1. After refactoring, all the old method names in the project should be changed.
 """
 """
 See whether the method is defined in a superclass or subclass. If so, you must repeat all steps in these classes too.
