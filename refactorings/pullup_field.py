@@ -41,13 +41,13 @@ def pullup_field(source_filenames: list,
                 A list of file names to be processed 
                 
            package_name : str
-                The name of the package in which the refactoring has to be done
+                The name of the package in which the refactoring has to be done (contains the classes/superclasses)
 
            class_name : str
-                Name of the class in which the refactoring has to be done
+                Name of the class that the field is pulled up from
 
            field_name : str
-                Name of the field whose final status has to be changed
+                Name of the field that has to be refactored
                 
            filename_mapping : str 
                 Mapping the file's name to the correct format so that it can be processed
