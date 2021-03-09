@@ -88,16 +88,27 @@ class Metric:
         :return: Number of public methods in class
         """
         class_entity = self.get_class_entity(class_longname)
-        print(class_longname)
         if class_entity:
             return class_entity.metric(['CountDeclMethodPublic']).get('CountDeclMethodPublic', 0)
+        return 0
+
+    def NOM(self, class_longname):
+        """
+        NOM - Number of Methods
+        :param class_longname: The longname of a class. For examole: package_name.ClassName
+        :return: Number of methods declared in a class.
+        """
+        class_entity = self.get_class_entity(class_longname)
+        if class_entity:
+            return class_entity.metric(['CountDeclMethod']).get('CountDeclMethod', 0)
         return 0
 
     def test(self):
         for ent in sorted(self.db.ents(kindstring='class'), key=lambda ent: ent.name()):
             if ent.kindname() == "Unknown Class":
                 continue
-            print(self.CIS(ent.longname()))
+            print(ent)
+            print(self.NOM(ent.longname()))
 
     def get_class_entity(self, class_longname):
         for ent in sorted(self.db.ents(kindstring='class'), key=lambda ent: ent.name()):
