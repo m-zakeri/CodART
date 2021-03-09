@@ -39,7 +39,46 @@ class Metric:
         ANA - Average Number of Ancestors
         :return: Average number of classes in the inheritance tree for each class
         """
+        # TODO: Make this complete.
         return None
+
+    def DAM(self, class_longname):
+        """
+        DAM - Direct Access Metric
+        :param class_longname: The longname of a class. For examole: package_name.ClassName
+        :return: Ratio of the number of private and protected attributes to the total number of attributes in a class.
+        """
+        public_variables = 0
+        protected_variables = 0
+        private_variables = 0
+
+        for ent in sorted(self.db.ents(kindstring='class'), key=lambda ent: ent.name()):
+            if ent.kindname() == "Unknown Class":
+                continue
+            if ent.longname() == class_longname:
+                for ref in ent.refs(refkindstring="define"):
+                    define = ref.ent()
+                    kind_name = define.kindname()
+                    if kind_name == "Public Variable":
+                        public_variables += 1
+                    elif kind_name == "Private Variable":
+                        private_variables += 1
+                    elif kind_name == "Protected Variable":
+                        protected_variables += 1
+            else:
+                continue
+        try:
+            ratio = (private_variables + protected_variables)/(private_variables + protected_variables + public_variables)
+        except ZeroDivisionError:
+            ratio = 0.0
+        return ratio
+
+    def test(self):
+        for ent in sorted(self.db.ents(kindstring='class'), key=lambda ent: ent.name()):
+            if ent.kindname() == "Unknown Class":
+                continue
+            print(ent)
+            print(self.DAM(ent.longname()))
 
     def print_all(self):
         for k, v in sorted(self.metrics.items()):
@@ -50,6 +89,5 @@ if __name__ == '__main__':
     db_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
     metric = Metric(db_path)
     # metric.print_all()
-    print("DSC", metric.DSC)
-    print("NOH", metric.NOH)
+    metric.test()
 
