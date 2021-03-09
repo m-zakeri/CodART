@@ -52,33 +52,60 @@ class Metric:
         protected_variables = 0
         private_variables = 0
 
-        for ent in sorted(self.db.ents(kindstring='class'), key=lambda ent: ent.name()):
-            if ent.kindname() == "Unknown Class":
-                continue
-            if ent.longname() == class_longname:
-                for ref in ent.refs(refkindstring="define"):
-                    define = ref.ent()
-                    kind_name = define.kindname()
-                    if kind_name == "Public Variable":
-                        public_variables += 1
-                    elif kind_name == "Private Variable":
-                        private_variables += 1
-                    elif kind_name == "Protected Variable":
-                        protected_variables += 1
-            else:
-                continue
+        class_entity = self.get_class_entity(class_longname)
+        for ref in class_entity.refs(refkindstring="define"):
+            define = ref.ent()
+            kind_name = define.kindname()
+            if kind_name == "Public Variable":
+                public_variables += 1
+            elif kind_name == "Private Variable":
+                private_variables += 1
+            elif kind_name == "Protected Variable":
+                protected_variables += 1
+
         try:
             ratio = (private_variables + protected_variables)/(private_variables + protected_variables + public_variables)
         except ZeroDivisionError:
             ratio = 0.0
         return ratio
 
+    def CMAC(self, class_longname):
+        """
+        CMAC - Cohesion Among Methods of class
+        Measures of how related methods are in a class in terms of used parameters.
+        It can also be computed by: 1 - LackOfCohesionOfMethods()
+        :param class_longname: The longname of a class. For examole: package_name.ClassName
+        :return:  A float number between 0 and 1.
+        """
+        class_entity = self.get_class_entity(class_longname)
+        percentage = class_entity.metric(['PercentLackOfCohesion']).get('PercentLackOfCohesion', 0)
+        return 1.0 - percentage / 100
+
+    def CIS(self, class_longname):
+        """
+        CIS - Class Interface Size
+        :param class_longname: The longname of a class. For examole: package_name.ClassName
+        :return: Number of public methods in class
+        """
+        class_entity = self.get_class_entity(class_longname)
+        print(class_longname)
+        if class_entity:
+            return class_entity.metric(['CountDeclMethodPublic']).get('CountDeclMethodPublic', 0)
+        return 0
+
     def test(self):
         for ent in sorted(self.db.ents(kindstring='class'), key=lambda ent: ent.name()):
             if ent.kindname() == "Unknown Class":
                 continue
-            print(ent)
-            print(self.DAM(ent.longname()))
+            print(self.CIS(ent.longname()))
+
+    def get_class_entity(self, class_longname):
+        for ent in sorted(self.db.ents(kindstring='class'), key=lambda ent: ent.name()):
+            if ent.kindname() == "Unknown Class":
+                continue
+            if ent.longname() == class_longname:
+                return ent
+        return None
 
     def print_all(self):
         for k, v in sorted(self.metrics.items()):
