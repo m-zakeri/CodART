@@ -155,12 +155,24 @@ class Metric:
             all_methods = 1
         return (all_methods - local_methods)/all_methods
 
+    def NOP(self, class_longname):
+        """
+        NOP - Number of Polymorphic Methods
+        Any method that can be used by a class and its descendants.
+        :param class_longname: The longname of a class. For examole: package_name.ClassName
+        :return: Counts of the number of methods in a class excluding private, static and final ones.
+        """
+        class_entity = self.get_class_entity(class_longname)
+        instance_methods = class_entity.metric(['CountDeclInstanceMethod']).get('CountDeclInstanceMethod', 0)
+        private_methods = class_entity.metric(['CountDeclMethodPrivate']).get('CountDeclMethodPrivate', 0)
+        return instance_methods - private_methods
+
     def test(self):
         for ent in sorted(self.db.ents(kindstring='class'), key=lambda ent: ent.name()):
             if ent.kindname() == "Unknown Class":
                 continue
             print("Entity:", ent)
-            print(self.MFA(ent.longname()))
+            print(self.NOP(ent.longname()))
 
     def get_class_entity(self, class_longname):
         for ent in sorted(self.db.ents(kindstring='class'), key=lambda ent: ent.name()):
