@@ -129,7 +129,7 @@ class Metric:
     def DCC(self, class_longname):
         """
         DCC - Direct Class Coupling
-        :param class_longname:
+        :param class_longname: The longname of a class. For examole: package_name.ClassName
         :return: Number of other classes a class relates to, either through a shared attribute or a parameter in a method.
         """
         counter = 0
@@ -141,12 +141,26 @@ class Metric:
                         counter += 1
         return counter
 
+    def MFA(self, class_longname):
+        """
+        MFA - Measure of Functional Abstraction
+        :param class_longname: The longname of a class. For examole: package_name.ClassName
+        :return: Ratio of the number of inherited methods per the total number of methods within a class.
+        """
+        class_entity = self.get_class_entity(class_longname)
+        metrics = class_entity.metric(['CountDeclMethod', 'CountDeclMethodAll'])
+        local_methods = metrics.get('CountDeclMethod')
+        all_methods = metrics.get('CountDeclMethodAll')
+        if all_methods == 0:
+            all_methods = 1
+        return (all_methods - local_methods)/all_methods
+
     def test(self):
         for ent in sorted(self.db.ents(kindstring='class'), key=lambda ent: ent.name()):
             if ent.kindname() == "Unknown Class":
                 continue
             print("Entity:", ent)
-            print(self.DCC(ent.longname()))
+            print(self.MFA(ent.longname()))
 
     def get_class_entity(self, class_longname):
         for ent in sorted(self.db.ents(kindstring='class'), key=lambda ent: ent.name()):
@@ -165,5 +179,5 @@ if __name__ == '__main__':
     db_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
     metric = Metric(db_path)
     # metric.print_all()
-    print(metric.MOA)
-    # metric.test()
+    # print(metric.MOA)
+    metric.test()
