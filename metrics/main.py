@@ -45,7 +45,24 @@ class Metric:
                 continue
             mit = ent.metric(['MaxInheritanceTree'])['MaxInheritanceTree']
             MITs.append(mit)
-        return sum(MITs)/len(MITs)
+        return sum(MITs) / len(MITs)
+
+    @property
+    def MOA(self):
+        """
+        MOA - Measure of Aggregation
+        :return: Count of number of attributes whose type is user defined class(es).
+        """
+        counter = 0
+        user_defined_classes = []
+        for ent in sorted(self.db.ents(kindstring="class"), key=lambda ent: ent.name()):
+            if ent.kindname() == "Unknown Class":
+                continue
+            user_defined_classes.append(ent.simplename())
+        for ent in sorted(self.db.ents(kindstring="variable"), key=lambda ent: ent.name()):
+            if ent.type() in user_defined_classes:
+                counter += 1
+        return counter
 
     def DAM(self, class_longname):
         """
@@ -69,7 +86,8 @@ class Metric:
                 protected_variables += 1
 
         try:
-            ratio = (private_variables + protected_variables)/(private_variables + protected_variables + public_variables)
+            ratio = (private_variables + protected_variables) / (
+                        private_variables + protected_variables + public_variables)
         except ZeroDivisionError:
             ratio = 0.0
         return ratio
@@ -147,6 +165,5 @@ if __name__ == '__main__':
     db_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
     metric = Metric(db_path)
     # metric.print_all()
-    # print(metric.ANA)
-    metric.test()
-
+    print(metric.MOA)
+    # metric.test()
