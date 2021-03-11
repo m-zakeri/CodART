@@ -39,8 +39,13 @@ class Metric:
         ANA - Average Number of Ancestors
         :return: Average number of classes in the inheritance tree for each class
         """
-        # TODO: Make this complete.
-        return None
+        MITs = []
+        for ent in sorted(self.db.ents(kindstring='class'), key=lambda ent: ent.name()):
+            if ent.kindname() == "Unknown Class":
+                continue
+            mit = ent.metric(['MaxInheritanceTree'])['MaxInheritanceTree']
+            MITs.append(mit)
+        return sum(MITs)/len(MITs)
 
     def DAM(self, class_longname):
         """
@@ -127,5 +132,6 @@ if __name__ == '__main__':
     db_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
     metric = Metric(db_path)
     # metric.print_all()
-    metric.test()
+    print(metric.ANA)
+    # metric.test()
 
