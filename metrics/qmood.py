@@ -2,7 +2,7 @@ import os
 import understand
 
 
-class Metric:
+class QMOOD:
     def __init__(self, udb_path):
         if not os.path.isfile(udb_path):
             raise ValueError("Project directory is not valid.")
@@ -189,7 +189,7 @@ class Metric:
 
 if __name__ == '__main__':
     db_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
-    metric = Metric(db_path)
+    metric = QMOOD(db_path)
     # metric.print_all()
     # print(metric.MOA)
     metric.test()
