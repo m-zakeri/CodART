@@ -108,12 +108,27 @@ class Metric:
             return class_entity.metric(['CountDeclMethod']).get('CountDeclMethod', 0)
         return 0
 
+    def DCC(self, class_longname):
+        """
+        DCC - Direct Class Coupling
+        :param class_longname:
+        :return: Number of other classes a class relates to, either through a shared attribute or a parameter in a method.
+        """
+        counter = 0
+        class_entity = self.get_class_entity(class_longname)
+        for ref in class_entity.refs():
+            if ref.kindname() == "Couple":
+                if ref.isforward():
+                    if "class" in ref.ent().kindname().lower():
+                        counter += 1
+        return counter
+
     def test(self):
         for ent in sorted(self.db.ents(kindstring='class'), key=lambda ent: ent.name()):
             if ent.kindname() == "Unknown Class":
                 continue
-            print(ent)
-            print(self.NOM(ent.longname()))
+            print("Entity:", ent)
+            print(self.DCC(ent.longname()))
 
     def get_class_entity(self, class_longname):
         for ent in sorted(self.db.ents(kindstring='class'), key=lambda ent: ent.name()):
@@ -132,6 +147,6 @@ if __name__ == '__main__':
     db_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
     metric = Metric(db_path)
     # metric.print_all()
-    print(metric.ANA)
-    # metric.test()
+    # print(metric.ANA)
+    metric.test()
 
