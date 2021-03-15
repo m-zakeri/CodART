@@ -113,25 +113,18 @@ class RenameMethodListener(JavaParserLabeledListener):
 
 def get_method_calls(udb_path, scope_class_name, new_name):
     # Open Database
-    """
-    Finds all of the refactored method calls in the database file
-    and returns all of the correct referencs
+    """Finds all of the refactored method calls in the database file
+       and returns all of the correct references
 
-    Parameters
-    ----------
-    udb_path : str
-        Address path to the database file
+        Args:
+            udb_path(str): Address path to the database file
 
-    scope_class_name : str
-        Name of the class in which the refactoring has to be done
+            scope_class_name(str): Name of the class in which the refactoring has to be done
 
-    new_name : str
-        The new name of the refactored method
+            new_name(str): The new name of the refactored method
 
-    Returns
-    ----------
-      references
-
+        Returns:
+            References
     """
     if not os.path.exists(path=udb_path):
         raise ValueError("Database file does not exist!")
@@ -154,28 +147,22 @@ def get_method_calls(udb_path, scope_class_name, new_name):
 
 
 def rename_method(java_file_path, scope_class_name, target_method_name, new_name, reference=None):
-    """
-    Main Entry Point to the Listener and Tree Walker
+    """Main Entry Point to the Listener and Tree Walker
 
-    Parameters
-    ----------
-      java_file_path : str
-        Address path to the test/source file
+    Args:
+        java_file_path(str): Address path to the test/source file
 
-      scope_class_name : str
-        Name of the class in which the refactoring has to be done
+        scope_class_name(str): Name of the class in which the refactoring has to be done
 
-      target_method_name : str
-        Name of the method in which the refactoring has to be done
+        target_method_name(str): Name of the method in which the refactoring has to be done
 
-      new_name : str
-        The new name of the refactored method
+        new_name(str): The new name of the refactored method
 
-    Returns
-    ----------
-      No returns
+        reference(str): Keeping track for all of the method references in the project scope
 
-    """
+    Returns:
+        No Returns
+   """
     stream = FileStream(java_file_path)
     lexer = JavaLexer(stream)
     tokens = CommonTokenStream(lexer)
