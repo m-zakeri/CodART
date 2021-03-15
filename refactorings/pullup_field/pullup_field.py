@@ -6,8 +6,6 @@ Introduction:
 When subclasses grow and get developed separately, identical (or nearly identical) fields and methods appear. 
 Pull up field refactoring removes the repetitive field from subclasses and moves it to a superclass.
 
-"""
-"""
 Pre and Post Conditions
 
 Pre Conditions:
@@ -29,34 +27,26 @@ def pullup_field(source_filenames: list,
                  class_name: str,
                  field_name: str,
                  filename_mapping=lambda x: (x[:-5] if x.endswith(".java") else x) + ".java") -> bool:
+
+    """The main function that does the process of pull up field refactoring.
+       Removes the repetitive fields from the subclasses, creates the superclass,
+       and moves the fields to the superclass.
+
+       Args:
+           source_filenames(list): A list of file names to be processed
+                
+           package_name(str): The name of the package in which the refactoring has to be done (contains the classes/superclasses)
+
+           class_name(str): Name of the class that the field is pulled up from
+
+           field_name(str): Name of the field that has to be refactored
+                
+           filename_mapping(str): Mapping the file's name to the correct format so that it can be processed
+                
+        Returns:
+            No returns
+    """
     program = utils2.get_program(source_filenames, print_status=True)
-    """
-           The main function that does the process of pull up field refactoring.
-           Removes the repetitive fields from the subclasses, creates the superclass,
-           and moves the fields to the superclass.
-
-           Parameters
-           ----------
-           source_filenames: list
-                A list of file names to be processed 
-                
-           package_name : str
-                The name of the package in which the refactoring has to be done (contains the classes/superclasses)
-
-           class_name : str
-                Name of the class that the field is pulled up from
-
-           field_name : str
-                Name of the field that has to be refactored
-                
-           filename_mapping : str 
-                Mapping the file's name to the correct format so that it can be processed
-                
-           Returns
-           ----------
-           No returns
-
-    """
     print(program.packages)
     if package_name not in program.packages \
             or class_name not in program.packages[package_name].classes \

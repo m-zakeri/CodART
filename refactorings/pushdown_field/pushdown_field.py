@@ -7,9 +7,6 @@ Although it was planned to use a field universally for all classes, in reality t
 some subclasses. This situation can occur when planned features fail to pan out, for example.
 because of this, we push down the field from the superclass into its related subclass.
 
-
-"""
-"""
 Pre and Post Conditions
 
 Pre Conditions:
@@ -31,32 +28,27 @@ def pushdown_field(source_filenames: list,
                    field_name: str,
                    class_names: list = [],
                    filename_mapping=lambda x: (x[:-5] if x.endswith(".java") else x) + ".java") -> bool:
-    program = utils2.get_program(source_filenames, print_status=True)
-    """
-              The main function that does the process of pull up field refactoring.
-              Adds the necessary fields to the subclasses and removes them from the superclass.
 
-              Parameters
-              ----------
-              source_filenames: list
-                 A list of file names to be processed 
+    """The main function that does the process of pull up field refactoring.
+        Adds the necessary fields to the subclasses and removes them from the superclass.
 
-              package_name : str
-                 The name of the package in which the refactoring has to be done (contains the superclass)
+        Args:
+              source_filenames(list): A list of file names to be processed
 
-              class_name : str
-                 Name of the class in which the refactoring has to be done (the class to push down field from)
+              package_name(str): The name of the package in which the refactoring has to be done (contains the superclass)
 
-              field_name : str
-                 Name of the field that has to be refactored
+              superclass_name(str): The name of the needed superclass
 
-              filename_mapping : str 
-                 Mapping the file's name to the correct format so that it can be processed
+              class_names(str): Name of the classes in which the refactoring has to be done (the classes to push down field from)
 
-              Returns
-              ----------
-                No returns
+              field_name(str): Name of the field that has to be refactored
+
+              filename_mapping(str): Mapping the file's name to the correct format so that it can be processed
+
+        Returns:
+            No returns
      """
+    program = utils2.get_program(source_filenames, print_status=True)
     if package_name not in program.packages \
             or superclass_name not in program.packages[package_name].classes \
             or field_name not in program.packages[package_name].classes[superclass_name].fields:

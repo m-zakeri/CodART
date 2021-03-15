@@ -2,14 +2,11 @@ import os
 
 from refactorings.utils import utils_listener_fast, utils2
 
-"""
-Introduction:
+"""Introduction:
 
 When multiple clients are using the same part of a class interface, or part of the interface in two classes is the same;
 Extract Interface Refactoring moves this identical portion to its own interface.
 
-"""
-"""
 Pre and Post Conditions
 
 Pre Conditions:
@@ -24,6 +21,7 @@ Post Conditions:
 No specific Post Condition
 """
 
+
 def extract_interface(source_filenames: list,
                       package_name: str,
                       class_names: list,
@@ -31,41 +29,29 @@ def extract_interface(source_filenames: list,
                       interface_name: str,
                       interface_filename: str,
                       filename_mapping=lambda x: (x[:-5] if x.endswith(".java") else x) + ".java") -> bool:
-    program = utils2.get_program(source_filenames, print_status=True)
-    """
-              The main function that does the process of extract interface refactoring.
+    """The main function that does the process of extract interface refactoring.
               Splits the identical,reused portion of the interface, creates a new interface,
               and moves the split portion to the new interface.
 
-              Parameters
-              ----------
-              source_filenames: list
-                   A list of file names to be processed
+        Args:
+              source_filenames (list): A list of file names to be processed
 
-              package_name : str
-                   The name of the package in which the refactoring has to be done (contains the classes)
+              package_name (str): The name of the package in which the refactoring has to be done (contains the classes)
 
-              class_name : str
-                  The classes which are going to implement the new interface
+              class_names (str): The classes which are going to implement the new interface
 
-              method_key : str
-                  The methods which are going to be included in the interface
+              method_keys (str): The methods which are going to be included in the interface
 
-              filename_mapping : str
-                   Mapping the file's name to the correct format so that it can be processed
+              filename_mapping (str): Mapping the file's name to the correct format so that it can be processed
                    
-              interface_name: str
-                   The new interface name
+              interface_name (str): The new interface name
                   
-              interface_filename: str
-                   The new interface file name
+              interface_filename (str): The new interface file name
                    
-              Returns
-              ----------
-              No returns
-
-       """
-
+        Returns:
+            No returns
+    """
+    program = utils2.get_program(source_filenames, print_status=True)
     if package_name not in program.packages \
             or any(
         class_name not in program.packages[package_name].classes

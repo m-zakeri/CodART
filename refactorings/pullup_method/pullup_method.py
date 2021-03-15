@@ -27,32 +27,23 @@ No specific Post Condition
 
 def pullup_method_refactoring(source_filenames: list, package_name: str, class_name: str, method_key: str,
                               filename_mapping=lambda x: x):
+    """The main function that does the process of pull up method refactoring.
+       Removes the necessary methods from the subclasses and moves them to a superclass.
+
+       Args:
+              source_filenames(list): A list of file names to be processed
+
+              package_name(str): The name of the package in which the refactoring has to be done(contains the classes)
+
+              class_name(str): Name of the class in which the refactoring has to be done (pulling up the field from here)
+
+              method_key(str): Name of the method which needs to be removed from the subclasses/pulled up
+
+              filename_mapping(str): Mapping the file's name to the correct format so that it can be processed
+
+       Returns:
+           No returns
     """
-              The main function that does the process of pull up method refactoring.
-              Removes the necessary methods from the subclasses and moves them to a superclass.
-
-              Parameters
-              ----------
-              source_filenames: list
-                   A list of file names to be processed
-
-              package_name : str
-                   The name of the package in which the refactoring has to be done(contains the classes)
-
-              class_name : str
-                   Name of the class in which the refactoring has to be done (pulling up the field from here)
-
-              method_key : str
-                   Name of the method which needs to be removed from the subclasses/pulled up
-
-              filename_mapping : str
-                   Mapping the file's name to the correct format so that it can be processed
-
-              Returns
-              ----------
-              No returns
-
-       """
     program = get_program(source_filenames)  # getting the program packages
     _sourceclass = program.packages[package_name].classes[class_name]
     target_class_name = _sourceclass.superclass_name

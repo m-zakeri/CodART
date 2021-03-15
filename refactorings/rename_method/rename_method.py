@@ -12,8 +12,7 @@ from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 Introduction:
 
 When the name of a method does not explain what the method does (method's functionality), it needs to be changed.
-"""
-"""
+
 Pre and Post Conditions
 
 Pre Conditions:
@@ -25,8 +24,6 @@ Pre Conditions:
 Post Conditions:
 1. After refactoring, all the old method names in the project should be changed.
 
-"""
-"""
 See whether the method is defined in a superclass or subclass. If so, you must repeat all steps in these classes too.
 
 The next method is important for maintaining the functionality of the program during the refactoring process. Create 
@@ -43,28 +40,20 @@ mark the old method as deprecated.
 class RenameMethodListener(JavaParserLabeledListener):
     def __init__(self, java_file_path, common_token_stream, scope_class_name, target_method_name, new_name,
                  reference=None):
-        """
-               The Main listener which parses the file based on the provided information,
-               using ANTLR parser generator and tokenization methods
+        """The Main listener which parses the file based on the provided information,
+            using ANTLR parser generator and tokenization methods
 
-               Parameters
-               ----------
-               java_file_path : str
-                    Address path to the test/source file
+            Args:
+                java_file_path(str): Address path to the test/source file
 
-               scope_class_name : str
-                    Name of the class in which the refactoring has to be done
+                scope_class_name(str): Name of the class in which the refactoring has to be done
 
-               target_method_name : str
-                    Name of the method in which the refactoring has to be done
+                target_method_name(str): Name of the method in which the refactoring has to be done
 
-               new_name : str
-                    The new name of the refactored method
+                new_name(str): The new name of the refactored method
 
-               Returns
-               ----------
-               No returns
-
+            Returns:
+                No returns
         """
         self.file_path = java_file_path
         self.token_stream = common_token_stream
