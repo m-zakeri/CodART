@@ -1,4 +1,4 @@
-site_name: My Docs
+site_name: CodArt
 
 theme:
   name: material
@@ -6,3 +6,16 @@ theme:
 plugins:
   - search
   - mkdocstrings
+
+nav:
+    - Home: index.md
+    - Code Reference:
+        - Decrease Field Visibility: DVisibilityField.md
+        - Increase Field Visibility: IVisibilityField.md
+        - Extract Interface: ExtractInterface.md
+        - Make Field Final: MakeFieldFinal.md
+        - Make Field Non-Final: MakeFieldNonFinal.md
+        - Pull-Up Field: PullUpField.md
+        - Push-Down Field: PushDownField.md
+        - Pull-Up Method: PullUpMethod.md
+        - Rename Method: RenameMethod.md
