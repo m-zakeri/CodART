@@ -1,26 +1,27 @@
-from refactorings.utils import utils_listener_fast, utils2
-
 """
-Introduction:
+## Introduction
 
 Although it was planned to use a field universally for all classes, in reality the field is used only in
 some subclasses. This situation can occur when planned features fail to pan out, for example.
 because of this, we push down the field from the superclass into its related subclass.
 
-Pre and Post Conditions
+## Pre and Post Conditions
 
-Pre Conditions:
+### Pre Conditions:
 1. There should exist a corresponding child and parent in the project.
 
 2. The field that should be pushed down must be valid.
 
 3. The user must enter the package's name, class's name and the fields that need to be added.
 
-Post Conditions:
+### Post Conditions:
 1. The changed field's usages and callings will also change respectively.
 
 2. There will be children and parents having their desired fields added or removed.
 """
+
+from refactorings.utils import utils_listener_fast, utils2
+
 
 def pushdown_field(source_filenames: list,
                    package_name: str,
@@ -28,7 +29,6 @@ def pushdown_field(source_filenames: list,
                    field_name: str,
                    class_names: list = [],
                    filename_mapping=lambda x: (x[:-5] if x.endswith(".java") else x) + ".java") -> bool:
-
     """The main function that does the process of pull up field refactoring.
         Adds the necessary fields to the subclasses and removes them from the superclass.
 
