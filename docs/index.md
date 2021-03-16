@@ -1,10 +1,10 @@
 # CodART: Automated Source Code Refactoring Toolkit
 
-By: **Morteza Zakeri**†
+**Morteza Zakeri**†
 
 † Ph.D. Student, Iran University of Science and Technology, Tehran, Iran (m-zakeri@live.com).
 
-Version 0.2.0 (16 March 2021) ├ Download [PDF](./pdfs/project_proposal_v1z.pdf) version
+Version 0.2.0 (16 March 2021) ├ Download PDF versions [v0.1.0](./pdfs/project_proposal_v1z.pdf), [v0.2.0](./pdfs/project_proposal_v2z.pdf)
 
 
 **Abstract—** Software refactoring is performed by changing the software structure without modifying its external behavior. Many software quality attributes can be enhanced through the source code refactoring, such as reusability, flexibility, understandability, and testability. Refactoring engines are tools that automate the application of refactorings: first, the user chooses a refactoring to apply, then the engine checks if the transformation is safe, and if so, transforms the program. Refactoring engines are a key component of modern Integrated Development Environments (IDEs), and programmers rely on them to perform refactorings. In this project, an open-source software toolkit for refactoring Java source codes, namely CodART, will be developed. ANTLR parser generator is used to create and modify the program syntax-tree and produce the refactored version of the program. To the best of our knowledge, CodART is the first open-source refactoring toolkit based on ANTLR.
@@ -34,9 +34,9 @@ Refactoring engines must be reliable. A fault in a refactoring engine can silent
 
 To perform refactoring correctly, the tool has to operate on the syntax tree of the code, not on the text. Manipulating the syntax tree is much more reliable to preserve what the code is doing. Refactoring is not just understanding and updating the syntax tree. The tool also needs to figure out how to rerender the code into text back in the editor view, called code transformation. All in all, implementing decent refactoring is a challenging programming exercise, required compiler knowledge. 
 
-In this project, we develop CodART, a toolkit for applying a given refactoring on the source code and obtain the refactored code. To this aim, we will use ANTLR [1] to generate and modify the program syntax tree. CodART development consists of two phases: In the first phase, 42 common refactoring operations will be automated, and in the second phase, an algorithm to find the best sequence of refactorings to apply on a given software will be developed using many-objective search-based approaches.
+In this project, we develop CodART, a toolkit for applying a given refactoring on the source code and obtain the refactored code. To this aim, we will use ANTLR [1] to generate and modify the program syntax tree. CodART development consists of two phases: In the first phase, **47 common refactoring operations** will be automated, and in the second phase, an algorithm to find the best sequence of refactorings to apply on a given software will be developed using many-objective search-based approaches.
 
-Section 2 describes the refactoring operations in detail. Section 3 discusses the search-based refactoring and many-objective evolutionary algorithms. Section 4 explains the implementation phases, dataset, developers' team arrangement, and grading policy. Conclusion and future works are discussed in Section 5.
+The rest of this *white-paper* is organized as follows. Section 2 describes the refactoring operations in detail. Section 3 explains code smells in detail. Section 4 briefly discusses the search-based refactoring techniques and many-objective evolutionary algorithms. Section 5 explains the implementation details of the current version of CodART. Section 6 lists the Java project used to evaluate CodART. Section 7 articulates the proposals that existed behind the CodART projects. Finally, the conclusion and future works are discussed in Section 8.
 
 
 
@@ -45,6 +45,7 @@ Section 2 describes the refactoring operations in detail. Section 3 discusses th
 This section explains the refactoring operations used in the project. A catalog of 72 refactoring operations has been proposed by Fowler [2]. We called this refactorings atomic refactoring operations. 
 
 Each refactoring operation has a definition and is clearly specified by the entities in which it is involved and the role of each. Table 1 describes the desirable refactorings, which we aim to automate them. It worth noting that not all of these refactoring operations are introduced by Fowler [2]. A concrete example for most of the refactoring operations in the table is available at [https://refactoring.com/catalog/](https://refactoring.com/catalog/). Examples of other refactorings can be found at [https://refactoring.guru/refactoring/techniques](https://refactoring.guru/refactoring/techniques) and [https://sourcemaking.com/refactoring/refactorings](ttps://sourcemaking.com/refactoring/refactorings). 
+
 
 *Table 1. Refactoring operations*
 
@@ -162,11 +163,13 @@ This section describes implementation details of the CodART. It includes CodART 
 
 ### 5.1	CodART architecture
 
-To be completed
+To be completed.
+
 
 ### 5.2	High-level structure of project repository
 
-To be completed
+To be completed.
+
 
 ### 5.3	Refactoring automation
 
@@ -175,6 +178,7 @@ Each refactoring operation in Table 1 is implemented as an API, with the refacto
 The core of our refactoring engine is a syntax-tree modification algorithm.  Fundamentally, ANTLR is used to generate and modify the syntax-tree of a given program. Each refactoring API is an ANTLR *Listener* or *visitor* class, which required argument by its constructor and preform refactoring when call by parse-tree walker object. The refactoring target and input parameters must read from a configuration file, which can be expressed in JSON, XML, or YAML formats.
 
 The key to use ANTLR for refactoring tasks is the ```TokenStreamRewriter``` object that knows how to give altered views of a token stream without actually modifying the stream. It treats all of the manipulation methods as "instructions" and queues them up for lazy execution when traversing the token stream to render it back as text. The rewriter *executes* those instructions every time we call ```getText()```. This strategy is very effective for the general problem of source code instrumentation or refactoring. The ```TokenStreamRewriter``` is a powerful and extremely efficient means of manipulating a token stream.
+
 
 ### 5.4	Refactoring recommendation
 
@@ -222,9 +226,9 @@ The detailed information of our current proposals are available in the following
     
  2. [Core code smells development](./proposals/core_code_smell_development.md) Current semester (Winter and Spring 2021)
     
- 3. Core search-based development (Future semesters)
+ 3. [Core search-based development](./proposals/core_search_based_development.md) (Future semesters)
 
- 4. Core refactoring to design patterns development (Future semesters)
+ 4. [Core refactoring to design patterns development](./proposals/core_refactoring_to_design_patterns_development.md) (Future semesters)
 
 
 **Note:** Students whose final project is confirmed by the reverse engineering laboratory have an opportunity to work on CodART as an independent and advanced research project. The only prerequisite is to pass the compiler graduate course by Dr. Saeed Parsa.
