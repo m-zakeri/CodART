@@ -26,7 +26,11 @@ import math
 # os.add_dll_directory('C:/Program Files/SciTools/bin/pc-win64')
 sys.path.insert(0, 'D:/program files/scitools/bin/pc-win64/python')
 
-import understand
+try:
+    import understand
+except ModuleNotFoundError:
+    # Error handling
+    pass
 
 import matplotlib.pyplot as plt
 import pandas as pd
