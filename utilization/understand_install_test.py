@@ -4,7 +4,7 @@ import sys
 import struct
 import shutil
 import re
-from utils.setup_understand import *
+from utilization.setup_understand import *
 
 # Verify Python 3
 
@@ -36,14 +36,14 @@ else:
 
 # Check that Understand is the same bitness as python
 understandBit = 0
-caseSensitive = True;
+caseSensitive = True
 ldTest = False
 if 'pc-win32' in undPath:
     understandBit = 32
-    caseSensitive = False;
+    caseSensitive = False
 elif 'pc-win64' in undPath:
     understandBit = 64
-    caseSensitive = False;
+    caseSensitive = False
 elif 'linux32' in undPath:
     understandBit = 32
     ldTest = True
@@ -59,7 +59,7 @@ pythonBit = (struct.calcsize("P") * 8)
 if (pythonBit != understandBit):
     print("Checking that Bit versions match: Fail")
     print("  Error: Python is", pythonBit, "bit and Understand is", understandBit, "bit. They need to match")
-    quit();
+    quit()
 print("Checking that Bit versions match: Pass")
 
 # If Linux, check if LD_LIBRARY_PATH is set. Otherwise graphing won't work
@@ -85,7 +85,7 @@ pythonPath = sys.path
 for testDir in pythonPath:
     cleanDir = os.path.normcase(testDir)
     if cleanDir == pythonDir:
-        inPythonPath = True;
+        inPythonPath = True
     if (cleanDir.find('\"') > 0):
         print("  Illegal Quote characters were found in PYTHONPATH: " + cleanDir)
 if (not inPythonPath):
