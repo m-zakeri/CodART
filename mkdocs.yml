@@ -1,21 +1,48 @@
-site_name: CodArt
+site_name: CodART Docs (v0.1.0)
+site_url: https://m-zakeri.github.io
+repo_url: https://github.com/m-zakeri/CodART
+site_description: Automated Source Code Refactoring Toolkit
+site_author: Zakeri, Tahaei, Ayati
+copyright: (c) 2020-2021 CodART Project - Reverse engineering laboratory
 
 theme:
   name: material
 
+
 plugins:
   - search
-  - mkdocstrings
+  - mkdocstrings:
+      handlers:
+        python:
+          setup_commands:
+            - import sys
+            - import os
+          selection:
+            members: True
 
 nav:
     - Home: index.md
-    - Code Reference:
-        - Decrease Field Visibility: DVisibilityField.md
-        - Increase Field Visibility: IVisibilityField.md
-        - Extract Interface: ExtractInterface.md
-        - Make Field Final: MakeFieldFinal.md
-        - Make Field Non-Final: MakeFieldNonFinal.md
-        - Pull-Up Field: PullUpField.md
-        - Push-Down Field: PushDownField.md
-        - Pull-Up Method: PullUpMethod.md
-        - Rename Method: RenameMethod.md
+    - Refactoring list: refactorings_list.md
+    - Code smell list: code_smells_list.md
+    - Benchmarks: benchmarks.md
+    - Proposals:
+        - Core Refactoring Development: proposals/core_refactorings_development.md
+        - Core Code Smell Development: proposals/core_code_smell_development.md
+    - Refactorings details:
+        - Decrease Field Visibility: refactorings/decrease_field_visibility.md
+        - Increase Field Visibility: refactorings/increase_field_visibility.md
+        - Extract Interface: refactorings/extract_interface.md
+        - Make Field Final: refactorings/make_field_final.md
+        - Make Field Non-Final: refactorings/make_field_non_final.md
+        - Pull-Up Field: refactorings/pull_up_field.md
+        - Push-Down Field: refactorings/push_down_field.md
+        - Pull-Up Method: refactorings/pull_up_method.md
+        - Rename Method: refactorings/rename_method.md
+    - Code smells details:
+        - Large class: code_smells/large_class.md
+        - Long method: code_smells/long_method.md
+        - Feature envy: code_smells/feature_envy.md
+    - Publications: publications.md
+    - About us: about.md
+    - FAQ : faq.md
+    - Issue Tracker: 'https://github.com/m-zakeri/CodART/issues'
