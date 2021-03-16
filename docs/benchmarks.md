@@ -28,7 +28,7 @@ Refactorings are applied to the software systems listed in Table 3. Benchmark pr
 
 ## New projects
 
-
+To be announced. 
 
 ## References
 
