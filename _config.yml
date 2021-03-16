@@ -1,0 +1,5 @@
+theme: jekyll-theme-minimal
+title: "IUST CodART"
+description: "Automated Source Code Refactoring Toolkit"
+logo: "./figs/logo.png"
+show_downloads: "true"

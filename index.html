@@ -1,0 +1,1123 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      <link rel="icon" href="assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.0.6">
+    
+    
+      
+        <title>CodART Docs (v0.1.0)</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.2c0c5eaf.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.7fa14f5b.min.css">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font-family:"Roboto";--md-code-font-family:"Roboto Mono"}</style>
+      
+    
+    
+    
+      <link rel="stylesheet" href="assets/_mkdocstrings.css">
+    
+    
+      
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+      
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#codart" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="." title="CodART Docs (v0.1.0)" class="md-header__button md-logo" aria-label="CodART Docs (v0.1.0)" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            CodART Docs (v0.1.0)
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              CodART
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="md-header__options">
+      
+    </div>
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="." title="CodART Docs (v0.1.0)" class="md-nav__button md-logo" aria-label="CodART Docs (v0.1.0)" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    CodART Docs (v0.1.0)
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          CodART
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="." class="md-nav__link md-nav__link--active">
+        CodART
+      </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#automated-source-code-refactoring-toolkit" class="md-nav__link">
+    Automated Source Code Refactoring Toolkit
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-introduction" class="md-nav__link">
+    1 Introduction
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-refactoring-operations" class="md-nav__link">
+    2 Refactoring operations
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-search-based-refactoring" class="md-nav__link">
+    3 Search-based refactoring
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-code-smells" class="md-nav__link">
+    4 Code smells
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-implementation" class="md-nav__link">
+    4 Implementation
+  </a>
+  
+    <nav class="md-nav" aria-label="4 Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-refactoring-automation" class="md-nav__link">
+    4.1 Refactoring automation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-refactoring-recommendation" class="md-nav__link">
+    4.2 Refactoring recommendation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-dataset" class="md-nav__link">
+    4.3 Dataset
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-agenda" class="md-nav__link">
+    4.4 Agenda
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#45-grading-policy" class="md-nav__link">
+    4.5 Grading policy
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="decrease_field_visibility/" class="md-nav__link">
+        Decrease field visibility
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="extract_interface/" class="md-nav__link">
+        Extract interface
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="increase_field_visibility/" class="md-nav__link">
+        Increase field visibility
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="make_field_final/" class="md-nav__link">
+        Make field final
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="make_field_non_final/" class="md-nav__link">
+        Make field non-final
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="pull_up_field/" class="md-nav__link">
+        Pull-up field
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="pull_up_method/" class="md-nav__link">
+        Pull-up method
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="push_down_field/" class="md-nav__link">
+        Push down field
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="rename_method/" class="md-nav__link">
+        Rename method
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#automated-source-code-refactoring-toolkit" class="md-nav__link">
+    Automated Source Code Refactoring Toolkit
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-introduction" class="md-nav__link">
+    1 Introduction
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-refactoring-operations" class="md-nav__link">
+    2 Refactoring operations
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-search-based-refactoring" class="md-nav__link">
+    3 Search-based refactoring
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-code-smells" class="md-nav__link">
+    4 Code smells
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-implementation" class="md-nav__link">
+    4 Implementation
+  </a>
+  
+    <nav class="md-nav" aria-label="4 Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-refactoring-automation" class="md-nav__link">
+    4.1 Refactoring automation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-refactoring-recommendation" class="md-nav__link">
+    4.2 Refactoring recommendation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-dataset" class="md-nav__link">
+    4.3 Dataset
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-agenda" class="md-nav__link">
+    4.4 Agenda
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#45-grading-policy" class="md-nav__link">
+    4.5 Grading policy
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                
+                <h1 id="codart">CodART</h1>
+<h3 id="automated-source-code-refactoring-toolkit">Automated Source Code Refactoring Toolkit</h3>
+<p>By: <strong>Morteza Zakeri</strong>†</p>
+<p>† Ph.D. Student, Iran University of Science and Technology, Tehran, Iran (m-zakeri@live.com).</p>
+<p>Version 0.1.0 (8 November 2020) ├ Download <a href="pdfs/project_proposal_v1z.pdf">PDF</a> version</p>
+<p><strong>Abstract—</strong> Software refactoring is performed by changing the software structure without modifying its external behavior. Many software quality attributes can be enhanced through the source code refactoring, such as reusability, flexibility, understandability, and testability. Refactoring engines are tools that automate the application of refactorings: first, the user chooses a refactoring to apply, then the engine checks if the transformation is safe, and if so, transforms the program. Refactoring engines are a key component of modern Integrated Development Environments (IDEs), and programmers rely on them to perform refactorings. In this project, an open-source software toolkit for refactoring Java source codes, namely CodART, will be developed. ANTLR parser generator is used to create and modify the program syntax-tree and produce the refactored version of the program. To the best of our knowledge, CodART is the first open-source refactoring toolkit based on ANTLR.</p>
+<p><strong>Index Terms:</strong> Software refactoring, refactoring engine, search-based refactoring, ANTLR, Java.</p>
+<h2 id="1-introduction">1 Introduction</h2>
+<p><strong>R</strong>efactoring is a behavior-preserving program transformation that improves the design of a program. Refactoring engines are tools that automate the application of refactorings. The programmer need only select which refactoring to apply, and the engine will automatically check the <em>preconditions</em> and apply the transformations across the entire program if the preconditions are satisfied. Refactoring is gaining popularity, as evidenced by the inclusion of refactoring engines in modern IDEs such as <a href="https://www.jetbrains.com/idea/">IntelliJ IDEA</a>, <a href="http://www.eclipse.org">Eclipse</a>, or <a href="http://www.netbeans.org">NetBeans</a> for Java.</p>
+<p>Considering the <em>EncapsulateField</em> refactoring as an illustrative example. This refactoring replaces all references to a field with accesses through setter and getter methods. The <em>EncapsulateField</em> refactoring takes as input the name of the field to encapsulate and the names of the new getter and setter methods. It performs the following transformations:</p>
+<ul>
+<li>Creates a public getter method that returns the field's value, </li>
+<li>Creates a public setter method that updates the field's value,
+to a given parameter's value,</li>
+<li>Replaces all field reads with calls to the getter method,</li>
+<li>Replaces all field writes with calls to the setter method,</li>
+<li>Changes the field's access modifier to private.</li>
+</ul>
+<p>The <em>EncapsulateField</em> refactoring checks several preconditions, including that the code does not already contain accessor methods and that these methods are applicable to the expressions in which the field appears. Figure 1 shows a sample program before and after encapsulating the field <code>f</code> into the <code>getF</code> and <code>setF</code> methods.</p>
+<p><img alt="Figure 1. Example EncapsulateField refactoring" src="figs/fig1.png" /></p>
+<p><em>Figure 1. Example EncapsulateField refactoring</em></p>
+<p>Refactoring engines must be reliable. A fault in a refactoring engine can silently introduce bugs in the refactored program and lead to challenging debugging sessions. If the original program compiles, but the refactored program does not, the refactoring is obviously incorrect and can be easily undone. However, if the refactoring engine erroneously produces a refactored program that compiles but does not preserve the semantics of the original program, this can have severe consequences. </p>
+<p>To perform refactoring correctly, the tool has to operate on the syntax tree of the code, not on the text. Manipulating the syntax tree is much more reliable to preserve what the code is doing. Refactoring is not just understanding and updating the syntax tree. The tool also needs to figure out how to rerender the code into text back in the editor view, called code transformation. All in all, implementing decent refactoring is a challenging programming exercise, required compiler knowledge. </p>
+<p>In this project, we want to develop CodART, a toolkit for applying a given refactoring on the source code and obtain the refactored code. To this aim, we will use ANTLR [1] to generate and modify the program syntax tree. CodART development consists of two phases: In the first phase, 42 common refactoring operations will be automated, and in the second phase, an algorithm to find the best sequence of refactorings to apply on a given software will be developed using many-objective search-based approaches.</p>
+<p>Section 2 describes the refactoring operations in detail. Section 3 discusses the search-based refactoring and many-objective evolutionary algorithms. Section 4 explains the implementation phases, dataset, developers' team arrangement, and grading policy. Conclusion and future works are discussed in Section 5.</p>
+<h2 id="2-refactoring-operations">2 Refactoring operations</h2>
+<p>This section explains the refactoring operations used in the project. A catalog of 72 refactoring operations has been proposed by Fowler [2]. Each refactoring operation has a definition and is clearly specified by the entities in which it is involved and the role of each. Table 1 describes the desirable refactorings, which we aim to automate them. It worth noting that not all of these refactoring operations are introduced by Fowler [2]. A concrete example for most of the refactoring operations in the table is available at <a href="https://refactoring.com/catalog/">https://refactoring.com/catalog/</a>. Examples of other refactorings can be found at <a href="https://refactoring.guru/refactoring/techniques">https://refactoring.guru/refactoring/techniques</a> and <a href="ttps://sourcemaking.com/refactoring/refactorings">https://sourcemaking.com/refactoring/refactorings</a>. </p>
+<p><em>Table 1. Refactoring operations</em></p>
+<table>
+<thead>
+<tr>
+<th>Refactoring</th>
+<th>Definition</th>
+<th>Entities</th>
+<th>Roles</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Move   class</td>
+<td>Move   a class from a package to another</td>
+<td>package     class</td>
+<td>source   package, target package     moved   class</td>
+</tr>
+<tr>
+<td>Move   method</td>
+<td>Move   a method from a class to another.</td>
+<td>class     method</td>
+<td>source   class, target class     moved   method</td>
+</tr>
+<tr>
+<td>Merge   packages</td>
+<td>Merge   the elements of a set of packages in one of them</td>
+<td>package</td>
+<td>source   package, target package</td>
+</tr>
+<tr>
+<td>Extract/Split   package</td>
+<td>Add   a package to compose the elements of another package</td>
+<td>package</td>
+<td>source   package, target package</td>
+</tr>
+<tr>
+<td>Extract   class</td>
+<td>Create   a new class and move fields and methods from the old class to the new one</td>
+<td>class     method</td>
+<td>source   class, new class     moved   methods</td>
+</tr>
+<tr>
+<td>Extract method</td>
+<td>Extract a code fragment into a method</td>
+<td>method     statement</td>
+<td>source method, new method     moved statements</td>
+</tr>
+<tr>
+<td>Inline   class</td>
+<td>Move   all features of a class in another one and remove it</td>
+<td>class</td>
+<td>source   class, target class</td>
+</tr>
+<tr>
+<td>Move   field</td>
+<td>Move   a field from a class to another</td>
+<td>class     field</td>
+<td>source   class, target class     field</td>
+</tr>
+<tr>
+<td>Push   down field</td>
+<td>Move   a field of a superclass to a subclass</td>
+<td>class     field</td>
+<td>super   class, sub classes     move   field</td>
+</tr>
+<tr>
+<td>Push   down method</td>
+<td>Move   a method of a superclass to a subclass</td>
+<td>class     method</td>
+<td>super   class, sub classes     moved   method</td>
+</tr>
+<tr>
+<td>Pull   up field</td>
+<td>Move   a field from subclasses to the superclass</td>
+<td>class     field</td>
+<td>sub   classes, super class     moved   field</td>
+</tr>
+<tr>
+<td>Pull   up method</td>
+<td>Move   a method from subclasses to the superclass</td>
+<td>class     method</td>
+<td>sub   classes, super class     moved   method</td>
+</tr>
+<tr>
+<td>Increase   field visibility</td>
+<td>Increase   the visibility of a field from public to protected, protected to package or   package to private</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Decrease   field visibility</td>
+<td>Decrease   the visibility of a field from private to package, package to protected or   protected to public</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Make   field final</td>
+<td>Make   a non-final field final</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Make   field non-final</td>
+<td>Make   a final field non-final</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Make   field static</td>
+<td>Make   a non-static field static</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Make   field non-static</td>
+<td>Make   a static field non-static</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Remove   field</td>
+<td>Remove   a field from a class</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Increase   method visibility</td>
+<td>Increase   the visibility of a method from public to protected, protected to package or   package to private</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Decrease   method visibility</td>
+<td>Decrease   the visibility of a method from private to package, package to protected or   protected to public</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Make   method final</td>
+<td>Make   a non-final method final</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Make   method non-final</td>
+<td>Make   a final method non-final</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Make   method static</td>
+<td>Make   a non-static method static</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Make   method non- static</td>
+<td>Make   a static method non-static</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Remove   method</td>
+<td>Remove   a method from a class</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Make   class-final</td>
+<td>Make   a non-final class final</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Make   class non-final</td>
+<td>Make   a final class non-final</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Make   class abstract</td>
+<td>Change   a concrete class to abstract</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Make   class concrete</td>
+<td>Change   an abstract class to concrete</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Extract   subclass</td>
+<td>Create   a subclass for a set of features</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Extract   interface</td>
+<td>Extract   methods of a class into an interface</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Inline   method</td>
+<td>Move   the body of a method into its callers and remove the method</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Collapse hierarchy</td>
+<td>Merge a superclass and a subclass</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Remove control flag</td>
+<td>Replace control flag with break</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Replace nested conditional with guard clauses</td>
+<td>Replace nested conditional with guard clauses</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Replace constructor with factory function</td>
+<td>Replace constructor with factory function</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Replace exception with test</td>
+<td>Replace exception with precheck</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Rename field</td>
+<td>Rename a field</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Rename method</td>
+<td>Rename a method</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Rename class</td>
+<td>Rename a class</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Rename package</td>
+<td>Rename a package</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="3-search-based-refactoring">3 Search-based refactoring</h2>
+<p>After refactoring operations were automated, we must decide which refactorings souled be performed in order to elevate software quality. The concern about using refactoring operations in Table 1 is whether each one of them has a positive impact on the refactored code quality or not. Finding the right sequence of refactorings to be applied in a software artifact is considered a challenging task since there is a wide range of refactorings. The ideal sequence is, therefore, must correlate to different quality attributes to be improved as a result of applying refactorings. </p>
+<p>Finding the best refactoring sequence is an optimization problem that can be solved by search techniques in the field known as Search-Based Software Engineering (SBSE) [3]. In this approach, refactorings are applied stochastically to the original software solution, and then the software is measured using a fitness function consisting of one or more software metrics. There are various metric suites available to measure characteristics like cohesion and coupling, but different metrics measure the software in different ways, and thus how they are applied will have a different effect on the outcome. </p>
+<p>The second phase of this project is to use a many-objective search algorithm to find the best sequence of refactoring on a given project. Recently, many-objective SBSE approach for refactoring [3]–[5] and remodularization, regrouping a set of classes C in terms of packages P, [6] has gained more attention due to its ability to find the best sequence of refactoring operations which is led to the improvement in software quality. Therefore, we first focus on implementing the proposed approach approaches in [3], [5], [6] as fundamental works in this area. Then, we will improve their approach. As a new contribution, we add new refactoring operations and new objective functions to improve the quality attribute of the software. We also evaluate our method on the new software projects which are not used in previous works.</p>
+<h2 id="4-code-smells">4 Code smells</h2>
+<h2 id="4-implementation">4 Implementation</h2>
+<p>This section describes two phases of the project: Refactoring automation with ANTLR parser generator and refactoring recommendation through many-objective search-based refactoring.</p>
+<h3 id="41-refactoring-automation">4.1 Refactoring automation</h3>
+<p>Each refactoring operation in Table 1 is implemented as an API, with the refactoring name. The API receives the involved entities with their refactoring roles and other required data as inputs, checks the feasibility of the refactoring using refactoring preconditions described in [2], performs the refactoring if it is feasible, and returns the refactored code or return null if the refactoring is not feasible.</p>
+<p>The core of our refactoring engine is a syntax-tree modification algorithm.  Fundamentally, ANTLR is used to generate and modify the syntax-tree of a given program. Each refactoring API is an ANTLR <em>Listener</em> or <em>visitor</em> class, which required argument by its constructor and preform refactoring when call by parse-tree walker object. The refactoring target and input parameters must read from a configuration file, which can be expressed in JSON, XML, or YAML formats.</p>
+<p>The key to use ANTLR for refactoring tasks is the <code>TokenStreamRewriter</code> object that knows how to give altered views of a token stream without actually modifying the stream. It treats all of the manipulation methods as "instructions" and queues them up for lazy execution when traversing the token stream to render it back as text. The rewriter <em>executes</em> those instructions every time we call <code>getText()</code>. This strategy is very effective for the general problem of source code instrumentation or refactoring. The <code>TokenStreamRewriter</code> is a powerful and extremely efficient means of manipulating a token stream.</p>
+<h3 id="42-refactoring-recommendation">4.2 Refactoring recommendation</h3>
+<p>A solution consists of a sequence of n refactoring operations applied to different code elements in the source code to fix. In order to represent a candidate solution (individual/chromosome), we use a vector-based representation. Each vector’s dimension represents a refactoring operation where the order of applying these refactoring operations corresponds to their positions in the vector. The initial population is generated by randomly assigning a sequence of refactorings to some code fragments. Each generated refactoring solution is executed on the software system <em>S</em>. Once all required data is computed, the solution is evaluated based on the quality of the resulting design.</p>
+<h3 id="43-dataset">4.3 Dataset</h3>
+<p>Refactorings are applied to software systems listed in Table 2. Datasets may change in the future. We use a set of well-known open-source Java projects that have been investigated in previous works and also add new Java software projects.</p>
+<p><em>Table 2. Software systems refactored in this project</em></p>
+<table>
+<thead>
+<tr>
+<th>System</th>
+<th>Release</th>
+<th>Previous releases</th>
+<th>Domain</th>
+<th>Reference</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>[Xerces-J]</td>
+<td>v2.7.0</td>
+<td></td>
+<td>software packages for parsing XML</td>
+<td>[3], [6]</td>
+</tr>
+<tr>
+<td>[Azureus]</td>
+<td>v2.3.0.6</td>
+<td></td>
+<td>Java BitTorrent client for handling multiple torrents</td>
+<td>[3]</td>
+</tr>
+<tr>
+<td>[ArgoUML]</td>
+<td>v0.26 and v0.3</td>
+<td></td>
+<td>UML tool for object-oriented design</td>
+<td>[3]</td>
+</tr>
+<tr>
+<td>[Apache Ant]</td>
+<td>v1.5.0 and v1.7.0</td>
+<td></td>
+<td>Java build tool and library</td>
+<td>[3]</td>
+</tr>
+<tr>
+<td>[GanttProject]</td>
+<td>v1.10.2 and v1.11.1</td>
+<td></td>
+<td>project management</td>
+<td>[3], [6], [5]</td>
+</tr>
+<tr>
+<td>[JHotDraw]</td>
+<td>v6.1 and v6.0b1 and v5.3</td>
+<td></td>
+<td>graphics tool</td>
+<td>[6], [5], [4]</td>
+</tr>
+<tr>
+<td>[JFreeChart]</td>
+<td>v1.0.9</td>
+<td></td>
+<td>chart tool</td>
+<td>[6]</td>
+</tr>
+<tr>
+<td>[Beaver]</td>
+<td>v0.9.11 and v0.9.8</td>
+<td></td>
+<td>parser generator</td>
+<td>[5], [4]</td>
+</tr>
+<tr>
+<td>[Apache XML-RPC]</td>
+<td>v3.1.1</td>
+<td></td>
+<td>B2B communications</td>
+<td>[5], [4]</td>
+</tr>
+<tr>
+<td>[JRDF]</td>
+<td>v0.3.4.3</td>
+<td></td>
+<td>semantic web (resource management)</td>
+<td>[5]</td>
+</tr>
+<tr>
+<td>[XOM]</td>
+<td>v1.2.1</td>
+<td></td>
+<td>XML tool</td>
+<td>[5]</td>
+</tr>
+<tr>
+<td>[JSON]</td>
+<td>v1.1</td>
+<td></td>
+<td>software packages for parsing JSON</td>
+<td>[4]</td>
+</tr>
+<tr>
+<td>[JFlex]</td>
+<td>v1.4.1</td>
+<td></td>
+<td>lexical analyzer generator</td>
+<td>[4]</td>
+</tr>
+<tr>
+<td>[Mango]</td>
+<td>v</td>
+<td></td>
+<td></td>
+<td>[4]</td>
+</tr>
+<tr>
+<td>[Weka]</td>
+<td>v3.9</td>
+<td></td>
+<td>data mining tool</td>
+<td>New</td>
+</tr>
+<tr>
+<td>[ANTLR]</td>
+<td>v4.8.0</td>
+<td></td>
+<td>parser generator tool</td>
+<td>New</td>
+</tr>
+</tbody>
+</table>
+<h3 id="44-agenda">4.4 Agenda</h3>
+<p>Students must form groups of up to three persons, and each group must implement several refactoring operations. The exact list of refactoring will be assigned to each group subsequently. The refactoring operations in Table 1 may update during the semester. </p>
+<p>As an example of refactoring automation, we have implemented the EncapsulateField refactoring, illustrated in Figure 1. A naïve implementation is available on the project official Github page at <a href="https://m-zakeri.github.io/CodART">https://m-zakeri.github.io/CodART</a>. In addition, 26 refactoring operations in Table 1 have been implemented by <a href="https://github.com/mmohan01/MultiRefactor">MultiRefactor</a> [7] based on <a href="http://sourceforge.net/projects/recoder">RECODER</a>, three of them have been implemented by JDeodrant [8], and other operations have been automated in  [3], [6]. RECODER extracts a model of the code that can be used to analyze and modify the code before the changes are applied and written to file. The tool takes Java source code as input and will output the modified source code to a specified folder. The input must be fully compilable and must be accompanied by any necessary library files as compressed jar files.</p>
+<h3 id="45-grading-policy">4.5 Grading policy</h3>
+<p><em>Table 3. Grading policy</em></p>
+<p>Table 3 shows the grading policy. Grading policy may change in the future. </p>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Score   (100)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Refactoring   operations implementation</td>
+<td>40</td>
+</tr>
+<tr>
+<td>Search-based   refactoring recommendation</td>
+<td>30</td>
+</tr>
+<tr>
+<td>Evaluation   of the tool on a real dataset</td>
+<td>20</td>
+</tr>
+<tr>
+<td>Documentations</td>
+<td>10</td>
+</tr>
+<tr>
+<td>Improving   the state-of-the-arts papers</td>
+<td>30+   (extra bonus)</td>
+</tr>
+</tbody>
+</table>
+<h1 id="5-conclusion">5 Conclusion</h1>
+<p>Software refactoring is used to reduce the costs and risks of software evolution. Automated software refactoring tools can reduce risks caused by manual refactoring, improve efficiency, and reduce software refactoring difficulties. Researchers have made great efforts to research how to implement and improve automated software refactoring tools. However, the results of automated refactoring tools often deviate from the intentions of the implementer. The goal of this project is to propose an open-source refactoring engine and toolkit that can automatically find the best refactoring sequence required for a given software and apply this sequence. Since the tool is work based on compiler principles, it is reliable to be used in practice and has many benefits for software developer companies. Students who participate in the project will learn compiler techniques such as lexing, parsing, source code analysis, and source code transformation. They also learn about software refactoring, search-based software engineering, optimization, software quality, and object-orient metrics. </p>
+<h3 id="conflict-of-interest">Conflict of interest</h3>
+<p>The project is supported by the (IUST Reverse Engineering Research Laboratory)[http://reverse.iust.ac.ir]. Interested students may continue working on this project to fulfill their final bachelor and master thesis or their internship.</p>
+<h2 id="references">References</h2>
+<p>[1] T. Parr and K. Fisher, “LL(*): the foundation of the ANTLR parser generator,” Proc. 32nd ACM SIGPLAN Conf. Program. Lang. Des. Implement., pp. 425–436, 2011.</p>
+<p>[2] M. K. B. Fowler, Refactoring: improving the design of existing code, Second Edi. Addison-Wesley, 2018.</p>
+<p>[3] M. W. Mkaouer, M. Kessentini, S. Bechikh, M. Ó Cinnéide, and K. Deb, “On the use of many quality attributes for software refactoring: a many-objective search-based software engineering approach,” Empir. Softw. Eng., vol. 21, no. 6, pp. 2503–2545, Dec. 2016.</p>
+<p>[4] M. Mohan, D. Greer, and P. McMullan, “Technical debt reduction using search based automated refactoring,” J. Syst. Softw., vol. 120, pp. 183–194, Oct. 2016.</p>
+<p>[5] M. Mohan and D. Greer, “Using a many-objective approach to investigate automated refactoring,” Inf. Softw. Technol., vol. 112, pp. 83–101, Aug. 2019.</p>
+<p>[6] W. Mkaouer et al., “Many-Objective Software Remodularization Using NSGA-III,” ACM Trans. Softw. Eng. Methodol., vol. 24, no. 3, pp. 1–45, May 2015.</p>
+<p>[7] M. Mohan and D. Greer, “MultiRefactor: automated refactoring to improve software quality,” 2017, pp. 556–572.</p>
+<p>[8] N. Tsantalis, T. Chaikalis, and A. Chatzigeorgiou, “Ten years of JDeodorant: lessons learned from the hunt for smells,” in 2018 IEEE 25th International Conference on Software Analysis, Evolution and Reengineering (SANER), 2018, pp. 4–14.</p>
+<h4 id="related-links">Related links</h4>
+<p><a href="http://parsa.iust.ac.ir/courses/compilers/">IUST compiler course official webpage</a></p>
+<p>ANTLR slides: PART 1: <a href="http://parsa.iust.ac.ir/download_center/courses_material/compilers/slides/ANTLR_part1_introduction.pdf">Introduction</a></p>
+<p>ANTLR slides: PART 2: <a href="http://parsa.iust.ac.ir/download_center/courses_material/compilers/slides/ANTLR_part2_getting_started_in_Java.pdf">Getting started in Java</a></p>
+<p>ANTLR slides: PART 3: <a href="http://parsa.iust.ac.ir/download_center/courses_material/compilers/slides/ANTLR_part3_getting_started_in_CSharp.pdf">Getting started in C#</a></p>
+<h4 id="endnotes">Endnotes</h4>
+<p>[1] <a href="https://www.jetbrains.com/idea/">https://www.jetbrains.com/idea/</a></p>
+<p>[2] <a href="http://www.eclipse.org">http://www.eclipse.org</a></p>
+<p>[3] <a href="http://www.netbeans.org">http://www.netbeans.org</a></p>
+<p>[4] <a href="https://github.com/mmohan01/MultiRefactor">https://github.com/mmohan01/MultiRefactor</a> </p>
+<p>[5] <a href="http://sourceforge.net/projects/recoder">http://sourceforge.net/projects/recoder</a> </p>
+<p>[6] <a href="http://reverse.iust.ac.ir">http://reverse.iust.ac.ir</a> </p>
+<h4 id="download-project-links-for-test">Download Project Links for Test</h4>
+<p><a href="https://github.com/apache/xerces2-j">Xerces-J</a>
+<a href="https://github.com/vuze/vuze-remote-for-android">Azureus</a>
+<a href="https://github.com/argouml-tigris-org/argouml">ArgoUML</a>                          <br />
+<a href="https://github.com/apache/ant">Apache Ant</a>                    <br />
+<a href="https://github.com/bardsoftware/ganttproject">GanttProject</a>        <br />
+<a href="https://github.com/wumpz/jhotdraw">JHotDraw</a>            <br />
+<a href="https://github.com/jfree/jfreechart">JFreeChart</a>                      <br />
+<a href="https://github.com/svn2github/beaver-parser-generator-v09">Beaver</a>                    <br />
+<a href="https://ws.apache.org/xmlrpc/">Apache XML-RPC</a>           <br />
+<a href="http://jrdf.sourceforge.net/index.html">JRDF</a>                             <br />
+<a href="https://github.com/elharo/xom">XOM</a>                          <br />
+<a href="https://github.com/stleary/JSON-java">JSON</a>                           <br />
+<a href="https://github.com/jflex-de/jflex">JFlex</a>                          <br />
+<a href="https://github.com/jfaster/mango">Mango</a>                          <br />
+<a href="https://github.com/ohmrefresh/Weka-Android-3.9.1-SNAPSHOT">Weka</a>                        <br />
+<a href="https://github.com/antlr/antlr4">ANTLR</a>                            </p>
+<h4 id="faq">FAQ</h4>
+<p>For any question please contact <code>m-zakeri@live.com</code></p>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+      
+        <a href="decrease_field_visibility/" class="md-footer__link md-footer__link--next" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Decrease field visibility
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+        
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": ".", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "assets/javascripts/workers/search.fb4a9340.min.js", "version": null}</script>
+    
+    
+      <script src="assets/javascripts/bundle.a1c7c35e.min.js"></script>
+      
+    
+  </body>
+</html>
