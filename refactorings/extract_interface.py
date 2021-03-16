@@ -1,25 +1,26 @@
-import os
-
-from refactorings.utils import utils_listener_fast, utils2
-
-"""Introduction:
+"""
+## Introduction
 
 When multiple clients are using the same part of a class interface, or part of the interface in two classes is the same;
 Extract Interface Refactoring moves this identical portion to its own interface.
 
-Pre and Post Conditions
+## Pre and Post Conditions
 
-Pre Conditions:
+### Pre Conditions:
 1. precondition is whether the package name, all the class names and method names in
 those classes exist.
 
 2. The parameter types and return types of each method should be the same across the
 classes.
 
-Post Conditions:
+### Post Conditions:
 
 No specific Post Condition
 """
+
+import os
+
+from refactorings.utils import utils_listener_fast, utils2
 
 
 def extract_interface(source_filenames: list,
