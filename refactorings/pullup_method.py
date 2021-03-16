@@ -1,28 +1,28 @@
-from antlr4.TokenStreamRewriter import TokenStreamRewriter
-from refactorings.utils.utils_listener_fast import TokensInfo, SingleFileElement
-from refactorings.pullup_method_get_removemethod import get_removemethods
-from refactorings.utils.utils2 import Rewriter, get_program, get_filenames_in_dir
-
 """
-Introduction:
+## Introduction
 
 When subclasses grow and get developed separately, your code may have methods that perform similar work.
 Pull up method refactoring removes the repetitive method from subclasses and moves it to a superclass.
 
-"""
-"""
-Pre and Post Conditions
 
-Pre Conditions:
+## Pre and Post Conditions
+
+### Pre Conditions:
 1. The source package, class and method should exist.
 
-2. If the method uses attributes and methods that are defined in the body of the classes, 
+2. If the method uses attributes and methods that are defined in the body of the classes,
    The refactoring should not be implemented.
 
-Post Conditions:
+### Post Conditions:
 
 No specific Post Condition
+
 """
+
+from antlr4.TokenStreamRewriter import TokenStreamRewriter
+from refactorings.utils.utils_listener_fast import TokensInfo, SingleFileElement
+from refactorings.pullup_method_get_removemethod import get_removemethods
+from refactorings.utils.utils2 import Rewriter, get_program, get_filenames_in_dir
 
 
 def pullup_method_refactoring(source_filenames: list, package_name: str, class_name: str, method_key: str,
