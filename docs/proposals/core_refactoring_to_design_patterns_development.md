@@ -1,3 +1,3 @@
-# Core refactoring to design patterns development
+# Core refactoring to design patterns development 
 
- To be announced.
+To be announced.
