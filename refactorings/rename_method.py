@@ -1,6 +1,12 @@
-from utils import understand_install_test
+
 import os
-import understand
+
+try:
+    import understand
+except ModuleNotFoundError:
+    # Error handling
+    pass
+
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
@@ -8,36 +14,38 @@ from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
-"""
-Introduction:
-
-When the name of a method does not explain what the method does (method's functionality), it needs to be changed.
-
-Pre and Post Conditions
-
-Pre Conditions:
-1. User must enter the existing method's name, The source class's name for the refactoring, and the new method name
- in order to rename.
-
-2. Check if the method exist, then rename it.
-
-Post Conditions:
-1. After refactoring, all the old method names in the project should be changed.
-
-See whether the method is defined in a superclass or subclass. If so, you must repeat all steps in these classes too.
-
-The next method is important for maintaining the functionality of the program during the refactoring process. Create 
-a new method with a new name. Copy the code of the old method to it. Delete all the code in the old method and, 
-instead of it, insert a call for the new method. 
-
-Find all references to the old method and replace them with references to the new one.
-
-Delete the old method. If the old method is part of a public interface, don’t perform this step. Instead, 
-mark the old method as deprecated. 
-"""
-
 
 class RenameMethodListener(JavaParserLabeledListener):
+    """
+    ## Introduction
+
+    When the name of a method does not explain what the method does (method's functionality), it needs to be changed.
+
+    ## Pre and Post Conditions
+
+    ### Pre Conditions:
+
+    1. User must enter the existing method's name, The source class's name for the refactoring, and the new method name
+         in order to rename.
+
+    2. Check if the method exist, then rename it.
+
+    ### Post Conditions:
+
+    1. After refactoring, all the old method names in the project should be changed.
+
+    See whether the method is defined in a superclass or subclass. If so, you must repeat all steps in these classes too.
+
+    The next method is important for maintaining the functionality of the program during the refactoring process. Create
+    a new method with a new name. Copy the code of the old method to it. Delete all the code in the old method and,
+    instead of it, insert a call for the new method.
+
+    Find all references to the old method and replace them with references to the new one.
+
+    Delete the old method. If the old method is part of a public interface, don’t perform this step. Instead,
+    mark the old method as deprecated.
+    """
+
     def __init__(self, java_file_path, common_token_stream, scope_class_name, target_method_name, new_name,
                  reference=None):
         """The Main listener which parses the file based on the provided information,
