@@ -1,4 +1,9 @@
-import understand
+try:
+    import understand
+except ModuleNotFoundError:
+    # Error handling
+    pass
+
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
@@ -7,23 +12,27 @@ from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
-"""Introduction:
-
-Add the "final" property to a field, so that it never changes once it's initialized.
-Pre and Post Conditions
-
-Pre Conditions:
-1. User must enter the field's name and the name of the source class in order to make it final
-
-2. Check if the field exists, then make it final
-
-Post Conditions:
-
-1. The value of this field should never be changed in the project
-"""
-
 
 class MakeFieldFinalRefactoringListener(JavaParserLabeledListener):
+    """
+    ## Introduction
+
+    Add the final property to a field, so that it never changes once it is initialized.
+    Pre and Post Conditions
+
+    ## Pre and Post Conditions
+
+    ### Pre Conditions:
+
+    1. User must enter the field's name and the name of the source class in order to make it final
+
+    2. Check if the field exists, then make it final
+
+    ### Post Conditions:
+
+    1. The value of this field should never be changed in the project
+    """
+
     def __init__(self, common_token_stream: CommonTokenStream = None, source_class=None, field_name: str = None):
         """The Main listener which parses the file based on the provided information,
            using ANTLR parser generator and tokenization methods.
