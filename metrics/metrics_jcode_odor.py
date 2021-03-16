@@ -9,8 +9,13 @@ Implementation of JCodeOdor metrics.
 
 import sys
 
-sys.path.insert(0, "D:/program files/scitools/bin/pc-win64/python")
-import understand as und
+
+try:
+    sys.path.insert(0, "D:/program files/scitools/bin/pc-win64/python")
+    import understand as und
+except ModuleNotFoundError:
+    # Error handling
+    pass
 
 from naming import UnderstandUtility
 
