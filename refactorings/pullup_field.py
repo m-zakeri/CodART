@@ -1,25 +1,26 @@
-from refactorings.utils import utils_listener_fast, utils2
-
 """
-Introduction:
+## Introduction
 
-When subclasses grow and get developed separately, identical (or nearly identical) fields and methods appear. 
+When subclasses grow and get developed separately, identical (or nearly identical) fields and methods appear.
 Pull up field refactoring removes the repetitive field from subclasses and moves it to a superclass.
 
-Pre and Post Conditions
+## Pre and Post Conditions
 
-Pre Conditions:
+### Pre Conditions:
 1. There should exist a corresponding child and parent in the project.
 
 2. The field that should be pulled up must be valid.
 
 3. The user must enter the package's name, class's name and the fields that need to be removed.
 
-Post Conditions:
+### Post Conditions:
 1. The changed field's usages and callings will also change respectively.
 
 2. There will be children and parents having their desired fields added or removed.
+
 """
+
+from refactorings.utils import utils_listener_fast, utils2
 
 
 def pullup_field(source_filenames: list,
@@ -27,7 +28,6 @@ def pullup_field(source_filenames: list,
                  class_name: str,
                  field_name: str,
                  filename_mapping=lambda x: (x[:-5] if x.endswith(".java") else x) + ".java") -> bool:
-
     """The main function that does the process of pull up field refactoring.
        Removes the repetitive fields from the subclasses, creates the superclass,
        and moves the fields to the superclass.
