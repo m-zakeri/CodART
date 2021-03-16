@@ -1,5 +1,3 @@
 # Core search-based development
 
- To be announced.
-
- 
+To be announced.
