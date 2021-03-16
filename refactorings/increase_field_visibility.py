@@ -1,8 +1,16 @@
-# Make field from public to private
+"""
+
+"""
+__version__ = '0.1.0'
+__author__ = 'Morteza'
+
 import os
 
-import understand
-import networkx as nx
+try:
+    import understand
+except ModuleNotFoundError:
+    # Error handling
+    pass
 
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
@@ -11,25 +19,26 @@ from gen.java.JavaParser import JavaParser
 from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
-from refactorings.Refactoring_action_module_for_big_project import Main_Refactors_Action_for_big_project
-
-"""Introduction:
-
-Increase the visibility of a field from private to package, package to protected or protected to public.
-
-Pre and Post Conditions
-
-Pre Conditions:
-1. User must enter the field's name, and the source class's name for the refactoring
-   in order to increase the target field's visibility.
-   
-Post Conditions:
-
-No specific Post Condition
-"""
 
 
 class IncreaseFieldVisibilityRefactoringListener(JavaParserLabeledListener):
+    """
+    ## Introduction
+
+    Increase the visibility of a field from private to package, package to protected or protected to public.
+
+    ## Pre and Post Conditions
+
+    ### Pre Conditions:
+
+    1. User must enter the field's name, and the source class's name for the refactoring
+       in order to increase the target field's visibility.
+
+    ### Post Conditions:
+
+    No specific Post Condition
+    """
+
     def __init__(self, common_token_stream: CommonTokenStream = None, source_class=None, field_name: str = None):
         """To implement Increase Field Visibility refactoring based on its actors.
            Detects the required field and increases/changes its visibility status.
@@ -127,7 +136,7 @@ class PropagationIncreaseFieldVisibilityRefactoringListener(JavaParserLabeledLis
 
             object_name (str): Name of the objects that need to be changed with the propagation operation
 
-            propagated_class_name(str): Name of the class in which the propagation operation needs to be implemented
+            propagated_class_name (str): Name of the class in which the propagation operation needs to be implemented
 
         Returns: No returns
         """
@@ -174,8 +183,8 @@ class PropagationIncreaseFieldVisibilityRefactoringListener(JavaParserLabeledLis
                 self.token_stream_rewriter.replaceRange(
                     from_idx=grand_child_ctx.start.tokenIndex,
                     to_idx=grand_child_ctx.stop.tokenIndex,
-                    text=grand_child_ctx.expression(0).primary().IDENTIFIER().getText() + '.'
-                         + 'get' + str.capitalize(grand_child_ctx.IDENTIFIER().getText()) + '()'
+                    text=grand_child_ctx.expression(0).primary().IDENTIFIER().getText() + '.' + 'get' + str.capitalize(
+                        grand_child_ctx.IDENTIFIER().getText()) + '()'
                 )
 
     def enterExpression(self, ctx: JavaParserLabeled.ExpressionContext):
@@ -191,8 +200,8 @@ class PropagationIncreaseFieldVisibilityRefactoringListener(JavaParserLabeledLis
                         self.token_stream_rewriter.replaceRange(
                             from_idx=parent_ctx.start.tokenIndex,
                             to_idx=parent_ctx.stop.tokenIndex,
-                            text=ctx.expression(0).primary().IDENTIFIER().getText() +
-                                 '.' + 'set' + str.capitalize(ctx.IDENTIFIER().getText()) + '(' + expressiontext + ')'
+                            text=ctx.expression(0).primary().IDENTIFIER().getText() + '.' + 'set' + str.capitalize(
+                                ctx.IDENTIFIER().getText()) + '(' + expressiontext + ')'
                         )
 
 
