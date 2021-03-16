@@ -1,9 +1,9 @@
-site_name: CodART Docs (v0.1.0)
+site_name: CodART Docs (v0.1.0dev)
 site_url: https://m-zakeri.github.io
 repo_url: https://github.com/m-zakeri/CodART
 site_description: Automated Source Code Refactoring Toolkit
 site_author: Zakeri, Tahaei, Ayati
-copyright: (c) 2020-2021 CodART Project - Reverse engineering laboratory
+copyright: © 2020-2021 CodART project - Reverse engineering laboratory
 
 theme:
   name: material
@@ -28,6 +28,8 @@ nav:
     - Proposals:
         - Core Refactoring Development: proposals/core_refactorings_development.md
         - Core Code Smell Development: proposals/core_code_smell_development.md
+        - Core Serach-based Development: proposals/core_search-based_development.md
+        - Core Refactoring to Patterns Development: proposals/Core_refactoring_to_design_patterns_development.md
     - Refactorings details:
         - Decrease Field Visibility: refactorings/decrease_field_visibility.md
         - Increase Field Visibility: refactorings/increase_field_visibility.md
