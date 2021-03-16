@@ -1,42 +1,86 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url>
-     <loc>None</loc>
+     <loc>https://m-zakeri.github.io/</loc>
      <lastmod>2021-03-16</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
-     <loc>None</loc>
+     <loc>https://m-zakeri.github.io/refactorings_list/</loc>
      <lastmod>2021-03-16</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
-     <loc>None</loc>
+     <loc>https://m-zakeri.github.io/code_smells_list/</loc>
      <lastmod>2021-03-16</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
-     <loc>None</loc>
+     <loc>https://m-zakeri.github.io/benchmarks/</loc>
      <lastmod>2021-03-16</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
-     <loc>None</loc>
+     <loc>https://m-zakeri.github.io/proposals/core_refactorings_development/</loc>
      <lastmod>2021-03-16</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
-     <loc>None</loc>
+     <loc>https://m-zakeri.github.io/proposals/core_code_smell_development/</loc>
      <lastmod>2021-03-16</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
-     <loc>None</loc>
+     <loc>https://m-zakeri.github.io/refactorings/decrease_field_visibility/</loc>
      <lastmod>2021-03-16</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
-     <loc>None</loc>
+     <loc>https://m-zakeri.github.io/refactorings/increase_field_visibility/</loc>
      <lastmod>2021-03-16</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
-     <loc>None</loc>
+     <loc>https://m-zakeri.github.io/refactorings/extract_interface/</loc>
      <lastmod>2021-03-16</lastmod>
      <changefreq>daily</changefreq>
     </url><url>
-     <loc>None</loc>
+     <loc>https://m-zakeri.github.io/refactorings/make_field_final/</loc>
+     <lastmod>2021-03-16</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>https://m-zakeri.github.io/refactorings/make_field_non_final/</loc>
+     <lastmod>2021-03-16</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>https://m-zakeri.github.io/refactorings/pull_up_field/</loc>
+     <lastmod>2021-03-16</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>https://m-zakeri.github.io/refactorings/push_down_field/</loc>
+     <lastmod>2021-03-16</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>https://m-zakeri.github.io/refactorings/pull_up_method/</loc>
+     <lastmod>2021-03-16</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>https://m-zakeri.github.io/refactorings/rename_method/</loc>
+     <lastmod>2021-03-16</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>https://m-zakeri.github.io/code_smells/large_class/</loc>
+     <lastmod>2021-03-16</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>https://m-zakeri.github.io/code_smells/long_method/</loc>
+     <lastmod>2021-03-16</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>https://m-zakeri.github.io/code_smells/feature_envy/</loc>
+     <lastmod>2021-03-16</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>https://m-zakeri.github.io/publications/</loc>
+     <lastmod>2021-03-16</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>https://m-zakeri.github.io/about/</loc>
+     <lastmod>2021-03-16</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>https://m-zakeri.github.io/faq/</loc>
      <lastmod>2021-03-16</lastmod>
      <changefreq>daily</changefreq>
     </url>

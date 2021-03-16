@@ -6,22 +6,28 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
+        <meta name="description" content="Automated Source Code Refactoring Toolkit">
       
       
       
-      <link rel="icon" href="../assets/images/favicon.png">
+        <meta name="author" content="Zakeri, Tahaei, Ayati">
+      
+      
+        <link rel="canonical" href="https://m-zakeri.github.io/refactorings/make_field_non_final/">
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.0.6">
     
     
       
-        <title>Make field non-final - CodART Docs (v0.1.0)</title>
+        <title>Make Field Non-Final - CodART Docs (v0.1.0dev)</title>
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.2c0c5eaf.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.2c0c5eaf.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.7fa14f5b.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.7fa14f5b.min.css">
         
       
     
@@ -36,7 +42,7 @@
     
     
     
-      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
     
       
@@ -71,7 +77,7 @@
     
       <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="CodART Docs (v0.1.0)" class="md-header__button md-logo" aria-label="CodART Docs (v0.1.0)" data-md-component="logo">
+    <a href="../.." title="CodART Docs (v0.1.0dev)" class="md-header__button md-logo" aria-label="CodART Docs (v0.1.0dev)" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
@@ -84,13 +90,13 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            CodART Docs (v0.1.0)
+            CodART Docs (v0.1.0dev)
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Make field non-final
+              Make Field Non-Final
             
           </span>
         </div>
@@ -131,6 +137,19 @@
 </div>
     
     
+      <div class="md-header__source">
+        
+<a href="https://github.com/m-zakeri/CodART/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
   </nav>
 </header>
     
@@ -152,14 +171,27 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="CodART Docs (v0.1.0)" class="md-nav__button md-logo" aria-label="CodART Docs (v0.1.0)" data-md-component="logo">
+    <a href="../.." title="CodART Docs (v0.1.0dev)" class="md-nav__button md-logo" aria-label="CodART Docs (v0.1.0dev)" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
 
     </a>
-    CodART Docs (v0.1.0)
+    CodART Docs (v0.1.0dev)
   </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/m-zakeri/CodART/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
   
   <ul class="md-nav__list" data-md-scrollfix>
     
@@ -171,8 +203,8 @@
   
   
     <li class="md-nav__item">
-      <a href=".." class="md-nav__link">
-        CodART
+      <a href="../.." class="md-nav__link">
+        Home
       </a>
     </li>
   
@@ -182,66 +214,200 @@
       
       
 
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings_list/" class="md-nav__link">
+        Refactoring list
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code_smells_list/" class="md-nav__link">
+        Code smell list
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benchmarks/" class="md-nav__link">
+        Benchmarks
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+      
+      <label class="md-nav__link" for="__nav_5">
+        Proposals
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Proposals" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Proposals
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proposals/core_refactorings_development/" class="md-nav__link">
+        Core Refactoring Development
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proposals/core_code_smell_development/" class="md-nav__link">
+        Core Code Smell Development
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proposals/core_search-based_development.md" class="md-nav__link">
+        Core Serach-based Development
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proposals/Core_refactoring_to_design_patterns_development.md" class="md-nav__link">
+        Core Refactoring to Patterns Development
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" type="checkbox" id="__nav_6" checked>
+      
+      <label class="md-nav__link" for="__nav_6">
+        Refactorings details
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Refactorings details" data-md-level="1">
+        <label class="md-nav__title" for="__nav_6">
+          <span class="md-nav__icon md-icon"></span>
+          Refactorings details
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
   
   
   
     <li class="md-nav__item">
       <a href="../decrease_field_visibility/" class="md-nav__link">
-        Decrease field visibility
+        Decrease Field Visibility
       </a>
     </li>
   
 
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../extract_interface/" class="md-nav__link">
-        Extract interface
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
+          
+            
   
   
   
     <li class="md-nav__item">
       <a href="../increase_field_visibility/" class="md-nav__link">
-        Increase field visibility
+        Increase Field Visibility
       </a>
     </li>
   
 
-    
-      
-      
-      
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../extract_interface/" class="md-nav__link">
+        Extract Interface
+      </a>
+    </li>
+  
 
+          
+            
   
   
   
     <li class="md-nav__item">
       <a href="../make_field_final/" class="md-nav__link">
-        Make field final
+        Make Field Final
       </a>
     </li>
   
 
-    
-      
-      
-      
-
+          
+            
   
   
     
@@ -255,12 +421,12 @@
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          Make field non-final
+          Make Field Non-Final
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        Make field non-final
+        Make Field Non-Final
       </a>
       
         
@@ -281,6 +447,46 @@
     refactorings.make_field_non_final.MakeFieldNonFinalRefactoringListener
   </a>
   
+    <nav class="md-nav" aria-label="refactorings.make_field_non_final.MakeFieldNonFinalRefactoringListener">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.make_field_non_final.MakeFieldNonFinalRefactoringListener--introduction" class="md-nav__link">
+    Introduction
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.make_field_non_final.MakeFieldNonFinalRefactoringListener--pre-and-post-conditions" class="md-nav__link">
+    Pre and Post Conditions
+  </a>
+  
+    <nav class="md-nav" aria-label="Pre and Post Conditions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.make_field_non_final.MakeFieldNonFinalRefactoringListener--pre-conditions" class="md-nav__link">
+    Pre Conditions:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.make_field_non_final.MakeFieldNonFinalRefactoringListener--post-conditions" class="md-nav__link">
+    Post Conditions:
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -297,47 +503,137 @@
     </li>
   
 
-    
-      
-      
-      
-
+          
+            
   
   
   
     <li class="md-nav__item">
       <a href="../pull_up_field/" class="md-nav__link">
-        Pull-up field
+        Pull-Up Field
       </a>
     </li>
   
 
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../pull_up_method/" class="md-nav__link">
-        Pull-up method
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
+          
+            
   
   
   
     <li class="md-nav__item">
       <a href="../push_down_field/" class="md-nav__link">
-        Push down field
+        Push-Down Field
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pull_up_method/" class="md-nav__link">
+        Pull-Up Method
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rename_method/" class="md-nav__link">
+        Rename Method
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7" type="checkbox" id="__nav_7" >
+      
+      <label class="md-nav__link" for="__nav_7">
+        Code smells details
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Code smells details" data-md-level="1">
+        <label class="md-nav__title" for="__nav_7">
+          <span class="md-nav__icon md-icon"></span>
+          Code smells details
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code_smells/large_class/" class="md-nav__link">
+        Large class
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code_smells/long_method/" class="md-nav__link">
+        Long method
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code_smells/feature_envy/" class="md-nav__link">
+        Feature envy
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../publications/" class="md-nav__link">
+        Publications
       </a>
     </li>
   
@@ -351,8 +647,38 @@
   
   
     <li class="md-nav__item">
-      <a href="../rename_method/" class="md-nav__link">
-        Rename method
+      <a href="../../about/" class="md-nav__link">
+        About us
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/" class="md-nav__link">
+        FAQ
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/m-zakeri/CodART/issues" class="md-nav__link">
+        Issue Tracker
       </a>
     </li>
   
@@ -387,6 +713,46 @@
     refactorings.make_field_non_final.MakeFieldNonFinalRefactoringListener
   </a>
   
+    <nav class="md-nav" aria-label="refactorings.make_field_non_final.MakeFieldNonFinalRefactoringListener">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.make_field_non_final.MakeFieldNonFinalRefactoringListener--introduction" class="md-nav__link">
+    Introduction
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.make_field_non_final.MakeFieldNonFinalRefactoringListener--pre-and-post-conditions" class="md-nav__link">
+    Pre and Post Conditions
+  </a>
+  
+    <nav class="md-nav" aria-label="Pre and Post Conditions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.make_field_non_final.MakeFieldNonFinalRefactoringListener--pre-conditions" class="md-nav__link">
+    Pre Conditions:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.make_field_non_final.MakeFieldNonFinalRefactoringListener--post-conditions" class="md-nav__link">
+    Post Conditions:
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -408,6 +774,10 @@
             <article class="md-content__inner md-typeset">
               
                 
+                  <a href="https://github.com/m-zakeri/CodART/edit/master/docs/refactorings/make_field_non_final.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
                 
                 <h1 id="make-field-non-final">Make field non-final</h1>
 
@@ -417,17 +787,20 @@
 <a id="refactorings.make_field_non_final.MakeFieldNonFinalRefactoringListener"></a>
     <div class="doc doc-contents first">
 
-      <p>Introduction:</p>
+      <h3 id="refactorings.make_field_non_final.MakeFieldNonFinalRefactoringListener--introduction">Introduction</h3>
 <p>Remove the "final" property from a field, so that it can be changed after initialization.</p>
-<p>Pre and Post Conditions</p>
-<p>Pre Conditions:</p>
-<pre><code>1. User must enter the field's name and the name of the source class in order to make it non-final
-
-2. Check if the field exists, then make it non-final
-</code></pre>
-<p>Post Conditions:</p>
-<pre><code>No specific Post Condition
-</code></pre>
+<h3 id="refactorings.make_field_non_final.MakeFieldNonFinalRefactoringListener--pre-and-post-conditions">Pre and Post Conditions</h3>
+<h4 id="refactorings.make_field_non_final.MakeFieldNonFinalRefactoringListener--pre-conditions">Pre Conditions:</h4>
+<ol>
+<li>
+<p>User must enter the field's name and the name of the source class in order to make it non-final</p>
+</li>
+<li>
+<p>Check if the field exists, then make it non-final</p>
+</li>
+</ol>
+<h4 id="refactorings.make_field_non_final.MakeFieldNonFinalRefactoringListener--post-conditions">Post Conditions:</h4>
+<p>No specific Post Condition</p>
 
 
 
@@ -460,13 +833,38 @@
       <p>The Main listener which parses the file based on the provided information,
 using ANTLR parser generator and tokenization methods.
 Detects the desired field and removes the "final" keyword from its properties.</p>
-<p>!!! args
-     common_token_stream (CommonTokenStream): A stream of tokens generated by parsing the main file using the ANTLR parser generator</p>
-<pre><code> source_class (str): Name of the class in which the refactoring has to be done
 
- field_name (str):Name of the field whose final status has to be changed
-</code></pre>
-<p>!!! returns
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>common_token_stream</code></td>
+        <td><code>CommonTokenStream</code></td>
+        <td><p>A stream of tokens generated by parsing the main file using the ANTLR parser generator</p></td>
+        <td><code>None</code></td>
+      </tr>
+      <tr>
+        <td><code>source_class</code></td>
+        <td><code>str</code></td>
+        <td><p>Name of the class in which the refactoring has to be done</p></td>
+        <td><code>None</code></td>
+      </tr>
+      <tr>
+        <td><code>field_name</code></td>
+        <td><code>str</code></td>
+        <td><p>Name of the field whose final status has to be changed</p></td>
+        <td><code>None</code></td>
+      </tr>
+  </tbody>
+</table>      <p>!!! returns
      No returns</p>
 
         <details class="quote">
@@ -476,12 +874,12 @@ Detects the desired field and removes the "final" keyword from its properties.</
 <span class="sd">       using ANTLR parser generator and tokenization methods.</span>
 <span class="sd">       Detects the desired field and removes the &quot;final&quot; keyword from its properties.</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            common_token_stream (CommonTokenStream): A stream of tokens generated by parsing the main file using the ANTLR parser generator</span>
+<span class="sd">       Args:</span>
+<span class="sd">           common_token_stream (CommonTokenStream): A stream of tokens generated by parsing the main file using the ANTLR parser generator</span>
 
-<span class="sd">            source_class (str): Name of the class in which the refactoring has to be done</span>
+<span class="sd">           source_class (str): Name of the class in which the refactoring has to be done</span>
 
-<span class="sd">            field_name (str):Name of the field whose final status has to be changed</span>
+<span class="sd">           field_name (str):Name of the field whose final status has to be changed</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            No returns</span>
@@ -545,7 +943,7 @@ Detects the desired field and removes the "final" keyword from its properties.</
               <span class="md-footer__direction">
                 Previous
               </span>
-              Make field final
+              Make Field Final
             </div>
           </div>
         </a>
@@ -557,7 +955,7 @@ Detects the desired field and removes the "final" keyword from its properties.</
               <span class="md-footer__direction">
                 Next
               </span>
-              Pull-up field
+              Pull-Up Field
             </div>
           </div>
           <div class="md-footer__button md-icon">
@@ -570,6 +968,10 @@ Detects the desired field and removes the "final" keyword from its properties.</
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
       <div class="md-footer-copyright">
+        
+          <div class="md-footer-copyright__highlight">
+            © 2020-2021 CodART project - Reverse engineering laboratory
+          </div>
         
         Made with
         <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
@@ -586,10 +988,10 @@ Detects the desired field and removes the "final" keyword from its properties.</
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../assets/javascripts/workers/search.fb4a9340.min.js", "version": null}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../../assets/javascripts/workers/search.fb4a9340.min.js", "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.a1c7c35e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a1c7c35e.min.js"></script>
       
     
   </body>

@@ -6,22 +6,28 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
+        <meta name="description" content="Automated Source Code Refactoring Toolkit">
       
       
       
-      <link rel="icon" href="../assets/images/favicon.png">
+        <meta name="author" content="Zakeri, Tahaei, Ayati">
+      
+      
+        <link rel="canonical" href="https://m-zakeri.github.io/refactorings/push_down_field/">
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.0.6">
     
     
       
-        <title>Push down field - CodART Docs (v0.1.0)</title>
+        <title>Push-Down Field - CodART Docs (v0.1.0dev)</title>
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.2c0c5eaf.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.2c0c5eaf.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.7fa14f5b.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.7fa14f5b.min.css">
         
       
     
@@ -36,7 +42,7 @@
     
     
     
-      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
     
       
@@ -71,7 +77,7 @@
     
       <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="CodART Docs (v0.1.0)" class="md-header__button md-logo" aria-label="CodART Docs (v0.1.0)" data-md-component="logo">
+    <a href="../.." title="CodART Docs (v0.1.0dev)" class="md-header__button md-logo" aria-label="CodART Docs (v0.1.0dev)" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
@@ -84,13 +90,13 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            CodART Docs (v0.1.0)
+            CodART Docs (v0.1.0dev)
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Push down field
+              Push-Down Field
             
           </span>
         </div>
@@ -131,6 +137,19 @@
 </div>
     
     
+      <div class="md-header__source">
+        
+<a href="https://github.com/m-zakeri/CodART/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
   </nav>
 </header>
     
@@ -152,14 +171,27 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="CodART Docs (v0.1.0)" class="md-nav__button md-logo" aria-label="CodART Docs (v0.1.0)" data-md-component="logo">
+    <a href="../.." title="CodART Docs (v0.1.0dev)" class="md-nav__button md-logo" aria-label="CodART Docs (v0.1.0dev)" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
 
     </a>
-    CodART Docs (v0.1.0)
+    CodART Docs (v0.1.0dev)
   </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/m-zakeri/CodART/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
   
   <ul class="md-nav__list" data-md-scrollfix>
     
@@ -171,8 +203,8 @@
   
   
     <li class="md-nav__item">
-      <a href=".." class="md-nav__link">
-        CodART
+      <a href="../.." class="md-nav__link">
+        Home
       </a>
     </li>
   
@@ -182,111 +214,224 @@
       
       
 
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings_list/" class="md-nav__link">
+        Refactoring list
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code_smells_list/" class="md-nav__link">
+        Code smell list
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benchmarks/" class="md-nav__link">
+        Benchmarks
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+      
+      <label class="md-nav__link" for="__nav_5">
+        Proposals
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Proposals" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Proposals
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proposals/core_refactorings_development/" class="md-nav__link">
+        Core Refactoring Development
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proposals/core_code_smell_development/" class="md-nav__link">
+        Core Code Smell Development
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proposals/core_search-based_development.md" class="md-nav__link">
+        Core Serach-based Development
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proposals/Core_refactoring_to_design_patterns_development.md" class="md-nav__link">
+        Core Refactoring to Patterns Development
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" type="checkbox" id="__nav_6" checked>
+      
+      <label class="md-nav__link" for="__nav_6">
+        Refactorings details
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Refactorings details" data-md-level="1">
+        <label class="md-nav__title" for="__nav_6">
+          <span class="md-nav__icon md-icon"></span>
+          Refactorings details
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
   
   
   
     <li class="md-nav__item">
       <a href="../decrease_field_visibility/" class="md-nav__link">
-        Decrease field visibility
+        Decrease Field Visibility
       </a>
     </li>
   
 
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../extract_interface/" class="md-nav__link">
-        Extract interface
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
+          
+            
   
   
   
     <li class="md-nav__item">
       <a href="../increase_field_visibility/" class="md-nav__link">
-        Increase field visibility
+        Increase Field Visibility
       </a>
     </li>
   
 
-    
-      
-      
-      
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../extract_interface/" class="md-nav__link">
+        Extract Interface
+      </a>
+    </li>
+  
 
+          
+            
   
   
   
     <li class="md-nav__item">
       <a href="../make_field_final/" class="md-nav__link">
-        Make field final
+        Make Field Final
       </a>
     </li>
   
 
-    
-      
-      
-      
-
+          
+            
   
   
   
     <li class="md-nav__item">
       <a href="../make_field_non_final/" class="md-nav__link">
-        Make field non-final
+        Make Field Non-Final
       </a>
     </li>
   
 
-    
-      
-      
-      
-
+          
+            
   
   
   
     <li class="md-nav__item">
       <a href="../pull_up_field/" class="md-nav__link">
-        Pull-up field
+        Pull-Up Field
       </a>
     </li>
   
 
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../pull_up_method/" class="md-nav__link">
-        Pull-up method
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
+          
+            
   
   
     
@@ -300,12 +445,12 @@
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          Push down field
+          Push-Down Field
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        Push down field
+        Push-Down Field
       </a>
       
         
@@ -322,8 +467,62 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#refactorings.pushdown_field" class="md-nav__link">
+    refactorings.pushdown_field
+  </a>
+  
+    <nav class="md-nav" aria-label="refactorings.pushdown_field">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.pushdown_field--introduction" class="md-nav__link">
+    Introduction
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.pushdown_field--pre-and-post-conditions" class="md-nav__link">
+    Pre and Post Conditions
+  </a>
+  
+    <nav class="md-nav" aria-label="Pre and Post Conditions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.pushdown_field--pre-conditions" class="md-nav__link">
+    Pre Conditions:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.pushdown_field--post-conditions" class="md-nav__link">
+    Post Conditions:
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#refactorings.pushdown_field.pushdown_field" class="md-nav__link">
-    refactorings.pushdown_field.pushdown_field
+    pushdown_field()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#refactorings.pushdown_field.test_ant" class="md-nav__link">
+    test_ant()
   </a>
   
 </li>
@@ -332,6 +531,102 @@
   
 </nav>
       
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pull_up_method/" class="md-nav__link">
+        Pull-Up Method
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rename_method/" class="md-nav__link">
+        Rename Method
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7" type="checkbox" id="__nav_7" >
+      
+      <label class="md-nav__link" for="__nav_7">
+        Code smells details
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Code smells details" data-md-level="1">
+        <label class="md-nav__title" for="__nav_7">
+          <span class="md-nav__icon md-icon"></span>
+          Code smells details
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code_smells/large_class/" class="md-nav__link">
+        Large class
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code_smells/long_method/" class="md-nav__link">
+        Long method
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code_smells/feature_envy/" class="md-nav__link">
+        Feature envy
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -344,8 +639,53 @@
   
   
     <li class="md-nav__item">
-      <a href="../rename_method/" class="md-nav__link">
-        Rename method
+      <a href="../../publications/" class="md-nav__link">
+        Publications
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../about/" class="md-nav__link">
+        About us
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/" class="md-nav__link">
+        FAQ
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/m-zakeri/CodART/issues" class="md-nav__link">
+        Issue Tracker
       </a>
     </li>
   
@@ -376,8 +716,62 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#refactorings.pushdown_field" class="md-nav__link">
+    refactorings.pushdown_field
+  </a>
+  
+    <nav class="md-nav" aria-label="refactorings.pushdown_field">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.pushdown_field--introduction" class="md-nav__link">
+    Introduction
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.pushdown_field--pre-and-post-conditions" class="md-nav__link">
+    Pre and Post Conditions
+  </a>
+  
+    <nav class="md-nav" aria-label="Pre and Post Conditions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.pushdown_field--pre-conditions" class="md-nav__link">
+    Pre Conditions:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.pushdown_field--post-conditions" class="md-nav__link">
+    Post Conditions:
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#refactorings.pushdown_field.pushdown_field" class="md-nav__link">
-    refactorings.pushdown_field.pushdown_field
+    pushdown_field()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#refactorings.pushdown_field.test_ant" class="md-nav__link">
+    test_ant()
   </a>
   
 </li>
@@ -394,14 +788,68 @@
             <article class="md-content__inner md-typeset">
               
                 
+                  <a href="https://github.com/m-zakeri/CodART/edit/master/docs/refactorings/push_down_field.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
                 
                 <h1 id="push-down-field">Push down field</h1>
 
 
+  <div class="doc doc-object doc-module">
+
+<a id="refactorings.pushdown_field"></a>
+    <div class="doc doc-contents first">
+
+      <h3 id="refactorings.pushdown_field--introduction">Introduction</h3>
+<p>Although it was planned to use a field universally for all classes, in reality the field is used only in
+some subclasses. This situation can occur when planned features fail to pan out, for example.
+because of this, we push down the field from the superclass into its related subclass.</p>
+<h3 id="refactorings.pushdown_field--pre-and-post-conditions">Pre and Post Conditions</h3>
+<h4 id="refactorings.pushdown_field--pre-conditions">Pre Conditions:</h4>
+<ol>
+<li>
+<p>There should exist a corresponding child and parent in the project.</p>
+</li>
+<li>
+<p>The field that should be pushed down must be valid.</p>
+</li>
+<li>
+<p>The user must enter the package's name, class's name and the fields that need to be added.</p>
+</li>
+</ol>
+<h4 id="refactorings.pushdown_field--post-conditions">Post Conditions:</h4>
+<ol>
+<li>
+<p>The changed field's usages and callings will also change respectively.</p>
+</li>
+<li>
+<p>There will be children and parents having their desired fields added or removed.</p>
+</li>
+</ol>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
   <div class="doc doc-object doc-function">
 
-<a id="refactorings.pushdown_field.pushdown_field"></a>
-    <div class="doc doc-contents first">
+
+
+<h2 id="refactorings.pushdown_field.pushdown_field" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">pushdown_field</span><span class="p">(</span><span class="n">source_filenames</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">superclass_name</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">class_names</span><span class="o">=</span><span class="p">[],</span> <span class="n">filename_mapping</span><span class="o">=&lt;</span><span class="n">function</span> <span class="o">&lt;</span><span class="k">lambda</span><span class="o">&gt;</span> <span class="n">at</span> <span class="mh">0x00000254A8C84430</span><span class="o">&gt;</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
 
       <p>The main function that does the process of pull up field refactoring.
 Adds the necessary fields to the subclasses and removes them from the superclass.</p>
@@ -478,7 +926,6 @@ Adds the necessary fields to the subclasses and removes them from the superclass
                    <span class="n">field_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                    <span class="n">class_names</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[],</span>
                    <span class="n">filename_mapping</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[:</span><span class="o">-</span><span class="mi">5</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.java&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.java&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-
     <span class="sd">&quot;&quot;&quot;The main function that does the process of pull up field refactoring.</span>
 <span class="sd">        Adds the necessary fields to the subclasses and removes them from the superclass.</span>
 
@@ -610,6 +1057,63 @@ Adds the necessary fields to the subclasses and removes them from the superclass
     </div>
 
   </div>
+
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="refactorings.pushdown_field.test_ant" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">test_ant</span><span class="p">()</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>target_files = [
+    "tests/apache-ant/main/org/apache/tools/ant/types/ArchiveFileSet.java",
+    "tests/apache-ant/main/org/apache/tools/ant/types/TarFileSet.java",
+    "tests/apache-ant/main/org/apache/tools/ant/types/ZipFileSet.java"
+]</p>
+
+        <details class="quote">
+          <summary>Source code in <code>refactorings\pushdown_field.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test_ant</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    target_files = [</span>
+<span class="sd">        &quot;tests/apache-ant/main/org/apache/tools/ant/types/ArchiveFileSet.java&quot;,</span>
+<span class="sd">        &quot;tests/apache-ant/main/org/apache/tools/ant/types/TarFileSet.java&quot;,</span>
+<span class="sd">        &quot;tests/apache-ant/main/org/apache/tools/ant/types/ZipFileSet.java&quot;</span>
+<span class="sd">    ]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ant_dir</span> <span class="o">=</span> <span class="s2">&quot;/home/ali/Desktop/code/TestProject/&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Success!&quot;</span> <span class="k">if</span> <span class="n">pushdown_field</span><span class="p">(</span>
+        <span class="n">utils2</span><span class="o">.</span><span class="n">get_filenames_in_dir</span><span class="p">(</span><span class="n">ant_dir</span><span class="p">),</span>
+        <span class="s2">&quot;test_package&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;App&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;push_down&quot;</span><span class="p">,</span>
+        <span class="p">[],</span>
+        <span class="c1"># lambda x: &quot;tests/pushdown_field_ant/&quot; + x[len(ant_dir):]</span>
+    <span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;Cannot refactor.&quot;</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
                 
               
               
@@ -627,7 +1131,7 @@ Adds the necessary fields to the subclasses and removes them from the superclass
   
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
-        <a href="../pull_up_method/" class="md-footer__link md-footer__link--prev" rel="prev">
+        <a href="../pull_up_field/" class="md-footer__link md-footer__link--prev" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -636,19 +1140,19 @@ Adds the necessary fields to the subclasses and removes them from the superclass
               <span class="md-footer__direction">
                 Previous
               </span>
-              Pull-up method
+              Pull-Up Field
             </div>
           </div>
         </a>
       
       
-        <a href="../rename_method/" class="md-footer__link md-footer__link--next" rel="next">
+        <a href="../pull_up_method/" class="md-footer__link md-footer__link--next" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Rename method
+              Pull-Up Method
             </div>
           </div>
           <div class="md-footer__button md-icon">
@@ -661,6 +1165,10 @@ Adds the necessary fields to the subclasses and removes them from the superclass
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
       <div class="md-footer-copyright">
+        
+          <div class="md-footer-copyright__highlight">
+            © 2020-2021 CodART project - Reverse engineering laboratory
+          </div>
         
         Made with
         <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
@@ -677,10 +1185,10 @@ Adds the necessary fields to the subclasses and removes them from the superclass
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../assets/javascripts/workers/search.fb4a9340.min.js", "version": null}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../../assets/javascripts/workers/search.fb4a9340.min.js", "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.a1c7c35e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a1c7c35e.min.js"></script>
       
     
   </body>
