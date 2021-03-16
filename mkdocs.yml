@@ -28,8 +28,8 @@ nav:
     - Proposals:
         - Core Refactoring Development: proposals/core_refactorings_development.md
         - Core Code Smell Development: proposals/core_code_smell_development.md
-        - Core Serach-based Development: proposals/core_search-based_development.md
-        - Core Refactoring to Patterns Development: proposals/Core_refactoring_to_design_patterns_development.md
+        - Core Serach-based Development: proposals/core_search_based_development.md
+        - Core Refactoring to Patterns Development: proposals/core_refactoring_to_design_patterns_development.md
     - Refactorings details:
         - Decrease Field Visibility: refactorings/decrease_field_visibility.md
         - Increase Field Visibility: refactorings/increase_field_visibility.md
