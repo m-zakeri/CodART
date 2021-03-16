@@ -10,9 +10,14 @@ The main module of CodART
 __version__ = '0.2.0'
 __author__ = 'Morteza'
 
-from utils.understand_install_test import *
+from utilization.understand_install_test import *
 
-import understand as und
+try:
+    import understand
+except ModuleNotFoundError:
+    # Error handling
+    pass
+
 
 print(und.version())
 
