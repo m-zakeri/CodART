@@ -234,7 +234,7 @@ The detailed information of our current proposals are available in the following
 **Note:** Students whose final project is confirmed by the reverse engineering laboratory have an opportunity to work on CodART as an independent and advanced research project. The only prerequisite is to pass the compiler graduate course by Dr. Saeed Parsa.
 
 
-# 8 Conclusion and remarks
+## 8 Conclusion and remarks
 
 Software refactoring is used to reduce the costs and risks of software evolution. Automated software refactoring tools can reduce risks caused by manual refactoring, improve efficiency, and reduce software refactoring difficulties. Researchers have made great efforts to research how to implement and improve automated software refactoring tools. However, the results of automated refactoring tools often deviate from the intentions of the implementer. The goal of this project is to propose an open-source refactoring engine and toolkit that can automatically find the best refactoring sequence required for a given software and apply this sequence. Since the tool is work based on compiler principles, it is reliable to be used in practice and has many benefits for software developer companies. Students who participate in the project will learn compiler techniques such as lexing, parsing, source code analysis, and source code transformation. They also learn about software refactoring, search-based software engineering, optimization, software quality, and object-orient metrics. 
 
