@@ -236,11 +236,14 @@ The detailed information of our current proposals are available in the following
 
 ## 8 Conclusion and remarks
 
-Software refactoring is used to reduce the costs and risks of software evolution. Automated software refactoring tools can reduce risks caused by manual refactoring, improve efficiency, and reduce software refactoring difficulties. Researchers have made great efforts to research how to implement and improve automated software refactoring tools. However, the results of automated refactoring tools often deviate from the intentions of the implementer. The goal of this project is to propose an open-source refactoring engine and toolkit that can automatically find the best refactoring sequence required for a given software and apply this sequence. Since the tool is work based on compiler principles, it is reliable to be used in practice and has many benefits for software developer companies. Students who participate in the project will learn compiler techniques such as lexing, parsing, source code analysis, and source code transformation. They also learn about software refactoring, search-based software engineering, optimization, software quality, and object-orient metrics. 
+Software refactoring is used to reduce the costs and risks of software evolution. 
+Automated software refactoring tools can reduce risks caused by manual refactoring, improve efficiency, and reduce software refactoring difficulties. Researchers have made great efforts to research how to implement and improve automated software refactoring tools. However, the results of automated refactoring tools often deviate from the intentions of the implementer. The goal of this project is to propose an open-source refactoring engine and toolkit that can automatically find the best refactoring sequence required for a given software and apply this sequence. Since the tool is work based on compiler principles, it is reliable to be used in practice and has many benefits for software developer companies. Students who participate in the project will learn compiler techniques such as lexing, parsing, source code analysis, and source code transformation. They also learn about software refactoring, search-based software engineering, optimization, software quality, and object-orient metrics. 
 
 
 ### Conflict of interest
-The project is supported by the (IUST Reverse Engineering Research Laboratory)[http://reverse.iust.ac.ir]. Interested students may continue working on this project to fulfill their final bachelor and master thesis or their internship.
+The project is supported by the [IUST Reverse Engineering Research Laboratory](http://reverse.iust.ac.ir). 
+Interested students may continue working on this project 
+to fulfill their final bachelor and master thesis or their internship.
 
 
 ## References
@@ -262,6 +265,7 @@ The project is supported by the (IUST Reverse Engineering Research Laboratory)[h
 [8]	N. Tsantalis, T. Chaikalis, and A. Chatzigeorgiou, “Ten years of JDeodorant: lessons learned from the hunt for smells,” in 2018 IEEE 25th International Conference on Software Analysis, Evolution and Reengineering (SANER), 2018, pp. 4–14.
 
 [9] T. Mens and T. Tourwe, “A survey of software refactoring,” IEEE Trans. Softw. Eng., vol. 30, no. 2, pp. 126–139, Feb. 2004.
+
 
 #### Related links
 
@@ -287,6 +291,4 @@ ANTLR slides: PART 3: [Getting started in C#](http://parsa.iust.ac.ir/download_c
 [5] [http://sourceforge.net/projects/recoder](http://sourceforge.net/projects/recoder) 
 
 [6] [http://reverse.iust.ac.ir](http://reverse.iust.ac.ir) 
-
-
 
