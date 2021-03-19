@@ -1,11 +1,7 @@
 
 import os
 
-try:
-    import understand
-except ModuleNotFoundError:
-    # Error handling
-    pass
+import utilization.setup_understand
 
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
