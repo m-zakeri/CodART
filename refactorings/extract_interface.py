@@ -225,21 +225,21 @@ def extract_interface(source_filenames: list,
 def test():
     print("Testing extract_interface...")
     filenames = [
-        "../testproject/tests/extract_interface/A.java",
-        "../testproject/tests/extract_interface/B.java",
-        "../testproject/tests/extract_interface/C.java",
-        "../testproject/tests/extract_interface/D.java",
-        "../testproject/tests/extract_interface/E.java",
-        "../testproject/tests/extract_interface/U.java",
+        "../benchmark_projects/tests/extract_interface/A.java",
+        "../benchmark_projects/tests/extract_interface/B.java",
+        "../benchmark_projects/tests/extract_interface/C.java",
+        "../benchmark_projects/tests/extract_interface/D.java",
+        "../benchmark_projects/tests/extract_interface/E.java",
+        "../benchmark_projects/tests/extract_interface/U.java",
     ]
     if extract_interface(filenames, "test", ["A", "B"], ["a(int,float)", "b()"], "Iab",
-                         "../testproject/tests/extract_interface/Iab.re.java"):
+                         "../tests/extract_interface/Iab.re.java"):
         print("A, B: Success!")
     else:
         print("A, B: Cannot refactor.")
     for third_class in ["C", "D", "E"]:
         if extract_interface(filenames, "test", ["A", "B", third_class], ["a(int,float)", "b()"], "Iab",
-                             "../testproject/tests/extract_interface/Iab.re.java"):
+                             "../tests/extract_interface/Iab.re.java"):
             print("A, B, " + third_class + ": Success!")
         else:
             print("A, B, " + third_class + ": Cannot refactor.")
