@@ -148,10 +148,10 @@ def pullup_field(source_filenames: list,
 def test():
     print("Testing pullup_field...")
     filenames = [
-        "../testproject/tests/pullup_field/test1.java",
-        "../testproject/tests/pullup_field/test2.java",
-        "../testproject/tests/pullup_field/test3.java",
-        "../testproject/tests/pullup_field/test4.java"
+        "../benchmark_projects/tests/pullup_field/test1.java",
+        "../benchmark_projects/tests/pullup_field/test2.java",
+        "../benchmark_projects/tests/pullup_field/test3.java",
+        "../benchmark_projects/tests/pullup_field/test4.java"
     ]
 
     if pullup_field(filenames, "pullup_field_test1", "B", "a"):
