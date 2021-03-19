@@ -5,16 +5,14 @@ Encapsulate field: Make a public field private and provide accessors
 
 """
 
-
 __version__ = '0.1.0'
 __author__ = 'Morteza'
-
 
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
 from gen.java9.Java9_v2Parser import Java9_v2Parser
-from gen.java9 import Java9_v2Listener
+from gen.java9.Java9_v2Listener import Java9_v2Listener
 
 
 class EncapsulateFiledRefactoringListener(Java9_v2Listener):
@@ -22,7 +20,6 @@ class EncapsulateFiledRefactoringListener(Java9_v2Listener):
     To implement the encapsulate filed refactored
     Encapsulate field: Make a public field private and provide accessors
     """
-
     def __init__(self, common_token_stream: CommonTokenStream = None,
                  field_identifier: str = None):
         """
@@ -84,4 +81,3 @@ class EncapsulateFiledRefactoringListener(Java9_v2Listener):
         self.token_stream_rewriter.replaceRange(from_idx=hidden[0].tokenIndex,
                                                 to_idx=hidden[-1].tokenIndex,
                                                 text='/*After refactoring (Refactored version)*/\n')
-
