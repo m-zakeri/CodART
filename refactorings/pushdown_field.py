@@ -160,13 +160,13 @@ def pushdown_field(source_filenames: list,
 def test():
     print("Testing pushdown_field...")
     filenames = [
-        "../testproject/tests/pushdown_field/test1.java",
-        "../testproject/tests/pushdown_field/test2.java",
-        "../testproject/tests/pushdown_field/test3.java",
-        "../testproject/tests/pushdown_field/test4.java",
-        "../testproject/tests/pushdown_field/test5.java",
-        "../testproject/tests/pushdown_field/test6.java",
-        "../testproject/tests/pushdown_field/test7.java",
+        "../benchmark_projects/tests/pushdown_field/test1.java",
+        "../benchmark_projects/tests/pushdown_field/test2.java",
+        "../benchmark_projects/tests/pushdown_field/test3.java",
+        "../benchmark_projects/tests/pushdown_field/test4.java",
+        "../benchmark_projects/tests/pushdown_field/test5.java",
+        "../benchmark_projects/tests/pushdown_field/test6.java",
+        "../benchmark_projects/tests/pushdown_field/test7.java",
     ]
 
     if pushdown_field(filenames[:2], "pushdown_field_test1", "A", "a"):
