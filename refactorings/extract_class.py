@@ -1,7 +1,8 @@
 import os
 
+import utilization.setup_understand
+
 import networkx as nx
-import understand
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
