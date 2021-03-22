@@ -26,25 +26,29 @@ nav:
     - Code smell list: code_smells_list.md
     - Benchmarks: benchmarks.md
     - Proposals:
-        - Core Refactoring Development: proposals/core_refactorings_development.md
-        - Core Code Smell Development: proposals/core_code_smell_development.md
-        - Core Serach-based Development: proposals/core_search_based_development.md
-        - Core Refactoring to Patterns Development: proposals/core_refactoring_to_design_patterns_development.md
+        - Core refactoring development: proposals/core_refactorings_development.md
+        - Core code smell development: proposals/core_code_smell_development.md
+        - Core serach-based development: proposals/core_search_based_development.md
+        - Core refactoring to patterns development: proposals/core_refactoring_to_design_patterns_development.md
     - Refactorings details:
-        - Decrease Field Visibility: refactorings/decrease_field_visibility.md
-        - Increase Field Visibility: refactorings/increase_field_visibility.md
-        - Extract Interface: refactorings/extract_interface.md
-        - Make Field Final: refactorings/make_field_final.md
-        - Make Field Non-Final: refactorings/make_field_non_final.md
-        - Pull-Up Field: refactorings/pull_up_field.md
-        - Push-Down Field: refactorings/push_down_field.md
-        - Pull-Up Method: refactorings/pull_up_method.md
-        - Rename Method: refactorings/rename_method.md
+        - Decrease field visibility: refactorings/decrease_field_visibility.md
+        - Increase field visibility: refactorings/increase_field_visibility.md
+        - Extract interface: refactorings/extract_interface.md
+        - Make field final: refactorings/make_field_final.md
+        - Make field non-final: refactorings/make_field_non_final.md
+        - Pull-up field: refactorings/pull_up_field.md
+        - Push-down field: refactorings/push_down_field.md
+        - Pull-up method: refactorings/pull_up_method.md
+        - Rename method: refactorings/rename_method.md
     - Code smells details:
         - Large class: code_smells/large_class.md
         - Long method: code_smells/long_method.md
         - Feature envy: code_smells/feature_envy.md
+    - Tutorials:
+        - ANTLR basics: turtorials/antlr_basics.md
+        - ANTLR advanced: tutorials/antlr_advanced.md
+        - Refactoring basics: tutorials/refactoring_basics.md
     - Publications: publications.md
     - About us: about.md
     - FAQ : faq.md
-    - Issue Tracker: 'https://github.com/m-zakeri/CodART/issues'
+    - Issue tracker: 'https://github.com/m-zakeri/CodART/issues'
