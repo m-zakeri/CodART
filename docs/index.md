@@ -163,15 +163,53 @@ This section describes implementation details of the CodART. It includes CodART 
 
 ### 5.1	CodART architecture
 
-To be completed.
+The high-level architecture of CodART is shown in Figure 2. The source code consists of several Python packages and directories. We briefly describe each component in CodART. 
+
+![CodART_Architecture](./figs/CodART_architecture__v0.1.1.png)
+
+*Figure 2. CodART architecture*
 
 
-### 5.2	High-level structure of project repository
+I. `grammars`: This directory contains three ANTLR4 grammars for the Java programming language: 
 
-To be completed.
+1.	`Java9_v2.g4`: This grammar was used in the initial version of CodART. The main problem of this grammar is that parsing large source code files is performed very slow due to some decisions used in grammar design. We have switched to the fast grammar `JavaParserLabled.g4`.
+      
+2.	`JavaLexer.g4`: The lexer of Java fast grammar. This lexer is used for both fast parsers, i.e., `JavaParser.g4` and JavaParserLabeled.
+      
+3.	`JavaParser.g4`: The original parser of Java fast grammar. This parser is currently used in some refactoring. In the future release, this grammar will be replaced with `JavaPaseredLabled.g4`.
+      
+4.	`JavaParserLabeled.g4`: This file contains the same `JavaParsar.g4` grammar. The only difference is that the rules with more than one extension are labled with a specific name. The ANTLR parser generator thus generates separate visitor and listener methods for each extension. This grammar facilitates the development of some refactoring. It is the preferred parser in CodART project.
 
 
-### 5.3	Refactoring automation
+II. `gen`: The `gen` packages contain all generated source code for the parser, lexer, visitor, and listener for different grammars available in the grammars directory. To develop refactorings and code smells, `gen.JavaLabled` package, which contains `JavaParserLabled.g4` generated source code, must be used. The content of this package is generated _automatically_, and therefore it should _not_ be modified _manually_. Modules within this gen package are just for importing and using in other modules.
+
+
+III. `speedy`: The python implementation for ANTLR is less efficient than Java or C++ implementation. The `speedy` module implements a Java parser with a C++ back-end, improving the efficiency and speed of parsing. It uses speedy-antlr implementation with some minor changes.  The current version of the speedy module use `java9_v2.g4` grammar, which inherently slow as described. To switch to C++ back-end, first, the speedy module must be installed on the client system. It requires a C++ compiler. We _recommended_ to CodART developers using the Python back-end as switching to C++ back-end would be done transparently in the future release. The Python back-end saves debugging and developing time.
+
+
+IV. `refactorings`: The `refactorings` package is the main package in the CodART project and contains numerous Python modules that form the kernel functionalities of CodART. Each module implements the automation of one refactoring operation according to standard practices. The modules may include several classes which _inherit_ from ANTLR listeners. Sub-packages in this module contain refactorings, which are in an early step of development or deprecated version of an existing refactoring. This package is under active development and testing. The module in the root packages can be used for testing purposes.
+
+
+V. `refactoring_design_patters`: The refactoring_design_pattern packages contain modules that implement refactoring to a specific design pattern automatically. 
+
+
+VI. `smells`: The smell package implements the automatic detection of software code and design smells relevant to the refactoring operation supported by CodART. Each smell corresponds to one or more refactoring in the refactoring package.
+
+
+VII. `metrics`: The metrics packages contain several modules that implement the computation of the most well-known source code metrics. These metrics used to detect code smells and measuring the quality of software in terms of quality attributed. 
+
+
+VIII. `tests`: The test directory contains individual test data and test cases that are used for developing specific refactorings. Typically, each test case is a single Java file that contains one or more Java classes.
+
+
+IX. `benchmark_projects`: This directory contains several open-source Java projects formerly used in automated refactoring researches by many researchers. Once the implementation of refactoring is completed, it will be executed and tested on all projects in this benchmark to ensure the generalization of functionality proposed by the implementation.  
+
+X. **Other packages**: The information of other packages will be announced in the future.  
+  
+
+
+
+### 5.2	Refactoring automation
 
 Each refactoring operation in Table 1 is implemented as an API, with the refactoring name. The API receives the involved entities with their refactoring roles and other required data as inputs, checks the feasibility of the refactoring using refactoring preconditions described in [2], performs the refactoring if it is feasible, and returns the refactored code or return null if the refactoring is not feasible.
 
@@ -180,7 +218,7 @@ The core of our refactoring engine is a syntax-tree modification algorithm.  Fun
 The key to use ANTLR for refactoring tasks is the ```TokenStreamRewriter``` object that knows how to give altered views of a token stream without actually modifying the stream. It treats all of the manipulation methods as "instructions" and queues them up for lazy execution when traversing the token stream to render it back as text. The rewriter *executes* those instructions every time we call ```getText()```. This strategy is very effective for the general problem of source code instrumentation or refactoring. The ```TokenStreamRewriter``` is a powerful and extremely efficient means of manipulating a token stream.
 
 
-### 5.4	Refactoring recommendation
+### 5.3	Refactoring recommendation
 
 A solution consists of a sequence of n refactoring operations applied to different code elements in the source code to fix. In order to represent a candidate solution (individual/chromosome), we use a vector-based representation. Each vector’s dimension represents a refactoring operation where the order of applying these refactoring operations corresponds to their positions in the vector. The initial population is generated by randomly assigning a sequence of refactorings to some code fragments. Each generated refactoring solution is executed on the software system *S*. Once all required data is computed, the solution is evaluated based on the quality of the resulting design.
 
