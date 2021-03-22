@@ -4,7 +4,7 @@
 
 † Ph.D. Student, Iran University of Science and Technology, Tehran, Iran (m-zakeri@live.com).
 
-Version 0.2.0 (16 March 2021) ├ Download PDF versions [v0.1.0](./pdfs/project_proposal_v1z.pdf), [v0.2.0](./pdfs/project_proposal_v2z.pdf)
+Version 0.2.2 (16 March 2021) ├ Download PDF versions [v0.1.0](./pdfs/project_proposal_v1z.pdf), [v0.2.0](./pdfs/project_proposal_v2z.pdf)
 
 
 **Abstract—** Software refactoring is performed by changing the software structure without modifying its external behavior. Many software quality attributes can be enhanced through the source code refactoring, such as reusability, flexibility, understandability, and testability. Refactoring engines are tools that automate the application of refactorings: first, the user chooses a refactoring to apply, then the engine checks if the transformation is safe, and if so, transforms the program. Refactoring engines are a key component of modern Integrated Development Environments (IDEs), and programmers rely on them to perform refactorings. In this project, an open-source software toolkit for refactoring Java source codes, namely CodART, will be developed. ANTLR parser generator is used to create and modify the program syntax-tree and produce the refactored version of the program. To the best of our knowledge, CodART is the first open-source refactoring toolkit based on ANTLR.
