@@ -19,10 +19,7 @@ import visualization.graph_visualization
 
 
 class DecreaseMethodVisibilityRefactoringListener(JavaParserLabeledListener):
-    """
-    To implement extract class refactoring based on its actors.
-    Creates a new class and move fields and methods from the old class to the new one
-    """
+
 
     def __init__(self, common_token_stream: CommonTokenStream = None, source_class=None, method_name = None):
 
