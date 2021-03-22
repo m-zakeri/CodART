@@ -45,9 +45,9 @@ nav:
         - Long method: code_smells/long_method.md
         - Feature envy: code_smells/feature_envy.md
     - Tutorials:
-        - ANTLR basics: turtorials/antlr_basics.md
+        - ANTLR basics: tutorials/antlr_basics.md
         - ANTLR advanced: tutorials/antlr_advanced.md
-        - Refactoring basics: tutorials/refactoring_basics.md
+        - Refactoring basics: tutorials/refactorings_basics.md
     - Publications: publications.md
     - About us: about.md
     - FAQ : faq.md
