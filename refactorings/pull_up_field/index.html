@@ -20,7 +20,7 @@
     
     
       
-        <title>Pull-Up Field - CodART Docs (v0.1.0dev)</title>
+        <title>Pull-up field - CodART Docs (v0.1.0dev)</title>
       
     
     
@@ -96,7 +96,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Pull-Up Field
+              Pull-up field
             
           </span>
         </div>
@@ -285,7 +285,7 @@
   
     <li class="md-nav__item">
       <a href="../../proposals/core_refactorings_development/" class="md-nav__link">
-        Core Refactoring Development
+        Core refactoring development
       </a>
     </li>
   
@@ -297,7 +297,7 @@
   
     <li class="md-nav__item">
       <a href="../../proposals/core_code_smell_development/" class="md-nav__link">
-        Core Code Smell Development
+        Core code smell development
       </a>
     </li>
   
@@ -309,7 +309,7 @@
   
     <li class="md-nav__item">
       <a href="../../proposals/core_search_based_development/" class="md-nav__link">
-        Core Serach-based Development
+        Core serach-based development
       </a>
     </li>
   
@@ -321,7 +321,7 @@
   
     <li class="md-nav__item">
       <a href="../../proposals/core_refactoring_to_design_patterns_development/" class="md-nav__link">
-        Core Refactoring to Patterns Development
+        Core refactoring to patterns development
       </a>
     </li>
   
@@ -365,7 +365,7 @@
   
     <li class="md-nav__item">
       <a href="../decrease_field_visibility/" class="md-nav__link">
-        Decrease Field Visibility
+        Decrease field visibility
       </a>
     </li>
   
@@ -377,7 +377,7 @@
   
     <li class="md-nav__item">
       <a href="../increase_field_visibility/" class="md-nav__link">
-        Increase Field Visibility
+        Increase field visibility
       </a>
     </li>
   
@@ -389,7 +389,7 @@
   
     <li class="md-nav__item">
       <a href="../extract_interface/" class="md-nav__link">
-        Extract Interface
+        Extract interface
       </a>
     </li>
   
@@ -401,7 +401,7 @@
   
     <li class="md-nav__item">
       <a href="../make_field_final/" class="md-nav__link">
-        Make Field Final
+        Make field final
       </a>
     </li>
   
@@ -413,7 +413,7 @@
   
     <li class="md-nav__item">
       <a href="../make_field_non_final/" class="md-nav__link">
-        Make Field Non-Final
+        Make field non-final
       </a>
     </li>
   
@@ -433,12 +433,12 @@
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          Pull-Up Field
+          Pull-up field
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        Pull-Up Field
+        Pull-up field
       </a>
       
         
@@ -529,7 +529,7 @@
   
     <li class="md-nav__item">
       <a href="../push_down_field/" class="md-nav__link">
-        Push-Down Field
+        Push-down field
       </a>
     </li>
   
@@ -541,7 +541,7 @@
   
     <li class="md-nav__item">
       <a href="../pull_up_method/" class="md-nav__link">
-        Pull-Up Method
+        Pull-up method
       </a>
     </li>
   
@@ -553,7 +553,7 @@
   
     <li class="md-nav__item">
       <a href="../rename_method/" class="md-nav__link">
-        Rename Method
+        Rename method
       </a>
     </li>
   
@@ -638,6 +638,72 @@
   
   
   
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8" type="checkbox" id="__nav_8" >
+      
+      <label class="md-nav__link" for="__nav_8">
+        Tutorials
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Tutorials" data-md-level="1">
+        <label class="md-nav__title" for="__nav_8">
+          <span class="md-nav__icon md-icon"></span>
+          Tutorials
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/antlr_basics/" class="md-nav__link">
+        ANTLR basics
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/antlr_advanced/" class="md-nav__link">
+        ANTLR advanced
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/refactorings_basics/" class="md-nav__link">
+        Refactoring basics
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
     <li class="md-nav__item">
       <a href="../../publications/" class="md-nav__link">
         Publications
@@ -685,7 +751,7 @@
   
     <li class="md-nav__item">
       <a href="https://github.com/m-zakeri/CodART/issues" class="md-nav__link">
-        Issue Tracker
+        Issue tracker
       </a>
     </li>
   
@@ -843,7 +909,7 @@ Pull up field refactoring removes the repetitive field from subclasses and moves
 
 
 <h2 id="refactorings.pullup_field.pullup_field" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">pullup_field</span><span class="p">(</span><span class="n">source_filenames</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">class_name</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">filename_mapping</span><span class="o">=&lt;</span><span class="n">function</span> <span class="o">&lt;</span><span class="k">lambda</span><span class="o">&gt;</span> <span class="n">at</span> <span class="mh">0x000001DF879C4280</span><span class="o">&gt;</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">pullup_field</span><span class="p">(</span><span class="n">source_filenames</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">class_name</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">filename_mapping</span><span class="o">=&lt;</span><span class="n">function</span> <span class="o">&lt;</span><span class="k">lambda</span><span class="o">&gt;</span> <span class="n">at</span> <span class="mh">0x00000284F731B0D0</span><span class="o">&gt;</span><span class="p">)</span></code>
 
 
 </h2>
@@ -866,39 +932,52 @@ and moves the fields to the superclass.</p>
   </thead>
   <tbody>
       <tr>
-        <td><code>source_filenames(list)</code></td>
-        <td><code></code></td>
+        <td><code>source_filenames</code></td>
+        <td><code>list</code></td>
         <td><p>A list of file names to be processed</p></td>
         <td><em>required</em></td>
       </tr>
       <tr>
-        <td><code>package_name(str)</code></td>
-        <td><code></code></td>
+        <td><code>package_name</code></td>
+        <td><code>str</code></td>
         <td><p>The name of the package in which the refactoring has to be done (contains the classes/superclasses)</p></td>
         <td><em>required</em></td>
       </tr>
       <tr>
-        <td><code>class_name(str)</code></td>
-        <td><code></code></td>
+        <td><code>class_name</code></td>
+        <td><code>str</code></td>
         <td><p>Name of the class that the field is pulled up from</p></td>
         <td><em>required</em></td>
       </tr>
       <tr>
-        <td><code>field_name(str)</code></td>
-        <td><code></code></td>
+        <td><code>field_name</code></td>
+        <td><code>str</code></td>
         <td><p>Name of the field that has to be refactored</p></td>
         <td><em>required</em></td>
       </tr>
       <tr>
-        <td><code>filename_mapping(str)</code></td>
-        <td><code></code></td>
+        <td><code>filename_mapping</code></td>
+        <td><code>str</code></td>
         <td><p>Mapping the file's name to the correct format so that it can be processed</p></td>
-        <td><em>required</em></td>
+        <td><code>&lt;function &lt;lambda&gt; at 0x00000284F731B0D0&gt;</code></td>
       </tr>
   </tbody>
-</table>      <p>!!! returns
-     No returns</p>
-
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>bool</code></td>
+      <td><p>No returns</p></td>
+    </tr>
+  </tbody>
+</table>
         <details class="quote">
           <summary>Source code in <code>refactorings\pullup_field.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">pullup_field</span><span class="p">(</span><span class="n">source_filenames</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
@@ -911,18 +990,18 @@ and moves the fields to the superclass.</p>
 <span class="sd">       and moves the fields to the superclass.</span>
 
 <span class="sd">       Args:</span>
-<span class="sd">           source_filenames(list): A list of file names to be processed</span>
+<span class="sd">           source_filenames (list): A list of file names to be processed</span>
 
-<span class="sd">           package_name(str): The name of the package in which the refactoring has to be done (contains the classes/superclasses)</span>
+<span class="sd">           package_name (str): The name of the package in which the refactoring has to be done (contains the classes/superclasses)</span>
 
-<span class="sd">           class_name(str): Name of the class that the field is pulled up from</span>
+<span class="sd">           class_name (str): Name of the class that the field is pulled up from</span>
 
-<span class="sd">           field_name(str): Name of the field that has to be refactored</span>
+<span class="sd">           field_name (str): Name of the field that has to be refactored</span>
 
-<span class="sd">           filename_mapping(str): Mapping the file&#39;s name to the correct format so that it can be processed</span>
+<span class="sd">           filename_mapping (str): Mapping the file&#39;s name to the correct format so that it can be processed</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            No returns</span>
+<span class="sd">       Returns:</span>
+<span class="sd">           No returns</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">program</span> <span class="o">=</span> <span class="n">utils2</span><span class="o">.</span><span class="n">get_program</span><span class="p">(</span><span class="n">source_filenames</span><span class="p">,</span> <span class="n">print_status</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">packages</span><span class="p">)</span>
@@ -1108,7 +1187,7 @@ and moves the fields to the superclass.</p>
               <span class="md-footer__direction">
                 Previous
               </span>
-              Make Field Non-Final
+              Make field non-final
             </div>
           </div>
         </a>
@@ -1120,7 +1199,7 @@ and moves the fields to the superclass.</p>
               <span class="md-footer__direction">
                 Next
               </span>
-              Push-Down Field
+              Push-down field
             </div>
           </div>
           <div class="md-footer__button md-icon">

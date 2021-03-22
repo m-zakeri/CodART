@@ -20,7 +20,7 @@
     
     
       
-        <title>Pull-Up Method - CodART Docs (v0.1.0dev)</title>
+        <title>Pull-up method - CodART Docs (v0.1.0dev)</title>
       
     
     
@@ -96,7 +96,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Pull-Up Method
+              Pull-up method
             
           </span>
         </div>
@@ -285,7 +285,7 @@
   
     <li class="md-nav__item">
       <a href="../../proposals/core_refactorings_development/" class="md-nav__link">
-        Core Refactoring Development
+        Core refactoring development
       </a>
     </li>
   
@@ -297,7 +297,7 @@
   
     <li class="md-nav__item">
       <a href="../../proposals/core_code_smell_development/" class="md-nav__link">
-        Core Code Smell Development
+        Core code smell development
       </a>
     </li>
   
@@ -309,7 +309,7 @@
   
     <li class="md-nav__item">
       <a href="../../proposals/core_search_based_development/" class="md-nav__link">
-        Core Serach-based Development
+        Core serach-based development
       </a>
     </li>
   
@@ -321,7 +321,7 @@
   
     <li class="md-nav__item">
       <a href="../../proposals/core_refactoring_to_design_patterns_development/" class="md-nav__link">
-        Core Refactoring to Patterns Development
+        Core refactoring to patterns development
       </a>
     </li>
   
@@ -365,7 +365,7 @@
   
     <li class="md-nav__item">
       <a href="../decrease_field_visibility/" class="md-nav__link">
-        Decrease Field Visibility
+        Decrease field visibility
       </a>
     </li>
   
@@ -377,7 +377,7 @@
   
     <li class="md-nav__item">
       <a href="../increase_field_visibility/" class="md-nav__link">
-        Increase Field Visibility
+        Increase field visibility
       </a>
     </li>
   
@@ -389,7 +389,7 @@
   
     <li class="md-nav__item">
       <a href="../extract_interface/" class="md-nav__link">
-        Extract Interface
+        Extract interface
       </a>
     </li>
   
@@ -401,7 +401,7 @@
   
     <li class="md-nav__item">
       <a href="../make_field_final/" class="md-nav__link">
-        Make Field Final
+        Make field final
       </a>
     </li>
   
@@ -413,7 +413,7 @@
   
     <li class="md-nav__item">
       <a href="../make_field_non_final/" class="md-nav__link">
-        Make Field Non-Final
+        Make field non-final
       </a>
     </li>
   
@@ -425,7 +425,7 @@
   
     <li class="md-nav__item">
       <a href="../pull_up_field/" class="md-nav__link">
-        Pull-Up Field
+        Pull-up field
       </a>
     </li>
   
@@ -437,7 +437,7 @@
   
     <li class="md-nav__item">
       <a href="../push_down_field/" class="md-nav__link">
-        Push-Down Field
+        Push-down field
       </a>
     </li>
   
@@ -457,12 +457,12 @@
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          Pull-Up Method
+          Pull-up method
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        Pull-Up Method
+        Pull-up method
       </a>
       
         
@@ -546,7 +546,7 @@
   
     <li class="md-nav__item">
       <a href="../rename_method/" class="md-nav__link">
-        Rename Method
+        Rename method
       </a>
     </li>
   
@@ -631,6 +631,72 @@
   
   
   
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8" type="checkbox" id="__nav_8" >
+      
+      <label class="md-nav__link" for="__nav_8">
+        Tutorials
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Tutorials" data-md-level="1">
+        <label class="md-nav__title" for="__nav_8">
+          <span class="md-nav__icon md-icon"></span>
+          Tutorials
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/antlr_basics/" class="md-nav__link">
+        ANTLR basics
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/antlr_advanced/" class="md-nav__link">
+        ANTLR advanced
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/refactorings_basics/" class="md-nav__link">
+        Refactoring basics
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
     <li class="md-nav__item">
       <a href="../../publications/" class="md-nav__link">
         Publications
@@ -678,7 +744,7 @@
   
     <li class="md-nav__item">
       <a href="https://github.com/m-zakeri/CodART/issues" class="md-nav__link">
-        Issue Tracker
+        Issue tracker
       </a>
     </li>
   
@@ -820,7 +886,7 @@ Pull up method refactoring removes the repetitive method from subclasses and mov
 
 
 <h2 id="refactorings.pullup_method.pullup_method_refactoring" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">pullup_method_refactoring</span><span class="p">(</span><span class="n">source_filenames</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">class_name</span><span class="p">,</span> <span class="n">method_key</span><span class="p">,</span> <span class="n">filename_mapping</span><span class="o">=&lt;</span><span class="n">function</span> <span class="o">&lt;</span><span class="k">lambda</span><span class="o">&gt;</span> <span class="n">at</span> <span class="mh">0x000001DF879C4AF0</span><span class="o">&gt;</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">pullup_method_refactoring</span><span class="p">(</span><span class="n">source_filenames</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">class_name</span><span class="p">,</span> <span class="n">method_key</span><span class="p">,</span> <span class="n">filename_mapping</span><span class="o">=&lt;</span><span class="n">function</span> <span class="o">&lt;</span><span class="k">lambda</span><span class="o">&gt;</span> <span class="n">at</span> <span class="mh">0x00000284F731B8B0</span><span class="o">&gt;</span><span class="p">)</span></code>
 
 
 </h2>
@@ -842,34 +908,34 @@ Removes the necessary methods from the subclasses and moves them to a superclass
   </thead>
   <tbody>
       <tr>
-        <td><code>source_filenames(list)</code></td>
-        <td><code></code></td>
+        <td><code>source_filenames</code></td>
+        <td><code>list</code></td>
         <td><p>A list of file names to be processed</p></td>
         <td><em>required</em></td>
       </tr>
       <tr>
-        <td><code>package_name(str)</code></td>
-        <td><code></code></td>
+        <td><code>package_name</code></td>
+        <td><code>str</code></td>
         <td><p>The name of the package in which the refactoring has to be done(contains the classes)</p></td>
         <td><em>required</em></td>
       </tr>
       <tr>
-        <td><code>class_name(str)</code></td>
-        <td><code></code></td>
+        <td><code>class_name</code></td>
+        <td><code>str</code></td>
         <td><p>Name of the class in which the refactoring has to be done (pulling up the field from here)</p></td>
         <td><em>required</em></td>
       </tr>
       <tr>
-        <td><code>method_key(str)</code></td>
-        <td><code></code></td>
+        <td><code>method_key</code></td>
+        <td><code>str</code></td>
         <td><p>Name of the method which needs to be removed from the subclasses/pulled up</p></td>
         <td><em>required</em></td>
       </tr>
       <tr>
-        <td><code>filename_mapping(str)</code></td>
-        <td><code></code></td>
+        <td><code>filename_mapping</code></td>
+        <td><code>str</code></td>
         <td><p>Mapping the file's name to the correct format so that it can be processed</p></td>
-        <td><em>required</em></td>
+        <td><code>&lt;function &lt;lambda&gt; at 0x00000284F731B8B0&gt;</code></td>
       </tr>
   </tbody>
 </table>
@@ -896,15 +962,15 @@ Removes the necessary methods from the subclasses and moves them to a superclass
 <span class="sd">       Removes the necessary methods from the subclasses and moves them to a superclass.</span>
 
 <span class="sd">       Args:</span>
-<span class="sd">              source_filenames(list): A list of file names to be processed</span>
+<span class="sd">              source_filenames (list): A list of file names to be processed</span>
 
-<span class="sd">              package_name(str): The name of the package in which the refactoring has to be done(contains the classes)</span>
+<span class="sd">              package_name (str): The name of the package in which the refactoring has to be done(contains the classes)</span>
 
-<span class="sd">              class_name(str): Name of the class in which the refactoring has to be done (pulling up the field from here)</span>
+<span class="sd">              class_name (str): Name of the class in which the refactoring has to be done (pulling up the field from here)</span>
 
-<span class="sd">              method_key(str): Name of the method which needs to be removed from the subclasses/pulled up</span>
+<span class="sd">              method_key (str): Name of the method which needs to be removed from the subclasses/pulled up</span>
 
-<span class="sd">              filename_mapping(str): Mapping the file&#39;s name to the correct format so that it can be processed</span>
+<span class="sd">              filename_mapping (str): Mapping the file&#39;s name to the correct format so that it can be processed</span>
 
 <span class="sd">       Returns:</span>
 <span class="sd">           No returns</span>
@@ -1009,7 +1075,7 @@ Removes the necessary methods from the subclasses and moves them to a superclass
               <span class="md-footer__direction">
                 Previous
               </span>
-              Push-Down Field
+              Push-down field
             </div>
           </div>
         </a>
@@ -1021,7 +1087,7 @@ Removes the necessary methods from the subclasses and moves them to a superclass
               <span class="md-footer__direction">
                 Next
               </span>
-              Rename Method
+              Rename method
             </div>
           </div>
           <div class="md-footer__button md-icon">
