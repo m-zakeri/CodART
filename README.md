@@ -15,11 +15,11 @@ In addition, a summary of CodART architecture is discussed in the following:
 
 ### CodART architecture
 
-The high-level architecture of CodART is shown in Figure 2. The source code consists of several Python packages and directories. We briefly describe each component in CodART. 
+The high-level architecture of CodART is shown in Figure 1. The source code consists of several Python packages and directories. We briefly describe each component in CodART. 
 
 ![CodART__Architecture](docs/figs/CodART_architecture__v0.1.1.png)
 
-*Figure 2. CodART architecture*
+*Figure 1. CodART architecture*
 
 
 I. `grammars`: This directory contains three ANTLR4 grammars for the Java programming language: 
