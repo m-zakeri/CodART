@@ -33,17 +33,17 @@ def pushdown_field(source_filenames: list,
         Adds the necessary fields to the subclasses and removes them from the superclass.
 
         Args:
-              source_filenames(list): A list of file names to be processed
+              source_filenames (list): A list of file names to be processed
 
-              package_name(str): The name of the package in which the refactoring has to be done (contains the superclass)
+              package_name (str): The name of the package in which the refactoring has to be done (contains the superclass)
 
-              superclass_name(str): The name of the needed superclass
+              superclass_name (str): The name of the needed superclass
 
-              class_names(str): Name of the classes in which the refactoring has to be done (the classes to push down field from)
+              class_names (str): Name of the classes in which the refactoring has to be done (the classes to push down field from)
 
-              field_name(str): Name of the field that has to be refactored
+              field_name (str): Name of the field that has to be refactored
 
-              filename_mapping(str): Mapping the file's name to the correct format so that it can be processed
+              filename_mapping (str): Mapping the file's name to the correct format so that it can be processed
 
         Returns:
             No returns

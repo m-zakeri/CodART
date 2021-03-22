@@ -33,18 +33,18 @@ def pullup_field(source_filenames: list,
        and moves the fields to the superclass.
 
        Args:
-           source_filenames(list): A list of file names to be processed
+           source_filenames (list): A list of file names to be processed
                 
-           package_name(str): The name of the package in which the refactoring has to be done (contains the classes/superclasses)
+           package_name (str): The name of the package in which the refactoring has to be done (contains the classes/superclasses)
 
-           class_name(str): Name of the class that the field is pulled up from
+           class_name (str): Name of the class that the field is pulled up from
 
-           field_name(str): Name of the field that has to be refactored
+           field_name (str): Name of the field that has to be refactored
                 
-           filename_mapping(str): Mapping the file's name to the correct format so that it can be processed
-                
-        Returns:
-            No returns
+           filename_mapping (str): Mapping the file's name to the correct format so that it can be processed
+
+       Returns:
+           No returns
     """
     program = utils2.get_program(source_filenames, print_status=True)
     print(program.packages)

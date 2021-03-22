@@ -31,15 +31,15 @@ def pullup_method_refactoring(source_filenames: list, package_name: str, class_n
        Removes the necessary methods from the subclasses and moves them to a superclass.
 
        Args:
-              source_filenames(list): A list of file names to be processed
+              source_filenames (list): A list of file names to be processed
 
-              package_name(str): The name of the package in which the refactoring has to be done(contains the classes)
+              package_name (str): The name of the package in which the refactoring has to be done(contains the classes)
 
-              class_name(str): Name of the class in which the refactoring has to be done (pulling up the field from here)
+              class_name (str): Name of the class in which the refactoring has to be done (pulling up the field from here)
 
-              method_key(str): Name of the method which needs to be removed from the subclasses/pulled up
+              method_key (str): Name of the method which needs to be removed from the subclasses/pulled up
 
-              filename_mapping(str): Mapping the file's name to the correct format so that it can be processed
+              filename_mapping (str): Mapping the file's name to the correct format so that it can be processed
 
        Returns:
            No returns

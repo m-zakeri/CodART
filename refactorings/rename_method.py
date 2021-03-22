@@ -125,11 +125,11 @@ def get_method_calls(udb_path, scope_class_name, new_name):
        and returns all of the correct references
 
         Args:
-            udb_path(str): Address path to the database file
+            udb_path (str): Address path to the database file
 
-            scope_class_name(str): Name of the class in which the refactoring has to be done
+            scope_class_name (str): Name of the class in which the refactoring has to be done
 
-            new_name(str): The new name of the refactored method
+            new_name (str): The new name of the refactored method
 
         Returns:
             References
