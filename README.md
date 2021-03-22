@@ -17,7 +17,7 @@ In addition, a summary of CodART architecture is discussed in the following:
 
 The high-level architecture of CodART is shown in Figure 2. The source code consists of several Python packages and directories. We briefly describe each component in CodART. 
 
-![CodART_Architecture](./docs/figs/CodART_architecture__v0.1.1.png)
+![CodART__Architecture](docs/figs/CodART_architecture__v0.1.1.png)
 
 *Figure 2. CodART architecture*
 
@@ -69,6 +69,7 @@ X. **Other packages**: The information of other packages will be announced in th
  * [CodART team members and contributors](https://m-zakeri.github.io/CodART/about/)
  * [CodART issues](https://github.com/m-zakeri/CodART/issues)
    
+
 
  * [Catalog of refactorings by Martin Fowler](https://refactoring.com/catalog/)
  * [Refactoring.Guru](https://refactoring.guru/)
