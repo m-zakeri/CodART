@@ -1,26 +1,20 @@
-"""
-The scripts implements different refactoring operations
+import os
 
+from gen.javaLabeled.JavaLexer import JavaLexer
 
-"""
-__version__ = '0.1.0'
-__author__ = 'Morteza'
-
-import networkx as nx
+try:
+    import understand as und
+except ImportError as e:
+    print(e)
 
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
-from gen.java9.Java9_v2Parser import Java9_v2Parser
-from gen.java9 import Java9_v2Listener
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
-import visualization.graph_visualization
 
 
-
-
-class myExtractSubClassRefactoringListener(JavaParserLabeledListener):
+class ExtractSubClassRefactoringListener(JavaParserLabeledListener):
     """
     To implement extract class refactoring based on its actors.
     Creates a new class and move fields and methods from the old class to the new one
@@ -61,7 +55,7 @@ class myExtractSubClassRefactoringListener(JavaParserLabeledListener):
         self.NEW_LINE = "\n"
         self.code = ""
 
-    def enterClassDeclaration(self, ctx:JavaParserLabeled.ClassDeclarationContext):
+    def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
         print("Refactoring started, please wait...")
         class_identifier = ctx.IDENTIFIER().getText()
         if class_identifier == self.source_class:
@@ -72,39 +66,39 @@ class myExtractSubClassRefactoringListener(JavaParserLabeledListener):
         else:
             self.is_source_class = False
 
-    def exitClassDeclaration(self, ctx:JavaParserLabeled.ClassDeclarationContext):
+    def exitClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
         if self.is_source_class:
             self.code += "}"
             self.is_source_class = False
 
-    def exitCompilationUnit(self, ctx:JavaParserLabeled.CompilationUnitContext):
+    def exitCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
         print("Finished Processing...")
         self.token_stream_rewriter.insertAfter(
             index=ctx.stop.tokenIndex,
             text=self.code
         )
 
-    def enterVariableDeclaratorId(self, ctx:JavaParserLabeled.VariableDeclaratorIdContext):
+    def enterVariableDeclaratorId(self, ctx: JavaParserLabeled.VariableDeclaratorIdContext):
         if not self.is_source_class:
             return None
         field_identifier = ctx.IDENTIFIER().getText()
         if field_identifier in self.moved_fields:
             self.detected_field = field_identifier
 
-    def exitFieldDeclaration(self, ctx:JavaParserLabeled.FieldDeclarationContext):
+    def exitFieldDeclaration(self, ctx: JavaParserLabeled.FieldDeclarationContext):
         if not self.is_source_class:
             return None
         # field_names = ctx.variableDeclarators().getText().split(",")
         field_identifier = ctx.variableDeclarators().variableDeclarator(0).variableDeclaratorId().IDENTIFIER().getText()
-        field_names=list()
+        field_names = list()
         field_names.append(field_identifier)
-        print("field_names=",field_names)
+        print("field_names=", field_names)
         print("Here")
         grand_parent_ctx = ctx.parentCtx.parentCtx
         if self.detected_field in field_names:
-            if(not grand_parent_ctx.modifier()):
+            if (not grand_parent_ctx.modifier()):
                 # print("******************************************")
-                modifier=""
+                modifier = ""
             else:
                 modifier = grand_parent_ctx.modifier(0).getText()
             field_type = ctx.typeType().getText()
@@ -118,21 +112,21 @@ class myExtractSubClassRefactoringListener(JavaParserLabeledListener):
             #         text=f"{modifier} {field_type} {','.join(field_names)};"
             #     )
             # else:
-                # self.token_stream_rewriter.delete(
-                #     program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-                #     from_idx=grand_parent_ctx.start.tokenIndex,
-                #     to_idx=grand_parent_ctx.stop.tokenIndex
-                # )
+            # self.token_stream_rewriter.delete(
+            #     program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+            #     from_idx=grand_parent_ctx.start.tokenIndex,
+            #     to_idx=grand_parent_ctx.stop.tokenIndex
+            # )
             self.detected_field = None
 
-    def enterMethodDeclaration(self, ctx:JavaParserLabeled.MethodDeclarationContext):
+    def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
         if not self.is_source_class:
             return None
         method_identifier = ctx.IDENTIFIER().getText()
         if method_identifier in self.moved_methods:
             self.detected_method = method_identifier
 
-    def exitMethodDeclaration(self, ctx:JavaParserLabeled.MethodDeclarationContext):
+    def exitMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
         if not self.is_source_class:
             return None
         method_identifier = ctx.IDENTIFIER().getText()
@@ -152,3 +146,45 @@ class myExtractSubClassRefactoringListener(JavaParserLabeledListener):
             #     to_idx=stop_index
             # )
             self.detected_method = None
+
+
+if __name__ == '__main__':
+    udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
+    source_class = "GodClass"
+    moved_methods = ['method1', 'method3', ]
+    moved_fields = ['field1', 'field2', ]
+
+    # initialize with understand
+    father_path_file = ""
+    file_list_to_be_propagate = set()
+    propagate_classes = set()
+
+    db = und.open(udb_path)
+
+    for cls in db.ents("class"):
+        if (cls.simplename() == source_class):
+            father_path_file = cls.parent().longname()
+            for ref in cls.refs("Coupleby"):
+                # print(ref.ent().longname())
+                propagate_classes.add(ref.ent().longname())
+                # print(ref.ent().parent().relname())
+                # file_list_to_be_propagate.add(ref.ent().parent().relname())
+        # if(cls.longname()==fatherclass):
+        #     print(cls.parent().relname())
+        #     father_path_file=cls.parent().relname()
+
+    stream = FileStream(father_path_file, encoding='utf8')
+    lexer = JavaLexer(stream)
+    token_stream = CommonTokenStream(lexer)
+    parser = JavaParserLabeled(token_stream)
+    parser.getTokenStream()
+    parse_tree = parser.compilationUnit()
+    my_listener = ExtractSubClassRefactoringListener(common_token_stream=token_stream,
+                                                     source_class=source_class,
+                                                     new_class=source_class + "extracted",
+                                                     moved_fields=moved_fields, moved_methods=moved_methods)
+    walker = ParseTreeWalker()
+    walker.walk(t=parse_tree, listener=my_listener)
+
+    with open(father_path_file, mode='w', newline='') as f:
+        f.write(my_listener.token_stream_rewriter.getDefaultText())
