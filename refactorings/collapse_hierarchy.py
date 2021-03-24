@@ -1,21 +1,10 @@
-"""
-The scripts implements different refactoring operations
-
-
-"""
-__version__ = '0.1.0'
-__author__ = 'Morteza'
-
-import networkx as nx
-
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
+from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
-
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
-
-import visualization.graph_visualization
+from refactorings.utils.utils2 import get_filenames_in_dir
 
 
 class Field:
@@ -103,7 +92,7 @@ class CollapseHierarchyRefactoringListener(JavaParserLabeledListener):
         if target_class:
             self.target_class = target_class
         else:
-            self.target_class = None
+            self.target_class = ""
         if target_class_data:
             self.target_class_data = target_class_data
         else:
@@ -121,7 +110,10 @@ class CollapseHierarchyRefactoringListener(JavaParserLabeledListener):
         if class_identifier == self.source_class:
             self.is_source_class = True
             self.is_target_class = False
-            self.target_class = ctx.typeType().classOrInterfaceType().IDENTIFIER(0).getText()
+            try:
+                self.target_class = ctx.typeType().classOrInterfaceType().IDENTIFIER(0).getText()
+            except AttributeError:
+                self.target_class = ""
         elif class_identifier == self.target_class:
             self.is_target_class = True
             self.is_source_class = False
@@ -184,7 +176,8 @@ class CollapseHierarchyRefactoringListener(JavaParserLabeledListener):
         if self.is_source_class or self.is_target_class:
             if ctx.formalParameters().formalParameterList():
                 constructor_parameters = [ctx.formalParameters().formalParameterList().children[i] for i in
-                                          range(len(ctx.formalParameters().formalParameterList().children)) if i % 2 == 0]
+                                          range(len(ctx.formalParameters().formalParameterList().children)) if
+                                          i % 2 == 0]
             else:
                 constructor_parameters = []
             constructor_text = ''
@@ -309,3 +302,44 @@ class CollapseHierarchyRefactoringListener(JavaParserLabeledListener):
                     to_idx=ctx.typeType().stop.tokenIndex,
                     text=self.target_class
                 )
+
+
+def main():
+    pass
+
+
+if __name__ == '__main__':
+    input_directory = "/home/ali/Desktop/code/TestProject"
+    input_java_files = get_filenames_in_dir(input_directory)
+    source_class_data = None
+    target_class = None
+    target_class_data = None
+    is_complete = False
+
+    for i in range(2):
+        for file in input_java_files:
+            stream = FileStream(file, encoding='utf8')
+            # if i == 0:
+            #     stream = FileStream(input_directory + '/' + file, encoding='utf8')
+            # else:
+            #     stream = FileStream(input_directory + '/refactored/' + '/' + file, encoding='utf8')
+
+            lexer = JavaLexer(stream)
+            token_stream = CommonTokenStream(lexer)
+            parser = JavaParserLabeled(token_stream)
+            tree = parser.compilationUnit()
+            my_listener = CollapseHierarchyRefactoringListener(
+                common_token_stream=token_stream, source_class='GodClassUser',
+                target_class='GodClass', source_class_data=source_class_data,
+                target_class_data=target_class_data, is_complete=is_complete
+            )
+
+            walker = ParseTreeWalker()
+            walker.walk(t=tree, listener=my_listener)
+            target_class = my_listener.target_class
+            source_class_data = my_listener.source_class_data
+            target_class_data = my_listener.target_class_data
+            is_complete = my_listener.is_complete
+            with open(file, mode='w+', newline='') as f:
+                f.write(my_listener.token_stream_rewriter.getDefaultText())
+            print("/\\", end='')
