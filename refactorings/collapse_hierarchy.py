@@ -1,8 +1,5 @@
-import errno
-import os
-
 from gen.javaLabeled.JavaLexer import JavaLexer
-from refactorings.class_refactorings.remove_class import RemoveClassRefactoringListener
+from refactorings.remove_class import RemoveClassRefactoringListener
 
 try:
     import understand as und
