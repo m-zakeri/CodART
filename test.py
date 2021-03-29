@@ -40,7 +40,7 @@ def main(args):
             if i == 0:
                 stream = FileStream(input_directory + '/' + file, encoding='utf8')
             else:
-                stream = FileStream('testproject/refactored/' + '/' + file, encoding='utf8')
+                stream = FileStream('benchmark_projects/refactored/' + '/' + file, encoding='utf8')
             # input_stream = StdinStream()
 
             # Step 2: Create an instance of AssignmentStLexer
@@ -88,7 +88,7 @@ def main(args):
                     common_token_stream=token_stream, target_class='JSONPointer',
                     target_methods=['builder']
                 )
-            with open('testproject/refactored/' + file, mode='w+', newline='') as f:
+            with open('benchmark_projects/refactored/' + file, mode='w+', newline='') as f:
                 f.write(my_listener.token_stream_rewriter.getDefaultText())
             print("/\\", end='')
 
@@ -97,7 +97,7 @@ if __name__ == '__main__':
     argparser = argparse.ArgumentParser()
     argparser.add_argument(
         '-d', '--directory',
-        help='Input source', default=r'testproject/input/src/main/java/org/json')
+        help='Input source', default=r'benchmark_projects/input/src/main/java/org/json')
     argparser.add_argument(
         '-r', '--refactor',
         help='i: inline class & c: collapse hierarchy & ms: make method static & mn: make method non static',

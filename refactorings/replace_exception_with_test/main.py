@@ -9,7 +9,7 @@ from refactorings.replace_exception_with_test.replace_exception_with_test import
 from gen.javaLabeled.JavaLexer import *
 from gen.javaLabeled.JavaParserLabeled import *
 
-directory = 'E:/git/CodART/testproject/input/src/main/java/org/json/CDL.java'
+directory = 'E:/git/CodART/benchmark_projects/input/src/main/java/org/json/CDL.java'
 
 
 def main(args):
