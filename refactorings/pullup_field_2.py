@@ -1,24 +1,19 @@
-"""
-The scripts implements different refactoring operations
+from gen.javaLabeled.JavaLexer import JavaLexer
 
-
-"""
-__version__ = '0.1.0'
-__author__ = 'Morteza'
-
-import networkx as nx
+try:
+    import understand as und
+except ImportError as e:
+    print(e)
 
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
-from gen.java9.Java9_v2Parser import Java9_v2Parser
-from gen.java9 import Java9_v2Listener
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
-import visualization.graph_visualization
 
-class movefieldup_gettextfield_Listener(JavaParserLabeledListener):
-    def __init__(self,common_token_stream: CommonTokenStream,child=None,field=None):
+
+class PullUpFieldGetTextFieldListener(JavaParserLabeledListener):
+    def __init__(self, common_token_stream: CommonTokenStream, child=None, field=None):
         if common_token_stream is None:
             raise ValueError('common_token_stream is None')
         else:
@@ -28,21 +23,22 @@ class movefieldup_gettextfield_Listener(JavaParserLabeledListener):
         else:
             self.child = child
 
-
         if field is None:
             raise ValueError("field is None")
         else:
             self.field = field
 
-        self.field_text=""
+        self.field_text = ""
+
     def enterFieldDeclaration(self, ctx: JavaParserLabeled.FieldDeclarationContext):
         ctx1 = ctx.parentCtx.parentCtx.parentCtx.parentCtx
         class_identifier = ctx1.IDENTIFIER().getText()
         if class_identifier in self.child:
             # field_identifier = ctx.variableDeclarators().getText().split(",")
-            field_identifier = ctx.variableDeclarators().variableDeclarator(0).variableDeclaratorId().IDENTIFIER().getText()
-            if self.field in  field_identifier :
-                ctx1=ctx.parentCtx.parentCtx
+            field_identifier = ctx.variableDeclarators().variableDeclarator(
+                0).variableDeclaratorId().IDENTIFIER().getText()
+            if self.field in field_identifier:
+                ctx1 = ctx.parentCtx.parentCtx
                 start_index = ctx1.start.tokenIndex
                 stop_index = ctx1.stop.tokenIndex
                 self.field_text = self.token_stream_rewriter.getText(
@@ -50,15 +46,15 @@ class movefieldup_gettextfield_Listener(JavaParserLabeledListener):
                     start=start_index,
                     stop=stop_index)
 
-class movefieldupRefactoringListener(JavaParserLabeledListener):
+
+class PullUpFieldRefactoringListener(JavaParserLabeledListener):
     """
     To implement extract class refactoring based on its actors.
     Creates a new class and move fields and methods from the old class to the new one
     """
 
-    def __init__(self, common_token_stream: CommonTokenStream = None, destination_class: str = None, children_class=None, moved_fields=None,fieldtext=None):
-
-
+    def __init__(self, common_token_stream: CommonTokenStream = None, destination_class: str = None,
+                 children_class=None, moved_fields=None, fieldtext=None):
 
         if moved_fields is None:
             self.moved_fields = []
@@ -96,24 +92,26 @@ class movefieldupRefactoringListener(JavaParserLabeledListener):
         self.TAB = "\t"
         self.NEW_LINE = "\n"
         self.code = ""
-        self.tempdeclarationcode=""
-        self.field_text=""
+        self.tempdeclarationcode = ""
+        self.field_text = ""
         # self.iscopyfieldtext=False
-    def enterFieldDeclaration(self, ctx:JavaParserLabeled.FieldDeclarationContext):
+
+    def enterFieldDeclaration(self, ctx: JavaParserLabeled.FieldDeclarationContext):
         print("Refactoring started, please wait...")
         # if self.is_source_class:
-        ctx1=ctx.parentCtx.parentCtx.parentCtx.parentCtx
+        ctx1 = ctx.parentCtx.parentCtx.parentCtx.parentCtx
         class_identifier = ctx1.IDENTIFIER().getText()
         if class_identifier in self.children_class:
 
             # class_identifier = ctx.variableDeclarators().variableDeclarator().variableDeclaratorId().IDENTIFIER.getText()
             # field_identifier = ctx.variableDeclarators().getText().split(",")
-            field_identifier = ctx.variableDeclarators().variableDeclarator(0).variableDeclaratorId().IDENTIFIER().getText()
+            field_identifier = ctx.variableDeclarators().variableDeclarator(
+                0).variableDeclaratorId().IDENTIFIER().getText()
             # print(class_identifier)
             # for item in self.moved_fields:
 
-            if self.moved_fields[0] in  field_identifier :
-                ctx1=ctx.parentCtx.parentCtx
+            if self.moved_fields[0] in field_identifier:
+                ctx1 = ctx.parentCtx.parentCtx
                 start_index = ctx1.start.tokenIndex
                 stop_index = ctx1.stop.tokenIndex
                 self.field_text = self.token_stream_rewriter.getText(
@@ -121,7 +119,7 @@ class movefieldupRefactoringListener(JavaParserLabeledListener):
                     start=start_index,
                     stop=stop_index)
 
-                     # delete field from source class
+                # delete field from source class
 
                 # self.token_stream_rewriter.replaceRange(
                 #     from_idx=ctx1.start.tokenIndex,
@@ -137,7 +135,7 @@ class movefieldupRefactoringListener(JavaParserLabeledListener):
 
             # print(self.field_text)
 
-    def enterClassDeclaration(self, ctx:JavaParserLabeled.ClassDeclarationContext):
+    def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
         class_identifier = ctx.IDENTIFIER().getText()
         if class_identifier == self.destination_class:
             self.is_source_class = True
@@ -145,7 +143,7 @@ class movefieldupRefactoringListener(JavaParserLabeledListener):
             # self.code += self.NEW_LINE * 2
             # self.code += f"// New class({self.destibation_class}) generated by CodART" + self.NEW_LINE
             # self.code += f"class {self.destibation_class}{self.NEW_LINE}" + "{" + self.NEW_LINE
-        elif class_identifier=="B":
+        elif class_identifier == "B":
             print("enter B class")
             # self.token_stream_rewriter.replaceRange(
             #                     from_idx=ctx.start.tokenIndex,
@@ -158,28 +156,27 @@ class movefieldupRefactoringListener(JavaParserLabeledListener):
 
     def enterClassBody(self, ctx: JavaParserLabeled.ClassBodyContext):
         print()
-        ctx1=ctx.parentCtx
+        ctx1 = ctx.parentCtx
         class_identifier = ctx1.IDENTIFIER().getText()
         print(class_identifier)
         if class_identifier == self.destination_class:
             # if not self.is_source_class:
-                self.token_stream_rewriter.replaceRange(
-                    from_idx=ctx.start.tokenIndex+1,
-                    to_idx=ctx.start.tokenIndex+1,
-                    text="\n"+self.fieldtext+"\n"
-                )
+            self.token_stream_rewriter.replaceRange(
+                from_idx=ctx.start.tokenIndex + 1,
+                to_idx=ctx.start.tokenIndex + 1,
+                text="\n" + self.fieldtext + "\n"
+            )
 
-    def exitClassDeclaration(self, ctx:JavaParserLabeled.ClassDeclarationContext):
+    def exitClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
         if self.is_source_class:
             # self.code += "}"
             self.is_source_class = False
 
-    def exitCompilationUnit(self, ctx:JavaParserLabeled.CompilationUnitContext):
+    def exitCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
         # self.count+=1
         # if(self.count==1):
         #     my_listener = movefieldupRefactoringListener(common_token_stream=self.token_stream_rewriter, destination_class='A',
         #                                                  children_class=["B", "S"], moved_fields=['a'],)
-
 
         print("Finished Processing...")
         self.token_stream_rewriter.insertAfter(
@@ -187,7 +184,7 @@ class movefieldupRefactoringListener(JavaParserLabeledListener):
             text=self.code
         )
 
-    def enterVariableDeclaratorId(self, ctx:JavaParserLabeled.VariableDeclaratorIdContext):
+    def enterVariableDeclaratorId(self, ctx: JavaParserLabeled.VariableDeclaratorIdContext):
         if not self.is_source_class:
             return None
         field_identifier = ctx.IDENTIFIER().getText()
@@ -249,10 +246,10 @@ class movefieldupRefactoringListener(JavaParserLabeledListener):
     #         self.detected_method = None
 
 
-class PropagationMovefieldUpRefactoringListener(JavaParserLabeledListener):
+class PropagationPullUpFieldRefactoringListener(JavaParserLabeledListener):
 
-    def __init__(self, token_stream_rewriter: CommonTokenStream = None, old_class_name:list=None,
-                 new_class_name:str=None,propagated_class_name:list=None):
+    def __init__(self, token_stream_rewriter: CommonTokenStream = None, old_class_name: list = None,
+                 new_class_name: str = None, propagated_class_name: list = None):
 
         if propagated_class_name is None:
             self.propagated_class_name = []
@@ -280,10 +277,10 @@ class PropagationMovefieldUpRefactoringListener(JavaParserLabeledListener):
         self.TAB = "\t"
         self.NEW_LINE = "\n"
         self.code = ""
-        self.tempdeclarationcode=""
-        self.method_text= ""
+        self.tempdeclarationcode = ""
+        self.method_text = ""
 
-    def enterVariableDeclarator(self, ctx:JavaParserLabeled.VariableDeclaratorContext):
+    def enterVariableDeclarator(self, ctx: JavaParserLabeled.VariableDeclaratorContext):
         print("Propagation started, please wait...")
         if not self.is_class:
             return None
@@ -302,7 +299,7 @@ class PropagationMovefieldUpRefactoringListener(JavaParserLabeledListener):
                 text=self.new_class_name
             )
 
-    def enterClassDeclaration(self, ctx:JavaParserLabeled.ClassDeclarationContext):
+    def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
         class_identifier = ctx.IDENTIFIER().getText()
         if class_identifier in self.propagated_class_name:
             self.is_class = True
@@ -311,3 +308,96 @@ class PropagationMovefieldUpRefactoringListener(JavaParserLabeledListener):
             print("enter other class")
             self.is_class = False
 
+
+if __name__ == '__main__':
+    udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
+    children_class = "AppChild1"
+    moved_fields = ["push_down", ]
+    # initialize with understand
+    fileslist_to_be_propagate = set()
+    propagation_classes = set()
+    father_class = ""
+    fileslist_to_be_rafeactored = set()
+    main_file = ""
+    db = und.open(udb_path)
+    i = 0
+    for field in db.ents("Java Variable"):
+        for child in children_class:
+            if field.longname().endswith(child + "." + moved_fields[0]):
+                if i == 0:
+                    main_file = field.parent().parent().longname()
+                i += 1
+                fileslist_to_be_rafeactored.add(field.parent().parent().longname())
+                for fth in field.parent().refs("Extend"):
+                    father_class = fth.ent().longname()
+                    fileslist_to_be_rafeactored.add(fth.ent().parent().longname())
+                for ref in field.refs("Setby , Useby"):
+                    propagation_classes.add(ref.ent().parent().longname())
+                    if ref.ent().parent().parent():
+                        fileslist_to_be_propagate.add(ref.ent().parent().parent().longname())
+    print("fileslist_to_be_propagate :", fileslist_to_be_propagate)
+    print("propagation_classes : ", propagation_classes)
+    print("fileslist_to_be_rafeactored :", fileslist_to_be_rafeactored)
+    print("father class :", father_class)
+    print("main file:", main_file)
+
+    print("===========================================================================================")
+
+    fileslist_to_be_propagate = list(fileslist_to_be_propagate)
+    propagation_classes = list(propagation_classes)
+    fileslist_to_be_rafeactored = list(fileslist_to_be_rafeactored)
+    # get text
+    stream = FileStream(main_file, encoding='utf8')
+    lexer = JavaLexer(stream)
+    token_stream = CommonTokenStream(lexer)
+    parser = JavaParserLabeled(token_stream)
+    parser.getTokenStream()
+    parse_tree = parser.compilationUnit()
+    print(
+        "************************************************************************************************************")
+    # get text
+    get_text = PullUpFieldGetTextFieldListener(common_token_stream=token_stream, child=children_class,
+                                               field=moved_fields[0])
+    walker = ParseTreeWalker()
+    walker.walk(t=parse_tree, listener=get_text)
+
+    field_text = get_text.field_text
+    print("field_text:", field_text)
+    # end get text
+    for file in fileslist_to_be_rafeactored:
+        stream = FileStream(file, encoding='utf8')
+        lexer = JavaLexer(stream)
+        token_stream = CommonTokenStream(lexer)
+        parser = JavaParserLabeled(token_stream)
+        parser.getTokenStream()
+        parse_tree = parser.compilationUnit()
+
+        my_listener = PullUpFieldRefactoringListener(common_token_stream=token_stream,
+                                                     destination_class=father_class,
+                                                     children_class=children_class, moved_fields=moved_fields,
+                                                     fieldtext=field_text)
+        walker = ParseTreeWalker()
+        walker.walk(t=parse_tree, listener=my_listener)
+
+        with open(file, mode='w', newline='') as f:
+            f.write(my_listener.token_stream_rewriter.getDefaultText())
+        # end refactor
+    # beging of propagate
+
+    for file in fileslist_to_be_propagate:
+        stream = FileStream(file, encoding='utf8')
+        lexer = JavaLexer(stream)
+        token_stream = CommonTokenStream(lexer)
+        parser = JavaParserLabeled(token_stream)
+        parser.getTokenStream()
+        parse_tree = parser.compilationUnit()
+        my_listener = PropagationPullUpFieldRefactoringListener(token_stream_rewriter=token_stream,
+                                                                old_class_name=children_class,
+                                                                new_class_name=father_class,
+                                                                propagated_class_name=propagation_classes)
+        walker = ParseTreeWalker()
+        walker.walk(t=parse_tree, listener=my_listener)
+
+
+        with open(file, mode='w', newline='') as f:
+            f.write(my_listener.token_stream_rewriter.getDefaultText())
