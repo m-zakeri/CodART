@@ -1,23 +1,15 @@
-"""
-The scripts implements different refactoring operations
+from gen.javaLabeled.JavaLexer import JavaLexer
 
-
-"""
-__version__ = '0.1.0'
-__author__ = 'Morteza'
-
-import networkx as nx
+try:
+    import understand as und
+except ImportError as e:
+    print(e)
 
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
-from gen.java9.Java9_v2Parser import Java9_v2Parser
-from gen.java9 import Java9_v2Listener
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
-import visualization.graph_visualization
-
-
 
 
 class MakeNonFinalClassRefactoringListener(JavaParserLabeledListener):
@@ -101,3 +93,28 @@ class MakeNonFinalClassRefactoringListener(JavaParserLabeledListener):
     #                 to_idx=ctx.start.tokenIndex+1,
     #                 text="\n"+self.field_text+"\n"
     #             )
+
+
+if __name__ == '__main__':
+    udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
+    source_class = "Triangle"
+    # initialize with understand
+    main_file = ""
+    db = und.open(udb_path)
+    for cls in db.ents("class"):
+        if cls.simplename() == source_class:
+            main_file = cls.parent().longname()
+
+    stream = FileStream(main_file, encoding='utf8')
+    lexer = JavaLexer(stream)
+    token_stream = CommonTokenStream(lexer)
+    parser = JavaParserLabeled(token_stream)
+    parser.getTokenStream()
+    parse_tree = parser.compilationUnit()
+    my_listener = MakeNonFinalClassRefactoringListener(common_token_stream=token_stream,
+                                                       class_name=source_class)
+    walker = ParseTreeWalker()
+    walker.walk(t=parse_tree, listener=my_listener)
+
+    with open(main_file, mode='w', newline='') as f:
+        f.write(my_listener.token_stream_rewriter.getDefaultText())

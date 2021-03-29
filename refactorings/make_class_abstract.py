@@ -1,23 +1,15 @@
-"""
-The scripts implements different refactoring operations
+from gen.javaLabeled.JavaLexer import JavaLexer
 
-
-"""
-__version__ = '0.1.0'
-__author__ = 'Morteza'
-
-import networkx as nx
+try:
+    import understand as und
+except ImportError as e:
+    print(e)
 
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
-from gen.java9.Java9_v2Parser import Java9_v2Parser
-from gen.java9 import Java9_v2Listener
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
-import visualization.graph_visualization
-
-
 
 
 class MakeAbstractClassRefactoringListener(JavaParserLabeledListener):
@@ -112,6 +104,7 @@ class MakeAbstractClassRefactoringListener(JavaParserLabeledListener):
     #                 text="\n"+self.field_text+"\n"
     #             )
 
+
 class PropagationMakeAbstractClassRefactoringListener(JavaParserLabeledListener):
 
     def __init__(self, common_token_stream: CommonTokenStream = None, Source_class= None, object_name=None,
@@ -178,7 +171,8 @@ class PropagationMakeAbstractClassRefactoringListener(JavaParserLabeledListener)
                             text=ctx.children[count-1].getText()
                         )
 
-class PropagationMakeAbstractClass_GetObjects_RefactoringListener(JavaParserLabeledListener):
+
+class PropagationMakeAbstractClassGetObjectsRefactoringListener(JavaParserLabeledListener):
 
     def __init__(self, common_token_stream: CommonTokenStream = None, source_class=None,
                  propagated_class_name=None):
@@ -221,3 +215,30 @@ class PropagationMakeAbstractClass_GetObjects_RefactoringListener(JavaParserLabe
             if className in self.source_class:
                 objectname=ctx.variableDeclaratorId().IDENTIFIER().getText()
                 self.objects.append(objectname)
+
+
+if __name__ == '__main__':
+    udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
+    source_class = "Circle"
+    # initialize with understand
+    main_file = ""
+    db = und.open(udb_path)
+    print("Here")
+    for cls in db.ents("class"):
+        if cls.simplename() == source_class:
+            main_file = cls.parent().longname()
+
+    stream = FileStream(main_file, encoding='utf8')
+    lexer = JavaLexer(stream)
+    token_stream = CommonTokenStream(lexer)
+    parser = JavaParserLabeled(token_stream)
+    parser.getTokenStream()
+    parse_tree = parser.compilationUnit()
+    my_listener = MakeAbstractClassRefactoringListener(common_token_stream=token_stream,
+                                                       class_name=source_class)
+    walker = ParseTreeWalker()
+    walker.walk(t=parse_tree, listener=my_listener)
+
+    with open(main_file, mode='w', newline='') as f:
+        f.write(my_listener.token_stream_rewriter.getDefaultText())
+

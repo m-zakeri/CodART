@@ -1,7 +1,7 @@
-
-import os
-
-import utilization.setup_understand
+try:
+    import understand
+except ImportError as e:
+    print(e)
 
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
@@ -101,15 +101,15 @@ if __name__ == '__main__':
     db_path = "/home/ali/Documents/compiler/Research/xerces2-j/xerces2-j.udb"
     class_name = "DesignDoc"
     field_name = "GENERATOR_NAME"
-    mainfile = ""
+    main_file = ""
 
     db = understand.open(db_path)
     for cls in db.ents("class"):
-        if (cls.simplename() == class_name):
+        if cls.simplename() == class_name:
             if cls.kindname() != "Unknown Class":
-                mainfile = cls.parent().longname()
+                main_file = cls.parent().longname()
 
-    stream = FileStream(mainfile, encoding='utf8')
+    stream = FileStream(main_file, encoding='utf8')
     # Step 2: Create an instance of AssignmentStLexer
     lexer = JavaLexer(stream)
     # Step 3: Convert the input source into a list of tokens
@@ -123,5 +123,5 @@ if __name__ == '__main__':
     walker = ParseTreeWalker()
     walker.walk(t=parse_tree, listener=my_listener)
 
-    with open(mainfile, mode='w', newline='') as f:
+    with open(main_file, mode='w', newline='') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())

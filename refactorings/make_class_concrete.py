@@ -1,23 +1,15 @@
-"""
-The scripts implements different refactoring operations
+from gen.javaLabeled.JavaLexer import JavaLexer
 
-
-"""
-__version__ = '0.1.0'
-__author__ = 'Morteza'
-
-import networkx as nx
+try:
+    import understand as und
+except ImportError as e:
+    print(e)
 
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
-from gen.java9.Java9_v2Parser import Java9_v2Parser
-from gen.java9 import Java9_v2Listener
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
-import visualization.graph_visualization
-
-
 
 
 class MakeConcreteClassRefactoringListener(JavaParserLabeledListener):
@@ -27,7 +19,6 @@ class MakeConcreteClassRefactoringListener(JavaParserLabeledListener):
     """
 
     def __init__(self, common_token_stream: CommonTokenStream = None, class_name: str = None):
-
 
         if common_token_stream is None:
             raise ValueError('common_token_stream is None')
@@ -47,19 +38,16 @@ class MakeConcreteClassRefactoringListener(JavaParserLabeledListener):
         self.NEW_LINE = "\n"
         self.code = ""
 
-
-    def enterTypeDeclaration(self, ctx:JavaParserLabeled.TypeDeclarationContext):
+    def enterTypeDeclaration(self, ctx: JavaParserLabeled.TypeDeclarationContext):
         print("Refactoring started, please wait...")
-        if  self.objective_class == ctx.classDeclaration().IDENTIFIER().getText():
-            for i in range (0, len(ctx.classOrInterfaceModifier())):
-             if ctx.classOrInterfaceModifier(i).getText()=="abstract":
-               self.token_stream_rewriter.replaceRange(
-               from_idx=ctx.classOrInterfaceModifier(i).start.tokenIndex,
-               to_idx=ctx.classOrInterfaceModifier(i).stop.tokenIndex,
-               text=""
-                )
-
-
+        if self.objective_class == ctx.classDeclaration().IDENTIFIER().getText():
+            for i in range(0, len(ctx.classOrInterfaceModifier())):
+                if ctx.classOrInterfaceModifier(i).getText() == "abstract":
+                    self.token_stream_rewriter.replaceRange(
+                        from_idx=ctx.classOrInterfaceModifier(i).start.tokenIndex,
+                        to_idx=ctx.classOrInterfaceModifier(i).stop.tokenIndex,
+                        text=""
+                    )
 
     # def enterFieldDeclaration(self, ctx:JavaParserLabeled.FieldDeclarationContext):
     #     if self.is_source_class:
@@ -101,9 +89,10 @@ class MakeConcreteClassRefactoringListener(JavaParserLabeledListener):
     #                 text="\n"+self.field_text+"\n"
     #             )
 
+
 class PropagationMakeConcreteClassRefactoringListener(JavaParserLabeledListener):
 
-    def __init__(self, common_token_stream: CommonTokenStream = None, Source_class= None, using_variable_name=None,
+    def __init__(self, common_token_stream: CommonTokenStream = None, Source_class=None, using_variable_name=None,
                  used_method_name=None, propagated_class_name=None):
 
         if Source_class is None:
@@ -115,7 +104,6 @@ class PropagationMakeConcreteClassRefactoringListener(JavaParserLabeledListener)
             self.using_method_name = []
         else:
             self.using_method_name = used_method_name
-
 
         if using_variable_name is None:
             self.using_variable_name = []
@@ -147,21 +135,22 @@ class PropagationMakeConcreteClassRefactoringListener(JavaParserLabeledListener)
 
         if class_identifier in self.propagated_class_name:
             self.token_stream_rewriter.replaceRange(from_idx=ctx.start.tokenIndex,
-                                              to_idx=ctx.typeType().stop.tokenIndex,
-                                              text=ctx.CLASS().getText() + ' ' + ctx.IDENTIFIER().getText()
-                                              )
+                                                    to_idx=ctx.typeType().stop.tokenIndex,
+                                                    text=ctx.CLASS().getText() + ' ' + ctx.IDENTIFIER().getText()
+                                                    )
 
-    def enterClassBody(self, ctx:JavaParserLabeled.ClassBodyContext):
+    def enterClassBody(self, ctx: JavaParserLabeled.ClassBodyContext):
         if not self.is_class:
             return None
-        self.object='obj'+str.capitalize(self.source_class)
+        self.object = 'obj' + str.capitalize(self.source_class)
         self.token_stream_rewriter.insertAfter(index=ctx.start.tokenIndex,
                                                text=self.NEW_LINE + self.TAB + self.TAB
-                                                +self.source_class + ' ' + self.object +
-                                               ' = '+ 'new '+ self.source_class + '('+ ')' + ';' + self.NEW_LINE,
+                                                    + self.source_class + ' ' + self.object +
+                                                    ' = ' + 'new ' + self.source_class + '(' + ')' + ';' + self.NEW_LINE,
                                                program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME
                                                )
-    def enterVariableDeclarator(self, ctx:JavaParserLabeled.VariableDeclaratorContext):
+
+    def enterVariableDeclarator(self, ctx: JavaParserLabeled.VariableDeclaratorContext):
         if not self.is_class:
             return None
         if ctx.variableDeclaratorId().IDENTIFIER().getText() in self.using_variable_name:
@@ -171,15 +160,41 @@ class PropagationMakeConcreteClassRefactoringListener(JavaParserLabeledListener)
                                                         text=self.object + '.',
                                                         program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME
                                                         )
-    def enterExpression(self, ctx:JavaParserLabeled.ExpressionContext):
+
+    def enterExpression(self, ctx: JavaParserLabeled.ExpressionContext):
         if not self.is_class:
             return None
-        if ctx!=None:
+        if ctx != None:
             if ctx.methodCall() != None:
                 if ctx.methodCall().IDENTIFIER().getText() in self.using_method_name:
-                    count=ctx.methodCall().getChildCount()
-                    if count==3:
+                    count = ctx.methodCall().getChildCount()
+                    if count == 3:
                         self.token_stream_rewriter.insertBefore(index=ctx.start.tokenIndex,
                                                                 text=self.object + '.',
                                                                 program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME
                                                                 )
+
+
+if __name__ == '__main__':
+    udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
+    source_class = "Shape"
+    # initialize with understand
+    main_file = ""
+    db = und.open(udb_path)
+    for cls in db.ents("class"):
+        if cls.simplename() == source_class:
+            main_file = cls.parent().longname()
+
+    stream = FileStream(main_file, encoding='utf8')
+    lexer = JavaLexer(stream)
+    token_stream = CommonTokenStream(lexer)
+    parser = JavaParserLabeled(token_stream)
+    parser.getTokenStream()
+    parse_tree = parser.compilationUnit()
+    my_listener = MakeConcreteClassRefactoringListener(common_token_stream=token_stream,
+                                                       class_name=source_class)
+    walker = ParseTreeWalker()
+    walker.walk(t=parse_tree, listener=my_listener)
+
+    with open(main_file, mode='w', newline='') as f:
+        f.write(my_listener.token_stream_rewriter.getDefaultText())
