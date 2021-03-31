@@ -4,7 +4,7 @@ import os
 import argparse
 
 
-from refactorings.replace_exception_with_test.replace_exception_with_test import \
+from refactorings.dead_codes.replace_exception_with_test import \
     ReplaceExceptionWithTestClassRefactoringListener
 from gen.javaLabeled.JavaLexer import *
 from gen.javaLabeled.JavaParserLabeled import *

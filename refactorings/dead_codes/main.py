@@ -64,7 +64,7 @@ def main(args):
     walker = ParseTreeWalker()
     walker.walk(t=parse_tree, listener=my_listener)
 
-    with open('tests/encapsulate_field_tests/input.refactored.java', mode='w', newline='') as f:
+    with open('../../tests/encapsulate_field_tests/input.refactored.java', mode='w', newline='') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
 
 

@@ -1,21 +1,15 @@
-"""
-The scripts implements different refactoring operations
+from gen.javaLabeled.JavaLexer import JavaLexer
 
-
-"""
-__version__ = '0.1.0'
-__author__ = 'Morteza'
-
-import networkx as nx
+try:
+    import understand as und
+except ImportError as e:
+    print(e)
 
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
-from gen.java9.Java9_v2Parser import Java9_v2Parser
-from gen.java9 import Java9_v2Listener
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
-import visualization.graph_visualization
 
 
 class MoveMethodDownRefactoring_GetMethodText_Listener(JavaParserLabeledListener):
@@ -46,8 +40,8 @@ class MoveMethodDownRefactoring_GetMethodText_Listener(JavaParserLabeledListener
         self.TAB = "\t"
         self.NEW_LINE = "\n"
         self.code = ""
-        self.tempdeclarationcode=""
-        self.method_text= ""
+        self.tempdeclarationcode = ""
+        self.method_text = ""
 
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
         print("Refactoring started, please wait...")
@@ -57,8 +51,8 @@ class MoveMethodDownRefactoring_GetMethodText_Listener(JavaParserLabeledListener
             method_identifier = ctx.IDENTIFIER().getText()
             print(method_identifier)
             print(self.moved_methods)
-            if self.moved_methods ==  method_identifier :
-                methodDefctx=ctx.parentCtx.parentCtx
+            if self.moved_methods == method_identifier:
+                methodDefctx = ctx.parentCtx.parentCtx
                 start_index = methodDefctx.start.tokenIndex
                 stop_index = methodDefctx.stop.tokenIndex
                 self.method_text = self.token_stream_rewriter.getText(
@@ -66,21 +60,18 @@ class MoveMethodDownRefactoring_GetMethodText_Listener(JavaParserLabeledListener
                     start=start_index,
                     stop=stop_index)
 
-            print("method text: ",self.method_text)
+            print("method text: ", self.method_text)
         else:
             return None
 
-    def enterClassDeclaration(self, ctx:JavaParserLabeled.ClassDeclarationContext):
+    def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
         class_identifier = ctx.IDENTIFIER().getText()
         if class_identifier == self.source_class:
             self.is_source_class = True
 
-        elif class_identifier=="B":
+        elif class_identifier == "B":
             print("enter B class")
             self.is_source_class = False
-
-
-
 
 
 class MoveMethodDownRefactoringListener(JavaParserLabeledListener):
@@ -89,7 +80,8 @@ class MoveMethodDownRefactoringListener(JavaParserLabeledListener):
     Creates a new class and move fields and methods from the old class to the new one
     """
 
-    def __init__(self, common_token_stream: CommonTokenStream = None, source_class: str = None, children_class=None, moved_methods:str =None, method_text:str =None):
+    def __init__(self, common_token_stream: CommonTokenStream = None, source_class: str = None, children_class=None,
+                 moved_methods: str = None, method_text: str = None):
 
         if method_text is None:
             self.method_text = []
@@ -123,7 +115,7 @@ class MoveMethodDownRefactoringListener(JavaParserLabeledListener):
         self.TAB = "\t"
         self.NEW_LINE = "\n"
         self.code = ""
-        self.tempdeclarationcode=""
+        self.tempdeclarationcode = ""
 
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
         print("Refactoring started, please wait...")
@@ -133,8 +125,8 @@ class MoveMethodDownRefactoringListener(JavaParserLabeledListener):
             method_identifier = ctx.IDENTIFIER().getText()
             print(method_identifier)
             print(self.moved_methods)
-            if self.moved_methods ==  method_identifier :
-                methodDefctx=ctx.parentCtx.parentCtx
+            if self.moved_methods == method_identifier:
+                methodDefctx = ctx.parentCtx.parentCtx
                 start_index = methodDefctx.start.tokenIndex
                 stop_index = methodDefctx.stop.tokenIndex
                 self.method_text = self.token_stream_rewriter.getText(
@@ -148,33 +140,34 @@ class MoveMethodDownRefactoringListener(JavaParserLabeledListener):
                     to_idx=methodDefctx.stop.tokenIndex
                 )
 
-            print("method text: ",self.method_text)
+            print("method text: ", self.method_text)
         else:
             return None
 
-    def enterClassDeclaration(self, ctx:JavaParserLabeled.ClassDeclarationContext):
+    def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
         class_identifier = ctx.IDENTIFIER().getText()
         if class_identifier == self.source_class:
             self.is_source_class = True
 
-        elif class_identifier=="B":
+        elif class_identifier == "B":
             print("enter B class")
             self.is_source_class = False
 
     def enterClassBody(self, ctx: JavaParserLabeled.ClassBodyContext):
-        classDecctx=ctx.parentCtx
+        classDecctx = ctx.parentCtx
         class_identifier = classDecctx.IDENTIFIER().getText()
         if class_identifier in self.children_class:
-                self.token_stream_rewriter.replaceRange(
-                    from_idx=ctx.start.tokenIndex+1,
-                    to_idx=ctx.start.tokenIndex+1,
-                    text="\n" + self.method_text + "\n"
-                )
-    def exitClassDeclaration(self, ctx:JavaParserLabeled.ClassDeclarationContext):
+            self.token_stream_rewriter.replaceRange(
+                from_idx=ctx.start.tokenIndex + 1,
+                to_idx=ctx.start.tokenIndex + 1,
+                text="\n" + self.method_text + "\n"
+            )
+
+    def exitClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
         if self.is_source_class:
             self.is_source_class = False
 
-    def exitCompilationUnit(self, ctx:JavaParserLabeled.CompilationUnitContext):
+    def exitCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
         print("Finished Processing...")
         self.token_stream_rewriter.insertAfter(
             index=ctx.stop.tokenIndex,
@@ -242,10 +235,11 @@ class MoveMethodDownRefactoringListener(JavaParserLabeledListener):
     #         )
     #         self.detected_method = None
 
+
 class PropagationMoveMethodDownRefactoringListener(JavaParserLabeledListener):
 
-    def __init__(self, token_stream_rewriter: CommonTokenStream = None, old_class_name:list=None,
-                 new_class_name:str=None,propagated_class_name:list=None):
+    def __init__(self, token_stream_rewriter: CommonTokenStream = None, old_class_name: list = None,
+                 new_class_name: str = None, propagated_class_name: list = None):
 
         if propagated_class_name is None:
             self.propagated_class_name = []
@@ -273,10 +267,10 @@ class PropagationMoveMethodDownRefactoringListener(JavaParserLabeledListener):
         self.TAB = "\t"
         self.NEW_LINE = "\n"
         self.code = ""
-        self.tempdeclarationcode=""
-        self.method_text= ""
+        self.tempdeclarationcode = ""
+        self.method_text = ""
 
-    def enterVariableDeclarator(self, ctx:JavaParserLabeled.VariableDeclaratorContext):
+    def enterVariableDeclarator(self, ctx: JavaParserLabeled.VariableDeclaratorContext):
         print("Propagation started, please wait...")
         if not self.is_class:
             return None
@@ -295,7 +289,7 @@ class PropagationMoveMethodDownRefactoringListener(JavaParserLabeledListener):
                 text=self.new_class_name
             )
 
-    def enterClassDeclaration(self, ctx:JavaParserLabeled.ClassDeclarationContext):
+    def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
         class_identifier = ctx.IDENTIFIER().getText()
         if class_identifier in self.propagated_class_name:
             self.is_class = True
@@ -303,3 +297,92 @@ class PropagationMoveMethodDownRefactoringListener(JavaParserLabeledListener):
         else:
             print("enter other class")
             self.is_class = False
+
+
+if __name__ == '__main__':
+    udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
+    source_class = "App"
+    moved_method = "methodToPullUp"
+    # initialize with understand
+    main_file = ""
+    fileslist_to_be_propagate = set()
+    propagation_classes = set()
+    children_class = set()
+    fileslist_to_be_rafeactored = set()
+    db = und.open(udb_path)
+    for mth in db.ents("Java Method"):
+        if mth.longname().endswith(source_class + "." + moved_method):
+            for childcls in mth.parent().refs("Extendby"):
+                children_class.add(childcls.ent().longname())
+                fileslist_to_be_rafeactored.add(childcls.ent().parent().longname())
+            print("mainfile : ", mth.parent().parent().relname())
+            main_file = mth.parent().parent().longname()
+            for ref in mth.refs("Java Callby"):
+                fileslist_to_be_propagate.add(ref.ent().parent().parent().longname())
+                propagation_classes.add(ref.ent().parent().longname())
+
+    print("fileslist_to_be_propagate :", fileslist_to_be_propagate)
+    print("propagation_classes : ", propagation_classes)
+    print("children_class :", children_class)
+    print("fileslist_to_be_rafeactored :", fileslist_to_be_rafeactored)
+    fileslist_to_be_propagate = list(fileslist_to_be_propagate)
+    propagation_classes = list(propagation_classes)
+    children_class = list(children_class)
+    fileslist_to_be_rafeactored = list(fileslist_to_be_rafeactored)
+    print("==============================================================================")
+
+    #  get text
+    stream = FileStream(main_file, encoding='utf8')
+    lexer = JavaLexer(stream)
+    token_stream = CommonTokenStream(lexer)
+    parser = JavaParserLabeled(token_stream)
+    parser.getTokenStream()
+    parse_tree = parser.compilationUnit()
+    # listener get text
+    get_text = MoveMethodDownRefactoring_GetMethodText_Listener(common_token_stream=token_stream,
+                                                                source_class=source_class,
+                                                                moved_method=moved_method)
+    walker = ParseTreeWalker()
+    walker.walk(t=parse_tree, listener=get_text)
+
+    method_text = get_text.method_text
+    print(method_text)
+    # end get text
+
+    # begin refarore
+
+    for file in fileslist_to_be_rafeactored:
+        stream = FileStream(file, encoding='utf8')
+        lexer = JavaLexer(stream)
+        token_stream = CommonTokenStream(lexer)
+        parser = JavaParserLabeled(token_stream)
+        parser.getTokenStream()
+        parse_tree = parser.compilationUnit()
+
+        my_listener = MoveMethodDownRefactoringListener(common_token_stream=token_stream, source_class=source_class,
+                                                        children_class=children_class, moved_methods=moved_method,
+                                                        method_text=method_text)
+        walker = ParseTreeWalker()
+        walker.walk(t=parse_tree, listener=my_listener)
+
+        with open(file, mode='w', newline='') as f:
+            f.write(my_listener.token_stream_rewriter.getDefaultText())
+
+    # {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{beging of propagate
+
+    for file in fileslist_to_be_propagate:
+        stream = FileStream(file, encoding='utf8')
+        lexer = JavaLexer(stream)
+        token_stream = CommonTokenStream(lexer)
+        parser = JavaParserLabeled(token_stream)
+        parser.getTokenStream()
+        parse_tree = parser.compilationUnit()
+        my_listener = PropagationMoveMethodDownRefactoringListener(token_stream_rewriter=token_stream,
+                                                                   old_class_name=source_class,
+                                                                   new_class_name=children_class[0],
+                                                                   propagated_class_name=propagation_classes)
+        walker = ParseTreeWalker()
+        walker.walk(t=parse_tree, listener=my_listener)
+
+        with open(file, mode='w', newline='') as f:
+            f.write(my_listener.token_stream_rewriter.getDefaultText())

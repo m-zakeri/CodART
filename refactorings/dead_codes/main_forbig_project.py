@@ -21,24 +21,16 @@ except ModuleNotFoundError:
 
 print(und.version())
 
-import argparse
-
 from antlr4 import *
 
 # from refactorings.extract_class import ExtractClassRefactoringListener
-from gen.java9 import Java9_v2Lexer
 from gen.java9.Java9_v2Parser import Java9_v2Parser
 # from refactorings.Main_refactorings_action_module import Main_Refactors_Action
 # from refactorings.Main_refactorings_action_module import Main_Refactors_Action
 # from refactorings.Refactoring_action_module_for_big_project import Main_Refactors_Action_for_big_project
-from refactorings.Refactoring_action_module_for_big_project import Main_Refactors_Action_for_big_project
+from refactorings.dead_codes.Refactoring_action_module_for_big_project import Main_Refactors_Action_for_big_project
 from refactorings.extract_class_migrated import myExtractClassRefactoringListener
-from refactorings.field_refactorings.MoveFieldDown_Main import main_movefileddown
 from refactorings.field_refactorings.MoveFieldUp_Main import main_movefiledUp
-from refactorings.field_refactorings.movefielddown import movefielddownRefactoringListener, \
-    movefield_down_gettextfield_Listener
-from refactorings.field_refactorings.movefieldup import movefieldupRefactoringListener, \
-    movefieldup_gettextfield_Listener
 from refactorings.method_refactorings.main_MoveMethodDown import main_MoveMethodDown
 from refactorings.method_refactorings.main_MoveMoethodUp import main_MoveMethodUp
 # from refactorings.Refactoring_action_module import Main_Refactors_Action
@@ -49,7 +41,6 @@ import argparse
 
 from antlr4 import *
 
-from gen.java.JavaParser import JavaParser
 from gen.java.JavaLexer import JavaLexer
 from refactorings.extract_class_migrated import myExtractClassRefactoringListener
 
@@ -283,7 +274,7 @@ def get_information(Root_path_project, source_class, move_field):
 
 if __name__ == '__main__':
     # print(timestamp())
-    with open("filename_status_database.txt", mode='w', encoding="utf-8", newline='') as f:
+    with open("../../filename_status_database.txt", mode='w', encoding="utf-8", newline='') as f:
         f.write(
             "This file contains the list of Java files that were refracted, and if the Java file name was in this file, you must read it from the(files_refactord) folder.\n")
     refactor_action = Main_Refactors_Action_for_big_project()
