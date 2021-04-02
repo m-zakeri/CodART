@@ -1,6 +1,10 @@
 """
-To implement the encapsulate filed refactored
-Encapsulate field: Make a public field private and provide accessors
+The module implements encapsulate field refactoring in
+response to `Deficient Encapsulation` design smell.
+
+## References
+[1] G. Suryanarayana, G. Samarthyam, and T. Sharma, Refactoring for software design smells: managing technical debt,
+1st ed. San Francisco, CA, USA: Morgan Kaufmann Publishers Inc., 2014.
 
 
 """
@@ -20,6 +24,7 @@ class EncapsulateFiledRefactoringListener(Java9_v2Listener):
     To implement the encapsulate filed refactored
     Encapsulate field: Make a public field private and provide accessors
     """
+
     def __init__(self, common_token_stream: CommonTokenStream = None,
                  field_identifier: str = None):
         """
