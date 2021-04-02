@@ -1,10 +1,10 @@
-import os
+"""
 
-try:
-    import understand
-except ModuleNotFoundError:
-    # Error handling
-    pass
+
+"""
+
+__version__ = '0.1.0'
+__author__ = 'IUST-Students'
 
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
@@ -13,6 +13,8 @@ from gen.java.JavaParser import JavaParser
 from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
+
+import utilization.setup_understand
 
 
 class DecreaseFieldVisibilityRefactoringListener(JavaParserLabeledListener):
