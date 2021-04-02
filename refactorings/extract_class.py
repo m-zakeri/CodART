@@ -1,6 +1,9 @@
-import os
+"""
 
-import utilization.setup_understand
+"""
+
+__version__ = '0.1.0'
+__author__ = 'Morteza'
 
 import networkx as nx
 from antlr4 import *
@@ -10,6 +13,8 @@ from visualization import graph_visualization
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
+
+import utilization.setup_understand
 
 
 class DependencyPreConditionListener(JavaParserLabeledListener):
@@ -351,7 +356,8 @@ class ChangeClassUsagesListener(JavaParserLabeledListener):
 
 
 class ExtractClassAPI:
-    def __init__(self, project_dir, file_path, source_class, new_class, moved_fields, moved_methods, new_file_path=None):
+    def __init__(self, project_dir, file_path, source_class, new_class, moved_fields, moved_methods,
+                 new_file_path=None):
         self.project_dir = project_dir
         self.file_path = file_path
         self.new_file_path = new_file_path or "/home/ali/Documents/dev/CodART/input.refactored.java"
