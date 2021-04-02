@@ -1,16 +1,20 @@
-from gen.javaLabeled.JavaLexer import JavaLexer
-from refactorings.remove_class import RemoveClassRefactoringListener
+"""
 
-try:
-    import understand as und
-except ImportError:
-    print("Can not import understand.")
+
+"""
+
+__version__ = '0.1.0'
+__author__ = 'IUST-Students'
 
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
+from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
+from refactorings.remove_class import RemoveClassRefactoringListener
+
+import utilization.setup_understand
 
 
 class CollapseHierarchyRefactoringGetFieldTextListener(JavaParserLabeledListener):
