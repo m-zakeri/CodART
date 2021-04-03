@@ -1,3 +1,10 @@
+"""
+QMOOD Design Metrics
+"""
+
+__version__ = '0.1.0'
+__author__ = 'Seyyed Ali Ayati'
+
 import os
 import understand
 
