@@ -13,7 +13,7 @@ __author__ = 'Morteza'
 from utilization.understand_install_test import *
 
 try:
-    import understand
+    import understand as und
 except ModuleNotFoundError:
     # Error handling
     pass

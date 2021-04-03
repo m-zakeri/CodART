@@ -7,7 +7,7 @@ __author__ = 'Morteza'
 import os
 
 try:
-    import understand
+    import understand as und
 except ModuleNotFoundError:
     # Error handling
     pass
@@ -270,7 +270,7 @@ if __name__ == '__main__':
     propagate_classes = set()
     file_list_include_file_name_that_edited = ""
     mainfile = ""
-    db = understand.open(udb_path)
+    db = und.open(udb_path)
     for field in db.ents("public variable"):
         if (str(field) == str(class_name + "." + field_name)):
             # get path file include this field.

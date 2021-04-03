@@ -107,7 +107,7 @@ if __name__ == '__main__':
     field_name = "length"
     mainfile = ""
 
-    db = understand.open(udb_path)
+    db = und.open(udb_path)
 
     for cls in db.ents("class"):
         if (cls.simplename() == class_name):

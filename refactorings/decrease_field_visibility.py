@@ -14,7 +14,7 @@ from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
-import utilization.setup_understand
+from utilization.setup_understand import *
 
 
 class DecreaseFieldVisibilityRefactoringListener(JavaParserLabeledListener):
@@ -114,7 +114,7 @@ if __name__ == '__main__':
     class_name = "AttributesImpl"
     field_name = "length"
     mainfile = ""
-    db = understand.open(udb_path)
+    db = und.open(udb_path)
     for cls in db.ents("class"):
         if (cls.simplename() == class_name):
             if cls.kindname() != "Unknown Class":

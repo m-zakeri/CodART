@@ -14,7 +14,7 @@ from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 from refactorings.remove_class import RemoveClassRefactoringListener
 
-import utilization.setup_understand
+from utilization.setup_understand import *
 
 
 class CollapseHierarchyRefactoringGetFieldTextListener(JavaParserLabeledListener):

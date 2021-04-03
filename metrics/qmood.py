@@ -6,14 +6,14 @@ __version__ = '0.1.0'
 __author__ = 'Seyyed Ali Ayati'
 
 import os
-import understand
+import understand as und
 
 
 class QMOOD:
     def __init__(self, udb_path):
         if not os.path.isfile(udb_path):
             raise ValueError("Project directory is not valid.")
-        self.db = understand.open(udb_path)
+        self.db = und.open(udb_path)
         self.metrics = self.db.metric(self.db.metrics())
 
     @property

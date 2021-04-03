@@ -2,7 +2,7 @@
 import os
 
 try:
-    import understand
+    import understand as und
 except ModuleNotFoundError:
     # Error handling
     pass
@@ -136,7 +136,7 @@ def get_method_calls(udb_path, scope_class_name, new_name):
     """
     if not os.path.exists(path=udb_path):
         raise ValueError("Database file does not exist!")
-    db = understand.open(udb_path)
+    db = und.open(udb_path)
     method_scope = scope_class_name + "." + new_name
     references = []
     # Find All Method Calls

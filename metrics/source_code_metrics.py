@@ -10,11 +10,6 @@ To be used in CodART project
 __version__ = '0.1.0'
 __author__ = 'Morteza'
 
-
-import sys
-sys.path.insert(0, "D:/program files/scitools/bin/pc-win64/python")
-import understand
-
 from abc import ABC, abstractmethod
 
 

@@ -13,7 +13,7 @@ from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
-import utilization.setup_understand
+from utilization.setup_understand import *
 
 
 class DecreaseMethodVisibilityRefactoringListener(JavaParserLabeledListener):
