@@ -64,9 +64,65 @@ class QMOOD:
                 counter += 1
         return counter
 
-    def DAM(self, class_longname):
+    @property
+    def DAM(self):
         """
-        DAM - Direct Access Metric
+        DAM - The Average of Direct Access Metric for all classes
+        :return: AVG(All Class's DAM).
+        """
+        return self.get_class_average(self.ClassLevelDAM)
+
+    @property
+    def CAMC(self):
+        """
+        CAMC - Cohesion Among Methods of class
+        :return: AVG(All Class's CAMC)
+        """
+        return self.get_class_average(self.ClassLevelCAMC)
+
+    @property
+    def CIS(self):
+        """
+        CIS - Class Interface Size
+        :return: AVG(All class's CIS)
+        """
+        return self.get_class_average(self.ClassLevelCIS)
+
+    @property
+    def NOM(self):
+        """
+        NOM - Number of Methods
+        :return: AVG(All class's NOM)
+        """
+        return self.get_class_average(self.ClassLevelNOM)
+
+    @property
+    def DCC(self):
+        """
+        DCC - Direct Class Coupling
+        :return: AVG(All class's DCC)
+        """
+        return self.get_class_average(self.ClassLevelDCC)
+
+    @property
+    def MFA(self):
+        """
+        MFA - Measure of Functional Abstraction
+        :return: AVG(All class's MFA)
+        """
+        return self.get_class_average(self.ClassLevelMFA)
+
+    @property
+    def NOP(self):
+        """
+        NOP - Number of Polymorphic Methods
+        :return: AVG(All class's NOP)
+        """
+        return self.get_class_average(self.ClassLevelNOP)
+
+    def ClassLevelDAM(self, class_longname):
+        """
+        DAM - Class Level Direct Access Metric
         :param class_longname: The longname of a class. For examole: package_name.ClassName
         :return: Ratio of the number of private and protected attributes to the total number of attributes in a class.
         """
@@ -87,14 +143,14 @@ class QMOOD:
 
         try:
             ratio = (private_variables + protected_variables) / (
-                        private_variables + protected_variables + public_variables)
+                    private_variables + protected_variables + public_variables)
         except ZeroDivisionError:
             ratio = 0.0
         return ratio
 
-    def CMAC(self, class_longname):
+    def ClassLevelCAMC(self, class_longname):
         """
-        CMAC - Cohesion Among Methods of class
+        CAMC - Class Level Cohesion Among Methods of class
         Measures of how related methods are in a class in terms of used parameters.
         It can also be computed by: 1 - LackOfCohesionOfMethods()
         :param class_longname: The longname of a class. For examole: package_name.ClassName
@@ -104,9 +160,9 @@ class QMOOD:
         percentage = class_entity.metric(['PercentLackOfCohesion']).get('PercentLackOfCohesion', 0)
         return 1.0 - percentage / 100
 
-    def CIS(self, class_longname):
+    def ClassLevelCIS(self, class_longname):
         """
-        CIS - Class Interface Size
+        CIS - Class Level Class Interface Size
         :param class_longname: The longname of a class. For examole: package_name.ClassName
         :return: Number of public methods in class
         """
@@ -115,9 +171,9 @@ class QMOOD:
             return class_entity.metric(['CountDeclMethodPublic']).get('CountDeclMethodPublic', 0)
         return 0
 
-    def NOM(self, class_longname):
+    def ClassLevelNOM(self, class_longname):
         """
-        NOM - Number of Methods
+        NOM - Class Level Number of Methods
         :param class_longname: The longname of a class. For examole: package_name.ClassName
         :return: Number of methods declared in a class.
         """
@@ -126,9 +182,9 @@ class QMOOD:
             return class_entity.metric(['CountDeclMethod']).get('CountDeclMethod', 0)
         return 0
 
-    def DCC(self, class_longname):
+    def ClassLevelDCC(self, class_longname):
         """
-        DCC - Direct Class Coupling
+        DCC - Class Level Direct Class Coupling
         :param class_longname: The longname of a class. For examole: package_name.ClassName
         :return: Number of other classes a class relates to, either through a shared attribute or a parameter in a method.
         """
@@ -141,9 +197,9 @@ class QMOOD:
                         counter += 1
         return counter
 
-    def MFA(self, class_longname):
+    def ClassLevelMFA(self, class_longname):
         """
-        MFA - Measure of Functional Abstraction
+        MFA - Class Level Measure of Functional Abstraction
         :param class_longname: The longname of a class. For examole: package_name.ClassName
         :return: Ratio of the number of inherited methods per the total number of methods within a class.
         """
@@ -153,11 +209,11 @@ class QMOOD:
         all_methods = metrics.get('CountDeclMethodAll')
         if all_methods == 0:
             all_methods = 1
-        return (all_methods - local_methods)/all_methods
+        return (all_methods - local_methods) / all_methods
 
-    def NOP(self, class_longname):
+    def ClassLevelNOP(self, class_longname):
         """
-        NOP - Number of Polymorphic Methods
+        NOP - Class Level Number of Polymorphic Methods
         Any method that can be used by a class and its descendants.
         :param class_longname: The longname of a class. For examole: package_name.ClassName
         :return: Counts of the number of methods in a class excluding private, static and final ones.
@@ -168,11 +224,8 @@ class QMOOD:
         return instance_methods - private_methods
 
     def test(self):
-        for ent in sorted(self.db.ents(kindstring='class'), key=lambda ent: ent.name()):
-            if ent.kindname() == "Unknown Class":
-                continue
-            print("Entity:", ent)
-            print(self.NOP(ent.longname()))
+        print("Entity:", "Project")
+        print(self.NOP)
 
     def get_class_entity(self, class_longname):
         for ent in sorted(self.db.ents(kindstring='class'), key=lambda ent: ent.name()):
@@ -181,6 +234,15 @@ class QMOOD:
             if ent.longname() == class_longname:
                 return ent
         return None
+
+    def get_class_average(self, class_level_metric):
+        scores = []
+        for ent in sorted(self.db.ents(kindstring='class'), key=lambda ent: ent.name()):
+            if ent.kindname() == "Unknown Class":
+                continue
+            else:
+                scores.append(class_level_metric(ent.longname()))
+        return sum(scores) / len(scores)
 
     def print_all(self):
         for k, v in sorted(self.metrics.items()):
