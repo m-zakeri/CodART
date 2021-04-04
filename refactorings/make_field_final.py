@@ -1,5 +1,5 @@
 try:
-    import understand
+    import understand as und
 except ModuleNotFoundError:
     # Error handling
     pass

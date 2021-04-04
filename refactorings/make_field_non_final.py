@@ -1,5 +1,5 @@
 try:
-    import understand
+    import understand as und
 except ImportError as e:
     print(e)
 
@@ -103,7 +103,7 @@ if __name__ == '__main__':
     field_name = "GENERATOR_NAME"
     main_file = ""
 
-    db = understand.open(db_path)
+    db = und.open(db_path)
     for cls in db.ents("class"):
         if cls.simplename() == class_name:
             if cls.kindname() != "Unknown Class":
