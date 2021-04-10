@@ -7,6 +7,11 @@ from utilization.directory_utils import update_understand_database
 
 
 def init_make_field_non_static(udb_path):
+    """
+    Randomly selects a candidate for this refactoring.
+    :param udb_path: Path for understand database file.
+    :return: refactoring main method and its parameters.
+    """
     refactoring_main = make_field_non_static.main
     params = {
         "udb_path": udb_path,
