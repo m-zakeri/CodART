@@ -67,11 +67,7 @@ class MakeFieldNonStaticRefactoringListener(JavaParserLabeledListener):
         print("Finished Processing...")
 
 
-if __name__ == '__main__':
-    udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
-    source_class = "Website"
-    field_name = "HELLO_FROM_STUDENT_WEBSITE"
-    # initialize with understand
+def main(udb_path, source_class, field_name):
     main_file = ""
     db = und.open(udb_path)
     for cls in db.ents("class"):
@@ -91,3 +87,11 @@ if __name__ == '__main__':
 
     with open(main_file, mode='w', newline='') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
+
+
+if __name__ == '__main__':
+    udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
+    source_class = "Website"
+    field_name = "HELLO_FROM_STUDENT_WEBSITE"
+    # initialize with understand
+    main(udb_path, source_class, field_name)
