@@ -1,4 +1,3 @@
-
 """
 The scripts implements different refactoring operations
 
@@ -11,12 +10,17 @@ import networkx as nx
 
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
-
+from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 import visualization.graph_visualization
+
+try:
+    import understand as understand
+except ImportError as e:
+    print(e)
 
 
 class Parameter:
@@ -86,7 +90,6 @@ class MakeMethodNonStaticRefactoringListener(JavaParserLabeledListener):
                 )
             self.is_target_class = False
 
-
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
         if self.is_target_class:
             if ctx.IDENTIFIER().getText() in self.target_methods:
@@ -136,8 +139,36 @@ class MakeMethodNonStaticRefactoringListener(JavaParserLabeledListener):
             self.target_class_data['constructors'].append(ConstructorOrMethod(
                 name=self.target_class,
                 parameters=[Parameter(parameterType=p.typeType().getText(),
-
-                name=p.variableDeclaratorId().IDENTIFIER().getText())
-
-                for p in constructor_parameters],
+                                      name=p.variableDeclaratorId().IDENTIFIER().getText()) for p in
+                            constructor_parameters],
                 text=constructor_text))
+
+
+def main(udb_path, target_class, target_methods):
+    main_file = ""
+    db = understand.open(udb_path)
+    for cls in db.ents("class"):
+        if cls.simplename() == target_class:
+            main_file = cls.parent().longname()
+
+    stream = FileStream(main_file, encoding='utf8')
+    lexer = JavaLexer(stream)
+    token_stream = CommonTokenStream(lexer)
+    parser = JavaParserLabeled(token_stream)
+    parser.getTokenStream()
+    parse_tree = parser.compilationUnit()
+    my_listener = MakeMethodNonStaticRefactoringListener(common_token_stream=token_stream, target_class=target_class,
+                                                         target_methods=target_methods)
+    walker = ParseTreeWalker()
+    walker.walk(t=parse_tree, listener=my_listener)
+
+    with open(main_file, mode='w', newline='') as f:
+        f.write(my_listener.token_stream_rewriter.getDefaultText())
+
+
+if __name__ == '__main__':
+    udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
+    target_class = "Website"
+    target_methods = "HELLO_FROM_STUDENT_WEBSITE"
+    # initialize with understand
+    main(udb_path, target_class, target_methods)
