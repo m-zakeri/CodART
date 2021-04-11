@@ -14,5 +14,4 @@ public class GodClass {
 	public int method3(){
 		return this.field2;
 	}
-	
 }
