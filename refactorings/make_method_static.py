@@ -5,7 +5,10 @@ The scripts implements different refactoring operations
 version = '0.1.0'
 author = 'Morteza'
 
-import networkx as nx
+try:
+    import understand as understand
+except ImportError as e:
+    print(e)
 
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
@@ -15,6 +18,7 @@ from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 import visualization.graph_visualization
+
 
 
 class MakeMethodStaticRefactoringListener(JavaParserLabeledListener):

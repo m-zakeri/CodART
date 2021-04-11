@@ -97,3 +97,33 @@ if __name__ == '__main__':
 
     with open(main_file, mode='w', newline='') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
+
+
+def main(udb_path, source_class, field_name):
+    main_file = ""
+    db = und.open(udb_path)
+    for cls in db.ents("class"):
+        if cls.simplename() == source_class:
+            main_file = cls.parent().longname()
+
+    stream = FileStream(main_file, encoding='utf8')
+    lexer = JavaLexer(stream)
+    token_stream = CommonTokenStream(lexer)
+    parser = JavaParserLabeled(token_stream)
+    parser.getTokenStream()
+    parse_tree = parser.compilationUnit()
+    my_listener = MakeFieldStaticRefactoringListener(common_token_stream=token_stream, source_class=source_class,
+                                                     field_name=field_name)
+    walker = ParseTreeWalker()
+    walker.walk(t=parse_tree, listener=my_listener)
+
+    with open(main_file, mode='w', newline='') as f:
+        f.write(my_listener.token_stream_rewriter.getDefaultText())
+
+
+if __name__ == '__main__':
+    udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
+    source_class = "Website"
+    field_name = "HELLO_FROM_STUDENT_WEBSITE"
+    # initialize with understand
+    main(udb_path, source_class, field_name)
