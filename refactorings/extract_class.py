@@ -411,37 +411,86 @@ class DimoExtractClassRefactoringListener(JavaParserLabeledListener):
         self.code = ""
         self.added=""
         self.started=False
-
-    def exitCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
-        print("Finished Processing...")
+        self.variablesNames=[]
+        self.variablesTypes = []
+        self.methodCallVar=[]
+        self.methodCallName = []
+        self.methodCallStart = []
+        self.methodCallEnd = []
+        self.variableCallStart = []
+        self.variableCallEnd = []
 
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
+        self.variablesNames = []
+        self.variablesTypes = []
+        self.methodCallVar = []
+        self.methodCallName = []
+        self.variableCallStart = []
+        self.variableCallEnd = []
+
         if not self.is_source_class:
             return None
         method_identifier = ctx.IDENTIFIER().getText()
         if method_identifier in self.moved_methods:
             self.detected_method = method_identifier
 
+    def enterVariableDeclaratorId(self, ctx: JavaParserLabeled.VariableDeclaratorIdContext):
+        field_identifier = ctx.IDENTIFIER().getText()
+        self.variablesNames.append(field_identifier)
+        self.variablesTypes.append(ctx.parentCtx.start.text)
+        self.variableCallStart.append(str(ctx.parentCtx.start.line)+":"+str(ctx.parentCtx.start.column))
+        self.variableCallEnd.append(str(ctx.parentCtx.stop.line)+":"+str(ctx.parentCtx.stop.column))
+        if field_identifier in self.moved_fields:
+            self.detected_field = field_identifier
+
+    def exitMethodCall0(self, ctx:JavaParserLabeled.MethodCall0Context):
+        self.methodCallName.append(ctx.IDENTIFIER().getText())
+        self.methodCallVar.append(ctx.parentCtx.start.text)
+
+
+
     def exitMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
-        if not self.is_source_class:
-            return None
-        if 1 == 1:
-            start_index = ctx.start.tokenIndex
-            stop_index = ctx.stop.tokenIndex
-            method_text = self.token_stream_rewriter.getText(
-                program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-                start=start_index,
-                stop=stop_index
-            )
-            self.code += (self.NEW_LINE + self.TAB + method_text + self.NEW_LINE)
+        for i in range(len(self.methodCallVar)):
+            if(self.methodCallName[i] in self.moved_methods):
+                x=self.variablesNames.index( self.methodCallVar[i])
+                if(x>=0):
+                    typeVar=self.variablesTypes[x]
+                    if(typeVar==self.source_class):
+                        # method_text = self.token_stream_rewriter.getText(
+                        #     program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                        #     start=self.variableCallStart[x],
+                        #     stop=self.variableCallEnd[x]
+                        # )
+                        try:
+                            # self.token_stream_rewriter.replace(
+                            #     program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                            #     from_idx=self.variableCallStart[x],
+                            #     to_idx=self.variableCallEnd[x],
+                            #     text=self.new_class+" "+self.variablesDimo[x]
+                            # )
+                            print("From: Line "+str(self.variableCallStart[x].split(":")[0])+" Col: "+str(self.variableCallStart[x].split(":")[1]))
+                            print("To: Line " + str(self.variableCallEnd[x].split(":")[0]) + " Col: " + str(self.variableCallEnd[x].split(":")[1]))
+                            print("Text: "+self.new_class+" "+self.variablesNames[x])
+                            print("="*50)
 
-            if (self.started == False):
-                self.added += (self.NEW_LINE + self.TAB + method_text + self.NEW_LINE)
+                        except Exception as e:
+                            print(e)
 
-            print("Dimo"+(self.NEW_LINE + self.TAB + method_text + self.NEW_LINE)+"Dimo")
+        start_index = ctx.start.tokenIndex
+        stop_index = ctx.stop.tokenIndex
+        method_text = self.token_stream_rewriter.getText(
+            program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+            start=start_index,
+            stop=stop_index
+        )
+        self.code += (self.NEW_LINE + self.TAB + method_text + self.NEW_LINE)
+        self.propagate(self.NEW_LINE + self.TAB + method_text + self.NEW_LINE)
+        if (self.started == False):
+            self.added += (self.NEW_LINE + self.TAB + method_text + self.NEW_LINE)
 
-            self.detected_method = None
-
+        self.detected_method = None
+    def propagate(self,inp):
+        a=0;
 class ExtractClassAPI:
     def __init__(self, project_dir, file_path, source_class, new_class, moved_fields, moved_methods,
                  new_file_path=None):
@@ -558,9 +607,6 @@ class DimoExtractClassAPI:
                 t=self.tree
             )
             xxx = listener.token_stream_rewriter.getDefaultText()
-            print(xxx)
-
-            print("=" * 50)
 
 def get_java_files(directory):
     if not os.path.isdir(directory):
@@ -571,20 +617,21 @@ def get_java_files(directory):
                 yield (os.path.join(root, file), file)
 
 if __name__ == "__main__":
-        ExtractClassAPI(
-            project_dir="D:\\University\\Term 6\\Compiler\\TA\\iust-compiler992\\test_project",
-            file_path="D:\\University\\Term 6\\Compiler\\CodART\\GodClass.java",
-            source_class="GodClass",
-            new_class="GodClassExtracted",
-            moved_fields=["field1", "field2", ],
-            moved_methods=["method1", "method3", ]
-        ).do_refactor()
-        # for i in get_java_files("D:\\University\\Term 6\\Compiler\\TA\\iust-compiler992\\test_project"):
-        #     DimoExtractClassAPI(
-        #         project_dir="D:\\University\\Term 6\\Compiler\\TA\\iust-compiler992\\test_project",
-        #         file_path=i[0],
-        #         source_class="GodClass",
-        #         new_class="GodClassExtracted",
-        #         moved_fields=["field1", "field2", ],
-        #         moved_methods=["method1", "method3", ]
-        #     ).dimo_propagate()
+        # ExtractClassAPI(
+        #     project_dir="D:\\University\\Term 6\\Compiler\\TA\\iust-compiler992\\test_project",
+        #     file_path="D:\\University\\Term 6\\Compiler\\CodART\\GodClass.java",
+        #     source_class="GodClass",
+        #     new_class="GodClassExtracted",
+        #     moved_fields=["field1", "field2", ],
+        #     moved_methods=["method1", "method3", ]
+        # ).do_refactor()
+        for i in get_java_files("D:\\University\\Term 6\\Compiler\\TA\\iust-compiler992\\test_project"):
+            # print(i[0])
+            DimoExtractClassAPI(
+                project_dir="D:\\University\\Term 6\\Compiler\\TA\\iust-compiler992\\test_project",
+                file_path=i[0],
+                source_class="GodClass",
+                new_class="GodClassExtracted",
+                moved_fields=["field1", "field2", ],
+                moved_methods=["method1", "method3", ]
+            ).dimo_propagate()
