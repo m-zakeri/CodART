@@ -24,8 +24,8 @@ class Initialization(object):
         self.individual_size = individual_size
 
         self._und = und.open(self.udb_path)
-        self._variables = self._und.ents("variable")
-        self._static_variables = self._und.ents("static variable")
+        self._variables = self.get_all_variables()
+        self._static_variables = self.get_all_variables(static=True)
         self._methods = self.get_all_methods()
         self._static_methods = self.get_all_methods(static=True)
 
@@ -43,6 +43,22 @@ class Initialization(object):
                 continue
             source_class, method_name = ent.name().split('.')
             candidates.append({'source_class': source_class, 'method_name': method_name})
+        return candidates
+
+    def get_all_variables(self, static=False):
+        candidates = []
+        if static:
+            query = self._und.ents("static variable")
+            blacklist = ()
+        else:
+            query = self._und.ents("variable")
+            blacklist = ('static',)
+        for ent in query:
+            kind_name = ent.kindname().lower()
+            if any(word in kind_name for word in blacklist):
+                continue
+            source_class, field_name = ent.name().split('.')
+            candidates.append({'source_class': source_class, 'field_name': field_name})
         return candidates
 
     def init_make_field_non_static(self):
@@ -85,10 +101,7 @@ class RandomInitialization(Initialization):
         """
         refactoring_main = make_field_non_static.main
         params = {"udb_path": self.udb_path}
-        candidates = []
-        for ent in self._static_variables:
-            source_class, field_name = ent.name().split('.')
-            candidates.append({'source_class': source_class, 'field_name': field_name})
+        candidates = self._static_variables
         params.update(random.choice(candidates))
         return refactoring_main, params
 
@@ -99,12 +112,7 @@ class RandomInitialization(Initialization):
         """
         refactoring_main = make_field_static.main
         params = {"udb_path": self.udb_path}
-        candidates = []
-        for ent in self._variables:
-            if 'static' in ent.kindname().lower():
-                continue
-            source_class, field_name = ent.name().split('.')
-            candidates.append({'source_class': source_class, 'field_name': field_name})
+        candidates = self._variables
         params.update(random.choice(candidates))
         return refactoring_main, params
 
@@ -134,6 +142,6 @@ class RandomInitialization(Initialization):
 if __name__ == '__main__':
     rand_pop = RandomInitialization(
         "/home/ali/Desktop/code/TestProject/TestProject.udb",
-        population_size=1000,
-        individual_size=4
+        population_size=100,
+        individual_size=2
     ).generate_population()
