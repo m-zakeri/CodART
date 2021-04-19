@@ -1,16 +1,9 @@
-<<<<<<< HEAD
-import progressbar
-import random
-
-from refactorings import make_field_non_static, make_field_static, make_method_static_2, make_method_non_static
-=======
 import random
 import progressbar
-
 from utilization.setup_understand import *
 from refactorings import make_field_non_static, make_field_static, make_method_static_2, make_method_non_static, \
     make_method_non_static_2
->>>>>>> c6229ebfbba09f91b7c124e9f5846e1fd2bf73cf
+from utilization.directory_utils import update_understand_database
 
 
 # TODO: check pymoo (framework) if possible
@@ -93,7 +86,6 @@ class Initialization(object):
                     random.choice(initializers)()
                 )
             population.append(individual)
-
         print(f"len of population is: {len(population)}")
         return population
 
