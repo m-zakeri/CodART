@@ -13,3 +13,5 @@ six==1.15.0
 progressbar2==3.53.1
 
 setuptools~=54.1.2
+pymoo~=0.4.2.2
+Understand~=0.0.3

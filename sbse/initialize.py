@@ -138,7 +138,7 @@ class RandomInitialization(Initialization):
 
 if __name__ == '__main__':
     rand_pop = RandomInitialization(
-        "/home/ali/Desktop/code/TestProject/TestProject.udb",
+        "C:\\Users\\Asus\\Desktop\\TestProject\\TestProject\\TestProject.udb",
         population_size=100,
         individual_size=2
     ).generate_population()
