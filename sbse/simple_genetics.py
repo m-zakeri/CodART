@@ -6,12 +6,13 @@ from initialize import make_field_static
 from initialize import make_method_static_2
 from initialize import make_method_non_static_2
 
-problem = get_problem("g01")
+problem = get_problem(make_method_non_static_2, make_field_non_static, make_field_static, make_method_static_2)
 
 
 def genetic_algorithm():
     algorithm = GA(
-        pop_size=100,
+        population_size=100,
+        individual_size=2,
         eliminate_duplicates=True)
 
     res = minimize(problem,
