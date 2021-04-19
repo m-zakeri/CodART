@@ -1,9 +1,7 @@
-import random, progressbar
+import progressbar
+import random
 
-from utilization.setup_understand import *
 from refactorings import make_field_non_static, make_field_static, make_method_static_2, make_method_non_static
-
-from utilization.directory_utils import update_understand_database
 
 
 def init_make_field_non_static(udb_path):
