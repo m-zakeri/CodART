@@ -5,8 +5,10 @@ from initialize import RandomInitialization
 from objectives import Objectives
 from utilization.directory_utils import update_understand_database, git_restore
 
-udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
-project_dir = "/home/ali/Desktop/code/TestProject/"
+# Please use relative path only
+udb_path = "../benchmark_projects/JSON.udb"
+project_dir = "../benchmark_projects/JSON"
+
 rand_init = RandomInitialization(
         udb_path=udb_path,
         population_size=POPULATION_SIZE,
