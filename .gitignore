@@ -2,5 +2,5 @@
 /.idea/
 .idea
 __pycache__/
-testproject/input/src/main/java/org/json/*.class
-testproject/refactored/
+benchmark_projects/JSON/src/main/java/org/json/*.class
+benchmark_projects/refactored/
