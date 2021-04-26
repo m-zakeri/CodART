@@ -39,7 +39,7 @@ class MakeNonFinalClassRefactoringListener(JavaParserLabeledListener):
         self.NEW_LINE = "\n"
         self.code = ""
     def enterTypeDeclaration(self, ctx:JavaParserLabeled.TypeDeclarationContext):
-        print("Refactoring started, please wait...")
+
 
         if  self.objective_class == ctx.classDeclaration().IDENTIFIER().getText():
             #modifier=ctx.getText().split(",")

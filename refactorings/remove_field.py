@@ -49,7 +49,7 @@ class RemoveFieldRefactoringListener(JavaParserLabeledListener):
             raise ValueError("fieldname is None")
 
     def enterClassDeclaration(self, ctx:JavaParserLabeled.ClassDeclarationContext):
-        print("Refactoring started, please wait...")
+
         self.class_number += 1
         if ctx.IDENTIFIER().getText() != self.class_identifier:
             return
@@ -57,7 +57,7 @@ class RemoveFieldRefactoringListener(JavaParserLabeledListener):
 
     # Enter a parse tree produced by Java9_v2Parser#normalClassDeclaration.
     # def enterNormalClassDeclaration(self, ctx: Java9_v2Parser.NormalClassDeclarationContext):
-    #     print("Refactoring started, please wait...")
+    #
     #     self.class_number += 1
     #     if ctx.identifier().getText() != self.class_identifier:
     #         return

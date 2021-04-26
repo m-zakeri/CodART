@@ -39,7 +39,7 @@ class GetMethodTextPullUpMethodRefactoringListener(JavaParserLabeledListener):
         self.method_text = ""
 
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
-        print("Refactoring started, please wait...")
+
         if self.is_children_class:
 
             method_identifier = ctx.IDENTIFIER().getText()
@@ -107,7 +107,7 @@ class PullUpMethodRefactoringListener(JavaParserLabeledListener):
         self.tempdeclarationcode = ""
 
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
-        print("Refactoring started, please wait...")
+
         if self.is_children_class:
 
             method_identifier = ctx.IDENTIFIER().getText()
@@ -152,7 +152,7 @@ class PullUpMethodRefactoringListener(JavaParserLabeledListener):
             self.is_children_class = False
 
     def exitCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
-        print("Finished Processing...")
+
         self.token_stream_rewriter.insertAfter(
             index=ctx.stop.tokenIndex,
             text=self.code

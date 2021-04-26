@@ -31,7 +31,7 @@ class IncreaseMethodVisibilityRefactoringListener(JavaParserLabeledListener):
         self.is_source_class = False
 
     def enterClassDeclaration(self, ctx:JavaParserLabeled.ClassDeclarationContext):
-        print("Refactoring started, please wait...")
+
         class_identifier = ctx.IDENTIFIER().getText()
         if class_identifier == self.source_class:
             self.is_source_class = True
@@ -63,7 +63,7 @@ class IncreaseMethodVisibilityRefactoringListener(JavaParserLabeledListener):
                     to_idx=grand_parent_ctx.modifier(0).stop.tokenIndex,
                     text='private '+grand_parent_ctx.modifier(0).getText())
 
-        print("Finished Processing...")
+
 
 
 if __name__ == '__main__':

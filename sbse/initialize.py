@@ -1,5 +1,6 @@
 import random
 import progressbar
+from config import *
 from utilization.setup_understand import *
 from refactorings import make_field_non_static, make_field_static, make_method_static_2, make_method_non_static, \
     make_method_non_static_2
@@ -138,7 +139,7 @@ class RandomInitialization(Initialization):
 
 if __name__ == '__main__':
     rand_pop = RandomInitialization(
-        "C:\\Users\\Asus\\Desktop\\TestProject\\TestProject\\TestProject.udb",
-        population_size=100,
-        individual_size=2
+        "/home/ali/Desktop/code/TestProject/TestProject.udb",
+        population_size=POPULATION_SIZE,
+        individual_size=INDIVIDUAL_SIZE
     ).generate_population()

@@ -126,7 +126,7 @@ class MoveClassRefactoringListener(JavaParserLabeledListener):
             if ctx.classDeclaration().IDENTIFIER().getText() != self.class_identifier:
                 return
 
-            print("Refactoring started, please wait...")
+
 
             self.enter_class = True
             self.class_found = True
@@ -187,7 +187,7 @@ class MoveClassRefactoringListener(JavaParserLabeledListener):
         new_file = open(file_address, 'w')
         new_file.write(self.code.replace("\r", ""))
         print(f"The class \"{self.class_identifier}\" moved to the target package successfully!")
-        print("Finished Processing...")
+
 
 
 class ReplaceDependentObjectsListener(JavaParserLabeledListener):
