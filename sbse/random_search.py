@@ -3,11 +3,11 @@ import random
 from config import *
 from initialize import RandomInitialization
 from objectives import Objectives
-from utilization.directory_utils import update_understand_database, git_restore
+from utilization.directory_utils import update_understand_database, git_restore, create_understand_database
 
 # Please use relative path only
-udb_path = "../benchmark_projects/JSON.udb"
-project_dir = "../benchmark_projects/JSON"
+udb_path = "../benchmark_projects/JSON/JSON.udb"
+project_dir = "../benchmark_projects/JSON/"
 
 rand_init = RandomInitialization(
         udb_path=udb_path,
@@ -28,6 +28,7 @@ while k < MAX_ITERATIONS and len(rand_pop) > 0:
     git_restore(project_dir)
     # execute individual
     for refactoring, params in individual:
+        print(params)
         refactoring(**params)
     # update understand database
     update_understand_database(udb_path)

@@ -103,6 +103,7 @@ def main(udb_path, source_class, field_name):
     main_file = ""
     db = und.open(udb_path)
     for cls in db.ents("class"):
+        print(cls.simplename(), source_class)
         if cls.simplename() == source_class:
             main_file = cls.parent().longname(True)
 
