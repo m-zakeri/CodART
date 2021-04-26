@@ -76,7 +76,7 @@ class IncreaseFieldVisibilityRefactoringListener(JavaParserLabeledListener):
         self.tempdeclarationcode = ""
 
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
-        print("Refactoring started, please wait...")
+
         class_identifier = ctx.IDENTIFIER().getText()
         if class_identifier == self.source_class:
             self.is_source_class = True
@@ -120,7 +120,7 @@ class IncreaseFieldVisibilityRefactoringListener(JavaParserLabeledListener):
 
             self.token_stream_rewriter.insertAfter(ctx.stop.tokenIndex, new_code)
 
-        print("Finished Processing...")
+
 
 
 class PropagationIncreaseFieldVisibilityRefactoringListener(JavaParserLabeledListener):

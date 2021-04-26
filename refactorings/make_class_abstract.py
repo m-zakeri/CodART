@@ -41,7 +41,7 @@ class MakeAbstractClassRefactoringListener(JavaParserLabeledListener):
 
 
     def enterClassDeclaration(self, ctx:JavaParserLabeled.ClassDeclarationContext):
-        print("Refactoring started, please wait...")
+
         print(ctx.IDENTIFIER().getText())
         if self.objective_class == ctx.IDENTIFIER().getText():
             print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
@@ -53,7 +53,7 @@ class MakeAbstractClassRefactoringListener(JavaParserLabeledListener):
             )
 
     # def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
-    #     print("Refactoring started, please wait...")
+    #
     #     print(ctx.IDENTIFIER().getText())
     #     if self.objective_class == ctx.IDENTIFIER().getText():
     #         print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")

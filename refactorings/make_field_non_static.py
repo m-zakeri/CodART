@@ -38,7 +38,7 @@ class MakeFieldNonStaticRefactoringListener(JavaParserLabeledListener):
         self.is_static = False
 
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
-        print("Refactoring started, please wait...")
+
         class_identifier = ctx.IDENTIFIER().getText()
         if class_identifier == self.source_class:
             self.is_source_class = True
@@ -64,7 +64,7 @@ class MakeFieldNonStaticRefactoringListener(JavaParserLabeledListener):
                         text=''
                     )
 
-        print("Finished Processing...")
+
 
 
 def main(udb_path, source_class, field_name):
@@ -72,7 +72,7 @@ def main(udb_path, source_class, field_name):
     db = und.open(udb_path)
     for cls in db.ents("class"):
         if cls.simplename() == source_class:
-            main_file = cls.parent().longname()
+            main_file = cls.parent().longname(True)
 
     stream = FileStream(main_file, encoding='utf8')
     lexer = JavaLexer(stream)

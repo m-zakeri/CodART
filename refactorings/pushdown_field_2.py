@@ -94,7 +94,7 @@ class PushDownFieldRefactoringListener(JavaParserLabeledListener):
         self.field_text = ""
 
     def enterFieldDeclaration(self, ctx: JavaParserLabeled.FieldDeclarationContext):
-        print("Refactoring started, please wait...")
+
         if self.is_source_class:
 
             # field_identifier = ctx.variableDeclarators().getText().split(",")
@@ -143,7 +143,7 @@ class PushDownFieldRefactoringListener(JavaParserLabeledListener):
             self.is_source_class = False
 
     def exitCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
-        print("Finished Processing...")
+
         self.token_stream_rewriter.insertAfter(
             index=ctx.stop.tokenIndex,
             text=self.code

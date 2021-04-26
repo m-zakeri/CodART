@@ -65,7 +65,7 @@ class MakeFieldNonFinalRefactoringListener(JavaParserLabeledListener):
         self.is_final = False
 
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
-        print("Refactoring started, please wait...")
+
         class_identifier = ctx.IDENTIFIER().getText()
         if class_identifier == self.source_class:
             self.is_source_class = True
@@ -94,7 +94,7 @@ class MakeFieldNonFinalRefactoringListener(JavaParserLabeledListener):
                         text=''
                     )
 
-        print("Finished Processing...")
+
 
 
 if __name__ == '__main__':

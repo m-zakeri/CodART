@@ -44,7 +44,7 @@ class MoveMethodDownRefactoring_GetMethodText_Listener(JavaParserLabeledListener
         self.method_text = ""
 
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
-        print("Refactoring started, please wait...")
+
         if self.is_source_class:
 
             # method_identifier = ctx.variableDeclarators().variableDeclarator().variableDeclaratorId().IDENTIFIER.getText()
@@ -118,7 +118,7 @@ class MoveMethodDownRefactoringListener(JavaParserLabeledListener):
         self.tempdeclarationcode = ""
 
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
-        print("Refactoring started, please wait...")
+
         if self.is_source_class:
 
             # method_identifier = ctx.variableDeclarators().variableDeclarator().variableDeclaratorId().IDENTIFIER.getText()
@@ -168,7 +168,7 @@ class MoveMethodDownRefactoringListener(JavaParserLabeledListener):
             self.is_source_class = False
 
     def exitCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
-        print("Finished Processing...")
+
         self.token_stream_rewriter.insertAfter(
             index=ctx.stop.tokenIndex,
             text=self.code

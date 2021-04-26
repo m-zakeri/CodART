@@ -38,7 +38,7 @@ class RemoveFieldRefactoringListener(JavaParserLabeledListener):
         self.is_static = False
 
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
-        print("Refactoring started, please wait...")
+
         class_identifier = ctx.IDENTIFIER().getText()
         if class_identifier == self.source_class:
             self.is_source_class = True
@@ -60,7 +60,7 @@ class RemoveFieldRefactoringListener(JavaParserLabeledListener):
             )
             self.detected_field = None
 
-            print("Finished Processing...")
+
 
 
 if __name__ == '__main__':
