@@ -56,7 +56,12 @@ class Initialization(object):
             kind_name = ent.kindname().lower()
             if any(word in kind_name for word in blacklist):
                 continue
-            source_class, field_name = ent.name().split('.')
+            if ent.parent() is None:
+                continue
+            print(ent.simplename(), ent.longname(), ent.kind(), ent.parent().longname())
+            # source_class, field_name = ent.name().split('.')
+            source_class = ent.parent().longname()
+            field_name = ent.simplename()
             candidates.append({'source_class': source_class, 'field_name': field_name})
         return candidates
 
