@@ -243,7 +243,7 @@ public class JSONML {
      * @return A JSONArray containing the structured data from the XML string.
      * @throws JSONException Thrown on error converting to a JSONArray
      */
-    public static JSONArray toJSONArray(String string) throws JSONException {
+    public  JSONArray toJSONArray(String string) throws JSONException {
         return (JSONArray)parse(new XMLTokener(string), true, null, false);
     }
 
@@ -265,7 +265,7 @@ public class JSONML {
      * @return A JSONArray containing the structured data from the XML string.
      * @throws JSONException Thrown on error converting to a JSONArray
      */
-    public static JSONArray toJSONArray(String string, boolean keepStrings) throws JSONException {
+    public  JSONArray toJSONArray(String string, boolean keepStrings) throws JSONException {
         return (JSONArray)parse(new XMLTokener(string), true, null, keepStrings);
     }
 
@@ -287,7 +287,7 @@ public class JSONML {
      * @return A JSONArray containing the structured data from the XML string.
      * @throws JSONException Thrown on error converting to a JSONArray
      */
-    public static JSONArray toJSONArray(XMLTokener x, boolean keepStrings) throws JSONException {
+    public  JSONArray toJSONArray(XMLTokener x, boolean keepStrings) throws JSONException {
         return (JSONArray)parse(x, true, null, keepStrings);
     }
 
@@ -304,7 +304,7 @@ public class JSONML {
      * @return A JSONArray containing the structured data from the XML string.
      * @throws JSONException Thrown on error converting to a JSONArray
      */
-    public static JSONArray toJSONArray(XMLTokener x) throws JSONException {
+    public  JSONArray toJSONArray(XMLTokener x) throws JSONException {
         return (JSONArray)parse(x, true, null, false);
     }
 
