@@ -53,7 +53,7 @@ def update_understand_database(udb_path, project_dir=None, und_path='/home/ali/s
         project_dir = os.path.dirname(os.path.normpath(udb_path))
 
     process = subprocess.Popen(
-        ['und', 'add', project_dir, 'analyze', '-all', udb_path],
+        ['und', 'analyze', '-all', udb_path],
         cwd=und_path
     )
     process.wait()

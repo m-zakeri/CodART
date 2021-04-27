@@ -100,12 +100,13 @@ if __name__ == '__main__':
 
 
 def main(udb_path, source_class, field_name):
+    print("Make Field Static")
     main_file = ""
     db = und.open(udb_path)
     for cls in db.ents("class"):
-        print(cls.simplename(), source_class)
         if cls.simplename() == source_class:
             main_file = cls.parent().longname(True)
+            print(main_file)
 
     stream = FileStream(main_file, encoding='utf8')
     lexer = JavaLexer(stream)

@@ -40,8 +40,14 @@ class Initialization(object):
             kind_name = ent.kindname().lower()
             if any(word in kind_name for word in blacklist):
                 continue
-            source_class = ent.parent().simplename()
+            parent = ent.parent()
+            if parent is None:
+                continue
+            if not parent.kind().check("class") or parent.kind().check("anonymous"):
+                continue
+            source_class = parent.simplename()
             method_name = ent.simplename()
+            # print("Method", source_class, parent.kindname(), method_name)
             candidates.append({'source_class': source_class, 'method_name': method_name})
         return candidates
 
@@ -57,10 +63,14 @@ class Initialization(object):
             kind_name = ent.kindname().lower()
             if any(word in kind_name for word in blacklist):
                 continue
-            if ent.parent() is None:
+            parent = ent.parent()
+            if parent is None:
                 continue
-            source_class = ent.parent().simplename()
+            if not parent.kind().check("class") or parent.kind().check("anonymous"):
+                continue
+            source_class = parent.simplename()
             field_name = ent.simplename()
+            # print("Variable", source_class, parent.kindname(), field_name)
             candidates.append({'source_class': source_class, 'field_name': field_name})
         return candidates
 
@@ -143,7 +153,7 @@ class RandomInitialization(Initialization):
 
 if __name__ == '__main__':
     rand_pop = RandomInitialization(
-        "/home/ali/Desktop/code/TestProject/TestProject.udb",
+        "../benchmark_projects/JSON/JSON.udb",
         population_size=POPULATION_SIZE,
         individual_size=INDIVIDUAL_SIZE
     ).generate_population()
