@@ -28,6 +28,7 @@ while k < MAX_ITERATIONS and len(rand_pop) > 0:
     git_restore(project_dir)
     # execute individual
     for refactoring, params in individual:
+        print(params)
         refactoring(**params)
     # update understand database
     update_understand_database(udb_path)
