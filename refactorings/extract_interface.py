@@ -259,7 +259,7 @@ def test():
             print("A, B, " + third_class + ": Cannot refactor.")
 
 
-def test_ant():
+def main():
     """
     target_files = [
         "tests/apache-ant/main/org/apache/tools/ant/input/InputRequest.java",
@@ -278,5 +278,3 @@ def test_ant():
     ).do_refactor() else "Cannot refactor.")
 
 
-if __name__ == "__main__":
-    test_ant()
