@@ -1,3 +1,5 @@
+import os
+
 from gen.javaLabeled.JavaLexer import JavaLexer
 
 try:
@@ -106,7 +108,10 @@ def main(udb_path, source_class, field_name):
     for cls in db.ents("class"):
         if cls.simplename() == source_class:
             main_file = cls.parent().longname(True)
-            print(main_file)
+            if not os.path.isfile(main_file):
+                continue
+    if main_file is None:
+        return
 
     stream = FileStream(main_file, encoding='utf8')
     lexer = JavaLexer(stream)
