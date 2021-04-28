@@ -1,4 +1,3 @@
-
 import os
 
 try:
@@ -192,7 +191,7 @@ def rename_method(java_file_path, scope_class_name, target_method_name, new_name
         new_file.write(listener.token_stream_rewriter.getDefaultText().replace('\r', ''))
 
 
-if __name__ == '__main__':
+def main():
     # TODO: Create UDB File automatically
     db_path = "/home/ali/Documents/compiler/Research/xerces2-j/xerces2-j.udb"
     file_path = "/home/ali/Documents/compiler/Research/xerces2-j/src/org/apache/xerces/dom/AttrImpl.java"
@@ -205,3 +204,7 @@ if __name__ == '__main__':
     for ref in references:
         rename_method(ref["file_path"], ref["scope"].split(".")[0], target_method_name=method_name,
                       new_name=new_method_name, reference=ref)
+
+
+if __name__ == "__main__":
+    main()

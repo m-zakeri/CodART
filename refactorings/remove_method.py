@@ -58,10 +58,8 @@ class RemoveMethodRefactoringListener(JavaParserLabeledListener):
             self.detected_method = None
 
 
-
-
 if __name__ == '__main__':
-    udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
+    udb_path = '/home/ali/Desktop/code/TestProject/TestProject.udb'
     source_class = "App"
     method_name = "testMethod"
     # initialize with understand

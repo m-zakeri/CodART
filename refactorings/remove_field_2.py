@@ -61,8 +61,6 @@ class RemoveFieldRefactoringListener(JavaParserLabeledListener):
             self.detected_field = None
 
 
-
-
 if __name__ == '__main__':
     udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
     source_class = "App"

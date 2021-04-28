@@ -306,6 +306,7 @@ class PropagationCollapseHierarchyListener(JavaParserLabeledListener):
 
 def main(udb, child, parent):
     # initialize with understand
+    udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
     child_path_file = ""
     father_path_file = ""
     file_list_to_be_propagate = set()
@@ -382,10 +383,3 @@ def main(udb, child, parent):
 
         with open(file, mode='w', newline='') as f:
             f.write(my_listener_propagate.token_stream_rewriter.getDefaultText())
-
-
-if __name__ == '__main__':
-    udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
-    child_class = "StudentWebsite"
-    father_class = "Website"
-    main(udb_path, child_class, father_class)

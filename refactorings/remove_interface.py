@@ -39,8 +39,7 @@ class RemoveInterfaceRefactoringListener(JavaParserLabeledListener):
         self.NEW_LINE = "\n"
         self.code = ""
 
-
-    def enterInterfaceDeclaration(self, ctx:JavaParserLabeled.InterfaceDeclarationContext):
+    def enterInterfaceDeclaration(self, ctx: JavaParserLabeled.InterfaceDeclarationContext):
 
         interface_identifier = ctx.IDENTIFIER().getText()
         print(interface_identifier)
