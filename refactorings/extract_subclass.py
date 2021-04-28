@@ -148,7 +148,7 @@ class ExtractSubClassRefactoringListener(JavaParserLabeledListener):
             self.detected_method = None
 
 
-if __name__ == '__main__':
+def main():
     udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
     source_class = "GodClass"
     moved_methods = ['method1', 'method3', ]
