@@ -106,7 +106,7 @@ class DecreaseFieldVisibilityRefactoringListener(JavaParserLabeledListener):
                     text='public ' + grand_parent_ctx.modifier(0).getText())
 
 
-if __name__ == '__main__':
+def main():
     print("Decrease Field Visibility")
     udb_path = "/home/ali/Documents/compiler/Research/xerces2-j/xerces2-j.udb"
     class_name = "AttributesImpl"
