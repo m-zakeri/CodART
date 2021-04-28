@@ -260,7 +260,7 @@ class PropagationIncreaseFieldVisibility_GetObjects_RefactoringListener(JavaPars
                 self.objects.append(objectname)
 
 
-if __name__ == '__main__':
+def main():
     print("Increase Field Visibility")
     udb_path = "/home/ali/Documents/compiler/Research/xerces2-j/xerces2-j3.udb"
     class_name = "ListNode"
