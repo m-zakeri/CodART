@@ -444,7 +444,7 @@ class ExtractClassAPI:
             print("Can not refactor!")
 
 
-if __name__ == "__main__":
+def main():
     ExtractClassAPI(
         project_dir="/home/ali/Desktop/code/TestProject/",
         file_path="/home/ali/Desktop/code/TestProject/src/test_package/GodClass.java",
