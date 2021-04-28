@@ -205,6 +205,3 @@ def main():
         rename_method(ref["file_path"], ref["scope"].split(".")[0], target_method_name=method_name,
                       new_name=new_method_name, reference=ref)
 
-
-if __name__ == "__main__":
-    main()
