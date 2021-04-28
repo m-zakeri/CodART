@@ -68,7 +68,7 @@ class DecreaseMethodVisibilityRefactoringListener(JavaParserLabeledListener):
                     text='public ' + grand_parent_ctx.modifier(0).getText())
 
 
-if __name__ == '__main__':
+def main():
     udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
     source_class = "App"
     method_name = "testMethod"
