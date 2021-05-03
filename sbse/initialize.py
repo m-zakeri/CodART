@@ -1,9 +1,10 @@
 import random
+from pathlib import Path
 import progressbar
 from config import *
 from utilization.setup_understand import *
 from refactorings import make_field_non_static, make_field_static, make_method_static_2, make_method_non_static, \
-    make_method_non_static_2
+    make_method_non_static_2, pullup_field
 from utilization.directory_utils import update_understand_database
 
 
@@ -74,6 +75,13 @@ class Initialization(object):
             candidates.append({'source_class': source_class, 'field_name': field_name})
         return candidates
 
+    def get_all_class_entities(self):
+        query = self._und.ents("class ~Unknown ~Anonymous ~TypeVariable")
+        class_entities = []
+        for ent in query:
+            class_entities.append(ent)
+        return class_entities
+
     def init_make_field_non_static(self):
         pass
 
@@ -84,6 +92,9 @@ class Initialization(object):
         pass
 
     def init_make_method_non_static(self):
+        pass
+
+    def init_pullup_field(self):
         pass
 
     def generate_population(self):
@@ -150,10 +161,22 @@ class RandomInitialization(Initialization):
         params.update(random.choice(candidates))
         return refactoring_main, params
 
+    def init_pullup_field(self):
+        """
+        Some description here!
+        :return:  refactoring main method and its parameters.
+        """
+        refactoring_main = pullup_field.main
+        params = {"project_dir": str(Path(self.udb_path).parent[0])}
+        # Find One class with one field in it and its package name!
+        return refactoring_main, params
+
 
 if __name__ == '__main__':
     rand_pop = RandomInitialization(
         "../benchmark_projects/JSON/JSON.udb",
         population_size=POPULATION_SIZE,
         individual_size=INDIVIDUAL_SIZE
-    ).generate_population()
+    )
+    rand_pop.get_all_class_entities()
+
