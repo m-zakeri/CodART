@@ -151,45 +151,23 @@ class PullUpFieldRefactoring:
                     body_start = utils_listener_fast.TokensInfo(body)
                     body_start.stop = body_start.start  # Start and stop both point to the '{'
                     rewriter.insert_after(body_start,
-                                          "\n    " + _class.name + "() { " + initializer_statement + " }"
+                                          "\n    " + _class.modifiers[
+                                              0] + " " + _class.name + "() { " + initializer_statement + " }"
                                           )
 
         rewriter.apply()
         return True
 
 
-def test():
-    print("Testing pullup_field...")
-    filenames = [
-        "../benchmark_projects/tests/pullup_field/test1.java",
-        "../benchmark_projects/tests/pullup_field/test2.java",
-        "../benchmark_projects/tests/pullup_field/test3.java",
-        "../benchmark_projects/tests/pullup_field/test4.java"
-    ]
-
-    if PullUpFieldRefactoring(filenames, "pullup_field_test1", "B", "a").do_refactor():
-        print("Success!")
-    else:
-        print("Cannot refactor.")
-
-
-def test_ant():
-    """
-    target_files = [
-        "tests/apache-ant/main/org/apache/tools/ant/types/ArchiveFileSet.java",
-        "tests/apache-ant/main/org/apache/tools/ant/types/TarFileSet.java",
-        "tests/apache-ant/main/org/apache/tools/ant/types/ZipFileSet.java"
-    ]
-    """
-    ant_dir = "/home/ali/Desktop/code/TestProject/"
+def main(project_dir: str, package_name: str, children_class: str, field_name: str):
     print("Success!" if PullUpFieldRefactoring(
-        utils2.get_filenames_in_dir(ant_dir),
-        "test_package",
-        "AppChild1",
-        "TEST",
+        utils2.get_filenames_in_dir(project_dir),
+        package_name,
+        children_class,
+        field_name
         # lambda x: "tests/pullup_field_ant/" + x[len(ant_dir):]
     ).do_refactor() else "Cannot refactor.")
 
 
 if __name__ == "__main__":
-    test_ant()
+    pass
