@@ -28,6 +28,7 @@ class Initialization(object):
         self._static_variables = self.get_all_variables(static=True)
         self._methods = self.get_all_methods()
         self._static_methods = self.get_all_methods(static=True)
+        self._pullup_field_candidates = self.find_pullup_field_candidates()
 
     def get_all_methods(self, static=False):
         candidates = []
@@ -82,6 +83,19 @@ class Initialization(object):
             class_entities.append(ent)
         return class_entities
 
+    def find_pullup_field_candidates(self):
+        candidates = []
+        class_entities = self.get_all_class_entities()
+        for ent in class_entities:
+            for ref in ent.refs("define", "variable"):
+                candidate = {
+                    "package_name": ent.parent().simplename(),
+                    "children_class": ent.simplename(),
+                    "field_name": ref.ent().simplename()
+                }
+                candidates.append(candidate)
+        return candidates
+
     def init_make_field_non_static(self):
         pass
 
@@ -103,6 +117,7 @@ class Initialization(object):
             self.inti_make_field_static,
             self.init_make_method_static,
             self.init_make_method_non_static,
+            self.init_pullup_field,
         )
         population = []
         for _ in progressbar.progressbar(range(self.population_size)):
@@ -163,20 +178,22 @@ class RandomInitialization(Initialization):
 
     def init_pullup_field(self):
         """
-        Some description here!
+        Find all classes with their attributes and package names, then chooses randomly one of them!
         :return:  refactoring main method and its parameters.
         """
         refactoring_main = pullup_field.main
-        params = {"project_dir": str(Path(self.udb_path).parent[0])}
-        # Find One class with one field in it and its package name!
+        params = {"project_dir": str(Path(self.udb_path).parent)}
+        candidates = self._pullup_field_candidates
+        params.update(random.choice(candidates))
         return refactoring_main, params
 
 
 if __name__ == '__main__':
     rand_pop = RandomInitialization(
-        "../benchmark_projects/JSON/JSON.udb",
+        "/home/ali/Desktop/code/TestProject/TestProject.udb",
         population_size=POPULATION_SIZE,
         individual_size=INDIVIDUAL_SIZE
     )
-    rand_pop.get_all_class_entities()
+    rand_pop.find_pullup_field_candidates()
+    population = rand_pop.generate_population()
 

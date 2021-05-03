@@ -55,7 +55,7 @@ class PullUpFieldRefactoring:
 
     def do_refactor(self):
         program = utils2.get_program(self.source_filenames, print_status=True)
-        print(program.packages)
+        # print(program.packages)
         if self.package_name not in program.packages \
                 or self.class_name not in program.packages[self.package_name].classes \
                 or self.field_name not in program.packages[self.package_name].classes[self.class_name].fields:
@@ -160,6 +160,7 @@ class PullUpFieldRefactoring:
 
 
 def main(project_dir: str, package_name: str, children_class: str, field_name: str):
+    print("Pullup Field")
     print("Success!" if PullUpFieldRefactoring(
         utils2.get_filenames_in_dir(project_dir),
         package_name,
