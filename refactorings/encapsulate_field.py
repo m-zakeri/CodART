@@ -32,6 +32,9 @@ class EncapsulateFiledRefactoringListener(Java9_v2Listener):
         """
         self.token_stream = common_token_stream
         self.field_identifier = field_identifier
+
+        self.is_public=False
+
         # Move all the tokens in the source code in a buffer, token_stream_rewriter.
         if common_token_stream is not None:
             self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
@@ -46,43 +49,49 @@ class EncapsulateFiledRefactoringListener(Java9_v2Listener):
                     to_idx=ctx.fieldModifier(0).stop.tokenIndex,
                     text='private')
 
-            # generate accessor and mutator methods
-            # Accessor body
-            new_code = '\n\t'
-            new_code += 'public ' + ctx.unannType().getText() + ' get' + str.capitalize(self.field_identifier)
-            new_code += '() { \n\t\t return this.' + self.field_identifier + ';' + '\n\t}'
+                self.is_public=True
 
-            # Mutator body
-            new_code += '\n\t'
-            new_code += 'public void set' + str.capitalize(self.field_identifier)
-            new_code += '(' + ctx.unannType().getText() + ' ' + self.field_identifier + ') { \n\t\t'
-            new_code += 'this.' + self.field_identifier + ' = ' + self.field_identifier + ';' + '\n\t}\n'
 
-            self.token_stream_rewriter.insertAfter(ctx.stop.tokenIndex, new_code)
+                # generate accessor and mutator methods
+                # Accessor body
+                new_code = '\n\t'
+                new_code += 'public ' + ctx.unannType().getText() + ' get' + str.capitalize(self.field_identifier)
+                new_code += '() { \n\t\t return this.' + self.field_identifier + ';' + '\n\t}'
 
-            hidden = self.token_stream.getHiddenTokensToRight(ctx.stop.tokenIndex)
-            self.token_stream_rewriter.replaceRange(from_idx=hidden[0].tokenIndex,
-                                                    to_idx=hidden[-1].tokenIndex,
-                                                    text='\t/*End of accessor and mutator methods!*/\n\n')
+                # Mutator body
+                new_code += '\n\t'
+                new_code += 'public void set' + str.capitalize(self.field_identifier)
+                new_code += '(' + ctx.unannType().getText() + ' ' + self.field_identifier + ') { \n\t\t'
+                new_code += 'this.' + self.field_identifier + ' = ' + self.field_identifier + ';' + '\n\t}\n'
+
+                self.token_stream_rewriter.insertAfter(ctx.stop.tokenIndex, new_code)
+
+                hidden = self.token_stream.getHiddenTokensToRight(ctx.stop.tokenIndex)
+                self.token_stream_rewriter.replaceRange(from_idx=hidden[0].tokenIndex,
+                                                        to_idx=hidden[-1].tokenIndex,
+                                                        text='\t/*End of accessor and mutator methods!*/\n\n\t')
 
     def exitAssignment(self, ctx: Java9_v2Parser.AssignmentContext):
-        if ctx.leftHandSide().getText() == self.field_identifier or \
-                ctx.leftHandSide().getText() == 'this.' + self.field_identifier:
-            expr_code = self.token_stream_rewriter.getText(program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-                                                           start=ctx.expression().start.tokenIndex,
-                                                           stop=ctx.expression().stop.tokenIndex)
-            # new_code = 'this.set' + str.capitalize(self.field_identifier) + '(' + ctx.expression().getText() + ')'
-            new_code = 'this.set' + str.capitalize(self.field_identifier) + '(' + expr_code + ')'
-            self.token_stream_rewriter.replaceRange(ctx.start.tokenIndex, ctx.stop.tokenIndex, new_code)
-
-    def exitPrimary(self, ctx: Java9_v2Parser.PrimaryContext):
-        if ctx.getChildCount() == 2:
-            if ctx.getText() == 'this.' + self.field_identifier or ctx.getText() == self.field_identifier:
-                new_code = 'this.get' + str.capitalize(self.field_identifier) + '()'
+        if(self.is_public):
+            if ctx.leftHandSide().getText() == self.field_identifier or \
+                    ctx.leftHandSide().getText() == 'this.' + self.field_identifier:
+                expr_code = self.token_stream_rewriter.getText(program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                                                               start=ctx.expression().start.tokenIndex,
+                                                               stop=ctx.expression().stop.tokenIndex)
+                # new_code = 'this.set' + str.capitalize(self.field_identifier) + '(' + ctx.expression().getText() + ')'
+                new_code = 'this.set' + str.capitalize(self.field_identifier) + '(' + expr_code + ')'
                 self.token_stream_rewriter.replaceRange(ctx.start.tokenIndex, ctx.stop.tokenIndex, new_code)
 
+    def exitPrimary(self, ctx: Java9_v2Parser.PrimaryContext):
+        if(self.is_public):
+            if ctx.getChildCount() == 2:
+                if ctx.getText() == 'this.' + self.field_identifier or ctx.getText() == self.field_identifier:
+                    new_code = 'this.get' + str.capitalize(self.field_identifier) + '()'
+                    self.token_stream_rewriter.replaceRange(ctx.start.tokenIndex, ctx.stop.tokenIndex, new_code)
+
     def enterCompilationUnit1(self, ctx: Java9_v2Parser.CompilationUnit1Context):
-        hidden = self.token_stream.getHiddenTokensToLeft(ctx.start.tokenIndex)
-        self.token_stream_rewriter.replaceRange(from_idx=hidden[0].tokenIndex,
-                                                to_idx=hidden[-1].tokenIndex,
-                                                text='/*After refactoring (Refactored version)*/\n')
+        if(self.is_public):
+            hidden = self.token_stream.getHiddenTokensToLeft(ctx.start.tokenIndex)
+            self.token_stream_rewriter.replaceRange(from_idx=hidden[0].tokenIndex,
+                                                    to_idx=hidden[-1].tokenIndex,
+                                                    text='/*After refactoring (Refactored version)*/\n')
