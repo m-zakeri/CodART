@@ -1,7 +1,8 @@
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 from refactorings.utils.utils2 import get_program, Rewriter, get_filenames_in_dir
-from refactorings.utils.utils_listener_fast import TokensInfo, SingleFileElement
-
+from refactorings.utils.utils_listener_fast import TokensInfo, SingleFileElement, Class
+import subprocess
+import os
 
 class MoveMethodRefactoring:
     def __init__(self, source_filenames: list, package_name: str, class_name: str, method_key: str,
@@ -14,6 +15,7 @@ class MoveMethodRefactoring:
         self.target_class_name = target_class_name
         self.target_package_name = target_package_name
         self.filename_mapping = filename_mapping
+        self.formatter = os.path.abspath("../assets/formatter/google-java-format-1.10.0-all-deps.jar")
 
     def do_refactor(self):
         program = get_program(self.source_filenames)
@@ -109,15 +111,19 @@ class MoveMethodRefactoring:
                                "import " + self.target_package_name + "." + self.target_class_name + ";")
         Rewriter_.replace(tokens_info, "")
         Rewriter_.apply()
+        # reformat source.java and target.java
+        self.__reformat(_sourceclass, _targetclass)
         return True
 
+    def __reformat(self, src_class: Class, target_class: Class):
+        subprocess.call(["java", "-jar", self.formatter, "--replace", src_class.filename, target_class.filename])
 
 if __name__ == "__main__":
-    mylist = get_filenames_in_dir('/home/ali/Desktop/code/TestProject/')
+    mylist = get_filenames_in_dir('/home/loop/IdeaProjects/Sample')
     # mylist = get_filenames_in_dir('tests/movemethod_test')
     print("Testing move_method...")
-    if MoveMethodRefactoring(mylist, "test_package", "AppChild1", "testFunc()",
-                             "AppChild2", "test_package").do_refactor():
+    if MoveMethodRefactoring(mylist, "sample", "Test", "a()",
+                             "Test2", "sample").do_refactor():
         # if move_method_refactoring(mylist, "ss", "source", "m(int)","target","sss"):
         print("Success!")
     else:
