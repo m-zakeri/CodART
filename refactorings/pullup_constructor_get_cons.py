@@ -1,4 +1,7 @@
 """
+## Introduction
+
+A function to complete the Pull up constructor refactoring by finding all the classes with similar constructors.
 
 """
 
@@ -43,6 +46,12 @@ def get_cons(program: Program, packagename: str, superclassname: str, methodkey:
                 s2 = set(listm_body)
                 if s2.issubset(s1):
                     removemethods1.append(Diff(listBody_text, listm_body))
+                    if class_.name not in removemethods:
+                        removemethods[class_.name] = [mk]
+                    else:
+                        removemethods[class_.name].append(mk)
+                elif s1.issubset(s2):
+                    removemethods1.append(Diff(listm_body, listBody_text))
                     if class_.name not in removemethods:
                         removemethods[class_.name] = [mk]
                     else:
