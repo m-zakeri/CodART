@@ -1,7 +1,8 @@
-from antlr4.TokenStreamRewriter import TokenStreamRewriter
-from refactorings.utils.utils2 import get_program, Rewriter, get_filenames_in_dir
-from refactorings.utils.utils_listener_fast import TokensInfo, SingleFileElement, Field
 import os
+
+from refactorings.utils.utils2 import get_program, Rewriter, get_filenames_in_dir
+from refactorings.utils.utils_listener_fast import TokensInfo, Field
+
 
 class MoveFieldRefactoring:
     def __init__(self, source_filenames: list, package_name: str,
@@ -21,7 +22,15 @@ class MoveFieldRefactoring:
         if self.target_class_name not in program.packages[self.target_package_name].classes:
             return False
         if self.field_name not in program.packages[self.package_name].classes[
-                    self.class_name].fields:
+            self.class_name].fields:
+            return False
+        return True
+
+    def is_method_scope_var(self, tokens, token, method):
+        method_params = list(map(lambda p: p[1], method.parameters))
+        if token.text not in method_params:
+            return False
+        if tokens[token.tokenIndex - 1].text == "." and tokens[token.tokenIndex - 2].text == "this":
             return False
         return True
 
@@ -43,20 +52,15 @@ class MoveFieldRefactoring:
         for method_name, method in methods.items():
             tokens_info = TokensInfo(method.parser_context)  # tokens of ctx method
             param_tokens_info = TokensInfo(method.formalparam_context)
-            param_text = list(map(lambda x:x.text, param_tokens_info.token_stream.tokens[
-                                                   param_tokens_info.start:param_tokens_info.stop + 1]))
+            param_text = list(map(lambda x: x.text, param_tokens_info.token_stream.tokens[
+                                                    param_tokens_info.start:param_tokens_info.stop + 1]))
             method_declaration_info = TokensInfo(method.method_declaration_context)
             exps = tokens_info.get_token_index(tokens_info.token_stream.tokens, tokens_info.start, tokens_info.stop)
-            method_params = method.parameters
+
             for token in exps:
                 if token.text == self.field_name:
-                    if param_tokens_info is not None:
-                        if token.text in param_text:
-                            if tokens_info.token_stream.tokens[token.tokenIndex - 1].text == '.' and tokens_info.token_stream.tokens[token.tokenIndex - 2].text == 'this':
-                                print(token)
-                            else:
-                                continue
-
+                    if self.is_method_scope_var(tokens_info.token_stream.tokens, token, method):
+                        continue
                     new_case = {
                         'method': method,
                         'tokens': list(filter(lambda t: t.line == token.line, exps))
@@ -80,7 +84,8 @@ class MoveFieldRefactoring:
         if not self.is_static(field):
             print("right now, we won't move non static members")
             return False
-        rewriter = Rewriter(program, lambda x: f"{os.path.dirname(x)}/{os.path.splitext(os.path.basename(x))[0]}.rewritten.java")
+        rewriter = Rewriter(program,
+                            lambda x: f"{os.path.dirname(x)}/{os.path.splitext(os.path.basename(x))[0]}.rewritten.java")
         self.remove_field(field, rewriter)
         return True
 
@@ -93,7 +98,7 @@ class MoveFieldRefactoring:
 
 
 if __name__ == '__main__':
-    path = "D:\\iust\\compiler\\final project\CodART\\tests\\move_field"
+    path = "/home/amiresm/Desktop/test_project"
     my_list = get_filenames_in_dir(path)
     refactoring = MoveFieldRefactoring(my_list, "hello", "classA", "a",
                                        "classB", "hello", "")
