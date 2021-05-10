@@ -17,16 +17,39 @@ class MoveFieldRefactoring:
 
     def validate_metadata(self, program) -> bool:
         if self.class_name not in program.packages[self.package_name].classes:
-            raise KeyError(f"The class {self.class_name} does not exist in the program")
+            return False
         if self.target_class_name not in program.packages[self.target_package_name].classes:
-            raise KeyError(f"The class {self.target_class_name} does not exist in the program")
+            return False
         if self.field_name not in program.packages[self.package_name].classes[
                     self.class_name].fields:
-            raise KeyError(f"The class {self.target_class_name} does not exist in the program")
-
+            return False
+        return True
 
     def get_usage(self):
         program = get_program(self.source_filenames)
+        if not self.validate_metadata(program):
+            raise Exception()
+
+        source_class = program.packages[self.package_name].classes[self.class_name]
+        target_class = program.packages[self.target_package_name].classes[self.target_class_name]
+        field = program.packages[self.package_name].classes[self.class_name].fields[self.field_name]
+        methods: dict = source_class.methods
+
+        if 'static' not in field.modifiers:
+            raise Exception()
+
+        usages = list()
+
+        for method_name, method in methods.items():
+            tokens_info = TokensInfo(method.parser_context)  # tokens of ctx method
+            param_tokens_info = TokensInfo(method.formalparam_context)
+            method_declaration_info = TokensInfo(method.method_declaration_context)
+            exps = tokens_info.get_token_index(tokens_info.token_stream.tokens, tokens_info.start, tokens_info.stop)
+
+            for token in exps:
+                if token.text == self.field_name:
+                    usages.append(token.tokenIndex)
+
         return program
 
 
