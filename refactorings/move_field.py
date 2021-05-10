@@ -4,6 +4,14 @@ from refactorings.utils.utils2 import get_program, Rewriter, get_filenames_in_di
 from refactorings.utils.utils_listener_fast import TokensInfo, Field, Class, LocalVariable
 
 
+class UnResolvedMetaError(Exception):
+    pass
+
+
+class NonStaticFieldRefactorError(Exception):
+    pass
+
+
 class MoveFieldRefactoring:
     def __init__(self, source_filenames: list, package_name: str,
                  class_name: str, field_name: str, target_class_name: str,
@@ -16,43 +24,78 @@ class MoveFieldRefactoring:
         self.target_package_name = target_package_name
         self.filename_mapping = filename_mapping + ".rewritten.java"
 
-    def validate_metadata(self, program) -> bool:
-        if self.class_name not in program.packages[self.package_name].classes:
-            return False
-        if self.target_class_name not in program.packages[self.target_package_name].classes:
-            return False
-        if self.field_name not in program.packages[self.package_name].classes[
-            self.class_name].fields:
-            return False
-        return True
+    def get_metadata(self, program):
+        """
+        Finds the source and the target class inside the program.
+        """
+        try:
+            class_name = program.packages[self.package_name].classes[self.class_name]
+            target_class = program.packages[self.package_name].classes[self.target_class_name]
+            field = program.packages[self.package_name].classes[self.class_name].fields[self.field_name]
+        except KeyError:
+            return None
+        return class_name, target_class, field
+
+    @staticmethod
+    def stringify(tokens, start, end):
+        """
+        Converts list of tokens into strings
+        """
+        string = ""
+        for t in tokens[start: end]:
+            if t.text != ' ':
+                string += t.text
+        return string
 
     def is_method_scope_var(self, tokens, token, method):
+        """
+        Checks if given token is related to a method parameter or not
+        """
         method_params = list(map(lambda p: p[1], method.parameters))
         if token.text in method_params:
-            selector = tokens[token.tokenIndex - 2].text
-            dot = tokens[token.tokenIndex - 1].text
-            return selector + dot not in ['this.', method.class_name + '.']
+            selector = self.stringify(tokens, token.tokenIndex - 2, token.tokenIndex)
+            if method.class_name == self.class_name:
+                return selector not in ['this.', self.class_name + '.']
+            return selector == self.class_name + '.'
         return False
 
     def is_declared_in_method(self, tokens, token, method):
-        selector = tokens[token.tokenIndex - 2].text
-        dot = tokens[token.tokenIndex - 1].text
-        if selector + dot in ['this.', method.class_name + '.']:
+        """
+        Checks if given token is related to a new declared variable in a method
+        """
+        selector = self.stringify(tokens, token.tokenIndex - 2, token.tokenIndex)
+        if method.class_name == self.class_name:
+            if selector in ['this.', self.class_name + '.']:
+                return False
+        elif selector == self.class_name + '.':
             return False
 
         local_exp_var = method.body_local_vars_and_expr_names
         try:
-            method_variables = next(filter(lambda x: isinstance(x, LocalVariable) and
-                                                     x.identifier == token.text, local_exp_var))
-            start = method_variables.parser_context.start.start
-            stop = method_variables.parser_context.stop.stop
+            local_var_definition = next(filter(lambda x: isinstance(x, LocalVariable) and
+                                                         x.identifier == token.text, local_exp_var))
+            start = local_var_definition.parser_context.start.start
             if start <= token.start:
                 return True
             return False
         except StopIteration:
             return False
 
+    def is_a_usage(self, tokens, token, method):
+        """
+        Checks if given token is related to the static field, program searching for
+        """
+        selector = self.stringify(tokens, token.tokenIndex - 2, token.tokenIndex)
+        if selector == 'this.':
+            if method.class_name == self.class_name:
+                return True
+            return False
+        return True
+
     def get_usages_in_methods(self, src):
+        """
+        Finds method based usages of a field
+        """
         usages = list()
 
         methods: dict = src.methods
@@ -64,10 +107,12 @@ class MoveFieldRefactoring:
 
             for token in exps:
                 if token.text == self.field_name:
-                    if self.is_method_scope_var(tokens_info.token_stream.tokens, token, method):
+                    is_method_param = self.is_method_scope_var(tokens_info.token_stream.tokens, token, method)
+                    is_new_declaration = self.is_declared_in_method(tokens_info.token_stream.tokens, token, method)
+                    is_a_usage = self.is_a_usage(tokens_info.token_stream.tokens, token, method)
+                    if is_new_declaration or is_method_param or not is_a_usage:
                         continue
-                    if self.is_declared_in_method(tokens_info.token_stream.tokens, token, method):
-                        continue
+
                     new_case = {
                         'method': method,
                         'tokens': list(filter(lambda t: t.line == token.line, exps))
@@ -76,37 +121,25 @@ class MoveFieldRefactoring:
         return usages
 
     def get_usage(self):
+        """
+        Finds usages of a field inside project files
+        # todo We should add usage search for class fields
+        """
         program = get_program(self.source_filenames)
-        if not self.validate_metadata(program):
-            raise Exception()
 
-        source_class = program.packages[self.package_name].classes[self.class_name]
-        target_class = program.packages[self.target_package_name].classes[self.target_class_name]
-        field = program.packages[self.package_name].classes[self.class_name].fields[self.field_name]
-        methods: dict = source_class.methods
+        try:
+            source_class, target_class, field = self.get_metadata(program)
+        except KeyError:
+            raise UnResolvedMetaError("Source or destination not found!")
 
         if 'static' not in field.modifiers:
-            raise Exception()
+            raise NonStaticFieldRefactorError("Non-static fields cannot be refactored!")
 
         usages = list()
-
-        for method_name, method in methods.items():
-            tokens_info = TokensInfo(method.parser_context)  # tokens of ctx method
-            param_tokens_info = TokensInfo(method.formalparam_context)
-            method_declaration_info = TokensInfo(method.method_declaration_context)
-            exps = tokens_info.get_token_index(tokens_info.token_stream.tokens, tokens_info.start, tokens_info.stop)
-
-            for token in exps:
-                if token.text == self.field_name:
-                    if self.is_method_scope_var(tokens_info.token_stream.tokens, token, method):
-                        continue
-                    if self.is_declared_in_method(tokens_info.token_stream.tokens, token, method):
-                        continue
-                    new_case = {
-                        'method': method,
-                        'tokens': list(filter(lambda t: t.line == token.line, exps))
-                    }
-                    usages.append(new_case)
+        for p_name, package in program.packages.items():
+            for cls_name, cls in package.classes.items():
+                new_usages = self.get_usages_in_methods(cls)
+                usages.extend(new_usages)
 
         return usages, program
 
