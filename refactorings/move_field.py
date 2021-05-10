@@ -43,11 +43,20 @@ class MoveFieldRefactoring:
         for method_name, method in methods.items():
             tokens_info = TokensInfo(method.parser_context)  # tokens of ctx method
             param_tokens_info = TokensInfo(method.formalparam_context)
+            param_text = list(map(lambda x:x.text, param_tokens_info.token_stream.tokens[
+                                                   param_tokens_info.start:param_tokens_info.stop + 1]))
             method_declaration_info = TokensInfo(method.method_declaration_context)
             exps = tokens_info.get_token_index(tokens_info.token_stream.tokens, tokens_info.start, tokens_info.stop)
-
+            method_params = method.parameters
             for token in exps:
                 if token.text == self.field_name:
+                    if param_tokens_info is not None:
+                        if token.text in param_text:
+                            if tokens_info.token_stream.tokens[token.tokenIndex - 1].text == '.' and tokens_info.token_stream.tokens[token.tokenIndex - 2].text == 'this':
+                                print(token)
+                            else:
+                                continue
+
                     new_case = {
                         'method': method,
                         'tokens': list(filter(lambda t: t.line == token.line, exps))
@@ -84,10 +93,10 @@ class MoveFieldRefactoring:
 
 
 if __name__ == '__main__':
-    path = "/home/loop/IdeaProjects/Sample"
+    path = "D:\\iust\\compiler\\final project\CodART\\tests\\move_field"
     my_list = get_filenames_in_dir(path)
-    refactoring = MoveFieldRefactoring(my_list, "sample", "Test3", "toBeMoved",
-                                       "Test", "sample", "")
+    refactoring = MoveFieldRefactoring(my_list, "hello", "classA", "a",
+                                       "classB", "hello", "")
 
     refac = refactoring.move()
     print(refac)
