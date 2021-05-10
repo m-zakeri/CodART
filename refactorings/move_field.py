@@ -1,8 +1,7 @@
-
-from antlr4.TokenStreamRewriter import TokenStreamRewriter
-from refactorings.utils.utils2 import get_program, Rewriter, get_filenames_in_dir
-from refactorings.utils.utils_listener_fast import TokensInfo, SingleFileElement, Field, Class
 import os
+
+from refactorings.utils.utils2 import get_program, Rewriter, get_filenames_in_dir
+from refactorings.utils.utils_listener_fast import TokensInfo, Field, Class, LocalVariable
 
 
 class MoveFieldRefactoring:
@@ -29,11 +28,52 @@ class MoveFieldRefactoring:
 
     def is_method_scope_var(self, tokens, token, method):
         method_params = list(map(lambda p: p[1], method.parameters))
-        if token.text not in method_params:
+        if token.text in method_params:
+            selector = tokens[token.tokenIndex - 2].text
+            dot = tokens[token.tokenIndex - 1].text
+            return selector + dot not in ['this.', method.class_name + '.']
+        return False
+
+    def is_declared_in_method(self, tokens, token, method):
+        selector = tokens[token.tokenIndex - 2].text
+        dot = tokens[token.tokenIndex - 1].text
+        if selector + dot in ['this.', method.class_name + '.']:
             return False
-        if tokens[token.tokenIndex - 1].text == "." and tokens[token.tokenIndex - 2].text == "this":
+
+        local_exp_var = method.body_local_vars_and_expr_names
+        try:
+            method_variables = next(filter(lambda x: isinstance(x, LocalVariable) and
+                                                     x.identifier == token.text, local_exp_var))
+            start = method_variables.parser_context.start.start
+            stop = method_variables.parser_context.stop.stop
+            if start <= token.start:
+                return True
             return False
-        return True
+        except StopIteration:
+            return False
+
+    def get_usages_in_methods(self, src):
+        usages = list()
+
+        methods: dict = src.methods
+        for method_name, method in methods.items():
+            tokens_info = TokensInfo(method.parser_context)  # tokens of ctx method
+            param_tokens_info = TokensInfo(method.formalparam_context)
+            method_declaration_info = TokensInfo(method.method_declaration_context)
+            exps = tokens_info.get_token_index(tokens_info.token_stream.tokens, tokens_info.start, tokens_info.stop)
+
+            for token in exps:
+                if token.text == self.field_name:
+                    if self.is_method_scope_var(tokens_info.token_stream.tokens, token, method):
+                        continue
+                    if self.is_declared_in_method(tokens_info.token_stream.tokens, token, method):
+                        continue
+                    new_case = {
+                        'method': method,
+                        'tokens': list(filter(lambda t: t.line == token.line, exps))
+                    }
+                    usages.append(new_case)
+        return usages
 
     def get_usage(self):
         program = get_program(self.source_filenames)
@@ -53,8 +93,6 @@ class MoveFieldRefactoring:
         for method_name, method in methods.items():
             tokens_info = TokensInfo(method.parser_context)  # tokens of ctx method
             param_tokens_info = TokensInfo(method.formalparam_context)
-            param_text = list(map(lambda x: x.text, param_tokens_info.token_stream.tokens[
-                                                    param_tokens_info.start:param_tokens_info.stop + 1]))
             method_declaration_info = TokensInfo(method.method_declaration_context)
             exps = tokens_info.get_token_index(tokens_info.token_stream.tokens, tokens_info.start, tokens_info.stop)
 
@@ -62,20 +100,22 @@ class MoveFieldRefactoring:
                 if token.text == self.field_name:
                     if self.is_method_scope_var(tokens_info.token_stream.tokens, token, method):
                         continue
+                    if self.is_declared_in_method(tokens_info.token_stream.tokens, token, method):
+                        continue
                     new_case = {
                         'method': method,
                         'tokens': list(filter(lambda t: t.line == token.line, exps))
                     }
                     usages.append(new_case)
 
-        return program
+        return usages, program
 
     def propagate(self):
         pass
 
     def move(self):
         # tokens_info = TokensInfo(_method.parser_context)  # tokens of ctx method
-        program = self.get_usage()
+        usage, program = self.get_usage()
         source_package = program.packages[self.package_name]
         source_class = source_package.classes[self.class_name]
         target_class = source_package.classes[self.target_class_name]
@@ -110,7 +150,7 @@ class MoveFieldRefactoring:
 
 
 if __name__ == '__main__':
-    path = "/home/loop/IdeaProjects/Sample"
+    path = "/home/amiresm/Desktop/test_project"
     my_list = get_filenames_in_dir(path)
     filtered = []
     for file in my_list:
@@ -119,8 +159,8 @@ if __name__ == '__main__':
         else:
             filtered.append(file)
 
-    refactoring = MoveFieldRefactoring(filtered, "sample", "Test3", "toBeMoved",
-                                       "Test", "sample", "")
+    refactoring = MoveFieldRefactoring(filtered, "hello", "classA", "a",
+                                       "classB", "hello", "")
 
     refac = refactoring.move()
     print(refac)
