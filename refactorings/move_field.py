@@ -48,7 +48,11 @@ class MoveFieldRefactoring:
 
             for token in exps:
                 if token.text == self.field_name:
-                    usages.append(token.tokenIndex)
+                    new_case = {
+                        'method': method,
+                        'tokens': list(filter(lambda t: t.line == token.line, exps))
+                    }
+                    usages.append(new_case)
 
         return program
 
