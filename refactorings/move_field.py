@@ -1,7 +1,7 @@
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 from refactorings.utils.utils2 import get_program, Rewriter, get_filenames_in_dir
-from refactorings.utils.utils_listener_fast import TokensInfo, SingleFileElement
-
+from refactorings.utils.utils_listener_fast import TokensInfo, SingleFileElement, Field
+import os
 
 class MoveFieldRefactoring:
     def __init__(self, source_filenames: list, package_name: str,
@@ -29,12 +29,38 @@ class MoveFieldRefactoring:
         program = get_program(self.source_filenames)
         return program
 
+    def propagate(self):
+        pass
+
+    def is_static(self, field: Field):
+        return "static" in field.modifiers
+
+    def move(self):
+        # tokens_info = TokensInfo(_method.parser_context)  # tokens of ctx method
+        program = self.get_usage()
+        source_package = program.packages[self.package_name]
+        source_class = source_package.classes[self.class_name]
+        field = source_class.fields[self.field_name]
+        if not self.is_static(field):
+            print("right now, we won't move non static members")
+            return False
+        rewriter = Rewriter(program, lambda x: f"{os.path.dirname(x)}/{os.path.splitext(os.path.basename(x))[0]}.rewritten.java")
+        self.remove_field(field, rewriter)
+        return True
+
+    def remove_field(self, field: Field, rewriter: Rewriter):
+        tokens = TokensInfo(field.parser_context)
+        rewriter.replace(tokens, "")
+        for mod_ctx in field.modifiers_parser_contexts:
+            rewriter.replace(TokensInfo(mod_ctx), "")
+        rewriter.apply()
+
 
 if __name__ == '__main__':
-    path = "/home/amiresm/Desktop/test_project"
+    path = "/home/loop/IdeaProjects/Sample"
     my_list = get_filenames_in_dir(path)
-    refactoring = MoveFieldRefactoring(my_list, "hello", "Simple", "x",
-                                       "Sample", "hello", 'hello')
+    refactoring = MoveFieldRefactoring(my_list, "sample", "Test3", "toBeMoved",
+                                       "Test", "sample", "")
 
-    refac = refactoring.get_usage()
+    refac = refactoring.move()
     print(refac)
