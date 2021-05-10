@@ -188,8 +188,6 @@ class MoveClassRefactoringListener(JavaParserLabeledListener):
         new_file.write(self.code.replace("\r", ""))
         print(f"The class \"{self.class_identifier}\" moved to the target package successfully!")
 
-
-
 class ReplaceDependentObjectsListener(JavaParserLabeledListener):
     """
     To implement the move class refactoring
@@ -292,16 +290,13 @@ class ReplaceDependentObjectsListener(JavaParserLabeledListener):
                 )
 
 
-
-
-
-filename = 'Color.java'
-class_identifier = 'Color'
-source_package = 'test_package'
-target_package = 'new_package'
+filename = 'Source.java'
+class_identifier = 'Source'
+source_package = 'sourcePackage'
+target_package = 'targetPackage'
 
 f_iteration_flag = False
-directory = '/home/ali/Desktop/code/TestProject/src/'
+directory = 'D:/Programming/Java/TestProject/'
 file_counter = 0
 
 
