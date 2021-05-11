@@ -23,8 +23,8 @@ class Scope:
         self.name = name
         self.type = scope_type
         self.scope_number = scope_number
-        self.declared_vars = {}
-        self.used_vars = {}
+        self.declared_vars = []
+        self.used_vars = []
 
     def __str__(self):
         return f"scope: {self.name} {self.type}"
@@ -91,6 +91,7 @@ class ScopeListener(UtilsListener):
                       self.current_scope)
         self.current_scope.children.append(scope)
         self.current_scope = scope
+        setattr(self.current_method, "scope", scope)
 
     def exitMethodBody(self, ctx:JavaParser.MethodBodyContext):
         super().enterMethodBody(ctx)
@@ -98,17 +99,24 @@ class ScopeListener(UtilsListener):
 
     def enterConstructorDeclaration(self, ctx: JavaParser.ConstructorDeclarationContext):
         super().enterConstructorDeclaration(ctx)
-
-    def exitConstructorDeclaration(self, ctx: JavaParser.ConstructorDeclarationContext):
-        super().exitConstructorDeclaration(ctx)
-
+        scope = Scope(ctx.IDENTIFIER().getText(), ScopeType.CONSTRUCTOR, self.current_scope.scope_number + 1,
+                      self.current_scope)
+        self.current_scope.children.append(scope)
+        self.current_scope = scope
+    #
+    # def exitConstructorDeclaration(self, ctx: JavaParser.ConstructorDeclarationContext):
+    #     super().exitConstructorDeclaration(ctx)
+    #     self.current_scope = self.current_scope.parent
 
     def enterBlockStatement(self, ctx:JavaParser.BlockStatementContext):
         super().enterBlockStatement(ctx)
         if self.current_scope is None:
             return
 
-        scope = Scope("", ScopeType.BLOCK_STATEMENT, self.current_scope.scope_number + 1,
+        if self.current_scope.type == ScopeType.CONSTRUCTOR:
+            return
+
+        scope = Scope("BLOCK", ScopeType.BLOCK_STATEMENT, self.current_scope.scope_number + 1,
                       self.current_scope)
         self.current_scope.children.append(scope)
         self.current_scope = scope
@@ -144,7 +152,40 @@ class ScopeListener(UtilsListener):
             self.current_scope.name = "TRY"
             return
 
-        # self.current_scope.name = "BLOCK"
+    def enterVariableDeclarator(self, ctx: JavaParser.VariableDeclaratorContext):
+        super().enterVariableDeclarator(ctx)
+        if self.current_local_var_type is None:
+            return
+
+        self.current_scope.declared_vars.append(self.current_method.body_local_vars_and_expr_names[-1])
+
+    # def exitFieldDeclaration(self, ctx: JavaParser.FieldDeclarationContext):
+    #     super().exitFieldDeclaration(ctx)
+    #     self.current_scope.declared_vars.append(self.package.classes[self.current_class_identifier].fields[field.name])
+    #     self.field_enter_count -= 1
+    #     if self.current_class_identifier is not None and self.field_enter_count == 0:
+    #         for i in range(len(self.current_field_ids)):
+    #             field_id = self.current_field_ids[i]
+    #             dims = self.current_field_dims[i]
+    #             field_init = self.current_field_inits[i]
+    #             var_ctx = self.current_field_var_ctxs[i]
+    #             field = Field(
+    #                 package_name=self.package.name,
+    #                 class_name=self.current_class_identifier,
+    #                 parser_context=self.current_field_decl[2],
+    #                 filename=self.filename,
+    #                 file_info=self.file_info
+    #             )
+    #             field.modifiers = self.current_field_decl[0]
+    #             field.modifiers_parser_contexts = self.current_field_decl[3]
+    #             field.datatype = self.current_field_decl[1] + dims
+    #             field.name = field_id
+    #             field.initializer = field_init
+    #             field.neighbor_names = [x for x in self.current_field_ids if x != field_id]
+    #             field.all_variable_declarator_contexts = self.current_field_var_ctxs
+    #             field.index_in_variable_declarators = i
+    #             self.package.classes[self.current_class_identifier].fields[field.name] = field
+    #         self.current_field_decl = None
 
 
 def get_program(source_files: list, print_status = False) -> Program:
