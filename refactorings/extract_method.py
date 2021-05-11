@@ -29,17 +29,19 @@ def get_duplicate_continues_statements(a_statements, b_statements):
             sa = a_statements[i]
             sb = b_statements[j]
             count_duplicate_statement = 0
-            duplicates = []
+            a_duplicates = []
+            b_duplicates = []
             k = 0
             while is_equal(sa.statement.getText(), sb.statement.getText()) \
                     and i + k < len_a_statement and j + k < len_b_statement:
                 sa = a_statements[i + k]
                 sb = b_statements[j + k]
                 count_duplicate_statement += 1
-                duplicates.append(sa)
+                a_duplicates.append(sa)
+                b_duplicates.append(sb)
                 k += 1
             if count_duplicate_statement != 0:
-                method_a_b_duplications.append((count_duplicate_statement, duplicates))
+                method_a_b_duplications.append((count_duplicate_statement, a_duplicates, b_duplicates))
             j += 1
         i += 1
 
@@ -142,8 +144,11 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
 
                 # return value is None when not any duplications have been found.
                 if duplicate is not None:
-                    print("{} and {} have {} duplicates lines".format(
-                        methods[i].getText(), methods[j].getText(), duplicate[0]),
+                    print()
+                    print("lines {}-{} in {} and lines {}-{} {} are duplicated. count: {}\n".format(
+                        duplicate[1][0].statement.start.line, duplicate[1][-1].statement.start.line,
+                        methods[i].getText(), duplicate[2][0].statement.start.line,
+                        duplicate[2][-1].statement.start.line, methods[j].getText(), duplicate[0]),
                         list(map(lambda x: x.statement.getText(), duplicate[1])))
 
                 j += 1
