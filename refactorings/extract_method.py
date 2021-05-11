@@ -61,11 +61,36 @@ class Statement:
         )
 
 
+class DuplicationRefactoring:
+    class Duplication:
+        def __init__(self, statements):
+            self.statements = statements
+            self.from_line = statements[0].statement.start.line
+            self.to_line = statements[-1].statement.stop.line
+
+    def __init__(self, list_of_statements):
+        duplications = []
+        for statements in list_of_statements:
+            duplications.append(DuplicationRefactoring.Duplication(statements))
+        self.duplications = duplications
+
+    # def log(self):
+    #     print("lines {}-{} and lines {}-{} are duplicated.\n".format(
+    #         duplicate[1][0].statement.start.line, duplicate[1][-1].statement.start.line,
+    #         methods[i].getText(), duplicate[2][0].statement.start.line,
+    #         duplicate[2][-1].statement.start.line, methods[j].getText(), duplicate[0]),
+    #         list(map(lambda x: x.statement.getText(), duplicate[1])))
+
+
 class ExtractMethodRefactoring(JavaParserLabeledListener):
 
-    def __init__(self, common_token_stream: CommonTokenStream = None, class_name: str = "Main"):
-        self.code = ""
+    def __init__(self, common_token_stream: CommonTokenStream = None, class_name: str = "Main",
+                 new_method_name: str = "newMethod"):
         self.refactor_class_name = class_name
+        self.new_method_name = new_method_name
+
+        # IDK why :) ?
+        self.code = ""
         if common_token_stream is None:
             raise ValueError('common_token_stream is None')
         else:
@@ -77,6 +102,8 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
         self.current_method_name = ""
         self.current_statement_index = 0
 
+        self.duplicates = None
+
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
         if is_equal(ctx.IDENTIFIER(), self.refactor_class_name):
             self.is_in_target_class = True
@@ -85,7 +112,8 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
         if is_equal(ctx.IDENTIFIER(), self.refactor_class_name):
             self.is_in_target_class = False
             self.find_duplicates()
-            self.refactor()
+            if self.duplicates is not None:
+                self.refactor(ctx)
 
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
         if self.is_in_target_class:
@@ -119,8 +147,7 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
         # )
         pass
 
-    def find_duplicates(self):
-        # it is for representing the statements of each method
+    def log_statements_of_methods(self):
         for method_name in self.statements.keys():
             print(method_name)
             statements = self.statements[method_name]
@@ -128,11 +155,22 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
                 print(str(statement))
             print("---------------")
 
+    @staticmethod
+    def log_duplication(duplicate, i, j, methods):
+        print()
+        print("lines {}-{} in {} and lines {}-{} {} are duplicated. count: {}\n".format(
+            duplicate[1][0].statement.start.line, duplicate[1][-1].statement.start.line,
+            methods[i].getText(), duplicate[2][0].statement.start.line,
+            duplicate[2][-1].statement.start.line, methods[j].getText(), duplicate[0]),
+            list(map(lambda x: x.statement.getText(), duplicate[1])))
+
+    def find_duplicates(self):
+        # it is for representing the statements of each method
+        # self.log_statements_of_methods()
+
         # Compare each one of methods with the other methods
         methods = list(self.statements.keys())
         len_method = len(methods)
-        print(len_method)
-        print(list(map(lambda x: x.getText(), self.statements.keys())))
         i = 0
         while i < len_method - 1:
             j = i + 1
@@ -144,18 +182,35 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
 
                 # return value is None when not any duplications have been found.
                 if duplicate is not None:
-                    print()
-                    print("lines {}-{} in {} and lines {}-{} {} are duplicated. count: {}\n".format(
-                        duplicate[1][0].statement.start.line, duplicate[1][-1].statement.start.line,
-                        methods[i].getText(), duplicate[2][0].statement.start.line,
-                        duplicate[2][-1].statement.start.line, methods[j].getText(), duplicate[0]),
-                        list(map(lambda x: x.statement.getText(), duplicate[1])))
+                    self.duplicates = DuplicationRefactoring([duplicate[1], duplicate[2]])
+                    self.log_duplication(duplicate, i, j, methods)
+                    return
 
                 j += 1
             i += 1
 
-    def refactor(self):
-        pass
+    def replace_duplicate_code(self):
+        self.duplicates.duplications.sort(key=lambda x: x.to_line, reverse=True)
+        for duplicate in self.duplicates.duplications:
+            start_index = duplicate.statements[0].statement.start.tokenIndex
+            end_index = duplicate.statements[-1].statement.stop.tokenIndex
+            self.token_stream_re_writer.replaceRange(start_index, end_index, "{}();".format(self.new_method_name))
+
+        print(self.token_stream_re_writer.getDefaultText())
+
+    def create_new_method(self, start_index):
+        new_method = "\n"
+        new_method += "\tpublic void " + self.new_method_name + "() {\n"
+        for statement_obj in self.duplicates.duplications[0].statements:
+            new_method += "\t\t{}\n".format(statement_obj.statement.getText())
+        new_method += "\t}\n"
+        new_method += "\n"
+
+        self.token_stream_re_writer.insertAfter(start_index, new_method)
+
+    def refactor(self, ctx):
+        self.create_new_method(ctx.stop.tokenIndex - 1)
+        self.replace_duplicate_code()
 
 
 if __name__ == "__main__":
@@ -168,7 +223,7 @@ if __name__ == "__main__":
     parser = JavaParserLabeled(token_stream)
     parser.getTokenStream()
     parse_tree = parser.compilationUnit()
-    my_listener = ExtractMethodRefactoring(common_token_stream=token_stream, class_name="Student")
+    my_listener = ExtractMethodRefactoring(common_token_stream=token_stream, class_name="Student", new_method_name="f")
     walker = ParseTreeWalker()
     walker.walk(t=parse_tree, listener=my_listener)
 
