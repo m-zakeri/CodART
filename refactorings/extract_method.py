@@ -7,6 +7,22 @@ from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 
+def is_equal(a, b):
+    return str(a) == str(b)
+
+
+class Statement:
+    def __init__(self, statement, expressions):
+        self.statement = statement
+        self.expressions = expressions
+
+    def __str__(self):
+        return "[\n\tstatement: {}\n\texpressions: {}\n]".format(
+            self.statement.getText(),
+            list(map(lambda x: x.getText(), self.expressions))
+        )
+
+
 class ExtractMethodRefactoring(JavaParserLabeledListener):
 
     def __init__(self, common_token_stream: CommonTokenStream = None, class_name: str = "Main"):
@@ -19,37 +35,50 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
 
         self.statements = {}
         self.is_in_target_class = False
+        self.is_in_a_method = False
         self.current_method_name = ""
+        self.current_statement_index = 0
 
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
-        if ctx.IDENTIFIER() == self.refactor_class_name:
+        if is_equal(ctx.IDENTIFIER(), self.refactor_class_name):
             self.is_in_target_class = True
 
     def exitClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
-        if ctx.IDENTIFIER() == self.refactor_class_name:
+        if is_equal(ctx.IDENTIFIER(), self.refactor_class_name):
             self.is_in_target_class = False
 
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
-        self.current_method_name = ctx.IDENTIFIER()
-        self.statements[self.current_method_name] = []
+        if self.is_in_target_class:
+            self.is_in_a_method = True
+            self.current_method_name = ctx.IDENTIFIER()
+            self.statements[self.current_method_name] = []
 
     def exitMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
-        pass
+        self.is_in_a_method = False
 
     def enterStatement15(self, ctx: JavaParserLabeled.Statement0Context):
-        self.statements[self.current_method_name].append(ctx)
+        if self.is_in_target_class:
+            if self.is_in_a_method:
+                self.current_statement_index = len(self.statements[self.current_method_name])
+                self.statements[self.current_method_name].append(
+                    Statement(ctx, [])
+                )
+
+    # def enterExpression0(self, ctx: JavaParserLabeled.Expression0Context):
+    #     if self.is_in_target_class:
+    #         if self.is_in_a_method:
+    #             print(self.current_statement_index)
+    #             print(self.statements[self.current_method_name][self.current_statement_index])
+    #             print(self.statements[self.current_method_name][self.current_statement_index].expressions)
+    #             self.statements[self.current_method_name][self.current_statement_index].expressions.append(ctx)
 
     def exitCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
-        s = []
         for method_name in self.statements.keys():
             print(method_name)
             statements = self.statements[method_name]
             for statement in statements:
-                s.append(statement)
-                print(statement.getText())
-            print("------------------")
-
-        print(list(map(lambda x: x.getText(), s)))
+                print(str(statement))
+            print("---------------")
 
         self.token_stream_re_writer.insertAfter(
             index=ctx.stop.tokenIndex,
