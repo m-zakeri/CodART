@@ -9,6 +9,51 @@ from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 
+
+class MoveClassPreConditionListener(JavaParserLabeledListener):
+
+    def __init__(self, common_token_stream: CommonTokenStream = None, class_identifier: str = None,
+                 source_package: str = None, target_package: str = None, filename: str = None, dirname: str = None):
+        self.token_stream = common_token_stream
+        self.file_classes = []
+
+    def enterCompilationUnit(self, ctx:JavaParserLabeled.CompilationUnitContext):
+        for declaration in ctx.children:
+            if isinstance(declaration, JavaParserLabeled.TypeDeclarationContext):
+                self.file_classes.append(declaration.classDeclaration().IDENTIFIER().getText())
+
+        return
+
+    def exitFieldDeclaration(self, ctx:JavaParserLabeled.FieldDeclarationContext):
+        field_type = ctx.typeType().getText()
+
+        if field_type in self.file_classes:
+            print('This class has fields that dependent on other classes')
+            print('Refactoring is forbidden')
+            exit(0)
+
+    def exitExpression0(self, ctx:JavaParserLabeled.Expression0Context):
+        expression = ctx.primary().getText()
+
+        if expression in self.file_classes:
+            print('This class has dependencies on other classes')
+            print('Refactoring is forbidden')
+            exit(0)
+
+        return
+
+    def exitLocalVariableDeclaration(self, ctx:JavaParserLabeled.LocalVariableDeclarationContext):
+        local_variable_type = ctx.typeType().getText()
+
+        if local_variable_type in self.file_classes:
+            print('This class has local variables that dependent on other classes')
+            print('Refactoring is forbidden')
+            exit(0)
+
+        return
+
+
+
 class MoveClassRefactoringListener(JavaParserLabeledListener):
     """
     To implement the move class refactoring
@@ -195,44 +240,12 @@ class MoveClassRefactoringListener(JavaParserLabeledListener):
 
         return
 
-    def enterClassBody(self, ctx:JavaParserLabeled.ClassBodyContext):
-        class_body = ctx.classBodyDeclaration(0).getText()
-
-        return
-
-    def enterClassType(self, ctx:JavaParserLabeled.ClassTypeContext):
-        class_type = ctx.classOrInterfaceType().getText()
-
-        return
-
-    def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
-        class_name = ctx.CLASS().getText()
-        # class
-        return
-
-    def enterExpression1(self, ctx: JavaParserLabeled.Expression1Context):
-        var = ctx.IDENTIFIER().getText()
-
-        return
-
     # Enter a parse tree produced by JavaParserLabeled#methodDeclaration.
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
         if not self.enter_class:
             return
         method_name = ctx.IDENTIFIER().getText()
         self.class_methods.append(method_name)
-
-    def enterVariableDeclarators(self, ctx:JavaParserLabeled.VariableDeclaratorsContext):
-        vars = ctx.variableDeclarators().getText()
-        var = ctx.variableDeclarator(0).getText()
-
-        return
-
-    def enterExpressionList(self, ctx:JavaParserLabeled.ExpressionListContext):
-        expressions = ctx.expression().getText()
-        expr = ctx.expression(0).getText()
-
-        return
 
     # Exit a parse tree produced by JavaParserLabeled#compilationUnit.
     def exitCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
@@ -372,7 +385,7 @@ class ReplaceDependentObjectsListener(JavaParserLabeledListener):
 
 
 filename = 'Source.java'
-class_identifier = 'Source'
+class_identifier = 'test'
 source_package = 'sourcePackage'
 target_package = 'targetPackage'
 
@@ -462,12 +475,12 @@ def process_file(file, is_source_file):
     # Step 5: Create parse tree
     parse_tree = parser.compilationUnit()
 
-    my_listener = MoveClassRefactoringListener(
+    pre_condition_listener = MoveClassPreConditionListener(
         common_token_stream=token_stream, source_package=source_package, target_package=target_package,
         class_identifier=class_identifier, filename=args.file, dirname=directory
     )
     walker = ParseTreeWalker()
-    walker.walk(t=parse_tree, listener=my_listener)
+    walker.walk(t=parse_tree, listener=pre_condition_listener)
 
     if is_source_file:
         move_class(token_stream, parse_tree, args)
@@ -489,6 +502,8 @@ if __name__ == '__main__':
         print(f"[Redundant]: doesn't need to refactor")
         print(f"The class \"{class_identifier}\" already exists in package \"{target_package}\"!")
         exit(0)
+
+
 
 
 
