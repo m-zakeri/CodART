@@ -36,18 +36,12 @@ class Student {
 
     public void actionNumberThree() {
         this.age += 3;
-        System.out.print("Student { ");
-        System.out.print("name: " + this.name + ", ");
-        System.out.print("age: " + this.age + ", ");
-        System.out.print("studentId: " + this.studentId + " }\n");
+        f();
     }
 
     public void actionNumberFour() {
         this.studentId = "97526312";
-        System.out.print("Student { ");
-        System.out.print("name: " + this.name + ", ");
-        System.out.print("age: " + this.age + ", ");
-        System.out.print("studentId: " + this.studentId + " }\n");
+        f();
     }
 
     public String getStudentId() {

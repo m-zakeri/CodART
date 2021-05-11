@@ -172,6 +172,7 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
         methods = list(self.statements.keys())
         len_method = len(methods)
         i = 0
+        duplicates = {"statements": [], "lines": [], "text": ""}
         while i < len_method - 1:
             j = i + 1
             while j < len_method:
@@ -182,12 +183,24 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
 
                 # return value is None when not any duplications have been found.
                 if duplicate is not None:
-                    self.duplicates = DuplicationRefactoring([duplicate[1], duplicate[2]])
                     self.log_duplication(duplicate, i, j, methods)
-                    return
+                    if len(duplicates["statements"]) == 0:
+                        duplicates["statements"].append(duplicate[1])
+                        duplicates["lines"].append(duplicate[1][0].statement.start.line)
+                        for d in duplicate[1]:
+                            duplicates["text"] += d.statement.getText()
+
+                    for i in range(1, 3):
+                        if duplicate[i][0].statement.start.line not in duplicates["lines"]:
+                            temp = ""
+                            for d in duplicate[i]:
+                                temp += d.statement.getText()
+                            if temp == duplicates["text"]:
+                                duplicates["statements"].append(duplicate[i])
 
                 j += 1
             i += 1
+        self.duplicates = DuplicationRefactoring(duplicates["statements"])
 
     def replace_duplicate_code(self):
         self.duplicates.duplications.sort(key=lambda x: x.to_line, reverse=True)
@@ -214,8 +227,8 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
 
 
 if __name__ == "__main__":
-    input_file = r"C:\Users\Amin\MAG\_term_6\CodART\tests\extract_method\input_file.java"
-    output_file = r"C:\Users\Amin\MAG\_term_6\CodART\tests\extract_method\output_file.java"
+    input_file = r"D:\iust\term 6\compiler\project\CodART\tests\extract_method\input_file.java"
+    output_file = r"D:\iust\term 6\compiler\project\CodART\tests\extract_method\output_file.java"
 
     stream = FileStream(input_file, encoding='utf8')
     lexer = JavaLexer(stream)
