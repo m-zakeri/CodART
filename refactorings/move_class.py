@@ -62,6 +62,28 @@ class MoveClassRefactoringListener(JavaParserLabeledListener):
         self.NEW_LINE = "\n"
         self.code = f"package {self.target_package};{self.NEW_LINE}{self.NEW_LINE}"
 
+    def exitQualifiedNameList(self, ctx:JavaParserLabeled.QualifiedNameListContext):
+        var = ctx.qualifiedName().getText()
+        return
+
+    def exitMethodCall0(self, ctx:JavaParserLabeled.MethodCall0Context):
+        a = ctx.IDENTIFIER().getText()
+        b = ctx.LPAREN().getText()
+        c = ctx.RPAREN().getText()
+        return
+
+    def exitMethodCall1(self, ctx:JavaParserLabeled.MethodCall1Context):
+        a = ctx.IDENTIFIER().getText()
+        b = ctx.LPAREN().getText()
+        c = ctx.RPAREN().getText()
+        return
+
+    def exitMethodCall2(self, ctx:JavaParserLabeled.MethodCall2Context):
+        a = ctx.IDENTIFIER().getText()
+        b = ctx.LPAREN().getText()
+        c = ctx.RPAREN().getText()
+        return
+
     # Exit a parse tree produced by JavaParserLabeled#importDeclaration.
     def exitImportDeclaration(self, ctx: JavaParserLabeled.ImportDeclarationContext):
         text_to_replace = "import " + ctx.qualifiedName().getText() + ';'
@@ -126,8 +148,6 @@ class MoveClassRefactoringListener(JavaParserLabeledListener):
             if ctx.classDeclaration().IDENTIFIER().getText() != self.class_identifier:
                 return
 
-
-
             self.enter_class = True
             self.class_found = True
 
@@ -169,12 +189,50 @@ class MoveClassRefactoringListener(JavaParserLabeledListener):
         for field in list_of_fields:
             self.class_fields.append(field)
 
+    def enterMethodBody(self, ctx:JavaParserLabeled.MethodBodyContext):
+        # example: method2 body
+        body = ctx.block().getText()
+
+        return
+
+    def enterClassBody(self, ctx:JavaParserLabeled.ClassBodyContext):
+        class_body = ctx.classBodyDeclaration(0).getText()
+
+        return
+
+    def enterClassType(self, ctx:JavaParserLabeled.ClassTypeContext):
+        class_type = ctx.classOrInterfaceType().getText()
+
+        return
+
+    def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
+        class_name = ctx.CLASS().getText()
+        # class
+        return
+
+    def enterExpression1(self, ctx: JavaParserLabeled.Expression1Context):
+        var = ctx.IDENTIFIER().getText()
+
+        return
+
     # Enter a parse tree produced by JavaParserLabeled#methodDeclaration.
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
         if not self.enter_class:
             return
         method_name = ctx.IDENTIFIER().getText()
         self.class_methods.append(method_name)
+
+    def enterVariableDeclarators(self, ctx:JavaParserLabeled.VariableDeclaratorsContext):
+        vars = ctx.variableDeclarators().getText()
+        var = ctx.variableDeclarator(0).getText()
+
+        return
+
+    def enterExpressionList(self, ctx:JavaParserLabeled.ExpressionListContext):
+        expressions = ctx.expression().getText()
+        expr = ctx.expression(0).getText()
+
+        return
 
     # Exit a parse tree produced by JavaParserLabeled#compilationUnit.
     def exitCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
@@ -187,6 +245,7 @@ class MoveClassRefactoringListener(JavaParserLabeledListener):
         new_file = open(file_address, 'w')
         new_file.write(self.code.replace("\r", ""))
         print(f"The class \"{self.class_identifier}\" moved to the target package successfully!")
+
 
 class ReplaceDependentObjectsListener(JavaParserLabeledListener):
     """
@@ -240,13 +299,28 @@ class ReplaceDependentObjectsListener(JavaParserLabeledListener):
 
     # Exit a parse tree produced by JavaParserLabeled#importDeclaration.
     def exitImportDeclaration(self, ctx: JavaParserLabeled.ImportDeclarationContext):
-        if ctx.qualifiedName().getText() != self.source_package + '.' + self.class_identifier:
+        # also include * imports
+        imported_package = ctx.qualifiedName().getText()
+        imported_class = ctx.MUL().getText()
+        final_import_statement = f"{imported_package}.{imported_class}"
+
+        if (final_import_statement != self.source_package + '.' + self.class_identifier
+            and imported_class != '*')\
+            or (final_import_statement != self.source_package + '.*'):
             return
+        # -------------
 
         start_index = ctx.start.tokenIndex
         stop_index = ctx.stop.tokenIndex
 
-        text_to_replace = "import " + self.target_package + '.' + self.class_identifier + ';'
+        # handle * imports
+        text_to_replace = f"import {self.source_package}.*;"
+        if final_import_statement != self.source_package + '.*':
+            text_to_replace = f"import {self.target_package}.{self.class_identifier};"
+        else:
+            text_to_replace += f"\nimport {self.target_package}.{self.class_identifier};"
+        # -------------
+
         if ctx.STATIC() is not None:
             text_to_replace = text_to_replace.replace("import", "import static")
 
@@ -258,8 +332,14 @@ class ReplaceDependentObjectsListener(JavaParserLabeledListener):
             text=text_to_replace
         )
 
+    def exitVariableDeclarators(self, ctx:JavaParserLabeled.VariableDeclaratorsContext):
+        vars = ctx.variableDeclarator(0)
+
+        return
+
     # Exit a parse tree produced by JavaParserLabeled#classOrInterfaceType.
     def exitClassOrInterfaceType(self, ctx: JavaParserLabeled.ClassOrInterfaceTypeContext):
+
         if not self.has_import or not self.need_import:
             if self.class_identifier in ctx.getText().split('.'):
                 self.need_import = True
@@ -272,6 +352,7 @@ class ReplaceDependentObjectsListener(JavaParserLabeledListener):
 
     # Exit a parse tree produced by JavaParserLabeled#expression1.
     def exitExpression1(self, ctx: JavaParserLabeled.Expression1Context):
+        a = ctx.expression().getText()
         if not self.has_import or not self.need_import:
             if ctx.expression().getText == self.class_identifier:
                 self.need_import = True
@@ -299,9 +380,75 @@ f_iteration_flag = False
 directory = 'D:/Programming/Java/TestProject/'
 file_counter = 0
 
+def move_class(token_stream, parse_tree, args):
+    my_listener = MoveClassRefactoringListener(
+        common_token_stream=token_stream, source_package=source_package, target_package=target_package,
+        class_identifier=class_identifier, filename=args.file, dirname=directory
+    )
+    walker = ParseTreeWalker()
+    walker.walk(t=parse_tree, listener=my_listener)
 
-def main(args):
-    global f_iteration_flag
+    with open(args.file, mode='w', newline='') as f:
+        f.write(my_listener.token_stream_rewriter.getDefaultText().replace("\r", ""))
+
+
+def post_move_class_propagation(token_stream, parse_tree, args):
+    has_import = False
+    has_exact_import = False
+
+    file_to_check = open(file=args.file, mode='r')
+    for line in file_to_check.readlines():
+        text_line = line.replace('\n', '').replace('\r', '').strip()
+        if (text_line.startswith('import') and text_line.endswith(source_package + '.' + class_identifier + ';'))\
+                or (text_line.startswith('import') and text_line.endswith(source_package + '.*;')):
+            has_import = True
+            break
+        if (text_line.startswith('import') and text_line.endswith(target_package + '.' + class_identifier + ';'))\
+                or (text_line.startswith('import') and text_line.endswith(target_package + '.*;')):
+            has_exact_import = True
+            break
+
+    if not has_exact_import:
+        print(f"Start checking file \"{file_to_check.name}\" *** {file_counter}/100")
+
+        my_listener = ReplaceDependentObjectsListener(
+            common_token_stream=token_stream, source_package=source_package, target_package=target_package,
+            class_identifier=class_identifier, filename=args.file, has_import=has_import
+        )
+        walker = ParseTreeWalker()
+        walker.walk(t=parse_tree, listener=my_listener)
+
+        with open(args.file, mode='w', newline='') as f:
+            f.write(my_listener.token_stream_rewriter.getDefaultText().replace("\r", ""))
+
+        print(f"Finish checking file \"{file_to_check.name}\" *** {file_counter}/100")
+
+
+def recursive_walk(dir):
+    global filename
+
+    filename_without_extension, extension = os.path.splitext(filename)
+    if extension == '.java':
+        process_file("{}/{}".format(dir + '/' + source_package.replace('.', '/'), filename), True)
+    else:
+        raise ValueError(f"The filename format must be \".java\", but found {extension}!")
+
+    for dirname, dirs, files in os.walk(dir):
+        for file in files:
+            if file == filename or file == class_identifier + '.java':
+                continue
+            file_without_extension, extension = os.path.splitext(file)
+            if extension == '.java':
+                process_file("{}/{}".format(dirname, file), False)
+
+
+def process_file(file, is_source_file):
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument(
+        '-n', '--file',
+        help='Input source', default=file)
+
+    args = argparser.parse_args()
 
     # Step 1: Load input source into stream
     stream = FileStream(args.file, encoding='utf8')
@@ -314,77 +461,18 @@ def main(args):
     parser.getTokenStream()
     # Step 5: Create parse tree
     parse_tree = parser.compilationUnit()
-    # Step 6: Create an instance of AssignmentStListener
-    if f_iteration_flag:
-        my_listener = MoveClassRefactoringListener(
-            common_token_stream=token_stream, source_package=source_package, target_package=target_package,
-            class_identifier=class_identifier, filename=args.file, dirname=directory
-        )
-        walker = ParseTreeWalker()
-        walker.walk(t=parse_tree, listener=my_listener)
 
-        with open(args.file, mode='w', newline='') as f:
-            f.write(my_listener.token_stream_rewriter.getDefaultText().replace("\r", ""))
+    my_listener = MoveClassRefactoringListener(
+        common_token_stream=token_stream, source_package=source_package, target_package=target_package,
+        class_identifier=class_identifier, filename=args.file, dirname=directory
+    )
+    walker = ParseTreeWalker()
+    walker.walk(t=parse_tree, listener=my_listener)
 
+    if is_source_file:
+        move_class(token_stream, parse_tree, args)
     else:
-        has_import = False
-        has_exact_import = False
-
-        file_to_check = open(file=args.file, mode='r')
-        for line in file_to_check.readlines():
-            text_line = line.replace('\n', '').replace('\r', '').strip()
-            if text_line.startswith('import') and text_line.endswith(source_package + '.' + class_identifier + ';'):
-                has_import = True
-                break
-            if text_line.startswith('import') and text_line.endswith(target_package + '.' + class_identifier + ';'):
-                has_exact_import = True
-                break
-
-        if not has_exact_import:
-            print(f"Start checking file \"{file_to_check.name}\" *** {file_counter}/100")
-
-            my_listener = ReplaceDependentObjectsListener(
-                common_token_stream=token_stream, source_package=source_package, target_package=target_package,
-                class_identifier=class_identifier, filename=args.file, has_import=has_import
-            )
-            walker = ParseTreeWalker()
-            walker.walk(t=parse_tree, listener=my_listener)
-
-            with open(args.file, mode='w', newline='') as f:
-                f.write(my_listener.token_stream_rewriter.getDefaultText().replace("\r", ""))
-
-            print(f"Finish checking file \"{file_to_check.name}\" *** {file_counter}/100")
-
-
-def recursive_walk(dir):
-    global f_iteration_flag, filename
-    f_iteration_flag = True
-
-    filename_without_extension, extension = os.path.splitext(filename)
-    if extension == '.java':
-        process_file("{}/{}".format(dir + '/' + source_package.replace('.', '/'), filename))
-    else:
-        raise ValueError(f"The filename format must be \".java\", but found {extension}!")
-
-    f_iteration_flag = False
-
-    for dirname, dirs, files in os.walk(dir):
-        for file in files:
-            if file == filename or file == class_identifier + '.java':
-                continue
-            file_without_extension, extension = os.path.splitext(file)
-            if extension == '.java':
-                process_file("{}/{}".format(dirname, file))
-
-
-def process_file(file):
-    argparser = argparse.ArgumentParser()
-    argparser.add_argument(
-        '-n', '--file',
-        help='Input source', default=file)
-
-    args = argparser.parse_args()
-    main(args)
+        post_move_class_propagation(token_stream, parse_tree, args)
 
 
 if __name__ == '__main__':
@@ -401,5 +489,8 @@ if __name__ == '__main__':
         print(f"[Redundant]: doesn't need to refactor")
         print(f"The class \"{class_identifier}\" already exists in package \"{target_package}\"!")
         exit(0)
+
+
+
 
     recursive_walk(directory)

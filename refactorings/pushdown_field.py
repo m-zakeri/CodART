@@ -174,25 +174,27 @@ class PushDownField:
 def test():
     print("Testing pushdown_field...")
     filenames = [
-        "../benchmark_projects/tests/pushdown_field/test1.java",
-        "../benchmark_projects/tests/pushdown_field/test2.java",
-        "../benchmark_projects/tests/pushdown_field/test3.java",
-        "../benchmark_projects/tests/pushdown_field/test4.java",
-        "../benchmark_projects/tests/pushdown_field/test5.java",
-        "../benchmark_projects/tests/pushdown_field/test6.java",
-        "../benchmark_projects/tests/pushdown_field/test7.java",
+        # "../benchmark_projects/tests/pushdown_field/test1.java",
+        # "../benchmark_projects/tests/pushdown_field/test2.java",
+        # "../benchmark_projects/tests/pushdown_field/test3.java",
+        # "../benchmark_projects/tests/pushdown_field/test4.java",
+        # "../benchmark_projects/tests/pushdown_field/test5.java",
+        # "../benchmark_projects/tests/pushdown_field/test6.java",
+        # "../benchmark_projects/tests/pushdown_field/test7.java",
+        "D:/Programming/Java/TestProject/fieldPackage/Vehicle.java"
     ]
 
-    if PushDownField(filenames[:2], "pushdown_field_test1", "A", "a").do_refactor():
-        print("1, 2: Success!")
-    else:
-        print("1, 2: Cannot refactor.")
-
-    for i in range(2, 7):
-        if PushDownField(filenames[:2] + [filenames[i]], "pushdown_field_test1", "A", "a").do_refactor():
-            print("1, 2, " + str(i + 1) + ": Success!")
-        else:
-            print("1, 2, " + str(i + 1) + ": Cannot refactor.")
+    refactored = PushDownField(filenames, "fieldPackage", "Vehicle", "brand").do_refactor()
+    # if PushDownField(filenames[:2], "pushdown_field_test1", "A", "a").do_refactor():
+    #     print("1, 2: Success!")
+    # else:
+    #     print("1, 2: Cannot refactor.")
+    #
+    # for i in range(2, 7):
+    #     if PushDownField(filenames[:2] + [filenames[i]], "pushdown_field_test1", "A", "a").do_refactor():
+    #         print("1, 2, " + str(i + 1) + ": Success!")
+    #     else:
+    #         print("1, 2, " + str(i + 1) + ": Cannot refactor.")
 
 
 def test_ant():
@@ -215,4 +217,4 @@ def test_ant():
 
 
 if __name__ == "__main__":
-    test_ant()
+    test()
