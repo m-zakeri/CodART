@@ -1,8 +1,9 @@
 import os
 import subprocess
 from refactorings.utils.utils2 import get_program, Rewriter, get_filenames_in_dir
+from refactorings.utils.scope_listener import get_program2
 from refactorings.utils.utils_listener_fast import TokensInfo, Field, Class, LocalVariable
-
+from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
 class UnResolvedMetaError(Exception):
     pass
@@ -101,6 +102,9 @@ class MoveFieldRefactoring:
 
         methods: dict = src.methods
         for method_name, method in methods.items():
+            # if hasattr(method, "scope"):
+            #     print(method.scope)
+            #      method.scope.declared_vars
             tokens_info = TokensInfo(method.parser_context)  # tokens of ctx method
             param_tokens_info = TokensInfo(method.formalparam_context)
             method_declaration_info = TokensInfo(method.method_declaration_context)
@@ -146,23 +150,31 @@ class MoveFieldRefactoring:
 
     def propagate(self, field: Field, rewriter: Rewriter):
         usages, program = self.get_usage()
-        field_tokens = TokensInfo(field.parser_context)
-
         for usage in usages:
-            # method_token = TokensInfo(field.parser_context)
-            for i, token in enumerate(usage['tokens']):
-                if token.text == self.field_name:
-                    field_tokens.start = token.tokenIndex
-                    field_tokens.stop = token.tokenIndex
-                    if i > 1:
-                        if usage["tokens"][i - 2].text == "this" or \
-                                usage["tokens"][i - 2].text == self.class_name:
-                            field_tokens.start -= 2
+            method_tokens = TokensInfo(usage["method"].parser_context)
 
-                    rewriter.replace(field_tokens, f'{self.target_class_name}.{self.field_name}')
+            for i, token in enumerate(usage['tokens']):
+                if token.text != self.field_name:
+                    continue
+
+                method_tokens.start = token.tokenIndex
+                method_tokens.stop = token.tokenIndex
+                if i > 1:
+                    if usage["tokens"][i - 2].text == "this" or \
+                            usage["tokens"][i - 2].text == self.class_name:
+                        method_tokens.start -= 2
+
+                token_stream = usage["method"].parser_context.parser.getTokenStream()
+                if token_stream not in rewriter.token_streams.keys():
+                    rewriter.token_streams[token_stream] = (
+                        usage["method"].filename,
+                        TokenStreamRewriter(token_stream),
+                        usage["method"].filename.replace(".java", ".rewritten.java")
+                    )
+                rewriter.replace(method_tokens, f'{self.target_class_name}.{self.field_name}')
+                break
 
     def move(self):
-        # tokens_info = TokensInfo(_method.parser_context)  # tokens of ctx method
         usage, program = self.get_usage()
         source_package = program.packages[self.package_name]
         source_class = source_package.classes[self.class_name]

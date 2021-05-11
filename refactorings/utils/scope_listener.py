@@ -3,7 +3,7 @@ from antlr4 import FileStream, ParseTreeWalker
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
 from gen.java.JavaLexer import JavaLexer
-from utils_listener_fast import *
+from .utils_listener_fast import *
 from enum import Enum
 
 
@@ -188,7 +188,7 @@ class ScopeListener(UtilsListener):
     #         self.current_field_decl = None
 
 
-def get_program(source_files: list, print_status = False) -> Program:
+def get_program2(source_files: list, print_status = False) -> Program:
     program = Program()
     listener: Optional[ScopeListener] = None
     for filename in source_files:
@@ -208,11 +208,11 @@ def get_program(source_files: list, print_status = False) -> Program:
         else:
             for classes_name in listener.package.classes:
                 program.packages[listener.package.name].classes[classes_name]=listener.package.classes[classes_name]
-    if listener is not None:
-        setattr(program, "scope", listener.root)
+    # if listener is not None:
+    #     setattr(program, "scope", listener.root)
     return program
 
 if __name__ == '__main__':
     filename = "/home/loop/IdeaProjects/Sample/src/sample2/Test4.java"
-    program = get_program([filename])
+    program = get_program2([filename])
     print()
