@@ -6,6 +6,8 @@ public class Main {
         Student reza = new Student("97524698", "reza", 20);
         reza.actionNumberOne();
         reza.actionNumberTwo();
+        reza.actionNumberThree();
+        reza.actionNumberFour();
     }
 
 }
@@ -29,6 +31,16 @@ class Student {
 
     public void actionNumberTwo() {
         this.age = 32;
+        printStudent();
+    }
+
+    public void actionNumberThree() {
+        this.age += 3;
+        printStudent();
+    }
+
+    public void actionNumberFour() {
+        this.studentId = "97526312";
         printStudent();
     }
 

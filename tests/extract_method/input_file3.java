@@ -24,12 +24,23 @@ class Student {
 
     public void actionNumberOne() {
         this.name = "IUST_" + this.name;
-        printStudent();
+
+        System.out.print("1 ");
+        System.out.print("Student details ");
+        System.out.print("Student { ");
+        System.out.print("name: " + this.name + ", ");
+        System.out.print("age: " + this.age + ", ");
+        System.out.print("studentId: " + this.studentId + " }\n");
     }
 
     public void actionNumberTwo() {
         this.age = 32;
-        printStudent();
+        System.out.print(2);
+        System.out.print("Student information ");
+        System.out.print("Student { ");
+        System.out.print("name: " + this.name + ", ");
+        System.out.print("age: " + this.age + ", ");
+        System.out.print("studentId: " + this.studentId + " }\n");
     }
 
     public String getStudentId() {
@@ -55,12 +66,4 @@ class Student {
     public void setAge(int age) {
         this.age = age;
     }
-
-	public void printStudent() {
-		System.out.print("Student { ");
-		System.out.print("name: "+this.name+", ");
-		System.out.print("age: "+this.age+", ");
-		System.out.print("studentId: "+this.studentId+" }\n");
-	}
-
 }

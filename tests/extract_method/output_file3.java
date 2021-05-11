@@ -24,11 +24,16 @@ class Student {
 
     public void actionNumberOne() {
         this.name = "IUST_" + this.name;
+
+        System.out.print("1 ");
+        System.out.print("Student details ");
         printStudent();
     }
 
     public void actionNumberTwo() {
         this.age = 32;
+        System.out.print(2);
+        System.out.print("Student information ");
         printStudent();
     }
 
