@@ -9,7 +9,7 @@ from antlr4 import FileStream, CommonTokenStream, ParseTreeWalker
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
 from gen.javaLabeled.JavaLexer import JavaLexer
-from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
+from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled, Token
 
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
@@ -80,6 +80,8 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
         :param class_name: the name of the class that duplications should be considered
         :param new_method_name: the name of the new method that contains that statements
         """
+        self.common_token_stream = common_token_stream
+        self.tokens = common_token_stream.tokens
         self.refactor_class_name = class_name
         self.new_method_name = new_method_name
 
@@ -111,7 +113,8 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
         if is_equal(ctx.IDENTIFIER(), self.refactor_class_name):
             self.is_in_target_class = False
             self.find_duplicates()
-            if self.duplicates is not None:
+            # print(self.duplicates.duplications[0].statements[0].statement.getText())
+            if self.duplicates is not None and len(self.duplicates.duplications) > 0:
                 self.refactor(ctx)
 
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
@@ -192,8 +195,12 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
             i += 1
 
         # calculate the maximum based on the number of duplications
-        max_duplicate = max(method_a_b_duplications, key=lambda x: x[0])
-        return max_duplicate
+        max_exact_duplicate = None
+        if len(method_a_b_duplications) > 1:
+            max_exact_duplicate = max(method_a_b_duplications, key=lambda x: x[0])
+
+
+        return max_exact_duplicate
 
     @staticmethod
     def log_duplication(duplicate, i, j, methods):
@@ -262,7 +269,7 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
 
     ###############
     # Refactoring
-    # Refactoring is in 2 step.
+    # Refactoring is in 2 steps.
     # First: Creating a new method at the end of the class.
     # Second: Deleting the duplications and replacing with new method.
     ###############
