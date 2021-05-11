@@ -148,14 +148,17 @@ class MoveFieldRefactoring:
         field_tokens = TokensInfo(field.parser_context)
 
         for usage in usages:
-            method_tokens = TokensInfo(usage['method'].parser_context)
-            print(method_tokens.token_stream.tokens)
+            # method_token = TokensInfo(field.parser_context)
             for i, token in enumerate(usage['tokens']):
                 if token.text == self.field_name:
+                    field_tokens.start = token.tokenIndex
+                    field_tokens.stop = token.tokenIndex
+                    if i > 1:
+                        if usage["tokens"][i - 2].text == "this" or \
+                                usage["tokens"][i - 2].text == self.class_name:
+                            field_tokens.start -= 2
 
-                    # method_tokens.start = token.tokenIndex
-                    # method_tokens.stop = token.tokenIndex
-                    rewriter.replace(method_tokens, f'{self.target_class_name}.{self.field_name}')
+                    rewriter.replace(field_tokens, f'{self.target_class_name}.{self.field_name}')
 
     def move(self):
         # tokens_info = TokensInfo(_method.parser_context)  # tokens of ctx method
@@ -186,16 +189,16 @@ class MoveFieldRefactoring:
 
     def __move_field_to_dst(self, target: Class, field: Field, rewriter: Rewriter):
         # this nasty if is because the grammar sucks. converts new SomeClass() to newSomeClass()
-        if field.initializer.startswith("new"):
+        if field.initializer is not None and field.initializer.startswith("new"):
             field.initializer = field.initializer.replace("new", "new ", 1)
 
-        new_field = f'\n\t{" ".join(field.modifiers)} {field.datatype} {field.name}{f" = {field.initializer};" if field.initializer else ";"}\n'
+        new_field = f'\n\t{" ".join(map(lambda x: "public" if x == "private" else x,field.modifiers))} {field.datatype} {field.name}{f" = {field.initializer};" if field.initializer else ";"}\n'
         target_class_tokens = TokensInfo(target.body_context)
         rewriter.insert_after_start(target_class_tokens, new_field)
 
 
 if __name__ == '__main__':
-    path = "C:\\Users\\nimam\\Downloads\\Compressed\\Sample"
+    path = "/home/loop/IdeaProjects/Sample"
     my_list = get_filenames_in_dir(path)
     filtered = []
     for file in my_list:
@@ -204,7 +207,7 @@ if __name__ == '__main__':
         else:
             filtered.append(file)
 
-    refactoring = MoveFieldRefactoring(filtered, "sample", "Test3", "test2",
+    refactoring = MoveFieldRefactoring(filtered, "sample", "Test3", "toBeMoved",
                                        "Test", "sample", "")
 
     refac = refactoring.move()
