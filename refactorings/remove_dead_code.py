@@ -210,31 +210,40 @@ class RemoveDeadCodeClass(JavaParserLabeledListener):
                 )
                 self.ParameterIndex += 1
 
+    def enterMethodCall0(self, ctx:JavaParserLabeled.MethodCall0Context):
+        parametersList = ctx.expressionList()
+        print(parametersList.parentCtx.IDENTIFIER().getText())
+        if self.Parameter and parametersList.parentCtx.IDENTIFIER().getText() in self.Parameters:
+            pass
+
+    def exitMethodCall0(self, ctx:JavaParserLabeled.MethodCall0Context):
+        pass
+
 
 def main():
     Path = "../tests/remove_dead_code"
     FolderPath = os.listdir(Path)
 
     Identifier = [
-        {"Classes": ["Simple2"],
-                   "Methods": ["Simple1/main2", "Simple3/main"],
-                   "Fields": ["Simple/field2", "Simple3/field1"],
+        {"Classes": ["Airplane"],
+                   "Methods": ["Car/Fly", "Engine/main2"],
+                   "Fields": ["Car/noway", "Engine/model"],
                    "Variables": [],
                    "Parameters": []},
 
         {"Classes": [],
                    "Methods": [],
                    "Fields": [],
-                   "Variables": ["Simple/main/text", "Simple/main2/text", "Simple/main3/variable",
-                                 "Simple1/main1/text", "Simple3/main2/variable", "Simple3/main2/variable2"],
-                   "Parameters": ["Simple/main/text", "Simple/main3/d", "Simple1/main1/text", "Simple3/main2/d"]},
+                   "Variables": ["Car/main/dead", "Car/Run/number", "Engine/SetName/what",
+                                 "Engine/main2/variable", "Engine/main2/dead"],
+                   "Parameters": ["Car/Drive/wheels", "Engine/main/k", "Engine/SetName/last"]},
 
-        {"Classes": ["Simple2"],
-                   "Methods": ["Simple1/main2", "Simple3/main"],
-                   "Fields": ["Simple/field2", "Simple3/field1"],
-                   "Variables": ["Simple/main/text", "Simple/main2/text", "Simple/main3/variable",
-                                 "Simple1/main/text", "Simple3/main2/variable", "Simple3/main2/variable2"],
-                   "Parameters": ["Simple3/main3/d"]}
+        {"Classes": ["Airplane"],
+                   "Methods": ["Car/Fly", "Engine/main2"],
+                   "Fields": ["Car/noway", "Engine/model"],
+                   "Variables": ["Car/main/dead", "Car/Run/number", "Engine/SetName/what",
+                                 "Engine/main2/variable", "Engine/main2/dead"],
+                   "Parameters": ["Car/Drive/wheels", "Engine/main/k", "Engine/SetName/last"]}
                   ]
 
     i = 0

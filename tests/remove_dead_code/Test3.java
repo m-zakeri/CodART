@@ -1,92 +1,60 @@
-class Simple{
-    private String field;
-    private String field1;
-    private String field2;
+public class Car{
+    private Engine engine = new Engine();
+    private Airplane noway;
+
     public static void main(String args[]){
+     String model = "Hello Java";
+     String dead = "dead";
+     System.out.println(model);
+    }
+
+    public void Run(String args[]){
      String text = "Hello Java";
+     int number = 5 + 10;
      System.out.println(text);
     }
-    public static void main1(String args[]){
-     String text = "Hello Java";
-     System.out.println(text);
+    public void Fly(String args[]){
+        return;
     }
-    public static void main2(String args[]){
-     String text = "Hello Java";
-     System.out.println(text);
-    }
-    public static void main3(String args[], Simple1 d){
-     String text = "Hello Java";
-     String variable = "";
-     System.out.println(text);
-    }
-}
-class Simple1{
-    private String field;
-    private String field1;
-    private String field2;
-    public static void main(String args[]){
-     String text = "Hello Java";
-     System.out.println(text);
-    }
-    public static void main1(String args[]){
-     String text = "Hello Java";
-     System.out.println(text);
-    }
-    public static void main2(String args[]){
-     String text = "Hello Java";
-     System.out.println(text);
-    }
-    public static void main3(String args[]){
-     String text = "Hello Java";
-     String variable = "";
-     System.out.println(text);
+    public void Drive(String args, int wheels){
+        this.engine.SetName("Yamaha", "last");
     }
 }
 
-class Simple2{
-    private String field;
-    private String field1;
-    private String field2;
-    public static void main(String args[], int k){
+class Airplane{
+    private Engine engine = new Engine();
+    private String brand;
+
+    public static void main(String args[]){
      String text = "Hello Java";
+     int deadVariable = 10 - 8;
      System.out.println(text);
     }
-    public static void main1(String args[], String mm){
-     String text = "Hello Java";
-     String variable = "";
-     System.out.println(text);
+    public void Fly(String args[]){
+        System.out.println("FLy");
     }
-    public static void main2(String args[]){
-     String text = "Hello Java";
-     String variable = "";
-     String variable2 = "";
-     System.out.println(text);
-    }
-    public static void main3(String args[]){
-     String text = "Hello Java";
-     System.out.println(text);
+    public void Checkup(String args[]){
+
     }
 }
-class Simple3{
-    private String field;
-    private String field1;
-    private String field2;
+
+class Engine{
+    public String Name;
+    private String model;
+
     public static void main(String args[], int k){
      String text = "Hello Java";
      System.out.println(text);
     }
-    public static void main1(String args[], String mm){
+    public void SetName(String X, String last){
+        Car what = new Car();
+        this.Name = X;
+    }
+    public void main2(String args[]){
      String text = "Hello Java";
-     String variable = "";
+     String variable;
+     String dead = "";
      System.out.println(text);
     }
-    public static void main2(String args[]){
-     String text = "Hello Java";
-     String variable = "";
-     String variable2 = "";
-     System.out.println(text);
-    }
-    public static void main3(String args[], Simple1 d){
-     String text = "Hello Java";
-     System.out.println(text);
-    }
+
+}
