@@ -14,7 +14,7 @@ class Simple{
      String text = "Hello Java";
      System.out.println(text);
     }
-    public static void main3(String args[]){
+    public static void main3(String args[], Simple1 d){
      String text = "Hello Java";
      String variable = "";
      System.out.println(text);

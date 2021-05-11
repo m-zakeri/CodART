@@ -2,7 +2,7 @@ class Simple{
     private String field;
     private String field1;
     private String field2;
-    public static void main(String args[]){
+    public static void main(String args[], Simple text){
      String text = "Hello Java";
      System.out.println(text);
     }
@@ -14,7 +14,7 @@ class Simple{
      String text = "Hello Java";
      System.out.println(text);
     }
-    public static void main3(String args[]){
+    public static void main3(String args[], Simple1 d){
      String text = "Hello Java";
      String variable = "";
      System.out.println(text);
@@ -28,7 +28,7 @@ class Simple1{
      String text = "Hello Java";
      System.out.println(text);
     }
-    public static void main1(String args[]){
+    public static void main1(String args[], String text){
      String text = "Hello Java";
      System.out.println(text);
     }
@@ -80,7 +80,7 @@ class Simple3{
      String variable = "";
      System.out.println(text);
     }
-    public static void main2(String args[]){
+    public static void main2(String args[], Simple1 d)){
      String text = "Hello Java";
      String variable = "";
      String variable2 = "";

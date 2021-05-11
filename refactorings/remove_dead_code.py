@@ -121,7 +121,7 @@ class RemoveDeadCodeClass(JavaParserLabeledListener):
                 if self.Parameters[i].split('/')[0] == classIdentifier:
                     self.IsSourceClassForParameters[i] = True
 
-        if self.Class and self.Classes[self.ClassIndex] == classIdentifier:
+        if self.Class and self.ClassIndex < len(self.Classes) and self.Classes[self.ClassIndex] == classIdentifier:
             startIndex = ctxParent.start.tokenIndex
             stopIndex = ctxParent.stop.tokenIndex
 
@@ -139,13 +139,14 @@ class RemoveDeadCodeClass(JavaParserLabeledListener):
         methodIdentifier = ctx.IDENTIFIER().getText()
         if self.Variable:
             for i in range(len(self.Variables)):
-                if self.Variables[i].split('/')[1] == methodIdentifier:
+                if self.IsSourceClassForVariables[i] and self.Variables[i].split('/')[1] == methodIdentifier:
                     self.IsSourceMethodForVariables[i] = True
 
         if self.Parameter:
             for i in range(len(self.Parameters)):
-                if self.Parameters[i].split('/')[1] == methodIdentifier:
+                if self.IsSourceClassForParameters[i] and self.Parameters[i].split('/')[1] == methodIdentifier:
                     self.IsSourceMethodForParameters[i] = True
+        pass
 
     def exitMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
         grandParentCtx = ctx.parentCtx.parentCtx
@@ -160,10 +161,10 @@ class RemoveDeadCodeClass(JavaParserLabeledListener):
                 )
                 self.MethodIndex += 1
 
-    def enterFieldDeclaration(self, ctx:JavaParserLabeled.FieldDeclarationContext):
+    def enterFieldDeclaration(self, ctx: JavaParserLabeled.FieldDeclarationContext):
         pass
 
-    def exitFieldDeclaration(self, ctx:JavaParserLabeled.FieldDeclarationContext):
+    def exitFieldDeclaration(self, ctx: JavaParserLabeled.FieldDeclarationContext):
         fieldIdentifier = ctx.variableDeclarators().variableDeclarator(0).variableDeclaratorId().IDENTIFIER().getText()
         grandParentCtx = ctx.parentCtx.parentCtx
 
@@ -177,16 +178,15 @@ class RemoveDeadCodeClass(JavaParserLabeledListener):
                 )
                 self.FieldIndex += 1
 
-    def enterVariableDeclarator(self, ctx:JavaParserLabeled.VariableDeclaratorContext):
+    def enterVariableDeclarator(self, ctx: JavaParserLabeled.VariableDeclaratorContext):
         pass
 
-    def exitVariableDeclarator(self, ctx:JavaParserLabeled.VariableDeclaratorContext):
+    def exitVariableDeclarator(self, ctx: JavaParserLabeled.VariableDeclaratorContext):
         variableIdentifier = ctx.variableDeclaratorId().IDENTIFIER().getText()
         grandParentCtx = ctx.parentCtx.parentCtx.parentCtx
-
-        if self.Variable and self.VariableIndex < len(self.Variables) and self.Variables[self.VariableIndex].split('/')[
-            2] == variableIdentifier:
-            if self.IsSourceClassForVariables[self.VariableIndex] and self.IsSourceMethodForVariables[self.VariableIndex]:
+        if self.Variable and self.VariableIndex < len(self.Variables) and self.Variables[self.VariableIndex].split('/')[2] == variableIdentifier:
+            if self.IsSourceClassForVariables[self.VariableIndex] and self.IsSourceMethodForVariables[
+                self.VariableIndex]:
                 self.CodeRewrite.delete(
                     self.CodeRewrite.DEFAULT_PROGRAM_NAME,
                     grandParentCtx.start.tokenIndex,
@@ -194,15 +194,13 @@ class RemoveDeadCodeClass(JavaParserLabeledListener):
                 )
                 self.VariableIndex += 1
 
-    def enterFormalParameter(self, ctx:JavaParserLabeled.FormalParameterContext):
+    def enterFormalParameter(self, ctx: JavaParserLabeled.FormalParameterContext):
         pass
 
-    def exitFormalParameter(self, ctx:JavaParserLabeled.FormalParameterContext):
+    def exitFormalParameter(self, ctx: JavaParserLabeled.FormalParameterContext):
         parameterIdentifier = ctx.variableDeclaratorId().IDENTIFIER().getText()
         grandParentCtx = ctx
-
-        if self.Parameter and self.ParameterIndex < len(self.Parameters) and self.Parameters[self.ParameterIndex].split('/')[
-            2] == parameterIdentifier:
+        if self.Parameter and self.ParameterIndex < len(self.Parameters) and self.Parameters[self.ParameterIndex].split('/')[2] == parameterIdentifier:
             if self.IsSourceClassForParameters[self.ParameterIndex] and self.IsSourceMethodForParameters[
                 self.ParameterIndex]:
                 self.CodeRewrite.delete(
@@ -217,21 +215,35 @@ def main():
     Path = "../tests/remove_dead_code"
     FolderPath = os.listdir(Path)
 
-    Identifier = {"Classes": ["Simple2"],
-                  "Methods": ["Simple/main"],
-                  "Fields": ["Simple/field1"],
-                  "Variables": ["Simple/main3/variable"],
-                  "Parameters": ["Simple/main/args"]}
+    Identifier = [
+        {"Classes": ["Simple2"],
+                   "Methods": ["Simple1/main2", "Simple3/main"],
+                   "Fields": ["Simple/field2", "Simple3/field1"],
+                   "Variables": [],
+                   "Parameters": []},
 
+        {"Classes": [],
+                   "Methods": [],
+                   "Fields": [],
+                   "Variables": ["Simple/main/text", "Simple/main2/text", "Simple/main3/variable",
+                                 "Simple1/main1/text", "Simple3/main2/variable", "Simple3/main2/variable2"],
+                   "Parameters": ["Simple/main/text", "Simple/main3/d", "Simple1/main1/text", "Simple3/main2/d"]},
+
+        {"Classes": ["Simple2"],
+                   "Methods": ["Simple1/main2", "Simple3/main"],
+                   "Fields": ["Simple/field2", "Simple3/field1"],
+                   "Variables": ["Simple/main/text", "Simple/main2/text", "Simple/main3/variable",
+                                 "Simple1/main/text", "Simple3/main2/variable", "Simple3/main2/variable2"],
+                   "Parameters": ["Simple3/main3/d"]}
+                  ]
+
+    i = 0
     for File in FolderPath:
         # We have all of the java files in this folder now
         if File.endswith('.java'):
             EachFilePath = Path + "\\" + File
             # Step 1: Load input source into stream
             EachFile = FileStream(str(EachFilePath))
-
-            # This is a new Java file which is the result
-            Refactored = open(os.path.join(Path, File + "_Refactored.java"), 'w')
 
             # Step 2: Create an instance of AssignmentStLexer
             Lexer = JavaLexer(EachFile)
@@ -248,18 +260,24 @@ def main():
             # ListenerForDetection = DetectCodeClass()
             # ListenerForDeadCodeDetection = DetectDeadCodeClass()
 
-            # Step 6: Create an instance of AssignmentStListener
-            ListenerForRemovingDeadCode = RemoveDeadCodeClass(TokenStream, Identifier)
+            if i < len(Identifier):
+                # This is a new Java file which is the result
+                Refactored = open(os.path.join(Path, File + "_Refactored.java"), mode='w', newline='')
 
-            Walker = ParseTreeWalker()
+                # Step 6: Create an instance of AssignmentStListener
+                ListenerForRemovingDeadCode = RemoveDeadCodeClass(TokenStream, Identifier[i])
 
-            # Walk
-            # Walker.walk(Listener, Tree)
-            # Walker.walk(ListenerOnMainCode, Tree)
+                Walker = ParseTreeWalker()
 
-            Walker.walk(ListenerForRemovingDeadCode, Tree)
+                # Walk
+                # Walker.walk(Listener, Tree)
+                # Walker.walk(ListenerOnMainCode, Tree)
 
-            Refactored.write(ListenerForRemovingDeadCode.CodeRewrite.getDefaultText())
+                Walker.walk(ListenerForRemovingDeadCode, Tree)
+
+                NewCode = str(ListenerForRemovingDeadCode.CodeRewrite.getDefaultText())
+                Refactored.write(NewCode)
+            i += 1
 
 
 if __name__ == "__main__":
