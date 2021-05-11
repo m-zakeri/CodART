@@ -1,5 +1,5 @@
 import os
-
+import subprocess
 from refactorings.utils.utils2 import get_program, Rewriter, get_filenames_in_dir
 from refactorings.utils.utils_listener_fast import TokensInfo, Field, Class, LocalVariable
 
@@ -23,6 +23,7 @@ class MoveFieldRefactoring:
         self.target_class_name = target_class_name
         self.target_package_name = target_package_name
         self.filename_mapping = filename_mapping + ".rewritten.java"
+        self.formatter = os.path.abspath("../assets/formatter/google-java-format-1.10.0-all-deps.jar")
 
     def get_metadata(self, program):
         """
@@ -175,6 +176,11 @@ class MoveFieldRefactoring:
         self.propagate(field, rewriter)
         rewriter.apply()
 
+        modified_files = set(map(lambda x: x["method"].filename.replace(".java", ".rewritten.java"), usage))
+        modified_files.add(source_class.filename.replace(".java", ".rewritten.java"))
+        modified_files.add(target_class.filename.replace(".java", ".rewritten.java"))
+        self.__reformat(modified_files)
+
         return True
 
     def __remove_field_from_src(self, field: Field, rewriter: Rewriter):
@@ -192,9 +198,29 @@ class MoveFieldRefactoring:
         if field.initializer is not None and field.initializer.startswith("new"):
             field.initializer = field.initializer.replace("new", "new ", 1)
 
-        new_field = f'\n\t{" ".join(map(lambda x: "public" if x == "private" else x,field.modifiers))} {field.datatype} {field.name}{f" = {field.initializer};" if field.initializer else ";"}\n'
+        self.__modify_access_modifiers(field)
+
+        new_field = f'\n\t{" ".join(field.modifiers)} {field.datatype} {field.name}{f" = {field.initializer};" if field.initializer else ";"}\n'
         target_class_tokens = TokensInfo(target.body_context)
         rewriter.insert_after_start(target_class_tokens, new_field)
+
+    def __modify_access_modifiers(self, field: Field):
+        index = -1
+        for i, mod in enumerate(field.modifiers):
+            if mod == "private" or mod == "protected":
+                index = i
+                break
+
+        if index != -1:
+            field.modifiers.pop(index)
+
+        field.modifiers.insert(0, "public")
+
+    def __reformat(self, modified_files: set):
+        temp = ["java", "-jar", self.formatter, "--replace"]
+        temp.extend(list(modified_files))
+        print(temp)
+        subprocess.call(temp)
 
 
 if __name__ == '__main__':
