@@ -143,8 +143,19 @@ class MoveFieldRefactoring:
 
         return usages, program
 
-    def propagate(self):
-        pass
+    def propagate(self, field: Field, rewriter: Rewriter):
+        usages, program = self.get_usage()
+        field_tokens = TokensInfo(field.parser_context)
+
+        for usage in usages:
+            method_tokens = TokensInfo(usage['method'].parser_context)
+            print(method_tokens.token_stream.tokens)
+            for i, token in enumerate(usage['tokens']):
+                if token.text == self.field_name:
+
+                    # method_tokens.start = token.tokenIndex
+                    # method_tokens.stop = token.tokenIndex
+                    rewriter.replace(method_tokens, f'{self.target_class_name}.{self.field_name}')
 
     def move(self):
         # tokens_info = TokensInfo(_method.parser_context)  # tokens of ctx method
@@ -158,6 +169,7 @@ class MoveFieldRefactoring:
 
         self.__remove_field_from_src(field, rewriter)
         self.__move_field_to_dst(target_class, field, rewriter)
+        self.propagate(field, rewriter)
         rewriter.apply()
 
         return True
@@ -183,7 +195,7 @@ class MoveFieldRefactoring:
 
 
 if __name__ == '__main__':
-    path = "/home/amiresm/Desktop/test_project"
+    path = "C:\\Users\\nimam\\Downloads\\Compressed\\Sample"
     my_list = get_filenames_in_dir(path)
     filtered = []
     for file in my_list:
@@ -192,8 +204,8 @@ if __name__ == '__main__':
         else:
             filtered.append(file)
 
-    refactoring = MoveFieldRefactoring(filtered, "hello", "classA", "a",
-                                       "classB", "hello", "")
+    refactoring = MoveFieldRefactoring(filtered, "sample", "Test3", "test2",
+                                       "Test", "sample", "")
 
     refac = refactoring.move()
     print(refac)
