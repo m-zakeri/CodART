@@ -26,34 +26,34 @@ class Student {
 
     public void actionNumberOne() {
         this.name = "IUST_" + this.name;
-        System.out.println("Student { " +
-                "name: " + this.name + ", " +
-                "age: " + this.age + ", " +
-                "studentId: " + this.studentId + " }");
+        System.out.print("Student { ");
+        System.out.print("name: " + this.name + ", ");
+        System.out.print("age: " + this.age + ", ");
+        System.out.print("studentId: " + this.studentId + " }\n");
     }
 
     public void actionNumberTwo() {
         this.age = 32;
-        System.out.println("Student { " +
-                "name: " + this.name + ", " +
-                "age: " + this.age + ", " +
-                "studentId: " + this.studentId + " }");
+        System.out.print("Student { ");
+        System.out.print("name: " + this.name + ", ");
+        System.out.print("age: " + this.age + ", ");
+        System.out.print("studentId: " + this.studentId + " }\n");
     }
 
     public void actionNumberThree() {
         this.age += 3;
-        System.out.println("Student { " +
-                "name: " + this.name + ", " +
-                "age: " + this.age + ", " +
-                "studentId: " + this.studentId + " }");
+        System.out.print("Student { ");
+        System.out.print("name: " + this.name + ", ");
+        System.out.print("age: " + this.age + ", ");
+        System.out.print("studentId: " + this.studentId + " }\n");
     }
 
     public void actionNumberFour() {
         this.studentId = "97526312";
-        System.out.println("Student { " +
-                "name: " + this.name + ", " +
-                "age: " + this.age + ", " +
-                "studentId: " + this.studentId + " }");
+        System.out.print("Student { ");
+        System.out.print("name: " + this.name + ", ");
+        System.out.print("age: " + this.age + ", ");
+        System.out.print("studentId: " + this.studentId + " }\n");
     }
 
     public String getStudentId() {
