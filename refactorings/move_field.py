@@ -2,7 +2,7 @@ import os
 import subprocess
 from refactorings.utils.utils2 import get_program, Rewriter, get_filenames_in_dir
 from refactorings.utils.scope_listener import get_program2
-from refactorings.utils.utils_listener_fast import TokensInfo, Field, Class, LocalVariable, ClassImport
+from refactorings.utils.utils_listener_fast import TokensInfo, Field, Class, Method, LocalVariable, ClassImport
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
 
@@ -40,7 +40,7 @@ class MoveFieldRefactoring:
         return class_name, target_class, field
 
     @staticmethod
-    def stringify(tokens, start, end):
+    def __stringify(tokens, start, end):
         """
         :param tokens: a list of tokens
         :param start: the index of the first token you want
@@ -55,7 +55,7 @@ class MoveFieldRefactoring:
 
         return string
 
-    def is_var_in_method_params(self, tokens, token, method):
+    def __is_var_in_method_params(self, tokens, token, method):
         """
         :param tokens: a list of all the tokens of the file in which the method is
         :param token: The token of the var that is to be checked
@@ -65,7 +65,7 @@ class MoveFieldRefactoring:
         """
         method_params = list(map(lambda p: p[1], method.parameters))
         if token.text in method_params:
-            selector = self.stringify(tokens, token.tokenIndex - 2, token.tokenIndex)
+            selector = self.__stringify(tokens, token.tokenIndex - 2, token.tokenIndex)
 
             if method.class_name == self.class_name:
                 return selector not in ['this.', self.class_name + '.']
@@ -74,7 +74,7 @@ class MoveFieldRefactoring:
 
         return False
 
-    def is_declared_in_method(self, tokens, token, method):
+    def __is_declared_in_method(self, tokens, token, method):
         """
         :param tokens: a list of all the tokens of the file in which the method is
         :param token: The token of the var that is to be checked
@@ -82,7 +82,7 @@ class MoveFieldRefactoring:
         :return: Whether the variable is declared in the method or not
         Checks if given token is related to a new declared variable in a method
         """
-        selector = self.stringify(tokens, token.tokenIndex - 2, token.tokenIndex)
+        selector = self.__stringify(tokens, token.tokenIndex - 2, token.tokenIndex)
         if method.class_name == self.class_name:
             if selector in ['this.', self.class_name + '.']:
                 return False
@@ -101,7 +101,7 @@ class MoveFieldRefactoring:
         except StopIteration:
             return False
 
-    def is_declared_in_class(self, tokens, token, method):
+    def __is_declared_in_class(self, tokens, token, method):
         """
         :param tokens: a list of all the tokens of the file in which the method is
         :param token: The token of the var that is to be checked
@@ -109,14 +109,14 @@ class MoveFieldRefactoring:
         :return: Whether the variable is declared in the method's class or not
         Checks if given token is related to a new declared variable in a method
         """
-        selector = self.stringify(tokens, token.tokenIndex - 2, token.tokenIndex)
+        selector = self.__stringify(tokens, token.tokenIndex - 2, token.tokenIndex)
         if method.class_name == self.class_name:
             if selector in ['this.', self.class_name + '.']:
                 return False
         elif selector == self.class_name + '.':
             return False
 
-    def is_a_usage(self, tokens, token, method):
+    def __is_a_usage(self, tokens, token, method):
         """
         :param tokens: a list of all the tokens of the file in which the method is
         :param token: The token of the var that is to be checked
@@ -124,7 +124,7 @@ class MoveFieldRefactoring:
         :return: Whether the field is used or not
         Checks if given token is related to the static field, program searching for
         """
-        selector = self.stringify(tokens, token.tokenIndex - 2, token.tokenIndex)
+        selector = self.__stringify(tokens, token.tokenIndex - 2, token.tokenIndex)
         if selector == 'this.':
             if method.class_name == self.class_name:
                 return True
@@ -133,7 +133,7 @@ class MoveFieldRefactoring:
 
         return True
 
-    def is_a_usage_in_class(self, tokens, token, field):
+    def __is_a_usage_in_class(self, tokens, token, field):
         """
         :param tokens: a list of all the tokens of the file in which the method is
         :param token: The token of the var that is to be checked
@@ -141,7 +141,7 @@ class MoveFieldRefactoring:
         :return: Whether the field is used in the class or not
         Checks if given token is related to the static field, program searching for
         """
-        selector = self.stringify(tokens, token.tokenIndex - 2, token.tokenIndex)
+        selector = self.__stringify(tokens, token.tokenIndex - 2, token.tokenIndex)
         if selector == self.class_name + '.':
             return True
         if selector == 'this.':
@@ -152,7 +152,7 @@ class MoveFieldRefactoring:
 
         return field.class_name == self.class_name
 
-    def get_usages_in_class_body(self, src):
+    def __get_usages_in_class_body(self, src):
         """
         :param src: The source in which we want to extract the field's usages
         :return: A `list` of all the field's usages in the class body
@@ -167,7 +167,7 @@ class MoveFieldRefactoring:
 
             for token in exps:
                 if token.text == self.field_name:
-                    if self.is_a_usage_in_class(tokens_info.token_stream.tokens, token, field):
+                    if self.__is_a_usage_in_class(tokens_info.token_stream.tokens, token, field):
                         new_case = {
                             'meta_data': field,
                             'tokens': list(filter(lambda t: t.line == token.line, exps))
@@ -176,7 +176,7 @@ class MoveFieldRefactoring:
 
         return usages
 
-    def get_usages_in_methods(self, src):
+    def __get_usages_in_methods(self, src):
         """
         :param src: The source in which we want to extract the field's usages
         :return: A `list` of all the field's usages in a method
@@ -196,9 +196,9 @@ class MoveFieldRefactoring:
 
             for token in exps:
                 if token.text == self.field_name:
-                    is_method_param = self.is_var_in_method_params(tokens_info.token_stream.tokens, token, method)
-                    is_new_declaration = self.is_declared_in_method(tokens_info.token_stream.tokens, token, method)
-                    is_a_usage = self.is_a_usage(tokens_info.token_stream.tokens, token, method)
+                    is_method_param = self.__is_var_in_method_params(tokens_info.token_stream.tokens, token, method)
+                    is_new_declaration = self.__is_declared_in_method(tokens_info.token_stream.tokens, token, method)
+                    is_a_usage = self.__is_a_usage(tokens_info.token_stream.tokens, token, method)
                     if is_new_declaration or is_method_param or not is_a_usage:
                         continue
 
@@ -210,7 +210,12 @@ class MoveFieldRefactoring:
 
         return usages
 
-    def should_add_import(self, klass: Class):
+    def __should_add_import(self, klass: Class):
+        """
+        :param klass: The class which might need an import statement
+        :return: Whether the class needs import or not
+        Check whether the file needs a certain import statement
+        """
         # we don't need to handle target class
         if klass.name == self.target_class_name:
             return False
@@ -228,7 +233,7 @@ class MoveFieldRefactoring:
         # if target class is not imported add the import
         return True
 
-    def is_field_in_class(self, field, target_class):
+    def __is_field_in_class(self, field, target_class):
         """
         :param field: The field which is to be checked
         :param target_class: The target class name
@@ -241,11 +246,10 @@ class MoveFieldRefactoring:
 
         return False
 
-    def get_usage(self):
+    def __get_usage(self):
         """
         :return: A list of all the usages of the field
         Finds usages of a field inside project files
-        # todo We should add usage search for class fields
         """
         program = get_program(self.source_filenames)
 
@@ -257,17 +261,17 @@ class MoveFieldRefactoring:
         if 'static' not in field.modifiers:
             raise NonStaticFieldRefactorError("Non-static fields cannot be refactored!")
 
-        if self.is_field_in_class(field, target_class):
+        if self.__is_field_in_class(field, target_class):
             raise Exception("A field with the same name exists in target class!")
 
         usages = list()
         for p_name, package in program.packages.items():
             for cls_name, cls in package.classes.items():
-                new_usages = self.get_usages_in_methods(cls)
+                new_usages = self.__get_usages_in_methods(cls)
                 usages.extend(new_usages)
-                new_usages = self.get_usages_in_class_body(cls)
+                new_usages = self.__get_usages_in_class_body(cls)
                 usages.extend(new_usages)
-                should_import = self.should_add_import(cls)
+                should_import = self.__should_add_import(cls)
 
                 if not should_import:
                     continue
@@ -278,9 +282,10 @@ class MoveFieldRefactoring:
 
         return usages, program
 
-    def propagate(self, usages: list, rewriter: Rewriter):
+    def __propagate(self, usages: list, rewriter: Rewriter):
         """
         :param rewriter: The rewriter object which is going to rewrite the files
+        :param usages: the usages of the field in the program
         :return: void
         Propagates the changes made to the files and the field
         """
@@ -323,7 +328,7 @@ class MoveFieldRefactoring:
         :return: Whether the refactoring is completed or not
         Performs the move field refactoring
         """
-        usages, program = self.get_usage()
+        usages, program = self.__get_usage()
         source_package = program.packages[self.package_name]
         target_package = program.packages[self.target_package_name]
         source_class = source_package.classes[self.class_name]
@@ -334,7 +339,7 @@ class MoveFieldRefactoring:
 
         self.__remove_field_from_src(field, rewriter)
         self.__move_field_to_dst(target_class, field, rewriter)
-        self.propagate(usages, rewriter)
+        self.__propagate(usages, rewriter)
         rewriter.apply()
         modified_files = set(map(lambda x: x["meta_data"].filename.replace(".java", ".rewritten.java"), filter(lambda x: "meta_data" in x, usages)))
         modified_files.union(set(map(lambda x: x["import"].filename.replace(".java", ".rewritten.java"), filter(lambda x: "import" in x, usages))))
@@ -407,6 +412,12 @@ class MoveFieldRefactoring:
         subprocess.call(temp)
 
     def __add_import(self, klass: Class, rewriter):
+        """
+        :param klass: The class where the import should be added to
+        :param rewriter: The rewriter object which is going to rewrite the files
+        :return: void
+        Adds the imports that are needed in the file since the refactorings
+        """
         # if there are no imports in the class appends before the start of class
         import_line = f"import {self.target_package_name}.{self.target_class_name};"
         if len(klass.file_info.all_imports) == 0:
@@ -423,7 +434,7 @@ class MoveFieldRefactoring:
 
 
 if __name__ == '__main__':
-    path = "/home/loop/IdeaProjects/Sample"
+    path = "C:\\Users\\nimam\\Downloads\\Compressed\\Sample"
     my_list = get_filenames_in_dir(path)
     filtered = []
     for file in my_list:
