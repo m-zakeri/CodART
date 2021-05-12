@@ -14,10 +14,8 @@ from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 class RemoveFlagArgumentListener(JavaParserLabeledListener):
     """
-
-    To remove boolean flag argument which specifies method logic in if and else block .
+        To remove boolean flag argument which specifies method logic in if and else block .
     For more information visit Martin Frauler book .
-
     if(flag)
     {
 
@@ -26,12 +24,26 @@ class RemoveFlagArgumentListener(JavaParserLabeledListener):
     {
 
     }
-
+    This listener is used to capture needed pattern and edit source method and extract two distinct logic
+    in if and else blog there are several key assumption made at this momenent that the argument should be
+    boolean and there must only been used in if else block and the structure of if and else should be in
+    block format and single line if and else are not supported
+        
     """
 
     def __init__(self, common_token_stream: CommonTokenStream = None, source_class="", source_method="",
                  argument_name: str = ""):
+        """create removeflaglistener to extract and edit needed pattern
 
+        Args:
+            common_token_stream (CommonTokenStream, optional): default token stream passed by higher level api. Defaults to None.
+            source_class (str, optional): name of the class which method rests in. Defaults to "".
+            source_method (str, optional): name of the method to be edited. Defaults to "".
+            argument_name (str, optional): name of the boolean argument which branchs the logic. Defaults to "".
+
+        Raises:
+            ValueError: if no common token stream is find will be raised since its is essential to the process
+        """
         self.argument_name = argument_name
         self.source_method = source_method
         self.source_class = source_class
@@ -48,10 +60,19 @@ class RemoveFlagArgumentListener(JavaParserLabeledListener):
         self.is_else_block = False
 
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
+        """check if the class is the source class
+        Args:
+            ctx (JavaParserLabeled.ClassDeclarationContext)
+        """
         print("Refactoring started, please wait...")
         self.is_source_class = (ctx.IDENTIFIER().getText() == self.source_class)
 
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
+        """check if this is the intended method if so capture signature and remove boolean argument
+            
+        Args:
+            ctx (JavaParserLabeled.MethodDeclarationContext): 
+        """
         self.is_source_method = (ctx.IDENTIFIER().getText() == self.source_method)
         if self.is_source_method:
 
@@ -75,12 +96,12 @@ class RemoveFlagArgumentListener(JavaParserLabeledListener):
             self.token_stream_rewriter = TokenStreamRewriter(self.common_token_stream)
 
 
-
-    def enterMethodBody(self, ctx: JavaParserLabeled.MethodBodyContext):
-        pass
-
     def exitMethodBody(self, ctx: JavaParserLabeled.MethodBodyContext):
-
+        """after exiting the soure method create two new method for new method logics and call these in if and
+        else block in the source method
+        Args:
+            ctx (JavaParserLabeled.MethodBodyContext)
+        """
         if self.is_source_method:
 
             signature1 = self.signature.split('(')[0].rstrip() + 'IsTrue'+ ' (' +''.join(self.signature.split('(')[1:] )
@@ -91,7 +112,7 @@ class RemoveFlagArgumentListener(JavaParserLabeledListener):
             self.token_stream_rewriter.insertAfter(index=ctx.stop.tokenIndex, text=res)
             # self.token_stream_rewriter.insertAfter(index=ctx.stop.tokenIndex, text=self.body_2)
             # self.token_stream_rewriter.insertAfter(index=ctx.stop.tokenIndex, text=self.signature)
-            print(self.signature)
+            # print(self.signature)
 
             arguments = [ s.rstrip().split(' ')[-1]  for s in signature1.split('(')[1].split(')')[0].split(',') ]
 
@@ -104,12 +125,15 @@ class RemoveFlagArgumentListener(JavaParserLabeledListener):
                                                     '\t' + signature2_name + '( ' + ','.join(arguments) + ')')
 
     def enterStatement0(self, ctx: JavaParserLabeled.Statement0Context):
-
         if self.is_source_method:
             pass
 
     def enterStatement2(self, ctx: JavaParserLabeled.Statement2Context):
-
+        """when entering if else block we get both of the logic in the block if this was source method
+            and capture the token which is needed later to do the refactoring
+        Args:
+            ctx (JavaParserLabeled.Statement2Context)
+        """
         if self.is_source_method:
             primary = ctx.parExpression().expression().primary()
             if hasattr(primary, "IDENTIFIER"):
@@ -133,12 +157,23 @@ class RemoveFlagArgumentListener(JavaParserLabeledListener):
 
 
 class RemoveFlagArgument:
-    def __init__(self):
-        self.source_class = "Playground"
-        self.field_name = "push_down_field"
-        self.source_method = "DeliveryDate"
+    """Refactoring API that can be used to to do remove flag argument 
 
-        self.main_file = "playground.java"
+    """
+    def __init__(self , source_class = "Playground"  , source_mathod = "DeliveryDate" , argument_name="b" , 
+        main_file = "playground.java"):
+        """create a removeflagargument refactor 
+
+        Args:
+            source_class (str): class name contaminated by code smell.
+            source_mathod (str): method name contaminated.
+            argument_name (str): boolean argument in method.
+            main_file (str): path of main file containing source class.
+        """
+        self.source_class = self.source_class
+        self.source_method = self.source_method
+        self.arguemnt_name = argument_name
+        self.main_file = main_file
 
         self.stream = FileStream(self.main_file, encoding='utf8')
         self.lexer = JavaLexer(self.stream)
@@ -149,9 +184,12 @@ class RemoveFlagArgument:
         self.my_listener = RemoveFlagArgumentListener(common_token_stream=self.token_stream,
                                                       source_class=self.source_class,
                                                       source_method=self.source_method,
-                                                      argument_name='b')
+                                                      argument_name=self.arguemnt_name)
 
     def do_refactor(self):
+        """removes flag argument logic and replace it by two method call of the new method generated from extracted
+            login in if else block
+        """
         walker = ParseTreeWalker()
         walker.walk(t=self.parse_tree, listener=self.my_listener)
 
