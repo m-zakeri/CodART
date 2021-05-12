@@ -1,3 +1,29 @@
+"""
+## Introduction
+
+Moving a class in a file from source package to target package
+
+## Pre and Post Conditions
+
+### Pre Conditions:
+1. The moving class should be independent from any other classes in the same file. eg. Consider
+   moving class "A" from file "A.java" in "source" package to "target" package. If class "A" is
+   dependent on class "B" in the same file("A.java"), then move class refactoring is not allowed.
+
+2. The moving class should be public
+
+3. The moving class should not exist in the target package. eg. Consider moving class "A" from
+   file "A.java" in "source" package to "target" package. If "target" package includes a file
+   name "A.java", the move class refactoring will not occur.
+
+### Post Conditions:
+1. After moving the class to the target package, the import declarations across the project must
+   be refactored. eg. If we have used "A" class in a "test.java" file, the import declaration
+   before moving class is "import source.A;". After moving the class, the import declaration changes
+   to "import target.A;"
+
+"""
+
 import argparse
 import os
 
@@ -10,17 +36,26 @@ from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 
 def log_error(title, message):
+    """
+    log_error method is used for logging erros
+    :param title: title of the error
+    :param message: message of the error
+    :return: None
+    """
     if title == "Redundant":
         print(f"[{title}]: Refactoring is not necessary")
     else:
         print(f"[{title}]: Refactoring is not allowed")
     print(f"{message}")
-    return
 
 
 class MoveClassPreConditionListener(JavaParserLabeledListener):
     def __init__(self):
         self.file_classes = []
+    """
+    MoveClassPreConditionListener class is used to check the pre-conditions on 
+    move class refactoring
+    """
 
     def enterCompilationUnit(self, ctx:JavaParserLabeled.CompilationUnitContext):
         for declaration in ctx.children:
@@ -441,7 +476,7 @@ class ReplaceDependentObjectsListener(JavaParserLabeledListener):
 
 
 filename = 'Source.java'
-class_identifier = 'Source'
+class_identifier = 'MyClass'
 source_package = 'sourcePackage'
 target_package = 'targetPackage'
 directory = 'D:/Programming/Java/TestProject/'
