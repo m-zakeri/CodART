@@ -17,7 +17,7 @@ class Vehicle {
     this.brand = "fiat";
   }    
   
-  public void epicMethod(){
+public void epicMethod(){
     System.out.println("hmmmm");
   }
 
@@ -37,6 +37,7 @@ class FourWheel extends Vehicle{
   protected int weight = 30;
   
   public void doNothing() {
+    epicMethod();
     System.out.println("doing something");
   }
 
