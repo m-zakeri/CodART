@@ -1,17 +1,29 @@
-package pushdown_field_test_vehicle;
+package pushdown_method_test_vehicle;
 class Vehicle {
     protected String brand;
      
-  protected String owner = "Ali";      // Vehicle attribute
+  protected String owner = "Ali"; 
+  public void setBrand() {
+    this.brand = "fiat";
+  }     // Vehicle attribute
+  public void epicMethod(){
+    System.out.println("hmmmm");
+  }
+  public void doNothing() {
+    System.out.println("doing nothing");
+  }
   public void honk() {                    // Vehicle method
     System.out.println("Tuut, tuut!");
+    setBrand();
   }
 }
 
 class FourWheel extends Vehicle{
     protected string color;
   protected int weight = 30;
-
+  public void doNothing() {
+    System.out.println("doing something");
+  }
   public void printName(){
     System.out.println("four wheel");
   }

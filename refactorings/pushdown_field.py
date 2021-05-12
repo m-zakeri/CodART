@@ -63,8 +63,6 @@ class PushDownField:
                 or self.field_name not in program.packages[self.package_name].classes[self.superclass_name].fields:
             return False
 
-        
-
         for m in superclass.methods:
             method: utils_listener_fast.Method = superclass.methods[m]
             for item in method.body_local_vars_and_expr_names:
@@ -114,8 +112,8 @@ class PushDownField:
                 fields_of_superclass_type_or_others = []
                 for fn in c.fields:
                     f: utils_listener_fast.Field = c.fields[fn]
-                    if (f.datatype == superclass.fields[self.field_name].datatype and has_imported_superclass) \
-                            or (self.package_name is not None and f.datatype == (
+                    if (f.name == self.field_name and has_imported_superclass) \
+                            or (self.package_name is not None and f.name == (
                             self.package_name + '.' + self.superclass_name)):
                         fields_of_superclass_type_or_others.append(f.name)
                     if any((c.file_info.has_imported_class(o.package_name, o.name) and f.datatype == o.name)
@@ -191,7 +189,7 @@ def test():
         # "../benchmark_projects/tests/pushdown_field/test6.java",
         # "../benchmark_projects/tests/pushdown_field/test7.java",
     ]
-    PushDownField(filenames, "pushdown_field_test_vehicle", "Vehicle", "owner", ["Car"]).do_refactor()
+    PushDownField(filenames, "pushdown_field_test_vehicle", "Vehicle", "brand").do_refactor()
 
     # if PushDownField(filenames[:2], "pushdown_field_test1", "A", "a").do_refactor():
     #     print("1, 2: Success!")

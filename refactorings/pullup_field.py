@@ -161,13 +161,14 @@ class PullUpFieldRefactoring:
 def test():
     print("Testing pullup_field...")
     filenames = [
-        "../benchmark_projects/tests/pullup_field/test1.java",
-        "../benchmark_projects/tests/pullup_field/test2.java",
-        "../benchmark_projects/tests/pullup_field/test3.java",
-        "../benchmark_projects/tests/pullup_field/test4.java"
+        "D:/archive/uni/CD/project/CodART/tests/pushdown_field/vehicle.java",
+        # "../benchmark_projects/tests/pullup_field/test1.java",
+        # "../benchmark_projects/tests/pullup_field/test2.java",
+        # "../benchmark_projects/tests/pullup_field/test3.java",
+        # "../benchmark_projects/tests/pullup_field/test4.java"
     ]
 
-    if PullUpFieldRefactoring(filenames, "pullup_field_test1", "B", "a").do_refactor():
+    if PullUpFieldRefactoring(filenames, "pushdown_field_test_vehicle", "Car", "color").do_refactor():
         print("Success!")
     else:
         print("Cannot refactor.")
@@ -192,4 +193,4 @@ def test_ant():
 
 
 if __name__ == "__main__":
-    test_ant()
+    test()
