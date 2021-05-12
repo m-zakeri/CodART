@@ -192,7 +192,7 @@ class ExtractClassRefactoringListener(JavaParserLabeledListener):
             else:
                 modifier = ""
             field_type = ctx.typeType().getText()
-            self.code += f"{self.TAB}{modifier} {field_type} {self.detected_field};{self.NEW_LINE}"
+            self.code += f"{modifier} {field_type} {self.detected_field};{self.NEW_LINE}"
             # delete field from source class
             field_names.remove(self.detected_field)
             if field_names:
@@ -228,7 +228,7 @@ class ExtractClassRefactoringListener(JavaParserLabeledListener):
                 start=start_index,
                 stop=stop_index
             )
-            self.code += self.NEW_LINE + self.TAB + (str(
+            self.code += self.NEW_LINE + (str(
                 ctx.parentCtx.parentCtx.children[0].children[0].children[0]) + " " + method_text + self.NEW_LINE)
             # delete method from source class
             self.token_stream_rewriter.delete(
@@ -548,7 +548,8 @@ class ExtractClassAPI:
             file1.truncate(0)
             file2 = open(self.file_path,"a")
             file2.truncate(0)
-            for i in s[a:-1]:
+            s[a+1]="public "+s[a+1]
+            for i in s[a+1:-1]:
                 i+="\n"
                 file1.write(i)
             file1.close()
