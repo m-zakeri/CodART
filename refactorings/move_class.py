@@ -51,43 +51,50 @@ def log_error(title, message):
 
 class MoveClassPreConditionListener(JavaParserLabeledListener):
     def __init__(self):
+        # Move all classes of a file into file_classes list
         self.file_classes = []
     """
     MoveClassPreConditionListener class is used to check the pre-conditions on 
     move class refactoring
     """
 
-    def enterCompilationUnit(self, ctx:JavaParserLabeled.CompilationUnitContext):
+    # Enter a parse tree produced by CompilationUnitContext
+    def enterCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
         for declaration in ctx.children:
             if isinstance(declaration, JavaParserLabeled.TypeDeclarationContext):
+                if declaration.classDeclaration() is None:
+                    continue
                 self.file_classes.append(declaration.classDeclaration().IDENTIFIER().getText())
 
-        return
+    # Exit a parse tree produced by FieldDeclarationContext
+    def exitFieldDeclaration(self, ctx: JavaParserLabeled.FieldDeclarationContext):
+        if ctx.typeType() is None:
+            return
 
-    def exitFieldDeclaration(self, ctx:JavaParserLabeled.FieldDeclarationContext):
         field_type = ctx.typeType().getText()
-
         if field_type in self.file_classes:
             log_error("Forbidden", "This class has fields that dependent on other classes")
             exit(0)
 
+    # Exit a parse tree produced by Expression0Context
     def exitExpression0(self, ctx:JavaParserLabeled.Expression0Context):
-        expression = ctx.primary().getText()
+        if ctx.primary() is None:
+            return
 
+        expression = ctx.primary().getText()
         if expression in self.file_classes:
             log_error("Forbidden", "This class has dependencies on other classes")
             exit(0)
 
-        return
-
+    # Exit a parse tree produced by LocalVariableDeclarationContext
     def exitLocalVariableDeclaration(self, ctx:JavaParserLabeled.LocalVariableDeclarationContext):
-        local_variable_type = ctx.typeType().getText()
+        if ctx.typeType() is None:
+            return
 
+        local_variable_type = ctx.typeType().getText()
         if local_variable_type in self.file_classes:
             log_error("Forbidden", "This class has local variables that dependent on other classes")
             exit(0)
-
-        return
 
 
 class MoveClassRefactoringListener(JavaParserLabeledListener):
@@ -100,7 +107,7 @@ class MoveClassRefactoringListener(JavaParserLabeledListener):
     def __init__(self, common_token_stream: CommonTokenStream = None, class_identifier: str = None,
                  source_package: str = None, target_package: str = None, filename: str = None, dirname: str = None):
         """
-        :param common_token_stream:
+        :param common_token_stream: used to edit the content of the parsers
         """
         self.enter_class = False
         self.token_stream = common_token_stream
@@ -248,12 +255,6 @@ class MoveClassRefactoringListener(JavaParserLabeledListener):
         for field in list_of_fields:
             self.class_fields.append(field)
 
-    def enterMethodBody(self, ctx:JavaParserLabeled.MethodBodyContext):
-        # example: method2 body
-        body = ctx.block().getText()
-
-        return
-
     # Enter a parse tree produced by JavaParserLabeled#methodDeclaration.
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
         if not self.enter_class:
@@ -326,7 +327,10 @@ class ReplaceDependentObjectsListener(JavaParserLabeledListener):
         self.mul_imports = []
         self.exact_imports = []
 
-    def enterCompilationUnit(self, ctx:JavaParserLabeled.CompilationUnitContext):
+    # Enter a parse tree produced by CompilationUnitContext
+    def enterCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
+        # Iterate over the declarations of context to save all import statements
+        # in exact_imports and mul_imports
         for declaration in ctx.children:
             if isinstance(declaration, JavaParserLabeled.ImportDeclarationContext):
                 imported_package = ""
@@ -341,11 +345,10 @@ class ReplaceDependentObjectsListener(JavaParserLabeledListener):
                     self.mul_imports.append(imported_package)
                 else:
                     self.exact_imports.append(imported_package)
-        return
 
     # Exit a parse tree produced by JavaParserLabeled#importDeclaration.
     def exitImportDeclaration(self, ctx: JavaParserLabeled.ImportDeclarationContext):
-        # also include * imports
+        # extract the imported package from context
         imported_package = ""
         mul = None
         if ctx.qualifiedName() is not None:
@@ -354,17 +357,9 @@ class ReplaceDependentObjectsListener(JavaParserLabeledListener):
             mul = ctx.MUL().getText()
             imported_package += '.' + ctx.MUL().getText()
 
-        # if (imported_package != self.source_package + '.' + self.class_identifier and mul is None)\
-        #     or (imported_package != self.source_package + '.' + mul):
-        #     return
-
+        # return if the current import statement is not relevant to source package
         if self.source_package not in imported_package:
             return
-
-        # if (final_import_statement != self.source_package + '.' + self.class_identifier and imported_class != '*') \
-        #         or (final_import_statement != self.source_package + '.*'):
-        #     return
-        # -------------
 
         start_index = ctx.start.tokenIndex
         stop_index = ctx.stop.tokenIndex
@@ -372,6 +367,10 @@ class ReplaceDependentObjectsListener(JavaParserLabeledListener):
         target_exact_package = f"{self.target_package}.{self.class_identifier}"
         target_exact_import = f"import {target_exact_package};"
 
+        if ctx.STATIC() is not None:
+            target_exact_import = target_exact_import.replace("import", "import ")
+
+        # handle import scenarios in files dependent on the moved class
         if target_exact_package in self.exact_imports:
             if mul is None:
                 self.token_stream_rewriter.delete(
@@ -395,52 +394,8 @@ class ReplaceDependentObjectsListener(JavaParserLabeledListener):
                 )
             self.exact_imports.append(target_exact_package)
 
-        # if mul is not None:
-        #     self.token_stream_rewriter.insertAfter(
-        #         program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-        #         index=stop_index,
-        #         text=self.NEW_LINE + target_exact_import
-        #     )
-        #     self.exact_imports.append(target_exact_package)
-        # else:
-        #     if target_exact_package in self.exact_imports:
-        #         self.token_stream_rewriter.delete(
-        #             program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-        #             from_idx=start_index,
-        #             to_idx=stop_index + 1
-        #         )
-        #     else:
-        #         self.token_stream_rewriter.replace(
-        #             program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-        #             from_idx=start_index,
-        #             to_idx=stop_index,
-        #             text=target_exact_import
-        #         )
-        #         self.exact_imports.append(target_exact_package)
-
-        return
-        # # handle * imports
-        # text_to_replace = f"import {self.source_package}.*;"
-        # if final_import_statement != self.source_package + '.*':
-        #     text_to_replace = f"import {self.target_package}.{self.class_identifier};"
-        # else:
-        #     text_to_replace += f"\nimport {self.target_package}.{self.class_identifier};"
-        # # -------------
-
-        # if ctx.STATIC() is not None:
-            # text_to_replace = text_to_replace.replace("import", "import static")
-
-        # # replace the import source package with target package
-        # self.token_stream_rewriter.replace(
-        #     program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-        #     from_idx=start_index,
-        #     to_idx=stop_index,
-        #     text=text_to_replace
-        # )
-
     # Exit a parse tree produced by JavaParserLabeled#classOrInterfaceType.
     def exitClassOrInterfaceType(self, ctx: JavaParserLabeled.ClassOrInterfaceTypeContext):
-
         if not self.has_import or not self.need_import:
             if self.class_identifier in ctx.getText().split('.'):
                 self.need_import = True
@@ -463,6 +418,7 @@ class ReplaceDependentObjectsListener(JavaParserLabeledListener):
             if not self.has_import or self.need_import:
                 index = ctx.start.tokenIndex
 
+                # return if the file has already imported the package
                 if (self.source_package + '.' + self.class_identifier not in self.exact_imports)\
                         or (self.target_package + '.' + self.class_identifier in self.exact_imports):
                     return
@@ -476,14 +432,21 @@ class ReplaceDependentObjectsListener(JavaParserLabeledListener):
 
 
 filename = 'Source.java'
-class_identifier = 'MyClass'
+class_identifier = 'Source'
 source_package = 'sourcePackage'
 target_package = 'targetPackage'
-directory = 'D:/Programming/Java/TestProject/'
+directory = '../tests/move_class/sample_project'
 file_counter = 0
 
 
 def move_class(token_stream, parse_tree, args):
+    """
+    move_class method uses MoveClassRefactorListener to move the class to the target package
+    :param token_stream: common token stream
+    :param parse_tree: generated parse tree
+    :param args: file arguments
+    :return: None
+    """
     move_class_listener = MoveClassRefactoringListener(
         common_token_stream=token_stream, source_package=source_package, target_package=target_package,
         class_identifier=class_identifier, filename=args.file, dirname=directory
@@ -496,6 +459,13 @@ def move_class(token_stream, parse_tree, args):
 
 
 def post_move_class_propagation(token_stream, parse_tree, args):
+    """
+    post_move_class_propagation method is used to propagate post-conditions after moving the class
+    :param token_stream: common token stream
+    :param parse_tree: generated parse tree
+    :param args: file arguments
+    :return: None
+    """
     has_import = False
     has_exact_import = False
 
@@ -528,6 +498,10 @@ def post_move_class_propagation(token_stream, parse_tree, args):
 
 
 def get_argument_parser(file):
+    """
+    get_argument_parser method used to parse the arguments
+    :param file: file name
+    """
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument(
         '-n', '--file',
@@ -538,6 +512,11 @@ def get_argument_parser(file):
 
 
 def get_parse_tree_token_stream(args):
+    """
+    returns parse tree and token stream base on the file stream
+    :param args: file arguments
+    """
+
     # Step 1: Load input source into stream
     stream = FileStream(args.file, encoding='utf8')
     # Step 2: Create an instance of AssignmentStLexer
@@ -553,10 +532,14 @@ def get_parse_tree_token_stream(args):
     return parse_tree, token_stream
 
 
-def recursive_walk(dir_name):
+def recursive_walk(dir_path):
+    """
+    walks through the specified directory files to implement refactoring
+    :param dir_path: directory path
+    """
     global filename
 
-    args = get_argument_parser("{}/{}".format(dir_name + '/' + source_package.replace('.', '/'), filename))
+    args = get_argument_parser("{}/{}".format(dir_path + '/' + source_package.replace('.', '/'), filename))
     parse_tree, token_stream = get_parse_tree_token_stream(args)
 
     # check if the class has dependencies on other classes in the same class
@@ -570,7 +553,7 @@ def recursive_walk(dir_name):
     else:
         raise ValueError(f"The filename format must be \".java\", but found {extension}!")
 
-    for dirname, dirs, files in os.walk(dir_name):
+    for dirname, dirs, files in os.walk(dir_path):
         for file in files:
             if file == filename or file == class_identifier + '.java':
                 continue
@@ -579,21 +562,6 @@ def recursive_walk(dir_name):
                 args = get_argument_parser("{}/{}".format(dirname, file))
                 parse_tree, token_stream = get_parse_tree_token_stream(args)
                 post_move_class_propagation(token_stream, parse_tree, args)
-
-
-# def process_file(token_stream, parse_tree, args, is_source_file):
-#     # args = get_argument_parser(file)
-#     # parse_tree, token_stream = get_token_stream_and_parse_tree(args)
-#     #
-#     # # check if the class has dependencies on other classes in the same class
-#     # pre_condition_listener = MoveClassPreConditionListener()
-#     # walker = ParseTreeWalker()
-#     # walker.walk(t=parse_tree, listener=pre_condition_listener)
-#
-#     if is_source_file:
-#         move_class(token_stream, parse_tree, args)
-#     else:
-#         post_move_class_propagation(token_stream, parse_tree, args)
 
 
 if __name__ == '__main__':
@@ -610,4 +578,5 @@ if __name__ == '__main__':
         log_error("Redundant", f"The class \"{class_identifier}\" already exists in package \"{target_package}\"!")
         exit(0)
 
+    # start refactoring
     recursive_walk(directory)
