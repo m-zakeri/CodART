@@ -288,50 +288,120 @@ class ReplaceDependentObjectsListener(JavaParserLabeledListener):
         self.TAB = "\t"
         self.NEW_LINE = "\n"
         self.code = ""
+        self.mul_imports = []
+        self.exact_imports = []
 
+    def enterCompilationUnit(self, ctx:JavaParserLabeled.CompilationUnitContext):
+        for declaration in ctx.children:
+            if isinstance(declaration, JavaParserLabeled.ImportDeclarationContext):
+                imported_package = ""
+                mul = None
+                if declaration.qualifiedName() is not None:
+                    imported_package += declaration.qualifiedName().getText()
+                if declaration.MUL() is not None:
+                    mul = declaration.MUL().getText()
+                    imported_package += ".*"
+
+                if mul is not None:
+                    self.mul_imports.append(imported_package)
+                else:
+                    self.exact_imports.append(imported_package)
+        return
 
     # Exit a parse tree produced by JavaParserLabeled#importDeclaration.
     def exitImportDeclaration(self, ctx: JavaParserLabeled.ImportDeclarationContext):
         # also include * imports
         imported_package = ""
-        imported_class = ""
+        mul = None
         if ctx.qualifiedName() is not None:
-            imported_package = ctx.qualifiedName().getText()
+            imported_package += ctx.qualifiedName().getText()
         if ctx.MUL() is not None:
-            imported_class = ctx.MUL().getText()
-        final_import_statement = f"{imported_package}.{imported_class}"
+            mul = ctx.MUL().getText()
+            imported_package += '.' + ctx.MUL().getText()
 
-        if (final_import_statement != self.source_package + '.' + self.class_identifier and imported_class != '*') \
-                or (final_import_statement != self.source_package + '.*'):
+        # if (imported_package != self.source_package + '.' + self.class_identifier and mul is None)\
+        #     or (imported_package != self.source_package + '.' + mul):
+        #     return
+
+        if self.source_package not in imported_package:
             return
+
+        # if (final_import_statement != self.source_package + '.' + self.class_identifier and imported_class != '*') \
+        #         or (final_import_statement != self.source_package + '.*'):
+        #     return
         # -------------
 
         start_index = ctx.start.tokenIndex
         stop_index = ctx.stop.tokenIndex
 
-        # handle * imports
-        text_to_replace = f"import {self.source_package}.*;"
-        if final_import_statement != self.source_package + '.*':
-            text_to_replace = f"import {self.target_package}.{self.class_identifier};"
+        target_exact_package = f"{self.target_package}.{self.class_identifier}"
+        target_exact_import = f"import {target_exact_package};"
+
+        if target_exact_package in self.exact_imports:
+            if mul is None:
+                self.token_stream_rewriter.delete(
+                    program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                    from_idx=start_index,
+                    to_idx=stop_index + 1
+                )
         else:
-            text_to_replace += f"\nimport {self.target_package}.{self.class_identifier};"
-        # -------------
+            if mul is not None:
+                self.token_stream_rewriter.insertAfter(
+                    program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                    index=stop_index,
+                    text=self.NEW_LINE + target_exact_import
+                )
+            else:
+                self.token_stream_rewriter.replace(
+                    program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                    from_idx=start_index,
+                    to_idx=stop_index,
+                    text=target_exact_import
+                )
+            self.exact_imports.append(target_exact_package)
 
-        if ctx.STATIC() is not None:
-            text_to_replace = text_to_replace.replace("import", "import static")
-
-        # replace the import source package with target package
-        self.token_stream_rewriter.replace(
-            program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-            from_idx=start_index,
-            to_idx=stop_index,
-            text=text_to_replace
-        )
-
-    def exitVariableDeclarators(self, ctx:JavaParserLabeled.VariableDeclaratorsContext):
-        vars = ctx.variableDeclarator(0)
+        # if mul is not None:
+        #     self.token_stream_rewriter.insertAfter(
+        #         program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+        #         index=stop_index,
+        #         text=self.NEW_LINE + target_exact_import
+        #     )
+        #     self.exact_imports.append(target_exact_package)
+        # else:
+        #     if target_exact_package in self.exact_imports:
+        #         self.token_stream_rewriter.delete(
+        #             program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+        #             from_idx=start_index,
+        #             to_idx=stop_index + 1
+        #         )
+        #     else:
+        #         self.token_stream_rewriter.replace(
+        #             program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+        #             from_idx=start_index,
+        #             to_idx=stop_index,
+        #             text=target_exact_import
+        #         )
+        #         self.exact_imports.append(target_exact_package)
 
         return
+        # # handle * imports
+        # text_to_replace = f"import {self.source_package}.*;"
+        # if final_import_statement != self.source_package + '.*':
+        #     text_to_replace = f"import {self.target_package}.{self.class_identifier};"
+        # else:
+        #     text_to_replace += f"\nimport {self.target_package}.{self.class_identifier};"
+        # # -------------
+
+        # if ctx.STATIC() is not None:
+            # text_to_replace = text_to_replace.replace("import", "import static")
+
+        # # replace the import source package with target package
+        # self.token_stream_rewriter.replace(
+        #     program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+        #     from_idx=start_index,
+        #     to_idx=stop_index,
+        #     text=text_to_replace
+        # )
 
     # Exit a parse tree produced by JavaParserLabeled#classOrInterfaceType.
     def exitClassOrInterfaceType(self, ctx: JavaParserLabeled.ClassOrInterfaceTypeContext):
@@ -348,7 +418,6 @@ class ReplaceDependentObjectsListener(JavaParserLabeledListener):
 
     # Exit a parse tree produced by JavaParserLabeled#expression1.
     def exitExpression1(self, ctx: JavaParserLabeled.Expression1Context):
-        a = ctx.expression().getText()
         if not self.has_import or not self.need_import:
             if ctx.expression().getText == self.class_identifier:
                 self.need_import = True
@@ -359,6 +428,10 @@ class ReplaceDependentObjectsListener(JavaParserLabeledListener):
             if not self.has_import or self.need_import:
                 index = ctx.start.tokenIndex
 
+                if (self.source_package + '.' + self.class_identifier not in self.exact_imports)\
+                        or (self.target_package + '.' + self.class_identifier in self.exact_imports):
+                    return
+
                 # delete class declaration from source class
                 self.token_stream_rewriter.insertBefore(
                     program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
@@ -367,11 +440,11 @@ class ReplaceDependentObjectsListener(JavaParserLabeledListener):
                 )
 
 
-filename = 'CDL.java'
-class_identifier = 'CDL'
-source_package = 'org.json'
-target_package = 'org.target'
-directory = 'D:/Programming/Java/JSON-java/src/main/java/'
+filename = 'Source.java'
+class_identifier = 'Source'
+source_package = 'sourcePackage'
+target_package = 'targetPackage'
+directory = 'D:/Programming/Java/TestProject/'
 file_counter = 0
 
 
