@@ -3,6 +3,12 @@ This class is for extracting kind of methods from a class that are duplicated.
 You can read more about this kind of refactoring in https://refactoring.guru/extract-method
 
 Authors: Arman Heydari, M.Amin Ghasvari
+
+Description about the code:
+- statements are each line of code showing an act for example this.x = 3 is an statement.
+- exact duplications are the ones that have completely the same code.
+- semi duplications are the ones that by using a variable we can make a new method and
+avoid duplications.
 """
 
 from antlr4 import FileStream, CommonTokenStream, ParseTreeWalker
@@ -25,6 +31,9 @@ def is_equal(a, b):
 
 
 class VariableTypes:
+    """
+    this class is to recognize the type of variable based on its token
+    """
     DECIMAL_LITERAL = 51
     HEX_LITERAL = 52
     OCT_LITERAL = 53
@@ -55,7 +64,7 @@ class Statement:
     def __init__(self, statement, expressions):
         self.statement = statement
         self.expressions = expressions
-        self.variables = []
+        self.variables = []  # variables are going to be used in semi duplications
 
     def copy(self):
         s = Statement(self.statement, self.expressions)
@@ -179,6 +188,14 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
     ##########################
 
     def check_semi_duplicate(self, sa, sb, k):
+        """
+        It checks if the statements are similar or not. Two statements are similar if
+        we can omit duplicated code with adding new method that has some arguments
+        :param sa: first statements
+        :param sb: second statement
+        :param k: the k represent the index of the statements.
+        :return:
+        """
         fta, ftb = sa.statement.start.tokenIndex, sb.statement.start.tokenIndex
         tta, ttb = sa.statement.stop.tokenIndex, sb.statement.stop.tokenIndex
 
@@ -249,7 +266,8 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
                     b_duplicates.append(sb)
                     k += 1
                 if count_duplicate_statement != 0:
-                    method_a_b_duplications.append((count_duplicate_statement, a_duplicates.copy(), b_duplicates.copy()))
+                    method_a_b_duplications.append(
+                        (count_duplicate_statement, a_duplicates.copy(), b_duplicates.copy()))
                 j += 1
             i += 1
 
@@ -349,6 +367,8 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
                         for d in duplicate[1]:
                             duplicates["text"] += d.statement.getText()
 
+                    # here we check how many duplications have been occurred.
+                    # trying to find out similar duplications to change them all together.
                     for i in range(1, 3):
                         print(duplicate[i][0].statement.start.line)
                         if duplicate[i][0].statement.start.line not in duplicates["lines"]:
