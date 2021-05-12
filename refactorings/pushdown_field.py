@@ -103,6 +103,7 @@ class PushDownField:
                             classes_to_add_to.append(c)
                     else:
                         other_derived_classes.append(c)
+                        
         # Check if the field is used from the superclass or other derived classes
         for pn in program.packages:
             p: utils_listener_fast.Package = program.packages[pn]

@@ -1,8 +1,9 @@
 """
 ## Introduction
 
-When subclasses grow and get developed separately, your code may have methods that perform similar work.
-Pull up method refactoring removes the repetitive method from subclasses and moves it to a superclass.
+When a method was meant to be universal for all classes but in reality is used in only one or few subclass. 
+This situation can occur when planned features fail to materialize.
+PUsh down method refactoring removes the method from super class and adds it to correspondent subclasses.
 
 
 ## Pre and Post Conditions
@@ -10,17 +11,16 @@ Pull up method refactoring removes the repetitive method from subclasses and mov
 ### Pre Conditions:
 1. The source package, class and method should exist.
 
-2. If the method uses attributes and methods that are defined in the body of the classes,
-   The refactoring should not be implemented.
+2. If the superclass uses the method, The refactoring should not be implemented.
 
 ### Post Conditions:
 
-No specific Post Condition
+1. If the subclasses has a method with the same name, The refactoring should not be implemented.
 
 """
 
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
-# from refactorings.utils.utils_listener_fast import TokensInfo, SingleFileElement
+from refactorings.utils.utils_listener_fast import TokensInfo, SingleFileElement
 from refactorings.pullup_method_get_removemethod import get_removemethods
 from refactorings.utils.utils2 import Rewriter, get_program, get_filenames_in_dir
 from refactorings.utils import utils_listener_fast, utils2
@@ -34,17 +34,19 @@ class PushDownMethodRefactoring:
                 class_names: list = [],
                 filename_mapping=lambda x: x):
         """
-        The main function that does the process of pull up method refactoring.
-               Removes the necessary methods from the subclasses and moves them to a superclass.
+        The main function that does the process of push down method refactoring.
+               Removes the necessary method from the superclass and moves it to correspondent subclasses .
 
                Args:
                       source_filenames (list): A list of file names to be processed
 
                       package_name (str): The name of the package in which the refactoring has to be done(contains the classes)
 
-                      class_name (str): Name of the class in which the refactoring has to be done (pushing down the method from here)
+                      superclass_name (str): Name of the superclass in which the refactoring has to be done (pushing down the method from here)
 
-                      method_key (str): Name of the method which needs to be removed from the subclasses/pushed down
+                      method_key (str): Name of the method which needs to be removed from the superclass/pushed down
+
+                      class_names (list) : Names of the classes which user chooses manually to push down the method
 
                       filename_mapping (str): Mapping the file's name to the correct format so that it can be processed
 
@@ -59,13 +61,13 @@ class PushDownMethodRefactoring:
         self.filename_mapping = filename_mapping
 
     def pre_propagation_check(self, program, superclass):
-        # check input validation
+        # check input validation (pre-condition 1)
         if self.package_name not in program.packages \
                 or self.superclass_name not in program.packages[self.package_name].classes \
                 or self.method_key not in program.packages[self.package_name].classes[self.superclass_name].methods:
             return False
 
-        # check if method is used in superclass
+        # check if method is used in superclass (pre-condition 2)
         for m in superclass.methods:
             method: utils_listener_fast.Method = superclass.methods[m]
             for item in method.body_local_vars_and_expr_names:
@@ -96,11 +98,19 @@ class PushDownMethodRefactoring:
 
                     # enable functionality of class name
                     if len(self.class_names) == 0 or cn in self.class_names:
+                        # check for methods with same name (post-condition 1)
                         if self.method_key in c.methods:
                             print("some classes have same method")
                             return False
                         else:
-                            classes_to_add_to.append(c)
+                            for m in c.methods:
+                                method: utils_listener_fast.Method = c.methods[m]
+                                is_used = False
+                                for item in method.body_local_vars_and_expr_names:
+                                    if isinstance(item, utils_listener_fast.MethodInvocation) and item.dot_separated_identifiers[0]+'()' == self.method_key:
+                                        is_used = True
+                                if is_used:
+                                    classes_to_add_to.append(c)
                     else:
                         other_derived_classes.append(c)
 
@@ -115,7 +125,7 @@ class PushDownMethodRefactoring:
         for c in classes_to_add_to:
             c_body_start = utils_listener_fast.TokensInfo(c.parser_context.classBody())
             c_body_start.stop = c_body_start.start 
-            rewriter.insert_after(c_body_start, "\n%s %s %s() {\n   %s\n}" % (method.modifiers.join(" "), method.returntype, method.name, method.body_text[1:-1]))
+            rewriter.insert_after(c_body_start, "\n%s %s %s() {\n   %s\n}" % (" ".join(method.modifiers), method.returntype, method.name, method.body_text[1:-1]))
 
         method_token_info = utils_listener_fast.TokensInfo(method.parser_context)
         rewriter.replace(method_token_info, "")
@@ -126,7 +136,7 @@ class PushDownMethodRefactoring:
 if __name__ == "__main__":
     mylist = get_filenames_in_dir('D:/archive/uni/CD/project/CodART/tests/pushdown_method/')
     print("Testing pushdown_method...")
-    if PushDownMethodRefactoring(mylist, "pushdown_method_test_vehicle", "Vehicle", "epicMethod()", "Tank").do_refactor():
+    if PushDownMethodRefactoring(mylist, "pushdown_method_test_vehicle", "Vehicle", "epicMethod()").do_refactor():
         print("Success!")
     else:
         print("Cannot refactor.")
