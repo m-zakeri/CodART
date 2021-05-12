@@ -271,7 +271,7 @@ class ReplaceDependentObjectsListener(JavaParserLabeledListener):
         if not self.has_import or not self.need_import:
             if self.class_identifier in ctx.getText().split('.'):
                 self.need_import = True
-    
+
     # Exit a parse tree produced by JavaParserLabeled#expression1.
     def exitExpression1(self, ctx: JavaParserLabeled.Expression1Context):
         if not self.has_import or not self.need_import:
