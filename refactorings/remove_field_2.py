@@ -59,7 +59,7 @@ class RemoveFieldRefactoringListener(JavaParserLabeledListener):
             return None
         field_identifier = ctx.variableDeclarators().variableDeclarator(0).variableDeclaratorId().IDENTIFIER().getText()
         # print("field_identifier:::::::::",field_identifier)
-        if self.field_name in field_identifier:
+        if self.field_name == field_identifier:
             grand_parent_ctx = ctx.parentCtx.parentCtx
             self.token_stream_rewriter.delete(
                 program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
