@@ -1,4 +1,5 @@
 from gen.javaLabeled.JavaLexer import JavaLexer
+import os
 
 try:
     import understand as und
@@ -201,6 +202,30 @@ class RemoveFlagArgument:
 
 if __name__ == '__main__':
     RemoveFlagArgument().do_refactor()
+
+    path = "D:\Uni\Compiler\project\CodART\benchmark_projects\JSON\src\main\java\org\json"
+    for file in os.listdir(path):
+        print(file)
+
+    source_class = "App"
+    field_name = "push_down_field"
+    # initialize with understand
+    main_file = ""
+
+    stream = FileStream(main_file, encoding='utf8')
+    lexer = JavaLexer(stream)
+    token_stream = CommonTokenStream(lexer)
+    parser = JavaParserLabeled(token_stream)
+    parser.getTokenStream()
+    parse_tree = parser.compilationUnit()
+
+    # my_listener = RemoveFieldRefactoringListener(common_token_stream=token_stream, source_class=source_class,
+    #                                              field_name=field_name)
+    walker = ParseTreeWalker()
+    walker.walk(t=parse_tree, listener=my_listener)
+
+    with open(main_file, mode='w', newline='') as f:
+        f.write(my_listener.token_stream_rewriter.getDefaultText())
 
     # print(my_listener.body_1)
     # print(my_listener.body_2)
