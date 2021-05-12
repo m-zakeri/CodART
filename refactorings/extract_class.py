@@ -558,7 +558,7 @@ class ExtractClassAPI:
             isinstance = f"   public {self.new_class} {objectname};"
             temp[0] = f"public class {self.source_class} "+"{\n"+isinstance
             for i in temp:
-                    file2.write(i)
+                file2.write(i)
             file2.close()
             print("=" * 50)
             # After Refactoring
