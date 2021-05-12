@@ -31,15 +31,11 @@ class MoveFieldRefactoring:
         """
         :param program: The program which is extracted from the get_program() method
         :return: The source class, target_class and the field which is to be moved
-        if there are no such classes or fields or packages in the program the value `None` would be returned
-        Finds the source and the target class inside the program.
+        if there are no such classes or fields or packages in the program, KeyError will be raised
         """
-        try:
-            class_name = program.packages[self.package_name].classes[self.class_name]
-            target_class = program.packages[self.target_package_name].classes[self.target_class_name]
-            field = program.packages[self.package_name].classes[self.class_name].fields[self.field_name]
-        except KeyError:
-            return None
+        class_name = program.packages[self.package_name].classes[self.class_name]
+        target_class = program.packages[self.target_package_name].classes[self.target_class_name]
+        field = program.packages[self.package_name].classes[self.class_name].fields[self.field_name]
 
         return class_name, target_class, field
 
