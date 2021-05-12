@@ -111,70 +111,13 @@ class PushDownMethodRefactoring:
         for c in classes_to_add_to:
             c_body_start = utils_listener_fast.TokensInfo(c.parser_context.classBody())
             c_body_start.stop = c_body_start.start  # Start and stop both point to the '{'
-            rewriter.insert_after(c_body_start, f"\n{modifier} {method.returntype} {method.name} () \n{method.body_text}")
+            rewriter.insert_after(c_body_start, "\n%s %s %s() {\n   %s\n}" % (modifier, method.returntype, method.name, method.body_text[1:-1]))
 
         method_token_info = utils_listener_fast.TokensInfo(method.parser_context)
         rewriter.replace(method_token_info, "")
         
         rewriter.apply()
         return True
-
-        # target_class_name = _sourceclass.superclass_name
-        # static = 0
-        # removemethod = get_removemethods(program, self.package_name, target_class_name, self.method_key,
-        #                                  self.class_name)  # Similar methods in other classes
-        # _targetclass = program.packages[self.package_name].classes[target_class_name]
-        # _method_name = program.packages[self.package_name].classes[self.class_name].methods[self.method_key]
-        # tokens_info = TokensInfo(_method_name.parser_context)
-        # exps = tokens_info.get_token_index(tokens_info.token_stream.tokens, tokens_info.start,
-        #                                    tokens_info.stop)  # list of class variables that are used in the method
-        # if _method_name.is_constructor:
-        #     return False
-        # # if method use param of class body return false
-        # for token in exps:
-        #     if token.text in _sourceclass.fields:
-        #         return False
-
-        # if bool(_method_name.body_method_invocations_without_typename):
-        #     return False
-
-        # Rewriter_ = Rewriter(program, self.filename_mapping)
-        # for remove in removemethod:
-        #     _methodd = removemethod[remove]
-        #     if _methodd is not None:
-        #         _methodds = _methodd[0]
-        #         _method = program.packages[self.package_name].classes[remove].methods[str(_methodds)]
-        #         _method_token_info = TokensInfo(_method.parser_context)
-        #         Rewriter_.replace(_method_token_info, " ")
-
-        # class_tokens_info = TokensInfo(_targetclass.parser_context)
-        # singlefileelement = SingleFileElement(_method_name.parser_context, _method_name.filename)
-        # token_stream_rewriter = TokenStreamRewriter(singlefileelement.get_token_stream())
-        # strofmethod = token_stream_rewriter.getText(program_name=token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-        #                                             start=tokens_info.start,
-        #                                             stop=tokens_info.stop)
-        # Rewriter_.insert_before(tokens_info=class_tokens_info, text=strofmethod)
-        # Rewriter_.apply()
-        # # The Method has to be updated anywhere else that it's used
-        # for package_names in program.packages:
-        #     package = program.packages[package_names]
-        #     for class_ in package.classes:
-        #         _class = package.classes[class_]
-        #         for method_ in _class.methods:
-        #             __method = _class.methods[method_]
-        #             for inv in __method.body_method_invocations:
-        #                 invc = __method.body_method_invocations[inv]
-        #                 method_name = self.method_key[:self.method_key.find('(')]
-        #                 if invc[0] == method_name & package_names == self.package_name:
-        #                     inv_tokens_info = TokensInfo(inv)
-        #                     if static == 0:
-        #                         class_token_info = TokensInfo(_class.body_context)
-        #                         Rewriter_.insert_after_start(class_token_info, target_class_name + " " + str.lower(
-        #                             target_class_name) + "=" + "new " + target_class_name + "();")
-        #                         Rewriter_.apply()
-        #                     Rewriter_.replace(inv_tokens_info, target_class_name)
-        #                     Rewriter_.apply()
-        # return True
 
 if __name__ == "__main__":
     mylist = get_filenames_in_dir('D:/archive/uni/CD/project/CodART/tests/pushdown_method/')
