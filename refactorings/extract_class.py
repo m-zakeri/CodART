@@ -150,6 +150,8 @@ class ExtractClassRefactoringListener(JavaParserLabeledListener):
         self.TAB = "\t"
         self.NEW_LINE = "\n"
         self.code = ""
+        self.file_cons=""
+        self.new_file_cons=""
 
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
         class_identifier = ctx.IDENTIFIER().getText()
@@ -237,6 +239,22 @@ class ExtractClassRefactoringListener(JavaParserLabeledListener):
                 to_idx=stop_index
             )
             self.detected_method = None
+    def exitConstructorDeclaration(self, ctx:JavaParserLabeled.ConstructorDeclarationContext):
+
+        for i in ctx.children[2].children[1:-1]:
+            text = self.token_stream_rewriter.getText(
+                program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                start=i.start.tokenIndex,
+                stop=i.stop.tokenIndex
+            )
+            for moved in self.moved_fields:
+                if(moved in text):
+                    self.new_file_cons+=self.TAB+self.TAB+ text+"\n"
+                    self.token_stream_rewriter.delete(
+                        program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                        from_idx=i.start.tokenIndex,
+                        to_idx=i.stop.tokenIndex
+                    )
 
 class FindClassUsagesListener(JavaParserLabeledListener):
     def __init__(self, source_class: str = None, new_class: str = None):
@@ -350,10 +368,10 @@ class ChangeClassUsagesListener(JavaParserLabeledListener):
                             right_side = ctx.methodCall().getText()
                             print(f"{right_side} is used method")
 
-class DimoExtractClassRefactoringListener(JavaParserLabeledListener):
+class PropagateClassRefactoringListener(JavaParserLabeledListener):
     """
-    To implement extract class refactoring based on its actors.
-    Creates a new class and move fields and methods from the old class to the new one
+    To implement propagate class refactoring based on its actors.
+    Changes all methods and field those are using our class also it will set constructor!
     """
 
     def __init__(
@@ -393,7 +411,9 @@ class DimoExtractClassRefactoringListener(JavaParserLabeledListener):
         self.code = ""
         self.added=""
         self.started=False
+        #It will store all variable names we have on a method
         self.variablesNames=[]
+        #It will store all variable types we have on a method
         self.variablesTypes = []
 
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
@@ -402,32 +422,27 @@ class DimoExtractClassRefactoringListener(JavaParserLabeledListener):
 
         if not self.is_source_class:
             return None
-        method_identifier = ctx.IDENTIFIER().getText()
-        if method_identifier in self.moved_methods:
-            self.detected_method = method_identifier
+        # method_identifier = ctx.IDENTIFIER().getText()
+        # if method_identifier in self.moved_methods:
+        #     self.detected_method = method_identifier
 
     def enterVariableDeclaratorId(self, ctx: JavaParserLabeled.VariableDeclaratorIdContext):
         field_identifier = ctx.IDENTIFIER().getText()
         self.variablesNames.append(field_identifier)
         self.variablesTypes.append(ctx.parentCtx.start.text)
-        if field_identifier in self.moved_fields:
-            self.detected_field = field_identifier
+        # if field_identifier in self.moved_fields:
+        #     self.detected_field = field_identifier
 
     def enterMethodCall0(self, ctx:JavaParserLabeled.MethodCall0Context):
-        fieldName=self.new_class[0].lower()+self.new_class[1:]
+        #When we enter on a method of one class, this listener will trigger
+        methodName=self.new_class[0].lower()+self.new_class[1:]
 
         if (ctx.parentCtx.start.text in self.variablesNames):
             x = self.variablesNames.index(ctx.parentCtx.start.text)
             typeVar = self.variablesTypes[x]
             if ((typeVar == self.source_class) and (ctx.IDENTIFIER().getText() in self.moved_methods)):
-                print("FROM* Line: " + str(ctx.start.line) + " Column: " + str(
-                    ctx.start.column))
-                print(
-                    "To  * Line: " + str(ctx.stop.line) + " Column: " + str(ctx.stop.column))
-                print("Text: " + "." + fieldName + "." + ctx.IDENTIFIER().getText())
-                print("=" * 50)
-
-                changed_text=ctx.parentCtx.start.text + "." + fieldName
+                changed_text=ctx.parentCtx.start.text + "." + methodName
+                #If it's one of our moved methods it will update that line to be compile
                 self.token_stream_rewriter.replaceRange(
                     ctx.parentCtx.children[0].start.tokenIndex,
                     ctx.parentCtx.children[0].start.tokenIndex,
@@ -437,18 +452,15 @@ class DimoExtractClassRefactoringListener(JavaParserLabeledListener):
                     f.write(self.token_stream_rewriter.getDefaultText())
 
     def enterExpression1(self, ctx:JavaParserLabeled.Expression2Context):
+        #When we enter on a field of one class, this listener will trigger
+
         fieldName=self.new_class[0].lower()+self.new_class[1:]
         if (ctx.start.text in self.variablesNames):
             x = self.variablesNames.index(ctx.start.text)
             typeVar = self.variablesTypes[x]
             if ((typeVar == self.source_class) and (ctx.stop.text in self.moved_fields)):
-                print("FROM* Line: " + str(ctx.start.line) + " Column: " + str(
-                    ctx.start.column))
-                print("To  * Line: " + str(ctx.stop.line) + " Column: " + str(ctx.stop.column))
-                print("Text: " + ctx.start.text + "." + fieldName + "." + ctx.stop.text)
-                print("=" * 50)
-
                 changed_text = ctx.start.text + "." + fieldName
+                #If it's one of our moved fields it will update that line to be compile
                 self.token_stream_rewriter.replaceRange(
                     ctx.parentCtx.children[0].start.tokenIndex,
                     ctx.parentCtx.children[0].start.tokenIndex,
@@ -456,7 +468,6 @@ class DimoExtractClassRefactoringListener(JavaParserLabeledListener):
                 )
                 with open(self.file_path, mode='w', newline='') as f:
                     f.write(self.token_stream_rewriter.getDefaultText())
-                # print("Amin"+token_stream_rewriter.getDefaultText()+"Amin")
 
 
 class ExtractClassAPI:
@@ -476,6 +487,8 @@ class ExtractClassAPI:
         self.tree = self.parser.compilationUnit()
         self.walker = ParseTreeWalker()
         self.checked = False
+        self.TAB = "\t"
+
 
     def check_dependency_graph(self):
         listener = DependencyPreConditionListener(
@@ -533,8 +546,6 @@ class ExtractClassAPI:
                 listener=listener,
                 t=self.tree
             )
-            print(listener.token_stream_rewriter.getDefaultText())
-
             s = listener.token_stream_rewriter.getDefaultText().split("\n")
             a = 0
             for i in s:
@@ -548,10 +559,18 @@ class ExtractClassAPI:
             file1.truncate(0)
             file2 = open(self.file_path,"a")
             file2.truncate(0)
-            s[a+1]="public "+s[a+1]
+            if(len(listener.new_file_cons)>0):
+                s[a+1]="public "+s[a+1]+"{"+f"\n{self.TAB}public {self.new_class}()"+"{\n"+listener.new_file_cons+self.TAB+"}"
+            else:
+                s[a + 1] = "public " + s[
+                    a + 1] + "{" + f"\n{self.TAB}"
+            tt=0
             for i in s[a+1:-1]:
-                i+="\n"
-                file1.write(i)
+                if(tt!=1):
+                    i+="\n"
+                    file1.write(i)
+                tt=tt+1
+
             file1.close()
             temp = firstcalss[0].split("{")
             objectname = str(self.new_class)
@@ -559,8 +578,14 @@ class ExtractClassAPI:
             isinstance = f"   public {self.new_class} {objectname};"
             temp[0] = f"public class {self.source_class} "+"{\n"+isinstance
             for i in temp:
-                file2.write(i)
+                if(f"{self.source_class}()" in i):
+                    x=i.index(f"{self.source_class}()")
+                    file2.write(i[:x+len(self.source_class)+2]+"{"+i[x+len(self.source_class)+2:])
+                else:
+                    file2.write(i)
+
             file2.close()
+            print("Finished")
             print("=" * 50)
             # After Refactoring
             self.find_usages(listener.token_stream_rewriter.getDefaultText())
@@ -570,7 +595,7 @@ class ExtractClassAPI:
             print("Can not refactor!")
 
 
-class DimoExtractClassAPI:
+class PropagateClassAPI:
     def __init__(self, project_dir, file_path, source_class, new_class, moved_fields, moved_methods,
                  new_file_path=None):
         self.project_dir = project_dir
@@ -588,8 +613,8 @@ class DimoExtractClassAPI:
         self.walker = ParseTreeWalker()
         self.checked = False
 
-    def dimo_propagate(self):
-            listener = DimoExtractClassRefactoringListener(
+    def do_propagate(self):
+            listener = PropagateClassRefactoringListener(
                 file_path=self.file_path,
                 common_token_stream=self.token_stream,
                 new_class=self.new_class,
@@ -621,13 +646,12 @@ if __name__ == "__main__":
             new_file_path="D:\\University\\Term 6\\Compiler\\CodART\\GodClassExtracted.java"
         ).do_refactor()
 
-        # for i in get_java_files("D:\\University\\Term 6\\Compiler\\TA\\iust-compiler992\\test_project"):
-        #     # print(i[0])
-        #     DimoExtractClassAPI(
-        #         project_dir="D:\\University\\Term 6\\Compiler\\TA\\iust-compiler992\\test_project",
-        #         file_path=i[0],
-        #         source_class="GodClass",
-        #         new_class="GodClassExtracted",
-        #         moved_fields=["field1", "field2", ],
-        #         moved_methods=["method1", "method3", ]
-        #     ).dimo_propagate()
+        for i in get_java_files("D:\\University\\Term 6\\Compiler\\TA\\iust-compiler992\\test_project"):
+            PropagateClassAPI(
+                project_dir="D:\\University\\Term 6\\Compiler\\TA\\iust-compiler992\\test_project",
+                file_path=i[0],
+                source_class="GodClass",
+                new_class="GodClassExtracted",
+                moved_fields=["field1", "field2", ],
+                moved_methods=["method1", "method3", ]
+            ).do_propagate()
