@@ -1,29 +1,45 @@
 package pushdown_method_test_vehicle;
+
 class Vehicle {
     protected String brand;
-     
+    protected string id;
+
+  private void getId() {
+    System.out.println(id);
+  }
+
+  protected void getId2() {
+    System.out.println(id);
+  }
+
   protected String owner = "Ali"; 
   public void setBrand() {
     this.brand = "fiat";
-  }     // Vehicle attribute
+  }    
+  
   public void epicMethod(){
     System.out.println("hmmmm");
   }
+
   public void doNothing() {
     System.out.println("doing nothing");
   }
-  public void honk() {                    // Vehicle method
+
+  public void honk() {                   
     System.out.println("Tuut, tuut!");
-    setBrand();
+    this.setBrand();
   }
 }
 
 class FourWheel extends Vehicle{
-    protected string color;
+
+  protected string color;
   protected int weight = 30;
+  
   public void doNothing() {
     System.out.println("doing something");
   }
+
   public void printName(){
     System.out.println("four wheel");
   }
