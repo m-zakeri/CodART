@@ -432,10 +432,10 @@ class ReplaceDependentObjectsListener(JavaParserLabeledListener):
 
 
 filename = 'Source.java'
-class_identifier = 'MyClass'
+class_identifier = 'Source'
 source_package = 'sourcePackage'
 target_package = 'targetPackage'
-directory = 'D:/Programming/Java/TestProject/'
+directory = '../tests/move_class/sample_project'
 file_counter = 0
 
 
