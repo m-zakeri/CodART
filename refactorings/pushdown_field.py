@@ -57,7 +57,7 @@ class PushDownField:
         self.class_names = class_names
         self.filename_mapping = filename_mapping
 
-    def pre_propagation_check(self, program, superclass):
+    def pre_condition_check(self, program, superclass):
         if self.package_name not in program.packages \
                 or self.superclass_name not in program.packages[self.package_name].classes \
                 or self.field_name not in program.packages[self.package_name].classes[self.superclass_name].fields:
@@ -79,7 +79,7 @@ class PushDownField:
         program = utils2.get_program(self.source_filenames, print_status=True)
         superclass: utils_listener_fast.Class = program.packages[self.package_name].classes[self.superclass_name]
 
-        if not self.pre_propagation_check(program, superclass):
+        if not self.pre_condition_check(program, superclass):
             print("Can't refactor")
             return False
 

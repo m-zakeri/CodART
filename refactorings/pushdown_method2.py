@@ -125,7 +125,8 @@ class PushDownMethodRefactoring:
         for c in classes_to_add_to:
             c_body_start = utils_listener_fast.TokensInfo(c.parser_context.classBody())
             c_body_start.stop = c_body_start.start 
-            rewriter.insert_after(c_body_start, "\n%s %s %s() {\n   %s\n}" % (" ".join(method.modifiers), method.returntype, method.name, method.body_text[1:-1]))
+            rewriter.insert_after(c_body_start, "\n\n    %s %s %s() {\n       %s\n    }\n"
+             % (" ".join(method.modifiers), method.returntype, method.name, method.body_text[1:-1]))
 
         method_token_info = utils_listener_fast.TokensInfo(method.parser_context)
         rewriter.replace(method_token_info, "")
@@ -134,7 +135,7 @@ class PushDownMethodRefactoring:
         return True
 
 if __name__ == "__main__":
-    mylist = get_filenames_in_dir('D:/archive/uni/CD/project/CodART/tests/pushdown_method/')
+    mylist = get_filenames_in_dir('D:/archive/uni/CD/project/CodART/tests/pushdown_method/vehicle')
     print("Testing pushdown_method...")
     if PushDownMethodRefactoring(mylist, "pushdown_method_test_vehicle", "Vehicle", "epicMethod()").do_refactor():
         print("Success!")
