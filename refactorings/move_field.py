@@ -2,7 +2,7 @@ import os
 import subprocess
 from refactorings.utils.utils2 import get_program, Rewriter, get_filenames_in_dir
 from refactorings.utils.scope_listener import get_program2
-from refactorings.utils.utils_listener_fast import TokensInfo, Field, Class, LocalVariable
+from refactorings.utils.utils_listener_fast import TokensInfo, Field, Class, LocalVariable, ClassImport
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
 
@@ -214,6 +214,24 @@ class MoveFieldRefactoring:
 
         return usages
 
+    def should_add_import(self, klass: Class):
+        # we don't need to handle target class
+        if klass.name == self.target_class_name:
+            return False
+
+        # check package imports
+        for package_import in klass.file_info.package_imports:
+            if package_import.package_name == self.target_package_name:
+                return False
+
+        # if target class not imported as package then check class imports
+        for class_import in klass.file_info.class_imports:
+            if class_import.class_name == self.target_class_name:
+                return False
+
+        # if target class is not imported add the import
+        return True
+
     def is_field_in_class(self, field, target_class):
         """
         :param field: The field which is to be checked
@@ -253,6 +271,14 @@ class MoveFieldRefactoring:
                 usages.extend(new_usages)
                 new_usages = self.get_usages_in_class_body(cls)
                 usages.extend(new_usages)
+                should_import = self.should_add_import(cls)
+
+                if not should_import:
+                    continue
+
+                usages.append({
+                    "import": cls,
+                })
 
         return usages, program
 
@@ -264,6 +290,10 @@ class MoveFieldRefactoring:
         """
         local_var_declared = False
         for usage in usages:
+            if "import" in usage:
+                self.__add_import(usage["import"], rewriter)
+                continue
+    
             method_tokens = TokensInfo(usage["meta_data"].parser_context)
             for i, token in enumerate(usage['tokens']):
                 if token.text != self.field_name:
@@ -310,11 +340,11 @@ class MoveFieldRefactoring:
         self.__move_field_to_dst(target_class, field, rewriter)
         self.propagate(usages, rewriter)
         rewriter.apply()
-
-        modified_files = set(map(lambda x: x["meta_data"].filename.replace(".java", ".rewritten.java"), usages))
+        modified_files = set(map(lambda x: x["meta_data"].filename.replace(".java", ".rewritten.java"), filter(lambda x: "meta_data" in x, usages)))
+        modified_files.union(set(map(lambda x: x["import"].filename.replace(".java", ".rewritten.java"), filter(lambda x: "import" in x, usages))))
         modified_files.add(source_class.filename.replace(".java", ".rewritten.java"))
         modified_files.add(target_class.filename.replace(".java", ".rewritten.java"))
-        self.__reformat(modified_files)
+        self.__reformat(list(modified_files))
 
         return True
 
@@ -369,16 +399,31 @@ class MoveFieldRefactoring:
 
         field.modifiers.insert(0, "public")
 
-    def __reformat(self, modified_files: set):
+    def __reformat(self, modified_files: list):
         """
         :param modified_files: The files that have been modified since the refactoring
         :return: void
         reformats the java files based on google's java pretty format
         """
         temp = ["java", "-jar", self.formatter, "--replace"]
-        temp.extend(list(modified_files))
+        temp.extend(modified_files)
         print(temp)
         subprocess.call(temp)
+
+    def __add_import(self, klass: Class, rewriter):
+        # if there are no imports in the class appends before the start of class
+        import_line = f"import {self.target_package_name}.{self.target_class_name};"
+        if len(klass.file_info.all_imports) == 0:
+            tokens_info = TokensInfo(klass.parser_context)
+            tokens_info.start -= len(klass.modifiers_parser_contexts) * 2
+            tokens_info.stop += 1
+            rewriter.insert_before_start(tokens_info, import_line)
+            return
+
+        # if however we have some imports append new import at the end of last import
+        tokens_info = TokensInfo(klass.file_info.all_imports[-1].parser_context)
+        tokens_info.stop += 1
+        rewriter.insert_after(tokens_info, import_line)
 
 
 if __name__ == '__main__':
