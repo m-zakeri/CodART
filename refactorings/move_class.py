@@ -57,7 +57,9 @@ class MoveClassPreConditionListener(JavaParserLabeledListener):
     move class refactoring
     """
 
-    def enterCompilationUnit(self, ctx:JavaParserLabeled.CompilationUnitContext):
+    # Enter a parse tree produced by CompilationUnitContext
+    def enterCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
+        # add each all classes in a file to file_classes list
         for declaration in ctx.children:
             if isinstance(declaration, JavaParserLabeled.TypeDeclarationContext):
                 self.file_classes.append(declaration.classDeclaration().IDENTIFIER().getText())
