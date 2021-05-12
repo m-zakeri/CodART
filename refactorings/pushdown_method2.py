@@ -20,7 +20,7 @@ No specific Post Condition
 """
 
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
-from refactorings.utils.utils_listener_fast import TokensInfo, SingleFileElement
+# from refactorings.utils.utils_listener_fast import TokensInfo, SingleFileElement
 from refactorings.pullup_method_get_removemethod import get_removemethods
 from refactorings.utils.utils2 import Rewriter, get_program, get_filenames_in_dir
 from refactorings.utils import utils_listener_fast, utils2
@@ -59,11 +59,13 @@ class PushDownMethodRefactoring:
         self.filename_mapping = filename_mapping
 
     def pre_propagation_check(self, program, superclass):
+        # check input validation
         if self.package_name not in program.packages \
                 or self.superclass_name not in program.packages[self.package_name].classes \
                 or self.method_key not in program.packages[self.package_name].classes[self.superclass_name].methods:
             return False
 
+        # check if method is used in superclass
         for m in superclass.methods:
             method: utils_listener_fast.Method = superclass.methods[m]
             for item in method.body_local_vars_and_expr_names:
@@ -79,20 +81,20 @@ class PushDownMethodRefactoring:
     def do_refactor(self):
         program = get_program(self.source_filenames, print_status=True)  # getting the program packages
         superclass: utils_listener_fast.Class = program.packages[self.package_name].classes[self.superclass_name]
-        # _sourceclass = program.packages[self.package_name].classes[self.class_name]
         if not self.pre_propagation_check(program, superclass):
             return False
 
         other_derived_classes = []
         classes_to_add_to = []
-        for pn in program.packages:
-            p: utils_listener_fast.Package = program.packages[pn]
-            for cn in p.classes:
-                c: utils_listener_fast.Class = p.classes[cn]
+        for p in program.packages:
+            package: utils_listener_fast.Package = program.packages[p]
+            for cn in package.classes:
+                c: utils_listener_fast.Class = package.classes[cn]
                 if ((c.superclass_name == self.superclass_name and c.file_info.has_imported_class(self.package_name,
                                                                                                   self.superclass_name)) \
                         or (self.package_name is not None and c.superclass_name == self.package_name + '.' + self.superclass_name)):
 
+                    # enable functionality of class name
                     if len(self.class_names) == 0 or cn in self.class_names:
                         if self.method_key in c.methods:
                             print("some classes have same method")
@@ -101,17 +103,19 @@ class PushDownMethodRefactoring:
                             classes_to_add_to.append(c)
                     else:
                         other_derived_classes.append(c)
+
         rewriter = utils2.Rewriter(program, self.filename_mapping)
 
         method = superclass.methods[self.method_key]
 
         is_public = "public" in method.modifiers
         is_protected = "protected" in method.modifiers
-        modifier = ("public " if is_public else ("protected " if is_protected else ""))
+        is_private = "private" in method.modifiers
+
         for c in classes_to_add_to:
             c_body_start = utils_listener_fast.TokensInfo(c.parser_context.classBody())
-            c_body_start.stop = c_body_start.start  # Start and stop both point to the '{'
-            rewriter.insert_after(c_body_start, "\n%s %s %s() {\n   %s\n}" % (modifier, method.returntype, method.name, method.body_text[1:-1]))
+            c_body_start.stop = c_body_start.start 
+            rewriter.insert_after(c_body_start, "\n%s %s %s() {\n   %s\n}" % (method.modifiers.join(" "), method.returntype, method.name, method.body_text[1:-1]))
 
         method_token_info = utils_listener_fast.TokensInfo(method.parser_context)
         rewriter.replace(method_token_info, "")
@@ -122,7 +126,7 @@ class PushDownMethodRefactoring:
 if __name__ == "__main__":
     mylist = get_filenames_in_dir('D:/archive/uni/CD/project/CodART/tests/pushdown_method/')
     print("Testing pushdown_method...")
-    if PushDownMethodRefactoring(mylist, "pushdown_method_test_vehicle", "Vehicle", "epicMethod()").do_refactor():
+    if PushDownMethodRefactoring(mylist, "pushdown_method_test_vehicle", "Vehicle", "epicMethod()", "Tank").do_refactor():
         print("Success!")
     else:
         print("Cannot refactor.")
