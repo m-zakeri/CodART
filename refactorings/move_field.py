@@ -83,6 +83,17 @@ class MoveFieldRefactoring:
         except StopIteration:
             return False
 
+    def is_declared_in_class(self, tokens, token, method):
+        """
+        Checks if given token is related to a new declared variable in a method
+        """
+        selector = self.stringify(tokens, token.tokenIndex - 2, token.tokenIndex)
+        if method.class_name == self.class_name:
+            if selector in ['this.', self.class_name + '.']:
+                return False
+        elif selector == self.class_name + '.':
+            return False
+
     def is_a_usage(self, tokens, token, method):
         """
         Checks if given token is related to the static field, program searching for
@@ -93,6 +104,40 @@ class MoveFieldRefactoring:
                 return True
             return False
         return True
+
+    def is_a_usage_in_class(self, tokens, token, field):
+        """
+        """
+        selector = self.stringify(tokens, token.tokenIndex - 2, token.tokenIndex)
+        if selector == self.class_name + '.':
+            return True
+        if selector == 'this.':
+            if field.class_name == self.class_name:
+                return True
+            return False
+        return field.class_name == self.class_name
+
+    def get_usages_in_class_body(self, src):
+        """
+        """
+        usages = list()
+
+        fields: dict = src.fields
+        for field_name, field in fields.items():
+            if field_name == self.field_name:
+                continue
+            tokens_info = TokensInfo(field.parser_context)  # tokens of ctx method
+            exps = tokens_info.get_token_index(tokens_info.token_stream.tokens, tokens_info.start, tokens_info.stop)
+
+            for token in exps:
+                if token.text == self.field_name:
+                    if self.is_a_usage_in_class(tokens_info.token_stream.tokens, token, field):
+                        new_case = {
+                            'field': field,
+                            'tokens': list(filter(lambda t: t.line == token.line, exps))
+                        }
+                        usages.append(new_case)
+        return usages
 
     def get_usages_in_methods(self, src):
         """
@@ -125,6 +170,13 @@ class MoveFieldRefactoring:
                     usages.append(new_case)
         return usages
 
+    def if_field_in_class(self, field, target_class):
+        class_fields = target_class.fields
+        for f in class_fields:
+            if f == field.name:
+                return True
+        return False
+
     def get_usage(self):
         """
         Finds usages of a field inside project files
@@ -140,11 +192,17 @@ class MoveFieldRefactoring:
         if 'static' not in field.modifiers:
             raise NonStaticFieldRefactorError("Non-static fields cannot be refactored!")
 
+        if self.if_field_in_class(field, target_class):
+            raise Exception("A field with the same name exists in target class!")
+
         usages = list()
         for p_name, package in program.packages.items():
             for cls_name, cls in package.classes.items():
                 new_usages = self.get_usages_in_methods(cls)
                 usages.extend(new_usages)
+                new_usages = self.get_usages_in_class_body(cls)
+                usages.extend(new_usages)
+
 
         return usages, program
 
@@ -236,7 +294,7 @@ class MoveFieldRefactoring:
 
 
 if __name__ == '__main__':
-    path = "/home/loop/IdeaProjects/Sample"
+    path = "D:\\iust\\compiler\\final project\\CodART\\tests\\move_field"
     my_list = get_filenames_in_dir(path)
     filtered = []
     for file in my_list:
@@ -245,8 +303,8 @@ if __name__ == '__main__':
         else:
             filtered.append(file)
 
-    refactoring = MoveFieldRefactoring(filtered, "sample", "Test3", "toBeMoved",
-                                       "Test", "sample", "")
+    refactoring = MoveFieldRefactoring(filtered, "hello", "classA", "a",
+                                       "classB", "hello", "")
 
     refac = refactoring.move()
     print(refac)
