@@ -36,7 +36,7 @@ class MoveFieldRefactoring:
         """
         try:
             class_name = program.packages[self.package_name].classes[self.class_name]
-            target_class = program.packages[self.package_name].classes[self.target_class_name]
+            target_class = program.packages[self.target_package_name].classes[self.target_class_name]
             field = program.packages[self.package_name].classes[self.class_name].fields[self.field_name]
         except KeyError:
             return None
@@ -257,26 +257,34 @@ class MoveFieldRefactoring:
 
         return usages, program
 
-    def propagate(self, rewriter: Rewriter):
+    def propagate(self, usages: list, rewriter: Rewriter):
         """
         :param rewriter: The rewriter object which is going to rewrite the files
         :return: void
         Propagates the changes made to the files and the field
         """
-        usages, program = self.get_usage()
+        local_var_declared = False
         for usage in usages:
             method_tokens = TokensInfo(usage["method"].parser_context)
-
             for i, token in enumerate(usage['tokens']):
                 if token.text != self.field_name:
                     continue
-
+                if usage["method"].class_name == "Extra":
+                    print()
                 method_tokens.start = token.tokenIndex
                 method_tokens.stop = token.tokenIndex
                 if i > 1:
                     if usage["tokens"][i - 2].text == "this" or \
                             usage["tokens"][i - 2].text == self.class_name:
                         method_tokens.start -= 2
+                    else:
+                        if local_var_declared:
+                            continue
+                        local_var_declared = True
+                        continue
+                else:
+                    if local_var_declared:
+                        continue
 
                 token_stream = usage["method"].parser_context.parser.getTokenStream()
                 if token_stream not in rewriter.token_streams.keys():
@@ -286,27 +294,27 @@ class MoveFieldRefactoring:
                         usage["method"].filename.replace(".java", ".rewritten.java")
                     )
                 rewriter.replace(method_tokens, f'{self.target_class_name}.{self.field_name}')
-                break
 
     def move(self):
         """
         :return: Whether the refactoring is completed or not
         Performs the move field refactoring
         """
-        usage, program = self.get_usage()
+        usages, program = self.get_usage()
         source_package = program.packages[self.package_name]
+        target_package = program.packages[self.target_package_name]
         source_class = source_package.classes[self.class_name]
-        target_class = source_package.classes[self.target_class_name]
+        target_class = target_package.classes[self.target_class_name]
         field = source_class.fields[self.field_name]
         rewriter = Rewriter(program,
                             lambda x: f"{os.path.dirname(x)}/{os.path.splitext(os.path.basename(x))[0]}.rewritten.java")
 
         self.__remove_field_from_src(field, rewriter)
         self.__move_field_to_dst(target_class, field, rewriter)
-        self.propagate(field, rewriter)
+        self.propagate(usages, rewriter)
         rewriter.apply()
 
-        modified_files = set(map(lambda x: x["method"].filename.replace(".java", ".rewritten.java"), usage))
+        modified_files = set(map(lambda x: x["method"].filename.replace(".java", ".rewritten.java"), usages))
         modified_files.add(source_class.filename.replace(".java", ".rewritten.java"))
         modified_files.add(target_class.filename.replace(".java", ".rewritten.java"))
         self.__reformat(modified_files)
@@ -355,7 +363,7 @@ class MoveFieldRefactoring:
         """
         index = -1
         for i, mod in enumerate(field.modifiers):
-            if mod == "private" or mod == "protected":
+            if mod == "private" or mod == "protected" or mod == "public":
                 index = i
                 break
 
@@ -377,7 +385,7 @@ class MoveFieldRefactoring:
 
 
 if __name__ == '__main__':
-    path = "D:\\iust\\compiler\\final project\\CodART\\tests\\move_field"
+    path = "/home/loop/IdeaProjects/Sample"
     my_list = get_filenames_in_dir(path)
     filtered = []
     for file in my_list:
@@ -386,8 +394,8 @@ if __name__ == '__main__':
         else:
             filtered.append(file)
 
-    refactoring = MoveFieldRefactoring(filtered, "hello", "classA", "a",
-                                       "classB", "hello", "")
+    refactoring = MoveFieldRefactoring(filtered, "source", "Source", "a",
+                                       "Target", "target", "")
 
     refac = refactoring.move()
     print(refac)
