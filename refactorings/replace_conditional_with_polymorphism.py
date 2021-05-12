@@ -64,7 +64,7 @@ if __name__ == '__main__':
         token = lexer.nextToken()
     #print(f"swich_type : {switch_type} , cases : {switches} , variables : {variables} , mehthod: {methods} , return : {returntype[0]}")
     #print(opening)
-    answer = open('../tests/replace_conditional_with_polymorphism/test_results', 'w')
+    answer = open('../tests/replace_conditional_with_polymorphism/test_results.java', 'w')
     first = str(clas[0])
     second = "switch(mnth){"
     for i in switches:
