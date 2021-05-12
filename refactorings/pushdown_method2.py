@@ -20,7 +20,7 @@ No specific Post Condition
 """
 
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
-# from refactorings.utils.utils_listener_fast import TokensInfo, SingleFileElement
+from refactorings.utils.utils_listener_fast import TokensInfo, SingleFileElement
 from refactorings.pullup_method_get_removemethod import get_removemethods
 from refactorings.utils.utils2 import Rewriter, get_program, get_filenames_in_dir
 from refactorings.utils import utils_listener_fast, utils2
