@@ -35,7 +35,6 @@ class Student {
     }
 
     public void actionNumberThree() {
-        this.age += 3;
         printStudent();
     }
 

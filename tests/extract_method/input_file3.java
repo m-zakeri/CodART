@@ -1,4 +1,4 @@
-package com.company;
+package ir.mag.test;
 
 public class Main {
 

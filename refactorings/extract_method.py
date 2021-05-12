@@ -24,6 +24,29 @@ def is_equal(a, b):
     return str(a) == str(b)
 
 
+class VariableTypes:
+    DECIMAL_LITERAL = 51
+    HEX_LITERAL = 52
+    OCT_LITERAL = 53
+    BINARY_LITERAL = 54
+    FLOAT_LITERAL = 55
+    HEX_FLOAT_LITERAL = 56
+    BOOL_LITERAL = 57
+    CHAR_LITERAL = 58
+    STRING_LITERAL = 59
+    MAP_TYPE = {
+        DECIMAL_LITERAL: "int",
+        HEX_LITERAL: "",
+        OCT_LITERAL: "",
+        BINARY_LITERAL: "boolean",
+        FLOAT_LITERAL: "float",
+        HEX_FLOAT_LITERAL: "float",
+        BOOL_LITERAL: "boolean",
+        CHAR_LITERAL: "char",
+        STRING_LITERAL: "String",
+    }
+
+
 class Statement:
     """
     Each line of code in the methods is a statement.
@@ -32,6 +55,12 @@ class Statement:
     def __init__(self, statement, expressions):
         self.statement = statement
         self.expressions = expressions
+        self.variables = []
+
+    def copy(self):
+        s = Statement(self.statement, self.expressions)
+        s.variables = self.variables.copy()
+        return s
 
     def __str__(self):
         """
@@ -149,8 +178,38 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
     # Searching Duplications
     ##########################
 
-    @staticmethod
-    def get_duplicate_continues_statements(a_statements, b_statements):
+    def check_semi_duplicate(self, sa, sb, k):
+        fta, ftb = sa.statement.start.tokenIndex, sb.statement.start.tokenIndex
+        tta, ttb = sa.statement.stop.tokenIndex, sb.statement.stop.tokenIndex
+
+        if tta - fta != ttb - ftb:
+            return False, sa, sb
+
+        count = 0
+
+        m = min(tta - fta, ttb - ftb)
+        for i in range(m):
+            txt_token_a = self.tokens[fta + i].text
+            txt_token_b = self.tokens[ftb + i].text
+            if txt_token_a != txt_token_b:
+                if self.tokens[fta + i].type != self.tokens[ftb + i].type:
+                    return False, sa, sb
+                else:
+                    history_a = list(map(lambda x: x[2], sa.variables))
+                    history_b = list(map(lambda x: x[2], sb.variables))
+                    count += 1
+                    if txt_token_a not in history_a:
+                        sa.variables.append(
+                            (self.tokens[fta + i].type,
+                             "variable{}Number{}{}".format(self.tokens[fta + i].type, k, count), txt_token_a))
+                    if txt_token_b not in history_b:
+                        sb.variables.append(
+                            (self.tokens[ftb + i].type,
+                             "variable{}Number{}{}".format(self.tokens[ftb + i].type, k, count), txt_token_b))
+
+        return True, sa, sb
+
+    def get_duplicate_continues_statements(self, a_statements, b_statements):
         """
         Find duplicate statements between two arrays of statements.
         :param a_statements: the first list of statements
@@ -190,7 +249,7 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
                     b_duplicates.append(sb)
                     k += 1
                 if count_duplicate_statement != 0:
-                    method_a_b_duplications.append((count_duplicate_statement, a_duplicates, b_duplicates))
+                    method_a_b_duplications.append((count_duplicate_statement, a_duplicates.copy(), b_duplicates.copy()))
                 j += 1
             i += 1
 
@@ -199,8 +258,42 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
         if len(method_a_b_duplications) > 1:
             max_exact_duplicate = max(method_a_b_duplications, key=lambda x: x[0])
 
+        # diagnose semi duplications
+        # here we search for duplications that can be avoided by passing variable
+        method_a_b_semi_duplications = []
+        i = 0
+        while i < len_a_statement:
+            j = 0
+            while j < len_b_statement:
+                count_duplicate_statement = 0
+                a_duplicates = []
+                b_duplicates = []
+                k = 0
+                while i + k < len_a_statement and j + k < len_b_statement:
+                    sa = a_statements.copy()[i + k]
+                    sb = b_statements.copy()[j + k]
+                    if is_equal(sa.statement.getText(), sb.statement.getText()):
+                        count_duplicate_statement += 1
+                    else:
+                        is_semi, sa, sb = self.check_semi_duplicate(sa.copy(), sb.copy(), k)
+                        if not is_semi:
+                            break
+                        count_duplicate_statement += 1
+                    a_duplicates.append(sa.copy())
+                    b_duplicates.append(sb.copy())
+                    k += 1
+                if count_duplicate_statement != 0:
+                    method_a_b_semi_duplications.append(
+                        (count_duplicate_statement, a_duplicates.copy(), b_duplicates.copy()))
+                j += 1
+            i += 1
 
-        return max_exact_duplicate
+        # calculate the maximum based on the number of duplications
+        max_semi_duplicate = None
+        if len(method_a_b_semi_duplications) > 1:
+            max_semi_duplicate = max(method_a_b_semi_duplications, key=lambda x: x[0])
+
+        return max(max_exact_duplicate, max_semi_duplicate, key=lambda x: x[0])
 
     @staticmethod
     def log_duplication(duplicate, i, j, methods):
@@ -237,7 +330,7 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
         methods = list(self.method_statements.keys())
         len_method = len(methods)
         i = 0
-        duplicates = {"statements": [], "lines": [], "text": ""}
+        duplicates = {"statements": [], "lines": [], "text": "", "variables": []}
         while i < len_method - 1:
             j = i + 1
             while j < len_method:
@@ -251,18 +344,37 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
                     self.log_duplication(duplicate, i, j, methods)
                     if len(duplicates["statements"]) == 0:
                         duplicates["statements"].append(duplicate[1])
+                        duplicates["variables"] = duplicate[1]
                         duplicates["lines"].append(duplicate[1][0].statement.start.line)
                         for d in duplicate[1]:
                             duplicates["text"] += d.statement.getText()
 
                     for i in range(1, 3):
+                        print(duplicate[i][0].statement.start.line)
                         if duplicate[i][0].statement.start.line not in duplicates["lines"]:
                             temp = ""
                             for d in duplicate[i]:
                                 temp += d.statement.getText()
                             if temp == duplicates["text"]:
                                 duplicates["statements"].append(duplicate[i])
-
+                            else:
+                                is_ok = True
+                                if len(duplicate[i]) != len(duplicates["statements"][0]):
+                                    break
+                                else:
+                                    for s1 in duplicates["statements"][0]:
+                                        for s2 in duplicate[i]:
+                                            if len(s1.variables) != len(s2.variables):
+                                                is_ok = False
+                                                break
+                                            else:
+                                                for v1 in s1.variables:
+                                                    for v2 in s2.variables:
+                                                        if v1[0] != v2[0]:
+                                                            is_ok = False
+                                                            break
+                                                    if is_ok:
+                                                        duplicates["statements"].append(duplicate[i])
                 j += 1
             i += 1
         self.duplicates = DuplicationRefactoring(duplicates["statements"])
@@ -280,10 +392,32 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
         :param start_index: the index of token.
         :return:
         """
+        # here we are creating the arguments
+        d = self.duplicates.duplications[0]
+        func_args = []
+        for s in d.statements:
+            for v in s.variables:
+                arg_type = v[0]
+                arg_name = v[1]
+                try:
+                    func_args.append(VariableTypes.MAP_TYPE[arg_type] + " " + arg_name)
+                except:
+                    pass
+        func_args = ", ".join(func_args)
+
+        # adding the new method
         new_method = "\n"
-        new_method += "\tpublic void " + self.new_method_name + "() {\n"
+        new_method += "\tpublic void " + self.new_method_name + "(" + func_args + ") {\n"
+        k = 0
         for statement_obj in self.duplicates.duplications[0].statements:
-            new_method += "\t\t{}\n".format(statement_obj.statement.getText())
+            if len(statement_obj.variables) == 0:
+                new_method += "\t\t{}\n".format(statement_obj.statement.getText())
+            else:
+                statement = "\t\t{}\n".format(statement_obj.statement.getText())
+                for v in statement_obj.variables:
+                    statement = statement.replace(v[2], v[1])
+                new_method += statement
+            k += 1
         new_method += "\t}\n"
         new_method += "\n"
 
@@ -296,10 +430,18 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
         """
         self.duplicates.duplications.sort(key=lambda x: x.to_line, reverse=True)
         for duplicate in self.duplicates.duplications:
+            # arguments
+            variables = []
+            for state in duplicate.statements:
+                for v in state.variables:
+                    variables.append(v)
+            variables = list(map(lambda x: x[2], variables))
+            # replacing
             start_index = duplicate.statements[0].statement.start.tokenIndex
             end_index = duplicate.statements[-1].statement.stop.tokenIndex
-            self.token_stream_re_writer.replaceRange(start_index, end_index, "{}();".format(self.new_method_name))
-        print(self.token_stream_re_writer.getDefaultText())
+            self.token_stream_re_writer.replaceRange(start_index, end_index,
+                                                     "{}({});".format(self.new_method_name, ", ".join(variables)))
+        # print(self.token_stream_re_writer.getDefaultText())
 
     def refactor(self, ctx):
         """
@@ -312,8 +454,8 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
 
 
 if __name__ == "__main__":
-    input_file = r"C:\Users\Amin\MAG\_term_6\CodART\tests\extract_method\input_file4.java"
-    output_file = r"C:\Users\Amin\MAG\_term_6\CodART\tests\extract_method\output_file4.java"
+    input_file = r"C:\Users\Amin\MAG\_term_6\CodART\tests\extract_method\input_file.java"
+    output_file = r"C:\Users\Amin\MAG\_term_6\CodART\tests\extract_method\output_file.java"
 
     stream = FileStream(input_file, encoding='utf8')
     lexer = JavaLexer(stream)

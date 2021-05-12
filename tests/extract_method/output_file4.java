@@ -6,8 +6,6 @@ public class Main {
         Student reza = new Student("97524698", "reza", 20);
         reza.actionNumberOne();
         reza.actionNumberTwo();
-        reza.actionNumberThree();
-        reza.actionNumberFour();
     }
 
 }
@@ -26,32 +24,14 @@ class Student {
 
     public void actionNumberOne() {
         this.name = "IUST_" + this.name;
-
-        System.out.print("1 ");
-        System.out.print("Student details ");
-        printStudent();
+        printStudent("1 ", "Student details ");
     }
 
     public void actionNumberTwo() {
         this.age = 32;
-        System.out.print("2 ");
-        System.out.print("Student information ");
-        printStudent();
+        printStudent("2 ", "Student information ");
     }
 
-    public void actionNumberThree() {
-        this.age += 3;
-        System.out.print("3 ");
-        System.out.print("Best student ");
-        printStudent();
-    }
-
-    public void actionNumberFour() {
-        this.studentId = "97526312";
-        System.out.print("4 ");
-        System.out.print("Message from student ");
-        printStudent();
-    }
 
     public String getStudentId() {
         return studentId;
@@ -77,7 +57,9 @@ class Student {
         this.age = age;
     }
 
-	public void printStudent() {
+	public void printStudent(String variable59Number01, String variable59Number11) {
+		System.out.print(variable59Number01);
+		System.out.print(variable59Number11);
 		System.out.print("Student { ");
 		System.out.print("name: "+this.name+", ");
 		System.out.print("age: "+this.age+", ");

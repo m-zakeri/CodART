@@ -1,4 +1,4 @@
-package com.company;
+package ir.mag.test;
 
 public class Main {
 
@@ -26,15 +26,13 @@ class Student {
         this.name = "IUST_" + this.name;
 
         System.out.print("1 ");
-        System.out.print("Student details ");
-        printStudent();
+        printStudent("Student details ");
     }
 
     public void actionNumberTwo() {
         this.age = 32;
         System.out.print(2);
-        System.out.print("Student information ");
-        printStudent();
+        printStudent("Student information ");
     }
 
     public String getStudentId() {
@@ -61,7 +59,8 @@ class Student {
         this.age = age;
     }
 
-	public void printStudent() {
+	public void printStudent(String variable59Number01) {
+		System.out.print(variable59Number01);
 		System.out.print("Student { ");
 		System.out.print("name: "+this.name+", ");
 		System.out.print("age: "+this.age+", ");

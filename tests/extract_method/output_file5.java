@@ -26,33 +26,26 @@ class Student {
 
     public void actionNumberOne() {
         this.name = "IUST_" + this.name;
-        System.out.print("Student { ");
-        System.out.print("name: " + this.name + ", ");
-        System.out.print("age: " + this.age + ", ");
-        System.out.print("studentId: " + this.studentId + " }\n");
+
+        printStudent("1 ", "Student details ");
     }
 
     public void actionNumberTwo() {
         this.age = 32;
-        System.out.print("Student { ");
-        System.out.print("name: " + this.name + ", ");
-        System.out.print("age: " + this.age + ", ");
-        System.out.print("studentId: " + this.studentId + " }\n");
+        printStudent("2 ", "Student information ");
     }
 
     public void actionNumberThree() {
-        System.out.print("Student { ");
-        System.out.print("name: " + this.name + ", ");
-        System.out.print("age: " + this.age + ", ");
-        System.out.print("studentId: " + this.studentId + " }\n");
+        printStudent("3 ", "Best student ");
+    }
+
+    public String a(){
+        return "a";
     }
 
     public void actionNumberFour() {
-        this.studentId = "97526312";
-        System.out.print("Student { ");
-        System.out.print("name: " + this.name + ", ");
-        System.out.print("age: " + this.age + ", ");
-        System.out.print("studentId: " + this.studentId + " }\n");
+        this.studentId = "97526312" + a();
+        printStudent("4 ", "Message from student ");
     }
 
     public String getStudentId() {
@@ -78,4 +71,15 @@ class Student {
     public void setAge(int age) {
         this.age = age;
     }
+
+	public void printStudent(String variable59Number01, String variable59Number11) {
+		System.out.print(variable59Number01);
+		System.out.print(variable59Number11);
+		System.out.print("Student { ");
+		System.out.print("name: "+this.name+", ");
+		System.out.print("age: "+this.age+", ");
+		System.out.print("studentId: "+this.studentId+" }\n");
+	}
+
 }
+
