@@ -155,20 +155,25 @@ class PullUpFieldRefactoring:
                                           )
 
         rewriter.apply()
+        
+        if _class.superclass_name is not None:
+            # super_class: utils_listener_fast.Class = program.packages[self.package_name].classes[_class.superclass_name]
+            PullUpFieldRefactoring(self.source_filenames, self.package_name, _class.superclass_name, "id").do_refactor()
         return True
 
 
 def test():
     print("Testing pullup_field...")
     filenames = [
-        "D:/archive/uni/CD/project/CodART/tests/pushdown_field/vehicle.java",
+        "D:/archive/uni/CD/project/CodART/tests/pullup_field/test5.java",
+        "D:/archive/uni/CD/project/CodART/tests/pullup_field/test6.java",
         # "../benchmark_projects/tests/pullup_field/test1.java",
         # "../benchmark_projects/tests/pullup_field/test2.java",
         # "../benchmark_projects/tests/pullup_field/test3.java",
         # "../benchmark_projects/tests/pullup_field/test4.java"
     ]
 
-    if PullUpFieldRefactoring(filenames, "pushdown_field_test_vehicle", "Car", "color").do_refactor():
+    if PullUpFieldRefactoring(filenames, "pullup_field_test5", "C", "id").do_refactor():
         print("Success!")
     else:
         print("Cannot refactor.")
