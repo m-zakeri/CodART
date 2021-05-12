@@ -1,6 +1,6 @@
 /venv/
 /.idea/
-.idea
+.idea/
 __pycache__/
 benchmark_projects/JSON/src/main/java/org/json/*.class
 benchmark_projects/refactored/

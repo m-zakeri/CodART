@@ -182,7 +182,7 @@ class PushDownField:
 def test():
     print("Testing pushdown_field...")
     filenames = [
-        "D:/archive/uni/CD/project/CodART/tests/pushdown_field/vehicle.java",
+        # "../benchmark_projects/tests/pushdown_field/test1.java",
         # "../benchmark_projects/tests/pushdown_field/test2.java",
         # "../benchmark_projects/tests/pushdown_field/test3.java",
         # "../benchmark_projects/tests/pushdown_field/test4.java",
@@ -196,7 +196,7 @@ def test():
     #     print("1, 2: Success!")
     # else:
     #     print("1, 2: Cannot refactor.")
-
+    #
     # for i in range(2, 7):
     #     if PushDownField(filenames[:2] + [filenames[i]], "pushdown_field_test1", "A", "a").do_refactor():
     #         print("1, 2, " + str(i + 1) + ": Success!")
