@@ -162,10 +162,9 @@ class MoveFieldRefactoring:
         :return: A `list` of all the field's usages in the class body
         """
         usages = list()
-
         fields: dict = src.fields
         for field_name, field in fields.items():
-            if field_name == self.field_name:
+            if field_name == self.field_name and src.name == self.class_name:
                 continue
             tokens_info = TokensInfo(field.parser_context)  # tokens of ctx method
             exps = tokens_info.get_token_index(tokens_info.token_stream.tokens, tokens_info.start, tokens_info.stop)
@@ -174,7 +173,7 @@ class MoveFieldRefactoring:
                 if token.text == self.field_name:
                     if self.is_a_usage_in_class(tokens_info.token_stream.tokens, token, field):
                         new_case = {
-                            'field': field,
+                            'meta_data': field,
                             'tokens': list(filter(lambda t: t.line == token.line, exps))
                         }
                         usages.append(new_case)
@@ -208,7 +207,7 @@ class MoveFieldRefactoring:
                         continue
 
                     new_case = {
-                        'method': method,
+                        'meta_data': method,
                         'tokens': list(filter(lambda t: t.line == token.line, exps))
                     }
                     usages.append(new_case)
@@ -265,12 +264,10 @@ class MoveFieldRefactoring:
         """
         local_var_declared = False
         for usage in usages:
-            method_tokens = TokensInfo(usage["method"].parser_context)
+            method_tokens = TokensInfo(usage["meta_data"].parser_context)
             for i, token in enumerate(usage['tokens']):
                 if token.text != self.field_name:
                     continue
-                if usage["method"].class_name == "Extra":
-                    print()
                 method_tokens.start = token.tokenIndex
                 method_tokens.stop = token.tokenIndex
                 if i > 1:
@@ -286,12 +283,12 @@ class MoveFieldRefactoring:
                     if local_var_declared:
                         continue
 
-                token_stream = usage["method"].parser_context.parser.getTokenStream()
+                token_stream = usage["meta_data"].parser_context.parser.getTokenStream()
                 if token_stream not in rewriter.token_streams.keys():
                     rewriter.token_streams[token_stream] = (
-                        usage["method"].filename,
+                        usage["meta_data"].filename,
                         TokenStreamRewriter(token_stream),
-                        usage["method"].filename.replace(".java", ".rewritten.java")
+                        usage["meta_data"].filename.replace(".java", ".rewritten.java")
                     )
                 rewriter.replace(method_tokens, f'{self.target_class_name}.{self.field_name}')
 
@@ -314,7 +311,7 @@ class MoveFieldRefactoring:
         self.propagate(usages, rewriter)
         rewriter.apply()
 
-        modified_files = set(map(lambda x: x["method"].filename.replace(".java", ".rewritten.java"), usages))
+        modified_files = set(map(lambda x: x["meta_data"].filename.replace(".java", ".rewritten.java"), usages))
         modified_files.add(source_class.filename.replace(".java", ".rewritten.java"))
         modified_files.add(target_class.filename.replace(".java", ".rewritten.java"))
         self.__reformat(modified_files)
