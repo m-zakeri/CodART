@@ -4,6 +4,7 @@ import antlr4
 from antlr4.Token import CommonToken
 import antlr4.tree
 from antlr4.CommonTokenStream import CommonTokenStream
+from typing import List, Optional
 
 from gen.java.JavaParser import JavaParser
 from gen.java.JavaParserListener import JavaParserListener

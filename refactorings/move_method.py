@@ -4,6 +4,7 @@ from refactorings.utils.utils_listener_fast import TokensInfo, SingleFileElement
 import subprocess
 import os
 
+
 class MoveMethodRefactoring:
     def __init__(self, source_filenames: list, package_name: str, class_name: str, method_key: str,
                  target_class_name: str, target_package_name: str,
@@ -55,8 +56,7 @@ class MoveMethodRefactoring:
             package = program.packages[package_names]
             for class_ in package.classes:
                 _class = package.classes[class_]
-                for method_ in _class.methods:
-                    __method = _class.methods[method_]
+                for method_, __method in _class.methods.items():
                     for inv in __method.body_method_invocations:
                         invc = __method.body_method_invocations[inv]
                         method_name = self.method_key[:self.method_key.find('(')]
@@ -87,12 +87,14 @@ class MoveMethodRefactoring:
                 token_stream_rewriter.replaceRange(from_idx=inv_tokens_info_target.start,
                                                    to_idx=inv_tokens_info_target.stop + 1, text=" ")
 
+            ################################
             # insert source.java class befor methods of sourcr class that used in method
         for i in _method.body_method_invocations_without_typename:
             if i.getText() == self.class_name:
                 ii = _method.body_method_invocations_without_typename[i]
-                i_tokens = TokensInfo(ii[0])
-                token_stream_rewriter.insertBeforeIndex(index=i_tokens.start, text=str.lower(self.class_name) + ".")
+                for j in ii:
+                    i_tokens = TokensInfo(j)
+                    token_stream_rewriter.insertBeforeIndex(index=i_tokens.start, text=str.lower(self.class_name) + ".")
 
         # pass object of source.java class to method
         if param_tokens_info.start is not None:
@@ -107,16 +109,25 @@ class MoveMethodRefactoring:
                                                     stop=tokens_info.stop)
 
         Rewriter_.insert_before(tokens_info=class_tokens_info, text=strofmethod)
-        Rewriter_.insert_after(package_tokens_info,
-                               "import " + self.target_package_name + "." + self.target_class_name + ";")
+        ##################################################
+        if self.target_package_name != self.package_name:
+            target_class_modifier_token = TokensInfo(_targetclass.modifiers_parser_contexts[0])
+            Rewriter_.insert_before_start(target_class_modifier_token,
+                                          "import " + self.package_name + "." + self.class_name + ";\n")  ##########
         Rewriter_.replace(tokens_info, "")
         Rewriter_.apply()
-        # reformat source.java and target.java
         self.__reformat(_sourceclass, _targetclass)
         return True
 
     def __reformat(self, src_class: Class, target_class: Class):
+        """
+        :param src_class: The src class that have been modified since the refactoring
+        :param target_class: The target class that have been modified since the refactoring
+        :return: void
+        reformats the java files based on google's java pretty format
+        """
         subprocess.call(["java", "-jar", self.formatter, "--replace", src_class.filename, target_class.filename])
+
 
 if __name__ == "__main__":
     mylist = get_filenames_in_dir('/home/loop/IdeaProjects/Sample')
