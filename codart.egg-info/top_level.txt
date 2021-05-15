@@ -1,6 +1,0 @@
-gen
-metrics
-refactoring_design_patterns
-refactorings
-sbse
-visualization

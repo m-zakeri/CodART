@@ -20,7 +20,6 @@ PUsh down method refactoring removes the method from super class and adds it to 
 """
 
 
-
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 from refactorings.utils.utils_listener_fast import TokensInfo, SingleFileElement
 from refactorings.pullup_method_get_removemethod import get_removemethods
