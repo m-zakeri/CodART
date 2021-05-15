@@ -12,6 +12,7 @@ from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 
+
 class PushDownGetTextFieldListener(JavaParserLabeledListener):
     def __init__(self, common_token_stream: CommonTokenStream, father: str = None, field=None):
         if common_token_stream is None:

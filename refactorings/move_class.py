@@ -35,6 +35,7 @@ from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 
+
 def log_error(title, message):
     """
     log_error method is used for logging erros
@@ -435,7 +436,7 @@ filename = 'Source.java'
 class_identifier = 'Source'
 source_package = 'sourcePackage'
 target_package = 'targetPackage'
-directory = '../tests/move_class/sample_project'
+directory = 'D:/Programming/Java/TestProject/'
 file_counter = 0
 
 
