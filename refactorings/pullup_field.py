@@ -57,7 +57,7 @@ class PullUpFieldRefactoring:
 
     def do_refactor(self):
         program = utils2.get_program(self.source_filenames, print_status=True)
-        print(program.packages)
+        # print(program.packages)
         if self.package_name not in program.packages \
                 or self.class_name not in program.packages[self.package_name].classes \
                 or self.field_name not in program.packages[self.package_name].classes[self.class_name].fields:
@@ -153,7 +153,8 @@ class PullUpFieldRefactoring:
                     body_start = utils_listener_fast.TokensInfo(body)
                     body_start.stop = body_start.start  # Start and stop both point to the '{'
                     rewriter.insert_after(body_start,
-                                          "\n    " + _class.name + "() { " + initializer_statement + " }"
+                                          "\n    " + _class.modifiers[
+                                              0] + " " + _class.name + "() { " + initializer_statement + " }"
                                           )
 
         rewriter.apply()
@@ -191,11 +192,13 @@ def test_ant():
     ]
     """
     ant_dir = "/home/ali/Desktop/code/TestProject/"
+def main(project_dir: str, package_name: str, children_class: str, field_name: str):
+    print("Pullup Field")
     print("Success!" if PullUpFieldRefactoring(
-        utils2.get_filenames_in_dir(ant_dir),
-        "test_package",
-        "AppChild1",
-        "TEST",
+        utils2.get_filenames_in_dir(project_dir),
+        package_name,
+        children_class,
+        field_name
         # lambda x: "tests/pullup_field_ant/" + x[len(ant_dir):]
     ).do_refactor() else "Cannot refactor.")
 

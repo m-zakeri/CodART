@@ -165,6 +165,8 @@ class QMOOD:
         """
         class_entity = self.get_class_entity(class_longname)
         percentage = class_entity.metric(['PercentLackOfCohesion']).get('PercentLackOfCohesion', 0)
+        if percentage is None:
+            percentage = 0
         return 1.0 - percentage / 100
 
     def ClassLevelCIS(self, class_longname):
@@ -174,9 +176,10 @@ class QMOOD:
         :return: Number of public methods in class
         """
         class_entity = self.get_class_entity(class_longname)
-        if class_entity:
-            return class_entity.metric(['CountDeclMethodPublic']).get('CountDeclMethodPublic', 0)
-        return 0
+        value = class_entity.metric(['CountDeclMethodPublic']).get('CountDeclMethodPublic', 0)
+        if value is None:
+            value = 0
+        return value
 
     def ClassLevelNOM(self, class_longname):
         """
@@ -235,20 +238,19 @@ class QMOOD:
         print(self.NOP)
 
     def get_class_entity(self, class_longname):
-        for ent in sorted(self.db.ents(kindstring='class'), key=lambda ent: ent.name()):
-            if ent.kindname() == "Unknown Class":
-                continue
+        for ent in self.db.ents(kindstring='class ~unknown'):
             if ent.longname() == class_longname:
                 return ent
         return None
 
     def get_class_average(self, class_level_metric):
         scores = []
-        for ent in sorted(self.db.ents(kindstring='class'), key=lambda ent: ent.name()):
+        for ent in self.db.ents(kindstring='class ~unknown'):
             if ent.kindname() == "Unknown Class":
                 continue
             else:
-                scores.append(class_level_metric(ent.longname()))
+                class_metric = class_level_metric(ent.longname())
+                scores.append(class_metric)
         return sum(scores) / len(scores)
 
     def print_all(self):
