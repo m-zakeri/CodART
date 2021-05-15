@@ -26,7 +26,7 @@ class SuggestedRoomsByFollowingsListViewAdapter extends BaseAdapter {
     private List<InputRoomSuggestSearchViewModel> SearchedRoomsList = null;
 
     public SuggestedRoomsByFollowingsListViewAdapter(Context context, List<InputRoomSuggestSearchViewModel> SearchedPersonsList) {
-        this.field_New = context;
+        field_New = context;
         this.SearchedRoomsList = this.field_New;
         inflater = LayoutInflater.from(mContext);
     }
