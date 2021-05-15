@@ -36,6 +36,7 @@ from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 
 
+
 def log_error(title, message):
     """
     log_error method is used for logging erros
