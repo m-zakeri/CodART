@@ -48,6 +48,7 @@ class RemoveFlagArgumentListener(JavaParserLabeledListener):
         self.argument_name = argument_name
         self.source_method = source_method
         self.source_class = source_class
+        self.token_stream_rewriter_changed = False
 
         if common_token_stream is None:
             raise ValueError('common_token_stream is None')
@@ -83,18 +84,22 @@ class RemoveFlagArgumentListener(JavaParserLabeledListener):
                 if formalParameter.variableDeclaratorId().IDENTIFIER().getText() == self.argument_name:
                     self.argument_token = formalParameter
                     nextParam = ctx.formalParameters().formalParameterList().formalParameter()[idx + 1] \
-                        if idx != len(ctx.formalParameters().formalParameterList().formalParameter() ) - 1 else None
+                        if idx != len(ctx.formalParameters().formalParameterList().formalParameter()) - 1 else None
                     break
 
-            if nextParam :
-                self.token_stream_rewriter.replaceRange(self.argument_token.start.tokenIndex, nextParam.start.tokenIndex - 1 , '')
-            else :
+            if nextParam:
+                self.token_stream_rewriter.replaceRange(self.argument_token.start.tokenIndex,
+                                                        nextParam.start.tokenIndex - 1, '')
+            else:
                 self.token_stream_rewriter.replaceRange(self.argument_token.start.tokenIndex,
                                                         self.argument_token.stop.tokenIndex, '')
 
-            self.signature = self.token_stream_rewriter.getText(self.token_stream_rewriter.DEFAULT_PROGRAM_NAME , ctx.start.tokenIndex, ctx.methodBody().start.tokenIndex)
+            self.signature = self.token_stream_rewriter.getText(self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                                                                ctx.start.tokenIndex, ctx.methodBody().start.tokenIndex)
 
-            self.token_stream_rewriter = TokenStreamRewriter(self.common_token_stream)
+            if self.token_stream_rewriter_changed == False:
+                self.token_stream_rewriter = TokenStreamRewriter(self.common_token_stream)
+                self.token_stream_rewriter_changed = True
 
 
     def exitMethodBody(self, ctx: JavaParserLabeled.MethodBodyContext):
@@ -104,8 +109,8 @@ class RemoveFlagArgumentListener(JavaParserLabeledListener):
             ctx (JavaParserLabeled.MethodBodyContext)
         """
         if self.is_source_method:
-
-            signature1 = self.signature.split('(')[0].rstrip() + 'IsTrue'+ ' (' +''.join(self.signature.split('(')[1:] )
+            signature1 = self.signature.split('(')[0].rstrip() + 'IsTrue' + ' (' + ''.join(
+                self.signature.split('(')[1:])
             signature2 = self.signature.split('(')[0].rstrip() + 'IsFalse' + ' (' + ''.join(
                 self.signature.split('(')[1:])
 
@@ -115,12 +120,14 @@ class RemoveFlagArgumentListener(JavaParserLabeledListener):
             # self.token_stream_rewriter.insertAfter(index=ctx.stop.tokenIndex, text=self.signature)
             # print(self.signature)
 
-            arguments = [ s.rstrip().split(' ')[-1]  for s in signature1.split('(')[1].split(')')[0].split(',') ]
-
+            arguments = [s.rstrip().split(' ')[-1] for s in signature1.split('(')[1].split(')')[0].split(',')]
+            print("exit method")
             signature1_name = signature1.split('(')[0].rstrip().split()[-1]
             signature2_name = signature2.split('(')[0].rstrip().split()[-1]
 
-            self.token_stream_rewriter.replaceRange(self.body_1_token.start.tokenIndex , self.body_1_token.stop.tokenIndex ,'\t' + signature1_name + '( ' + ','.join(arguments) + ')')
+            self.token_stream_rewriter.replaceRange(self.body_1_token.start.tokenIndex,
+                                                    self.body_1_token.stop.tokenIndex,
+                                                    '\t' + signature1_name + '( ' + ','.join(arguments) + ')')
             self.token_stream_rewriter.replaceRange(self.body_2_token.start.tokenIndex,
                                                     self.body_2_token.stop.tokenIndex,
                                                     '\t' + signature2_name + '( ' + ','.join(arguments) + ')')
@@ -136,33 +143,39 @@ class RemoveFlagArgumentListener(JavaParserLabeledListener):
             ctx (JavaParserLabeled.Statement2Context)
         """
         if self.is_source_method:
-            primary = ctx.parExpression().expression().primary()
-            if hasattr(primary, "IDENTIFIER"):
-                if ctx.parExpression().expression().primary().IDENTIFIER().getText() == self.argument_name:
-                    iterator = iter(ctx.statement())
 
+            try :
+                primary = ctx.parExpression().expression().primary()
+                if hasattr(primary, "IDENTIFIER"):
+                    if ctx.parExpression().expression().primary().IDENTIFIER().getText() == self.argument_name:
+                        iterator = iter(ctx.statement())
 
-                    #TODO : handle on statements blocks .e.g. {}
+                        # TODO : handle on statements blocks .e.g. {}
 
-                    self.body_1, self.body_2 = [self.common_token_stream.getText(s.block().start, s.block().stop)[1:] for s
-                                                in ctx.statement()]
+                        self.body_1, self.body_2 = [self.common_token_stream.getText(s.block().start, s.block().stop)[1:]
+                                                    for s
+                                                    in ctx.statement()]
 
-                    self.body_1_token , self.body_2_token = [s.block() for s in ctx.statement()]
+                        self.body_1_token, self.body_2_token = [s.block() for s in ctx.statement()]
 
-                    # print(ctx.getPayload())
-                    # print(self.common_token_stream.getText(ctx.start, ctx.stop))
-                    # print(dir(ctx.statement()[0].block()))
+                        # print(ctx.getPayload())
+                        # print(self.common_token_stream.getText(ctx.start, ctx.stop))
+                        # print(dir(ctx.statement()[0].block()))
 
-                    # for s in ctx.statement():
-                    #     print(s.block().getText())
+                        # for s in ctx.statement():
+                        #     print(s.block().getText())
+
+            except :
+                pass
 
 
 class RemoveFlagArgument:
     """Refactoring API that can be used to to do remove flag argument 
 
     """
-    def __init__(self , source_class = "Playground"  , source_mathod = "DeliveryDate" , argument_name="b" , 
-        main_file = "playground.java"):
+
+    def __init__(self, source_class="Playground", source_method="DeliveryDate", argument_name="b",
+                 main_file="playground.java"):
         """create a removeflagargument refactor 
 
         Args:
@@ -171,8 +184,9 @@ class RemoveFlagArgument:
             argument_name (str): boolean argument in method.
             main_file (str): path of main file containing source class.
         """
-        self.source_class = self.source_class
-        self.source_method = self.source_method
+
+        self.source_class = source_class
+        self.source_method = source_method
         self.arguemnt_name = argument_name
         self.main_file = main_file
 
@@ -194,38 +208,14 @@ class RemoveFlagArgument:
         walker = ParseTreeWalker()
         walker.walk(t=self.parse_tree, listener=self.my_listener)
 
-        self.my_listener.body_1
+        # self.my_listener.body_1
 
-        with open('playground.java', 'w') as f:
+        with open(self.main_file, 'w') as f:
             f.write(self.my_listener.token_stream_rewriter.getDefaultText())
 
 
 if __name__ == '__main__':
     RemoveFlagArgument().do_refactor()
 
-    path = "D:\Uni\Compiler\project\CodART\benchmark_projects\JSON\src\main\java\org\json"
-    for file in os.listdir(path):
-        print(file)
+    RemoveFlagArgument("JSONArray", "addAll", "wrap",r"D:\Uni\Compiler\project\CodART\benchmark_projects\JSON\src\main\java\org\json\JSONArray.java" ).do_refactor()
 
-    source_class = "App"
-    field_name = "push_down_field"
-    # initialize with understand
-    main_file = ""
-
-    stream = FileStream(main_file, encoding='utf8')
-    lexer = JavaLexer(stream)
-    token_stream = CommonTokenStream(lexer)
-    parser = JavaParserLabeled(token_stream)
-    parser.getTokenStream()
-    parse_tree = parser.compilationUnit()
-
-    # my_listener = RemoveFieldRefactoringListener(common_token_stream=token_stream, source_class=source_class,
-    #                                              field_name=field_name)
-    walker = ParseTreeWalker()
-    walker.walk(t=parse_tree, listener=my_listener)
-
-    with open(main_file, mode='w', newline='') as f:
-        f.write(my_listener.token_stream_rewriter.getDefaultText())
-
-    # print(my_listener.body_1)
-    # print(my_listener.body_2)
