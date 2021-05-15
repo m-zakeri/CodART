@@ -156,7 +156,8 @@ class ReplaceParameterWithQueryRefactoringListener(JavaParserLabeledListener):
                         parameter_type = parameter.typeType().getText()
                         parameter_vdi = parameter.variableDeclaratorId().getText()
                         parameter_initializer = self.add_to_top_of_target_method[0]
-                        text += parameter_type + ' ' + parameter_vdi + ' = ' + parameter_initializer + ';' + self.NEW_LINE + self.TAB + self.TAB
+                        text += parameter_type + ' ' + parameter_vdi + ' = ' + parameter_initializer \
+                                + ';' + self.NEW_LINE + self.TAB + self.TAB
                         self.add_to_top_of_target_method.remove(parameter_initializer)
 
                     else:
@@ -176,6 +177,7 @@ class ReplaceParameterWithQueryRefactoringListener(JavaParserLabeledListener):
                 index=block_statement.start.tokenIndex - 1,
                 text=text
             )
+
 
 class ReplaceParameterWithQueryAPI:
 
