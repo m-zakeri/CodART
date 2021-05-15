@@ -193,15 +193,17 @@ def rename_method(java_file_path, scope_class_name, target_method_name, new_name
 
 def main():
     # TODO: Create UDB File automatically
-    db_path = "/home/ali/Documents/compiler/Research/xerces2-j/xerces2-j.udb"
-    file_path = "/home/ali/Documents/compiler/Research/xerces2-j/src/org/apache/xerces/dom/AttrImpl.java"
-    class_name = "AttrImpl"
-    method_name = "setIdAttribute"
-    new_method_name = "setIdAttributeNew"
-    references = get_method_calls(db_path, class_name, method_name)
+    # db_path = "/home/ali/Documents/compiler/Research/xerces2-j/xerces2-j.udb"
+    file_path = "D:/archive/uni/CD/project/CodART/tests/simpleCode.java"
+    class_name = "C"
+    method_name = "printG"
+    new_method_name = "printFUCK"
+    # references = get_method_calls(db_path, class_name, method_name)
     rename_method(file_path, class_name, method_name, new_method_name)
 
-    for ref in references:
-        rename_method(ref["file_path"], ref["scope"].split(".")[0], target_method_name=method_name,
-                      new_name=new_method_name, reference=ref)
+    # for ref in references:
+        # rename_method(ref["file_path"], ref["scope"].split(".")[0], target_method_name=method_name,
+        #               new_name=new_method_name, reference=ref)
 
+if __name__ == '__main__':
+    main()

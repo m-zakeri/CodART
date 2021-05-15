@@ -1,2 +1,1 @@
-
-from refactorings import collapse_hierarchy
+# from refactorings import collapse_hierarchy

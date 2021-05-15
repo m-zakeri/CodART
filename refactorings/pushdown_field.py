@@ -57,18 +57,17 @@ class PushDownField:
         self.class_names = class_names
         self.filename_mapping = filename_mapping
 
-    def do_refactor(self):
-        program = utils2.get_program(self.source_filenames, print_status=True)
+
+
+    def pre_condition_check(self, program, superclass):
         if self.package_name not in program.packages \
                 or self.superclass_name not in program.packages[self.package_name].classes \
                 or self.field_name not in program.packages[self.package_name].classes[self.superclass_name].fields:
             return False
 
-        superclass: utils_listener_fast.Class = program.packages[self.package_name].classes[self.superclass_name]
-
-        for mk in superclass.methods:
-            m: utils_listener_fast.Method = superclass.methods[mk]
-            for item in m.body_local_vars_and_expr_names:
+        for m in superclass.methods:
+            method: utils_listener_fast.Method = superclass.methods[m]
+            for item in method.body_local_vars_and_expr_names:
                 if isinstance(item, utils_listener_fast.ExpressionName):
                     if ((len(item.dot_separated_identifiers) == 1
                          and item.dot_separated_identifiers[0] == self.field_name)
@@ -76,6 +75,15 @@ class PushDownField:
                                 and item.dot_separated_identifiers[0] == "this"
                                 and item.dot_separated_identifiers[1] == self.field_name)):
                         return False
+        return True
+
+    def do_refactor(self):
+        program = utils2.get_program(self.source_filenames, print_status=True)
+        superclass: utils_listener_fast.Class = program.packages[self.package_name].classes[self.superclass_name]
+
+        if not self.pre_condition_check(program, superclass):
+            print("Can't refactor")
+            return False
 
         # all_derived_classes = [] # Not needed
         other_derived_classes = []
@@ -86,16 +94,18 @@ class PushDownField:
                 c: utils_listener_fast.Class = p.classes[cn]
                 if ((c.superclass_name == self.superclass_name and c.file_info.has_imported_class(self.package_name,
                                                                                                   self.superclass_name)) \
-                        or (
-                                self.package_name is not None and c.superclass_name == self.package_name + '.' + self.superclass_name)):
+                        or (self.package_name is not None and c.superclass_name == self.package_name + '.' + self.superclass_name)):
                     # all_derived_classes.append(c)
+
                     if len(self.class_names) == 0 or cn in self.class_names:
                         if self.field_name in c.fields:
+                            print("some classes have same variable")
                             return False
                         else:
                             classes_to_add_to.append(c)
                     else:
                         other_derived_classes.append(c)
+                        
         # Check if the field is used from the superclass or other derived classes
         for pn in program.packages:
             p: utils_listener_fast.Package = program.packages[pn]
@@ -105,8 +115,8 @@ class PushDownField:
                 fields_of_superclass_type_or_others = []
                 for fn in c.fields:
                     f: utils_listener_fast.Field = c.fields[fn]
-                    if (f.datatype == self.superclass_name and has_imported_superclass) \
-                            or (self.package_name is not None and f.datatype == (
+                    if (f.name == self.field_name and has_imported_superclass) \
+                            or (self.package_name is not None and f.name == (
                             self.package_name + '.' + self.superclass_name)):
                         fields_of_superclass_type_or_others.append(f.name)
                     if any((c.file_info.has_imported_class(o.package_name, o.name) and f.datatype == o.name)
@@ -182,6 +192,7 @@ def test():
         "../benchmark_projects/tests/pushdown_field/test6.java",
         "../benchmark_projects/tests/pushdown_field/test7.java",
     ]
+    PushDownField(filenames, "pushdown_field_test_vehicle", "Vehicle", "brand").do_refactor()
 
     if PushDownField(filenames[:2], "pushdown_field_test1", "A", "a").do_refactor():
         print("1, 2: Success!")

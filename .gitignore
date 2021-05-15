@@ -1,3 +1,10 @@
+/venv/
+.idea/
+benchmark_projects/JSON/src/main/java/org/json/*.class
+benchmark_projects/refactored/
+codart.egg-info
+dist
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
