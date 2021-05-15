@@ -18,6 +18,8 @@ Pull up field refactoring removes the repetitive field from subclasses and moves
 
 2. There will be children and parents having their desired fields added or removed.
 
+3. Check for multilevel inheritance.
+
 """
 
 from refactorings.utils import utils_listener_fast, utils2
@@ -156,9 +158,40 @@ class PullUpFieldRefactoring:
                                           )
 
         rewriter.apply()
+
+        # check for multilevel inheritance recursively.
+
+        if _class.superclass_name is not None:
+            PullUpFieldRefactoring(self.source_filenames, self.package_name, _class.superclass_name, "id").do_refactor()
         return True
 
 
+def test():
+    print("Testing pullup_field...")
+    filenames = [
+        "D:/archive/uni/CD/project/CodART/tests/pullup_field/test5.java",
+        "D:/archive/uni/CD/project/CodART/tests/pullup_field/test6.java",
+        # "../benchmark_projects/tests/pullup_field/test1.java",
+        # "../benchmark_projects/tests/pullup_field/test2.java",
+        # "../benchmark_projects/tests/pullup_field/test3.java",
+        # "../benchmark_projects/tests/pullup_field/test4.java"
+    ]
+
+    if PullUpFieldRefactoring(filenames, "pullup_field_test5", "C", "id").do_refactor():
+        print("Success!")
+    else:
+        print("Cannot refactor.")
+
+
+def test_ant():
+    """
+    target_files = [
+        "tests/apache-ant/main/org/apache/tools/ant/types/ArchiveFileSet.java",
+        "tests/apache-ant/main/org/apache/tools/ant/types/TarFileSet.java",
+        "tests/apache-ant/main/org/apache/tools/ant/types/ZipFileSet.java"
+    ]
+    """
+    ant_dir = "/home/ali/Desktop/code/TestProject/"
 def main(project_dir: str, package_name: str, children_class: str, field_name: str):
     print("Pullup Field")
     print("Success!" if PullUpFieldRefactoring(
@@ -171,4 +204,4 @@ def main(project_dir: str, package_name: str, children_class: str, field_name: s
 
 
 if __name__ == "__main__":
-    pass
+    test()

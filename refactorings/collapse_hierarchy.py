@@ -14,7 +14,7 @@ from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 from refactorings.remove_class import RemoveClassRefactoringListener
 
-from utilization.setup_understand import *
+# from utilization.setup_understand import *
 
 
 class CollapseHierarchyRefactoringGetFieldTextListener(JavaParserLabeledListener):
@@ -311,15 +311,15 @@ def main(udb, child, parent):
     father_path_file = ""
     file_list_to_be_propagate = set()
     propagate_classes = set()
-    db = und.open(udb)
-    for cls in db.ents("class"):
-        if cls.simplename() == child:
-            child_path_file = cls.parent().longname()
-            for ref in cls.refs("Coupleby"):
-                propagate_classes.add(ref.ent().longname())
-                file_list_to_be_propagate.add(ref.ent().parent().longname())
-        if cls.simplename() == parent:
-            father_path_file = cls.parent().longname()
+    # db = und.open(udb)
+    # for cls in db.ents("class"):
+    #     if cls.simplename() == child:
+    #         child_path_file = cls.parent().longname()
+    #         for ref in cls.refs("Coupleby"):
+    #             propagate_classes.add(ref.ent().longname())
+    #             file_list_to_be_propagate.add(ref.ent().parent().longname())
+    #     if cls.simplename() == parent:
+    #         father_path_file = cls.parent().longname()
 
     file_list_to_be_propagate = list(file_list_to_be_propagate)
     propagate_classes = list(propagate_classes)
