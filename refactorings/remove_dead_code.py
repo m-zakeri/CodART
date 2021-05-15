@@ -200,19 +200,25 @@ class RemoveDeadCodeClass(JavaParserLabeledListener):
     def exitFormalParameter(self, ctx: JavaParserLabeled.FormalParameterContext):
         parameterIdentifier = ctx.variableDeclaratorId().IDENTIFIER().getText()
         grandParentCtx = ctx
+        Parent = ctx.parentCtx.children
+        # for i in range(len(Parent)):
+        #     print(Parent[i].variableDeclaratorId().IDENTIFIER().getText())
+
+        start = grandParentCtx.start.tokenIndex
+        stop = grandParentCtx.stop.tokenIndex
         if self.Parameter and self.ParameterIndex < len(self.Parameters) and self.Parameters[self.ParameterIndex].split('/')[2] == parameterIdentifier:
             if self.IsSourceClassForParameters[self.ParameterIndex] and self.IsSourceMethodForParameters[
                 self.ParameterIndex]:
                 self.CodeRewrite.delete(
                     self.CodeRewrite.DEFAULT_PROGRAM_NAME,
-                    grandParentCtx.start.tokenIndex,
-                    grandParentCtx.stop.tokenIndex
+                    start,
+                    stop
                 )
                 self.ParameterIndex += 1
 
     def enterMethodCall0(self, ctx:JavaParserLabeled.MethodCall0Context):
         parametersList = ctx.expressionList()
-        print(parametersList.parentCtx.IDENTIFIER().getText())
+        # print(parametersList.parentCtx.IDENTIFIER().getText())
         if self.Parameter and parametersList.parentCtx.IDENTIFIER().getText() in self.Parameters:
             pass
 
