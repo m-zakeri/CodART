@@ -34,22 +34,30 @@ class RemoveMethodRefactoringListener(JavaParserLabeledListener):
             self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
 
         self.is_source_class = False
-        self.is_static=False
+        self.inner_class_count = 0
+        self.is_static = False
 
-    def enterClassDeclaration(self, ctx:JavaParserLabeled.ClassDeclarationContext):
+    def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
 
         class_identifier = ctx.IDENTIFIER().getText()
         if class_identifier == self.source_class:
             self.is_source_class = True
-        else:
-            self.is_source_class = False
+        elif self.is_source_class is True:
+            self.inner_class_count += 1
 
-    def exitMethodDeclaration(self, ctx:JavaParserLabeled.MethodDeclarationContext):
-        if not self.is_source_class:
+    def exitClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
+        class_identifier = ctx.IDENTIFIER().getText()
+        if class_identifier == self.source_class:
+            self.is_source_class = False
+        elif self.is_source_class is True:
+            self.inner_class_count -= 1
+
+    def exitMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
+        if not self.is_source_class or self.inner_class_count != 0:
             return None
         grand_parent_ctx = ctx.parentCtx.parentCtx
         method_identifier = ctx.IDENTIFIER().getText()
-        if self.method_name in method_identifier:
+        if self.method_name == method_identifier:
             self.token_stream_rewriter.delete(
                 program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
                 from_idx=grand_parent_ctx.start.tokenIndex,

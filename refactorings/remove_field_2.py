@@ -35,6 +35,7 @@ class RemoveFieldRefactoringListener(JavaParserLabeledListener):
             self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
 
         self.is_source_class = False
+        self.inner_class_count = 0
         self.is_static = False
 
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
@@ -42,16 +43,23 @@ class RemoveFieldRefactoringListener(JavaParserLabeledListener):
         class_identifier = ctx.IDENTIFIER().getText()
         if class_identifier == self.source_class:
             self.is_source_class = True
-        else:
+        elif self.is_source_class is True:
+            self.inner_class_count += 1
+
+    def exitClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
+        class_identifier = ctx.IDENTIFIER().getText()
+        if class_identifier == self.source_class:
             self.is_source_class = False
+        elif self.is_source_class is True:
+            self.inner_class_count -= 1
 
     def exitFieldDeclaration(self, ctx: JavaParserLabeled.FieldDeclarationContext):
         # print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
-        if not self.is_source_class:
+        if not self.is_source_class or self.inner_class_count != 0:
             return None
         field_identifier = ctx.variableDeclarators().variableDeclarator(0).variableDeclaratorId().IDENTIFIER().getText()
         # print("field_identifier:::::::::",field_identifier)
-        if self.field_name in field_identifier:
+        if self.field_name == field_identifier:
             grand_parent_ctx = ctx.parentCtx.parentCtx
             self.token_stream_rewriter.delete(
                 program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
