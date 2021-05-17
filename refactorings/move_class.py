@@ -35,8 +35,6 @@ from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 
-
-
 def log_error(title, message):
     """
     log_error method is used for logging erros
@@ -55,6 +53,7 @@ class MoveClassPreConditionListener(JavaParserLabeledListener):
     def __init__(self):
         # Move all classes of a file into file_classes list
         self.file_classes = []
+
     """
     MoveClassPreConditionListener class is used to check the pre-conditions on 
     move class refactoring
@@ -79,7 +78,7 @@ class MoveClassPreConditionListener(JavaParserLabeledListener):
             exit(0)
 
     # Exit a parse tree produced by Expression0Context
-    def exitExpression0(self, ctx:JavaParserLabeled.Expression0Context):
+    def exitExpression0(self, ctx: JavaParserLabeled.Expression0Context):
         if ctx.primary() is None:
             return
 
@@ -89,7 +88,7 @@ class MoveClassPreConditionListener(JavaParserLabeledListener):
             exit(0)
 
     # Exit a parse tree produced by LocalVariableDeclarationContext
-    def exitLocalVariableDeclaration(self, ctx:JavaParserLabeled.LocalVariableDeclarationContext):
+    def exitLocalVariableDeclaration(self, ctx: JavaParserLabeled.LocalVariableDeclarationContext):
         if ctx.typeType() is None:
             return
 
@@ -407,7 +406,7 @@ class ReplaceDependentObjectsListener(JavaParserLabeledListener):
         if not self.has_import or not self.need_import:
             if self.class_identifier in ctx.getText().split('.'):
                 self.need_import = True
-    
+
     # Exit a parse tree produced by JavaParserLabeled#expression1.
     def exitExpression1(self, ctx: JavaParserLabeled.Expression1Context):
         if not self.has_import or not self.need_import:
@@ -421,7 +420,7 @@ class ReplaceDependentObjectsListener(JavaParserLabeledListener):
                 index = ctx.start.tokenIndex
 
                 # return if the file has already imported the package
-                if (self.source_package + '.' + self.class_identifier not in self.exact_imports)\
+                if (self.source_package + '.' + self.class_identifier not in self.exact_imports) \
                         or (self.target_package + '.' + self.class_identifier in self.exact_imports):
                     return
 
@@ -433,11 +432,11 @@ class ReplaceDependentObjectsListener(JavaParserLabeledListener):
                 )
 
 
-filename = 'Source.java'
-class_identifier = 'Source'
-source_package = 'sourcePackage'
-target_package = 'targetPackage'
-directory = 'D:/Programming/Java/TestProject/'
+filename = 'AlphaBetaPlayer.java'
+class_identifier = 'AlphaBetaPlayer'
+source_package = 'chess.player'
+target_package = 'chess.test_pack'
+directory = '/home/ali/Documents/dev/java-chess/src'
 file_counter = 0
 
 
@@ -474,11 +473,11 @@ def post_move_class_propagation(token_stream, parse_tree, args):
     file_to_check = open(file=args.file, mode='r')
     for line in file_to_check.readlines():
         text_line = line.replace('\n', '').replace('\r', '').strip()
-        if (text_line.startswith('import') and text_line.endswith(source_package + '.' + class_identifier + ';'))\
+        if (text_line.startswith('import') and text_line.endswith(source_package + '.' + class_identifier + ';')) \
                 or (text_line.startswith('import') and text_line.endswith(source_package + '.*;')):
             has_import = True
             break
-        if (text_line.startswith('import') and text_line.endswith(target_package + '.' + class_identifier + ';'))\
+        if (text_line.startswith('import') and text_line.endswith(target_package + '.' + class_identifier + ';')) \
                 or (text_line.startswith('import') and text_line.endswith(target_package + '.*;')):
             has_exact_import = True
             break
@@ -540,8 +539,7 @@ def recursive_walk(dir_path):
     :param dir_path: directory path
     """
     global filename
-
-    args = get_argument_parser("{}/{}".format(dir_path + '/' + source_package.replace('.', '/'), filename))
+    args = get_argument_parser(source_file_path)
     parse_tree, token_stream = get_parse_tree_token_stream(args)
 
     # check if the class has dependencies on other classes in the same class
@@ -561,22 +559,27 @@ def recursive_walk(dir_path):
                 continue
             file_without_extension, extension = os.path.splitext(file)
             if extension == '.java':
-                args = get_argument_parser("{}/{}".format(dirname, file))
+                args = get_argument_parser(os.path.join(dirname, file))
                 parse_tree, token_stream = get_parse_tree_token_stream(args)
                 post_move_class_propagation(token_stream, parse_tree, args)
 
 
 if __name__ == '__main__':
-    if not os.path.exists(directory + '/' + source_package.replace('.', '/')):
+    source_package_directory = os.path.join(directory, source_package.replace('.', '/'))
+    target_package_directory = os.path.join(directory, target_package.replace('.', '/'))
+    source_file_path = os.path.join(source_package_directory, filename)
+    target_file_path = os.path.join(target_package_directory, f"{class_identifier}.java")
+
+    if not os.path.exists(source_package_directory):
         raise NotADirectoryError(f"The package \"{source_package}\" NOT FOUND!")
 
-    if not os.path.exists(directory + '/' + target_package.replace('.', '/')):
+    if not os.path.exists(target_package_directory):
         raise NotADirectoryError(f"The package \"{target_package}\" NOT FOUND!")
 
-    if not os.path.isfile(directory + '/' + source_package.replace('.', '/') + '/' + filename):
+    if not os.path.isfile(source_file_path):
         raise FileNotFoundError(f"The file \"{filename}\" NOT FOUND in package {source_package}!")
 
-    if os.path.isfile(directory + '/' + target_package.replace('.', '/') + '/' + class_identifier + '.java'):
+    if os.path.isfile(target_file_path):
         log_error("Redundant", f"The class \"{class_identifier}\" already exists in package \"{target_package}\"!")
         exit(0)
 
