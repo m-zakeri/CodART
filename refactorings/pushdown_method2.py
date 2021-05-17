@@ -3,7 +3,7 @@
 
 When a method was meant to be universal for all classes but in reality is used in only one or few subclass. 
 This situation can occur when planned features fail to materialize.
-PUsh down method refactoring removes the method from super class and adds it to correspondent subclasses.
+Push down method refactoring removes the method from super class and adds it to correspondent subclasses.
 
 
 ## Pre and Post Conditions
@@ -19,7 +19,6 @@ PUsh down method refactoring removes the method from super class and adds it to 
 
 """
 
-
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 from refactorings.utils.utils_listener_fast import TokensInfo, SingleFileElement
 from refactorings.pullup_method_get_removemethod import get_removemethods
@@ -28,12 +27,12 @@ from refactorings.utils import utils_listener_fast, utils2
 
 
 class PushDownMethodRefactoring:
-    def __init__(self, source_filenames: list, 
-                package_name: str,
-                superclass_name: str,
-                method_key: str,
-                class_names: list = [],
-                filename_mapping=lambda x: x):
+    def __init__(self, source_filenames: list,
+                 package_name: str,
+                 superclass_name: str,
+                 method_key: str,
+                 class_names: list = [],
+                 filename_mapping=lambda x: x):
         """
         The main function that does the process of push down method refactoring.
                Removes the necessary method from the superclass and moves it to correspondent subclasses .
@@ -94,8 +93,8 @@ class PushDownMethodRefactoring:
             for cn in package.classes:
                 c: utils_listener_fast.Class = package.classes[cn]
                 if ((c.superclass_name == self.superclass_name and c.file_info.has_imported_class(self.package_name,
-                                                                                                  self.superclass_name)) \
-                        or (self.package_name is not None and c.superclass_name == self.package_name + '.' + self.superclass_name)):
+                                                                                                  self.superclass_name)) or (
+                        self.package_name is not None and c.superclass_name == self.package_name + '.' + self.superclass_name)):
 
                     # enable functionality of class name
                     if len(self.class_names) == 0 or cn in self.class_names:
@@ -108,7 +107,8 @@ class PushDownMethodRefactoring:
                                 method: utils_listener_fast.Method = c.methods[m]
                                 is_used = False
                                 for item in method.body_local_vars_and_expr_names:
-                                    if isinstance(item, utils_listener_fast.MethodInvocation) and item.dot_separated_identifiers[0]+'()' == self.method_key:
+                                    if isinstance(item, utils_listener_fast.MethodInvocation) and \
+                                            item.dot_separated_identifiers[0] + '()' == self.method_key:
                                         is_used = True
                                 if is_used:
                                     classes_to_add_to.append(c)
@@ -125,20 +125,23 @@ class PushDownMethodRefactoring:
 
         for c in classes_to_add_to:
             c_body_start = utils_listener_fast.TokensInfo(c.parser_context.classBody())
-            c_body_start.stop = c_body_start.start 
+            c_body_start.stop = c_body_start.start
             rewriter.insert_after(c_body_start, "\n\n    %s %s %s() {\n       %s\n    }\n"
-             % (" ".join(method.modifiers), method.returntype, method.name, method.body_text[1:-1]))
+                                  % (
+                                      " ".join(method.modifiers), method.returntype, method.name,
+                                      method.body_text[1:-1]))
 
         method_token_info = utils_listener_fast.TokensInfo(method.parser_context)
         rewriter.replace(method_token_info, "")
-        
+
         rewriter.apply()
         return True
 
+
 if __name__ == "__main__":
-    mylist = get_filenames_in_dir('D:/archive/uni/CD/project/CodART/tests/pushdown_method/vehicle')
+    my_list = get_filenames_in_dir('D:/archive/uni/CD/project/CodART/tests/pushdown_method/vehicle')
     print("Testing pushdown_method...")
-    if PushDownMethodRefactoring(mylist, "pushdown_method_test_vehicle", "Vehicle", "epicMethod()").do_refactor():
+    if PushDownMethodRefactoring(my_list, "pushdown_method_test_vehicle", "Vehicle", "epicMethod()").do_refactor():
         print("Success!")
     else:
         print("Cannot refactor.")
