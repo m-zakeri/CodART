@@ -294,7 +294,7 @@ class MoveFieldRefactoring:
             if "import" in usage:
                 self.__add_import(usage["import"], rewriter)
                 continue
-    
+
             method_tokens = TokensInfo(usage["meta_data"].parser_context)
             for i, token in enumerate(usage['tokens']):
                 if token.text != self.field_name:
@@ -341,8 +341,10 @@ class MoveFieldRefactoring:
         self.__move_field_to_dst(target_class, field, rewriter)
         self.__propagate(usages, rewriter)
         rewriter.apply()
-        modified_files = set(map(lambda x: x["meta_data"].filename.replace(".java", ".rewritten.java"), filter(lambda x: "meta_data" in x, usages)))
-        modified_files.union(set(map(lambda x: x["import"].filename.replace(".java", ".rewritten.java"), filter(lambda x: "import" in x, usages))))
+        modified_files = set(map(lambda x: x["meta_data"].filename.replace(".java", ".rewritten.java"),
+                                 filter(lambda x: "meta_data" in x, usages)))
+        modified_files.union(set(map(lambda x: x["import"].filename.replace(".java", ".rewritten.java"),
+                                     filter(lambda x: "import" in x, usages))))
         modified_files.add(source_class.filename.replace(".java", ".rewritten.java"))
         modified_files.add(target_class.filename.replace(".java", ".rewritten.java"))
         self.__reformat(list(modified_files))
