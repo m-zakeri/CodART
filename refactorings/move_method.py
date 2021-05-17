@@ -21,7 +21,7 @@ class MoveMethodRefactoring:
     def do_refactor(self):
         program = get_program(self.source_filenames)
         static = 0
-
+        
         if self.class_name not in program.packages[self.package_name].classes or self.target_class_name not in \
                 program.packages[
                     self.target_package_name].classes or self.method_key not in \
@@ -46,7 +46,7 @@ class MoveMethodRefactoring:
         # check that method is static or not
         for modifier in _method.modifiers:
             if modifier == "static":
-                static = 1;
+                static = 1
 
         for token in exps:
             if token.text in _sourceclass.fields:
@@ -130,11 +130,11 @@ class MoveMethodRefactoring:
 
 
 if __name__ == "__main__":
-    mylist = get_filenames_in_dir('/home/loop/IdeaProjects/Sample')
+    mylist = get_filenames_in_dir('/home/ali/Desktop/JavaTestProject')
     # mylist = get_filenames_in_dir('tests/movemethod_test')
     print("Testing move_method...")
-    if MoveMethodRefactoring(mylist, "sample", "Test", "a()",
-                             "Test2", "sample").do_refactor():
+    if MoveMethodRefactoring(mylist, "source_package", "SourceClass", "method_for_move()",
+                             "TargetClass", "target_package").do_refactor():
         # if move_method_refactoring(mylist, "ss", "source", "m(int)","target","sss"):
         print("Success!")
     else:

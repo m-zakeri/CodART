@@ -7,7 +7,7 @@ from gen.java.JavaLexer import JavaLexer
 from refactorings.utils.utils_listener_fast import *
 
 
-def get_program(source_files: list, print_status = False) -> Program:
+def get_program(source_files: list, print_status=False) -> Program:
     program = Program()
     for filename in source_files:
         if print_status:
@@ -22,21 +22,23 @@ def get_program(source_files: list, print_status = False) -> Program:
         walker.walk(listener, tree)
 
         if not listener.package.name in program.packages:
-            program.packages[listener.package.name] = listener.package
+            program.packages[listener.package.name or ""] = listener.package
         else:
             for classes_name in listener.package.classes:
-                program.packages[listener.package.name].classes[classes_name]=listener.package.classes[classes_name]
+                program.packages[listener.package.name].classes[classes_name] = listener.package.classes[classes_name]
 
     return program
 
-def get_filenames_in_dir(directory_name: str, filter = lambda x: x.endswith(".java")) -> list:
+
+def get_filenames_in_dir(directory_name: str, filter=lambda x: x.endswith(".java")) -> list:
     result = []
     for (dirname, dirnames, filenames) in os.walk(directory_name):
         result.extend([dirname + '/' + name for name in filenames if filter(name)])
     return result
 
+
 class Rewriter:
-    def __init__(self, program: Program, filename_mapping = lambda x: x + ".rewritten.java"):
+    def __init__(self, program: Program, filename_mapping=lambda x: x + ".rewritten.java"):
         self.program = program
         # keys: CommonTokenStream
         # values: (old_filename, TokenStreamRewriter, _new_filename)
@@ -63,13 +65,14 @@ class Rewriter:
         self.get_token_stream_rewriter(tokens_info.token_stream).insertAfter(tokens_info.stop, text)
 
     def insert_before(self, tokens_info: TokensInfo, text: str):
-        self.get_token_stream_rewriter(tokens_info.token_stream).insertBeforeIndex(tokens_info.stop,text)
+        self.get_token_stream_rewriter(tokens_info.token_stream).insertBeforeIndex(tokens_info.stop, text)
 
     def insert_before_start(self, tokens_info: TokensInfo, text: str):
-        self.get_token_stream_rewriter(tokens_info.token_stream).insertBeforeIndex(tokens_info.start,text)
+        self.get_token_stream_rewriter(tokens_info.token_stream).insertBeforeIndex(tokens_info.start, text)
 
     def insert_after_start(self, tokens_info: TokensInfo, text: str):
         self.get_token_stream_rewriter(tokens_info.token_stream).insertAfter(tokens_info.start, text)
+
     def apply(self):
         for token_stream in self.token_streams:
             (old_filename, token_stream_rewriter, new_filename) = self.token_streams[token_stream]
