@@ -17,14 +17,13 @@ class NonStaticFieldRefactorError(Exception):
 class MoveFieldRefactoring:
     def __init__(self, source_filenames: list, package_name: str,
                  class_name: str, field_name: str, target_class_name: str,
-                 target_package_name: str, filename_mapping: str):
+                 target_package_name: str):
         self.source_filenames = source_filenames
         self.package_name = package_name
         self.class_name = class_name
         self.field_name = field_name
         self.target_class_name = target_class_name
         self.target_package_name = target_package_name
-        self.filename_mapping = filename_mapping + ".rewritten.java"
         self.formatter = os.path.abspath("../assets/formatter/google-java-format-1.10.0-all-deps.jar")
 
     def get_metadata(self, program):
@@ -319,7 +318,7 @@ class MoveFieldRefactoring:
                     rewriter.token_streams[token_stream] = (
                         usage["meta_data"].filename,
                         TokenStreamRewriter(token_stream),
-                        usage["meta_data"].filename.replace(".java", ".rewritten.java")
+                        usage["meta_data"].filename
                     )
                 rewriter.replace(method_tokens, f'{self.target_class_name}.{self.field_name}')
 
@@ -335,18 +334,18 @@ class MoveFieldRefactoring:
         target_class = target_package.classes[self.target_class_name]
         field = source_class.fields[self.field_name]
         rewriter = Rewriter(program,
-                            lambda x: f"{os.path.dirname(x)}/{os.path.splitext(os.path.basename(x))[0]}.rewritten.java")
+                            lambda x: f"{os.path.dirname(x)}/{os.path.splitext(os.path.basename(x))[0]}.java")
 
         self.__remove_field_from_src(field, rewriter)
         self.__move_field_to_dst(target_class, field, rewriter)
         self.__propagate(usages, rewriter)
         rewriter.apply()
-        modified_files = set(map(lambda x: x["meta_data"].filename.replace(".java", ".rewritten.java"),
+        modified_files = set(map(lambda x: x["meta_data"].filename,
                                  filter(lambda x: "meta_data" in x, usages)))
-        modified_files.union(set(map(lambda x: x["import"].filename.replace(".java", ".rewritten.java"),
+        modified_files.union(set(map(lambda x: x["import"].filename,
                                      filter(lambda x: "import" in x, usages))))
-        modified_files.add(source_class.filename.replace(".java", ".rewritten.java"))
-        modified_files.add(target_class.filename.replace(".java", ".rewritten.java"))
+        modified_files.add(source_class.filename)
+        modified_files.add(target_class.filename)
         self.__reformat(list(modified_files))
 
         return True
@@ -436,17 +435,11 @@ class MoveFieldRefactoring:
 
 
 if __name__ == '__main__':
-    path = "C:\\Users\\nimam\\Downloads\\Compressed\\Sample"
+    path = "/home/ali/Desktop/JavaTestProject/src/"
     my_list = get_filenames_in_dir(path)
-    filtered = []
-    for file in my_list:
-        if "rewritten.java" in file:
-            os.remove(file)
-        else:
-            filtered.append(file)
 
-    refactoring = MoveFieldRefactoring(filtered, "source", "Source", "a",
-                                       "Target", "target", "")
+    refactoring = MoveFieldRefactoring(my_list, "", "SourceClass", "field_for_move",
+                                       "TargetClass", "")
 
     refac = refactoring.move()
     print(refac)
