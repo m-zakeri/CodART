@@ -3,7 +3,7 @@ from antlr4 import FileStream, ParseTreeWalker
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
 from gen.java.JavaLexer import JavaLexer
-from .utils_listener_fast import *
+from utils_listener_fast import *
 from enum import Enum
 
 
@@ -23,7 +23,7 @@ class Scope:
         self.name = name
         self.type = scope_type
         self.scope_number = scope_number
-        self.declared_vars = []
+        self.declared_vars = {}
         self.used_vars = []
 
     def __str__(self):
@@ -35,6 +35,7 @@ class ScopeListener(UtilsListener):
         super().__init__(filename)
         self.root: Optional[Scope] = None
         self.current_scope: Optional[Scope] = None
+        self.current_block_name = ""
 
     def enterPackageDeclaration(self, ctx:JavaParser.PackageDeclarationContext):
         super().enterPackageDeclaration(ctx)
@@ -65,17 +66,18 @@ class ScopeListener(UtilsListener):
             return
 
         if ctx.STATIC() is not None:
-            scope = Scope("STATIC", ScopeType.STATIC_BLOCK, self.current_scope.scope_number + 1, self.current_scope)
-            self.current_scope.children.append(scope)
-            self.current_scope = scope
+            self.current_block_name = "STATIC"
+            # scope = Scope("STATIC", ScopeType.STATIC_BLOCK, self.current_scope.scope_number + 1, self.current_scope)
+            # self.current_scope.children.append(scope)
+            # self.current_scope = scope
             return
 
         if ctx.block() is None:
             return
-
-        scope = Scope("NON_STATIC", ScopeType.BLOCK_STATEMENT, self.current_scope.scope_number + 1, self.current_scope)
-        self.current_scope.children.append(scope)
-        self.current_scope = scope
+        self.current_block_name = "NON_STATIC"
+        # scope = Scope("NON_STATIC", ScopeType.BLOCK_STATEMENT, self.current_scope.scope_number + 1, self.current_scope)
+        # self.current_scope.children.append(scope)
+        # self.current_scope = scope
 
     def exitClassBodyDeclaration(self, ctx:JavaParser.ClassBodyDeclarationContext):
         if self.current_scope.type == ScopeType.BLOCK_STATEMENT \
@@ -86,12 +88,12 @@ class ScopeListener(UtilsListener):
         super().enterMethodBody(ctx)
         if self.current_scope is None:
             return
-
-        scope = Scope(self.current_method_identifier, ScopeType.METHOD, self.current_scope.scope_number + 1,
-                      self.current_scope)
-        self.current_scope.children.append(scope)
-        self.current_scope = scope
-        setattr(self.current_method, "scope", scope)
+        self.current_block_name = self.current_method_identifier
+        # scope = Scope(self.current_method_identifier, ScopeType.METHOD, self.current_scope.scope_number + 1,
+        #               self.current_scope)
+        # self.current_scope.children.append(scope)
+        # self.current_scope = scope
+        # setattr(self.current_method, "scope", scope)
 
     def exitMethodBody(self, ctx:JavaParser.MethodBodyContext):
         super().enterMethodBody(ctx)
@@ -108,22 +110,41 @@ class ScopeListener(UtilsListener):
     #     super().exitConstructorDeclaration(ctx)
     #     self.current_scope = self.current_scope.parent
 
-    def enterBlockStatement(self, ctx:JavaParser.BlockStatementContext):
-        super().enterBlockStatement(ctx)
+    def enterBlock(self, ctx:JavaParser.BlockContext):
+        super().enterBlock(ctx)
         if self.current_scope is None:
             return
 
         if self.current_scope.type == ScopeType.CONSTRUCTOR:
             return
 
-        scope = Scope("BLOCK", ScopeType.BLOCK_STATEMENT, self.current_scope.scope_number + 1,
+        scope = Scope(self.current_block_name, ScopeType.BLOCK_STATEMENT, self.current_scope.scope_number + 1,
                       self.current_scope)
         self.current_scope.children.append(scope)
         self.current_scope = scope
-
-    def exitBlockStatement(self, ctx:JavaParser.BlockStatementContext):
-        super().exitBlockStatement(ctx)
+    
+    def exitBlock(self, ctx:JavaParser.BlockContext):
+        super().exitBlock(ctx)
         self.current_scope = self.current_scope.parent
+        self.current_block_name = self.current_scope.name
+    #
+    # def enterBlockStatement(self, ctx:JavaParser.BlockStatementContext):
+    #     super().enterBlockStatement(ctx)
+    #     self.current_block_name = "BLOCK"
+        # if self.current_scope is None:
+        #     return
+        #
+        # if self.current_scope.type == ScopeType.CONSTRUCTOR:
+        #     return
+        #
+        # scope = Scope("BLOCK", ScopeType.BLOCK_STATEMENT, self.current_scope.scope_number + 1,
+        #               self.current_scope)
+        # self.current_scope.children.append(scope)
+        # self.current_scope = scope
+    #
+    # def exitBlockStatement(self, ctx:JavaParser.BlockStatementContext):
+    #     super().exitBlockStatement(ctx)
+    #     self.current_scope = self.current_scope.parent
 
     def enterStatement(self, ctx:JavaParser.StatementContext):
         super().enterStatement(ctx)
@@ -131,62 +152,44 @@ class ScopeListener(UtilsListener):
             return
 
         if ctx.IF():
-            self.current_scope.name = "IF"
+            self.current_block_name = "IF"
             return
         if ctx.ELSE():
-            self.current_scope.name = "ELSE"
+            self.current_block_name = "ELSE"
             return
         if ctx.SWITCH():
-            self.current_scope.name = "SWITCH"
+            self.current_block_name = "SWITCH"
+            self.__add_scope(ScopeType.BLOCK_STATEMENT)
             return
         if ctx.FOR():
-            self.current_scope.name = "FOR"
+            self.current_block_name = "FOR"
             return
         if ctx.WHILE():
-            self.current_scope.name = "WHILE"
+            self.current_block_name = "WHILE"
             return
         if ctx.DO():
-            self.current_scope.name = "DO"
+            self.current_block_name = "DO"
             return
         if ctx.TRY():
-            self.current_scope.name = "TRY"
+            self.current_block_name = "TRY"
             return
+
+    def exitStatement(self, ctx:JavaParser.StatementContext):
+        super().exitStatement(ctx)
+        if self.current_block_name == "SWITCH":
+            self.current_scope = self.current_scope.parent
+            self.current_block_name = self.current_scope.name
 
     def enterVariableDeclarator(self, ctx: JavaParser.VariableDeclaratorContext):
         super().enterVariableDeclarator(ctx)
-        if self.current_local_var_type is None:
-            return
+        id = ctx.variableDeclaratorId().IDENTIFIER().getText()
+        self.current_scope.declared_vars[id] = ctx
 
-        self.current_scope.declared_vars.append(self.current_method.body_local_vars_and_expr_names[-1])
-
-    # def exitFieldDeclaration(self, ctx: JavaParser.FieldDeclarationContext):
-    #     super().exitFieldDeclaration(ctx)
-    #     self.current_scope.declared_vars.append(self.package.classes[self.current_class_identifier].fields[field.name])
-    #     self.field_enter_count -= 1
-    #     if self.current_class_identifier is not None and self.field_enter_count == 0:
-    #         for i in range(len(self.current_field_ids)):
-    #             field_id = self.current_field_ids[i]
-    #             dims = self.current_field_dims[i]
-    #             field_init = self.current_field_inits[i]
-    #             var_ctx = self.current_field_var_ctxs[i]
-    #             field = Field(
-    #                 package_name=self.package.name,
-    #                 class_name=self.current_class_identifier,
-    #                 parser_context=self.current_field_decl[2],
-    #                 filename=self.filename,
-    #                 file_info=self.file_info
-    #             )
-    #             field.modifiers = self.current_field_decl[0]
-    #             field.modifiers_parser_contexts = self.current_field_decl[3]
-    #             field.datatype = self.current_field_decl[1] + dims
-    #             field.name = field_id
-    #             field.initializer = field_init
-    #             field.neighbor_names = [x for x in self.current_field_ids if x != field_id]
-    #             field.all_variable_declarator_contexts = self.current_field_var_ctxs
-    #             field.index_in_variable_declarators = i
-    #             self.package.classes[self.current_class_identifier].fields[field.name] = field
-    #         self.current_field_decl = None
-
+    def __add_scope(self, scope_type):
+        scope = Scope(self.current_block_name, scope_type, self.current_scope.scope_number + 1,
+                      self.current_scope)
+        self.current_scope.children.append(scope)
+        self.current_scope = scope
 
 def get_program2(source_files: list, print_status = False) -> Program:
     program = Program()
@@ -208,11 +211,11 @@ def get_program2(source_files: list, print_status = False) -> Program:
         else:
             for classes_name in listener.package.classes:
                 program.packages[listener.package.name].classes[classes_name]=listener.package.classes[classes_name]
-    # if listener is not None:
-    #     setattr(program, "scope", listener.root)
+    if listener is not None:
+        setattr(program, "scope", listener.root)
     return program
 
 if __name__ == '__main__':
-    filename = "/home/loop/IdeaProjects/Sample/src/sample2/Test4.java"
+    filename = "/home/loop/IdeaProjects/Sample/src/scope/Scope.java"
     program = get_program2([filename])
     print()
