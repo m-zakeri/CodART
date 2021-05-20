@@ -1,0 +1,91 @@
+// import com.sun.org.apache.xalan.internal.xsltc.compiler.Copy
+
+buildscript {
+    ext.kotlin_version = '1.5.0'
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+apply plugin: 'kotlin'
+apply plugin: 'maven-publish'
+
+configurations {
+    direct
+    cloud {
+        attributes {
+            attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category, Category.LIBRARY))
+            attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.JAVA_RUNTIME))
+            attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling, Bundling.EXTERNAL))
+            attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, JavaVersion.current().majorVersion.toInteger())
+        }
+    }
+}
+
+artifacts {
+    cloud jar
+}
+dependencies {
+    providedCompile project(path: ':biz.ganttproject.app.libs', configuration: 'exported')
+    direct fileTree(dir: project.ext.libDir, include: ['*.jar'])
+    direct "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    direct "com.google.guava:guava:25.+"
+
+    compile configurations.direct
+    compile configurations.providedCompile
+
+    cloud configurations.direct
+
+    testImplementation(
+        'org.junit.jupiter:junit-jupiter-api:5.+',
+        'com.nhaarman.mockitokotlin2:mockito-kotlin:2.+'
+    )
+    testRuntimeOnly(
+        'org.junit.jupiter:junit-jupiter-engine:5.+'
+    )
+}
+
+test {
+    useJUnitPlatform()
+}
+
+task copyPlugin(dependsOn: assemble) {
+    doFirst {
+        println "Copying $project.name to $rootProject.pluginsDir"
+    }
+    doLast {
+        println "Installing $project.name"
+        copy {
+            into(new File(rootProject.pluginsDir, project.name))
+            from(fileTree(".")) {
+                include "plugin.xml"
+            }
+            from(fileTree("src/main/")) {
+                include "resources/**"
+            }
+        }
+        copy {
+            into(new File(rootProject.pluginsDir, "${project.name}/lib/"))
+            from(configurations.direct) {
+                include "*.jar"
+            }
+            from(jar.outputs.getFiles().getFiles().flatten())
+            rename { filename -> filename + ".lib" }
+        }
+        println "<<< $project.name"
+    }
+
+}
+
+addPublishing(project)
+publishing {
+    publications {
+        core(MavenPublication) {
+            artifactId = 'biz.ganttproject.core'
+            artifact jar
+        }
+    }
+}

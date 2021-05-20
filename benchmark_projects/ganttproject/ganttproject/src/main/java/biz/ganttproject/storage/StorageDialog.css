@@ -1,0 +1,501 @@
+/*
+Copyright 2019 BarD Software s.r.o
+
+This file is part of GanttProject, an open-source project management tool.
+
+GanttProject is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+GanttProject is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GanttProject.  If not, see <http://www.gnu.org/licenses/>.
+*/
+* {
+    -gp-orange: #ffca28;
+    -gp-light-gray: #e0e0e0;
+    -gp-medium-gray: #616161;
+    -gp-dark-gray: #424242;
+    -gp-control-background: white;
+}
+
+webdav-list-cell-button-pane.alert-warning {
+    -fx-background-color: derive(orange, 40%);
+    -fx-border-color: derive(orange, 20%);
+    -fx-text-fill: dimgray;
+    -fx-font-weight: bold;
+    -fx-padding: 5;
+    -fx-wrap-text: true;
+}
+
+.body {
+    -fx-background-color: white;
+    -fx-padding: 0;
+    -fx-border-insets: 0;
+}
+
+.body > .button-bar {
+    -fx-pref-height: 0;
+}
+
+.bordered {
+    -fx-border-width: 1;
+    -fx-border-style: dotted;
+    -fx-border-color: red;
+}
+
+.btn-done {
+    -fx-font-weight: bold;
+}
+
+.btn-radio {
+    -fx-padding: 3px 0 3px 0;
+}
+
+.btn-service {
+    -fx-background-color: #e5e5e5;
+    -fx-border-width: 0;
+    -fx-text-fill: black;
+    -fx-border-radius: 0;
+    -fx-cursor: hand;
+    -fx-alignment: center-left;
+    -fx-padding: 5px 3px;
+}
+
+.btn-service {
+    -fx-alignment: center-left;
+}
+
+.btn-service > * {
+    -fx-font-size: 200%;
+}
+
+.btn-service:hover {
+    -fx-background-color: white;
+}
+
+.btn-service.active {
+    -fx-background-color: #ffc241;
+}
+
+
+
+.button-pane {
+    -fx-padding: 5px 0px 0px 0px;
+}
+
+.center {
+    -fx-alignment: center;
+    -fx-max-width: Infinity;
+}
+
+.control-label {
+    -fx-padding: 10 0;
+}
+
+.control-row {
+    -fx-padding: 5 0;
+}
+
+.custom-text-field:right-node-visible .right-pane {
+    -fx-padding: 0;
+}
+
+.custom-text-field.error {
+    -fx-effect: innershadow(three-pass-box, #ff6f85, 3, 1, 0, 0);
+}
+
+.doclist-save-box {
+    -fx-padding: 1ex 0 0 0;
+    -fx-pref-width: 100%;
+}
+
+HBox.title {
+}
+
+HBox.title Button {
+    -fx-font-weight: bold;
+}
+
+HBox.title Label {
+    -fx-font-size: 130%;
+    -fx-font-weight: bold;
+}
+
+HBox.title-integrated {
+    -fx-background-color: -gp-dark-gray;
+}
+
+HBox.title-integrated Label {
+    -fx-padding: 10 10 10 10;
+    -fx-text-fill: -gp-orange;
+}
+
+
+.help {
+    -fx-font-size: 80%;
+    -fx-padding: 0 0 0 0;
+    -fx-pref-width: 400px;
+    -fx-max-width: 400px;
+    -fx-wrap-text: true;
+}
+
+.hide {
+    visibility: hidden;
+}
+
+.hint-validation {
+    -fx-padding: 3 2 3 0;
+    -fx-text-fill: -gp-dark-gray;
+}
+
+.hint-validation-pane {
+    -fx-border-insets: 3 0 3 0;
+    -fx-background-color: -gp-orange;
+    -fx-background-radius: 3;
+    -fx-background-insets: 3 0 3 0;
+    /*-fx-border-color: -gp-orange;*/
+    -fx-border-radius: 3;
+    -fx-border-width: 5;
+    -fx-pref-width: 100%;
+    -fx-min-width: 400;
+    -fx-border-color: -gp-orange;
+    visibility: visible;
+}
+.hint-validation-pane.noerror {
+    /*visibility: hidden;*/
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.hint .glyph-icon {
+    -fx-fill: -gp-dark-gray;
+    -fx-padding: 3 3 3 3;
+}
+
+/*.hint.error {*/
+/*    visibility: visible;*/
+/*}*/
+
+/*.hint.warning {*/
+/*    visibility: visible;*/
+/*}*/
+
+/*.hint.noerror {*/
+/*    visibility: hidden;*/
+/*}*/
+
+.notification {
+    -fx-padding: 5px 10px 0px 10px;
+    -fx-background-color: rgba(255, 255, 255, 0);
+}
+
+.notification.alert-error > *.content {
+    -fx-padding: 3px;
+    -fx-text-fill: maroon;
+}
+
+.notification.alert-info {
+    -fx-padding: 3px;
+    -fx-text-fill: black;
+}
+
+.pane-service-buttons {
+    -fx-border-width: 0 1 0 0;
+    -fx-background-color: #e5e5e5;
+    -fx-border-color: derive(#e5e5e5, -15%);
+    -fx-padding: 10 10;
+    -fx-spacing: 8;
+    -fx-alignment: top-left;
+}
+
+.pane-service-buttons .btn-create {
+    -fx-background-color: -gp-dark-gray;
+    -fx-text-fill: -gp-light-gray;
+    -fx-fill: -gp-light-gray;
+    -fx-border-color: transparent;
+}
+
+.pane-service-buttons .btn-create .glyph-icon {
+    -fx-fill: -gp-light-gray;
+}
+
+.pane-service-buttons .btn-create:hover {
+    -fx-background-color: derive(-gp-dark-gray, 10%);
+    -fx-text-fill: derive(-gp-light-gray, -10%);
+    -fx-effect: dropshadow(gaussian, -gp-light-gray, 4, 0, 0, 4);
+}
+
+.pane-service-contents {
+    -fx-padding: 10 10 10 10;
+    -fx-font-family: Arial;
+    -fx-fill-width: true;
+    -fx-pref-width: 100%;
+    -fx-pref-height: 100%;
+}
+
+.pane-service-contents > * {
+    -fx-font-family: Arial;
+}
+
+.pane-service-contents > RadioButton {
+    -fx-padding: 5 0 5 0;
+}
+
+.pane-service-contents > TextField {
+    -fx-padding: 5 0 5 0;
+}
+
+.pane-service-contents > .breadcrumb {
+    -fx-padding: 0 0 5 0;
+}
+
+.pane-service-contents > .folder-view-hint {
+    -fx-padding: 1ex 0 0 0;
+}
+
+.pane-service-contents > .title-help {
+    -fx-padding: 0 5 10 5;
+    -fx-font-size: 80%;
+    -fx-text-fill: dimgray;
+    -fx-wrap-text: true;
+    -fx-pref-width: 400px;
+}
+
+.pane-service-contents HBox {
+    -fx-fill-width: true;
+    -fx-spacing: 5;
+}
+
+.pane-service-contents HBox.title {
+    -fx-padding: 0 0 5 0;
+    -fx-alignment: center-left;
+}
+
+.pane-service-contents.local-storage HBox.open {
+    -fx-alignment: center-right;
+}
+
+.pane-service-contents.local-storage .filename {
+    -fx-padding: 5 0 0 0;
+    -fx-font-size: 90%;
+}
+
+.pane-service-contents.local-storage HBox.browse {
+    -fx-alignment: center;
+    -fx-font-size: 90%;
+    -fx-padding: 3 0 0 0;
+}
+
+.pane-service-contents.local-storage HBox.browse Button {
+    -fx-background-radius: 20;
+    -fx-background-insets: 0, 1, 1;
+    -fx-text-fill: black;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.6), 3, 0.0, 0, 1);
+}
+
+.pane-storage {
+    -fx-padding: 0;
+    -fx-border-insets: 0;
+}
+
+.pane-storage > * {
+    -fx-font-family: Arial;
+}
+
+.dlg-storage .header Label {
+    -fx-font-weight: bold;
+    -fx-font-size: 130%;
+    -fx-padding: 0;
+}
+
+.open-save-buttons {
+    -fx-alignment: baseline-center;
+    -fx-font-size: 110%;
+    -fx-spacing: 1ex;
+}
+
+.open-save-buttons .button {
+    -fx-border-color: transparent;
+    -fx-background-color: transparent;
+    -fx-border-radius: 0;
+    -fx-text-fill: -gp-dark-gray;
+    /*    -fx-font-size: 110%;*/
+    -fx-padding: 0.75ex 2em;
+    -fx-cursor: hand;
+}
+
+.open-save-buttons .button:hover,.open-save-buttons .button:focused {
+    -fx-border-color: -gp-dark-gray;
+    -fx-border-width: 0 0 1 0;
+}
+.open-save-buttons .button.selected {
+    -fx-border-color: transparent;
+    -fx-font-weight: bold;
+    -fx-background-color: -gp-dark-gray;
+    -fx-text-fill: white;
+}
+
+.property-sheet {
+    -fx-background-color: white;
+    -fx-padding: 5px 0 0 0;
+}
+
+.property-sheet BorderPane {
+    -fx-background-color: white;
+}
+.property-sheet .scroll-pane .property-pane {
+    -fx-background-color: white;
+}
+
+.property-sheet .scroll-pane {
+    -fx-background-color: white;
+    -fx-fit-to-height: true;
+}
+
+.property-sheet .scroll-pane .accordion {
+    -fx-background-color: white;
+}
+.space-section {
+    -fx-padding: 10px 0 10px 0;
+}
+
+.status-bar {
+    -fx-background-color: transparent;
+}
+
+.storage-list {
+    -fx-padding: 2em 0 0 0;
+}
+
+.storage-list .storage-name {
+    -fx-effect: none;
+}
+
+.subtitle {
+    -fx-padding: 0 0 3 0;
+    -fx-font-weight: bold;
+    -fx-text-fill: dimgray;
+}
+
+.webdav-button-pane {
+    -fx-padding: 5 0 0 0;
+    -fx-alignment: center-right;
+    -fx-spacing: 5;
+}
+
+.list-cell {
+    -fx-padding: 10 5 10 10;
+}
+
+.list-cell .label {
+    -fx-text-fill: -gp-medium-gray;
+    -fx-alignment: CENTER-LEFT;
+    -fx-font-size: 120%;
+}
+
+.list-cell:selected {
+    -fx-background-color: -gp-light-gray;
+}
+
+.list-cell:selected .label {
+    -fx-text-fill: -gp-medium-gray;
+    -fx-alignment: CENTER-LEFT;
+}
+
+.list-cell:hover .label {
+    -fx-text-fill: -gp-dark-gray;
+}
+
+.webdav-list-cell-button-pane {
+    -fx-alignment: center-right;
+}
+
+.item-action {
+    -fx-min-width: 20;
+    -fx-min-height: 20;
+    -fx-alignment: center;
+    -fx-cursor: hand;
+}
+
+
+.item-action .glyph-icon {
+    -fx-alignment: center;
+    -fx-fill: -gp-medium-gray;
+    -glyph-size: 16;
+}
+
+
+.item-action:hover .glyph-icon {
+    -fx-fill: derive(-gp-medium-gray, -10%);
+    -glyph-size: 18;
+}
+
+.folder-view {
+    -fx-focus-color: -gp-light-gray;
+}
+
+.nav-search {
+    -fx-background-color: -gp-dark-gray;
+    -fx-padding: 10 10 10 10;
+}
+
+
+.bread-crumb-bar {
+    -fx-background-color: transparent;
+    -fx-padding: 0 0 1em 0;
+}
+
+.crumb {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-fill: -gp-light-gray;
+    -fx-text-fill: -gp-light-gray;
+}
+
+.crumb:hover,
+.crumb:selected,
+.crumb:focused,
+.crumb-selected {
+    -fx-background-color: -gp-medium-gray;
+}
+
+.folder-view-progress {
+    -fx-min-height: 10;
+    -fx-padding: 0;
+    -fx-background-color: -gp-dark-gray;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+    -fx-border-width: 0;
+    -fx-border-insets: 0;
+    -fx-padding: 0;
+    -fx-indeterminate-bar-length: 100;
+    -fx-indeterminate-bar-escape: true;
+    -fx-indeterminate-bar-flip: true;
+    -fx-indeterminate-bar-animation-time: 2;
+}
+
+.folder-view-progress > .bar {
+    -fx-background-color: -gp-dark-gray;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+    -fx-border-width: 0;
+    -fx-padding: 0;
+}
+
+.folder-view-progress:indeterminate > .bar {
+    -fx-background-color: linear-gradient(to left, transparent, -gp-orange);
+}
+
+.folder-view-progress > .track {
+    -fx-background-color: -gp-dark-gray;
+    -fx-background-insets:  0;
+    -fx-border-width: 0;
+    -fx-border-insets: 0;
+    -fx-padding: 0;
+}

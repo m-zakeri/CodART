@@ -1,0 +1,29 @@
+Package: GanttProject
+Version: 2.99.0
+Section: unknown
+Maintainer: Dmitry Barashev, BarD Software s.r.o
+Priority: optional
+Architecture: amd64
+Provides: ganttproject
+Description: Free desktop application for project scheduling and project management.
+ .
+ .
+ This is an early access build of GanttProject 3.0. It includes all features of GanttProject 2.8.10
+ plus:
+ .
+ .
+ .
+ .
+ GanttProject Cloud: cloud service for team work and collaboration. 
+ .
+ * Project file sharing
+ .
+ * Access control
+ .
+ * File locking to prevent concurrent modificatons
+ .
+ * File versions to keep the whole history of project changes
+ .
+ * File update notifications to keep collaborators aware of changes
+Installed-Size: 185704
+

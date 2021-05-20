@@ -1,0 +1,59 @@
+// This installs dependencyUpdates plugin
+// Run gradle dependencyUpdates to get the report
+
+// Path to launch4j binary
+ext.launch4j = '/opt/launch4j/launch4j'
+// Directories where we build the distro
+ext.semver = '3.1'
+ext.buildNum = '3100'
+ext.distBinDir = file('ganttproject-builder/dist-bin')
+ext.pluginsDir = file("ganttproject-builder/dist-bin/plugins/base")
+
+version = "${semver}.${buildNum}"
+
+// Config for all projects: deps come from Maven repository,
+// compile using Java 11, libs normally sit in lib
+allprojects {
+    configurations {
+        direct
+        providedCompile
+    }
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    apply plugin: 'java'
+    ext {
+        libDir = 'lib'
+        mvnDir = 'lib/mvn'
+    }
+    sourceCompatibility = 11
+    targetCompatibility = 11
+
+    clean {
+        delete += "dist-bin"
+    }
+}
+
+subprojects {
+    group 'biz.ganttproject'
+    version = new Date().format("yy.MM.dd")
+}
+
+
+def addPublishing(project) {
+    project.publishing {
+        repositories {
+            maven {
+                name "ganttproject-maven-repository-internal"
+                url "gcs://ganttproject-maven-repository/internal"
+            }
+        }
+    }
+}
+//
+//runtime {
+//    distDir = rootProject.distBinDir
+//    options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
+//    modules = ['java.base']
+//}

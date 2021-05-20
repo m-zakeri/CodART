@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin
+   id="biz.ganttproject.core"
+   name="GanttProject Core"
+   version="2.5.0"
+   provider-name="">
+
+   <runtime>
+      <library name="lib/*">
+         <export name="*"/>
+      </library>
+      <library name="resources/">
+         <export name="*"/>
+      </library>
+   </runtime>
+   <requires>
+      <import plugin="biz.ganttproject.app.libs"/>
+      <import plugin="org.eclipse.core.runtime"/>
+   </requires>
+</plugin>
