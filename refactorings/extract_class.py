@@ -655,3 +655,46 @@ if __name__ == "__main__":
                 moved_fields=["field1", "field2", ],
                 moved_methods=["method1", "method3", ]
             ).do_propagate()
+# public class GodClass {
+#   int field1;
+#   int field2;
+#   int field3;
+#
+#   public int method1(){
+#     return this.field1+this.field2;
+#   }
+#
+#   public int method2(){
+#     return this.field3;
+#   }
+#
+#   public int method3(){
+#     return this.field2;
+#   }
+# }
+
+
+#
+# public class GodClass {
+#   int field1;
+#   int field2;
+#   int field3;
+#
+#   public GodClass(){
+#     this.field1=0;
+#     this.field2=0;
+#     this.field3=0;
+#   }
+#
+#   public int method1(){
+#     return this.field1+this.field2;
+#   }
+#
+#   public int method2(){
+#     return this.field3;
+#   }
+#
+#   public int method3(){
+#     return this.field2;
+#   }
+# }
