@@ -1,11 +1,9 @@
+import os
 import re  # regular expressions
-
 import antlr4
 from antlr4.Token import CommonToken
 import antlr4.tree
 from antlr4.CommonTokenStream import CommonTokenStream
-from typing import List, Optional
-
 from gen.java.JavaParser import JavaParser
 from gen.java.JavaParserListener import JavaParserListener
 
@@ -588,3 +586,77 @@ class UtilsListener(JavaParserListener):
                 field.index_in_variable_declarators = i
                 self.package.classes[self.current_class_identifier].fields[field.name] = field
             self.current_field_decl = None
+
+
+class FieldUsageListener(UtilsListener):
+    def __init__(self, filename: str, field_name: str, source_class: str):
+        super().__init__(filename)
+        self.current_class_name = os.path.basename(filename).replace(".java", "")
+        self.field_name = field_name
+        self.source_class = source_class
+        self.stack = []
+        self.usages = []
+
+    def enterExpression(self, ctx:JavaParser.ExpressionContext):
+        text = ctx.getText()
+
+        # if we reached expression this.field
+        if text == f"this.{self.field_name}":
+            self.usages.append(ctx)
+            return
+
+        # if we reached expression Source.field
+        if text == f"{self.source_class}.{self.field_name}":
+            self.usages.append(ctx)
+            return
+
+        if text != self.field_name:
+            return
+
+        # if we reached field and there is no local declaration with the same name as field
+        if len(self.stack) == 0:
+            self.usages.append(ctx)
+
+
+        # self.state_machine.change_state(ctx, len(self.stack) > 0 and self.stack[-1] == self.field_name)
+        # if self.state_machine.is_final():
+        #     self.state_machine.reset()
+        #     self.usages.append(ctx)
+
+    def exitClassBody(self, ctx:JavaParser.ClassBodyContext):
+        if self.current_class_name not in self.package.classes:
+            print("wtf")
+            return
+        setattr(self.package.classes[self.current_class_name], "usages", self.usages)
+
+    def enterBlock(self, ctx:JavaParser.BlockContext):
+        super().enterBlock(ctx)
+
+        if len(self.stack) != 0:
+            self.stack.append(self.field_name)
+
+    def exitBlock(self, ctx:JavaParser.BlockContext):
+        super().exitBlock(ctx)
+        try:
+            self.stack.pop()
+        except IndexError:
+            pass
+
+    def enterVariableDeclarator(self, ctx: JavaParser.VariableDeclaratorContext):
+        super().enterVariableDeclarator(ctx)
+        if type(ctx.parentCtx.parentCtx) is JavaParser.FieldDeclarationContext:
+            return
+
+        # if we're in a method and we have a parameter with
+        # the same name as field, we shouldn't consider any
+        # references to field a usage since it is referring
+        # to the parameter
+        var_name = ctx.variableDeclaratorId().IDENTIFIER().getText()
+        if self.current_method is not None:
+            for _, param in self.current_method.parameters:
+                if param == self.field_name:
+                    self.stack.append(var_name)
+                    return
+
+        if var_name == self.field_name:
+            self.stack.append(var_name)
