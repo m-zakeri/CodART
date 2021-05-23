@@ -359,7 +359,7 @@ class ReplaceDependentObjectsListener(JavaParserLabeledListener):
             imported_package += '.' + ctx.MUL().getText()
 
         # return if the current import statement is not relevant to source package
-        if self.source_package not in imported_package:
+        if self.source_package not in imported_package or (self.class_identifier not in imported_package and '*' not in imported_package):
             return
 
         start_index = ctx.start.tokenIndex
@@ -387,6 +387,7 @@ class ReplaceDependentObjectsListener(JavaParserLabeledListener):
                     text=self.NEW_LINE + target_exact_import
                 )
             else:
+                print(ctx.getText())
                 self.token_stream_rewriter.replace(
                     program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
                     from_idx=start_index,
@@ -432,11 +433,11 @@ class ReplaceDependentObjectsListener(JavaParserLabeledListener):
                 )
 
 
-filename = 'AlphaBetaPlayer.java'
-class_identifier = 'AlphaBetaPlayer'
-source_package = 'chess.player'
-target_package = 'chess.test_pack'
-directory = '/home/ali/Documents/dev/java-chess/src'
+filename = 'MoveClass.java'
+class_identifier = 'MoveClass'
+source_package = 'source_package'
+target_package = 'target_package'
+directory = '/home/ali/Desktop/JavaTestProject/src/'
 file_counter = 0
 
 
