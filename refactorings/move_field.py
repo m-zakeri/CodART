@@ -133,7 +133,6 @@ class MoveFieldRefactoring:
                 return True
 
             return False
-        print(selector)
         return True
 
     def __is_a_usage_in_class(self, tokens, token, field):
