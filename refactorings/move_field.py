@@ -124,12 +124,16 @@ class MoveFieldRefactoring:
         Checks if given token is related to the static field, program searching for
         """
         selector = self.__stringify(tokens, token.tokenIndex - 2, token.tokenIndex)
+        method_package_name = method.package_name or ""
+        if method.class_name == self.class_name and method_package_name != self.package_name and method_package_name != self.target_package_name:
+            return False
+
         if selector == 'this.':
             if method.class_name == self.class_name:
                 return True
 
             return False
-
+        print(selector)
         return True
 
     def __is_a_usage_in_class(self, tokens, token, field):
@@ -304,14 +308,14 @@ class MoveFieldRefactoring:
                     if usage["tokens"][i - 2].text == "this" or \
                             usage["tokens"][i - 2].text == self.class_name:
                         method_tokens.start -= 2
-                    else:
-                        if local_var_declared:
-                            continue
-                        local_var_declared = True
-                        continue
-                else:
-                    if local_var_declared:
-                        continue
+                #     else:
+                #         if local_var_declared:
+                #             continue
+                #         local_var_declared = True
+                #         continue
+                # else:
+                #     if local_var_declared:
+                #         continue
 
                 token_stream = usage["meta_data"].parser_context.parser.getTokenStream()
                 if token_stream not in rewriter.token_streams.keys():
