@@ -1,20 +1,24 @@
-package example;
-public class ExtractMethodTest{
-    public void main(int x, long y) {
-        int z = 0;
-        long k = 1;
-		print(y);
-        int f = 0;
-        for (int x = 0;x<5;x++)
-        {
-            System.out.println("amount: "+z);
-            System.out.println("name: "+ f );
-        }
+public class ExtractMethod {
+
+    String name = "Ali";
+
+    void printBanner() {
+        System.out.println("ExtractMethod.printBanner()");
     }
-	public void print(long y)
+
+    int getOutstanding(){
+        return 334;
+    }
+
+    void printOwing() {
+        printBanner();
+
+        // Print details.
+		printDetails();
+    }
+	public void printDetails()
 	{
-        System.out.println("name: "+ y );
-        int f = 0;
-        System.out.println("name: "+ f );
+        System.out.println("name: " + this.name);
+        System.out.println("amount: " + getOutstanding());
 	}
 }

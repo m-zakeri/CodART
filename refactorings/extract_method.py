@@ -1,6 +1,4 @@
 from antlr4 import *
-from antlr4.TokenStreamRewriter import TokenStreamRewriter
-import datetime
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
@@ -12,6 +10,12 @@ from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
     Description about the code:
     - statements are each line of code showing an act for example a = 5; is an statement.
     - exact each method of each class.
+"""
+
+"""
+    Conf object help:
+        1.if package is not important or is unknown enter None for its value.
+        2.lines are calculated from beginning of method you are willing to extract counting from 0.
 """
 
 
@@ -30,10 +34,12 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
 
     def __init__(self,
                  target_package: str = None, target_class: str = None,
-                 target_method: str = None, lines: list = []):
+                 target_method: str = None, lines=None):
         # TODO add target method None possibility
 
         # checks Target method not to be None
+        if lines is None:
+            raise Exception('Extract lines are not specified.')
         if target_method is None:
             raise Exception('Target method should be specified.')
 
@@ -47,7 +53,7 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
         self.target_method = target_method
 
         # tree helper variables
-        self.is_in_target_package = False
+        self.is_in_target_package = self.target_package is None
         self.is_in_target_class = False
         self.is_in_a_method = False
         self.is_in_target_method = False
@@ -200,8 +206,10 @@ def extract_method(conf):
     line_num = 1
     # func_added = False
     func = []
+    print('extracting following lines:')
     for line in lines:
         if listener.lines.__contains__(line_num):
+            print(line, end='')
             if line_num == min(listener.lines):
                 output.append('\t\t' + conf['new_method_name'] + get_args(listener.used_variables))
             if listener.remain_lines.__contains__(line_num):
@@ -219,6 +227,7 @@ def extract_method(conf):
             output.append(line)
         line_num += 1
     file1.close()
+    print('--------------------')
 
     file2 = open(conf['output_file'], 'w')
     for item in output:
@@ -234,51 +243,21 @@ def extract_method(conf):
 def main():
     print("Started Extract Method")
     _conf = {
-        'target_package': 'example',
+        'target_package': None,
         'target_file': "D:\\Sajad\\Uni\\Spring00\\Compiler\\CodART\\tests\\extract_method\\in\\ExtractMethodTest.java",
         'output_file': "D:\\Sajad\\Uni\\Spring00\\Compiler\\CodART\\tests\\extract_method\\out\\ExtractMethodTest.java",
-        'target_class': 'ExtractMethodTest',
-        'target_method': 'main',
-        'lines': [4, 5, 3],
-        'new_method_name': 'print',
+        'target_class': 'ExtractMethod',
+        'target_method': 'printOwing',
+        'lines': [4, 5],
+        'new_method_name': 'printDetails',
     }
     extract_method(_conf)
-
-    # stream = FileStream(input_path, encoding='utf8')
-    # lexer = JavaLexer(stream)
-    # token_stream = CommonTokenStream(lexer)
-    # parser = JavaParserLabeled(token_stream)
-    # parser.getTokenStream()
-    # parse_tree = parser.compilationUnit()
-    # my_listener = ExtractMethodRefactoring(target_package=target_package,
-    #                                        target_class=target_class, target_method=target_method,
-    #                                        staring_line=9, ending_line=11)
-    #
-    # walker = ParseTreeWalker()
-    # walker.walk(t=parse_tree, listener=my_listener)
-    #
-    # f = open(output_path, mode='w', newline='')
-    # text = str(datetime.datetime.now())
-    # f.write(f'// modified at: {text[:-7]}\n')
-    # # text = my_listener.token_stream_rewriter.getDefaultText()
-    # f.write(text)
-    # f.flush()
-    #
-    # # for each in my_listener.method_name_list:
-    # # print(f'{each} : {my_listener.method_statements_list[each]}')
-    # # print(f'{each} : {my_listener.method_body_list[each]}')
-    # # print('*' * 10)
 
     print("Finished Extract Method")
 
 
 if __name__ == '__main__':
     main()
-    # selectedFile = 'Test1.java'
-    # input_file = f"../tests/extract_method_tests/input_tests/{selectedFile}"
-    # # todo: remember in java we need the name of static classes to be exactly the same as file name
-    # output_file = f"../tests/extract_method_tests/output_tests/output-{selectedFile}"
-    # source_package = "Test1"
-    # source_class = "Test1"
-    # source_method = "a"
-    # main(input_file, output_file, source_package, source_class, source_method)
+
+    # todo: remember in java we need the name of static classes to be exactly the same as file name
+    # todo: remember in java we need static variables to only be used in static method
