@@ -21,12 +21,13 @@ def get_program(source_files: list, print_status=False) -> Program:
         walker = ParseTreeWalker()
         walker.walk(listener, tree)
 
-        if not listener.package.name in program.packages:
-            program.packages[listener.package.name or ""] = listener.package
+        listener_package_name = listener.package.name or ""
+
+        if not listener_package_name in program.packages:
+            program.packages[listener_package_name] = listener.package
         else:
             for classes_name in listener.package.classes:
-                program.packages[listener.package.name].classes[classes_name] = listener.package.classes[classes_name]
-
+                program.packages[listener_package_name].classes[classes_name] = listener.package.classes[classes_name]
     return program
 
 

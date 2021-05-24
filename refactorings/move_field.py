@@ -409,7 +409,6 @@ class MoveFieldRefactoring:
         """
         temp = ["java", "-jar", self.formatter, "--replace"]
         temp.extend(modified_files)
-        print(temp)
         subprocess.call(temp)
 
     def __add_import(self, klass: Class, rewriter):
@@ -420,6 +419,9 @@ class MoveFieldRefactoring:
         Adds the imports that are needed in the file since the refactorings
         """
         # if there are no imports in the class appends before the start of class
+        if not self.target_package_name:
+            return
+
         import_line = f"import {self.target_package_name}.{self.target_class_name};"
         if len(klass.file_info.all_imports) == 0:
             tokens_info = TokensInfo(klass.parser_context)
@@ -435,7 +437,7 @@ class MoveFieldRefactoring:
 
 
 if __name__ == '__main__':
-    path = "/home/ali/Desktop/JavaTestProject/src/"
+    path = "/home/ali/Desktop/JavaTestProject/"
     my_list = get_filenames_in_dir(path)
 
     refactoring = MoveFieldRefactoring(my_list, "", "SourceClass", "field_for_move",

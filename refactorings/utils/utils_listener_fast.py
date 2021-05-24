@@ -304,7 +304,7 @@ class UtilsListener(JavaParserListener):
     def enterPackageDeclaration(self, ctx: JavaParser.PackageDeclarationContext):
         self.package.name = ctx.qualifiedName().getText()
         self.file_info.package_name = self.package.name
-        self.package.package_ctx = ctx;
+        self.package.package_ctx = ctx
 
     def enterImportDeclaration(self, ctx: JavaParser.ImportDeclarationContext):
         if ctx.STATIC() is None:
