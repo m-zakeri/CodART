@@ -23,7 +23,8 @@ class MoveFieldRefactoring:
         self.field_name = field_name
         self.target_class_name = target_class_name
         self.target_package_name = target_package_name
-        self.formatter = os.path.abspath("../assets/formatter/google-java-format-1.10.0-all-deps.jar")
+        self.formatter = os.path.abspath(
+            "../assets/formatter/google-java-format-1.10.0-all-deps.jar")
         if filename_mapper is None:
             self.filename_mapper = lambda x: f"{os.path.dirname(x)}/{os.path.splitext(os.path.basename(x))[0]}.rewritten.java"
             return
@@ -58,161 +59,6 @@ class MoveFieldRefactoring:
 
         return string
 
-    # def __is_var_in_method_params(self, tokens, token, method):
-    #     """
-    #     :param tokens: a list of all the tokens of the file in which the method is
-    #     :param token: The token of the var that is to be checked
-    #     :param method: The method that is going to be checked for its parameters
-    #     :return: Whether the variable is in the method's parameters or not
-    #     Checks if given token is related to a method parameter or not
-    #     """
-    #     method_params = list(map(lambda p: p[1], method.parameters))
-    #     if token.text in method_params:
-    #         selector = self.__stringify(tokens, token.tokenIndex - 2, token.tokenIndex)
-    #
-    #         if method.class_name == self.class_name:
-    #             return selector not in ['this.', self.class_name + '.']
-    #
-    #         return selector == self.class_name + '.'
-    #
-    #     return False
-
-    # def __is_declared_in_method(self, tokens, token, method):
-    #     """
-    #     :param tokens: a list of all the tokens of the file in which the method is
-    #     :param token: The token of the var that is to be checked
-    #     :param method: The method that is going to be checked for its local variables
-    #     :return: Whether the variable is declared in the method or not
-    #     Checks if given token is related to a new declared variable in a method
-    #     """
-    #     selector = self.__stringify(tokens, token.tokenIndex - 2, token.tokenIndex)
-    #     if method.class_name == self.class_name:
-    #         if selector in ['this.', self.class_name + '.']:
-    #             return False
-    #     elif selector == self.class_name + '.':
-    #         return False
-    #
-    #     local_exp_var = method.body_local_vars_and_expr_names
-    #     try:
-    #         local_var_definition = next(filter(lambda x: isinstance(x, LocalVariable) and
-    #                                                      x.identifier == token.text, local_exp_var))
-    #         start = local_var_definition.parser_context.start.start
-    #         if start <= token.start:
-    #             return True
-    #
-    #         return False
-    #     except StopIteration:
-    #         return False
-
-    # def __is_declared_in_class(self, tokens, token, method):
-    #     """
-    #     :param tokens: a list of all the tokens of the file in which the method is
-    #     :param token: The token of the var that is to be checked
-    #     :param method: The method that is going to be checked for its fields
-    #     :return: Whether the variable is declared in the method's class or not
-    #     Checks if given token is related to a new declared variable in a method
-    #     """
-    #     selector = self.__stringify(tokens, token.tokenIndex - 2, token.tokenIndex)
-    #     if method.class_name == self.class_name:
-    #         if selector in ['this.', self.class_name + '.']:
-    #             return False
-    #     elif selector == self.class_name + '.':
-    #         return False
-
-    # def __is_a_usage(self, tokens, token, method):
-    #     """
-    #     :param tokens: a list of all the tokens of the file in which the method is
-    #     :param token: The token of the var that is to be checked
-    #     :param method: The method that is going to be checked
-    #     :return: Whether the field is used or not
-    #     Checks if given token is related to the static field, program searching for
-    #     """
-    #     selector = self.__stringify(tokens, token.tokenIndex - 2, token.tokenIndex)
-    #     if selector == 'this.':
-    #         if method.class_name == self.class_name:
-    #             return True
-    #
-    #         return False
-    #
-    #     return True
-
-    # def __is_a_usage_in_class(self, tokens, token, field):
-    #     """
-    #     :param tokens: a list of all the tokens of the file in which the method is
-    #     :param token: The token of the var that is to be checked
-    #     :param field: The field that is going to be checked
-    #     :return: Whether the field is used in the class or not
-    #     Checks if given token is related to the static field, program searching for
-    #     """
-    #     selector = self.__stringify(tokens, token.tokenIndex - 2, token.tokenIndex)
-    #     if selector == self.class_name + '.':
-    #         return True
-    #     if selector == 'this.':
-    #         if field.class_name == self.class_name:
-    #             return True
-    #
-    #         return False
-    #
-    #     return field.class_name == self.class_name
-
-    # def __get_usages_in_class_body(self, src):
-    #     """
-    #     :param src: The source in which we want to extract the field's usages
-    #     :return: A `list` of all the field's usages in the class body
-    #     """
-    #     usages = list()
-    #     fields: dict = src.fields
-    #     for field_name, field in fields.items():
-    #         if field_name == self.field_name and src.name == self.class_name:
-    #             continue
-    #         tokens_info = TokensInfo(field.parser_context)  # tokens of ctx method
-    #         exps = tokens_info.get_token_index(tokens_info.token_stream.tokens, tokens_info.start, tokens_info.stop)
-    #
-    #         for token in exps:
-    #             if token.text == self.field_name:
-    #                 if self.__is_a_usage_in_class(tokens_info.token_stream.tokens, token, field):
-    #                     new_case = {
-    #                         'meta_data': field,
-    #                         'tokens': list(filter(lambda t: t.line == token.line, exps))
-    #                     }
-    #                     usages.append(new_case)
-    #
-    #     return usages
-
-    # def __get_usages_in_methods(self, src):
-    #     """
-    #     :param src: The source in which we want to extract the field's usages
-    #     :return: A `list` of all the field's usages in a method
-    #     Finds method based usages of a field
-    #     """
-    #     usages = list()
-    #
-    #     methods: dict = src.methods
-    #     for method_name, method in methods.items():
-    #         # if hasattr(method, "scope"):
-    #         #     print(method.scope)
-    #         #      method.scope.declared_vars
-    #         tokens_info = TokensInfo(method.parser_context)  # tokens of ctx method
-    #         param_tokens_info = TokensInfo(method.formalparam_context)
-    #         method_declaration_info = TokensInfo(method.method_declaration_context)
-    #         exps = tokens_info.get_token_index(tokens_info.token_stream.tokens, tokens_info.start, tokens_info.stop)
-    #
-    #         for token in exps:
-    #             if token.text == self.field_name:
-    #                 is_method_param = self.__is_var_in_method_params(tokens_info.token_stream.tokens, token, method)
-    #                 is_new_declaration = self.__is_declared_in_method(tokens_info.token_stream.tokens, token, method)
-    #                 is_a_usage = self.__is_a_usage(tokens_info.token_stream.tokens, token, method)
-    #                 if is_new_declaration or is_method_param or not is_a_usage:
-    #                     continue
-    #
-    #                 new_case = {
-    #                     'meta_data': method,
-    #                     'tokens': list(filter(lambda t: t.line == token.line, exps))
-    #                 }
-    #                 usages.append(new_case)
-    #
-    #     return usages
-
     def __has_import(self, klass: Class) -> bool:
         """
         :param klass: The class which might need an import statement
@@ -234,42 +80,6 @@ class MoveFieldRefactoring:
                 return True
 
         return False
-
-    # def __get_usage(self):
-    #     """
-    #     :return: A list of all the usages of the field
-    #     Finds usages of a field inside project files
-    #     """
-    #     program = get_program(self.source_filenames)
-    #
-    #     try:
-    #         source_class, target_class, field = self.get_metadata(program)
-    #     except KeyError:
-    #         raise UnResolvedMetaError("Source or destination not found!")
-    #
-    #     if 'static' not in field.modifiers:
-    #         raise NonStaticFieldRefactorError("Non-static fields cannot be refactored!")
-    #
-    #     if self.__is_field_in_class(field, target_class):
-    #         raise Exception("A field with the same name exists in target class!")
-    #
-    #     usages = list()
-    #     for p_name, package in program.packages.items():
-    #         for cls_name, cls in package.classes.items():
-    #             new_usages = self.__get_usages_in_methods(cls)
-    #             usages.extend(new_usages)
-    #             new_usages = self.__get_usages_in_class_body(cls)
-    #             usages.extend(new_usages)
-    #             should_import = self.__should_add_import(cls)
-    #
-    #             if not should_import:
-    #                 continue
-    #
-    #             usages.append({
-    #                 "import": cls,
-    #             })
-    #
-    #     return usages, program
 
     def __propagate(self, program: Program, rewriter: Rewriter):
         """
@@ -312,7 +122,8 @@ class MoveFieldRefactoring:
         Performs the move field refactoring
         """
         # usages, program = self.__get_usage()
-        program = get_program_with_field_usage(self.source_filenames, self.field_name, self.class_name)
+        program = get_program_with_field_usage(
+            self.source_filenames, self.field_name, self.class_name)
         source_package = program.packages[self.package_name]
         target_package = program.packages[self.target_package_name]
         source_class = source_package.classes[self.class_name]
@@ -411,18 +222,32 @@ class MoveFieldRefactoring:
         rewriter.insert_after(tokens_info, import_line)
 
 
-if __name__ == '__main__':
-    path = "/home/loop/IdeaProjects/Sample"
-    my_list = get_filenames_in_dir(path)
-    filtered = []
-    for file in my_list:
+def clean_up_dir(files: list) -> list:
+
+    """
+    :param files: List of files in the project directory
+    :return: list
+
+    Cleans up trashed files and gives original files
+    """
+
+    original_files = list()
+    for file in files:
         if "rewritten.java" in file:
             os.remove(file)
         else:
-            filtered.append(file)
+            original_files.append(file)
+    return original_files
 
-    refactoring = MoveFieldRefactoring(filtered, "scope", "Scope", "a",
-                                       "Target", "target")
 
-    refac = refactoring.move()
-    print(refac)
+if __name__ == '__main__':
+    path = "/home/amiresm/Documents/project/personal/tmp"
+    my_list = get_filenames_in_dir(path)
+
+    filtered = clean_up_dir(my_list)
+
+    refactoring = MoveFieldRefactoring(filtered, "mypackage", "Class1", "z",
+                                       "Class2", "mypackage")
+
+    result = refactoring.move()
+    print(result)
