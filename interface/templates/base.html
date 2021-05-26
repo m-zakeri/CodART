@@ -1,0 +1,79 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>
+        {% block title %}
+
+        {% endblock %}
+    </title>
+    <!-- plugins:css -->
+    <link rel="stylesheet" href="{% static 'vendors/feather/feather.css' %}">
+    <link rel="stylesheet" href="{% static 'vendors/ti-icons/css/themify-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'vendors/css/vendor.bundle.base.css' %}">
+    <!-- endinject -->
+    <!-- Plugin css for this page -->
+    <link rel="stylesheet" href="{% static 'vendors/ti-icons/css/themify-icons.css' %}">
+    <!-- End plugin css for this page -->
+    <!-- inject:css -->
+    <link rel="stylesheet" href="{% static 'css/vertical-layout-light/style.css' %}">
+    <!-- endinject -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+
+    {% block css %}
+
+    {% endblock %}
+</head>
+<body>
+<div class="container-scroller">
+    {% include 'navbar.html' %}
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+        <!-- partial -->
+        <!-- partial:partials/_sidebar.html -->
+        {% include 'sidebar.html' %}
+        <!-- partial -->
+        <div class="main-panel">
+            <div class="content-wrapper">
+                {% block content %}
+
+                {% endblock %}
+            </div>
+            <!-- content-wrapper ends -->
+            <!-- partial:partials/_footer.html -->
+            {% include 'footer.html' %}
+            <!-- partial -->
+        </div>
+        <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+</div>
+<!-- container-scroller -->
+
+<!-- plugins:js -->
+<script src="{% static 'vendors/js/vendor.bundle.base.js' %}"></script>
+<!-- endinject -->
+
+<!-- End plugin js for this page -->
+<!-- inject:js -->
+<script src="{% static 'js/off-canvas.js' %}"></script>
+<script src="{% static 'js/hoverable-collapse.js' %}"></script>
+<script src="{% static 'js/template.js' %}"></script>
+<!-- endinject -->
+<!-- Custom js for this page-->
+<script src="{% static 'js/dashboard.js' %}"></script>
+<!-- End custom js for this page-->
+
+<script src="{% static 'js/base.js' %}"></script>
+
+{% block js %}
+
+{% endblock %}
+
+</body>
+
+</html>
