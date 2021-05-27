@@ -10,7 +10,7 @@ Description about the code:
 - semi duplications are the ones that by using a variable we can make a new method and
 avoid duplications.
 """
-
+import os
 from antlr4 import FileStream, CommonTokenStream, ParseTreeWalker
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
@@ -474,19 +474,25 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
 
 
 if __name__ == "__main__":
-    input_file = r"C:\Users\Amin\MAG\_term_6\CodART\tests\extract_method\input_file.java"
-    output_file = r"C:\Users\Amin\MAG\_term_6\CodART\tests\extract_method\output_file.java"
+    input_directory = r"D:\iust\term 6\compiler\project\CodART\benchmark_projects\JSON\src\main\java\org\json"
+    output_directory = os.path.join(input_directory, "extract_method_refactored")
+    if not os.path.exists(output_directory):
+        os.mkdir(output_directory)
+    for input_file in os.listdir(input_directory):
+        if input_file.endswith(".java"):
+            stream = FileStream(os.path.join(input_directory, input_file), encoding='utf8')
+            lexer = JavaLexer(stream)
+            token_stream = CommonTokenStream(lexer)
+            parser = JavaParserLabeled(token_stream)
+            parser.getTokenStream()
+            parse_tree = parser.compilationUnit()
+            my_listener = ExtractMethodRefactoring(common_token_stream=token_stream, class_name="Student",
+                                                   new_method_name="printStudent")
+            walker = ParseTreeWalker()
+            walker.walk(t=parse_tree, listener=my_listener)
 
-    stream = FileStream(input_file, encoding='utf8')
-    lexer = JavaLexer(stream)
-    token_stream = CommonTokenStream(lexer)
-    parser = JavaParserLabeled(token_stream)
-    parser.getTokenStream()
-    parse_tree = parser.compilationUnit()
-    my_listener = ExtractMethodRefactoring(common_token_stream=token_stream, class_name="Student",
-                                           new_method_name="printStudent")
-    walker = ParseTreeWalker()
-    walker.walk(t=parse_tree, listener=my_listener)
-
-    with open(output_file, mode='w', newline='') as f:
-        f.write(my_listener.token_stream_re_writer.getDefaultText())
+            output_file = os.path.join(output_directory, input_file)
+            with open(output_file, mode='w', newline='') as f:
+                f.write(my_listener.token_stream_re_writer.getDefaultText())
+        else:
+            continue
