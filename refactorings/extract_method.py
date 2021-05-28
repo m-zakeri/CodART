@@ -184,7 +184,7 @@ def get_args_with_type(variables, all_variables):
 
 # extract method function
 def extract_method(conf):
-    stream = FileStream(conf['target_file'])
+    stream = FileStream(conf['target_file'],encoding="utf-8")
     lexer = JavaLexer(stream)
     tokens = CommonTokenStream(lexer)
     parser = JavaParserLabeled(tokens)
@@ -201,7 +201,7 @@ def extract_method(conf):
     # print(listener.variable_info)
 
     output = []
-    file1 = open(conf['target_file'], 'r')
+    file1 = open(conf['target_file'], 'r',encoding="utf-8")
     lines = file1.readlines()
     line_num = 1
     # func_added = False
@@ -229,7 +229,7 @@ def extract_method(conf):
     file1.close()
     print('--------------------')
 
-    file2 = open(conf['output_file'], 'w')
+    file2 = open(conf['output_file'], 'w',encoding="utf-8")
     for item in output:
         file2.write(item)
     file2.close()
@@ -244,11 +244,11 @@ def main():
     print("Started Extract Method")
     _conf = {
         'target_package': None,
-        'target_file': "D:\\Sajad\\Uni\\Spring00\\Compiler\\CodART\\tests\\extract_method\\in\\ExtractMethodTest.java",
-        'output_file': "D:\\Sajad\\Uni\\Spring00\\Compiler\\CodART\\tests\\extract_method\\out\\ExtractMethodTest.java",
+        'target_file': "/home/ali/Desktop/JavaTestProject/src/ExtractMethod.java",
+        'output_file': "/home/ali/Desktop/JavaTestProject/src/ExtractMethod.java",
         'target_class': 'ExtractMethod',
         'target_method': 'printOwing',
-        'lines': [4, 5],
+        'lines': [3, 4, 5, ],
         'new_method_name': 'printDetails',
     }
     extract_method(_conf)
