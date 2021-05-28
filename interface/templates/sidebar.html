@@ -6,17 +6,17 @@
                 <span class="menu-title">CodArt Project</span>
             </a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item {% if refactorings %}active{% endif %}">
             <a class="nav-link" data-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
                 <i class="icon-layout menu-icon"></i>
                 <span class="menu-title">Refactorings</span>
                 <i class="menu-arrow"></i>
             </a>
-            <div class="collapse" id="ui-basic">
+            <div class="collapse {% if refactorings %}show{% endif %}" id="ui-basic">
                 <ul class="nav flex-column sub-menu">
                     {% for refactoring in all_refactorings %}
                     <li class="nav-item">
-                        <a class="nav-link" href="pages/ui-features/buttons.html">
+                        <a class="nav-link" href="{{ refactoring.get_absolute_url }}">
                             {{ refactoring }}
                         </a>
                     </li>

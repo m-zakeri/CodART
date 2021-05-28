@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.urls import reverse_lazy
 
 
 class Parameter(models.Model):
@@ -46,4 +47,6 @@ class Refactoring(Plugin):
     pre_conditions = models.TextField(blank=True, null=True)
     post_conditions = models.TextField(blank=True, null=True)
 
+    def get_absolute_url(self):
+        return reverse_lazy('refactoring_detail', kwargs={'refactoring_id': self.id})
 

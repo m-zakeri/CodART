@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{{ refactoring.name }}
+{% endblock %}
+
+{% block css %}
+<style>
+</style>
+{% endblock %}
+
+{% block content %}
+{% if refactoring.description %}
+<div class="row">
+    <div class="col-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title">
+                    Description
+                </h3>
+
+                <div class="description">
+                    {{ refactoring.description }}
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row">
+    {% if refactoring.pre_conditions %}
+    <div class="col-md-6 col-sm-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title">
+                    Pre Conditions
+                </h3>
+
+                <div class="description">
+                    {{ refactoring.pre_conditions }}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if refactoring.post_conditions %}
+    <div class="col-md-6 col-sm-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title">
+                    Post Conditions
+                </h3>
+
+                <div class="description">
+                    {{ refactoring.post_conditions }}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% if refactoring.has_example %}
+<hr>
+<h4 class="display-4">Example:</h4>
+<div class="row">
+    <div class="col-md-6 col-sm-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title">
+                    Input Source
+                </h3>
+
+                <div>
+
+                    <pre>
+                        <code>
+                            {{ refactoring.input_example }}
+                        </code>
+                    </pre>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="col-md-6 col-sm-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title">
+                    Result
+                </h3>
+
+                <div>
+
+                    <pre>
+                        <code>
+                            {{ refactoring.output_example }}
+                        </code>
+                    </pre>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
