@@ -7,6 +7,19 @@ from gen.java.JavaLexer import JavaLexer
 from refactorings.utils.utils_listener_fast import *
 
 
+def get_file_info(filename: str) -> FileInfo:
+    stream = FileStream(filename, encoding='utf8')
+    lexer = JavaLexer(stream)
+    token_stream = CommonTokenStream(lexer)
+    parser = JavaParser(token_stream)
+    tree = parser.compilationUnit()
+    listener = UtilsListener(filename)
+    walker = ParseTreeWalker()
+    walker.walk(listener, tree)
+
+    return listener.file_info
+
+
 def get_program(source_files: list, print_status = False) -> Program:
     program = Program()
     for filename in source_files:
