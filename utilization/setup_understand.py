@@ -20,7 +20,7 @@ os.environ["LD_LIBRARY_PATH"] = LD_LIBRARY_PATH  # Put your path here
 # https://scitools.com/support/python-api/
 # Python 3.8 and newer require the user add a call to os.add_dll_directory(“SciTools/bin/“  # Put your path here
 # os.add_dll_directory('C:/Program Files/SciTools/bin/pc-win64')  # Put your path here
-sys.path.insert(0, 'D:/program files/scitools/bin/pc-win64/python')  # Put your path here
+sys.path.insert(0, PYTHONPATH)  # Put your path here
 
 
 # --------------------

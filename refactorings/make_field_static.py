@@ -2,10 +2,7 @@ import os
 
 from gen.javaLabeled.JavaLexer import JavaLexer
 
-try:
-    import understand as und
-except ImportError as e:
-    print(e)
+from utilization.setup_understand import *
 
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
@@ -74,11 +71,9 @@ class MakeFieldStaticRefactoringListener(JavaParserLabeledListener):
 
 
 def main(udb_path, source_class, field_name):
-    udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
-    source_class = "Website"
-    field_name = "HELLO_FROM_STUDENT_WEBSITE"
     print("Make Field Static")
     main_file = ""
+    print(udb_path)
     db = und.open(udb_path)
     for cls in db.ents("class"):
         if cls.simplename() == source_class:
@@ -102,3 +97,9 @@ def main(udb_path, source_class, field_name):
     with open(main_file, mode='w', newline='') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
 
+if __name__ == '__main__':
+    main(
+        udb_path="/home/ali/Desktop/JavaTestProject/JavaTestProject.udb",
+        source_class="SourceClass",
+        field_name="field_for_move"
+    )
