@@ -32,7 +32,7 @@ def create_understand_database(project_dir, und_path='/home/ali/scitools/bin/lin
     # An example of command-line is:
     # und create -languages c++ add @myFiles.txt analyze -all myDb.udb
     process = subprocess.Popen(
-        ['und', 'create', '-languages', 'Java', 'add', project_dir, 'analyze', '-all', db_path],
+        ['und', 'create', '-db', db_path, '-languages', 'Java', 'add', project_dir, 'analyze', '-all'],
         cwd=und_path
     )
     process.wait()

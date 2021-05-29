@@ -1,2 +1,4 @@
+from . import setup_understand
+from . import directory_utils
 
-from utilization import setup_understand
+utils = directory_utils

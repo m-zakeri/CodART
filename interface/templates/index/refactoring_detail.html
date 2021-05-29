@@ -11,11 +11,11 @@
     pre {
         background-color: inherit;
     }
-
 </style>
 {% endblock %}
 
 {% block content %}
+<!--Description-->
 {% if refactoring.description %}
 <div class="row">
     <div class="col-12 grid-margin stretch-card">
@@ -35,6 +35,7 @@
 </div>
 {% endif %}
 
+<!--Conditions-->
 <div class="row">
     {% if refactoring.pre_conditions %}
     <div class="col-md-6 col-sm-12 grid-margin stretch-card">
@@ -69,6 +70,7 @@
     {% endif %}
 </div>
 
+<!--Example-->
 {% if refactoring.has_example %}
 <hr>
 <h4 class="display-4">Example:</h4>
@@ -110,6 +112,16 @@
     </div>
 </div>
 {% endif %}
+
+<div class="row">
+    <div class="col-12">
+        <form action="." method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input type="submit">
+        </form>
+    </div>
+</div>
 
 {% endblock %}
 
