@@ -4,7 +4,7 @@ import sys
 import struct
 import shutil
 import re
-from utilization.setup_understand import *
+from setup_understand import *
 
 # Verify Python 3
 

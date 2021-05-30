@@ -9,8 +9,8 @@ import sys
 
 # -------------------
 # For Linux os
-LD_LIBRARY_PATH = "/home/ali/scitools/bin/linux64/"  # Put your path here
-PYTHONPATH = "/home/ali/scitools/bin/linux64/Python"  # Put your path here
+LD_LIBRARY_PATH = "/data/Dev/scitools/bin/linux64"  # Put your path here
+PYTHONPATH = "/data/Dev/scitools/bin/linux64/Python"  # Put your path here
 
 os.environ["LD_LIBRARY_PATH"] = LD_LIBRARY_PATH  # Put your path here
 
@@ -29,4 +29,3 @@ try:
     import understand as und
 except ModuleNotFoundError:
     raise ModuleNotFoundError('Understand cannot import')
-
