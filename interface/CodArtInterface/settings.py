@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Project's Apps
     'index.apps.IndexConfig',
+    # Third Party Apps
+    'tinymce',
 ]
 
 MIDDLEWARE = [
@@ -134,3 +136,19 @@ MEDIA_ROOT = BASE_DIR/'media'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# tinymce
+# https://django-tinymce.readthedocs.io/en/latest/index.html
+TINYMCE_JS_URL = 'https://cdn.tiny.cloud/1/8gmtybnbslqqckpvg78unqpkqnpanxi1onix7gdd8j4bo9md/tinymce/5/tinymce.min.js'
+TINYMCE_DEFAULT_CONFIG = {
+  'plugins': [
+    'advlist anchor autolink codesample fullscreen help image imagetools',
+    ' lists link media noneditable preview',
+    ' searchreplace table template visualblocks wordcount'
+  ],
+  'toolbar':
+    'insertfile undo redo | bold italic | forecolor backcolor | template codesample | alignleft aligncenter alignright alignjustify | bullist numlist | link image tinydrive',
+  'content_style': 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+}
+# TINYMCE_SPELLCHECKER = True
+# TINYMCE_COMPRESSOR = True

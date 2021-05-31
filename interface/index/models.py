@@ -2,6 +2,8 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.urls import reverse_lazy
 
+from tinymce import models as tinymce_models
+
 
 class Parameter(models.Model):
     class ParameterDataTypes(models.TextChoices):
@@ -12,7 +14,7 @@ class Parameter(models.Model):
         LIST = 'list', _("List")
 
     name = models.CharField(max_length=128)
-    description = models.TextField(blank=True, null=True)
+    description = tinymce_models.HTMLField(blank=True, null=True)
     data_type = models.CharField(max_length=128, choices=ParameterDataTypes.choices)
 
     def __str__(self):
@@ -25,9 +27,9 @@ class Parameter(models.Model):
 class Plugin(models.Model):
     name = models.CharField(max_length=128)
     map_string = models.CharField(max_length=256)
-    description = models.TextField(blank=True, null=True)
-    input_example = models.TextField(blank=True, null=True)
-    output_example = models.TextField(blank=True, null=True)
+    description = tinymce_models.HTMLField(blank=True, null=True)
+    input_example = tinymce_models.HTMLField(blank=True, null=True)
+    output_example = tinymce_models.HTMLField(blank=True, null=True)
     parameters = models.ManyToManyField(Parameter)
 
     def has_example(self):
@@ -44,9 +46,8 @@ class Plugin(models.Model):
 
 
 class Refactoring(Plugin):
-    pre_conditions = models.TextField(blank=True, null=True)
-    post_conditions = models.TextField(blank=True, null=True)
+    pre_conditions = tinymce_models.HTMLField(blank=True, null=True)
+    post_conditions = tinymce_models.HTMLField(blank=True, null=True)
 
     def get_absolute_url(self):
         return reverse_lazy('refactoring_detail', kwargs={'refactoring_id': self.id})
-

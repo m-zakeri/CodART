@@ -26,7 +26,7 @@
                 </h3>
 
                 <div class="description">
-                    {{ refactoring.description }}
+                    {{ refactoring.description | safe }}
                 </div>
 
             </div>
@@ -46,7 +46,7 @@
                 </h3>
 
                 <div class="description">
-                    {{ refactoring.pre_conditions }}
+                    {{ refactoring.pre_conditions | safe }}
                 </div>
             </div>
         </div>
@@ -62,7 +62,7 @@
                 </h3>
 
                 <div class="description">
-                    {{ refactoring.post_conditions }}
+                    {{ refactoring.post_conditions | safe }}
                 </div>
             </div>
         </div>
@@ -82,11 +82,8 @@
                     Input Source
                 </h3>
 
-                <pre>
-                    <code class="language-java">
-{{ refactoring.input_example }}
-                    </code>
-                </pre>
+
+{{ refactoring.input_example | safe }}
 
             </div>
         </div>
@@ -100,11 +97,7 @@
                     Result
                 </h3>
 
-                <pre>
-                    <code class="language-java">
-{{ refactoring.output_example }}
-                    </code>
-                </pre>
+{{ refactoring.output_example | safe }}
 
             </div>
         </div>
