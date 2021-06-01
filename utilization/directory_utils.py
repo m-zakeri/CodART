@@ -17,7 +17,7 @@ def git_restore(project_dir):
     process.wait()
 
 
-def create_understand_database(project_dir, und_path='/home/ali/scitools/bin/linux64/'):
+def create_understand_database(project_dir, und_path='/data/Dev/scitools/bin/linux64'):
     """
     This function creates understand database for the given project directory.
     :param und_path: The path of und binary file for executing understand command-line
@@ -32,14 +32,15 @@ def create_understand_database(project_dir, und_path='/home/ali/scitools/bin/lin
     # An example of command-line is:
     # und create -languages c++ add @myFiles.txt analyze -all myDb.udb
     process = subprocess.Popen(
-        ['und', 'create', '-db', db_path, '-languages', 'Java', 'add', project_dir, 'analyze', '-all'],
+        ['und', 'create', '-db', db_path, '-languages',
+            'Java', 'add', project_dir, 'analyze', '-all'],
         cwd=und_path
     )
     process.wait()
     return db_path
 
 
-def update_understand_database(udb_path, project_dir=None, und_path='/home/ali/scitools/bin/linux64/'):
+def update_understand_database(udb_path, project_dir=None, und_path='/data/Dev/scitools/bin/linux64'):
     """
     This function updates database due to file changes.
     :param project_dir: If understand database file is not in project directory you can specify the project directory.

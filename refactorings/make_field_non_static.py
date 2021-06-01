@@ -1,12 +1,9 @@
 import os
+import sys
+sys.path.append("..")
 
 from gen.javaLabeled.JavaLexer import JavaLexer
-
-try:
-    import understand as und
-except ImportError as e:
-    print(e)
-
+from utilization.setup_understand import *
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
@@ -34,7 +31,8 @@ class MakeFieldNonStaticRefactoringListener(JavaParserLabeledListener):
         if common_token_stream is None:
             raise ValueError('common_token_stream is None')
         else:
-            self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
+            self.token_stream_rewriter = TokenStreamRewriter(
+                common_token_stream)
 
         self.is_source_class = False
         self.is_static = False
@@ -95,8 +93,9 @@ def main(udb_path, source_class, field_name):
 
 
 if __name__ == '__main__':
-    udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
-    source_class = "Website"
-    field_name = "HELLO_FROM_STUDENT_WEBSITE"
+    print("Main Thread")
+    udb_path = "/data/Dev/JavaSample/JavaSample.udb"
+    source_class = "SourceClass"
+    field_name = "number"
     # initialize with understand
     main(udb_path, source_class, field_name)
