@@ -9,6 +9,7 @@ Pull up constructor refactoring removes the repetitive method from subclasses an
 
 ### Pre Conditions:
 1. The source package, class and constructor should exist.
+2. The order of the params in the constructor should be equal in the child classes
 
 ### Post Conditions:
 
@@ -23,7 +24,7 @@ from refactorings.utils.utils2 import Rewriter, get_program, get_filenames_in_di
 
 
 class PullUpConstructorRefactoring:
-    def __init__(self, source_filenames: list, package_name: str, class_name: str, constructor_key: str,
+    def __init__(self, source_filenames: list, package_name: str, class_name: str,
                  filename_mapping=lambda x: x):
         """
         The main function that does the process of pull up constructor refactoring.
@@ -36,8 +37,6 @@ class PullUpConstructorRefactoring:
 
                       class_name (str): Name of the class in which the refactoring has to be done (pulling up the field from here)
 
-                      constructor_key (str): Name of the constructor which needs to be removed from the subclasses/pulled up
-
                       filename_mapping (str): Mapping the file's name to the correct format so that it can be processed
 
                Returns:
@@ -46,17 +45,21 @@ class PullUpConstructorRefactoring:
         self.source_filenames = source_filenames
         self.package_name = package_name
         self.class_name = class_name
-        self.constructor_key = constructor_key
         self.filename_mapping = filename_mapping
 
     def do_refactor(self):
         program = get_program(self.source_filenames)  # getting the program packages
         _sourceclass = program.packages[self.package_name].classes[self.class_name]
         target_class_name = _sourceclass.superclass_name
-        removemethod, removemethod1 = get_cons(program, self.package_name, target_class_name, self.constructor_key,
+        removemethod, removemethod1 = get_cons(program, self.package_name, target_class_name,
                                                self.class_name)  # Similar cons in other classes
         _targetclass = program.packages[self.package_name].classes[target_class_name]
-        _method_name = program.packages[self.package_name].classes[self.class_name].methods[self.constructor_key]
+        mets = program.packages[self.package_name].classes[self.class_name].methods
+        _method_name = []
+        for methodName, method in mets.items():
+            if method.is_constructor:
+                _method_name = method
+                break
         tokens_info = TokensInfo(_method_name.parser_context)
 
         if not _method_name.is_constructor:
@@ -118,8 +121,8 @@ class PullUpConstructorRefactoring:
 
 
 if __name__ == "__main__":
-    mylist = get_filenames_in_dir('../tests/pullup_constructor')
-    if PullUpConstructorRefactoring(mylist, "tests.utils_test2", "sourceclass", "(String,String,int)").do_refactor():
+    mylist = get_filenames_in_dir('/data/Dev/JavaSample/')
+    if PullUpConstructorRefactoring(mylist, "", "Admin").do_refactor():
         print("Success!")
     else:
         print("Cannot refactor.")

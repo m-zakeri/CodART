@@ -10,12 +10,20 @@ from refactorings.utils.utils_listener_fast import Program
 def Diff(li1, li2):
     return list(set(li1) - set(li2)) + list(set(li2) - set(li1))
 
-def get_cons(program: Program, packagename: str, superclassname: str, methodkey: str, classname: str):
+def get_cons(program: Program, packagename: str, superclassname: str, classname: str):
     extendedclass = []
     removemethods = {}
     removemethods1 = []
+    removemethods3 = {}
 
-    met = program.packages[packagename].classes[classname].methods[methodkey]
+    mets = program.packages[packagename].classes[classname].methods
+    met = []
+    methodkey = ""
+    for methodName, method in mets.items():
+        if method.is_constructor:
+            met = method
+            methodkey = methodName
+            break
     body_text_method = met.body_text
     parammethod = met.parameters
 
@@ -52,6 +60,17 @@ def get_cons(program: Program, packagename: str, superclassname: str, methodkey:
                         removemethods[class_.name].append(mk)
                 elif s1.issubset(s2):
                     removemethods1.append(Diff(listm_body, listBody_text))
+                    if class_.name not in removemethods:
+                        removemethods[class_.name] = [mk]
+                    else:
+                        removemethods[class_.name].append(mk)
+                else:
+                    a = Diff(listBody_text, listm_body)
+                    if class_.name not in removemethods3:
+                        removemethods3[class_.name] = [a]
+                    else:
+                        removemethods3[class_.name].append(a)
+
                     if class_.name not in removemethods:
                         removemethods[class_.name] = [mk]
                     else:
