@@ -1,24 +1,14 @@
-public class ExtractMethod {
-
-    String name = "Ali";
-
-    void printBanner() {
-        System.out.println("ExtractMethod.printBanner()");
-    }
-
-    int getOutstanding(){
-        return 334;
-    }
+public class ExtractMethodTest {
 
     void printOwing() {
-        printBanner();
+    printBanner();
 
-        // Print details.
+    // Print details.
 		printDetails();
     }
 	public void printDetails()
 	{
-        System.out.println("name: " + this.name);
-        System.out.println("amount: " + getOutstanding());
+        System.out.println("name: " + name);
+        System.out.println("name printed ");
 	}
 }
