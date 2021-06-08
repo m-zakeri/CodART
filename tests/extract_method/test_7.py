@@ -1,7 +1,7 @@
 """
     extracting lines containing static variables.
 
-    test status: failed
+    test status: failedgit pull https://github.com/9Knight9n/CodART.git extract_method
 """
 
 from refactorings.extract_method import extract_method
