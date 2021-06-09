@@ -35,6 +35,7 @@ class EncapsulateFiledRefactoringListener(JavaParserLabeledListener):
         """
         self.token_stream = common_token_stream
         self.field_identifier = field_identifier
+        self.set_field = False
         # Move all the tokens in the source code in a buffer, token_stream_rewriter.
         if common_token_stream is not None:
             self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
@@ -78,17 +79,27 @@ class EncapsulateFiledRefactoringListener(JavaParserLabeledListener):
 #             new_code = 'this.set' + str.capitalize(self.field_identifier) + '(' + expr_code + ')'
 #             self.token_stream_rewriter.replaceRange(ctx.start.tokenIndex, ctx.stop.tokenIndex, new_code)
 #
-#     def exitPrimary(self, ctx: Java9_v2Parser.PrimaryContext):
-#         if ctx.getChildCount() == 2:
-#             if ctx.getText() == 'this.' + self.field_identifier or ctx.getText() == self.field_identifier:
-#                 new_code = 'this.get' + str.capitalize(self.field_identifier) + '()'
-#                 self.token_stream_rewriter.replaceRange(ctx.start.tokenIndex, ctx.stop.tokenIndex, new_code)
-#
-#     def enterCompilationUnit1(self, ctx: Java9_v2Parser.CompilationUnit1Context):
-#         hidden = self.token_stream.getHiddenTokensToLeft(ctx.start.tokenIndex)
-#         self.token_stream_rewriter.replaceRange(from_idx=hidden[0].tokenIndex,
-#                                                 to_idx=hidden[-1].tokenIndex,
-#                                                 text='/*After refactoring (Refactored version)*/\n')
+
+    def exitExpression1(self, ctx:JavaParserLabeled.Expression1Context):
+        # if ctx.getChildCount() == 2:
+        try:
+            if ctx.parentCtx.getChild(1).getText() in ('=','+=', '-=', '*=', '/=',
+                                                       '&=', '|=', '^=', '>>=',
+                                                       '>>>=', '<<=', '%=') and \
+                    ctx.parentCtx.getChild(0) == ctx:
+                return
+        except:
+            pass
+        if ctx.getText() == 'this.' + self.field_identifier:
+            new_code = 'this.get' + str.capitalize(self.field_identifier) + '()'
+            self.token_stream_rewriter.replaceRange(ctx.start.tokenIndex, ctx.stop.tokenIndex, new_code)
+
+    def enterCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
+        hidden = self.token_stream.getHiddenTokensToLeft(ctx.start.tokenIndex)
+        self.token_stream_rewriter.replaceRange(from_idx=hidden[0].tokenIndex,
+                                                to_idx=hidden[-1].tokenIndex,
+                                                text='/*After refactoring (Refactored version)*/\n')
+
 
 
 def main():
