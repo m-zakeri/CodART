@@ -79,6 +79,19 @@ class EncapsulateFiledRefactoringListener(JavaParserLabeledListener):
 #             new_code = 'this.set' + str.capitalize(self.field_identifier) + '(' + expr_code + ')'
 #             self.token_stream_rewriter.replaceRange(ctx.start.tokenIndex, ctx.stop.tokenIndex, new_code)
 #
+    def exitExpression0(self, ctx:JavaParserLabeled.Expression0Context):
+        # if ctx.getChildCount() == 2:
+        try:
+            if ctx.parentCtx.getChild(1).getText() in ('=','+=', '-=', '*=', '/=',
+                                                       '&=', '|=', '^=', '>>=',
+                                                       '>>>=', '<<=', '%=') and \
+                    ctx.parentCtx.getChild(0) == ctx:
+                return
+        except:
+            pass
+        if ctx.getText() == self.field_identifier:
+            new_code = 'this.get' + str.capitalize(self.field_identifier) + '()'
+            self.token_stream_rewriter.replaceRange(ctx.start.tokenIndex, ctx.stop.tokenIndex, new_code)
 
     def exitExpression1(self, ctx:JavaParserLabeled.Expression1Context):
         # if ctx.getChildCount() == 2:
@@ -104,9 +117,9 @@ class EncapsulateFiledRefactoringListener(JavaParserLabeledListener):
 
 def main():
     Path = "../tests/encapsulate_field_tests/"
-    test_file = FileStream(str(Path + "input.java"))
+    test_file = FileStream(str(Path + "use_field_propagation_test.java"))
     print("file opened")
-    Refactored = open(os.path.join(Path, "inputRefactored1.java"), 'w', newline='')
+    Refactored = open(os.path.join(Path, "use_field_propagation_test_refactored.java"), 'w', newline='')
 
     Lexer = JavaLexer(test_file)
 
