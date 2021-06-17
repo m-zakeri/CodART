@@ -68,15 +68,15 @@ class EncapsulateFiledRefactoringListener(JavaParserLabeledListener):
 #                                                     to_idx=hidden[-1].tokenIndex,
 #                                                     text='\t/*End of accessor and mutator methods!*/\n\n')
 #
-#     def exitAssignment(self, ctx: Java9_v2Parser.AssignmentContext):
-#         if ctx.leftHandSide().getText() == self.field_identifier or \
-#                 ctx.leftHandSide().getText() == 'this.' + self.field_identifier:
-#             expr_code = self.token_stream_rewriter.getText(program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-#                                                            start=ctx.expression().start.tokenIndex,
-#                                                            stop=ctx.expression().stop.tokenIndex)
-#             # new_code = 'this.set' + str.capitalize(self.field_identifier) + '(' + ctx.expression().getText() + ')'
-#             new_code = 'this.set' + str.capitalize(self.field_identifier) + '(' + expr_code + ')'
-#             self.token_stream_rewriter.replaceRange(ctx.start.tokenIndex, ctx.stop.tokenIndex, new_code)
+    def exitExpression21(self, ctx:JavaParserLabeled.Expression21Context):
+        print("test: ",ctx.expression(0).IDENTIFIER().getText())
+
+        if ctx.expression(0).IDENTIFIER().getText() == self.field_identifier or \
+                ctx.expression(0).IDENTIFIER().getText() == 'this.' + self.field_identifier:
+            expr_code = ctx.expression(1).getText()
+            # new_code = 'this.set' + str.capitalize(self.field_identifier) + '(' + ctx.expression().getText() + ')'
+            new_code = 'this.set' + str.capitalize(self.field_identifier) + '(' + expr_code + ')'
+            self.token_stream_rewriter.replaceRange(ctx.start.tokenIndex, ctx.stop.tokenIndex, new_code)
 #
 #     def exitPrimary(self, ctx: Java9_v2Parser.PrimaryContext):
 #         if ctx.getChildCount() == 2:
