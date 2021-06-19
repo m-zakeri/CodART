@@ -59,15 +59,6 @@ class MoveFieldRefactoring:
 
         return string
 
-    def __has_import(self, klass: Class) -> bool:
-        """
-        :param klass: The class which might need an import statement
-        :return: Whether the class needs import or not
-        Check whether the file needs a certain import statement
-        """
-        return klass.file_info.has_imported_class(self.target_package_name, self.target_class_name) \
-            or klass.file_info.has_imported_package(self.target_package_name)
-
     def __is_field_in_class(self, field, target_class):
         """
         :param field: The field which is to be checked
@@ -80,6 +71,24 @@ class MoveFieldRefactoring:
                 return True
 
         return False
+
+    def should_add_import(self, klass: Class):
+        # we don't need to handle target class
+        if klass.name == self.target_class_name:
+            return False
+
+        # check package imports
+        for package_import in klass.file_info.package_imports:
+            if package_import.package_name == self.target_package_name:
+                return False
+
+        # if target class not imported as package then check class imports
+        for class_import in klass.file_info.class_imports:
+            if class_import.class_name == self.target_class_name:
+                return False
+
+        # if target class is not imported add the import
+        return True
 
     def __propagate(self, program: Program, rewriter: Rewriter):
         """
@@ -110,10 +119,9 @@ class MoveFieldRefactoring:
                 if klass.name == self.target_class_name:
                     continue
 
-                if self.__has_import(klass):
-                    continue
+                if self.should_add_import(klass):
+                    self.__add_import(klass, rewriter)
 
-                self.__add_import(klass, rewriter)
         return modified_files
 
     def move(self):
@@ -208,7 +216,7 @@ class MoveFieldRefactoring:
         Adds the imports that are needed in the file since the refactorings
         """
         # if there are no imports in the class appends before the start of class
-        import_line = f"import {self.target_package_name}.{self.target_class_name};"
+        import_line = f"import {self.target_package_name}.{self.target_class_name};\n"
         if len(klass.file_info.all_imports) == 0:
             tokens_info = TokensInfo(klass.parser_context)
             tokens_info.start -= len(klass.modifiers_parser_contexts) * 2
@@ -241,13 +249,13 @@ def clean_up_dir(files: list) -> list:
 
 
 if __name__ == '__main__':
-    path = "/home/amiresm/Documents/project/personal/tmp"
+    path = "/home/amiresm/Projects/personal/test"
     my_list = get_filenames_in_dir(path)
 
     filtered = clean_up_dir(my_list)
 
-    refactoring = MoveFieldRefactoring(filtered, "mypackage", "Class1", "z",
-                                       "Class2", "mypackage")
+    refactoring = MoveFieldRefactoring(filtered, "source", "Source", "number",
+                                       "Target", "target")
 
     result = refactoring.move()
     print(result)
