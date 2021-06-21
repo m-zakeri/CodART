@@ -103,24 +103,48 @@ class EncapsulateFiledRefactoringListener(JavaParserLabeledListener):
             new_code = 'this.set' + str.capitalize(self.field_identifier) + '(' + expr_code + ')'
             self.token_stream_rewriter.replaceRange(ctx.start.tokenIndex, ctx.stop.tokenIndex, new_code)
 #
-#     def exitPrimary(self, ctx: Java9_v2Parser.PrimaryContext):
-#         if ctx.getChildCount() == 2:
-#             if ctx.getText() == 'this.' + self.field_identifier or ctx.getText() == self.field_identifier:
-#                 new_code = 'this.get' + str.capitalize(self.field_identifier) + '()'
-#                 self.token_stream_rewriter.replaceRange(ctx.start.tokenIndex, ctx.stop.tokenIndex, new_code)
 #
-#     def enterCompilationUnit1(self, ctx: Java9_v2Parser.CompilationUnit1Context):
-#         hidden = self.token_stream.getHiddenTokensToLeft(ctx.start.tokenIndex)
-#         self.token_stream_rewriter.replaceRange(from_idx=hidden[0].tokenIndex,
-#                                                 to_idx=hidden[-1].tokenIndex,
-#                                                 text='/*After refactoring (Refactored version)*/\n')
+    def exitExpression0(self, ctx:JavaParserLabeled.Expression0Context):
+        # if ctx.getChildCount() == 2:
+        try:
+            if ctx.parentCtx.getChild(1).getText() in ('=','+=', '-=', '*=', '/=',
+                                                       '&=', '|=', '^=', '>>=',
+                                                       '>>>=', '<<=', '%=') and \
+                    ctx.parentCtx.getChild(0) == ctx:
+                return
+        except:
+            pass
+        if ctx.getText() == self.field_identifier:
+            new_code = 'this.get' + str.capitalize(self.field_identifier) + '()'
+            self.token_stream_rewriter.replaceRange(ctx.start.tokenIndex, ctx.stop.tokenIndex, new_code)
+
+    def exitExpression1(self, ctx:JavaParserLabeled.Expression1Context):
+        # if ctx.getChildCount() == 2:
+        try:
+            if ctx.parentCtx.getChild(1).getText() in ('=','+=', '-=', '*=', '/=',
+                                                       '&=', '|=', '^=', '>>=',
+                                                       '>>>=', '<<=', '%=') and \
+                    ctx.parentCtx.getChild(0) == ctx:
+                return
+        except:
+            pass
+        if ctx.getText() == 'this.' + self.field_identifier:
+            new_code = 'this.get' + str.capitalize(self.field_identifier) + '()'
+            self.token_stream_rewriter.replaceRange(ctx.start.tokenIndex, ctx.stop.tokenIndex, new_code)
+
+    def enterCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
+        hidden = self.token_stream.getHiddenTokensToLeft(ctx.start.tokenIndex)
+        self.token_stream_rewriter.replaceRange(from_idx=hidden[0].tokenIndex,
+                                                to_idx=hidden[-1].tokenIndex,
+                                                text='/*After refactoring (Refactored version)*/\n')
+
 
 
 def main():
     Path = "../tests/encapsulate_field_tests/"
-    test_file = FileStream(str(Path + "input.java"))
+    test_file = FileStream(str(Path + "use_field_propagation_test.java"))
     print("file opened")
-    Refactored = open(os.path.join(Path, "inputRefactored1.java"), 'w', newline='')
+    Refactored = open(os.path.join(Path, "use_field_propagation_test_refactored.java"), 'w', newline='')
 
     Lexer = JavaLexer(test_file)
 
