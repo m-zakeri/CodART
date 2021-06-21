@@ -97,13 +97,16 @@ class MoveMethodRefactoring:
                 for j in ii:
                     i_tokens = TokensInfo(j)
                     token_stream_rewriter.insertBeforeIndex(index=i_tokens.start, text=str.lower(self.class_name) + ".")
+        # Rewriter_.insert_before_start(target_method_parser,'sdsddsds')
         # pass object of source.java class to method
-        if param_tokens_info.start is not None:
-            token_stream_rewriter.insertBeforeIndex(param_tokens_info.start,
-                                                    text=self.class_name + " " + str.lower(self.class_name) + ",")
-        else:
-            token_stream_rewriter.insertBeforeIndex(method_declaration_info.stop,
-                                                    text=self.class_name + " " + str.lower(self.class_name))
+        # if param_tokens_info.start is not None:
+        #     token_stream_rewriter.insertBeforeIndex(param_tokens_info.start,
+        #                                             text=self.class_name + " " + str.lower(self.class_name) + ",")
+        # else:
+        token_stream_rewriter.insertBeforeIndex(method_declaration_info.stop + 3,
+                                                text='\n' + self.class_name + " " + str.lower(
+                                                    self.class_name) + str(
+                                                    int(time.time())) + ' = new ' + self.class_name + '();')
 
         strofmethod = token_stream_rewriter.getText(program_name=token_stream_rewriter.DEFAULT_PROGRAM_NAME,
                                                     start=tokens_info.start,
@@ -136,20 +139,25 @@ class MoveMethodRefactoring:
                             my_line = instance_name + '.' + self.method_key
                             if my_line in method_item_dict.body_text:
                                 import_parser = TokensInfo(import_item.parser_context)
-                                rewriter.insert_after(import_parser,
-                                                      '\nimport ' + self.target_package_name + '.' + self.target_class_name + ';')
+                                if self.target_package_name != class_item_dic.package_name:
+                                    rewriter.insert_after(import_parser,
+                                                          '\nimport ' + self.target_package_name + '.' + self.target_class_name + ';')
                                 new_instance_name = instance_name + str(int(time.time()))
                                 method_parser = TokensInfo(
                                     method_item_dict.body_local_vars_and_expr_names[0].parser_context)
-                                rewriter.insert_before_start(method_parser,
-                                                             self.target_class_name + ' ' + new_instance_name + ' = new ' + self.target_class_name + '();\n')
+                                if self.target_class_name != class_item_dic.name:
+                                    rewriter.insert_before_start(method_parser,
+                                                                 self.target_class_name + ' ' + new_instance_name + ' = new ' + self.target_class_name + '();\n')
                                 for body_item in method_item_dict.body_local_vars_and_expr_names:
                                     try:
                                         if body_item.dot_separated_identifiers[0] == instance_name and \
                                                 body_item.dot_separated_identifiers[1] == self.method_key.split('(')[0]:
                                             instance_parser = TokensInfo(body_item.parser_context)
-                                            print(instance_parser)
-                                            rewriter.replace(instance_parser, new_instance_name+'.'+self.method_key+';')
+                                            if self.target_class_name != class_item_dic.name:
+                                                rewriter.replace(instance_parser,
+                                                                 new_instance_name + '.' + self.method_key)
+                                            else:
+                                                rewriter.replace(instance_parser, self.method_key)
                                     except:
                                         continue
 
@@ -163,8 +171,8 @@ if __name__ == "__main__":
     mylist = get_filenames_in_dir('/home/pouorix/Desktop/compilerProject/javaTest/src/propagationTest')
     # mylist = get_filenames_in_dir('tests/movemethod_test')
     print("Testing move_method...")
-    if MoveMethodRefactoring(mylist, "my_package", "Source", "printTest()", "Target",
-                             "my_package").do_refactor():  # if move_method_refactoring(mylist, "ss", "source", "m(int)","target","sss"):
+    if MoveMethodRefactoring(mylist, "my_package", "Source", "printTest()", "User",
+                             "test_package").do_refactor():  # if move_method_refactoring(mylist, "ss", "source", "m(int)","target","sss"):
         print("Success!")
     else:
         print("Cannot refactor.")
