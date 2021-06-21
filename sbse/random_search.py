@@ -6,8 +6,8 @@ from initialize import RandomInitialization
 from objectives import Objectives
 from utilization.directory_utils import update_understand_database, git_restore, create_understand_database
 
-udb_path = "/home/ali/Documents/dev/CodART/benchmark_projects/JSON/JSON.udb"
-project_dir = "/home/ali/Documents/dev/CodART/benchmark_projects/JSON/"
+udb_path = "/data/Dev/CodART/benchmark_projects/JSON/JSON.udb"
+project_dir = "/data/Dev/CodART/benchmark_projects/JSON/"
 
 rand_init = RandomInitialization(
         udb_path=udb_path,
@@ -17,12 +17,15 @@ rand_init = RandomInitialization(
 rand_pop = rand_init.generate_population()
 score = Objectives(udb_path=udb_path).reusability
 k = 0
+limit = len(rand_pop)
 best_answer = None
 print("Reusability before starting the algorithm:", score)
 # Random search for improving reusability
-while k < MAX_ITERATIONS and len(rand_pop) > 0:
+while k < MAX_ITERATIONS and limit > 0:
     print("Iteration No.", k)
-    index = random.randint(0, len(rand_pop))
+    index = random.randint(0, limit-1)
+    limit -= 1
+    print(f"index is {index}")
     individual = rand_pop.pop(index)
     # git restore prev changes
     git_restore(project_dir)

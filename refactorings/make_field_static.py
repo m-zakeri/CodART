@@ -74,9 +74,6 @@ class MakeFieldStaticRefactoringListener(JavaParserLabeledListener):
 
 
 def main(udb_path, source_class, field_name):
-    udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
-    source_class = "Website"
-    field_name = "HELLO_FROM_STUDENT_WEBSITE"
     print("Make Field Static")
     main_file = ""
     db = und.open(udb_path)
@@ -87,7 +84,9 @@ def main(udb_path, source_class, field_name):
                 continue
     if main_file is None:
         return
-
+    if not os.path.isfile(main_file):
+        return
+    print(f"Main File {main_file}", os.path.isfile(main_file))
     stream = FileStream(main_file, encoding='utf8')
     lexer = JavaLexer(stream)
     token_stream = CommonTokenStream(lexer)

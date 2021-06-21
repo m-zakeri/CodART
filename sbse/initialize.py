@@ -115,9 +115,9 @@ class Initialization(object):
         initializers = (
             self.init_make_field_non_static,
             self.inti_make_field_static,
-            self.init_make_method_static,
-            self.init_make_method_non_static,
-            self.init_pullup_field,
+            # self.init_make_method_static,
+            # self.init_make_method_non_static,
+            # self.init_pullup_field,
         )
         population = []
         for _ in progressbar.progressbar(range(self.population_size)):
@@ -187,10 +187,9 @@ class RandomInitialization(Initialization):
         params.update(random.choice(candidates))
         return refactoring_main, params
 
-
 if __name__ == '__main__':
     rand_pop = RandomInitialization(
-        "/home/ali/Desktop/code/TestProject/TestProject.udb",
+        "/data/Dev/CodART/benchmark_projects/JSON/JSON.udb",
         population_size=POPULATION_SIZE,
         individual_size=INDIVIDUAL_SIZE
     )
