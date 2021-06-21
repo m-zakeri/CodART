@@ -23,13 +23,13 @@ class MoveMethodRefactoring:
         program = get_program(self.source_filenames)
 
         static = 0
-
-        if self.class_name not in program.packages[self.package_name].classes or self.target_class_name not in \
-                program.packages[
-                    self.target_package_name].classes or self.method_key not in \
-                program.packages[self.package_name].classes[
-                    self.class_name].methods:
+        if self.class_name not in program.packages[self.package_name].classes:
             return False
+        if self.target_class_name not in program.packages[self.target_package_name].classes:
+            return False
+        if self.method_key not in program.packages[self.package_name].classes[self.class_name].methods:
+            return False
+
 
         _sourceclass = program.packages[self.package_name].classes[self.class_name]
         _targetclass = program.packages[self.target_package_name].classes[self.target_class_name]
@@ -44,7 +44,6 @@ class MoveMethodRefactoring:
         method_declaration_info = TokensInfo(_method.method_declaration_context)
         exp = []  # برای نگه داری متغیرهایی که داخل کلاس تعریف شدند و در بدنه متد استفاده شدند
         exps = tokens_info.get_token_index(tokens_info.token_stream.tokens, tokens_info.start, tokens_info.stop)
-        self.propagate(program.packages, Rewriter_)
         # check that method is static or not
         for modifier in _method.modifiers:
             if modifier == "static":
@@ -119,8 +118,13 @@ class MoveMethodRefactoring:
                                           "import " + self.package_name + "." + self.class_name + ";\n")
         Rewriter_.replace(tokens_info, "")
         Rewriter_.apply()
+        self.propagate(program.packages, Rewriter_)
+        for package_item in program.packages:
+            package_item_dic = program.packages[package_item]
+            for classes_item in package_item_dic.classes:
+                class_item_dic = package_item_dic.classes[classes_item]
+                self.__reformat(class_item_dic)
 
-        self.__reformat(_sourceclass, _targetclass)
         return True
 
     def propagate(self, package, rewriter):
@@ -160,19 +164,19 @@ class MoveMethodRefactoring:
                                                 rewriter.replace(instance_parser, self.method_key)
                                     except:
                                         continue
-
                                 rewriter.apply()
+                                #self.__reformat(class_item_dic, class_item_dic)
 
-    def __reformat(self, src_class: Class, target_class: Class):
-        subprocess.call(["java", "-jar", self.formatter, "--replace", src_class.filename, target_class.filename])
+    def __reformat(self, src_class: Class):
+        subprocess.call(["java", "-jar", self.formatter, "--replace", src_class.filename])
 
 
 if __name__ == "__main__":
     mylist = get_filenames_in_dir('/home/pouorix/Desktop/compilerProject/javaTest/src/propagationTest')
     # mylist = get_filenames_in_dir('tests/movemethod_test')
     print("Testing move_method...")
-    if MoveMethodRefactoring(mylist, "my_package", "Source", "printTest()", "User",
-                             "test_package").do_refactor():  # if move_method_refactoring(mylist, "ss", "source", "m(int)","target","sss"):
+    if MoveMethodRefactoring(mylist, "my_package", "Source", "printTest()", "Target",
+                             "my_package").do_refactor():  # if move_method_refactoring(mylist, "ss", "source", "m(int)","target","sss"):
         print("Success!")
     else:
         print("Cannot refactor.")
