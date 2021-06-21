@@ -101,28 +101,58 @@ class PullUpConstructorRefactoring:
                 else:
                     Rewriter_.replace(_method_token_info, "public " + remove + "(" + params2[:-1] + ")"
                                       + "{\n\t" + "super(" + params[:-1] + ");" + "\n\t}")
+        has_cons = False
+        for method in _targetclass.methods:
+            meth = _targetclass.methods[method]
+            if meth.is_constructor:
+                has_cons = True
 
-        class_tokens_info = TokensInfo(_targetclass.parser_context.classBody())
-        class_tokens_info.stop = class_tokens_info.start
-        key = min(len_params, key=len_params.get)
-        _method_name1 = program.packages[self.package_name].classes[key].methods[removemethod[key][0]]
-        tokens_info = TokensInfo(_method_name1.parser_context)
-        singlefileelement = SingleFileElement(_method_name1.parser_context, _method_name1.filename)
-        token_stream_rewriter = TokenStreamRewriter(singlefileelement.get_token_stream())
-        strofmethod = token_stream_rewriter.getText(program_name=token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-                                                    start=tokens_info.start,
-                                                    stop=tokens_info.stop)
-        strofmethod = strofmethod.replace(_method_name1.class_name, target_class_name)
+        if has_cons:
+            for class_body_decl in _targetclass.parser_context.classBody().getChildren():
+                if class_body_decl.getText() in ['{', '}']:
+                    continue
+                member_decl = class_body_decl.memberDeclaration()
+                if member_decl is not None:
+                    constructor = member_decl.constructorDeclaration()
+                    if constructor is not None:
+                        class_tokens_info = TokensInfo(class_body_decl)
+                        key = min(len_params, key=len_params.get)
+                        _method_name1 = program.packages[self.package_name].classes[key].methods[removemethod[key][0]]
+                        tokens_info = TokensInfo(_method_name1.parser_context)
+                        singlefileelement = SingleFileElement(_method_name1.parser_context, _method_name1.filename)
+                        token_stream_rewriter = TokenStreamRewriter(singlefileelement.get_token_stream())
+                        strofmethod = token_stream_rewriter.getText(
+                            program_name=token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                            start=tokens_info.start,
+                            stop=tokens_info.stop)
+                        strofmethod = strofmethod.replace(_method_name1.class_name, target_class_name)
 
-        Rewriter_.insert_after(tokens_info=class_tokens_info, text=strofmethod)
-        Rewriter_.apply()
+                        Rewriter_.replace(tokens_info=class_tokens_info, text=strofmethod)
+                        Rewriter_.apply()
+                        break
+
+        else:
+            class_tokens_info = TokensInfo(_targetclass.parser_context.classBody())
+            class_tokens_info.stop = class_tokens_info.start
+            key = min(len_params, key=len_params.get)
+            _method_name1 = program.packages[self.package_name].classes[key].methods[removemethod[key][0]]
+            tokens_info = TokensInfo(_method_name1.parser_context)
+            singlefileelement = SingleFileElement(_method_name1.parser_context, _method_name1.filename)
+            token_stream_rewriter = TokenStreamRewriter(singlefileelement.get_token_stream())
+            strofmethod = token_stream_rewriter.getText(program_name=token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                                                        start=tokens_info.start,
+                                                        stop=tokens_info.stop)
+            strofmethod = strofmethod.replace(_method_name1.class_name, target_class_name)
+
+            Rewriter_.insert_after(tokens_info=class_tokens_info, text=strofmethod)
+            Rewriter_.apply()
 
         return True
 
 
 if __name__ == "__main__":
     mylist = get_filenames_in_dir('../tests/pullup_constructor')
-    if PullUpConstructorRefactoring(mylist, "tests.utils_test2", "sourceclass").do_refactor():
+    if PullUpConstructorRefactoring(mylist, "tests.utils_test3", "sourceclass2").do_refactor():
         print("Success!")
     else:
         print("Cannot refactor.")
