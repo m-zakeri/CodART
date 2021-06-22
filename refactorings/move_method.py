@@ -138,12 +138,12 @@ class MoveMethodRefactoring:
                         method_item_dict = sourceClass.methods[method_item]
                         for i in method_item_dict.body_method_invocations_without_typename:
                             if i.getText() == self.class_name:
-                                import_parser = TokensInfo(
-                                    sourceClass.parser_context)
                                 if self.target_package_name != self.package_name:  # 1-import package-check to don't import self package
-                                    rewriter.insert_after(import_parser,
-                                                          '\nimport ' + self.target_package_name + '.' + self.target_class_name + ';')
-                                ii = method_item_dict.body_method_invocations_without_typename[i] # create instance before where our target function usage
+                                    import_parser = TokensInfo(sourceClass.modifiers_parser_contexts[0])
+                                    rewriter.insert_before_start(import_parser,
+                                                                 '\nimport ' + self.target_package_name + '.' + self.target_class_name + ';')
+                                ii = method_item_dict.body_method_invocations_without_typename[
+                                    i]  # create instance before where our target function usage
                                 for j in ii:
                                     i_tokens = TokensInfo(j)
                                     rewriter.insert_before_start(i_tokens,
@@ -155,43 +155,40 @@ class MoveMethodRefactoring:
                                     rewriter.apply()
 
                 else:
-                    for import_item in class_item_dic.file_info.class_imports:
-                        if (
-                                self.class_name == import_item.class_name):  # check if the class has the import of our sorce class or not
-                            for method_item in class_item_dic.methods:
-                                method_item_dict = class_item_dic.methods[
-                                    method_item]  # check that class use our target method or not ***
-                                tempIndex = method_item_dict.body_text.find('=new' + self.class_name + '()')
-                                tempIndex2 = method_item_dict.body_text[:tempIndex].find(self.class_name)
-                                tempIndex2 = tempIndex2 + len(self.class_name)
-                                instance_name = method_item_dict.body_text[tempIndex2:tempIndex]
-                                my_line = instance_name + '.' + self.method_key
-                                if my_line in method_item_dict.body_text:  # check that class use our target method or not ***
-                                    import_parser = TokensInfo(import_item.parser_context)
-                                    if self.target_package_name != class_item_dic.package_name:  # check to dont import self package
-                                        rewriter.insert_after(import_parser,
-                                                              '\nimport ' + self.target_package_name + '.' + self.target_class_name + ';')
-                                    new_instance_name = self.target_class_name.lower() + str(
-                                        int(time.time()))  # this trick will create a unique name
-                                    method_parser = TokensInfo(
-                                        method_item_dict.body_local_vars_and_expr_names[0].parser_context)
-                                    if self.target_class_name != class_item_dic.name:  # dont create a instace of self class ( if target class is our selecting class )
-                                        rewriter.insert_before_start(method_parser,
-                                                                     self.target_class_name + ' ' + new_instance_name + ' = new ' + self.target_class_name + '();\n')
-                                    for body_item in method_item_dict.body_local_vars_and_expr_names:
-                                        try:
-                                            if body_item.dot_separated_identifiers[0] == instance_name and \
-                                                    body_item.dot_separated_identifiers[1] == \
-                                                    self.method_key.split('(')[0]:
-                                                instance_parser = TokensInfo(body_item.parser_context)
-                                                if self.target_class_name != class_item_dic.name:  # if target class is our selecting class dont write myClass.function instead of function
-                                                    rewriter.replace(instance_parser,
-                                                                     new_instance_name + '.' + self.method_key)
-                                                else:
-                                                    rewriter.replace(instance_parser, self.method_key)
-                                        except:
-                                            continue
-                                    rewriter.apply()
+                    for method_item in class_item_dic.methods:
+                        method_item_dict = class_item_dic.methods[
+                            method_item]  # check that class use our target method or not ***
+                        tempIndex = method_item_dict.body_text.find('=new' + self.class_name + '()')
+                        tempIndex2 = method_item_dict.body_text[:tempIndex].find(self.class_name)
+                        tempIndex2 = tempIndex2 + len(self.class_name)
+                        instance_name = method_item_dict.body_text[tempIndex2:tempIndex]
+                        my_line = instance_name + '.' + self.method_key
+                        if my_line in method_item_dict.body_text:  # check that class use our target method or not ***
+                            if self.target_package_name != class_item_dic.package_name:  # check to dont import self package
+                                import_parser = TokensInfo(class_item_dic.modifiers_parser_contexts[0])
+                                rewriter.insert_before_start(import_parser,
+                                                             '\nimport ' + self.target_package_name + '.' + self.target_class_name + ';')
+                            new_instance_name = self.target_class_name.lower() + str(
+                                int(time.time()))  # this trick will create a unique name
+                            method_parser = TokensInfo(
+                                method_item_dict.body_local_vars_and_expr_names[0].parser_context)
+                            if self.target_class_name != class_item_dic.name:  # dont create a instace of self class ( if target class is our selecting class )
+                                rewriter.insert_before_start(method_parser,
+                                                             self.target_class_name + ' ' + new_instance_name + ' = new ' + self.target_class_name + '();\n')
+                            for body_item in method_item_dict.body_local_vars_and_expr_names:
+                                try:
+                                    if body_item.dot_separated_identifiers[0] == instance_name and \
+                                            body_item.dot_separated_identifiers[1] == \
+                                            self.method_key.split('(')[0]:
+                                        instance_parser = TokensInfo(body_item.parser_context)
+                                        if self.target_class_name != class_item_dic.name:  # if target class is our selecting class dont write myClass.function instead of function
+                                            rewriter.replace(instance_parser,
+                                                             new_instance_name + '.' + self.method_key)
+                                        else:
+                                            rewriter.replace(instance_parser, self.method_key)
+                                except:
+                                    continue
+                            rewriter.apply()
 
     def __reformat(self, src_class: Class):
         subprocess.call(["java", "-jar", self.formatter, "--replace", src_class.filename])
@@ -201,8 +198,8 @@ if __name__ == "__main__":
     mylist = get_filenames_in_dir('/home/pouorix/Desktop/compilerProject/javaTest/src/propagationTest')
     # mylist = get_filenames_in_dir('tests/movemethod_test')
     print("Testing move_method...")
-    if MoveMethodRefactoring(mylist, "my_package", "Source", "printTest()", "Target",
-                             "my_package").do_refactor():  # if move_method_refactoring(mylist, "ss", "source", "m(int)","target","sss"):
+    if MoveMethodRefactoring(mylist, "my_package", "Source", "printTest()", "User",
+                             "test_package").do_refactor():  # if move_method_refactoring(mylist, "ss", "source", "m(int)","target","sss"):
         print("Success!")
     else:
         print("Cannot refactor.")
