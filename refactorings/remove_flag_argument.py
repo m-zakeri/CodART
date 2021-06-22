@@ -203,7 +203,10 @@ class RemoveFlagArgument:
 if __name__ == '__main__':
     # RemoveFlagArgument().do_refactor()
     
-    RemoveFlagArgument(source_method = 'addAll' , argument_name = 'wrap').do_refactor()
+    # RemoveFlagArgument(source_method = 'addAll' , argument_name = 'wrap').do_refactor()
+
+    RemoveFlagArgument(source_method = 'parse' , argument_name = 'arrayForm').do_refactor()
+
 
     # RemoveFlagArgument("JSONArray", "addAll", "wrap",r"D:\Uni\Compiler\project\CodART\benchmark_projects\JSON\src\main\java\org\json\JSONArray.java" ).do_refactor()
 
