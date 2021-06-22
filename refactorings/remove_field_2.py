@@ -35,38 +35,42 @@ class RemoveFieldRefactoringListener(JavaParserLabeledListener):
             self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
 
         self.is_source_class = False
-        self.inner_class_count = 0
+        self.nested_level = -1
+        self.field_found = False
         self.is_static = False
 
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
-
         class_identifier = ctx.IDENTIFIER().getText()
         if class_identifier == self.source_class:
             self.is_source_class = True
-        elif self.is_source_class is True:
-            self.inner_class_count += 1
 
     def exitClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
         class_identifier = ctx.IDENTIFIER().getText()
         if class_identifier == self.source_class:
             self.is_source_class = False
-        elif self.is_source_class is True:
-            self.inner_class_count -= 1
+
+    def enterClassBodyDeclaration2(self, ctx: JavaParserLabeled.ClassBodyDeclaration2Context):
+        if self.is_source_class is True:
+            self.nested_level += 1
+
+    def exitClassBodyDeclaration2(self, ctx: JavaParserLabeled.ClassBodyDeclaration2Context):
+        if self.is_source_class is True:
+            self.nested_level -= 1
+        if not self.field_found or self.nested_level != -1:
+            return None
+        self.token_stream_rewriter.delete(
+            program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+            from_idx=ctx.start.tokenIndex,
+            to_idx=ctx.stop.tokenIndex
+        )
+        self.field_found = False
 
     def exitFieldDeclaration(self, ctx: JavaParserLabeled.FieldDeclarationContext):
-        # print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
-        if not self.is_source_class or self.inner_class_count != 0:
+        if not self.is_source_class or self.nested_level != 0:
             return None
         field_identifier = ctx.variableDeclarators().variableDeclarator(0).variableDeclaratorId().IDENTIFIER().getText()
-        # print("field_identifier:::::::::",field_identifier)
         if self.field_name == field_identifier:
-            grand_parent_ctx = ctx.parentCtx.parentCtx
-            self.token_stream_rewriter.delete(
-                program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-                from_idx=grand_parent_ctx.start.tokenIndex,
-                to_idx=grand_parent_ctx.stop.tokenIndex
-            )
-            self.detected_field = None
+            self.field_found = True
 
 
 if __name__ == '__main__':
