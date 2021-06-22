@@ -79,21 +79,20 @@ class RemoveFlagArgumentListener(JavaParserLabeledListener):
 
         if self.is_source_method:
 
-            nextParam = None
-
+            nextParam = None  # to capture next parameter after removed flag argument
+            prevParam = None
             for idx, formalParameter in enumerate(ctx.formalParameters().formalParameterList().formalParameter()):
                 if formalParameter.variableDeclaratorId().IDENTIFIER().getText() == self.argument_name:  # check for argument
                     self.argument_token = formalParameter
                     nextParam = ctx.formalParameters().formalParameterList().formalParameter()[idx + 1] \
                         if idx != len(ctx.formalParameters().formalParameterList().formalParameter()) - 1 else None
+
+                    prevParam = ctx.formalParameters().formalParameterList().formalParameter()[idx - 1] \
+                        if idx > 0 else None
                     break
-            #TODO : check for validity
-            if nextParam:
-                self.token_stream_rewriter.replaceRange(self.argument_token.start.tokenIndex,
-                                                        nextParam.start.tokenIndex - 1, '')
-            else:
-                self.token_stream_rewriter.replaceRange(self.argument_token.start.tokenIndex-1,
-                                                        self.argument_token.stop.tokenIndex, '')
+            # create method signature for two newly added method 
+            self.token_stream_rewriter.replaceRange(self.argument_token.start.tokenIndex - (1 if prevParam else 0 ),
+                                                        nextParam.start.tokenIndex - (1 if nextParam else 0 ), '')
 
             self.signature = self.token_stream_rewriter.getText(self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
                                                                 ctx.start.tokenIndex, ctx.methodBody().start.tokenIndex)
@@ -118,25 +117,19 @@ class RemoveFlagArgumentListener(JavaParserLabeledListener):
 
             res = '\n\t' + signature1 + self.body_1 + '\n\t' + signature2 + self.body_2
             self.token_stream_rewriter.insertAfter(index=ctx.stop.tokenIndex, text=res)
-            # self.token_stream_rewriter.insertAfter(index=ctx.stop.tokenIndex, text=self.body_2)
-            # self.token_stream_rewriter.insertAfter(index=ctx.stop.tokenIndex, text=self.signature)
-            # print(self.signature)
+
 
             arguments = [s.rstrip().split(' ')[-1] for s in signature1.split('(')[1].split(')')[0].split(',')]
-            print("exit method")
             signature1_name = signature1.split('(')[0].rstrip().split()[-1]
             signature2_name = signature2.split('(')[0].rstrip().split()[-1]
 
             self.token_stream_rewriter.replaceRange(self.body_1_token.start.tokenIndex,
                                                     self.body_1_token.stop.tokenIndex,
-                                                    '\t' + signature1_name + '( ' + ','.join(arguments) + ')')
+                                                    '\n\t' + signature1_name + '( ' + ','.join(arguments) + ')\n')
             self.token_stream_rewriter.replaceRange(self.body_2_token.start.tokenIndex,
                                                     self.body_2_token.stop.tokenIndex,
-                                                    '\t' + signature2_name + '( ' + ','.join(arguments) + ')')
+                                                    '\n\t' + signature2_name + '( ' + ','.join(arguments) + ')\n')
 
-    def enterStatement0(self, ctx: JavaParserLabeled.Statement0Context):
-        if self.is_source_method:
-            pass
 
     def enterStatement2(self, ctx: JavaParserLabeled.Statement2Context):
         """when entering if else block we get both of the logic in the block if this was source method
@@ -152,20 +145,11 @@ class RemoveFlagArgumentListener(JavaParserLabeledListener):
                     if ctx.parExpression().expression().primary().IDENTIFIER().getText() == self.argument_name:
                         iterator = iter(ctx.statement())
 
-                        # TODO : handle on statements blocks .e.g. {}
-
                         self.body_1, self.body_2 = [self.common_token_stream.getText(s.block().start, s.block().stop)[1:]
                                                     for s
                                                     in ctx.statement()]
 
                         self.body_1_token, self.body_2_token = [s.block() for s in ctx.statement()]
-
-                        # print(ctx.getPayload())
-                        # print(self.common_token_stream.getText(ctx.start, ctx.stop))
-                        # print(dir(ctx.statement()[0].block()))
-
-                        # for s in ctx.statement():
-                        #     print(s.block().getText())
 
             except :
                 pass
@@ -217,7 +201,9 @@ class RemoveFlagArgument:
 
 
 if __name__ == '__main__':
-    RemoveFlagArgument().do_refactor()
+    # RemoveFlagArgument().do_refactor()
+    
+    RemoveFlagArgument(source_method = 'addAll' , argument_name = 'wrap').do_refactor()
 
     # RemoveFlagArgument("JSONArray", "addAll", "wrap",r"D:\Uni\Compiler\project\CodART\benchmark_projects\JSON\src\main\java\org\json\JSONArray.java" ).do_refactor()
 
