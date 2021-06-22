@@ -119,11 +119,14 @@ class MoveMethodRefactoring:
         Rewriter_.replace(tokens_info, "")
         Rewriter_.apply()
         self.propagate(program.packages, Rewriter_)
-        for package_item in program.packages:
-            package_item_dic = program.packages[package_item]
-            for classes_item in package_item_dic.classes:
-                class_item_dic = package_item_dic.classes[classes_item]
-                self.__reformat(class_item_dic)
+        self.__reformat(_sourceclass)
+        self.__reformat(_targetclass)
+        #its not efficient for big project ! :
+        # for package_item in program.packages:
+        #     package_item_dic = program.packages[package_item]
+        #     for classes_item in package_item_dic.classes:
+        #         class_item_dic = package_item_dic.classes[classes_item]
+        #         self.__reformat(class_item_dic)
 
         return True
 
@@ -135,6 +138,8 @@ class MoveMethodRefactoring:
                 if classes_item == self.class_name:  # check any method in source class use that function or not
                     sourceClass = package[self.package_name].classes[self.class_name]
                     for method_item in sourceClass.methods:
+                        if method_item==self.method_key:
+                            continue
                         method_item_dict = sourceClass.methods[method_item]
                         for i in method_item_dict.body_method_invocations_without_typename:
                             if i.getText() == self.class_name:
@@ -189,6 +194,7 @@ class MoveMethodRefactoring:
                                 except:
                                     continue
                             rewriter.apply()
+                self.__reformat(class_item_dic)
 
     def __reformat(self, src_class: Class):
         subprocess.call(["java", "-jar", self.formatter, "--replace", src_class.filename])
