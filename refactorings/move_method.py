@@ -80,7 +80,8 @@ class MoveMethodRefactoring:
 
         # insert name of source.java class befor param that define in body of classe (that use in method)
         for index in exp:
-            token_stream_rewriter.insertBeforeIndex(index=index, text=str.lower(self.class_name) + ".")
+            token_stream_rewriter.insertBeforeIndex(index=index, text=str.lower(self.class_name)+ str(
+                        int(time.time())) + ".")
 
         for inv in _method.body_method_invocations:
             if inv.getText() == self.target_class_name:
@@ -204,8 +205,8 @@ if __name__ == "__main__":
     mylist = get_filenames_in_dir('/home/pouorix/Desktop/compilerProject/javaTest/src/propagationTest')
     # mylist = get_filenames_in_dir('tests/movemethod_test')
     print("Testing move_method...")
-    if MoveMethodRefactoring(mylist, "my_package", "Source", "printTest()", "User",
-                             "test_package").do_refactor():  # if move_method_refactoring(mylist, "ss", "source", "m(int)","target","sss"):
+    if MoveMethodRefactoring(mylist, "my_package", "Source", "printTest2()", "Target",
+                             "my_package").do_refactor():  # if move_method_refactoring(mylist, "ss", "source", "m(int)","target","sss"):
         print("Success!")
     else:
         print("Cannot refactor.")
