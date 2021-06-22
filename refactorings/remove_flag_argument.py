@@ -76,22 +76,23 @@ class RemoveFlagArgumentListener(JavaParserLabeledListener):
             ctx (JavaParserLabeled.MethodDeclarationContext): 
         """
         self.is_source_method = (ctx.IDENTIFIER().getText() == self.source_method)
+
         if self.is_source_method:
 
             nextParam = None
 
             for idx, formalParameter in enumerate(ctx.formalParameters().formalParameterList().formalParameter()):
-                if formalParameter.variableDeclaratorId().IDENTIFIER().getText() == self.argument_name:
+                if formalParameter.variableDeclaratorId().IDENTIFIER().getText() == self.argument_name:  # check for argument
                     self.argument_token = formalParameter
                     nextParam = ctx.formalParameters().formalParameterList().formalParameter()[idx + 1] \
                         if idx != len(ctx.formalParameters().formalParameterList().formalParameter()) - 1 else None
                     break
-
+            #TODO : check for validity
             if nextParam:
                 self.token_stream_rewriter.replaceRange(self.argument_token.start.tokenIndex,
                                                         nextParam.start.tokenIndex - 1, '')
             else:
-                self.token_stream_rewriter.replaceRange(self.argument_token.start.tokenIndex,
+                self.token_stream_rewriter.replaceRange(self.argument_token.start.tokenIndex-1,
                                                         self.argument_token.stop.tokenIndex, '')
 
             self.signature = self.token_stream_rewriter.getText(self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
@@ -109,6 +110,7 @@ class RemoveFlagArgumentListener(JavaParserLabeledListener):
             ctx (JavaParserLabeled.MethodBodyContext)
         """
         if self.is_source_method:
+            print(f"signature is {self.signature}")
             signature1 = self.signature.split('(')[0].rstrip() + 'IsTrue' + ' (' + ''.join(
                 self.signature.split('(')[1:])
             signature2 = self.signature.split('(')[0].rstrip() + 'IsFalse' + ' (' + ''.join(
@@ -217,5 +219,5 @@ class RemoveFlagArgument:
 if __name__ == '__main__':
     RemoveFlagArgument().do_refactor()
 
-    RemoveFlagArgument("JSONArray", "addAll", "wrap",r"D:\Uni\Compiler\project\CodART\benchmark_projects\JSON\src\main\java\org\json\JSONArray.java" ).do_refactor()
+    # RemoveFlagArgument("JSONArray", "addAll", "wrap",r"D:\Uni\Compiler\project\CodART\benchmark_projects\JSON\src\main\java\org\json\JSONArray.java" ).do_refactor()
 
