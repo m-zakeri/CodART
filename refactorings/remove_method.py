@@ -34,48 +34,54 @@ class RemoveMethodRefactoringListener(JavaParserLabeledListener):
             self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
 
         self.is_source_class = False
-        self.inner_class_count = 0
+        self.nested_level = -1
+        self.method_found = False
         self.is_static = False
 
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
-
         class_identifier = ctx.IDENTIFIER().getText()
         if class_identifier == self.source_class:
             self.is_source_class = True
-        elif self.is_source_class is True:
-            self.inner_class_count += 1
 
     def exitClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
         class_identifier = ctx.IDENTIFIER().getText()
         if class_identifier == self.source_class:
             self.is_source_class = False
-        elif self.is_source_class is True:
-            self.inner_class_count -= 1
+
+    def enterClassBodyDeclaration2(self, ctx: JavaParserLabeled.ClassBodyDeclaration2Context):
+        if self.is_source_class is True:
+            self.nested_level += 1
+
+    def exitClassBodyDeclaration2(self, ctx: JavaParserLabeled.ClassBodyDeclaration2Context):
+        if self.is_source_class is True:
+            self.nested_level -= 1
+        if not self.method_found or self.nested_level != -1:
+            return None
+        self.token_stream_rewriter.delete(
+            program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+            from_idx=ctx.start.tokenIndex,
+            to_idx=ctx.stop.tokenIndex
+        )
+        self.method_found = False
 
     def exitMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
-        if not self.is_source_class or self.inner_class_count != 0:
+        if not self.is_source_class or self.nested_level != 0:
             return None
-        grand_parent_ctx = ctx.parentCtx.parentCtx
         method_identifier = ctx.IDENTIFIER().getText()
         if self.method_name == method_identifier:
-            self.token_stream_rewriter.delete(
-                program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-                from_idx=grand_parent_ctx.start.tokenIndex,
-                to_idx=grand_parent_ctx.stop.tokenIndex
-            )
-            self.detected_method = None
+            self.method_found = True
 
 
 if __name__ == '__main__':
-    udb_path = '/home/ali/Desktop/code/TestProject/TestProject.udb'
-    source_class = "App"
-    method_name = "testMethod"
+    #udb_path = '/home/ali/Desktop/code/TestProject/TestProject.udb'
+    source_class = "JSONArray"
+    method_name = "optLong"
     # initialize with understand
-    main_file = ""
-    db = und.open(udb_path)
-    for cls in db.ents("class"):
-        if cls.simplename() == source_class:
-            main_file = cls.parent().longname()
+    main_file = r"E:\UNI\Term6\Compiler\Project\CodART\benchmark_projects\JSON\src\main\java\org\json\JSONArray.java"
+    #db = und.open(udb_path)
+    #for cls in db.ents("class"):
+    #    if cls.simplename() == source_class:
+    #        main_file = cls.parent().longname()
 
     stream = FileStream(main_file, encoding='utf8')
     lexer = JavaLexer(stream)
@@ -89,5 +95,5 @@ if __name__ == '__main__':
     walker = ParseTreeWalker()
     walker.walk(t=parse_tree, listener=my_listener)
 
-    with open(main_file, mode='w', newline='') as f:
+    with open(main_file, mode='w', newline='', encoding='utf8') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
