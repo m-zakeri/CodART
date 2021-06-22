@@ -89,5 +89,5 @@ if __name__ == '__main__':
     walker = ParseTreeWalker()
     walker.walk(t=parse_tree, listener=my_listener)
 
-    with open(main_file, mode='w', newline='') as f:
+    with open(main_file, mode='w', newline='', encoding='utf8') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
