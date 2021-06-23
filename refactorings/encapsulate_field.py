@@ -94,11 +94,13 @@ class EncapsulateFiledRefactoringListener(JavaParserLabeledListener):
             #                                         text='\n\t/*End of accessor and mutator methods!*/\n\n')
 
     def exitExpression21(self, ctx:JavaParserLabeled.Expression21Context):
-        print("test: ",ctx.expression(0).IDENTIFIER().getText())
+        # print("test: ",ctx.expression(0).IDENTIFIER().getText())
 
-        if ctx.expression(0).IDENTIFIER().getText() == self.field_identifier or \
-                ctx.expression(0).IDENTIFIER().getText() == 'this.' + self.field_identifier:
-            expr_code = ctx.expression(1).getText()
+        if ctx.expression(0).getText() == self.field_identifier or \
+                ctx.expression(0).getText() == 'this.' + self.field_identifier:
+            expr_code = self.token_stream_rewriter.getText(program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                                                           start=ctx.expression(1).start.tokenIndex,
+                                                           stop=ctx.expression(1).stop.tokenIndex)
             # new_code = 'this.set' + str.capitalize(self.field_identifier) + '(' + ctx.expression().getText() + ')'
             new_code = 'this.set' + str.capitalize(self.field_identifier) + '(' + expr_code + ')'
             self.token_stream_rewriter.replaceRange(ctx.start.tokenIndex, ctx.stop.tokenIndex, new_code)
