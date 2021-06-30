@@ -1,14 +1,14 @@
 public class ExtractMethodTest {
 
-    void printOwing() {
-    printBanner();
+    public static void printOwing2() {
+        printBanner();
+        String fname = "hello",lname = "world";
 
-    // Print details.
-		printDetails();
+		printDetails(fname, lname);
     }
-	public void printDetails()
+	private void printDetails(String fname, String lname)
 	{
-        System.out.println("name: " + name);
+        System.out.println("fname: " + fname+", lname"+lname);
         System.out.println("name printed ");
 	}
 }

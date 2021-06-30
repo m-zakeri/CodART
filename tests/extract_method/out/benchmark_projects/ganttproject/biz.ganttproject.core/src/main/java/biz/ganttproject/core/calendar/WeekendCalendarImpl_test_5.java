@@ -309,7 +309,7 @@ public class WeekendCalendarImpl extends GPCalendarBase implements GPCalendarCal
 //      }
 //    }
   }
-	public void iterateOnCalender(Collection<CalendarEvent> holidays)
+	private void iterateOnCalender(Collection<CalendarEvent> holidays)
 	{
     for (CalendarEvent h : holidays) {
       if (h.isRecurring) {

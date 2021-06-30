@@ -191,7 +191,7 @@ public class DateParser {
 		fillBufferWithDate(buffer, calendar);
         return buffer.toString();
     }
-	public void fillBufferWithDate(StringBuffer buffer, Calendar calendar)
+	private void fillBufferWithDate(StringBuffer buffer, Calendar calendar)
 	{
         buffer.append("T");
         buffer.append(twoDigit(calendar.get(Calendar.HOUR_OF_DAY)));

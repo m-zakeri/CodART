@@ -2,10 +2,11 @@ from antlr4 import *
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
+import numpy as np
 
 """
     An Extraction method refactoring class for using compiler listeners 
-    Authors: Mohammad Sajad Naghizadeh, Sadegh Jafari, Sina Ziaee
+    Authors: Mohammad Sajad Naghizadeh, Sadegh Jafari, Sina Ziaee, Mohammad reza babaee
     
     Description about the code:
     - statements are each line of code showing an act for example a = 5; is an statement.
@@ -14,8 +15,12 @@ from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 """
     Conf object help:
-        1.if package is not important or is unknown enter None for its value.
-        2.lines are calculated from beginning of method you are willing to extract counting from 0.
+        -- lines are calculated from beginning the beginning of file starting from 1 .
+"""
+
+"""
+    limitations : 
+        -- extracted lines must be a part of a method or a class constructor any other format simply would not work.(though we don't know java even supports any other format)
 """
 
 
@@ -26,140 +31,174 @@ def is_equivalent(a, b):
 
 
 """
-    Extract method factoring class extending java parser labeled listener
+    Extract method factoring class extending javaParserLabeledListener
 """
 
 
 class ExtractMethodRefactoring(JavaParserLabeledListener):
 
-    def __init__(self,
-                 target_package: str = None, target_class: str = None,
-                 target_method: str = None, lines=None):
-        # TODO add target method None possibility
+    def __init__(self, lines: list,post_variables : list = []):
 
-        # checks Target method not to be None
-        if lines is None:
-            raise Exception('Extract lines are not specified.')
-        if target_method is None:
-            raise Exception('Target method should be specified.')
+        # checks Target method and lines to be valid
+        if lines is None or len(lines) == 0:
+            raise Exception('target lines are not specified.')
 
-        # checks lines not to be Empty
-        if len(lines) == 0:
-            raise Exception('lines list should not be empty.')
-
-        # getting targets
-        self.target_package = target_package
-        self.target_class = target_class
-        self.target_method = target_method
+        # setting variables
+        self.lines = np.array(lines)
+        self.lines.reshape((len(lines), 1))
+        self.last_line = self.lines.max()
+        self.first_line = self.lines.min()
 
         # tree helper variables
-        self.is_in_target_package = self.target_package is None
-        self.is_in_target_class = False
-        self.is_in_a_method = False
+        self.target_method_found = False
         self.is_in_target_method = False
+        # list of variables created and initialized before extracted lines
+        self.pre_variables = {}
+        # list of variables used after extracted lines
+        self.post_variables = post_variables
+        self.pre_assign_variable = False
+        self.assign_variable_in_extract_lines = False
         self.used_variables = set([])
-        self.lines = lines
-        # self.extract_lines = set([])
-        self.remain_lines = set([])
-        self.variable_info = {'class': self.target_class, 'method': self.target_method, 'variables': {}}
-        self.method_start_line = 0
+        self.created_variables = set([])
+        self.assigned_variable = None
         self.method_stop_line = 0
-        self.is_inside_rule = None
+        self.exception = None
+        self.is_target_method_static=False
 
     ######################################
     # Overriding required methods to satisfy our extraction requirements
     ######################################
 
-    def enterPackageDeclaration(self, ctx: JavaParserLabeled.PackageDeclarationContext):
-        if self.target_package is None or is_equivalent(ctx.qualifiedName().getText(), self.target_package):
-            self.is_in_target_package = True
-
-    # def exitPackageDeclaration(self, ctx: JavaParserLabeled.PackageDeclarationContext):
-    #     if self.target_package is None or is_equivalent(ctx.qualifiedName().getText(), self.target_package):
-    #         self.is_in_target_package = False
-    #         # todo: do code smell removal in phase 2
-
-    def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
-        if self.is_in_target_package and self.target_class is None or is_equivalent(ctx.IDENTIFIER(),
-                                                                                    self.target_class):
-            self.is_in_target_class = True
-
-    def exitClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
-        if self.is_in_target_package and self.target_class is None or is_equivalent(ctx.IDENTIFIER(),
-                                                                                    self.target_class):
-            self.is_in_target_class = False
-            # todo: do code smell removal in phase 2
-
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
-        # checking if current method is the target method
-        if self.is_in_target_package and self.is_in_target_class and is_equivalent(ctx.IDENTIFIER(),
-                                                                                   self.target_method):
+        if ctx.start.line <= self.first_line and ctx.stop.line >= self.last_line:
             self.is_in_target_method = True
+            self.target_method_found = True
+            for modifier in ctx.parentCtx.parentCtx.modifier():
+                if modifier.getText() == 'static':
+                    self.is_target_method_static = True
+                    break
+            if ctx.qualifiedNameList():
+                print('ex found :',ctx.qualifiedNameList().getText())
+                self.exception = ctx.qualifiedNameList().getText()
             self.method_start_line = ctx.start.line
-            new_lines = []
-            for line in self.lines:
-                new_lines.append(line + self.method_start_line)
-            self.lines = new_lines
             self.method_stop_line = ctx.stop.line
 
     def exitMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
-        self.is_in_a_method = False
-        if self.is_in_target_package and self.is_in_target_class and self.is_in_target_method:
-            self.is_in_target_method = False
-        # todo: do code smell removal in phase 2
+        self.is_in_target_method = False
+
+    def enterConstructorDeclaration(self, ctx:JavaParserLabeled.ConstructorDeclarationContext):
+        if ctx.start.line <= self.first_line and ctx.stop.line >= self.last_line:
+            self.is_in_target_method = True
+            self.target_method_found = True
+            for modifier in ctx.parentCtx.parentCtx.modifier():
+                if modifier.getText() == 'static':
+                    self.is_target_method_static = True
+                    break
+            self.method_start_line = ctx.start.line
+            self.method_stop_line = ctx.stop.line
+
+    def exitConstructorDeclaration(self, ctx:JavaParserLabeled.ConstructorDeclarationContext):
+        self.is_in_target_method = False
 
     def enterLocalVariableDeclaration(self, ctx: JavaParserLabeled.LocalVariableDeclarationContext):
-        # print('dec detected')
         if self.is_in_target_method:
-            # print('inside target with :', ctx.getText())
-            if set(range(ctx.start.line, ctx.stop.line + 1)).issubset(set(self.lines)):
-                # print('dec in extract lines')
-                self.remain_lines = self.remain_lines.union(range(ctx.start.line, ctx.stop.line + 1))
-                # self.extract_lines =
-                # print('new remain lines :', self.remain_lines)
-            elif not ctx.start.line > max(self.lines):
-                # print('dec not in extract lines')
-                self.variable_info['variables'][ctx.variableDeclarators().variableDeclarator()[
-                    0].variableDeclaratorId().getText()] = ctx.typeType().getText()
-                # print('new variables :', self.variable_info)
+            if not set(range(ctx.start.line, ctx.stop.line + 1)).issubset(set(self.lines)):
+                if ctx.start.line < self.last_line:
+                    for var in ctx.variableDeclarators().variableDeclarator():
+                        self.pre_variables[
+                            var.variableDeclaratorId().getText()] = {
+                            'type': ctx.typeType().getText(),
+                            'init': str(var.getText()).__contains__('=')}
+            else:
+                self.created_variables.add(
+                    ctx.variableDeclarators().variableDeclarator()[0].variableDeclaratorId().getText())
+
+    def enterEnhancedForControl(self, ctx:JavaParserLabeled.EnhancedForControlContext):
+        if self.is_in_target_method:
+            if not set(range(ctx.start.line, ctx.stop.line + 1)).issubset(set(self.lines)):
+                if ctx.start.line < self.last_line:
+                    var = ctx.variableDeclaratorId()
+                    self.pre_variables[
+                        var.getText()] = {
+                        'type': ctx.typeType().getText(),
+                        'init': True}
+            else:
+                self.created_variables.add(
+                    ctx.variableDeclarators().variableDeclarator()[0].variableDeclaratorId().getText())
+
 
     def enterFormalParameter(self, ctx: JavaParserLabeled.FormalParameterContext):
         if self.is_in_target_method:
-            self.variable_info['variables'][ctx.variableDeclaratorId().getText()] = ctx.typeType().getText()
+            self.pre_variables[ctx.variableDeclaratorId().getText()] = {'type': ctx.typeType().getText(), 'init': True}
+            # self.variable_info['variables'][ctx.variableDeclaratorId().getText()] = ctx.typeType().getText()
+
+    def enterExpression21(self, ctx: JavaParserLabeled.Expression21Context):
+        if self.is_in_target_method:
+            if not set(range(ctx.start.line, ctx.stop.line + 1)).issubset(
+                    set(self.lines)):
+                if ctx.start.line < self.last_line:
+                    self.pre_assign_variable = True
+            else:
+                self.assign_variable_in_extract_lines = True
 
     def enterEveryRule(self, ctx: ParserRuleContext):
         if self.is_in_target_method:
-            # print('for rule',ctx.getText())
-            # print(set(range(ctx.start.line, ctx.stop.line + 1)),'&',set(self.lines))
             if set(range(ctx.start.line, ctx.stop.line + 1)) & set(self.lines):
                 if not set(self.lines).issubset(set(range(ctx.start.line, ctx.stop.line + 1))) and not set(
                         range(ctx.start.line, ctx.stop.line + 1)).issubset(self.lines):
                     raise Exception('input lines contains some part of a command,not the entire command!')
-            if self.is_inside_rule is None:
-                if set(range(ctx.start.line, ctx.stop.line + 1)).issubset(set(self.lines)):
-                    # self.extract_lines = self.extract_lines.union(range(ctx.start.line, ctx.stop.line + 1))
-                    # print(ctx.getText())
-                    self.is_inside_rule = ctx
-                    # self.stack.append(ctx)
-            # else:
-            #     self.stack.append(ctx)
 
     def enterPrimary4(self, ctx: JavaParserLabeled.Primary4Context):
-        if self.is_inside_rule is not None:
-            if self.variable_info['variables'].keys().__contains__(str(ctx.IDENTIFIER())):
-                self.used_variables.add(str(ctx.IDENTIFIER()))
+        # print('for variable:', str(ctx.IDENTIFIER()))
+        if self.is_in_target_method:
+            if self.assign_variable_in_extract_lines:
+                # print(1)
+                if self.pre_variables.keys().__contains__(str(ctx.IDENTIFIER())):
+                    print(self.post_variables)
+                    if self.assigned_variable and (
+                    not is_equivalent(self.assigned_variable, str(ctx.IDENTIFIER()))) and len(self.post_variables) > 1:
+                        raise Exception(
+                            'Only one value assignment is allowed in extracted lines.(found \'' + self.assigned_variable + '\' before.)')
+                    else:
+                        if self.post_variables.__contains__(str(ctx.IDENTIFIER())):
+                            self.assigned_variable = str(ctx.IDENTIFIER())
+                        if not self.created_variables.__contains__(
+                                str(ctx.IDENTIFIER())) and self.pre_variables.keys().__contains__(
+                            str(ctx.IDENTIFIER())):
+                            self.used_variables.add(str(ctx.IDENTIFIER()))
+                self.assign_variable_in_extract_lines = False
+            elif self.pre_assign_variable:
+                # print(2)
+                self.pre_assign_variable = False
+                self.pre_variables[str(ctx.IDENTIFIER())]['init'] = True
+            elif not set(range(ctx.start.line, ctx.stop.line + 1)).issubset(set(self.lines)):
+                # print(3)
+                if ctx.start.line > self.last_line:
+                    self.post_variables.append(str(ctx.IDENTIFIER()))
+            else:
+                # print(4)
+                # print(not self.created_variables.__contains__(
+                #         str(ctx.IDENTIFIER())))
+                # print(self.pre_variables.keys())
+                # print(self.pre_variables.keys().__contains__(str(ctx.IDENTIFIER())))
+                if not self.created_variables.__contains__(
+                        str(ctx.IDENTIFIER())) and self.pre_variables.keys().__contains__(str(ctx.IDENTIFIER())):
+                    self.used_variables.add(str(ctx.IDENTIFIER()))
+                # if self.variable_info['variables'].keys().__contains__(str(ctx.IDENTIFIER())):
+                #     self.used_variables.add(str(ctx.IDENTIFIER()))
 
-    def exitEveryRule(self, ctx: ParserRuleContext):
-        if self.is_inside_rule is not None and self.is_inside_rule == ctx:
-            self.is_inside_rule = None
+    # def exitEveryRule(self, ctx: ParserRuleContext):
+    #     if self.is_inside_rule is not None and self.is_inside_rule == ctx:
+    #         self.is_inside_rule = None
 
 
 # helper functions
-def get_args(variables):
-    # print(variables)
+def get_args(variables, all_variables):
     result = '('
     first = True
     for item in variables:
+        if not all_variables[item]['init']:
+            continue
         if not first:
             result += ', '
         else:
@@ -173,35 +212,44 @@ def get_args_with_type(variables, all_variables):
     result = '('
     first = True
     for item in variables:
+        if not all_variables[item]['init']:
+            continue
         if not first:
             result += ', '
         else:
             first = False
-        result += all_variables[item] + ' ' + item
+        result += all_variables[item]['type'] + ' ' + item
     result += ')'
     return result
 
 
 # extract method function
 def extract_method(conf):
-    stream = FileStream(conf['target_file'],encoding="utf-8")
+    stream = FileStream(conf['target_file'], encoding="utf-8")
     lexer = JavaLexer(stream)
     tokens = CommonTokenStream(lexer)
     parser = JavaParserLabeled(tokens)
     tree = parser.compilationUnit()
-    # TODO : too many params for ExtractMethodRefactoring constructor
-    listener = ExtractMethodRefactoring(conf['target_package'], conf['target_class'], conf['target_method'],
-                                        conf['lines'])
-    walker = ParseTreeWalker()
-    walker.walk(
+    listener0 = ExtractMethodRefactoring(conf['lines'])
+    walker0 = ParseTreeWalker()
+    walker0.walk(
+        listener=listener0,
+        t=tree
+    )
+    listener = ExtractMethodRefactoring(conf['lines'],listener0.post_variables)
+    walker1 = ParseTreeWalker()
+    walker1.walk(
         listener=listener,
         t=tree
     )
     # print(parser.getTokenStream())
     # print(listener.variable_info)
+    # print(listener.used_variables)
+    # print(listener.created_variables)
+    # print(listener.pre_variables)
 
     output = []
-    file1 = open(conf['target_file'], 'r',encoding="utf-8")
+    file1 = open(conf['target_file'], 'r', encoding="utf-8")
     lines = file1.readlines()
     line_num = 1
     # func_added = False
@@ -210,26 +258,33 @@ def extract_method(conf):
     for line in lines:
         if listener.lines.__contains__(line_num):
             print(line, end='')
-            if line_num == min(listener.lines):
-                output.append('\t\t' + conf['new_method_name'] + get_args(listener.used_variables))
-            if listener.remain_lines.__contains__(line_num):
-                output.append(line)
+            if line_num == listener.last_line:
+                if listener.assigned_variable:
+                    output.append('\t\t' + listener.assigned_variable + ' = ' + conf['new_method_name'] + get_args(
+                        listener.used_variables, listener.pre_variables))
+                else:
+                    output.append(
+                        '\t\t' + conf['new_method_name'] + get_args(listener.used_variables, listener.pre_variables))
             func.append(line)
         elif line_num == listener.method_stop_line:
             output.append(line)
-            output.append('\tpublic void ' + conf['new_method_name'] + get_args_with_type(listener.used_variables,
-                                                                                          listener.variable_info[
-                                                                                              'variables']) + '\n')
+            output.append('\tprivate '+ ('static ' if listener.is_target_method_static else '')+'void ' + conf['new_method_name'] + get_args_with_type(listener.used_variables,
+                                                                                           listener.pre_variables) + ((' throws '+listener.exception) if listener.exception is not None else '') + '\n')
             output.append('\t{\n')
+            for item in listener.pre_variables.keys():
+                var = listener.pre_variables[item]
+                if not var['init']:
+                    output.append('\t\t'+var['type']+' '+item+';\n')
             output = output + func
+            if listener.assigned_variable:
+                output.append('\t\treturn ' + listener.assigned_variable + ';\n')
             output.append('\t}\n')
         else:
             output.append(line)
         line_num += 1
     file1.close()
-    print('--------------------')
 
-    file2 = open(conf['output_file'], 'w',encoding="utf-8")
+    file2 = open(conf['output_file'], 'w', encoding="utf-8")
     for item in output:
         file2.write(item)
     file2.close()
@@ -243,12 +298,9 @@ def extract_method(conf):
 def main():
     print("Started Extract Method")
     _conf = {
-        'target_package': None,
-        'target_file': "/home/ali/Desktop/JavaTestProject/src/ExtractMethod.java",
-        'output_file': "/home/ali/Desktop/JavaTestProject/src/ExtractMethod.java",
-        'target_class': 'ExtractMethod',
-        'target_method': 'printOwing',
-        'lines': [3, 4, 5, ],
+        'target_file': "/mnt/d/Sajad/Uni/Spring00/Compiler/CodART/tests/extract_method/in/ExtractMethodTest.java",
+        'output_file': "/mnt/d/Sajad/Uni/Spring00/Compiler/CodART/tests/extract_method/out/ExtractMethodTest.java",
+        'lines': [7, 8],
         'new_method_name': 'printDetails',
     }
     extract_method(_conf)
@@ -259,5 +311,3 @@ def main():
 if __name__ == '__main__':
     main()
 
-    # todo: remember in java we need the name of static classes to be exactly the same as file name
-    # todo: remember in java we need static variables to only be used in static method

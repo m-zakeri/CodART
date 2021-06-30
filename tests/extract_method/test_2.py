@@ -1,9 +1,7 @@
 """
     extracting lines from methods which have been overloaded.
-    for instance target method test (specified in _conf below) has been overloaded.
-    we added target_method_args to our _conf object to specify arguments types of overloaded method.
 
-    test status: failed
+    test status: pass
 """
 
 from refactorings.extract_method import extract_method
@@ -19,13 +17,9 @@ def main():
             if exc.errno != errno.EEXIST:
                 raise
     _conf = {
-        'target_package': 'org.w3c.util',
         'target_file': base_dir+"benchmark_projects/ganttproject/biz.ganttproject.core/src/main/java/org/w3c/util/DateParser.java",
-        'output_file': base_dir+"tests/extract_method/out/benchmark_projects/ganttproject/biz.ganttproject.core/src/main/java/org/w3c/util/DateParser.java",
-        'target_class': 'DateParser',
-        'target_method': 'test',
-        'target_method_args':['Date',],
-        'lines': [2 ],
+        'output_file': base_dir+"tests/extract_method/out/benchmark_projects/ganttproject/biz.ganttproject.core/src/main/java/org/w3c/util/DateParser_test_2.java",
+        'lines': [255,256,257,258 ],
         'new_method_name': 'printDivider',
     }
     extract_method(_conf)

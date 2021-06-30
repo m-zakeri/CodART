@@ -252,10 +252,7 @@ public class DateParser {
         String isodate = null;
         System.out.println("----------------------------------");
         try {
-            System.out.println(">> " + date.toString() + " [" + date.getTime()
-                    + "]");
-            isodate = getIsoDate(date);
-            System.out.println(">> " + isodate);
+		    isodate = printDivider(date, isodate);
             date = parse(isodate);
             System.out.println(">> " + date.toString() + " [" + date.getTime()
                     + "]");
@@ -265,8 +262,12 @@ public class DateParser {
         }
         System.out.println("----------------------------------");
     }
-	public void printDivider()
+	private void printDivider(Date date, String isodate)
 	{
+            System.out.println(">> " + date.toString() + " [" + date.getTime()
+                    + "]");
+            isodate = getIsoDate(date);
+            System.out.println(">> " + isodate);
 	}
 
     public static void main(String args[]) {

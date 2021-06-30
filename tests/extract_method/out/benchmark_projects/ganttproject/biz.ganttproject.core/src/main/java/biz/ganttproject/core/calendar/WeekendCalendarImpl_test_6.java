@@ -182,7 +182,7 @@ public class WeekendCalendarImpl extends GPCalendarBase implements GPCalendarCal
     myTypes[day - 1] = type;
     fireCalendarChanged();
   }
-	public void checkTypeCondition(int day, DayType type)
+	private void checkTypeCondition(int day, DayType type)
 	{
     if (type != myTypes[day - 1]) {
       myWeekendDaysCount += (type == DayType.WEEKEND ? 1 : -1);

@@ -92,7 +92,7 @@ public class WeekendCalendarImpl extends GPCalendarBase implements GPCalendarCal
     setWeekDayType(GregorianCalendar.SUNDAY, GPCalendar.DayType.WEEKEND);
     fireCalendarChanged();
   }
-	public void clearMap()
+	private void clearMap()
 	{
     myRecurringEvents.clear();
     myOneOffEvents.clear();
