@@ -9,7 +9,8 @@ Pull up constructor refactoring removes the repetitive method from subclasses an
 
 ### Pre Conditions:
 1. The source package, class and constructor should exist.
-2. The order of the params in the constructor should be equal in the child classes
+2. The order of the params in the constructor should be equal in the child classes.
+3. package name should be specified and cannot be empty.
 
 ### Post Conditions:
 
@@ -102,10 +103,13 @@ class PullUpConstructorRefactoring:
                     Rewriter_.replace(_method_token_info, "public " + remove + "(" + params2[:-1] + ")"
                                       + "{\n\t" + "super(" + params[:-1] + ");" + "\n\t}")
         has_cons = False
+        parent_cons = []
         for method in _targetclass.methods:
             meth = _targetclass.methods[method]
             if meth.is_constructor:
+                parent_cons = meth
                 has_cons = True
+                break
 
         if has_cons:
             for class_body_decl in _targetclass.parser_context.classBody().getChildren():
@@ -115,21 +119,29 @@ class PullUpConstructorRefactoring:
                 if member_decl is not None:
                     constructor = member_decl.constructorDeclaration()
                     if constructor is not None:
-                        class_tokens_info = TokensInfo(class_body_decl)
+                        body = constructor.constructorBody  # Start token = '{'
+                        class_tokens_info = TokensInfo(body)
+                        class_tokens_info.stop = class_tokens_info.start  # Start and stop both point to the '{'
                         key = min(len_params, key=len_params.get)
                         _method_name1 = program.packages[self.package_name].classes[key].methods[removemethod[key][0]]
-                        tokens_info = TokensInfo(_method_name1.parser_context)
+                        tokens_info = TokensInfo(_method_name1.parser_context.memberDeclaration()
+                                                 .constructorDeclaration()
+                                                 .constructorBody)
                         singlefileelement = SingleFileElement(_method_name1.parser_context, _method_name1.filename)
                         token_stream_rewriter = TokenStreamRewriter(singlefileelement.get_token_stream())
                         strofmethod = token_stream_rewriter.getText(
                             program_name=token_stream_rewriter.DEFAULT_PROGRAM_NAME,
                             start=tokens_info.start,
                             stop=tokens_info.stop)
-                        strofmethod = strofmethod.replace(_method_name1.class_name, target_class_name)
-
-                        Rewriter_.replace(tokens_info=class_tokens_info, text=strofmethod)
-                        Rewriter_.apply()
-                        break
+                        strofmethod = strofmethod.replace(_method_name1.class_name, target_class_name)\
+                            .replace("{", "").replace("}", "")
+                        a1 = parent_cons.body_text.replace("{", "").replace("}", "")
+                        a2 = _method_name1.body_text.replace("}", "").replace("{", "")
+                        if a2 not in a1:
+                            Rewriter_.insert_after(tokens_info=class_tokens_info, text=strofmethod)
+                            Rewriter_.apply()
+                            break
+            Rewriter_.apply()
 
         else:
             class_tokens_info = TokensInfo(_targetclass.parser_context.classBody())
@@ -152,7 +164,7 @@ class PullUpConstructorRefactoring:
 
 if __name__ == "__main__":
     mylist = get_filenames_in_dir('../tests/pullup_constructor')
-    if PullUpConstructorRefactoring(mylist, "tests.utils_test3", "sourceclass2").do_refactor():
+    if PullUpConstructorRefactoring(mylist, "tests.utils_test3", "Manager").do_refactor():
         print("Success!")
     else:
         print("Cannot refactor.")
