@@ -299,6 +299,8 @@ class UtilsListener(JavaParserListener):
 
         self.field_enter_count = 0
 
+        self.objects_declaration = {}
+
     def enterPackageDeclaration(self, ctx: JavaParser.PackageDeclarationContext):
         self.package.name = ctx.qualifiedName().getText()
         self.file_info.package_name = self.package.name
@@ -369,6 +371,8 @@ class UtilsListener(JavaParserListener):
                     current_class.superinterface_names.append(interface_type.getText())
             self.package.classes[current_class.name] = current_class
 
+            self.objects_declaration[self.current_class_identifier] = {}
+
         else:
             if self.nest_count == 0:
                 self.current_class_identifier_temp = self.current_class_identifier
@@ -413,6 +417,8 @@ class UtilsListener(JavaParserListener):
             # This is done on exit to collect params too, to support overloading.
             # self.package.classes[self.current_class_identifier].methods[method.name] = method
             self.current_method = method
+
+            self.objects_declaration[self.current_class_identifier][self.current_method_identifier] = {}
 
     def enterFormalParameters(self, ctx: JavaParser.FormalParametersContext):
         if self.current_method is not None:
@@ -475,28 +481,31 @@ class UtilsListener(JavaParserListener):
 
     def enterMethodCall(self, ctx: JavaParser.MethodCallContext):
         if self.current_method is not None:
-            if ctx.parentCtx.IDENTIFIER() != None:
-                if ctx.parentCtx.IDENTIFIER() not in self.current_method.body_method_invocations:
-                    self.current_method.body_method_invocations[ctx.parentCtx.IDENTIFIER()] = [
-                        ctx.IDENTIFIER().getText()]
+            if len(ctx.parentCtx.children) == 3:
+                object_or_class = ctx.parentCtx.children[0]
+                if object_or_class not in self.current_method.body_method_invocations:
+                    self.current_method.body_method_invocations[object_or_class] = [ctx.IDENTIFIER().getText()]
                 else:
-                    self.current_method.body_method_invocations[ctx.parentCtx.IDENTIFIER()].append(
-                        ctx.IDENTIFIER().getText())
-            else:
-                a = len(ctx.parentCtx.children)
-            if a == 1:
-                if ctx.IDENTIFIER() != None:
-                    if self.current_class_ctx not in self.current_method.body_method_invocations_without_typename:
-                        self.current_method.body_method_invocations_without_typename[self.current_class_ctx] = [ctx]
-                    else:
-                        self.current_method.body_method_invocations_without_typename[self.current_class_ctx].append(
-                            ctx)
+                    self.current_method.body_method_invocations[object_or_class].append(ctx.IDENTIFIER().getText())
+
+            elif len(ctx.parentCtx.children) == 1 and ctx.IDENTIFIER():
+                if self.current_class_ctx not in self.current_method.body_method_invocations_without_typename:
+                    self.current_method.body_method_invocations_without_typename[self.current_class_ctx] = [ctx]
+                else:
+                    self.current_method.body_method_invocations_without_typename[self.current_class_ctx].append(ctx)
             # MethodInvocation
             txt = ctx.getText()
             ids = txt[:txt.find('(')].split('.')
-            self.current_method.body_local_vars_and_expr_names.append(
-                MethodInvocation(ids, ctx)
-            )
+            self.current_method.body_local_vars_and_expr_names.append(MethodInvocation(ids, ctx))
+
+    def enterCreator(self, ctx:JavaParser.CreatorContext):
+        try:
+            object_name = ctx.parentCtx.parentCtx.parentCtx.children[0].IDENTIFIER().getText()
+            class_name = ctx.parentCtx.parentCtx.parentCtx.parentCtx.parentCtx.children[0].children[0].getText()
+            self.objects_declaration[self.current_class_identifier][self.current_method_identifier][object_name] = class_name
+        except:
+            pass
+
 
     def enterExpression(self, ctx: JavaParser.ExpressionContext):
         if self.current_method is not None:
