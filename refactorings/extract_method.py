@@ -37,7 +37,8 @@ def is_equivalent(a, b):
 
 class ExtractMethodRefactoring(JavaParserLabeledListener):
 
-    def __init__(self, lines: list,post_variables : list = []):
+
+    def __init__(self, lines: list):
 
         # checks Target method and lines to be valid
         if lines is None or len(lines) == 0:
@@ -48,179 +49,318 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
         self.lines.reshape((len(lines), 1))
         self.last_line = self.lines.max()
         self.first_line = self.lines.min()
-
-        # tree helper variables
-        self.target_method_found = False
-        self.is_in_target_method = False
-        # list of variables created and initialized before extracted lines
+        self.post_variables = {}
         self.pre_variables = {}
-        # list of variables used after extracted lines
-        self.post_variables = post_variables
-        self.pre_assign_variable = False
-        self.assign_variable_in_extract_lines = False
-        self.used_variables = set([])
-        self.created_variables = set([])
-        self.assigned_variable = None
+        self.mid_variables = {}
+        self.is_in_target_method = False
+        self.is_target_method_static = False
+        self.is_result_valid = False
+        self.exception_thrown_in_target_method = None
+        self.assigning_value_pre = False
+        self.assigning_value_mid = False
+        self.assigning_value_post = False
         self.method_stop_line = 0
-        self.exception = None
-        self.is_target_method_static=False
+        self.return_variable = None
+
 
     ######################################
     # Overriding required methods to satisfy our extraction requirements
     ######################################
 
+
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
+
+        #checks if this is the method containing target lines
         if ctx.start.line <= self.first_line and ctx.stop.line >= self.last_line:
+            print("Found method containing target lines.")
             self.is_in_target_method = True
-            self.target_method_found = True
+            self.is_result_valid = True
+
+            # checks if method is static
             for modifier in ctx.parentCtx.parentCtx.modifier():
                 if modifier.getText() == 'static':
                     self.is_target_method_static = True
+                    print("Target Method is static.")
                     break
+
+            #checks if method throws any exception
             if ctx.qualifiedNameList():
-                print('ex found :',ctx.qualifiedNameList().getText())
-                self.exception = ctx.qualifiedNameList().getText()
-            self.method_start_line = ctx.start.line
+                self.exception_thrown_in_target_method = ctx.qualifiedNameList().getText()
+                print("Target Method throws exception.")
+                # TODO : check extracted lines for exception occurrence instead ,
+                #  as they may not throw exception even though their parent method does
+
+            # save method's last line number
             self.method_stop_line = ctx.stop.line
+
 
     def exitMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
         self.is_in_target_method = False
 
+
     def enterConstructorDeclaration(self, ctx:JavaParserLabeled.ConstructorDeclarationContext):
+
+        # checks if this Constructor contains target lines
         if ctx.start.line <= self.first_line and ctx.stop.line >= self.last_line:
+            print("Found Constructor containing target lines.")
             self.is_in_target_method = True
-            self.target_method_found = True
+            self.is_result_valid = True
+
+            # checks if Constructor is static
             for modifier in ctx.parentCtx.parentCtx.modifier():
                 if modifier.getText() == 'static':
                     self.is_target_method_static = True
+                    print("Target Method is static.")
                     break
-            self.method_start_line = ctx.start.line
+
+            # checks if Constructor throws any exception
+            if ctx.qualifiedNameList():
+                self.exception_thrown_in_target_method = ctx.qualifiedNameList().getText()
+                print("Target Method throws exception.")
+                # TODO : check extracted lines for exception occurrence instead ,
+                #  as they may not throw exception even though their parent method does
+
+            # save method's last line number
             self.method_stop_line = ctx.stop.line
+
 
     def exitConstructorDeclaration(self, ctx:JavaParserLabeled.ConstructorDeclarationContext):
         self.is_in_target_method = False
 
+
     def enterLocalVariableDeclaration(self, ctx: JavaParserLabeled.LocalVariableDeclarationContext):
+
+        # checks if we are in target method
         if self.is_in_target_method:
+
+            # checks if this statement is not in extracting lines
             if not set(range(ctx.start.line, ctx.stop.line + 1)).issubset(set(self.lines)):
+
+                # checks if this statement is before extracting lines
                 if ctx.start.line < self.last_line:
+
+                    # adding all created variables
                     for var in ctx.variableDeclarators().variableDeclarator():
-                        self.pre_variables[
-                            var.variableDeclaratorId().getText()] = {
-                            'type': ctx.typeType().getText(),
-                            'init': str(var.getText()).__contains__('=')}
+                        self.pre_variables[var.variableDeclaratorId().getText()] = \
+                            {
+                                'type': ctx.typeType().getText(),
+                                'write': str(var.getText()).__contains__('=')
+                            }
+
+                # this statement is after extracting lines
+                else:
+                    pass
+
+            # this statement is inside extracting lines
             else:
-                self.created_variables.add(
-                    ctx.variableDeclarators().variableDeclarator()[0].variableDeclaratorId().getText())
+
+                # adding all created variables
+                for var in ctx.variableDeclarators().variableDeclarator():
+                    self.mid_variables[
+                        var.variableDeclaratorId().getText()] = \
+                        {
+                            'type': ctx.typeType().getText(),
+                            'write': str(var.getText()).__contains__('=')
+                        }
+
 
     def enterEnhancedForControl(self, ctx:JavaParserLabeled.EnhancedForControlContext):
+
+        # checks if we are in target method
         if self.is_in_target_method:
+
+            # checks if this statement is not in extracting lines
             if not set(range(ctx.start.line, ctx.stop.line + 1)).issubset(set(self.lines)):
+
+                # checks if this statement is before extracting lines
                 if ctx.start.line < self.last_line:
+
+                    # adding created variables
                     var = ctx.variableDeclaratorId()
-                    self.pre_variables[
-                        var.getText()] = {
+                    self.pre_variables[var.getText()] = \
+                        {
+                            'type': ctx.typeType().getText(),
+                            'write': True
+                        }
+
+                # this statement is after extracting lines
+                else:
+                    pass
+
+            # this statement is inside extracting lines
+            else:
+
+                # adding created variables
+                var = ctx.variableDeclaratorId()
+                self.mid_variables[var.getText()] = \
+                    {
                         'type': ctx.typeType().getText(),
-                        'init': True}
-            else:
-                self.created_variables.add(
-                    ctx.variableDeclarators().variableDeclarator()[0].variableDeclaratorId().getText())
+                        'write': True
+                    }
 
 
+
+    # adding target method parameters to pre_variables
     def enterFormalParameter(self, ctx: JavaParserLabeled.FormalParameterContext):
-        if self.is_in_target_method:
-            self.pre_variables[ctx.variableDeclaratorId().getText()] = {'type': ctx.typeType().getText(), 'init': True}
-            # self.variable_info['variables'][ctx.variableDeclaratorId().getText()] = ctx.typeType().getText()
 
-    def enterExpression21(self, ctx: JavaParserLabeled.Expression21Context):
+        # checks if we are in target method
         if self.is_in_target_method:
-            if not set(range(ctx.start.line, ctx.stop.line + 1)).issubset(
-                    set(self.lines)):
+
+            # adding all created variables
+            self.pre_variables[ctx.variableDeclaratorId().getText()] = \
+            {
+                'type': ctx.typeType().getText(),
+                'write': True
+            }
+
+
+    # detecting writing value to variables
+    def enterExpression21(self, ctx: JavaParserLabeled.Expression21Context):
+
+        # checks if we are in target method
+        if self.is_in_target_method:
+
+            # checks if this statement is not in extracting lines
+            if not set(range(ctx.start.line, ctx.stop.line + 1)).issubset(set(self.lines)):
+
+                # checks if this statement is before extracting lines
                 if ctx.start.line < self.last_line:
-                    self.pre_assign_variable = True
+                    self.assigning_value_pre = True
+
+                # this statement is after extracting lines
+                elif ctx.start.line > self.last_line:
+                    self.assigning_value_post = True
+
+                # any other case is useless
+                else:
+                    pass
+
+            # this statement is inside extracting lines
             else:
-                self.assign_variable_in_extract_lines = True
+                self.assigning_value_mid = True
+
 
     def enterEveryRule(self, ctx: ParserRuleContext):
+
+        # checks if we are in target method
         if self.is_in_target_method:
+
+            #checks if every statements are is either completely inside or outside of extracting lines
             if set(range(ctx.start.line, ctx.stop.line + 1)) & set(self.lines):
-                if not set(self.lines).issubset(set(range(ctx.start.line, ctx.stop.line + 1))) and not set(
-                        range(ctx.start.line, ctx.stop.line + 1)).issubset(self.lines):
-                    raise Exception('input lines contains some part of a command,not the entire command!')
+                if not set(self.lines).issubset(set(range(ctx.start.line, ctx.stop.line + 1))) and \
+                        not set(range(ctx.start.line, ctx.stop.line + 1)).issubset(self.lines):
+                    self.is_result_valid = False
+
 
     def enterPrimary4(self, ctx: JavaParserLabeled.Primary4Context):
-        # print('for variable:', str(ctx.IDENTIFIER()))
+
+        # checks if we are in target method
         if self.is_in_target_method:
-            if self.assign_variable_in_extract_lines:
-                # print(1)
+
+            # writing value to a variable in mid
+            if self.assigning_value_mid:
+
+                # adding variable
+                if self.mid_variables.keys().__contains__(str(ctx.IDENTIFIER())):
+                    self.mid_variables[ctx.IDENTIFIER()]['write'] = True
+                else:
+                    self.mid_variables[ctx.IDENTIFIER()] = {'write': True}
+                self.assigning_value_mid=False
+
+            # writing value to a variable in pre
+            elif self.assigning_value_pre:
+
+                # adding variable
                 if self.pre_variables.keys().__contains__(str(ctx.IDENTIFIER())):
-                    print(self.post_variables)
-                    if self.assigned_variable and (
-                    not is_equivalent(self.assigned_variable, str(ctx.IDENTIFIER()))) and len(self.post_variables) > 1:
-                        raise Exception(
-                            'Only one value assignment is allowed in extracted lines.(found \'' + self.assigned_variable + '\' before.)')
-                    else:
-                        if self.post_variables.__contains__(str(ctx.IDENTIFIER())):
-                            self.assigned_variable = str(ctx.IDENTIFIER())
-                        if not self.created_variables.__contains__(
-                                str(ctx.IDENTIFIER())) and self.pre_variables.keys().__contains__(
-                            str(ctx.IDENTIFIER())):
-                            self.used_variables.add(str(ctx.IDENTIFIER()))
-                self.assign_variable_in_extract_lines = False
-            elif self.pre_assign_variable:
-                # print(2)
-                self.pre_assign_variable = False
-                self.pre_variables[str(ctx.IDENTIFIER())]['init'] = True
+                    self.pre_variables[str(ctx.IDENTIFIER())]['write'] = True
+                else:
+                    self.pre_variables[str(ctx.IDENTIFIER())] = {'write': True}
+                self.assigning_value_pre = False
+
+            # writing value to a variable in post
+            elif self.assigning_value_post:
+
+                # adding variable
+                if self.post_variables.keys().__contains__(str(ctx.IDENTIFIER())):
+                    self.post_variables[str(ctx.IDENTIFIER())]['write'] = True
+                else:
+                    self.post_variables[str(ctx.IDENTIFIER())] = {'write' : True}
+                self.assigning_value_post = False
+
+            # reading a variable value not in extracting lines
             elif not set(range(ctx.start.line, ctx.stop.line + 1)).issubset(set(self.lines)):
-                # print(3)
+
+                # checks if this statement is after extracting lines
                 if ctx.start.line > self.last_line:
-                    self.post_variables.append(str(ctx.IDENTIFIER()))
+
+                    # adding variable to post_variables
+                    if self.post_variables.keys().__contains__(str(ctx.IDENTIFIER())):
+                        self.post_variables[str(ctx.IDENTIFIER())]['read'] = True
+                    else:
+                        self.post_variables[str(ctx.IDENTIFIER())] = {'read' : True}
+
+                # this statement is before extracting lines
+                else:
+                    pass
+
+            # this statement is inside extracting lines
             else:
-                # print(4)
-                # print(not self.created_variables.__contains__(
-                #         str(ctx.IDENTIFIER())))
-                # print(self.pre_variables.keys())
-                # print(self.pre_variables.keys().__contains__(str(ctx.IDENTIFIER())))
-                if not self.created_variables.__contains__(
-                        str(ctx.IDENTIFIER())) and self.pre_variables.keys().__contains__(str(ctx.IDENTIFIER())):
-                    self.used_variables.add(str(ctx.IDENTIFIER()))
-                # if self.variable_info['variables'].keys().__contains__(str(ctx.IDENTIFIER())):
-                #     self.used_variables.add(str(ctx.IDENTIFIER()))
-
-    # def exitEveryRule(self, ctx: ParserRuleContext):
-    #     if self.is_inside_rule is not None and self.is_inside_rule == ctx:
-    #         self.is_inside_rule = None
+                if self.mid_variables.keys().__contains__(str(ctx.IDENTIFIER())):
+                    self.mid_variables[str(ctx.IDENTIFIER())]['read'] = True
+                else:
+                    self.mid_variables[str(ctx.IDENTIFIER())] = {'read' : True}
 
 
-# helper functions
-def get_args(variables, all_variables):
-    result = '('
-    first = True
-    for item in variables:
-        if not all_variables[item]['init']:
-            continue
-        if not first:
-            result += ', '
-        else:
-            first = False
-        result += item
-    result += ');\n'
-    return result
+    # helper functions
+    # get method arguments for function call
+    def get_args(self, include_type : bool):
+        result = '('
+        first = True
+        for key in self.mid_variables.keys():
+            if self.mid_variables[key].keys().__contains__('type'):
+                continue
+            if self.pre_variables.keys().__contains__(key) and\
+                    self.pre_variables[key].keys().__contains__('write') and \
+                    self.pre_variables[key]['write']:
+                if not first:
+                    result += ', '
+                else:
+                    first = False
+                if include_type:
+                    result += self.pre_variables[key]['type'] + ' ' + key
+                else:
+                    result += key
+        result += ');'
+        return result
 
 
-def get_args_with_type(variables, all_variables):
-    result = '('
-    first = True
-    for item in variables:
-        if not all_variables[item]['init']:
-            continue
-        if not first:
-            result += ', '
-        else:
-            first = False
-        result += all_variables[item]['type'] + ' ' + item
-    result += ')'
-    return result
+    def get_write_variable(self):
+        result = None
+        for key in self.post_variables.keys():
+            if self.mid_variables.__contains__(key) and self.mid_variables[key].__contains__('type') and self.mid_variables[key]['type']:
+                if result is None:
+                    self.return_variable = key
+                    result = self.mid_variables[key]['type'] + ' ' + key + ' = '
+                else:
+                    self.return_variable = None
+                    raise Exception('only one assignment in extracting lines is acceptable!')
+
+            if self.pre_variables.__contains__(key) and self.pre_variables[key].__contains__('type') and self.pre_variables[key]['type']:
+                if result is None:
+                    result = key + ' = '
+                    self.return_variable = key
+                else:
+                    self.return_variable = None
+                    raise Exception('only one assignment in extracting lines is acceptable!')
+        return '' if result is None else result
+
+
+def get_tabs(line : str):
+    line_trim = line.lstrip()
+    return line.split(line_trim)[0]
+
+
+
 
 
 # extract method function
@@ -230,23 +370,15 @@ def extract_method(conf):
     tokens = CommonTokenStream(lexer)
     parser = JavaParserLabeled(tokens)
     tree = parser.compilationUnit()
-    listener0 = ExtractMethodRefactoring(conf['lines'])
-    walker0 = ParseTreeWalker()
-    walker0.walk(
-        listener=listener0,
-        t=tree
-    )
-    listener = ExtractMethodRefactoring(conf['lines'],listener0.post_variables)
-    walker1 = ParseTreeWalker()
-    walker1.walk(
+    listener = ExtractMethodRefactoring(conf['lines'])
+    walker = ParseTreeWalker()
+    walker.walk(
         listener=listener,
         t=tree
     )
-    # print(parser.getTokenStream())
-    # print(listener.variable_info)
-    # print(listener.used_variables)
-    # print(listener.created_variables)
-    # print(listener.pre_variables)
+
+    if not listener.is_result_valid:
+        raise Exception('Some problem happened!')
 
     output = []
     file1 = open(conf['target_file'], 'r', encoding="utf-8")
@@ -259,26 +391,24 @@ def extract_method(conf):
         if listener.lines.__contains__(line_num):
             print(line, end='')
             if line_num == listener.last_line:
-                if listener.assigned_variable:
-                    output.append('\t\t' + listener.assigned_variable + ' = ' + conf['new_method_name'] + get_args(
-                        listener.used_variables, listener.pre_variables))
-                else:
-                    output.append(
-                        '\t\t' + conf['new_method_name'] + get_args(listener.used_variables, listener.pre_variables))
+                output.append(get_tabs(line) + listener.get_write_variable()
+                              + conf['new_method_name'] + listener.get_args(False) + '\n')
             func.append(line)
         elif line_num == listener.method_stop_line:
             output.append(line)
-            output.append('\tprivate '+ ('static ' if listener.is_target_method_static else '')+'void ' + conf['new_method_name'] + get_args_with_type(listener.used_variables,
-                                                                                           listener.pre_variables) + ((' throws '+listener.exception) if listener.exception is not None else '') + '\n')
-            output.append('\t{\n')
+            output.append(get_tabs(line)+'private '+ ('static ' if listener.is_target_method_static else '')+
+                          'void ' + conf['new_method_name'] + listener.get_args(True) +
+                          ((' throws '+listener.exception_thrown_in_target_method)
+                           if listener.exception_thrown_in_target_method is not None else '') + '\n')
+            output.append(get_tabs(line)+'{\n')
             for item in listener.pre_variables.keys():
                 var = listener.pre_variables[item]
-                if not var['init']:
-                    output.append('\t\t'+var['type']+' '+item+';\n')
+                if not var['write']:
+                    output.append(get_tabs(line)+'\t'+var['type']+' '+item+';\n')
             output = output + func
-            if listener.assigned_variable:
-                output.append('\t\treturn ' + listener.assigned_variable + ';\n')
-            output.append('\t}\n')
+            if listener.return_variable is not None:
+                output.append(get_tabs(line)+'\treturn ' + listener.return_variable + ';\n')
+            output.append(get_tabs(line)+'}\n')
         else:
             output.append(line)
         line_num += 1
@@ -300,7 +430,7 @@ def main():
     _conf = {
         'target_file': "/mnt/d/Sajad/Uni/Spring00/Compiler/CodART/tests/extract_method/in/ExtractMethodTest.java",
         'output_file': "/mnt/d/Sajad/Uni/Spring00/Compiler/CodART/tests/extract_method/out/ExtractMethodTest.java",
-        'lines': [7, 8],
+        'lines': [10, 11],
         'new_method_name': 'printDetails',
     }
     extract_method(_conf)

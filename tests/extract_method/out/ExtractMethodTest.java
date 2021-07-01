@@ -1,14 +1,19 @@
 public class ExtractMethodTest {
 
     public static void printOwing2() {
-        printBanner();
-        String fname = "hello",lname = "world";
+        int a;
+        a = 5;
+        
+        int[] c = {5,6,45,65};
+        String fName = "hello",lName = "world";
 
-		printDetails(fname, lname);
+        int b = printDetails(a, c, fName, lName);
+        System.out.println(b);
     }
-	private void printDetails(String fname, String lname)
-	{
-        System.out.println("fname: " + fname+", lname"+lname);
-        System.out.println("name printed ");
-	}
+    private static void printDetails(int a, int[] c, String fName, String lName);
+    {
+        System.out.println(a+c+fName+lName);
+        int b = 12;
+    	return b;
+    }
 }
