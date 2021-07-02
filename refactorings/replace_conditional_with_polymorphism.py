@@ -80,6 +80,7 @@ if __name__ == '__main__':
         token = lexer.nextToken()
         not_switch = True
         opening = ""
+        whole = ""
         while token.type != Token.EOF:
             if not_switch:
                 if token.type != lexer.SWITCH:
@@ -91,9 +92,9 @@ if __name__ == '__main__':
                     token = lexer.nextToken()
                 switch_type = token.text.rstrip("\n")
             token = lexer.nextToken()
-        # print(f"swich_type : {switch_type} , cases : {switches} , variables : {variables} , mehthod: {methods} , return : {returntype[0]}")
-        # print(opening)
-        answer = open('../tests/replace_conditional_with_polymorphism/test_results.java', 'w')
+       # print(f"swich_type : {switch_type} , cases : {switches} , variables : {variables} , mehthod: {methods} , return : {returntype[0]}")
+        #print(opening)
+        # answer = open('../tests/replace_conditional_with_polymorphism/test_results.java', 'w')
         first = str(clas[0])
         second = "switch(mnth){"
         for i in switches:
@@ -130,26 +131,40 @@ if __name__ == '__main__':
                 # print(last)
         opening += classname + "_" + val + " chosen = " "new " + classname + "_" + val + "()" + '\n' + '\t' + '\t'
         opening += "chosen." + func + "(this);" + '\n' + '\t' + '\t' + last
-        answer.write(opening)
-        answer.write("abstract class " + "parent" + classname + '\n' + '{' + '\n')
-        answer.write('\t' + "public " + "parent" + classname + "()" + '{' + '\n' + '\t' + '}' + '\n')
+        # print(opening)
+        # answer.write(opening)
+        #opening.rstrip("\n")
+        ii = len(opening)
+        cnt = 0
+        while cnt < 2:
+            ii -= 1
+            if opening[ii] == '}':
+                cnt += 1
+                ii -= 1
 
+        #print(opening[0:ii]+'}'+'\n'+'}'+'\n')
+        whole += opening[0:ii]+'}'+'\n'+'}'+'\n'
+        # answer.write("abstract class " + "parent" + classname + '\n' + '{' + '\n')
+        whole += "abstract class " + "parent" + classname + '\n' + '{' + '\n'
+        # answer.write('\t' + "public " + "parent" + classname + "()" + '{' + '\n' + '\t' + '}' + '\n')
+        whole +='\t' + "public " + "parent" + classname + "()" + '{' + '\n' + '\t' + '}' + '\n'
         method_type = "void"
         if 'return' in switches[0]:
             method_type = returntype[0]
-        answer.write(
-            '\t' + "abstract public " + method_type + " " + func + "(" + classname + ' input_class ' + ") ;" + '\n' + "}")
-
+        # answer.write('\t' + "abstract public " + method_type + " " + func + "(" + classname + ' input_class ' + ") ;" + '\n' + "}")
+        whole += '\t' + "abstract public " + method_type + " " + func + "(" + classname + ' input_class ' + ") ;" + '\n' + "}"
         for case in switches:
-            answer.write('\n')
+            # answer.write('\n')
+            whole += '\n'
             ar = case.split(':')
             if "case" in ar[0]:
                 ar[0] = ar[0].removeprefix("case")
-            answer.write("class " + classname + "_" + ar[0] + " extends parent" + classname + '\n' + '{' + '\n')
-            answer.write('\t' + "public " + classname + "_" + ar[0] + "()" + '{' + '\n' + '\t' + '}' + '\n')
-
-            answer.write(
-                '\t' + "public " + returntype[0] + " " + func + "(" + classname + ' input_class ' + ") {" + '\n')
+            # answer.write("class " + classname + "_" + ar[0] + " extends parent" + classname + '\n' + '{' + '\n')
+            whole += "class " + classname + "_" + ar[0] + " extends parent" + classname + '\n' + '{' + '\n'
+            # answer.write('\t' + "public " + classname + "_" + ar[0] + "()" + '{' + '\n' + '\t' + '}' + '\n')
+            whole += '\t' + "public " + classname + "_" + ar[0] + "()" + '{' + '\n' + '\t' + '}' + '\n'
+            # answer.write('\t' + "public " + returntype[0] + " " + func + "(" + classname + ' input_class ' + ") {" + '\n')
+            whole += '\t' + "public " + returntype[0] + " " + func + "(" + classname + ' input_class ' + ") {" + '\n'
             index = case.find(':')
             rp = " {" + '\n' + '\t' + '\t' + '\t'
             case = case.replace('{', rp)
@@ -163,11 +178,25 @@ if __name__ == '__main__':
             case = case.replace('(', rp)
             rp = " % "
             case = case.replace('%', rp)
+            if "return" in case:
+                rr = case.find("return")
+                blue = case[0:rr]+" return "+ case[rr+6:]
+                #print(blue)
+
+            case = blue
 
             for i in variables:
-                if i in case:
+                if i in case and len(i) != 1:
                     case = case.replace(i, "input_class." + i)
 
             if "this." in case:
                 case = case.replace("this.", " ")
-            answer.write('\t' + '\t' + case[index + 1:-1] + '\n' + '\t' + '}' + '\n' + '}')
+            # answer.write('\t' + '\t' + case[index + 1:-1] + '\n' + '\t' + '}' + '\n' + '}')
+            whole += '\t' + '\t' + case[index + 1:-1] + '\n' + '\t' + '}' + '\n' + '}'
+            #print(whole)
+            answer = open('../tests/replace_conditional_with_polymorphism/test_results.java', 'w')
+            answer.write(whole)
+            answer.close()
+
+#fixed some issues like failure in recognizing some syntax in cases and replacing them.
+#a few issues are stil remaining for ohase 3 due to complexity of homework,multiple exams and shortage of time
