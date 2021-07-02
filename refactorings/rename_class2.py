@@ -141,11 +141,11 @@ class RenameClassRefactoringListener(JavaParserLabeledListener):
 
 
 def main():
-    Path = "../tests/rename_tests/"
-    rename_class_test_file = FileStream(str(Path + "rename_class_test.java"))
+    Path = "../tests/rename_tests/benchmark/"
+    rename_class_test_file = FileStream(str(Path + "Cookie.java"))
     print("file opened")
 
-    Refactored = open(os.path.join(Path, "rename_class_test_Refactored.java"), 'w', newline='')
+    Refactored = open(os.path.join(Path, "Cookie_refactored.java"), 'w', newline='')
 
     Lexer = JavaLexer(rename_class_test_file)
 
@@ -155,7 +155,7 @@ def main():
 
     Tree = Parser.compilationUnit()
 
-    ListenerForReRenameClass = RenameClassRefactoringListener(TokenStream, "newClass", "SuggestedRoomsByFollowingsListViewAdapter")
+    ListenerForReRenameClass = RenameClassRefactoringListener(TokenStream, "Cookie", "CDL")
 
     Walker = ParseTreeWalker()
 
