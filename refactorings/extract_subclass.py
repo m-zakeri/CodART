@@ -497,5 +497,117 @@ def main():
     # find_usages_listener = FindUsagesListener()
 
 
+class IdentifierUsage:
+    def __init__(self):
+        self.file_name=""
+        self.identifier=""
+        self.methods_used=[]
+        self.fields_used=[]
+        self.identifier_type=""
+        self.scope=[]
+
+    def is_in_methods_used(self,method_name: str):
+        return method_name in self.methods_used
+
+    def is_in_fields_used(self,field_name: str):
+        return field_name in self.fields_used
+
+    def add_method(self,method_name: str):
+        if not self.is_in_methods_used(method_name):
+            self.methods_used.append(method_name)
+
+    def add_field(self,field_name: str):
+        if not self.is_in_fields_used(field_name):
+            self.fields_used.append(field_name)
+
+    def set_file_name(self,name: str):
+        self.file_name = name
+
+    def set_identifier(self,name: str):
+        self.identifier = name
+
+    def add_to_scope(self,type_name:str, name: str):
+        self.scope.append(type_name+":"+name)
+
+    def remove_from_scope(self,type_name:str, name: str):
+        item_name = type_name+":"+name
+        if item_name != self.scope[-1]:
+            raise Exception("invalid operation on scope")
+        else:
+            self.scope.pop()
+
+    def get_methods_name(self):
+        return self.methods_used
+
+    def get_fields_name(self):
+        return self.fields_used
+
+    def get_identifier_name(self):
+        return self.identifier
+
+    def get_scope(self):
+        return self.scope
+
+    def get_file_name(self):
+        return self.file_name
+
+    def get_identifier_type(self):
+        return self.identifier_type
+
+
+class AllUsageList:
+    def __init__(self):
+        self.all_usage = dict() #all_usage is a dictionary of IdentifierUsage       tuple(scope,identifier_name) ==> IdentifierUsage()
+
+    def is_already_used(self,identifier_usage: tuple):
+        return identifier_usage in self.all_usage
+
+    def add_identifier(self,identifier: tuple): #identifier is tuple of (identifier_name,scope)
+        self.all_usage[identifier]=IdentifierUsage()
+
+    def add_method_to_identifier(self,identifier:tuple,method_name:str):
+        if identifier in self.all_usage:
+            self.all_usage[identifier].add_method(method_name)
+        else:
+            self.all_usage[identifier]=IdentifierUsage()
+            self.all_usage[identifier].add_method(method_name)
+
+    def add_field_to_identifier(self,identifier: tuple, field_name:str):
+        if identifier in self.all_usage:
+            self.all_usage[identifier].add_field(field_name)
+        else:
+            self.all_usage[identifier]=IdentifierUsage()
+            self.all_usage[identifier].add_field(field_name)
+
+    def is_method_of_identifier(self,identifier: tuple, method_name: str):
+        return identifier in self.all_usage[identifier] and self.all_usage[identifier].is_in_methods_used(method_name)
+
+    def is_field_of_identifier(self,identifier: tuple, field_name: str):
+        return identifier in self.all_usage[identifier] and self.all_usage[identifier].is_in_fields_used(field_name)
+
+    def get_identifier_methods(self,identifier: tuple):
+        if not identifier in self.all_usage:
+            raise Exception("invalid access")
+        else:
+            return self.all_usage[identifier].get_methods_name()
+
+    def get_identifier_fields(self,identifier: tuple):
+        if not identifier in self.all_usage:
+            raise Exception("invalid access")
+        else:
+            return self.all_usage[identifier].get_fields_name()
+
+    # aul = AllUsageList()
+    # aul.add_field_to_identifier((tuple(["class:A"]), "a"), "field")
+    # aul.add_method_to_identifier((tuple(["class:A"]), "a"), "func")
+    # # print("hello")
+    # a = dict()
+    # a["1"] = 1
+    # a["2"] = 2
+    # print(aul.get_identifier_fields((tuple(["class:A"]), "a")), aul.get_identifier_methods((tuple(["class:A"]), "a")))
+
+
+
+
 if __name__ == '__main__':
     main()
