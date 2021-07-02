@@ -1,88 +1,227 @@
-"""
-The module implements encapsulate field refactoring in
-response to `Deficient Encapsulation` design smell.
-
-## References
-[1] G. Suryanarayana, G. Samarthyam, and T. Sharma, Refactoring for software design smells: managing technical debt,
-1st ed. San Francisco, CA, USA: Morgan Kaufmann Publishers Inc., 2014.
-
-
-"""
-
-__version__ = '0.1.0'
-__author__ = 'Morteza'
+import os
+import time
+import argparse
 
 from antlr4 import *
-from antlr4.TokenStreamRewriter import TokenStreamRewriter
+from gen.javaLabeled.JavaLexer import JavaLexer
+from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
+from antlr4.TokenStreamRewriter import TokenStreamRewriter as TSR
 
-from gen.java9.Java9_v2Parser import Java9_v2Parser
-from gen.java9.Java9_v2Listener import Java9_v2Listener
+from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 
-class EncapsulateFiledRefactoringListener(Java9_v2Listener):
-    """
-    To implement the encapsulate filed refactored
-    Encapsulate field: Make a public field private and provide accessors
-    """
-
-    def __init__(self, common_token_stream: CommonTokenStream = None,
-                 field_identifier: str = None):
+class RemoveFieldRefactoringListener(JavaParserLabeledListener):
+    def __init__(self, common_token_stream: CommonTokenStream = None, class_identifier: str = None,
+                 fieldname: str = None, filename: str = None):
         """
         :param common_token_stream:
         """
+        self.enter_class = False
+        self.enter_field = False
+        self.is_found_field = False
+        self.is_found = False
         self.token_stream = common_token_stream
-        self.field_identifier = field_identifier
+        self.class_identifier = class_identifier
+        self.class_number = 0
+        self.type_field=None
         # Move all the tokens in the source code in a buffer, token_stream_rewriter.
         if common_token_stream is not None:
-            self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
+            self.token_stream_rewriter = TSR(common_token_stream)
         else:
             raise TypeError('common_token_stream is None')
 
-    def exitFieldDeclaration(self, ctx: Java9_v2Parser.FieldDeclarationContext):
-        if ctx.variableDeclaratorList().getText() == self.field_identifier:
-            if ctx.fieldModifier(0).getText() == 'public':
-                self.token_stream_rewriter.replaceRange(
-                    from_idx=ctx.fieldModifier(0).start.tokenIndex,
-                    to_idx=ctx.fieldModifier(0).stop.tokenIndex,
-                    text='private')
+        self.class_fields = []
+        self.class_methods = []
 
-            # generate accessor and mutator methods
-            # Accessor body
+        if class_identifier is not None:
+            self.class_identifier = class_identifier
+        else:
+            raise ValueError("class_identifier is None")
+
+        if filename is not None:
+            self.filename = filename
+        else:
+            raise ValueError("filename is None")
+
+        if fieldname is not None:
+            self.fieldname = fieldname
+        else:
+            raise ValueError("fieldname is None")
+
+    def enterClassDeclaration(self, ctx:JavaParserLabeled.ClassDeclarationContext):
+
+        self.class_number += 1
+        if ctx.IDENTIFIER().getText() != self.class_identifier:
+            return
+        self.enter_class = True
+
+    # Enter a parse tree produced by Java9_v2Parser#normalClassDeclaration.
+    # def enterNormalClassDeclaration(self, ctx: Java9_v2Parser.NormalClassDeclarationContext):
+    #
+    #     self.class_number += 1
+    #     if ctx.identifier().getText() != self.class_identifier:
+    #         return
+    #     self.enter_class = True
+
+    def exitClassDeclaration(self, ctx:JavaParserLabeled.ClassDeclarationContext):
+        self.enter_class = False
+        if ctx.IDENTIFIER().getText() != self.class_identifier:
+            return
+
+        old_file = open(self.filename, 'w')
+        old_file.write(self.token_stream_rewriter.getDefaultText().replace("\r", ""))
+
+    # Exit a parse tree produced by Java9_v2Parser#normalClassDeclaration.
+    # def exitNormalClassDeclaration(self, ctx: Java9_v2Parser.NormalClassDeclarationContext):
+    #     self.enter_class = False
+    #     if ctx.identifier().getText() != self.class_identifier:
+    #         return
+    #
+    #     old_file = open(self.filename, 'w')
+    #     old_file.write(self.token_stream_rewriter.getDefaultText().replace("\r", ""))
+    #
+    #     # print("----------------------------")
+    #     # print("Class attributes: ", str(self.class_fields))
+    #     # print("Class methods: ", str(self.class_methods))
+    #     # print("----------------------------")
+
+    # Enter a parse tree produced by Java9_v2Parser#fieldDeclaration.
+
+    def enterFieldDeclaration(self, ctx:JavaParserLabeled.FieldDeclarationContext):
+        if not self.enter_class:
+            return
+        self.enter_field = True
+        self.is_found_field = False
+
+    def exitFieldDeclaration(self, ctx:JavaParserLabeled.FieldDeclarationContext):
+        if (self.is_found_field):
+            self.type_field=ctx.typeType().getText()
+
+    def enterAnnotation(self, ctx:JavaParserLabeled.AnnotationContext):
+        start = ctx.start.tokenIndex
+        stop = ctx.stop.tokenIndex
+        new_code = '\n\t'
+        new_code += 'public '+self.type_field + ' get' +str.capitalize(self.fieldname)
+        new_code += '() { \n\t\t return this.' + self.fieldname + ';' + '\n\t}'
+
+        # Mutator body
+        new_code += '\n\t'
+        new_code += 'public void set' + str.capitalize(self.fieldname)
+        new_code += '(' + self.type_field  + ' ' + self.fieldname + ') { \n\t\t'
+        new_code += 'this.' + self.fieldname + ' = ' + self.fieldname + ';' + '\n\t}\n'
+        self.token_stream_rewriter.insertAfter(ctx.stop.tokenIndex, new_code)
+        print(ctx.getText())
+
+
+
+    def exitClassBodyDeclaration2(self, ctx:JavaParserLabeled.ClassBodyDeclaration2Context):
+        if not self.enter_class:
+            return
+        start = ctx.start.tokenIndex
+        stop = ctx.stop.tokenIndex
+        # print("Enter 'exitFieldDeclaration' Methode")
+
+        if (self.is_found_field):
+            self.token_stream_rewriter.delete(program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                                              from_idx=start,
+                                              to_idx=stop)
+            new_code = 'private '+self.type_field+" "+self.fieldname+";"
+            self.token_stream_rewriter.insertAfter(ctx.stop.tokenIndex, new_code)
+
+
+    def exitVariableDeclarators(self, ctx:JavaParserLabeled.VariableDeclaratorsContext):
+        if not (self.enter_class and self.enter_field):
+            return
+        # print("Enter 'exitVariableDeclaratorList' Methode")
+        fields = ctx.getText().split(',')
+        start = ctx.start.tokenIndex
+        stop = ctx.stop.tokenIndex
+        for index, field in enumerate(fields):
+            if (self.fieldname == str(field).split('=')[0]):
+                self.is_found = True
+                self.is_found_field = True
+                print(f'Find "{self.fieldname}", At: {start} - {stop}')
+                if (len(fields) == 1):
+                    return
+                del fields[index]
+                print('New: ' ,', '.join(str(field) for field in fields))
+                self.token_stream_rewriter.replace(program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                                                   from_idx=start,
+                                                   to_idx=stop,
+                                                   text=', '.join(str(field) for field in fields))
+                self.is_found_field = False
+                print(f'Field: "{self.fieldname}" SUCCESSFULLY REMOVED...')
+                break
+
+
+    def exitCompilationUnit(self, ctx:JavaParserLabeled.CompilationUnitContext):
+        if not self.is_found:
+            print(f'Field "{self.fieldname}" NOT FOUND...')
+        else:
+            start = ctx.start.tokenIndex
+            stop = ctx.stop.tokenIndex
             new_code = '\n\t'
-            new_code += 'public ' + ctx.unannType().getText() + ' get' + str.capitalize(self.field_identifier)
-            new_code += '() { \n\t\t return this.' + self.field_identifier + ';' + '\n\t}'
+            new_code += 'public ' + self.type_field + ' get' + str.capitalize(self.fieldname)
+            new_code += '() { \n\t\t return this.' + self.fieldname + ';' + '\n\t}'
 
             # Mutator body
             new_code += '\n\t'
-            new_code += 'public void set' + str.capitalize(self.field_identifier)
-            new_code += '(' + ctx.unannType().getText() + ' ' + self.field_identifier + ') { \n\t\t'
-            new_code += 'this.' + self.field_identifier + ' = ' + self.field_identifier + ';' + '\n\t}\n'
+            new_code += 'public void set' + str.capitalize(self.fieldname)
+            new_code += '(' + self.type_field + ' ' + self.fieldname + ') { \n\t\t'
+            new_code += 'this.' + self.fieldname + ' = ' + self.fieldname + ';' + '\n\t}\n'
+            print('public void set' + str.capitalize(self.fieldname))
+            print(ctx.getText())
+            if not ctx.getText().__contains__('publicvoidset'+str.capitalize(self.fieldname)):
+                self.token_stream_rewriter.insertAfter(ctx.stop.tokenIndex-1, new_code)
 
-            self.token_stream_rewriter.insertAfter(ctx.stop.tokenIndex, new_code)
+directory = "C:\\Users\\asus\\Desktop\\TestProject"
 
-            hidden = self.token_stream.getHiddenTokensToRight(ctx.stop.tokenIndex)
-            self.token_stream_rewriter.replaceRange(from_idx=hidden[0].tokenIndex,
-                                                    to_idx=hidden[-1].tokenIndex,
-                                                    text='\t/*End of accessor and mutator methods!*/\n\n')
 
-    def exitAssignment(self, ctx: Java9_v2Parser.AssignmentContext):
-        if ctx.leftHandSide().getText() == self.field_identifier or \
-                ctx.leftHandSide().getText() == 'this.' + self.field_identifier:
-            expr_code = self.token_stream_rewriter.getText(program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-                                                           start=ctx.expression().start.tokenIndex,
-                                                           stop=ctx.expression().stop.tokenIndex)
-            # new_code = 'this.set' + str.capitalize(self.field_identifier) + '(' + ctx.expression().getText() + ')'
-            new_code = 'this.set' + str.capitalize(self.field_identifier) + '(' + expr_code + ')'
-            self.token_stream_rewriter.replaceRange(ctx.start.tokenIndex, ctx.stop.tokenIndex, new_code)
+def main(args):
+    # Step 1: Load input source into stream
+    stream = FileStream(args.file, encoding='utf8')
+    # input_stream = StdinStream()
 
-    def exitPrimary(self, ctx: Java9_v2Parser.PrimaryContext):
-        if ctx.getChildCount() == 2:
-            if ctx.getText() == 'this.' + self.field_identifier or ctx.getText() == self.field_identifier:
-                new_code = 'this.get' + str.capitalize(self.field_identifier) + '()'
-                self.token_stream_rewriter.replaceRange(ctx.start.tokenIndex, ctx.stop.tokenIndex, new_code)
+    # Step 2: Create an instance of AssignmentStLexer
+    lexer = JavaLexer(stream)
+    # Step 3: Convert the input source into a list of tokens
+    token_stream = CommonTokenStream(lexer)
+    # Step 4: Create an instance of the AssignmentStParser
+    parser = JavaParserLabeled(token_stream)
+    parser.getTokenStream()
 
-    def enterCompilationUnit1(self, ctx: Java9_v2Parser.CompilationUnit1Context):
-        hidden = self.token_stream.getHiddenTokensToLeft(ctx.start.tokenIndex)
-        self.token_stream_rewriter.replaceRange(from_idx=hidden[0].tokenIndex,
-                                                to_idx=hidden[-1].tokenIndex,
-                                                text='/*After refactoring (Refactored version)*/\n')
+    print("=====Enter Create ParseTree=====")
+    # Step 5: Create parse tree
+    parse_tree = parser.compilationUnit()
+    print("=====Create ParseTree Finished=====")
+
+    # Step 6: Create an instance of AssignmentStListener
+    my_listener = RemoveFieldRefactoringListener(common_token_stream=token_stream, class_identifier='GodClass',
+                                                 fieldname='field2', filename=args.file)
+
+    # return
+    walker = ParseTreeWalker()
+    walker.walk(t=parse_tree, listener=my_listener)
+
+    with open(args.file, mode='w', newline='') as f:
+        f.write(my_listener.token_stream_rewriter.getDefaultText())
+
+
+def process_file(file):
+    argparser = argparse.ArgumentParser()
+    # argparser.add_argument(
+    #     '-n', '--file',
+    #     help='Input source', default=r'refactorings/test/test1.java')
+    argparser.add_argument(
+        '-n', '--file',
+        help='Input source', default=file)
+    args = argparser.parse_args()
+    main(args)
+
+
+if __name__ == '__main__':
+    for dirname, dirs, files in os.walk(directory):
+        for file in files:
+            name, extension = os.path.splitext(file)
+            if extension == '.java':
+                process_file("{}/{}".format(dirname, file))

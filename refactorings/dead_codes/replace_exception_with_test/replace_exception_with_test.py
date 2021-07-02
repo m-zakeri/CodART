@@ -1,10 +1,16 @@
+import os
+import time
+import argparse
+
+from antlr4 import *
+from gen.javaLabeled.JavaLexer import JavaLexer
+from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from antlr4.TokenStreamRewriter import TokenStreamRewriter as TSR
 
-from gen.javaLabeled.JavaParserLabeled import *
-from gen.javaLabeled.JavaParserLabeledListener import *
+from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 
-class ReplaceExceptionWithTestClassRefactoringListener(JavaParserLabeledListener):
+class ReplaceExceptionWithPrecheckListener(JavaParserLabeledListener):
     def __init__(self, common_token_stream: CommonTokenStream = None,
                  class_identifier: str = None, filename: str = None):
         self.IOOBE = False  # IndexOutOfBoundException
@@ -12,6 +18,13 @@ class ReplaceExceptionWithTestClassRefactoringListener(JavaParserLabeledListener
         self.token_stream = common_token_stream
         self.class_identifier = class_identifier
         self.dictionary = {}
+        self.returnedValue=''
+        self.currentLine=1
+        self.lastLine=0
+        self.returnedValue0=''
+        self.name=''
+        self.index=''
+        self.VFE=False #throwwrongValueFormatException
         with open(filename, 'r') as file:
             self.lines = file.readlines()
             file.close()
@@ -31,18 +44,13 @@ class ReplaceExceptionWithTestClassRefactoringListener(JavaParserLabeledListener
         else:
             raise ValueError("filename is None")
 
-    def enterStatement6(self, ctx: JavaParserLabeled.Statement6Context):
-        print("'enterStatement6'")
 
-    # def enterTryStatement1(self, ctx:Java9_v2Parser.TryStatement1Context):
-    #     print("'enterTryStatement1'")
-    #     pass
 
     def exitStatement6(self, ctx: JavaParserLabeled.Statement6Context):
         # TODO ctx.finally...
         if (self.IOOBE and len(ctx.catchClause()) == 1 and ctx.finallyBlock() is None):
             ctx.TRY().getText()
-            tryline = ctx.TRY().symbol.line - 1
+            tryline = ctx.TRY().symbol.line-1
             self.lines[tryline] = self.lines[tryline].replace('try', '')
 
             lbraceline = ctx.block().children[0].symbol.line - 1
@@ -51,267 +59,134 @@ class ReplaceExceptionWithTestClassRefactoringListener(JavaParserLabeledListener
             rbraceline = ctx.block().children[-1].symbol.line - 1
             head, _sep, tail = self.lines[rbraceline].rpartition('}')
             self.lines[rbraceline] = self.lines[rbraceline] = head + '' + tail
+            new_code = ''
+            new_code += (f' return ({self.index} >= {self.name}.length) ? {self.returnedValue} : {self.returnedValue0}')
+            self.token_stream_rewriter.replace(program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                                               from_idx=ctx.start.tokenIndex,
+                                               to_idx=ctx.stop.tokenIndex,
+                                               text=new_code)
 
         file = open(self.filename, 'w')
         file.writelines(self.lines)
         file.close()
-        print("'exitTryStatement1'")
 
-    # def exitTryStatement1(self, ctx:Java9_v2Parser.TryStatement1Context):
-    #     # TODO Replace Exceptions With Test(ReWrite file with self.lines)
-    #     if self.IOOBE and len(ctx.catches().children) == 1:
-    #         ctx.TRY().getText()
-    #         tryline = ctx.TRY().symbol.line - 1
-    #         self.lines[tryline] = self.lines[tryline].replace('try', '')
-    #
-    #         lbraceline = ctx.block().children[0].symbol.line - 1
-    #         self.lines[lbraceline] = self.lines[lbraceline].replace('{', '')
-    #
-    #         rbraceline = ctx.block().children[2].symbol.line - 1
-    #         head, _sep, tail = self.lines[rbraceline].rpartition('}')
-    #         self.lines[rbraceline] = self.lines[rbraceline] = head + '' + tail
-    #
-    #     file = open('refactorings/test/test3.java', 'w')
-    #     file.writelines(self.lines)
-    #     file.close()
-    #     print("'exitTryStatement1'")
 
-    # def enterTryStatement2(self, ctx:Java9_v2Parser.TryStatement2Context):
-    #     print("'enterTryStatement2'")
-    #     pass
+    def exitExpression0(self, ctx: JavaParserLabeled.Expression0Context):
+        self.returnedValue=ctx.getText()
 
-    # def exitTryStatement2(self, ctx:Java9_v2Parser.TryStatement2Context):
-    #     # TODO Replace Exceptions With Test(ReWrite file with self.lines)
-    #     file = open('refactorings/test/test3.java', 'w')
-    #     file.writelines(self.lines)
-    #     file.close()
-    #
-    #     print("'exitTryStatement2'")
-
-    # def enterTryStatement3(self, ctx:Java9_v2Parser.TryStatement3Context):
-    #     print("'enterTryStatement3'")
-    #     pass
-    #
-    # def exitTryStatement3(self, ctx:Java9_v2Parser.TryStatement3Context):
-    #     print("'exitTryStatement3'")
-    #     pass
-
-    # ====================================================================================================
-
-    def enterExpression2(self, ctx: JavaParserLabeled.Expression2Context):
-        print("'enterExpression2'")
-
-    # def enterArrayAccess(self, ctx:Java9_v2Parser.ArrayAccessContext):
-    #     print("'enterArrayAccess'")
 
     def exitExpression2(self, ctx: JavaParserLabeled.Expression2Context):
         start = ctx.start.tokenIndex
         stop = ctx.stop.tokenIndex
 
-        print(f"ArrayName: {ctx.expression(0).getText()}; ArrayIndex: {ctx.expression(1).getText()};")
-        name = ctx.expression(0).getText()
-        index = ctx.expression(1).getText()
-        # TODO Find Prev. & Next ';' Of Current Line
-        currentline = ctx.start.line - 1
-
+        self.returnedValue0=ctx.getText()+";"
+        self.name = ctx.expression(0).getText()
+        self.index = ctx.expression(1).getText()
+        currentline = ctx.start.line-1
         array = self.token_stream.getText(start, stop)
         idx = self.lines[currentline].find(f'{array}')
         before = self.lines[currentline][:idx]
         after = self.lines[currentline][idx + len(f'{array}'):]
+       # self.lines[currentline]=f"if ({self.index} >= {self.name}.length) {{\n "
 
-        prevsc = before.rfind(';')  # Previous ';' Index
-        if prevsc != -1:
-            before = f"{before[:prevsc + 1]}\nif ({index} < {name}.length) {{\n\t {before[prevsc + 1:]}"
 
-        nextsc = after.find(';')  # Next ';' Index
-        if nextsc != -1:
-            after = f"{after[:nextsc + 1]} }}\n{after[nextsc + 1:]}"
-            self.dictionary[currentline] = len(before) + len(array) + nextsc + 4  # '; }\n' = 4 Characters
-
-        self.lines[currentline] = f"{before}{array}{after}"
-
-        offset = 1
-        while nextsc == -1:
-            nextsc = self.lines[currentline + offset].find(';')
-            if nextsc == -1:
-                self.lines[currentline + offset] = "\t" + self.lines[currentline + offset]
-            else:
-                self.lines[currentline + offset] = f"\t{self.lines[currentline + offset][:nextsc + 1]} }}\n" \
-                                                   f"{self.lines[currentline + offset][nextsc + 1:]}"
-                self.dictionary[currentline + offset] = nextsc + 4  # '; }\n' = 4 Characters
-            offset += 1
-
-        offset = 1
-        while prevsc == -1:
-            prevsc = self.lines[currentline - offset].rfind(';')
-            if prevsc == -1:
-                self.lines[currentline - offset] = "\t" + self.lines[currentline - offset]
-            else:
-                self.lines[currentline - offset] = f"{self.lines[currentline - offset][:prevsc + 1]}\n" \
-                                                   f"if ({index} < {name}.length) {{\n" \
-                                                   f"\t{self.lines[currentline - offset][prevsc + 1:]}"
-
-            offset += 1
-
-        print("'exitArrayAccess'")
-
-    # def exitArrayAccess(self, ctx:Java9_v2Parser.ArrayAccessContext):
-    #     # if not self.IOOBE:
-    #     #     return
-    #     start = ctx.start.tokenIndex
-    #     stop = ctx.stop.tokenIndex
-    #
-    #     print(f"ArrayName: {ctx.expressionName().identifier().getText()}; ArrayIndex: {ctx.expression(0).getText()};")
-    #     name = ctx.expressionName().identifier().getText()
-    #     index = ctx.expression(0).getText()
-    #     # TODO Find Prev. & Next ';' Of Current Line
-    #     currentline = ctx.start.line - 1
-    #
-    #     array = self.token_stream.getText(start, stop)
-    #     idx = self.lines[currentline].find(f'{array}')
-    #     before = self.lines[currentline][:idx]
-    #     after = self.lines[currentline][idx + len(f'{array}'):]
-    #
-    #     prevsc = before.rfind(';')  # Previous ';' Index
-    #     if prevsc != -1:
-    #         before = f"{before[:prevsc + 1]}\nif ({index} < {name}.length) {{\n\t {before[prevsc + 1:]}"
-    #
-    #     nextsc = after.find(';')  # Next ';' Index
-    #     if nextsc != -1:
-    #         after = f"{after[:nextsc + 1]} }}\n{after[nextsc + 1:]}"
-    #         self.dictionary[currentline] = len(before) + len(array) + nextsc + 4  # '; }\n' = 4 Characters
-    #
-    #     self.lines[currentline] = f"{before}{array}{after}"
-    #
-    #     offset = 1
-    #     while nextsc == -1:
-    #         nextsc = self.lines[currentline + offset].find(';')
-    #         if nextsc == -1:
-    #             self.lines[currentline + offset] = "\t" + self.lines[currentline + offset]
-    #         else:
-    #             self.lines[currentline + offset] = f"\t{self.lines[currentline + offset][:nextsc + 1]} }}\n" \
-    #                                                f"{self.lines[currentline + offset][nextsc + 1:]}"
-    #             self.dictionary[currentline + offset] = nextsc + 4  # '; }\n' = 4 Characters
-    #         offset += 1
-    #
-    #     offset = 1
-    #     while prevsc == -1:
-    #         prevsc = self.lines[currentline - offset].rfind(';')
-    #         if prevsc == -1:
-    #             self.lines[currentline - offset] = "\t" + self.lines[currentline - offset]
-    #         else:
-    #             self.lines[currentline - offset] = f"{self.lines[currentline - offset][:prevsc + 1]}\n" \
-    #                                                f"if ({index} < {name}.length) {{\n" \
-    #                                                f"\t{self.lines[currentline - offset][prevsc + 1:]}"
-    #
-    #         offset += 1
-    #
-    #     print("'exitArrayAccess'")
-
-    # def enterArrayAccess_lfno_primary(self, ctx:Java9_v2Parser.ArrayAccess_lfno_primaryContext):
-    #     print("'enterArrayAccess_lfno_primary'")
-    #
-    # def exitArrayAccess_lfno_primary(self, ctx:Java9_v2Parser.ArrayAccess_lfno_primaryContext):
-    #     start = ctx.start.tokenIndex
-    #     stop = ctx.stop.tokenIndex
-    #
-    #     print(f"ArrayName: {ctx.expressionName().identifier().getText()}; ArrayIndex: {ctx.expression(0).getText()};")
-    #     name = ctx.expressionName().identifier().getText()
-    #     index = ctx.expression(0).getText()
-    #     # TODO Find Prev. & Next ';' Of Current Line
-    #     currentline = ctx.start.line - 1
-    #
-    #     array = self.token_stream.getText(start, stop)
-    #     idx = self.lines[currentline].find(f'{array}')
-    #     before = self.lines[currentline][:idx]
-    #     after = self.lines[currentline][idx + len(f'{array}'):]
-    #
-    #     prevsc = before.rfind(';') # Previous ';' Index
-    #     if prevsc != -1:
-    #         before = f"{before[:prevsc + 1]}\nif ({index} < {name}.length) {{\n\t {before[prevsc + 1:]}"
-    #
-    #     nextsc = after.find(';') # Next ';' Index
-    #     if nextsc != -1:
-    #         after = f"{after[:nextsc + 1]} }}\n{after[nextsc + 1:]}"
-    #         self.dictionary[currentline] = len(before) + len(array) + nextsc + 4  # '; }\n' = 4 Characters
-    #
-    #     self.lines[currentline] = f"{before}{array}{after}"
-    #
-    #     offset = 1
-    #     while nextsc == -1:
-    #         nextsc = self.lines[currentline + offset].find(';')
-    #         if nextsc == -1:
-    #             self.lines[currentline + offset] = "\t" + self.lines[currentline + offset]
-    #         else:
-    #             self.lines[currentline + offset] = f"\t{self.lines[currentline + offset][:nextsc + 1]} }}\n" \
-    #                                                f"{self.lines[currentline + offset][nextsc + 1:]}"
-    #             self.dictionary[currentline + offset] = nextsc + 4 # '; }\n' = 4 Characters
-    #         offset += 1
-    #
-    #     offset = 1
-    #     while prevsc == -1:
-    #         prevsc = self.lines[currentline - offset].rfind(';')
-    #         if prevsc == -1:
-    #             self.lines[currentline - offset] = "\t" + self.lines[currentline - offset]
-    #         else:
-    #             self.lines[currentline - offset] = f"{self.lines[currentline - offset][:prevsc + 1]}\n" \
-    #                                                f"if ({index} < {name}.length) {{\n" \
-    #                                                f"\t{self.lines[currentline - offset][prevsc + 1:]}"
-    #
-    #         offset += 1
-    #
-    #     print("'exitArrayAccess_lfno_primary'")
-
-    def exitCatchClause(self, ctx: JavaParserLabeled.CatchClauseContext):
-        exception = ctx.catchType().getText()
-        if (exception == "IndexOutOfBoundsException"):
+    def enterCatchClause(self, ctx:JavaParserLabeled.CatchClauseContext):
+        print(ctx.getText())
+        if ctx.catchType().getText()=='ArrayIndexOutOfBoundsException':
             self.IOOBE = True
-            start = ctx.block().start.tokenIndex
-            stop = ctx.block().stop.tokenIndex
-            # self.token_stream_rewriter.delete(program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-            #                                   from_idx=start, to_idx=stop)
-            print(f'Start: {ctx.start.line}, Stop: {ctx.stop.line}')
-            catch_block = self.token_stream.getText(start=start, stop=stop)
-            for key in self.dictionary:
-                self.lines[key] = f"{self.lines[key][:self.dictionary[key]]} else {catch_block}\n" \
-                                  f"{self.lines[key][self.dictionary[key]:]}"
-            print('=' * 50)
-            for line in range(ctx.start.line - 1, ctx.stop.line):
-                del self.lines[ctx.start.line - 1]
-            print('=' * 50)
+            start = ctx.getText().find('return') + 6
+            stop = ctx.getText().find(';')
+            rbraceline = ctx.block().children[-1].symbol.line
+            self.returnedValue = ctx.getText()[start:stop]
+            # for i in range(self.currentLine,self.lines.__len__()):
+            #     if(self.lines[self.currentLine].__contains__('catch')):
+            #         self.lines[self.currentLine]=f" return {self.returnedValue};\n}}"
+            #         for j in range(self.currentLine+1,rbraceline):
+            #             self.lines[i]=''
+            #         break
+            #     else:
+            #         if (self.lines[self.currentLine].__contains__('return')):
+            #             self.lines[i]=''
+        elif ctx.getText().__contains__('throwwrongValueFormatException'):
+            self.VFE=True
 
-            # # TODO Replace Exceptions With Test(ReWrite file with self.lines)
-            # file = open('refactorings/test/test3.java', 'w')
-            # file.writelines(self.lines)
-            # file.close()
 
-            # print("Dictionary: \n", self.dictionary)
-            # print("Catch Clause: \n", self.token_stream.getText(start=start, stop=stop))
 
-    # def exitCatchClause(self, ctx:Java9_v2Parser.CatchClauseContext):
-    #     exception = ctx.catchFormalParameter().catchType().unannClassType().getText()
-    #     if (exception == "IndexOutOfBoundsException"):
-    #         self.IOOBE = True
-    #         start = ctx.block().start.tokenIndex
-    #         stop = ctx.block().stop.tokenIndex
-    #         # self.token_stream_rewriter.delete(program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-    #         #                                   from_idx=start, to_idx=stop)
-    #         print(f'Start: {ctx.start.line}, Stop: {ctx.stop.line}')
-    #         catch_block = self.token_stream.getText(start=start, stop=stop)
-    #         for key in self.dictionary:
-    #             self.lines[key] = f"{self.lines[key][:self.dictionary[key]]} else {catch_block}\n" \
-    #                               f"{self.lines[key][self.dictionary[key]:]}"
-    #         print('=' * 50)
-    #         for line in range(ctx.start.line - 1, ctx.stop.line):
-    #             del self.lines[ctx.start.line - 1]
-    #         print('='*50)
-    #
-    #         # # TODO Replace Exceptions With Test(ReWrite file with self.lines)
-    #         # file = open('refactorings/test/test3.java', 'w')
-    #         # file.writelines(self.lines)
-    #         # file.close()
-    #
-    #         print("Dictionary: \n", self.dictionary)
-    #         print("Catch Clause: \n", self.token_stream.getText(start=start, stop=stop))
+    def enterMethodBody(self, ctx:JavaParserLabeled.MethodBodyContext):
+        if not self.IOOBE:
+            return
 
-# ====================================================================================================
+    def exitMethodBody(self, ctx:JavaParserLabeled.MethodBodyContext):
+        if not self.IOOBE:
+            return
+
+
+
+
+    # def exitCompilationUnit(self, ctx:JavaParserLabeled.CompilationUnitContext):
+    #     if not self.IOOBE:
+    #         return
+    #     else:
+    #         new_code=''
+    #         for i in range(0,self.lines.__len__()):
+    #             new_code+=self.lines[i]
+    #         self.token_stream_rewriter.replace(program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+    #                                            from_idx=ctx.start.tokenIndex,
+    #                                            to_idx=ctx.stop.tokenIndex,
+    #                                            text=new_code)
+
+
+
+
+directory = "C:\\Users\\asus\\Desktop\\TestProject"
+
+
+def main(args):
+    # Step 1: Load input source into stream
+    stream = FileStream(args.file, encoding='utf8')
+    # input_stream = StdinStream()
+
+    # Step 2: Create an instance of AssignmentStLexer
+    lexer = JavaLexer(stream)
+    # Step 3: Convert the input source into a list of tokens
+    token_stream = CommonTokenStream(lexer)
+    # Step 4: Create an instance of the AssignmentStParser
+    parser = JavaParserLabeled(token_stream)
+    parser.getTokenStream()
+
+    print("=====Enter Create ParseTree=====")
+    # Step 5: Create parse tree
+    parse_tree = parser.compilationUnit()
+    print("=====Create ParseTree Finished=====")
+
+    # Step 6: Create an instance of AssignmentStListener
+    my_listener = ReplaceExceptionWithPrecheckListener(common_token_stream=token_stream, class_identifier='GodClass',
+                                                 filename=args.file)
+
+    # return
+    walker = ParseTreeWalker()
+    walker.walk(t=parse_tree, listener=my_listener)
+
+    with open(args.file, mode='w', newline='') as f:
+        f.write(my_listener.token_stream_rewriter.getDefaultText())
+
+
+def process_file(file):
+    argparser = argparse.ArgumentParser()
+    # argparser.add_argument(
+    #     '-n', '--file',
+    #     help='Input source', default=r'refactorings/test/test1.java')
+    argparser.add_argument(
+        '-n', '--file',
+        help='Input source', default=file)
+    args = argparser.parse_args()
+    main(args)
+
+
+if __name__ == '__main__':
+    for dirname, dirs, files in os.walk(directory):
+        for file in files:
+            name, extension = os.path.splitext(file)
+            if extension == '.java':
+                print(name)
+                process_file("{}/{}".format(dirname, file))
