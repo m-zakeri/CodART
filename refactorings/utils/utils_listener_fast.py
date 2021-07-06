@@ -1,11 +1,16 @@
 import os
 import re  # regular expressions
 import antlr4
+from antlr4 import FileStream
 from antlr4.Token import CommonToken
 import antlr4.tree
 from antlr4.CommonTokenStream import CommonTokenStream
 from gen.java.JavaParser import JavaParser
 from gen.java.JavaParserListener import JavaParserListener
+
+from antlr4 import FileStream, ParseTreeWalker
+from antlr4.TokenStreamRewriter import TokenStreamRewriter
+from gen.java.JavaLexer import JavaLexer
 
 
 class Program:
@@ -260,8 +265,9 @@ class LocalVariable:
 
 
 class ExpressionName:
-    def __init__(self, dot_separated_identifiers: list):
+    def __init__(self, dot_separated_identifiers: list, ctx: JavaParser.ExpressionContext):
         self.dot_separated_identifiers = dot_separated_identifiers
+        self.parser_context = ctx
 
 
 class MethodInvocation:
@@ -513,7 +519,7 @@ class UtilsListener(JavaParserListener):
                     if not re.match("^[A-Za-z0-9_]*$", name):
                         should_add = False
                 if should_add:
-                    self.current_method.body_local_vars_and_expr_names.append(ExpressionName(names))
+                    self.current_method.body_local_vars_and_expr_names.append(ExpressionName(names, ctx))
 
     def enterLocalVariableDeclaration(self, ctx: JavaParser.LocalVariableDeclarationContext):
         if self.current_method is not None:
@@ -588,7 +594,7 @@ class UtilsListener(JavaParserListener):
             self.current_field_decl = None
 
 
-class FieldUsageListener(UtilsListener):
+class StaticFieldUsageListener(UtilsListener):
     def __init__(self, filename: str, field_name: str, source_class: str):
         super().__init__(filename)
         self.current_class_name = os.path.basename(filename).replace(".java", "")
@@ -597,7 +603,7 @@ class FieldUsageListener(UtilsListener):
         self.stack = []
         self.usages = []
 
-    def enterExpression(self, ctx:JavaParser.ExpressionContext):
+    def enterExpression(self, ctx: JavaParser.ExpressionContext):
         text = ctx.getText()
 
         # if we reached expression this.field
@@ -617,25 +623,24 @@ class FieldUsageListener(UtilsListener):
         if len(self.stack) == 0:
             self.usages.append(ctx)
 
-
         # self.state_machine.change_state(ctx, len(self.stack) > 0 and self.stack[-1] == self.field_name)
         # if self.state_machine.is_final():
         #     self.state_machine.reset()
         #     self.usages.append(ctx)
 
-    def exitClassBody(self, ctx:JavaParser.ClassBodyContext):
+    def exitClassBody(self, ctx: JavaParser.ClassBodyContext):
         if self.current_class_name not in self.package.classes:
             print("wtf")
             return
         setattr(self.package.classes[self.current_class_name], "usages", self.usages)
 
-    def enterBlock(self, ctx:JavaParser.BlockContext):
+    def enterBlock(self, ctx: JavaParser.BlockContext):
         super().enterBlock(ctx)
 
         if len(self.stack) != 0:
             self.stack.append(self.field_name)
 
-    def exitBlock(self, ctx:JavaParser.BlockContext):
+    def exitBlock(self, ctx: JavaParser.BlockContext):
         super().exitBlock(ctx)
         try:
             self.stack.pop()
@@ -660,3 +665,110 @@ class FieldUsageListener(UtilsListener):
 
         if var_name == self.field_name:
             self.stack.append(var_name)
+
+
+class FieldUsageListener(UtilsListener):
+    """
+    FieldUsageListener finds all the usage of
+    an specified field f, from a class c in
+    package pkg.
+    """
+
+    def __init__(self, filename: str, source_class: str, source_package: str, field_name: str, field_candidates: set):
+        super().__init__(filename)
+        self.source_class = source_class
+        self.source_package = source_package
+        self.field_name = field_name
+        self.has_imported_source = False
+        self.usages = []
+        # current class name is the public class in each file.
+        self.current_class_name = ""
+        self.field_candidates = field_candidates
+
+    def enterClassDeclaration(self, ctx: JavaParser.ClassDeclarationContext):
+        super().enterClassDeclaration(ctx)
+
+        if ctx.parentCtx.classOrInterfaceModifier()[0].getText() == "public":
+            self.current_class_name = ctx.IDENTIFIER()
+
+        self.has_imported_source = self.file_info.has_imported_package(self.source_package) or \
+                                   self.file_info.has_imported_class(self.source_package, self.source_class)
+
+    def exitMethodBody(self, ctx: JavaParser.MethodBodyContext):
+        super().exitMethodBody(ctx)
+
+        # if we have not imported source package or
+        # Source class just ignore this
+        if not self.has_imported_source:
+            return
+
+        local_candidates = set()
+
+        # find parameters with type Source
+        for t, identifier in self.current_method.parameters:
+            if t == self.source_class:
+                local_candidates.add(identifier)
+
+        # find all local variables with type Source
+        for var_or_exprs in self.current_method.body_local_vars_and_expr_names:
+            if type(var_or_exprs) is LocalVariable:
+                if var_or_exprs.datatype == self.source_class:
+                    local_candidates.add(var_or_exprs.identifier)
+
+        for var_or_exprs in self.current_method.body_local_vars_and_expr_names:
+            if type(var_or_exprs) is ExpressionName:
+                # we're going to find source.field
+                if len(var_or_exprs.dot_separated_identifiers) < 2:
+                    continue
+                if (var_or_exprs.dot_separated_identifiers[0] in local_candidates or
+                        var_or_exprs.dot_separated_identifiers[0] in self.field_candidates) and \
+                        var_or_exprs.dot_separated_identifiers[1] == self.field_name:
+                    self.usages.append(var_or_exprs.parser_context)
+
+            elif type(var_or_exprs) is MethodInvocation:
+                # we are going to find getter or setters
+                if len(var_or_exprs.dot_separated_identifiers) < 2:
+                    continue
+
+                if self.is_getter_or_setter(var_or_exprs.dot_separated_identifiers[0], var_or_exprs.dot_separated_identifiers[1], local_candidates):
+                    self.usages.append(var_or_exprs.parser_context)
+
+    def is_getter_or_setter(self, first_id: str, second_id: str, local_candidates: set):
+        return (first_id in local_candidates or first_id in self.field_candidates) and (
+            second_id == f"set{self.field_name[0].upper() + self.field_name[1:-1]}" or
+            second_id == f"get{self.field_name[0].upper() + self.field_name[1:-1]}" or
+            second_id == f"has{self.field_name[0].upper() + self.field_name[1:-1]}" or
+            second_id == f"is{self.field_name[0].upper() + self.field_name[1:-1]}"
+        )
+
+
+if __name__ == '__main__':
+    source_class = "Source"
+    source_package = "source"
+    field_name = "a"
+    path = "/home/loop/IdeaProjects/move-field/src/extra/Extra.java"
+    stream = FileStream(path, encoding='utf8')
+    lexer = JavaLexer(stream)
+    token_stream = CommonTokenStream(lexer)
+    parser = JavaParser(token_stream)
+    tree = parser.compilationUnit()
+    utilsListener = UtilsListener(path)
+    walker = ParseTreeWalker()
+    walker.walk(utilsListener, tree)
+
+
+    if len(utilsListener.package.classes) > 1:
+        print("no supported yet")
+        exit(1)
+
+    # find fields with the type Source first and store it
+    field_candidate = set()
+    for klass in utilsListener.package.classes.values():
+        for f in klass.fields.values():
+            if f.datatype == source_class:
+                field_candidate.add(f.name)
+
+    listener = FieldUsageListener(path, source_class, source_package, field_name, field_candidate)
+    walker.walk(listener, tree)
+    for usage in listener.usages:
+        print(usage.getText())
