@@ -807,9 +807,20 @@ class FieldUsageListener(UtilsListener):
 
             elif type(var_or_exprs) is MethodInvocation:
                 # we are going to find getter or setters
-                if len(var_or_exprs.dot_separated_identifiers) < 2:
-                    continue
-                if self.is_getter_or_setter(var_or_exprs.dot_separated_identifiers[0],
+                # if len(var_or_exprs.dot_separated_identifiers) < 2:
+                #     continue
+
+                if self.is_method_getter_or_setter(var_or_exprs.dot_separated_identifiers[0]):
+                    if not target_added:
+                        # add target to param
+                        self.rewriter.insertBeforeIndex(ctx.parentCtx.formalParameters().stop.tokenIndex,
+                                                        target_param)
+                        target_added = True
+                    if var_or_exprs.parser_context is not None and type(var_or_exprs.parser_context) is not JavaParser.ExpressionContext:
+                        continue
+                    self.usages.append(var_or_exprs.parser_context)
+                    self.propagate_getter_setter_form2(var_or_exprs.parser_context, target_param_name)
+                elif self.is_getter_or_setter(var_or_exprs.dot_separated_identifiers[0],
                                             var_or_exprs.dot_separated_identifiers[1], local_candidates):
                     if not target_added:
                         # add target to param
@@ -819,15 +830,7 @@ class FieldUsageListener(UtilsListener):
 
                     self.usages.append(var_or_exprs.parser_context)
                     self.propagate_getter_setter(var_or_exprs.parser_context, target_param_name)
-                # elif self.is_method_getter_or_setter(var_or_exprs.dot_separated_identifiers[0]):
-                #     if not target_added:
-                #         # add target to param
-                #         self.rewriter.insertBeforeIndex(ctx.parentCtx.formalParameters().stop.tokenIndex,
-                #                                         target_param)
-                #         target_added = True
-                #
-                #     self.usages.append(var_or_exprs.parser_context)
-                #     self.propagate_getter_setter_form2(var_or_exprs.parser_context, target_param_name)
+
 
     def is_getter_or_setter(self, first_id: str, second_id: str, local_candidates: set):
         return (first_id in local_candidates or first_id in self.field_candidates) and (
