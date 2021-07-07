@@ -15,7 +15,8 @@ def get_cons(program: Program, packagename: str, superclassname: str, classname:
     removemethods = {}
     removemethods1 = []
     removemethods3 = {}
-
+    if packagename == "":
+        packagename = None
     mets = program.packages[packagename].classes[classname].methods
     met = []
     methodkey = ""

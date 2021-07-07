@@ -1,5 +1,3 @@
-package tests.utils_test3;
-
 public class Employee {
     String name;
     String id;
@@ -17,8 +15,3 @@ public class Employee {
         System.out.println("Zero argument constructor");
     }
 }
-
-
-
-
-

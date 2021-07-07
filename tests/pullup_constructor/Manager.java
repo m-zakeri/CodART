@@ -1,5 +1,3 @@
-package tests.utils_test3;
-
 public class Manager extends Employee {
     public Manager(String name, String id, int grade) {
         this.name = name;
@@ -7,6 +5,3 @@ public class Manager extends Employee {
         this.grade = grade;
     }
 }
-
-
-
