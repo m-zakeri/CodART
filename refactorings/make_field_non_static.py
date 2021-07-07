@@ -1,5 +1,7 @@
 import os
-
+import os
+import errno
+import argparse
 from gen.javaLabeled.JavaLexer import JavaLexer
 
 try:
@@ -65,6 +67,100 @@ class MakeFieldNonStaticRefactoringListener(JavaParserLabeledListener):
                         to_idx=grand_parent_ctx.modifier(i).stop.tokenIndex,
                         text=''
                     )
+class PropagationMakeFieldNonStaticRefactoringListener(JavaParserLabeledListener):
+
+    def __init__(self, common_token_stream: CommonTokenStream = None, using_field_name= None,
+                 propagated_class_name=None,mainclass=None):
+
+        if using_field_name is None:
+            self.using_field_name = []
+        else:
+            self.using_field_name = using_field_name
+        #
+        if mainclass is None:
+            self.mainclass = []
+        else:
+            self.mainclass = mainclass
+
+        if propagated_class_name is None:
+            self.propagated_class_name = []
+        else:
+            self.propagated_class_name = propagated_class_name
+
+        if common_token_stream is None:
+            raise ValueError('common_token_stream is None')
+        else:
+            self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
+
+        self.is_class = False
+    def enterClassBody(self, ctx:JavaParserLabeled.ClassBodyContext):
+        if(self.is_class == True):
+            text="\n"+self.mainclass+" "+self.mainclass+"obj = new "+self.mainclass+"();\n"
+            print("enterClassBodyDeclaration2")
+            self.token_stream_rewriter.replaceRange(
+            from_idx=ctx.start.tokenIndex+1,
+            to_idx=ctx.start.tokenIndex+1,
+            text=text)
+    def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
+        # print("Propagation started,11111111111111111 please wait...")
+        class_identifier = ctx.IDENTIFIER().getText()
+        # print("class_identifier:",class_identifier)
+        # print(self.propagated_class_name)
+
+        # if class_identifier == self.propagated_class_name:
+        if (class_identifier in self.propagated_class_name):
+            self.is_class = True
+            print("Propagation started, please wait...")
+        else:
+            self.is_class = False
+    def exitClassDeclaration(self, ctx:JavaParserLabeled.ClassDeclarationContext):
+        if (self.is_class == True):
+            self.is_class=False
+    # def enterVariableDeclarator(self, ctx:JavaParserLabeled.VariableDeclaratorContext):
+    #     if not self.is_class:
+    #         return None
+    #     usingfieldidentifier=ctx.variableDeclaratorId().IDENTIFIER().getText()
+    #     grand_child_ctx = ctx.variableInitializer().expression()
+    #     if usingfieldidentifier in self.using_field_name:
+    #         objectidentifier = grand_child_ctx.expression(0).primary().IDENTIFIER().getText()
+    #         if objectidentifier in self.object_name:
+    #             self.token_stream_rewriter.replaceRange(
+    #                 from_idx=grand_child_ctx.start.tokenIndex,
+    #                 to_idx=grand_child_ctx.stop.tokenIndex,
+    #                 text=grand_child_ctx.expression(0).primary().IDENTIFIER().getText()+'.'
+    #                      +'get' + str.capitalize(grand_child_ctx.IDENTIFIER().getText())+'()'
+    #             )
+
+    def enterExpression1(self, ctx:JavaParserLabeled.Expression1Context):
+
+        if not self.is_class:
+            return
+        print("ctx.expression()",ctx.expression())
+        if ctx.expression()!=None:
+            print("ctx.expression().primary()",ctx.expression().primary())
+            if ctx.expression().primary() != None:
+                print("ctx.expression().primary().IDENTIFIER().getText()",ctx.expression().primary().IDENTIFIER().getText())
+                print(ctx.DOT())
+                print(ctx.IDENTIFIER().getText())
+                if ctx.expression().primary().IDENTIFIER().getText() == self.mainclass\
+                        and ctx.DOT().getText()=="." and ctx.IDENTIFIER().getText()==self.using_field_name:
+                    print("111111111111111111111111111111111")
+                    text = self.mainclass + "obj"
+                    print("enterClassBodyDeclaration2")
+                    self.token_stream_rewriter.replaceRange(
+                        from_idx=ctx.start.tokenIndex ,
+                        to_idx=ctx.start.tokenIndex ,
+                        text=text)
+                    # parent_ctx = ctx.parentCtx
+                    # count=parent_ctx.getChildCount()
+                    # if count==3:
+                    #     expressiontext=parent_ctx.children[2].getText()
+                    #     self.token_stream_rewriter.replaceRange(
+                    #         from_idx=parent_ctx.start.tokenIndex,
+                    #         to_idx=parent_ctx.stop.tokenIndex,
+                    #         text=ctx.expression(0).primary().IDENTIFIER().getText() +
+                    #              '.' + 'set' + str.capitalize(ctx.IDENTIFIER().getText()) +'(' +expressiontext+')'
+                    #     )
 
 
 def main(udb_path, source_class, field_name):
@@ -74,8 +170,19 @@ def main(udb_path, source_class, field_name):
     for cls in db.ents("class"):
         if cls.simplename() == source_class:
             main_file = cls.parent().longname(True)
+            print(main_file)
+            #
+            print("counstructor {{{")
+            for mth in cls.ents('Define', 'Java Method Constructor'):
+                print("mth=",mth)
+            print("counstructor }}}}")
+            #
             if not os.path.isfile(main_file):
                 continue
+    # for cun in db.ents("Java Method Constructor"):
+    #     print(cun)
+
+
     if main_file is None:
         return
 
@@ -90,13 +197,59 @@ def main(udb_path, source_class, field_name):
     walker = ParseTreeWalker()
     walker.walk(t=parse_tree, listener=my_listener)
 
-    with open(main_file, mode='w', newline='') as f:
+    # print(my_listener.token_stream_rewriter.getDefaultText())
+
+    with open(main_file, mode='w',encoding="utf-8", newline='') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
+    # /////////////////////////////////////////////////////////////////////////////////////////////////////////
+    # propagation
+    file_list_to_be_propagate = set()
+    propagate_classes = set()
+    for fld in db.ents("variable"):
+        if fld.simplename() == field_name:
+            # print(fld.longname())
+            # print("refs",fld.refs())
+
+            for ref in fld.refs("Definein"):
+                # print(ref.ent().simplename())
+                if (ref.ent().simplename()==source_class):
+                    print(fld.refs())
+                    for ref in fld.refs("Setby , Useby"):
+                        if not (str(ref.ent()) == str(fld.parent())
+                                or str(ref.ent().parent()) == str(fld.parent())):
+                            propagate_classes.add(str(ref.ent().parent().simplename()))
+                            # file_list_to_be_propagate.add( ref.file().relname())
+                            file_list_to_be_propagate.add( ref.file().longname(True))
+                            print(propagate_classes)
+                            print(file_list_to_be_propagate)
+
+    for file in file_list_to_be_propagate:
+        print(file)
+        argparser = argparse.ArgumentParser()
+        argparser.add_argument('-n', '--file', help='Input source', default= file)
+        args = argparser.parse_args()
+        stream = FileStream(main_file, encoding='utf8')
+        lexer = JavaLexer(stream)
+        token_stream = CommonTokenStream(lexer)
+        parser = JavaParserLabeled(token_stream)
+        parser.getTokenStream()
+        parse_tree = parser.compilationUnit()
+        my_listener = PropagationMakeFieldNonStaticRefactoringListener(common_token_stream=token_stream,
+                                                                            using_field_name=field_name,
+                                                                            propagated_class_name=propagate_classes,mainclass=source_class)
+        walker = ParseTreeWalker()
+        walker.walk(t=parse_tree, listener=my_listener)
+        print(my_listener.token_stream_rewriter.getDefaultText())
+
+        with open(main_file, mode='w', encoding="utf-8", newline='') as f:
+            f.write(my_listener.token_stream_rewriter.getDefaultText())
 
 
 if __name__ == '__main__':
-    udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
-    source_class = "Website"
-    field_name = "HELLO_FROM_STUDENT_WEBSITE"
+    # udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
+    udb_path = "D:\CodART\\benchmark_projects\\myhesabdari.udb"
+    source_class = "mainclass"
+    field_name = "staticfield"
+
     # initialize with understand
     main(udb_path, source_class, field_name)
