@@ -690,6 +690,7 @@ class FieldUsageListener(UtilsListener):
         self.rewriter = None
         # this represents the text to be added in target i.e. public int a;
         self.field_tobe_moved = field_tobe_moved
+        self.methods_tobe_updated = []
 
     def enterCompilationUnit(self, ctx:JavaParser.CompilationUnitContext):
         super().enterCompilationUnit(ctx)
@@ -753,9 +754,17 @@ class FieldUsageListener(UtilsListener):
                 ctx.parentCtx.parentCtx.start.tokenIndex,
                 ctx.parentCtx.parentCtx.stop.tokenIndex, "")
 
+    def exitConstructorDeclaration(self, ctx:JavaParser.ConstructorDeclarationContext):
+        self.handleMethodUsage(ctx)
+        super().exitConstructorDeclaration(ctx)
+
     def exitMethodBody(self, ctx: JavaParser.MethodBodyContext):
         super().exitMethodBody(ctx)
+        self.handleMethodUsage(ctx)
 
+    def handleMethodUsage(self, ctx):
+        method_identifier = ctx.IDENTIFIER().getText() if self.current_method.is_constructor else ctx.parentCtx.IDENTIFIER().getText()
+        formal_params = ctx.formalParameters() if self.current_method.is_constructor else ctx.parentCtx.formalParameters()
         target_added = False
         target_param_name = "$$target"
         target_param = f"Target {target_param_name}" if \
@@ -772,7 +781,7 @@ class FieldUsageListener(UtilsListener):
             # we will remove getter and setter from source
             # and add it to target so there is no need to
             # find usages there
-            if self.is_method_getter_or_setter(ctx.parentCtx.IDENTIFIER().getText()):
+            if self.is_method_getter_or_setter(method_identifier):
                 self.rewriter.replaceRange(ctx.start.tokenIndex, ctx.stop.tokenIndex, "")
                 return
             local_candidates.add("this")
@@ -798,7 +807,7 @@ class FieldUsageListener(UtilsListener):
                         var_or_exprs.dot_separated_identifiers[1] == self.field_name:
                     if not target_added:
                         # add target to param
-                        self.rewriter.insertBeforeIndex(ctx.parentCtx.formalParameters().stop.tokenIndex,
+                        self.rewriter.insertBeforeIndex(formal_params.stop.tokenIndex,
                                                         target_param)
                         target_added = True
 
@@ -813,24 +822,24 @@ class FieldUsageListener(UtilsListener):
                 if self.is_method_getter_or_setter(var_or_exprs.dot_separated_identifiers[0]):
                     if not target_added:
                         # add target to param
-                        self.rewriter.insertBeforeIndex(ctx.parentCtx.formalParameters().stop.tokenIndex,
+                        self.rewriter.insertBeforeIndex(formal_params.stop.tokenIndex,
                                                         target_param)
                         target_added = True
-                    if var_or_exprs.parser_context is not None and type(var_or_exprs.parser_context) is not JavaParser.ExpressionContext:
+                    if var_or_exprs.parser_context is not None and type(
+                            var_or_exprs.parser_context) is not JavaParser.ExpressionContext:
                         continue
                     self.usages.append(var_or_exprs.parser_context)
                     self.propagate_getter_setter_form2(var_or_exprs.parser_context, target_param_name)
                 elif self.is_getter_or_setter(var_or_exprs.dot_separated_identifiers[0],
-                                            var_or_exprs.dot_separated_identifiers[1], local_candidates):
+                                              var_or_exprs.dot_separated_identifiers[1], local_candidates):
                     if not target_added:
                         # add target to param
-                        self.rewriter.insertBeforeIndex(ctx.parentCtx.formalParameters().stop.tokenIndex,
+                        self.rewriter.insertBeforeIndex(formal_params.stop.tokenIndex,
                                                         target_param)
                         target_added = True
 
                     self.usages.append(var_or_exprs.parser_context)
                     self.propagate_getter_setter(var_or_exprs.parser_context, target_param_name)
-
 
     def is_getter_or_setter(self, first_id: str, second_id: str, local_candidates: set):
         return (first_id in local_candidates or first_id in self.field_candidates) and (
