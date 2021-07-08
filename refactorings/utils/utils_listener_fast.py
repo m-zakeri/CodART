@@ -756,6 +756,8 @@ class FieldUsageListener(UtilsListener):
 
     def exitConstructorDeclaration(self, ctx:JavaParser.ConstructorDeclarationContext):
         self.handleMethodUsage(ctx)
+        self.current_method.name = ctx.IDENTIFIER().getText()
+        self.current_method.returntype = self.current_method.class_name
         super().exitConstructorDeclaration(ctx)
 
     def exitMethodBody(self, ctx: JavaParser.MethodBodyContext):
@@ -797,9 +799,20 @@ class FieldUsageListener(UtilsListener):
                 if var_or_exprs.datatype == self.source_class:
                     local_candidates.add(var_or_exprs.identifier)
 
+        should_ignore = False
+
         for var_or_exprs in self.current_method.body_local_vars_and_expr_names:
             if type(var_or_exprs) is ExpressionName:
                 # we're going to find source.field
+                try:
+                    local_ctx = var_or_exprs.parser_context.parentCtx.parentCtx.parentCtx.parentCtx.parentCtx.parentCtx
+                    creator = local_ctx.expression()[0].getText()
+                    if creator.__contains__(f"new{self.source_class}") and local_ctx.IDENTIFIER().getText() == self.field_name:
+                        self.propagate_field(local_ctx, target_param_name)
+                        
+                except :
+                    pass
+
                 if len(var_or_exprs.dot_separated_identifiers) < 2:
                     continue
                 if (var_or_exprs.dot_separated_identifiers[0] in local_candidates or
@@ -809,6 +822,7 @@ class FieldUsageListener(UtilsListener):
                         # add target to param
                         self.rewriter.insertBeforeIndex(formal_params.stop.tokenIndex,
                                                         target_param)
+                        self.methods_tobe_updated.append(self.current_method)
                         target_added = True
 
                     self.usages.append(var_or_exprs.parser_context)
@@ -818,24 +832,29 @@ class FieldUsageListener(UtilsListener):
                 # we are going to find getter or setters
                 # if len(var_or_exprs.dot_separated_identifiers) < 2:
                 #     continue
-
-                if self.is_method_getter_or_setter(var_or_exprs.dot_separated_identifiers[0]):
+                if var_or_exprs.dot_separated_identifiers[0] == f"new{self.source_class}":
+                    if var_or_exprs.parser_context.methodCall() is not None and \
+                            self.is_method_getter_or_setter(var_or_exprs.parser_context.methodCall().IDENTIFIER().getText()):
+                        self.propagate_getter_setter(var_or_exprs.parser_context, target_param_name)
+                elif self.is_method_getter_or_setter(var_or_exprs.dot_separated_identifiers[0]):
                     if not target_added:
                         # add target to param
                         self.rewriter.insertBeforeIndex(formal_params.stop.tokenIndex,
                                                         target_param)
+                        self.methods_tobe_updated.append(self.current_method)
                         target_added = True
-                    if var_or_exprs.parser_context is not None and type(
+                    if not should_ignore and var_or_exprs.parser_context is not None and type(
                             var_or_exprs.parser_context) is not JavaParser.ExpressionContext:
                         continue
                     self.usages.append(var_or_exprs.parser_context)
                     self.propagate_getter_setter_form2(var_or_exprs.parser_context, target_param_name)
-                elif self.is_getter_or_setter(var_or_exprs.dot_separated_identifiers[0],
+                elif len(var_or_exprs.dot_separated_identifiers) > 1 and self.is_getter_or_setter(var_or_exprs.dot_separated_identifiers[0],
                                               var_or_exprs.dot_separated_identifiers[1], local_candidates):
                     if not target_added:
                         # add target to param
                         self.rewriter.insertBeforeIndex(formal_params.stop.tokenIndex,
                                                         target_param)
+                        self.methods_tobe_updated.append(self.current_method)
                         target_added = True
 
                     self.usages.append(var_or_exprs.parser_context)
@@ -888,8 +907,10 @@ if __name__ == '__main__':
     field_name = "a"
     files = ["/home/loop/IdeaProjects/move-field/src/source/Source.java",
              "/home/loop/IdeaProjects/move-field/src/target/Target.java",
-             "/home/loop/IdeaProjects/move-field/src/extra/Extra.java"]
+             "/home/loop/IdeaProjects/move-field/src/extra/Extra.java",
+             "/home/loop/IdeaProjects/move-field/src/extra/Extra2.java"]
     field = None
+    methods_tobe_update = []
     for file in files:
         stream = FileStream(file, encoding='utf8')
         lexer = JavaLexer(stream)
@@ -910,8 +931,6 @@ if __name__ == '__main__':
                 if f.datatype == source_class:
                     field_candidate.add(f.name)
 
-
-
         listener = FieldUsageListener(
             file,
             source_class,
@@ -923,8 +942,12 @@ if __name__ == '__main__':
             field)
         walker.walk(listener, tree)
 
+        methods_tobe_update = listener.methods_tobe_updated + methods_tobe_update
+
         if file.__contains__(source_class):
             field = listener.field_tobe_moved
 
         # for usage in listener.usages:
         #     print(usage.getText())
+    for method in methods_tobe_update:
+        print(method.name)
