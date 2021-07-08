@@ -899,6 +899,28 @@ def save(rewriter: TokenStreamRewriter, file_name: str, filename_mapping=lambda 
         file.write(rewriter.getDefaultText())
 
 
+class MethodUsageListener(UtilsListener):
+    def __init__(self, filename: str, methods: str, target_class: str):
+        super().__init__(filename)
+        self.methods = methods
+        self.method_names = set(map(lambda m: m.name, methods))
+        self.rewriter = None
+        self.target_class = target_class
+
+    def enterCompilationUnit(self, ctx:JavaParser.CompilationUnitContext):
+        super().enterCompilationUnit(ctx)
+        self.rewriter = TokenStreamRewriter(ctx.parser.getTokenStream())
+
+    def exitMethodCall(self, ctx: JavaParser.MethodCallContext):
+        super().exitMethodCall(ctx)
+        if ctx.IDENTIFIER().getText() in self.method_names:
+            text = f"new {self.target_class}()" if ctx.expressionList() is None else f", new {self.target_class}()"
+            self.rewriter.insertBeforeIndex(ctx.RPAREN().symbol.tokenIndex, text)
+
+    def exitClassBody(self, ctx: JavaParser.ClassBodyContext):
+        super().exitClassBody(ctx)
+        save(self.rewriter, self.filename)
+
 if __name__ == '__main__':
     source_class = "Source"
     source_package = "source"
@@ -947,7 +969,19 @@ if __name__ == '__main__':
         if file.__contains__(source_class):
             field = listener.field_tobe_moved
 
-        # for usage in listener.usages:
-        #     print(usage.getText())
     for method in methods_tobe_update:
         print(method.name)
+
+    filess = ["/home/loop/IdeaProjects/move-field/src/source/Source.java.rewritten.java",
+             "/home/loop/IdeaProjects/move-field/src/target/Target.java.rewritten.java",
+             "/home/loop/IdeaProjects/move-field/src/extra/Extra.java.rewritten.java",
+             "/home/loop/IdeaProjects/move-field/src/extra/Extra2.java.rewritten.java"]
+    for i, file in enumerate(files):
+        stream = FileStream(filess[i], encoding='utf8')
+        lexer = JavaLexer(stream)
+        token_stream = CommonTokenStream(lexer)
+        parser = JavaParser(token_stream)
+        tree = parser.compilationUnit()
+        listener = MethodUsageListener(file, methods_tobe_update, target_class)
+        walker = ParseTreeWalker()
+        walker.walk(listener, tree)
