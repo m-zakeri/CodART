@@ -29,23 +29,35 @@ class EncapsulateFiledRefactoringListener(JavaParserLabeledListener):
     """
 #
     def __init__(self, common_token_stream: CommonTokenStream = None,
+                 package_name: str = None,
                  source_class_name: str = None,
                  field_identifier: str = None):
         """
         :param common_token_stream:
         """
         self.token_stream = common_token_stream
+        if package_name is None:
+            self.package_name = ''
+        else:
+            self.package_name = package_name
         self.source_class_name = source_class_name
         self.field_identifier = field_identifier
         self.getter_exist = False
         self.setter_exist = False
         self.in_source_class = False
+        self.in_selected_package = True if self.package_name == '' else False
         # Move all the tokens in the source code in a buffer, token_stream_rewriter.
         if common_token_stream is not None:
             self.token_stream_rewriter =\
                 TokenStreamRewriter(common_token_stream)
         else:
             raise TypeError('common_token_stream is None')
+
+    def enterPackageDeclaration(self, ctx:JavaParserLabeled.PackageDeclarationContext):
+        if self.package_name == ctx.qualifiedName().getText():
+            self.in_selected_package = True
+        else:
+            self.in_selected_package = False
 
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
         if ctx.IDENTIFIER().getText() == self.source_class_name:
@@ -55,7 +67,7 @@ class EncapsulateFiledRefactoringListener(JavaParserLabeledListener):
         self.in_source_class = False
 
     def exitFieldDeclaration(self, ctx: JavaParserLabeled.FieldDeclarationContext):
-        if self.in_source_class:
+        if self.in_source_class and self.in_selected_package:
             if ctx.variableDeclarators().getText() == self.field_identifier:
                 if not ctx.parentCtx.parentCtx.modifier(0):
                     self.token_stream_rewriter.insertBeforeIndex(
@@ -118,7 +130,7 @@ class EncapsulateFiledRefactoringListener(JavaParserLabeledListener):
                 #                                         text='\n\t/*End of accessor and mutator methods!*/\n\n')
 
     def exitExpression21(self, ctx: JavaParserLabeled.Expression21Context):
-        if self.in_source_class:
+        if self.in_source_class and self.in_selected_package:
             if ctx.expression(0).getText() == self.field_identifier or \
                     ctx.expression(0).getText() == 'this.' + self.field_identifier:
                 expr_code = self.token_stream_rewriter.getText(
@@ -129,7 +141,7 @@ class EncapsulateFiledRefactoringListener(JavaParserLabeledListener):
                 self.token_stream_rewriter.replaceRange(ctx.start.tokenIndex, ctx.stop.tokenIndex, new_code)
 
     def exitExpression0(self, ctx: JavaParserLabeled.Expression0Context):
-        if self.in_source_class:
+        if self.in_source_class and self.in_selected_package:
             try:
                 if ctx.parentCtx.getChild(1).getText() in ('=', '+=', '-=',
                                                            '*=', '/=', '&=',
@@ -146,7 +158,7 @@ class EncapsulateFiledRefactoringListener(JavaParserLabeledListener):
                                                         new_code)
 
     def exitExpression1(self, ctx: JavaParserLabeled.Expression1Context):
-        if self.in_source_class:
+        if self.in_source_class and self.in_selected_package:
             try:
                 if ctx.parentCtx.getChild(1).getText() in ('=', '+=', '-=',
                                                            '*=', '/=', '&=',
@@ -162,7 +174,7 @@ class EncapsulateFiledRefactoringListener(JavaParserLabeledListener):
                                                         ctx.stop.tokenIndex,
                                                         new_code)
 
-    def enterCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
+    def exitCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
         try:
             hidden = self.token_stream.getHiddenTokensToLeft(ctx.start.tokenIndex)
             self.token_stream_rewriter.replaceRange(from_idx=hidden[0].tokenIndex,
@@ -172,7 +184,7 @@ class EncapsulateFiledRefactoringListener(JavaParserLabeledListener):
             pass
 
 
-def main(directory_path, source_class, field_name):
+def main(directory_path, package_name, source_class, field_name):
     print('Encapsulate Field')
 
     for root, dirs, files in os.walk(directory_path):
@@ -183,6 +195,7 @@ def main(directory_path, source_class, field_name):
                 token_stream = CommonTokenStream(lexer)
                 parser = JavaParserLabeled(token_stream)
                 ef_listener = EncapsulateFiledRefactoringListener(token_stream,
+                                                                  package_name,
                                                                   source_class,
                                                                   field_name)
                 tree = parser.compilationUnit()
@@ -198,6 +211,7 @@ def main(directory_path, source_class, field_name):
 
 if __name__ == "__main__":
     directory_path = "../tests/encapsulate_field_tests/"
+    package_name = ''
     source_class = 'A'
     field_name = 'f'
-    main(directory_path, source_class, field_name)
+    main(directory_path, package_name, source_class, field_name)
