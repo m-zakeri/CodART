@@ -596,7 +596,7 @@ public class JSONArray implements Iterable<Object> {
      *            The index must be between 0 and length() - 1.
      * @return The truth.
      */
-    public static boolean optBoolean(int index) {
+    public boolean optBoolean(int index) {
         return this.optBoolean(index, false);
     }
 
@@ -611,7 +611,7 @@ public class JSONArray implements Iterable<Object> {
      *            A boolean default.
      * @return The truth.
      */
-    public static boolean optBoolean(int index, boolean defaultValue) {
+    public boolean optBoolean(int index, boolean defaultValue) {
         try {
             return this.getBoolean(index);
         } catch (Exception e) {
@@ -628,7 +628,7 @@ public class JSONArray implements Iterable<Object> {
      *            The index must be between 0 and length() - 1.
      * @return The value.
      */
-    public double optDouble(int index) {
+    public double optDouble_old(int index) {
         return this.optDouble(index, Double.NaN);
     }
 
