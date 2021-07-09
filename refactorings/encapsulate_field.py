@@ -284,7 +284,6 @@ def main(directory_path, package_name, source_class, field_name):
                 refactored = open(os.path.join(root, file), 'w', newline='')
                 refactored.write(ip_listener.token_stream_rewriter.getDefaultText())
                 refactored.close()
-        break
 
     print('Finished!')
 

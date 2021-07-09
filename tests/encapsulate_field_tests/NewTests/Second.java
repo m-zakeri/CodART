@@ -1,6 +1,6 @@
 package testjava;
 
-import learnjava.;
+import learnjava.*;
 
 class Second {  
     public static void main(String[] args) {  
