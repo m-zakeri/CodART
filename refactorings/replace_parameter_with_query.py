@@ -1,4 +1,3 @@
-
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
@@ -156,8 +155,9 @@ class ReplaceParameterWithQueryRefactoringListener(JavaParserLabeledListener):
                         parameter_type = parameter.typeType().getText()
                         parameter_vdi = parameter.variableDeclaratorId().getText()
                         parameter_initializer = self.add_to_top_of_target_method[0]
-                        text += parameter_type + ' ' + parameter_vdi + ' = ' + parameter_initializer \
-                                + ';' + self.NEW_LINE + self.TAB + self.TAB
+                        text += \
+                            parameter_type + ' ' + parameter_vdi + ' = ' + parameter_initializer +\
+                            ';' + self.NEW_LINE + self.TAB + self.TAB
                         self.add_to_top_of_target_method.remove(parameter_initializer)
 
                     else:
@@ -183,8 +183,7 @@ class ReplaceParameterWithQueryAPI:
 
     def __init__(self, file_path, target_class, target_method, target_parameters):
         self.file_path = file_path
-        self.new_file_path = \
-            "C:\\Users\\asus\\Desktop\\desk\\projects\\Workspace\\Workspace\\src\\com\\amirh\\CodART_Test_result.java"
+        self.new_file_path = file_path
         self.target_class = target_class
         self.target_method = target_method
         self.target_parameters = target_parameters
@@ -210,14 +209,17 @@ class ReplaceParameterWithQueryAPI:
         print(listener.add_to_top_of_target_method)
         print(listener.token_stream_rewriter.getDefaultText())
 
+        print(type(self.new_file_path))
+
         with open(self.new_file_path, mode="w", newline="") as f:
             f.write(listener.token_stream_rewriter.getDefaultText())
 
 
 if __name__ == '__main__':
     ReplaceParameterWithQueryAPI(
-        file_path="C:\\Users\\asus\\Desktop\\desk\\projects\\Workspace\\Workspace\\src\\com\\amirh\\CodART_Test.java",
-        target_class='CodART_Test',
-        target_method="availableVacation",
-        target_parameters=[2, 3],
+        file_path="C:\\Users\\asus\\Desktop\\desk\\University\\99002-CD (compiler)\\Project\\CodART\\"
+                  "benchmark_projects\\JSON\\src\\main\\java\\org\\json\\JSONArray.java",
+        target_class='JSONArray',
+        target_method="optDouble",
+        target_parameters=[2],
     ).do_refactor()
