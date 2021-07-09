@@ -15,6 +15,9 @@ from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 
+files_to_refactor=[]
+
+
 class ExtractSubClassRefactoringListener(JavaParserLabeledListener):
     """
     To implement extract class refactoring based on its actors.
@@ -367,6 +370,22 @@ class FindUsagesListener(JavaParserLabeledListener):
         self.NEW_LINE = "\n"
         self.code = ""
 
+    def exitTypeTypeOrVoid(self, ctx: JavaParserLabeled.TypeTypeOrVoidContext):
+        if ctx.getText() == self.source_class:
+            self.token_stream_rewriter.replaceRange(
+                from_idx=ctx.start.tokenIndex,
+                to_idx=ctx.stop.tokenIndex,
+                text=f"{self.new_class}"
+            )
+
+    def exitFormalParameter(self, ctx: JavaParserLabeled.FormalParameterContext):
+        if ctx.typeType().getText() == self.source_class:
+            self.token_stream_rewriter.replaceRange(
+                from_idx=ctx.typeType().start.tokenIndex,
+                to_idx=ctx.typeType().stop.tokenIndex,
+                text=f"{self.new_class}"
+            )
+
 
 # =======================================================================
 
@@ -454,25 +473,28 @@ def main():
     # moved_methods = ['method1', 'method3', ]
     # moved_fields = ['field1', 'field2', ]
     udb_path = "C:\\Users\\asus\\Desktop\\test_project\\test_project.udb"
-    source_class = "CDL"
-    moved_methods = ['getValue', 'rowToJSONArray', 'getVal', ]
-    moved_fields = ['number_2', 'number_1', ]
+    source_class = "JSONArray"
+    # moved_methods = ['getValue', 'rowToJSONArray', 'getVal', ]
+    # moved_fields = ['number_2', 'number_1', ]
+
+    moved_methods = ['put']
+    moved_fields = []
 
     # initialize with understand
     father_path_file = ""
     file_list_to_be_propagate = set()
     propagate_classes = set()
 
-    db = und.open(udb_path)
-    # db=open(udb_path)
+    # db = und.open(udb_path)
+    # # db=open(udb_path)
+    #
+    # for cls in db.ents("class"):
+    #     if (cls.simplename() == source_class):
+    #         father_path_file = cls.parent().longname()
+    #         for ref in cls.refs("Coupleby"):
+    #             propagate_classes.add(ref.ent().longname())
 
-    for cls in db.ents("class"):
-        if (cls.simplename() == source_class):
-            father_path_file = cls.parent().longname()
-            for ref in cls.refs("Coupleby"):
-                propagate_classes.add(ref.ent().longname())
-
-    father_path_file = "C:\\Users\\asus\\Desktop\\test_project\\CDL.java"
+    father_path_file = "C:\\Users\\asus\\Desktop\\test_project\\JSONArray.java"
     father_path_directory = "C:\\Users\\asus\\Desktop\\test_project"
 
     stream = FileStream(father_path_file, encoding='utf8')
@@ -495,11 +517,31 @@ def main():
     #iterate on ther files
     # for file in other files: ...
 
-    my_listener2 = FindUsagesListener(common_token_stream=token_stream,
-                                      source_class=source_class,
-                                      new_class=source_class + "extracted",
-                                      moved_fields=moved_fields, moved_methods=moved_methods,
-                                      output_path=father_path_directory)
+    path_to_refactor="C:\\Users\\asus\\Desktop\\test_project"
+
+
+    extractJavaFilesAndProcess(path_to_refactor, father_path_file)
+
+    for file in files_to_refactor:
+        stream = FileStream(file, encoding='utf8')
+        lexer = JavaLexer(stream)
+        token_stream = CommonTokenStream(lexer)
+        parser = JavaParserLabeled(token_stream)
+        parser.getTokenStream()
+        parse_tree = parser.compilationUnit()
+
+        my_listener = FindUsagesListener(common_token_stream=token_stream,
+                                          source_class=source_class,
+                                          new_class=source_class + "extracted",
+                                          moved_fields=moved_fields, moved_methods=moved_methods,
+                                          output_path=father_path_directory)
+
+        walker = ParseTreeWalker()
+        walker.walk(t=parse_tree, listener=my_listener)
+
+        with open(file, mode='w', newline='') as f:
+            f.write(my_listener.token_stream_rewriter.getDefaultText())
+
 
 
 
@@ -617,6 +659,21 @@ class AllUsageList:
     # a["2"] = 2
     # print(aul.get_identifier_fields((tuple(["class:A"]), "a")), aul.get_identifier_methods((tuple(["class:A"]), "a")))
 
+
+
+
+def extractJavaFilesAndProcess(path,source_class_file):
+    try:
+        entries=os.listdir(path)
+        for entry in entries:
+            print(entry)
+            if(not os.path.isfile(os.path.join(path, entry))):
+                extractJavaFilesAndProcess(os.path.join(path,entry))
+            else:
+                if('.java' in entry or '.Java' in entry) and str(entry) != source_class_file:
+                    files_to_refactor.append(os.path.join(path,entry))
+    except:
+        print("error to read")
 
 
 
