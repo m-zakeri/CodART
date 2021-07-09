@@ -492,6 +492,17 @@ def main():
     with open(father_path_file, mode='w', newline='') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
 
+    #iterate on ther files
+    # for file in other files: ...
+
+    my_listener2 = FindUsagesListener(common_token_stream=token_stream,
+                                      source_class=source_class,
+                                      new_class=source_class + "extracted",
+                                      moved_fields=moved_fields, moved_methods=moved_methods,
+                                      output_path=father_path_directory)
+
+
+
     # ================================================================================
 
     # find_usages_listener = FindUsagesListener()
