@@ -674,7 +674,8 @@ class FieldUsageListener(UtilsListener):
     package pkg.
     """
 
-    def __init__(self, filename: str, source_class: str, source_package: str,target_class: str, target_package: str, field_name: str, field_candidates: set, field_tobe_moved: Field):
+    def __init__(self, filename: str, source_class: str, source_package: str, target_class: str, target_package: str,
+                 field_name: str, field_candidates: set, field_tobe_moved: Field):
         super().__init__(filename)
         self.source_class = source_class
         self.source_package = source_package
@@ -692,7 +693,7 @@ class FieldUsageListener(UtilsListener):
         self.field_tobe_moved = field_tobe_moved
         self.methods_tobe_updated = []
 
-    def enterCompilationUnit(self, ctx:JavaParser.CompilationUnitContext):
+    def enterCompilationUnit(self, ctx: JavaParser.CompilationUnitContext):
         super().enterCompilationUnit(ctx)
         self.rewriter = TokenStreamRewriter(ctx.parser.getTokenStream())
 
@@ -707,7 +708,8 @@ class FieldUsageListener(UtilsListener):
 
         # import target if we're not in Target and have not imported before
         if self.current_class_name != self.target_class:
-            self.rewriter.insertBeforeIndex(ctx.parentCtx.start.tokenIndex, f"import {self.target_package}.{self.target_class};\n")
+            self.rewriter.insertBeforeIndex(ctx.parentCtx.start.tokenIndex,
+                                            f"import {self.target_package}.{self.target_class};\n")
 
     def enterClassBody(self, ctx: JavaParser.ClassBodyContext):
         super().exitClassBody(ctx)
@@ -728,13 +730,15 @@ class FieldUsageListener(UtilsListener):
             setter = f"\tpublic void set{method_name}({type} {name}) {{ this.{name} = {name}; }}\n"
             self.rewriter.insertBeforeIndex(ctx.stop.tokenIndex, getter)
             self.rewriter.insertBeforeIndex(ctx.stop.tokenIndex, setter)
+
     def exitFieldDeclaration(self, ctx: JavaParser.FieldDeclarationContext):
         super().exitFieldDeclaration(ctx)
         if self.current_class_name != self.source_class:
             return
 
         if self.field_tobe_moved is None:
-            field = self.package.classes[self.current_class_name].fields[ctx.variableDeclarators().children[0].children[0].IDENTIFIER().getText()]
+            field = self.package.classes[self.current_class_name].fields[
+                ctx.variableDeclarators().children[0].children[0].IDENTIFIER().getText()]
             if field.name == self.field_name:
                 self.field_tobe_moved = field
 
@@ -754,7 +758,7 @@ class FieldUsageListener(UtilsListener):
                 ctx.parentCtx.parentCtx.start.tokenIndex,
                 ctx.parentCtx.parentCtx.stop.tokenIndex, "")
 
-    def exitConstructorDeclaration(self, ctx:JavaParser.ConstructorDeclarationContext):
+    def exitConstructorDeclaration(self, ctx: JavaParser.ConstructorDeclarationContext):
         self.handleMethodUsage(ctx)
         self.current_method.name = ctx.IDENTIFIER().getText()
         self.current_method.returntype = self.current_method.class_name
@@ -807,10 +811,11 @@ class FieldUsageListener(UtilsListener):
                 try:
                     local_ctx = var_or_exprs.parser_context.parentCtx.parentCtx.parentCtx.parentCtx.parentCtx.parentCtx
                     creator = local_ctx.expression()[0].getText()
-                    if creator.__contains__(f"new{self.source_class}") and local_ctx.IDENTIFIER().getText() == self.field_name:
+                    if creator.__contains__(
+                            f"new{self.source_class}") and local_ctx.IDENTIFIER().getText() == self.field_name:
                         self.propagate_field(local_ctx, target_param_name)
-                        
-                except :
+
+                except:
                     pass
 
                 if len(var_or_exprs.dot_separated_identifiers) < 2:
@@ -834,7 +839,8 @@ class FieldUsageListener(UtilsListener):
                 #     continue
                 if var_or_exprs.dot_separated_identifiers[0] == f"new{self.source_class}":
                     if var_or_exprs.parser_context.methodCall() is not None and \
-                            self.is_method_getter_or_setter(var_or_exprs.parser_context.methodCall().IDENTIFIER().getText()):
+                            self.is_method_getter_or_setter(
+                                var_or_exprs.parser_context.methodCall().IDENTIFIER().getText()):
                         self.propagate_getter_setter(var_or_exprs.parser_context, target_param_name)
                 elif self.is_method_getter_or_setter(var_or_exprs.dot_separated_identifiers[0]):
                     if not target_added:
@@ -848,8 +854,9 @@ class FieldUsageListener(UtilsListener):
                         continue
                     self.usages.append(var_or_exprs.parser_context)
                     self.propagate_getter_setter_form2(var_or_exprs.parser_context, target_param_name)
-                elif len(var_or_exprs.dot_separated_identifiers) > 1 and self.is_getter_or_setter(var_or_exprs.dot_separated_identifiers[0],
-                                              var_or_exprs.dot_separated_identifiers[1], local_candidates):
+                elif len(var_or_exprs.dot_separated_identifiers) > 1 and self.is_getter_or_setter(
+                        var_or_exprs.dot_separated_identifiers[0],
+                        var_or_exprs.dot_separated_identifiers[1], local_candidates):
                     if not target_added:
                         # add target to param
                         self.rewriter.insertBeforeIndex(formal_params.stop.tokenIndex,
@@ -870,10 +877,10 @@ class FieldUsageListener(UtilsListener):
 
     def is_method_getter_or_setter(self, method: str):
         return (
-            method == f"set{self.field_name[0].upper() + self.field_name[1:-1]}" or
-            method == f"get{self.field_name[0].upper() + self.field_name[1:-1]}" or
-            method == f"has{self.field_name[0].upper() + self.field_name[1:-1]}" or
-            method == f"is{self.field_name[0].upper() + self.field_name[1:-1]}"
+                method == f"set{self.field_name[0].upper() + self.field_name[1:-1]}" or
+                method == f"get{self.field_name[0].upper() + self.field_name[1:-1]}" or
+                method == f"has{self.field_name[0].upper() + self.field_name[1:-1]}" or
+                method == f"is{self.field_name[0].upper() + self.field_name[1:-1]}"
         )
 
     def propagate_getter_setter(self, ctx: JavaParser.ExpressionContext, target_name: str):
@@ -885,6 +892,7 @@ class FieldUsageListener(UtilsListener):
         form 2 is getA() setA()...
         """
         self.rewriter.insertBeforeIndex(ctx.start.tokenIndex, f"{target_name}.")
+
     def propagate_field(self, ctx: JavaParser.ExpressionContext, target_name: str):
         index = ctx.DOT().symbol.tokenIndex
         self.rewriter.replaceRange(ctx.start.tokenIndex, index - 1, target_name)
@@ -907,11 +915,11 @@ class MethodUsageListener(UtilsListener):
         self.rewriter = None
         self.target_class = target_class
 
-    def enterCompilationUnit(self, ctx:JavaParser.CompilationUnitContext):
+    def enterCompilationUnit(self, ctx: JavaParser.CompilationUnitContext):
         super().enterCompilationUnit(ctx)
         self.rewriter = TokenStreamRewriter(ctx.parser.getTokenStream())
 
-    def enterClassCreatorRest(self, ctx:JavaParser.ClassCreatorRestContext):
+    def enterClassCreatorRest(self, ctx: JavaParser.ClassCreatorRestContext):
         if type(ctx.parentCtx) is JavaParser.CreatorContext:
             if ctx.parentCtx.createdName().IDENTIFIER()[0].getText() not in self.method_names:
                 return
@@ -929,16 +937,39 @@ class MethodUsageListener(UtilsListener):
         super().exitClassBody(ctx)
         save(self.rewriter, self.filename)
 
+
+def get_filenames_in_dir(directory_name: str, filter=lambda x: x.endswith(".java")) -> list:
+    result = []
+    for (dirname, dirnames, filenames) in os.walk(directory_name):
+        result.extend([dirname + '/' + name for name in filenames if filter(name)])
+    return result
+
+
+def clean_up_dir(files: list) -> list:
+    """
+    :param files: List of files in the project directory
+    :return: list
+
+    Cleans up trashed files and gives original files
+    """
+
+    original_files = list()
+    for file in files:
+        if "rewritten.java" in file:
+            os.remove(file)
+        else:
+            original_files.append(file)
+    return original_files
+
+
 if __name__ == '__main__':
-    source_class = "Source"
-    source_package = "source"
-    target_class = "Target"
-    target_package = "target"
-    field_name = "a"
-    files = ["/home/loop/IdeaProjects/move-field/src/source/Source.java",
-             "/home/loop/IdeaProjects/move-field/src/target/Target.java",
-             "/home/loop/IdeaProjects/move-field/src/extra/Extra.java",
-             "/home/loop/IdeaProjects/move-field/src/extra/Extra2.java"]
+    source_class = "JSONArray"
+    source_package = "org.json"
+    target_class = "JSON Object"
+    target_package = "org.json"
+    field_name = "myArrayList"
+    files = get_filenames_in_dir(
+        '/home/nima/Nima/Uni/Compiler/Project/CodART/benchmark_projects/JSON/src/main/java/org/json/')
     field = None
     methods_tobe_update = []
     for file in files:
@@ -980,10 +1011,7 @@ if __name__ == '__main__':
     for method in methods_tobe_update:
         print(method.name)
 
-    filess = ["/home/loop/IdeaProjects/move-field/src/source/Source.java.rewritten.java",
-             "/home/loop/IdeaProjects/move-field/src/target/Target.java.rewritten.java",
-             "/home/loop/IdeaProjects/move-field/src/extra/Extra.java.rewritten.java",
-             "/home/loop/IdeaProjects/move-field/src/extra/Extra2.java.rewritten.java"]
+    filess = [f'{file}.rewritten.java' for file in files]
     for i, file in enumerate(files):
         stream = FileStream(filess[i], encoding='utf8')
         lexer = JavaLexer(stream)
