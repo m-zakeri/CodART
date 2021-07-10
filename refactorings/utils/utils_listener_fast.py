@@ -759,18 +759,18 @@ class FieldUsageListener(UtilsListener):
                 ctx.parentCtx.parentCtx.stop.tokenIndex, "")
 
     def exitConstructorDeclaration(self, ctx: JavaParser.ConstructorDeclarationContext):
-        self.handleMethodUsage(ctx)
         self.current_method.name = ctx.IDENTIFIER().getText()
         self.current_method.returntype = self.current_method.class_name
+        self.handleMethodUsage(ctx, True)
         super().exitConstructorDeclaration(ctx)
 
     def exitMethodBody(self, ctx: JavaParser.MethodBodyContext):
         super().exitMethodBody(ctx)
-        self.handleMethodUsage(ctx)
+        self.handleMethodUsage(ctx, False)
 
-    def handleMethodUsage(self, ctx):
-        method_identifier = ctx.IDENTIFIER().getText() if self.current_method.is_constructor else ctx.parentCtx.IDENTIFIER().getText()
-        formal_params = ctx.formalParameters() if self.current_method.is_constructor else ctx.parentCtx.formalParameters()
+    def handleMethodUsage(self, ctx, is_constructor: bool):
+        method_identifier = ctx.IDENTIFIER().getText() if is_constructor else ctx.parentCtx.IDENTIFIER().getText()
+        formal_params = ctx.formalParameters() if is_constructor else ctx.parentCtx.formalParameters()
         target_added = False
         target_param_name = "$$target"
         target_param = f"Target {target_param_name}" if \
