@@ -1039,13 +1039,13 @@ if __name__ == '__main__':
     # for method in methods_tobe_update:
     #     print(method.name)
 
-    # filess = [f'{file.split(".")[0]}.rewritten.java' for file in files]
-    # for i, file in enumerate(files):
-    #     stream = FileStream(filess[i], encoding='utf8')
-    #     lexer = JavaLexer(stream)
-    #     token_stream = CommonTokenStream(lexer)
-    #     parser = JavaParser(token_stream)
-    #     tree = parser.compilationUnit()
-    #     listener = MethodUsageListener(file, methods_tobe_update, target_class)
-    #     walker = ParseTreeWalker()
-    #     walker.walk(listener, tree)
+    filess = [f'{file.split(".")[0]}.rewritten.java' for file in files]
+    for i, file in enumerate(files):
+        stream = FileStream(filess[i], encoding='utf8')
+        lexer = JavaLexer(stream)
+        token_stream = CommonTokenStream(lexer)
+        parser = JavaParser(token_stream)
+        tree = parser.compilationUnit()
+        listener = MethodUsageListener(file, methods_tobe_update, target_class)
+        walker = ParseTreeWalker()
+        walker.walk(listener, tree)
