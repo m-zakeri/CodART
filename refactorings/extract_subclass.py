@@ -403,37 +403,36 @@ class FindUsagesListener(JavaParserLabeledListener):
 
     def exitFieldDeclaration(self, ctx:JavaParserLabeled.FieldDeclarationContext):
         if ctx.typeType().getText() == self.source_class:
-            self.aul.add_identifier((ctx.variableDeclarators().variableDeclarator().variableDeclaratorId().IDENTIFIER().getText(),
+            self.aul.add_identifier((ctx.variableDeclarators().variableDeclarator(0).variableDeclaratorId().IDENTIFIER().getText(),
                                     self.scope))
 
     def exitLocalVariableDeclaration(self, ctx:JavaParserLabeled.LocalVariableDeclarationContext):
         if(ctx.typeType().getText() == self.source_class):
-            self.aul.add_identifier((ctx.variableDeclarators().variableDeclarator().variableDeclaratorId().IDENTIFIER().getText(),
+            self.aul.add_identifier((ctx.variableDeclarators().variableDeclarator(0).variableDeclaratorId().IDENTIFIER().getText(),
                                     self.scope))
 
     def exitExpression1(self, ctx: JavaParserLabeled.Expression1Context):
-        parent=ctx.parentCtx
-        if type(parent)==JavaParserLabeled.Expression21Context:
-            child = ctx.children[0]
-            if type(child) == JavaParserLabeled.Expression0Context:
-                #identifier.field
-                self.aul.add_field_to_identifier(identifier=(ctx.expression().getText(), self.scope),
-                                                  field_name=ctx.IDENTIFIER().getText())
-            elif type(child) == JavaParserLabeled.Expression1Context:
-                #this.identifier.field
-                self.aul.add_field_to_identifier(identifier=(ctx.expression().IDENTIFIER().getText(), self.scope),
-                                                 field_name=ctx.IDENTIFIER().getText())
+        #left_hand_side'.'right_hand_side  ==> identifier.method | identifier.field
+        right_hand_side=ctx.children[-1]
+        left_hand_side=ctx.children[0]
+        if type(left_hand_side)==JavaParserLabeled.Expression0Context:
+            if type(right_hand_side)==tree.Tree.TerminalNodeImpl:
+                if left_hand_side.getText()!='this':
+                    self.aul.add_field_to_identifier(identifier=(left_hand_side.getText(), self.scope),
+                                                     field_name=right_hand_side.getText())
+            elif type(right_hand_side)==JavaParserLabeled.MethodCall0Context:
+                if left_hand_side.getText()!='this':
+                    self.aul.add_method_to_identifier(identifier=(left_hand_side.getText(),self.scope),
+                                                      method_name=right_hand_side.children[0].getText())
 
-        elif type(parent)==JavaParserLabeled.Statement15Context:
-            child=ctx.children[0]
-            if type(child)==JavaParserLabeled.Expression0Context:
-                #identifier.method
-                self.aul.add_method_to_identifier(identifier=(ctx.expression().getText(),self.scope),
-                                                  method_name=ctx.methodCall().IDENTIFIER().getText())
-            elif type(child)==JavaParserLabeled.Expression1Context:
-                #this.identifier.method
-                self.aul.add_method_to_identifier(identifier=(ctx.expression().IDENTIFIER().getText(), self.scope),
-                                                  method_name=ctx.methodCall().IDENTIFIER().getText())
+        elif type(left_hand_side)==JavaParserLabeled.Expression1Context:
+            if type(right_hand_side)==tree.Tree.TerminalNodeImpl:
+                self.aul.add_field_to_identifier(identifier=(left_hand_side.children[-1].getText(), self.scope),
+                                                 field_name=right_hand_side.getText())
+            elif type(right_hand_side)==JavaParserLabeled.MethodCall0Context:
+                self.aul.add_method_to_identifier(identifier=(left_hand_side.children[-1].getText(), self.scope),
+                                                  method_name=right_hand_side.children[0].getText())
+
 
     # def exitExpression21(self, ctx: JavaParserLabeled.Expression21Context):
     #     child=ctx.children[0]
@@ -676,59 +675,64 @@ class AllUsageList:
         self.all_usage = dict() #all_usage is a dictionary of IdentifierUsage       tuple(scope,identifier_name) ==> IdentifierUsage()
 
     def is_already_used(self,identifier_usage: tuple):
-        return identifier_usage in self.all_usage
+        return self.get_tuple(identifier_usage) in self.all_usage
+
+    def get_tuple(self,identifier:tuple):
+        return (identifier[0],tuple(identifier[1]))
 
     def add_identifier(self,identifier: tuple): #identifier is tuple of (identifier_name,scope)
-        self.all_usage[identifier]=IdentifierUsage()
+        self.all_usage[self.get_tuple(identifier)]=IdentifierUsage()
 
     def add_method_to_identifier(self,identifier:tuple,method_name:str):#identifier is tuple of (identifier_name,scope)
-        if identifier in self.all_usage:
-            self.all_usage[identifier].add_method(method_name)
+        if self.get_tuple(identifier) in self.all_usage:
+            self.all_usage[self.get_tuple(identifier)].add_method(method_name)
         else:
             # self.all_usage[identifier]=IdentifierUsage()
             # self.all_usage[identifier].add_method(method_name)
             flag=False
-            tmp = identifier[1]
+            id= identifier[0]
+            tmp = identifier[1].copy()
             while len(tmp) > 0:
                 tmp.pop()
-                if identifier in self.all_usage:
-                    self.all_usage[identifier].add_method(method_name)
+                if self.get_tuple((id,tmp)) in self.all_usage:
+                    self.all_usage[self.get_tuple((id,tmp))].add_method(method_name)
                     flag=True
                     break
 
 
     def add_field_to_identifier(self,identifier: tuple, field_name:str):
-        if identifier in self.all_usage:
-            self.all_usage[identifier].add_field(field_name)
+        if self.get_tuple(identifier) in self.all_usage:
+            self.all_usage[self.get_tuple(identifier)].add_field(field_name)
         else:
             # self.all_usage[identifier]=IdentifierUsage()
             # self.all_usage[identifier].add_field(field_name)
-            tmp=identifier[1]
+            id=identifier[0]
+            tmp=identifier[1].copy()
             flag=False
             while len(tmp) > 0:
                 tmp.pop()
-                if identifier in self.all_usage:
-                    self.all_usage[identifier].add_field(field_name)
+                if self.get_tuple((id,tmp)) in self.all_usage:
+                    self.all_usage[self.get_tuple((id,tmp))].add_field(field_name)
                     flag=True
                     break
 
     def is_method_of_identifier(self,identifier: tuple, method_name: str):
-        return identifier in self.all_usage[identifier] and self.all_usage[identifier].is_in_methods_used(method_name)
+        return self.get_tuple(identifier) in self.all_usage and self.all_usage[self.get_tuple(identifier)].is_in_methods_used(method_name)
 
     def is_field_of_identifier(self,identifier: tuple, field_name: str):
-        return identifier in self.all_usage[identifier] and self.all_usage[identifier].is_in_fields_used(field_name)
+        return self.get_tuple(identifier) in self.all_usage and self.all_usage[self.get_tuple(identifier)].is_in_fields_used(field_name)
 
     def get_identifier_methods(self,identifier: tuple):
-        if not identifier in self.all_usage:
+        if not self.get_tuple(identifier) in self.all_usage:
             raise Exception("invalid access")
         else:
-            return self.all_usage[identifier].get_methods_name()
+            return self.all_usage[self.get_tuple(identifier)].get_methods_name()
 
     def get_identifier_fields(self,identifier: tuple):
-        if not identifier in self.all_usage:
+        if not self.get_tuple(identifier) in self.all_usage:
             raise Exception("invalid access")
         else:
-            return self.all_usage[identifier].get_fields_name()
+            return self.all_usage[self.get_tuple(identifier)].get_fields_name()
 
     # aul = AllUsageList()
     # aul.add_field_to_identifier((tuple(["class:A"]), "a"), "field")
