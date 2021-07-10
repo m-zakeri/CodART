@@ -1,3 +1,17 @@
+from gen.java.JavaParser import JavaParser
+from gen.java.JavaParserListener import JavaParserListener
+
+from antlr4 import CommonTokenStream, FileStream, ParseTreeWalker
+from antlr4.TokenStreamRewriter import TokenStreamRewriter
+from gen.java.JavaLexer import JavaLexer
+from .utils.utils_listener_fast import ExpressionName, MethodInvocation, LocalVariable, Field, UtilsListener
+
+from pathlib import Path
+from typing import Union, List, Callable
+
+import os
+
+
 class FieldUsageListener(UtilsListener):
     """
     FieldUsageListener finds all the usage of
@@ -35,7 +49,7 @@ class FieldUsageListener(UtilsListener):
             self.current_class_name = ctx.IDENTIFIER().getText()
 
         self.has_imported_source = self.file_info.has_imported_package(self.package.name) or \
-                                   self.file_info.has_imported_class(self.package.name, self.source_class)
+            self.file_info.has_imported_class(self.package.name, self.source_class)
 
         # import target if we're not in Target and have not imported before
         if self.current_class_name != self.target_class:
@@ -75,7 +89,6 @@ class FieldUsageListener(UtilsListener):
 
     def exitClassBody(self, ctx: JavaParser.ClassBodyContext):
         super().exitClassBody(ctx)
-        save(self.rewriter, self.filename)
 
     def exitMethodDeclaration(self, ctx: JavaParser.MethodDeclarationContext):
         super().exitMethodDeclaration(ctx)
@@ -200,18 +213,18 @@ class FieldUsageListener(UtilsListener):
 
     def is_getter_or_setter(self, first_id: str, second_id: str, local_candidates: set):
         return (first_id in local_candidates or first_id in self.field_candidates) and (
-                second_id == f"set{self.field_name[0].upper() + self.field_name[1:-1]}" or
-                second_id == f"get{self.field_name[0].upper() + self.field_name[1:-1]}" or
-                second_id == f"has{self.field_name[0].upper() + self.field_name[1:-1]}" or
-                second_id == f"is{self.field_name[0].upper() + self.field_name[1:-1]}"
+            second_id == f"set{self.field_name[0].upper() + self.field_name[1:-1]}" or
+            second_id == f"get{self.field_name[0].upper() + self.field_name[1:-1]}" or
+            second_id == f"has{self.field_name[0].upper() + self.field_name[1:-1]}" or
+            second_id == f"is{self.field_name[0].upper() + self.field_name[1:-1]}"
         )
 
     def is_method_getter_or_setter(self, method: str):
         return (
-                method == f"set{self.field_name[0].upper() + self.field_name[1:-1]}" or
-                method == f"get{self.field_name[0].upper() + self.field_name[1:-1]}" or
-                method == f"has{self.field_name[0].upper() + self.field_name[1:-1]}" or
-                method == f"is{self.field_name[0].upper() + self.field_name[1:-1]}"
+            method == f"set{self.field_name[0].upper() + self.field_name[1:-1]}" or
+            method == f"get{self.field_name[0].upper() + self.field_name[1:-1]}" or
+            method == f"has{self.field_name[0].upper() + self.field_name[1:-1]}" or
+            method == f"is{self.field_name[0].upper() + self.field_name[1:-1]}"
         )
 
     def propagate_getter_setter(self, ctx: JavaParser.ExpressionContext, target_name: str):
@@ -227,3 +240,182 @@ class FieldUsageListener(UtilsListener):
     def propagate_field(self, ctx: JavaParser.ExpressionContext, target_name: str):
         index = ctx.DOT().symbol.tokenIndex
         self.rewriter.replaceRange(ctx.start.tokenIndex, index - 1, target_name)
+
+    def save(self, override: bool, filename_mapping=lambda x: x + ".rewritten.java"):
+        if not override:
+            new_filename = filename_mapping(self.filename).replace("\\", "/")
+        else:
+            new_filename = self.filename
+        path = new_filename[:new_filename.rfind('/')]
+        if not os.path.exists(path):
+            os.makedirs(path)
+        with open(new_filename, mode='w', newline='') as file:
+            file.write(self.rewriter.getDefaultText())
+
+
+class MethodUsageListener(UtilsListener):
+    def __init__(self, filename: str, methods: str, target_class: str):
+        super().__init__(filename)
+        self.methods = methods
+        self.method_names = set(map(lambda m: m.name, methods))
+        self.rewriter = None
+        self.target_class = target_class
+
+    def enterCompilationUnit(self, ctx: JavaParser.CompilationUnitContext):
+        super().enterCompilationUnit(ctx)
+        self.rewriter = TokenStreamRewriter(ctx.parser.getTokenStream())
+
+    def enterClassCreatorRest(self, ctx: JavaParser.ClassCreatorRestContext):
+        if type(ctx.parentCtx) is JavaParser.CreatorContext:
+            if ctx.parentCtx.createdName().IDENTIFIER()[0].getText() not in self.method_names:
+                return
+        text = f"new {self.target_class}()" if ctx.arguments(
+        ).expressionList() is None else f", new {self.target_class}()"
+        index = ctx.arguments().RPAREN().symbol.tokenIndex
+        self.rewriter.insertBeforeIndex(index, text)
+
+    def exitMethodCall(self, ctx: JavaParser.MethodCallContext):
+        super().exitMethodCall(ctx)
+        if ctx.IDENTIFIER().getText() in self.method_names:
+            text = f"new {self.target_class}()" if ctx.expressionList() is None else f", new {self.target_class}()"
+            self.rewriter.insertBeforeIndex(ctx.RPAREN().symbol.tokenIndex, text)
+
+    def exitClassBody(self, ctx: JavaParser.ClassBodyContext):
+        super().exitClassBody(ctx)
+
+    def save(self, override: bool, filename_mapping=lambda x: x + ".rewritten.java"):
+
+        if not override:
+            new_filename = filename_mapping(self.filename).replace("\\", "/")
+        else:
+            new_filename = self.filename
+        path = new_filename[:new_filename.rfind('/')]
+        if not os.path.exists(path):
+            os.makedirs(path)
+        with open(new_filename, mode='w', newline='') as file:
+            file.write(self.rewriter.getDefaultText())
+
+
+class MoveField:
+
+    def __init__(self,
+                 src_package: str,
+                 src_class: str,
+                 field_name: str,
+                 target_package: str,
+                 target_class: str,
+                 project_dir: Union[str, Path],
+                 override: bool = False,
+                 filename_maping: Callable = lambda x: x + ".rewritten.java"
+                 ) -> None:
+
+        self.src_package = src_package
+        self.src_class = src_class
+        self.field_name = field_name
+        self.target_package = target_package
+        self.target_class = target_class
+        self.files = MoveField.get_filenames_in_dir(project_dir)
+        self.override = override
+        self.filename_maping = filename_maping
+
+    @staticmethod
+    def get_filenames_in_dir(dir: Union[str, Path],
+                             filter=lambda x: x.endswith(".java")
+                             ) -> List[str]:
+        result = []
+        for (dirname, dirnames, filenames) in os.walk(dir):
+            result.extend([dirname + '/' + name for name in filenames if filter(name)])
+        return result
+
+    def clean_up_dir(files: List[str]) -> List[str]:
+        """
+        :param files: List of files in the project directory
+        :return: list
+
+        Cleans up trashed files and gives original files
+        """
+
+        original_files = list()
+        for file in files:
+            if "rewritten.java" in file:
+                os.remove(file)
+            else:
+                original_files.append(file)
+        return original_files
+
+    def transfer_field(self):
+        methods_tobe_update = []
+        for file in self.files:
+            stream = FileStream(file, encoding='utf8')
+            lexer = JavaLexer(stream)
+            token_stream = CommonTokenStream(lexer)
+            parser = JavaParser(token_stream)
+            tree = parser.compilationUnit()
+            utilsListener = UtilsListener(file)
+            walker = ParseTreeWalker()
+            walker.walk(utilsListener, tree)
+
+            if len(utilsListener.package.classes) > 1:
+                exit(1)
+
+            # find fields with the type Source first and store it
+            field_candidate = set()
+            for klass in utilsListener.package.classes.values():
+                for f in klass.fields.values():
+                    if f.datatype == self.src_class:
+                        field_candidate.add(f.name)
+
+            listener = FieldUsageListener(
+                file,
+                self.src_class,
+                self.src_package,
+                self.target_class,
+                self.target_package,
+                self.field_name,
+                field_candidate,
+                field)
+            walker.walk(listener, tree)
+            listener.save(override=self.override, filename_mapping=self.filename_maping)
+
+            methods_tobe_update = listener.methods_tobe_updated + methods_tobe_update
+
+            if file.__contains__(self.src_class):
+                field = listener.field_tobe_moved
+
+        return methods_tobe_update
+
+    def update_method_calls(self, methods):
+        if self.override:
+            files_to_apply = [self.filename_maping(file) for file in self.files]
+
+        else:
+            files_to_apply = self.files
+
+        for i, file in enumerate(self.files):
+            stream = FileStream(files_to_apply[i], encoding='utf8')
+            lexer = JavaLexer(stream)
+            token_stream = CommonTokenStream(lexer)
+            parser = JavaParser(token_stream)
+            tree = parser.compilationUnit()
+            listener = MethodUsageListener(file, methods, self.target_class)
+            walker = ParseTreeWalker()
+            walker.walk(listener, tree)
+            listener.save(override=self.override, filename_mapping=self.filename_maping)
+
+    def refactor(self):
+        methods_to_be_update = self.transfer_field()
+        self.update_method_calls(methods_to_be_update)
+
+
+if __name__ == "__main__":
+
+    move_field = MoveField(
+        src_class="JSONArray",
+        src_package="org.json",
+        target_class="JSONObject",
+        target_package="org.json",
+        field_name="myArrayList",
+        project_dir="home/nima/Nima/Uni/Compiler/Project/CodART/benchmark_projects/JSON/src/main/java/org/json/"
+    )
+
+    move_field.refactor()
