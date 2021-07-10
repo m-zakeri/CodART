@@ -412,12 +412,34 @@ class FindUsagesListener(JavaParserLabeledListener):
                                     self.scope))
 
     def exitExpression1(self, ctx: JavaParserLabeled.Expression1Context):
-        self.aul.add_method_to_identifier(identifier=(ctx.expression0().getText(),self.scope),
-                                          method_name=ctx.methodCall0().IDENTIFIER().getText())
+        parent=ctx.parentCtx
+        if type(parent)==JavaParserLabeled.Expression21Context:
+            child = ctx.children[0]
+            if type(child) == JavaParserLabeled.Expression0Context:
+                #identifier.field
+                self.aul.add_field_to_identifier(identifier=(ctx.expression().getText(), self.scope),
+                                                  field_name=ctx.IDENTIFIER().getText())
+            elif type(child) == JavaParserLabeled.Expression1Context:
+                #this.identifier.field
+                self.aul.add_field_to_identifier(identifier=(ctx.expression().IDENTIFIER().getText(), self.scope),
+                                                 field_name=ctx.IDENTIFIER().getText())
 
-    def exitExpression21(self, ctx: JavaParserLabeled.Expression21Context):
-        self.aul.add_field_to_identifier(identifier=(ctx.expression1().expression0().getText(),self.scope),
-                                         field_name=ctx.expression1().IDENTIFIER().getText())
+        elif type(parent)==JavaParserLabeled.Statement15Context:
+            child=ctx.children[0]
+            if type(child)==JavaParserLabeled.Expression0Context:
+                #identifier.method
+                self.aul.add_method_to_identifier(identifier=(ctx.expression().getText(),self.scope),
+                                                  method_name=ctx.methodCall().IDENTIFIER().getText())
+            elif type(child)==JavaParserLabeled.Expression1Context:
+                #this.identifier.method
+                self.aul.add_method_to_identifier(identifier=(ctx.expression().IDENTIFIER().getText(), self.scope),
+                                                  method_name=ctx.methodCall().IDENTIFIER().getText())
+
+    # def exitExpression21(self, ctx: JavaParserLabeled.Expression21Context):
+    #     child=ctx.children[0]
+    #
+    #     self.aul.add_field_to_identifier(identifier=(ctx.expression1().expression0().getText(),self.scope),
+    #                                      field_name=ctx.expression1().IDENTIFIER().getText())
 
 # =======================================================================
 
