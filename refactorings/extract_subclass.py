@@ -440,6 +440,137 @@ class FindUsagesListener(JavaParserLabeledListener):
     #     self.aul.add_field_to_identifier(identifier=(ctx.expression1().expression0().getText(),self.scope),
     #                                      field_name=ctx.expression1().IDENTIFIER().getText())
 
+class PropagationListener(JavaParserLabeledListener):
+    def __init__(
+            self, common_token_stream: CommonTokenStream = None,
+            source_class: str = None, new_class: str = None,
+            moved_fields=None, moved_methods=None,
+            output_path: str = "", aul=None):
+
+        if moved_methods is None:
+            self.moved_methods = []
+        else:
+            self.moved_methods = moved_methods
+
+        if moved_fields is None:
+            self.moved_fields = []
+        else:
+            self.moved_fields = moved_fields
+
+        if common_token_stream is None:
+            raise ValueError('common_token_stream is None')
+        else:
+            self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
+
+        if source_class is None:
+            raise ValueError("source_class is None")
+        else:
+            self.source_class = source_class
+
+        if new_class is None:
+            raise ValueError("new_class is None")
+        else:
+            self.new_class = new_class
+
+        self.output_path = output_path
+
+        self.is_source_class = False
+        self.detected_field = None
+        self.detected_method = None
+        self.TAB = "\t"
+        self.NEW_LINE = "\n"
+        self.code = ""
+        self.scope = []
+        self.aul=aul
+
+    def intersection(self,lst1, lst2):
+        lst3 = [value for value in lst1 if value in lst2]
+        return lst3
+
+    def enterClassDeclaration(self, ctx:JavaParserLabeled.ClassDeclarationContext):
+        self.scope.append(f"class:{ctx.IDENTIFIER().getText()}")
+
+    def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
+        self.scope.append(f"method:{ctx.IDENTIFIER().getText()}")
+
+    def exitClassDeclaration(self, ctx:JavaParserLabeled.ClassDeclarationContext):
+        self.scope.pop()
+
+    def exitMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
+        self.scope.pop()
+
+    def exitFieldDeclaration(self, ctx:JavaParserLabeled.FieldDeclarationContext):
+        if ctx.typeType().getText() == self.source_class:
+            flag = False
+            for child in ctx.variableDeclarators().children:
+                if child.getText() != ',':
+                    id=child.variableDeclaratorId().IDENTIFIER().getText()
+                    fields_used = self.aul.get_identifier_fields((id,self.scope))
+                    methods_used = self.aul.get_identifier_methods((id,self.scope))
+
+                    if len(self.intersection(fields_used,self.moved_fields)) > 0 or len(self.intersection(methods_used,self.moved_methods)) > 0:
+                        flag=True
+
+            if flag==True:
+                self.token_stream_rewriter.replaceRange(
+                    from_idx=ctx.typeType().start.tokenIndex,
+                    to_idx=ctx.typeType().stop.tokenIndex,
+                    text=f"{self.new_class}"
+                )
+
+                for child in ctx.variableDeclarators().children:
+                    if child.getText() != ',':
+                        if type(child.children[-1])==JavaParserLabeled.VariableInitializer1Context and \
+                           type(child.children[-1].children[0])==JavaParserLabeled.Expression4Context and \
+                           child.children[-1].children[0].children[0].getText()=='new' and \
+                           len(child.children[-1].children[0].children) > 1  and \
+                           type(child.children[-1].children[0].children[1])==JavaParserLabeled.Creator1Context:
+                            if child.variableInitializer().expression().creator().createdName().getText() == self.source_class:
+                                self.token_stream_rewriter.replaceRange(
+                                    from_idx=child.variableInitializer().expression().creator().createdName().start.tokenIndex,
+                                    to_idx=child.variableInitializer().expression().creator().createdName().stop.tokenIndex,
+                                    text=f"{self.new_class}"
+                                )
+            # self.aul.add_identifier((ctx.variableDeclarators().variableDeclarator(0).variableDeclaratorId().IDENTIFIER().getText(),
+            #                         self.scope))
+
+    def exitLocalVariableDeclaration(self, ctx:JavaParserLabeled.LocalVariableDeclarationContext):
+        if ctx.typeType().getText() == self.source_class:
+            flag = False
+            for child in ctx.variableDeclarators().children:
+                if child.getText() != ',':
+                    id=child.variableDeclaratorId().IDENTIFIER().getText()
+                    fields_used = self.aul.get_identifier_fields((id,self.scope))
+                    methods_used = self.aul.get_identifier_methods((id,self.scope))
+
+                    if len(self.intersection(fields_used,self.moved_fields)) > 0 or len(self.intersection(methods_used,self.moved_methods)) > 0:
+                        flag=True
+
+            if flag==True:
+                self.token_stream_rewriter.replaceRange(
+                    from_idx=ctx.typeType().start.tokenIndex,
+                    to_idx=ctx.typeType().stop.tokenIndex,
+                    text=f"{self.new_class}"
+                )
+
+                for child in ctx.variableDeclarators().children:
+                    if child.getText() != ',':
+                        if type(child.children[-1])==JavaParserLabeled.VariableInitializer1Context and \
+                           type(child.children[-1].children[0])==JavaParserLabeled.Expression4Context and \
+                           child.children[-1].children[0].children[0].getText()=='new' and \
+                           len(child.children[-1].children[0].children) > 1  and \
+                           type(child.children[-1].children[0].children[1])==JavaParserLabeled.Creator1Context:
+                            if child.variableInitializer().expression().creator().createdName().getText() == self.source_class:
+                                self.token_stream_rewriter.replaceRange(
+                                    from_idx=child.variableInitializer().expression().creator().createdName().start.tokenIndex,
+                                    to_idx=child.variableInitializer().expression().creator().createdName().stop.tokenIndex,
+                                    text=f"{self.new_class}"
+                                )
+
+            # self.aul.add_identifier((ctx.variableDeclarators().variableDeclarator(0).variableDeclaratorId().IDENTIFIER().getText(),
+            #                         self.scope))
+
+
 # =======================================================================
 
 
@@ -599,6 +730,28 @@ def main():
         with open(file, mode='w', newline='') as f:
             f.write(my_listener.token_stream_rewriter.getDefaultText())
 
+        #after find usages
+
+        stream = FileStream(file, encoding='utf8')
+        lexer = JavaLexer(stream)
+        token_stream = CommonTokenStream(lexer)
+        parser = JavaParserLabeled(token_stream)
+        parser.getTokenStream()
+        parse_tree = parser.compilationUnit()
+
+        my_listener = PropagationListener(common_token_stream=token_stream,
+                                         source_class=source_class,
+                                         new_class=source_class + "extracted",
+                                         moved_fields=moved_fields, moved_methods=moved_methods,
+                                         output_path=father_path_directory,aul=tmp_aul)
+
+        walker = ParseTreeWalker()
+        walker.walk(t=parse_tree, listener=my_listener)
+
+        with open(file, mode='w', newline='') as f:
+            f.write(my_listener.token_stream_rewriter.getDefaultText())
+
+
 
 
 
@@ -723,16 +876,36 @@ class AllUsageList:
         return self.get_tuple(identifier) in self.all_usage and self.all_usage[self.get_tuple(identifier)].is_in_fields_used(field_name)
 
     def get_identifier_methods(self,identifier: tuple):
-        if not self.get_tuple(identifier) in self.all_usage:
-            raise Exception("invalid access")
-        else:
+        # if not self.get_tuple(identifier) in self.all_usage:
+        #     raise Exception("invalid access")
+        # else:
+        #     return self.all_usage[self.get_tuple(identifier)].get_methods_name()
+        if self.get_tuple(identifier) in self.all_usage:
             return self.all_usage[self.get_tuple(identifier)].get_methods_name()
+        else:
+            id = identifier[0]
+            tmp = identifier[1].copy()
+            while len(tmp) > 0:
+                tmp.pop()
+                if self.get_tuple((id, tmp)) in self.all_usage:
+                    return self.all_usage[self.get_tuple((id, tmp))].get_methods_name()
 
     def get_identifier_fields(self,identifier: tuple):
-        if not self.get_tuple(identifier) in self.all_usage:
-            raise Exception("invalid access")
+        # if not self.get_tuple(identifier) in self.all_usage:
+        #     raise Exception("invalid access")
+        # else:
+        #     return self.all_usage[self.get_tuple(identifier)].get_fields_name()
+        if self.get_tuple(identifier) in self.all_usage:
+            return self.all_usage[self.get_tuple(identifier)].get_methods_name()
         else:
-            return self.all_usage[self.get_tuple(identifier)].get_fields_name()
+            id = identifier[0]
+            tmp = identifier[1].copy()
+            while len(tmp) > 0:
+                tmp.pop()
+                if self.get_tuple((id, tmp)) in self.all_usage:
+                    return self.all_usage[self.get_tuple((id, tmp))].get_fields_name()
+
+
 
     # aul = AllUsageList()
     # aul.add_field_to_identifier((tuple(["class:A"]), "a"), "field")
