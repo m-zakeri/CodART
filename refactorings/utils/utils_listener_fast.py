@@ -702,6 +702,8 @@ class FieldUsageListener(UtilsListener):
 
         if ctx.parentCtx.classOrInterfaceModifier()[0].getText() == "public":
             self.current_class_name = ctx.IDENTIFIER().getText()
+        else:
+            return
 
         self.has_imported_source = self.file_info.has_imported_package(self.package.name) or \
                                    self.file_info.has_imported_class(self.package.name, self.source_class)
@@ -897,13 +899,13 @@ class FieldUsageListener(UtilsListener):
         index = ctx.DOT().symbol.tokenIndex
         self.rewriter.replaceRange(ctx.start.tokenIndex, index - 1, target_name)
 
-
 def save(rewriter: TokenStreamRewriter, file_name: str, filename_mapping=lambda x: x + ".rewritten.java"):
     new_filename = filename_mapping(file_name).replace("\\", "/")
     path = new_filename[:new_filename.rfind('/')]
     if not os.path.exists(path):
         os.makedirs(path)
     with open(new_filename, mode='w', newline='') as file:
+        print("write?", new_filename)
         file.write(rewriter.getDefaultText())
 
 
@@ -929,6 +931,8 @@ class MethodUsageListener(UtilsListener):
 
     def exitMethodCall(self, ctx: JavaParser.MethodCallContext):
         super().exitMethodCall(ctx)
+        if ctx.THIS() is not None:
+            return
         if ctx.IDENTIFIER().getText() in self.method_names:
             text = f"new {self.target_class}()" if ctx.expressionList() is None else f", new {self.target_class}()"
             self.rewriter.insertBeforeIndex(ctx.RPAREN().symbol.tokenIndex, text)
@@ -962,14 +966,35 @@ def clean_up_dir(files: list) -> list:
     return original_files
 
 
+class PreConditionListener(UtilsListener):
+    def __init__(self, filename):
+        super().__init__(filename)
+        self.can_convert = True
+
+    def enterInterfaceDeclaration(self, ctx:JavaParser.InterfaceDeclarationContext):
+        super().enterInterfaceDeclaration(ctx)
+        if ctx.INTERFACE() is not None:
+            self.can_convert = False
+
+    def enterClassDeclaration(self, ctx: JavaParser.ClassDeclarationContext):
+        super().enterClassDeclaration(ctx)
+        if self.nest_count > 0:
+            self.can_convert = False
+
+    def exitMethodBody(self, ctx:JavaParser.MethodBodyContext):
+        super().exitMethodBody(ctx)
+        if self.current_method is None:
+            self.can_convert = False
+
 if __name__ == '__main__':
     source_class = "JSONArray"
     source_package = "org.json"
-    target_class = "JSON Object"
+    target_class = "JSONObject"
     target_package = "org.json"
     field_name = "myArrayList"
+    path = ""
     files = get_filenames_in_dir(
-        '/home/nima/Nima/Uni/Compiler/Project/CodART/benchmark_projects/JSON/src/main/java/org/json/')
+        '/home/loop/Desktop/Ass/Compiler/CodART/benchmark_projects/JSON/src/main/java/org/json/')
     field = None
     methods_tobe_update = []
     for file in files:
@@ -978,10 +1003,13 @@ if __name__ == '__main__':
         token_stream = CommonTokenStream(lexer)
         parser = JavaParser(token_stream)
         tree = parser.compilationUnit()
-        utilsListener = UtilsListener(file)
+        utilsListener = PreConditionListener(file)
         walker = ParseTreeWalker()
         walker.walk(utilsListener, tree)
-
+        
+        if not utilsListener.can_convert:
+            continue
+        
         if len(utilsListener.package.classes) > 1:
             exit(1)
 
@@ -1008,16 +1036,16 @@ if __name__ == '__main__':
         if file.__contains__(source_class):
             field = listener.field_tobe_moved
 
-    for method in methods_tobe_update:
-        print(method.name)
+    # for method in methods_tobe_update:
+    #     print(method.name)
 
-    filess = [f'{file}.rewritten.java' for file in files]
-    for i, file in enumerate(files):
-        stream = FileStream(filess[i], encoding='utf8')
-        lexer = JavaLexer(stream)
-        token_stream = CommonTokenStream(lexer)
-        parser = JavaParser(token_stream)
-        tree = parser.compilationUnit()
-        listener = MethodUsageListener(file, methods_tobe_update, target_class)
-        walker = ParseTreeWalker()
-        walker.walk(listener, tree)
+    # filess = [f'{file.split(".")[0]}.rewritten.java' for file in files]
+    # for i, file in enumerate(files):
+    #     stream = FileStream(filess[i], encoding='utf8')
+    #     lexer = JavaLexer(stream)
+    #     token_stream = CommonTokenStream(lexer)
+    #     parser = JavaParser(token_stream)
+    #     tree = parser.compilationUnit()
+    #     listener = MethodUsageListener(file, methods_tobe_update, target_class)
+    #     walker = ParseTreeWalker()
+    #     walker.walk(listener, tree)
