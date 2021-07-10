@@ -911,6 +911,14 @@ class MethodUsageListener(UtilsListener):
         super().enterCompilationUnit(ctx)
         self.rewriter = TokenStreamRewriter(ctx.parser.getTokenStream())
 
+    def enterClassCreatorRest(self, ctx:JavaParser.ClassCreatorRestContext):
+        if type(ctx.parentCtx) is JavaParser.CreatorContext:
+            if ctx.parentCtx.createdName().IDENTIFIER()[0].getText() not in self.method_names:
+                return
+        text = f"new {self.target_class}()" if ctx.arguments().expressionList() is None else f", new {self.target_class}()"
+        index = ctx.arguments().RPAREN().symbol.tokenIndex
+        self.rewriter.insertBeforeIndex(index, text)
+
     def exitMethodCall(self, ctx: JavaParser.MethodCallContext):
         super().exitMethodCall(ctx)
         if ctx.IDENTIFIER().getText() in self.method_names:
