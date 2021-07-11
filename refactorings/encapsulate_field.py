@@ -69,7 +69,7 @@ class EncapsulateFiledRefactoringListener(JavaParserLabeledListener):
 
     def exitFieldDeclaration(self, ctx: JavaParserLabeled.FieldDeclarationContext):
         if self.in_source_class and self.in_selected_package:
-            if ctx.variableDeclarators().getText() == self.field_identifier:
+            if ctx.variableDeclarators().variableDeclarator(0).variableDeclaratorId().getText() == self.field_identifier:
                 if not ctx.parentCtx.parentCtx.modifier(0):
                     self.token_stream_rewriter.insertBeforeIndex(
                         index=ctx.typeType().stop.tokenIndex,
@@ -215,12 +215,13 @@ class InstancePropagationEncapsulateFieldListener(JavaParserLabeledListener):
 
     def exitLocalVariableDeclaration(self, ctx: JavaParserLabeled.LocalVariableDeclarationContext):
         try:
-            if (self.has_access_to_class and ctx.variableDeclarators().variableDeclarator(0) \
+            instance_class_name = ctx.variableDeclarators().variableDeclarator(0) \
                     .variableInitializer().expression().creator() \
-                    .createdName().getText() == self.source_class_name) \
-                    or ctx.variableDeclarators().variableDeclarator(0) \
-                    .variableInitializer().expression().creator() \
-                    .createdName().getText() == self.package_name + '.' + self.source_class_name:
+                    .createdName().getText()
+
+            if (self.has_access_to_class and instance_class_name == self.source_class_name) \
+                    or instance_class_name == self.package_name + '.' + self.source_class_name:
+
                 self.instances.append(ctx.variableDeclarators().variableDeclarator(0).variableDeclaratorId().getText())
         except:
             pass
