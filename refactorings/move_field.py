@@ -47,6 +47,8 @@ class FieldUsageListener(UtilsListener):
 
         if ctx.parentCtx.classOrInterfaceModifier()[0].getText() == "public":
             self.current_class_name = ctx.IDENTIFIER().getText()
+        else:
+            return
 
         self.has_imported_source = self.file_info.has_imported_package(self.package.name) or \
             self.file_info.has_imported_class(self.package.name, self.source_class)
@@ -241,7 +243,7 @@ class FieldUsageListener(UtilsListener):
         index = ctx.DOT().symbol.tokenIndex
         self.rewriter.replaceRange(ctx.start.tokenIndex, index - 1, target_name)
 
-    def save(self, override: bool, filename_mapping=lambda x: x + ".rewritten.java"):
+    def save(self, override: bool, filename_mapping=lambda x: x.replace(".java", ".rewritten.java")):
         if not override:
             new_filename = filename_mapping(self.filename).replace("\\", "/")
         else:
@@ -276,14 +278,13 @@ class MethodUsageListener(UtilsListener):
 
     def exitMethodCall(self, ctx: JavaParser.MethodCallContext):
         super().exitMethodCall(ctx)
+        if ctx.THIS() is not None:
+            return
         if ctx.IDENTIFIER().getText() in self.method_names:
             text = f"new {self.target_class}()" if ctx.expressionList() is None else f", new {self.target_class}()"
             self.rewriter.insertBeforeIndex(ctx.RPAREN().symbol.tokenIndex, text)
 
-    def exitClassBody(self, ctx: JavaParser.ClassBodyContext):
-        super().exitClassBody(ctx)
-
-    def save(self, override: bool, filename_mapping=lambda x: x + ".rewritten.java"):
+    def save(self, override: bool, filename_mapping=lambda x: x.replace(".java", ".rewritten.java")):
 
         if not override:
             new_filename = filename_mapping(self.filename).replace("\\", "/")
@@ -296,6 +297,27 @@ class MethodUsageListener(UtilsListener):
             file.write(self.rewriter.getDefaultText())
 
 
+class PreConditionListener(UtilsListener):
+    def __init__(self, filename):
+        super().__init__(filename)
+        self.can_convert = True
+
+    def enterInterfaceDeclaration(self, ctx: JavaParser.InterfaceDeclarationContext):
+        super().enterInterfaceDeclaration(ctx)
+        if ctx.INTERFACE() is not None:
+            self.can_convert = False
+
+    def enterClassDeclaration(self, ctx: JavaParser.ClassDeclarationContext):
+        super().enterClassDeclaration(ctx)
+        if self.nest_count > 0:
+            self.can_convert = False
+
+    def exitMethodBody(self, ctx: JavaParser.MethodBodyContext):
+        super().exitMethodBody(ctx)
+        if self.current_method is None:
+            self.can_convert = False
+
+
 class MoveField:
 
     def __init__(self,
@@ -306,7 +328,7 @@ class MoveField:
                  target_class: str,
                  project_dir: Union[str, Path],
                  override: bool = False,
-                 filename_maping: Callable = lambda x: x + ".rewritten.java"
+                 filename_maping: Callable = lambda x: x.replace(".java", ".rewritten.java")
                  ) -> None:
 
         self.src_package = src_package
@@ -351,9 +373,12 @@ class MoveField:
             token_stream = CommonTokenStream(lexer)
             parser = JavaParser(token_stream)
             tree = parser.compilationUnit()
-            utilsListener = UtilsListener(file)
+            utilsListener = PreConditionListener(file)
             walker = ParseTreeWalker()
             walker.walk(utilsListener, tree)
+
+            if not utilsListener.can_convert:
+                continue
 
             if len(utilsListener.package.classes) > 1:
                 exit(1)
