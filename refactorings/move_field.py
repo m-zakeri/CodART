@@ -10,6 +10,18 @@ from gen.java.JavaParser import JavaParser
 from refactorings.utils.utils_listener_fast import ExpressionName, MethodInvocation, LocalVariable, Field, UtilsListener
 
 
+class FieldNotFound(Exception):
+    pass
+
+
+class TargetDoesNotExist(Exception):
+    pass
+
+
+class DuplicateField(Exception):
+    pass
+
+
 class FieldUsageListener(UtilsListener):
     """
     FieldUsageListener finds all the usage of
@@ -243,8 +255,8 @@ class FieldUsageListener(UtilsListener):
         index = ctx.DOT().symbol.tokenIndex
         self.rewriter.replaceRange(ctx.start.tokenIndex, index - 1, target_name)
 
-    def save(self, override: bool, filename_mapping=lambda x: x + ".rewritten.java"):
-        if override:
+    def save(self, overwrite: bool, filename_mapping=lambda x: x + ".rewritten.java"):
+        if overwrite:
             new_filename = self.filename
         else:
             new_filename = filename_mapping(self.filename).replace("\\", "/")
@@ -289,9 +301,9 @@ class MethodUsageListener(UtilsListener):
         super().exitClassBody(ctx)
         # self.save(self.rewriter, self.filename)
 
-    def save(self, override: bool, filename_mapping=lambda x: x + ".rewritten.java"):
+    def save(self, overwrite: bool, filename_mapping=lambda x: x + ".rewritten.java"):
 
-        if override:
+        if overwrite:
             new_filename = self.filename
         else:
             new_filename = filename_mapping(self.filename).replace("\\", "/")
@@ -305,9 +317,23 @@ class MethodUsageListener(UtilsListener):
 
 
 class PreConditionListener(UtilsListener):
-    def __init__(self, filename):
+    def __init__(self, filename: str,
+                 field_name: str,
+                 src_class: str,
+                 src_package: str,
+                 target_class: str,
+                 target_package: str
+                 ):
         super().__init__(filename)
         self.can_convert = True
+        self.field_name = field_name
+        self.contains_field = False
+        self.target_exists = False
+        self.duplicate_field = False
+        self.src_class = src_class
+        self.src_package = src_package
+        self.target_class = target_class
+        self.target_package = target_package
 
     def enterInterfaceDeclaration(self, ctx: JavaParser.InterfaceDeclarationContext):
         super().enterInterfaceDeclaration(ctx)
@@ -324,6 +350,27 @@ class PreConditionListener(UtilsListener):
         if self.current_method is None:
             self.can_convert = False
 
+    def exitCompilationUnit(self, ctx: JavaParser.CompilationUnitContext):
+        super().exitCompilationUnit(ctx)
+        if self.package.name == self.src_package:
+            if self.src_class in self.package.classes:
+                if self.field_name in self.package.classes[self.src_class].fields:
+                    self.contains_field = True
+
+        if self.package.name == self.target_package and self.target_class in self.package.classes:
+            self.target_exists = True
+            if self.field_name in self.package.classes[self.target_class].fields:
+                self.duplicate_field = True
+
+    def is_field_inside_class(self) -> bool:
+        return self.contains_field
+
+    def does_target_exists(self) -> bool:
+        return self.target_exists
+
+    def duplicate_field_exists_in_target(self):
+        return self.duplicate_field
+
 
 class MoveField:
 
@@ -334,7 +381,7 @@ class MoveField:
                  target_package: str,
                  target_class: str,
                  project_dir: Union[str, Path],
-                 override: bool = False,
+                 overwrite: bool = False,
                  filename_map: Callable = lambda x: x + ".rewritten.java"
                  ) -> None:
 
@@ -344,7 +391,7 @@ class MoveField:
         self.target_package = target_package
         self.target_class = target_class
         self.files = MoveField.get_filenames_in_dir(project_dir)
-        self.override = override
+        self.overwrite = overwrite
         self.filename_map = filename_map
 
     @staticmethod
@@ -355,6 +402,24 @@ class MoveField:
         for (dirname, dirnames, filenames) in os.walk(dir):
             result.extend([dirname + '/' + name for name in filenames if filter(name)])
         return result
+
+    def change_file_order(self):
+        for i, f in enumerate(self.files):
+            if f.endswith(f"{self.src_class}.java"):
+                self.files.insert(0, self.files.pop(i))
+                return
+
+    def check_file_exists(self):
+        src_file = False
+        target_file = False
+
+        for f in self.files:
+            if f.endswith(f"{self.src_class}.java"):
+                src_file = True
+            elif f.endswith(f"{self.target_class}.java"):
+                target_file = True
+
+        return src_file and target_file
 
     def clean_up_dir(self) -> None:
         """
@@ -378,9 +443,27 @@ class MoveField:
             token_stream = CommonTokenStream(lexer)
             parser = JavaParser(token_stream)
             tree = parser.compilationUnit()
-            utils_listener = PreConditionListener(file)
+            utils_listener = PreConditionListener(file, self.field_name,
+                                                  self.src_class,
+                                                  self.src_package,
+                                                  self.target_class,
+                                                  self.target_package)
             walker = ParseTreeWalker()
             walker.walk(utils_listener, tree)
+
+            if file.endswith(f"{self.src_class}.java"):
+                # todo for sina
+                if not utils_listener.is_field_inside_class():
+                    raise FieldNotFound("Provided field is not found")
+
+            if file.endswith(f"{self.target_class}.java"):
+                # todo for sina
+                if not utils_listener.does_target_exists():
+                    raise TargetDoesNotExist("Specified target does not exits")
+
+                # todo for sina
+                if utils_listener.duplicate_field_exists_in_target():
+                    raise DuplicateField("Target has a field similar to source")
 
             if not utils_listener.can_convert:
                 continue
@@ -405,7 +488,7 @@ class MoveField:
                 field_candidate,
                 field)
             walker.walk(listener, tree)
-            listener.save(override=self.override, filename_mapping=self.filename_map)
+            listener.save(overwrite=self.overwrite, filename_mapping=self.filename_map)
 
             methods_tobe_update = listener.methods_tobe_updated + methods_tobe_update
 
@@ -416,7 +499,7 @@ class MoveField:
 
     def update_method_calls(self, methods):
 
-        if not self.override:
+        if not self.overwrite:
             files_to_apply = [self.filename_map(file) for file in self.files]
 
         else:
@@ -431,10 +514,13 @@ class MoveField:
             listener = MethodUsageListener(file, methods, self.target_class)
             walker = ParseTreeWalker()
             walker.walk(listener, tree)
-            listener.save(override=self.override, filename_mapping=self.filename_map)
+            listener.save(overwrite=self.overwrite, filename_mapping=self.filename_map)
 
     def refactor(self):
         self.clean_up_dir()
+        if not self.check_file_exists():
+            raise FileNotFoundError("Names of source and target must match the file name or they does not exist")
+        self.change_file_order()
         methods_to_be_update = self.transfer_field()
         self.update_method_calls(methods_to_be_update)
 
@@ -442,12 +528,11 @@ class MoveField:
 if __name__ == "__main__":
     move_field = MoveField(
         src_class="Source",
-        src_package="src",
+        src_package="source",
         target_class="Target",
         target_package="target",
         field_name="a",
         project_dir="/home/amiresm/Projects/personal/src",
-        override=True
     )
 
     move_field.refactor()
