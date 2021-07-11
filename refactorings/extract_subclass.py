@@ -101,8 +101,7 @@ class ExtractSubClassRefactoringListener(JavaParserLabeledListener):
         field_identifier = ctx.variableDeclarators().variableDeclarator(0).variableDeclaratorId().IDENTIFIER().getText()
         field_names = list()
         field_names.append(field_identifier)
-        print("field_names=", field_names)
-        print("Here")
+        # print("field_names=", field_names)
         grand_parent_ctx = ctx.parentCtx.parentCtx
         if self.detected_field in field_names:
             if (not grand_parent_ctx.modifier()):
@@ -463,15 +462,56 @@ def main():
     # moved_methods = ['method1', 'method3', ]
     # moved_fields = ['field1', 'field2', ]
     udb_path = "C:\\Users\\asus\\Desktop\\test_project\\test_project.udb"
-    source_class = "JSONArray"
     # moved_methods = ['getValue', 'rowToJSONArray', 'getVal', ]
     # moved_fields = ['number_2', 'number_1', ]
 
-    moved_methods = ['put']
-    moved_fields = []
 
-    father_path_file = "C:\\Users\\asus\\Desktop\\test_project\\JSONArray.java"
-    father_path_directory = "C:\\Users\\asus\\Desktop\\test_project"
+
+
+    # source_class = "JSONArray"
+    # moved_methods = ['put']
+    # moved_fields = []
+    # father_path_file = "C:\\Users\\asus\\Desktop\\test_project\\JSONArray.java"
+    # father_path_directory = "C:\\Users\\asus\\Desktop\\test_project"
+    # path_to_refactor = "C:\\Users\\asus\\Desktop\\test_project"
+    # new_class_file = "C:\\Users\\asus\\Desktop\\test_project\\JSONArrayextracted.java"
+
+
+    # source_class = "TaskNode"
+    # moved_methods = ['getUserObject']
+    # moved_fields = []
+    # father_path_file = "C:\\Users\\asus\\Desktop\\benchmark_projects\\ganttproject\\ganttproject\\src\\main\\java\\net\\sourceforge\\ganttproject\\task\\TaskNode.java"
+    # father_path_directory = "C:\\Users\\asus\\Desktop\\benchmark_projects\\ganttproject\\ganttproject\\src\\main\\java\\net\\sourceforge\\ganttproject\\task"
+    # path_to_refactor = "C:\\Users\\asus\\Desktop\\benchmark_projects\\ganttproject"
+    # new_class_file = "C:\\Users\\asus\\Desktop\\benchmark_projects\\ganttproject\\ganttproject\\src\\main\\java\\net\\sourceforge\\ganttproject\\task\\TaskNodeextracted.java"
+
+
+    # source_class = "SecuritySupport"
+    # moved_methods = ['getSystemProperty']
+    # moved_fields = []
+    # father_path_file = "C:\\Users\\asus\\Desktop\\benchmark_projects\\xerces2-j\\src\\org\\apache\\html\\dom\\SecuritySupport.java"
+    # father_path_directory = "C:\\Users\\asus\\Desktop\\benchmark_projects\\xerces2-j\\src\\org\\apache\\html\\dom"
+    # path_to_refactor = "C:\\Users\\asus\\Desktop\\benchmark_projects\\xerces2-j"
+    # new_class_file = "C:\\Users\\asus\\Desktop\\benchmark_projects\\xerces2-j\\src\\org\\apache\\html\\dom\\SecuritySupportextracted.java"
+
+    # source_class = "BaseMarkupSerializer"
+    # moved_methods = ['setOutputCharStream']
+    # moved_fields = []
+    # father_path_file = "C:\\Users\\asus\\Desktop\\benchmark_projects\\xerces2-j\\src\\org\\apache\\xml\\serialize\\BaseMarkupSerializer.java"
+    # father_path_directory = "C:\\Users\\asus\\Desktop\\benchmark_projects\\xerces2-j\\src\\org\\apache\\xml\\serialize"
+    # path_to_refactor = "C:\\Users\\asus\\Desktop\\benchmark_projects\\xerces2-j"
+    # new_class_file = "C:\\Users\\asus\\Desktop\\benchmark_projects\\xerces2-j\\src\\org\\apache\\xml\\serialize\\BaseMarkupSerializerextracted.java"
+
+    source_class = "Piece"
+    moved_methods = ['setX']
+    moved_fields = []
+    father_path_file = "C:\\Users\\asus\\Desktop\\benchmark_projects\\Chess_master\\src\\game\\Piece.java"
+    father_path_directory = "C:\\Users\\asus\\Desktop\\benchmark_projects\\Chess_master\\src\\game"
+    path_to_refactor = "C:\\Users\\asus\\Desktop\\benchmark_projects\\Chess_master"
+    new_class_file = "C:\\Users\\asus\\Desktop\\benchmark_projects\\Chess_master\\src\\game\\Pieceextracted.java"
+
+
+
 
     stream = FileStream(father_path_file, encoding='utf8')
     lexer = JavaLexer(stream)
@@ -491,8 +531,6 @@ def main():
         f.write(my_listener.token_stream_rewriter.getDefaultText())
 
 
-    path_to_refactor = "C:\\Users\\asus\\Desktop\\test_project"
-    new_class_file = "C:\\Users\\asus\\Desktop\\test_project\\JSONArrayextracted.java"
 
     extractJavaFilesAndProcess(path_to_refactor, father_path_file, new_class_file)
 
@@ -510,6 +548,8 @@ def main():
                                           moved_fields=moved_fields, moved_methods=moved_methods,
                                           output_path=father_path_directory)
 
+        # output_path=father_path_directory)
+
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener)
 
@@ -520,25 +560,27 @@ def main():
 
         #after find usages
 
-        stream = FileStream(file, encoding='utf8')
-        lexer = JavaLexer(stream)
-        token_stream = CommonTokenStream(lexer)
-        parser = JavaParserLabeled(token_stream)
-        parser.getTokenStream()
-        parse_tree = parser.compilationUnit()
+        try:
+            stream = FileStream(file, encoding='utf8')
+            lexer = JavaLexer(stream)
+            token_stream = CommonTokenStream(lexer)
+            parser = JavaParserLabeled(token_stream)
+            parser.getTokenStream()
+            parse_tree = parser.compilationUnit()
 
-        my_listener = PropagationListener(common_token_stream=token_stream,
-                                         source_class=source_class,
-                                         new_class=source_class + "extracted",
-                                         moved_fields=moved_fields, moved_methods=moved_methods,
-                                         output_path=father_path_directory,aul=tmp_aul)
+            my_listener = PropagationListener(common_token_stream=token_stream,
+                                             source_class=source_class,
+                                             new_class=source_class + "extracted",
+                                             moved_fields=moved_fields, moved_methods=moved_methods,
+                                             output_path=father_path_directory,aul=tmp_aul)
 
-        walker = ParseTreeWalker()
-        walker.walk(t=parse_tree, listener=my_listener)
+            walker = ParseTreeWalker()
+            walker.walk(t=parse_tree, listener=my_listener)
 
-        with open(file, mode='w', newline='') as f:
-            f.write(my_listener.token_stream_rewriter.getDefaultText())
-
+            with open(file, mode='w', newline='') as f:
+                f.write(my_listener.token_stream_rewriter.getDefaultText())
+        except:
+            print("not utf8")
 
 
 class IdentifierUsage:
@@ -673,7 +715,7 @@ def extractJavaFilesAndProcess(path,source_class_file, new_class_file):
         for entry in entries:
             print(entry)
             if(not os.path.isfile(os.path.join(path, entry))):
-                extractJavaFilesAndProcess(os.path.join(path,entry))
+                extractJavaFilesAndProcess(os.path.join(path,entry),source_class_file, new_class_file)
             else:
                 if('.java' in entry or '.Java' in entry) and str(entry) != source_class_file and str(entry) != new_class_file :
                     files_to_refactor.append(os.path.join(path,entry))
