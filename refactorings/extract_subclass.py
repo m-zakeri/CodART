@@ -1,22 +1,11 @@
 import os
-
 from gen.javaLabeled.JavaLexer import JavaLexer
-
-# try:
-#     import understand as und
-# except ImportError as e:
-#     print(e)
-from utilization.setup_understand import *
-
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
-
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
-
 files_to_refactor=[]
-
 
 class ExtractSubClassRefactoringListener(JavaParserLabeledListener):
     """
@@ -67,7 +56,6 @@ class ExtractSubClassRefactoringListener(JavaParserLabeledListener):
         """
         It checks if it is source class, we generate the declaration of the new class, by appending some text to self.code.
         """
-
         class_identifier = ctx.IDENTIFIER().getText()
         if class_identifier == self.source_class:
             self.is_source_class = True
@@ -82,7 +70,6 @@ class ExtractSubClassRefactoringListener(JavaParserLabeledListener):
         """
         It close the opened curly brackets If it is the source class.
         """
-
         if self.is_source_class:
             self.code += "}"
             self.is_source_class = False
@@ -91,12 +78,6 @@ class ExtractSubClassRefactoringListener(JavaParserLabeledListener):
         """
         it writes self.code in the output path.​
         """
-
-        # self.token_stream_rewriter.insertAfter(
-        #     index=ctx.stop.tokenIndex,
-        #     text=self.code
-        # )
-
         child_file_name = self.new_class + ".java"
         with open(os.path.join(self.output_path, child_file_name), "w+") as f:
             f.write(self.code.replace('\r\n', '\n'))
@@ -105,7 +86,6 @@ class ExtractSubClassRefactoringListener(JavaParserLabeledListener):
         """
         It sets the detected field to the field if it is one of the moved fields. ​
         """
-
         if not self.is_source_class:
             return None
         field_identifier = ctx.IDENTIFIER().getText()
@@ -116,10 +96,8 @@ class ExtractSubClassRefactoringListener(JavaParserLabeledListener):
         """
         It gets the field name, if the field is one of the moved fields, we move it and delete it from the source program. ​
         """
-
         if not self.is_source_class:
             return None
-        # field_names = ctx.variableDeclarators().getText().split(",")
         field_identifier = ctx.variableDeclarators().variableDeclarator(0).variableDeclaratorId().IDENTIFIER().getText()
         field_names = list()
         field_names.append(field_identifier)
@@ -128,26 +106,11 @@ class ExtractSubClassRefactoringListener(JavaParserLabeledListener):
         grand_parent_ctx = ctx.parentCtx.parentCtx
         if self.detected_field in field_names:
             if (not grand_parent_ctx.modifier()):
-                # print("******************************************")
                 modifier = ""
             else:
                 modifier = grand_parent_ctx.modifier(0).getText()
             field_type = ctx.typeType().getText()
             self.code += f"{self.TAB}{modifier} {field_type} {self.detected_field};{self.NEW_LINE}"
-            # delete field from source class
-            # field_names.remove(self.detected_field)
-            # if field_names:
-            #     self.token_stream_rewriter.replaceRange(
-            #         from_idx=grand_parent_ctx.start.tokenIndex,
-            #         to_idx=grand_parent_ctx.stop.tokenIndex,
-            #         text=f"{modifier} {field_type} {','.join(field_names)};"
-            #     )
-            # else:
-            # self.token_stream_rewriter.delete(
-            #     program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-            #     from_idx=grand_parent_ctx.start.tokenIndex,
-            #     to_idx=grand_parent_ctx.stop.tokenIndex
-            # )
 
             # delete field from source class ==>new
             start_index = ctx.parentCtx.parentCtx.start.tokenIndex
@@ -164,7 +127,6 @@ class ExtractSubClassRefactoringListener(JavaParserLabeledListener):
         """
         It sets the detected field to the method if it is one of the moved methods. ​
         """
-
         if not self.is_source_class:
             return None
         method_identifier = ctx.IDENTIFIER().getText()
@@ -175,17 +137,10 @@ class ExtractSubClassRefactoringListener(JavaParserLabeledListener):
         """
         It gets the method name, if the method is one of the moved methods, we move it to the subclass and delete it from the source program.
         """
-
         if not self.is_source_class:
             return None
         method_identifier = ctx.IDENTIFIER().getText()
         if self.detected_method == method_identifier:
-            # method_modifier = ctx.parentCtx.parentCtx.modifier(0)
-            # if(method_modifier!=)
-            # method_modifier_text=method_modifier.getText()
-            # print(method_modifier_text)
-
-            # start_index = ctx.start.tokenIndex
             start_index = ctx.parentCtx.parentCtx.start.tokenIndex
             stop_index = ctx.stop.tokenIndex
             method_text = self.token_stream_rewriter.getText(
@@ -209,9 +164,6 @@ class ExtractSubClassRefactoringListener(JavaParserLabeledListener):
             self.methods_in_constructor = []
             self.constructor_body = ctx.block()
             children = self.constructor_body.children
-            # for child in children:
-            #     if child.getText()=='{' or child.getText()=='}':
-            #         continue
 
     def exitConstructorDeclaration(self, ctx: JavaParserLabeled.ConstructorDeclarationContext):
         if self.is_source_class and self.is_in_constructor:
@@ -225,9 +177,6 @@ class ExtractSubClassRefactoringListener(JavaParserLabeledListener):
                     move_constructor_flag = True
 
             if move_constructor_flag:
-                # start_index = ctx.parentCtx.parentCtx.start.tokenIndex
-                # stop_index = ctx.parentCtx.parentCtx.stop.tokenIndex
-
                 if ctx.formalParameters().formalParameterList():
                     constructor_parameters = [ctx.formalParameters().formalParameterList().children[i] for i in
                                               range(len(ctx.formalParameters().formalParameterList().children)) if
@@ -238,7 +187,6 @@ class ExtractSubClassRefactoringListener(JavaParserLabeledListener):
                 constructor_text = ''
                 for modifier in ctx.parentCtx.parentCtx.modifier():
                     constructor_text += modifier.getText() + ' '
-                # constructor_text += ctx.IDENTIFIER().getText()#======
                 constructor_text += self.new_class
                 constructor_text += ' ( '
                 for parameter in constructor_parameters:
@@ -253,9 +201,7 @@ class ExtractSubClassRefactoringListener(JavaParserLabeledListener):
                     stop=ctx.block().stop.tokenIndex - 1
                 )
                 constructor_text += '}\n'
-
                 self.code += constructor_text
-
                 start_index = ctx.parentCtx.parentCtx.start.tokenIndex
                 stop_index = ctx.parentCtx.parentCtx.stop.tokenIndex
                 self.token_stream_rewriter.delete(
@@ -277,59 +223,6 @@ class ExtractSubClassRefactoringListener(JavaParserLabeledListener):
         if self.is_source_class and self.is_in_constructor:
             self.methods_in_constructor.append(ctx.IDENTIFIER())
 
-
-"""
-Utilities related to project directory.
-"""
-
-import os
-import subprocess
-
-
-# def create_understand_database(project_dir, und_path='/home/ali/scitools/bin/linux64/'):
-def create_understand_database(project_dir, und_path='C:\\Program Files\\SciTools\\bin\\pc-win64'):
-    """
-    This function creates understand database for the given project directory.
-    :param und_path: The path of und binary file for executing understand command-line
-    :param project_dir: The absolute path of project's directory.
-    :return: String path of created database.
-    """
-    assert os.path.isdir(project_dir)
-    assert os.path.isdir(und_path)
-    db_name = os.path.basename(os.path.normpath(project_dir)) + ".udb"
-    db_path = os.path.join(project_dir, db_name)
-    assert os.path.exists(db_path) is False
-    # An example of command-line is:
-    # und create -languages c++ add @myFiles.txt analyze -all myDb.udb
-    process = subprocess.Popen(
-        ['und', 'create', '-languages', 'Java', 'add', project_dir, 'analyze', '-all', db_path],
-        cwd=und_path
-    )
-    process.wait()
-    return db_path
-
-
-def update_understand_database(udb_path, project_dir=None, und_path='/home/ali/scitools/bin/linux64/'):
-    """
-    This function updates database due to file changes.
-    :param project_dir: If understand database file is not in project directory you can specify the project directory.
-    :param und_path: The path of und binary file for executing understand command-line
-    :param udb_path: The absolute path of understand database.
-    :return: None
-    """
-    assert os.path.isfile(udb_path)
-    assert os.path.isdir(und_path)
-    if project_dir is None:
-        project_dir = os.path.dirname(os.path.normpath(udb_path))
-
-    process = subprocess.Popen(
-        ['und', 'analyze', '-all', udb_path],
-        cwd=und_path
-    )
-    process.wait()
-
-
-# =======================================================================
 class FindUsagesListener(JavaParserLabeledListener):
     def __init__(
             self, common_token_stream: CommonTokenStream = None,
@@ -433,13 +326,6 @@ class FindUsagesListener(JavaParserLabeledListener):
                 self.aul.add_method_to_identifier(identifier=(left_hand_side.children[-1].getText(), self.scope),
                                                   method_name=right_hand_side.children[0].getText())
 
-
-    # def exitExpression21(self, ctx: JavaParserLabeled.Expression21Context):
-    #     child=ctx.children[0]
-    #
-    #     self.aul.add_field_to_identifier(identifier=(ctx.expression1().expression0().getText(),self.scope),
-    #                                      field_name=ctx.expression1().IDENTIFIER().getText())
-
 class PropagationListener(JavaParserLabeledListener):
     def __init__(
             self, common_token_stream: CommonTokenStream = None,
@@ -531,8 +417,6 @@ class PropagationListener(JavaParserLabeledListener):
                                     to_idx=child.variableInitializer().expression().creator().createdName().stop.tokenIndex,
                                     text=f"{self.new_class}"
                                 )
-            # self.aul.add_identifier((ctx.variableDeclarators().variableDeclarator(0).variableDeclaratorId().IDENTIFIER().getText(),
-            #                         self.scope))
 
     def exitLocalVariableDeclaration(self, ctx:JavaParserLabeled.LocalVariableDeclarationContext):
         if ctx.typeType().getText() == self.source_class:
@@ -567,84 +451,6 @@ class PropagationListener(JavaParserLabeledListener):
                                     text=f"{self.new_class}"
                                 )
 
-            # self.aul.add_identifier((ctx.variableDeclarators().variableDeclarator(0).variableDeclaratorId().IDENTIFIER().getText(),
-            #                         self.scope))
-
-
-# =======================================================================
-
-
-class ExtractSubclassAPI:
-    def __init__(self, project_dir, file_path, source_class, new_class, moved_fields, moved_methods,
-                 new_file_path=None):
-        self.project_dir = project_dir
-        self.file_path = file_path
-        self.new_file_path = new_file_path or "/home/ali/Documents/dev/CodART/input.refactored.java"
-        self.source_class = source_class
-        self.new_class = new_class
-        self.moved_fields = moved_fields
-        self.moved_methods = moved_methods
-        self.stream = FileStream(self.file_path, encoding="utf8")
-        self.lexer = JavaLexer(self.stream)
-        self.token_stream = CommonTokenStream(self.lexer)
-        self.parser = JavaParserLabeled(self.token_stream)
-        self.tree = self.parser.compilationUnit()
-        self.walker = ParseTreeWalker()
-        self.checked = False
-
-    def extract_subclass(self):
-        # udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
-        # udb_path=create_understand_database("C:\\Users\\asus\\Desktop\\test_project")
-        # source_class = "GodClass"
-        # moved_methods = ['method1', 'method3', ]
-        # moved_fields = ['field1', 'field2', ]
-        udb_path = "C:\\Users\\asus\\Desktop\\test_project\\test_project.udb"
-        source_class = "CDL"
-        moved_methods = ['getValue', 'rowToJSONArray', 'getVal', ]
-        moved_fields = ['number', 'number_2', 'number_1', ]
-
-        # initialize with understand
-        father_path_file = ""
-        file_list_to_be_propagate = set()
-        propagate_classes = set()
-
-        db = und.open(udb_path)
-        # db=open(udb_path)
-
-        for cls in db.ents("class"):
-            if (cls.simplename() == source_class):
-                father_path_file = cls.parent().longname()
-                for ref in cls.refs("Coupleby"):
-                    # print(ref.ent().longname())
-                    propagate_classes.add(ref.ent().longname())
-                    # print(ref.ent().parent().relname())
-                    # file_list_to_be_propagate.add(ref.ent().parent().relname())
-            # if(cls.longname()==fatherclass):
-            #     print(cls.parent().relname())
-            #     father_path_file=cls.parent().relname()
-
-        father_path_file = "C:\\Users\\asus\\Desktop\\test_project\\CDL.java"
-        father_path_directory = "C:\\Users\\asus\\Desktop\\test_project"
-
-        stream = FileStream(father_path_file, encoding='utf8')
-        lexer = JavaLexer(stream)
-        token_stream = CommonTokenStream(lexer)
-        parser = JavaParserLabeled(token_stream)
-        parser.getTokenStream()
-        parse_tree = parser.compilationUnit()
-        my_listener = ExtractSubClassRefactoringListener(common_token_stream=token_stream,
-                                                         source_class=source_class,
-                                                         new_class=source_class + "extracted",
-                                                         moved_fields=moved_fields, moved_methods=moved_methods,
-                                                         output_path=father_path_directory)
-        walker = ParseTreeWalker()
-        walker.walk(t=parse_tree, listener=my_listener)
-
-        with open(father_path_file, mode='w', newline='') as f:
-            f.write(my_listener.token_stream_rewriter.getDefaultText())
-
-    # def propagate_refactor(self):
-
 
 def main():
     """
@@ -663,20 +469,6 @@ def main():
 
     moved_methods = ['put']
     moved_fields = []
-
-    # initialize with understand
-    father_path_file = ""
-    file_list_to_be_propagate = set()
-    propagate_classes = set()
-
-    # db = und.open(udb_path)
-    # # db=open(udb_path)
-    #
-    # for cls in db.ents("class"):
-    #     if (cls.simplename() == source_class):
-    #         father_path_file = cls.parent().longname()
-    #         for ref in cls.refs("Coupleby"):
-    #             propagate_classes.add(ref.ent().longname())
 
     father_path_file = "C:\\Users\\asus\\Desktop\\test_project\\JSONArray.java"
     father_path_directory = "C:\\Users\\asus\\Desktop\\test_project"
@@ -698,13 +490,9 @@ def main():
     with open(father_path_file, mode='w', newline='') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
 
-    #iterate on ther files
-    # for file in other files: ...
 
     path_to_refactor = "C:\\Users\\asus\\Desktop\\test_project"
     new_class_file = "C:\\Users\\asus\\Desktop\\test_project\\JSONArrayextracted.java"
-
-
 
     extractJavaFilesAndProcess(path_to_refactor, father_path_file, new_class_file)
 
@@ -751,15 +539,6 @@ def main():
         with open(file, mode='w', newline='') as f:
             f.write(my_listener.token_stream_rewriter.getDefaultText())
 
-
-
-
-
-
-
-    # ================================================================================
-
-    # find_usages_listener = FindUsagesListener()
 
 
 class IdentifierUsage:
@@ -840,33 +619,24 @@ class AllUsageList:
         if self.get_tuple(identifier) in self.all_usage:
             self.all_usage[self.get_tuple(identifier)].add_method(method_name)
         else:
-            # self.all_usage[identifier]=IdentifierUsage()
-            # self.all_usage[identifier].add_method(method_name)
-            flag=False
             id= identifier[0]
             tmp = identifier[1].copy()
             while len(tmp) > 0:
                 tmp.pop()
                 if self.get_tuple((id,tmp)) in self.all_usage:
                     self.all_usage[self.get_tuple((id,tmp))].add_method(method_name)
-                    flag=True
                     break
-
 
     def add_field_to_identifier(self,identifier: tuple, field_name:str):
         if self.get_tuple(identifier) in self.all_usage:
             self.all_usage[self.get_tuple(identifier)].add_field(field_name)
         else:
-            # self.all_usage[identifier]=IdentifierUsage()
-            # self.all_usage[identifier].add_field(field_name)
             id=identifier[0]
             tmp=identifier[1].copy()
-            flag=False
             while len(tmp) > 0:
                 tmp.pop()
                 if self.get_tuple((id,tmp)) in self.all_usage:
                     self.all_usage[self.get_tuple((id,tmp))].add_field(field_name)
-                    flag=True
                     break
 
     def is_method_of_identifier(self,identifier: tuple, method_name: str):
@@ -876,10 +646,6 @@ class AllUsageList:
         return self.get_tuple(identifier) in self.all_usage and self.all_usage[self.get_tuple(identifier)].is_in_fields_used(field_name)
 
     def get_identifier_methods(self,identifier: tuple):
-        # if not self.get_tuple(identifier) in self.all_usage:
-        #     raise Exception("invalid access")
-        # else:
-        #     return self.all_usage[self.get_tuple(identifier)].get_methods_name()
         if self.get_tuple(identifier) in self.all_usage:
             return self.all_usage[self.get_tuple(identifier)].get_methods_name()
         else:
@@ -891,10 +657,6 @@ class AllUsageList:
                     return self.all_usage[self.get_tuple((id, tmp))].get_methods_name()
 
     def get_identifier_fields(self,identifier: tuple):
-        # if not self.get_tuple(identifier) in self.all_usage:
-        #     raise Exception("invalid access")
-        # else:
-        #     return self.all_usage[self.get_tuple(identifier)].get_fields_name()
         if self.get_tuple(identifier) in self.all_usage:
             return self.all_usage[self.get_tuple(identifier)].get_methods_name()
         else:
@@ -904,20 +666,6 @@ class AllUsageList:
                 tmp.pop()
                 if self.get_tuple((id, tmp)) in self.all_usage:
                     return self.all_usage[self.get_tuple((id, tmp))].get_fields_name()
-
-
-
-    # aul = AllUsageList()
-    # aul.add_field_to_identifier((tuple(["class:A"]), "a"), "field")
-    # aul.add_method_to_identifier((tuple(["class:A"]), "a"), "func")
-    # # print("hello")
-    # a = dict()
-    # a["1"] = 1
-    # a["2"] = 2
-    # print(aul.get_identifier_fields((tuple(["class:A"]), "a")), aul.get_identifier_methods((tuple(["class:A"]), "a")))
-
-
-
 
 def extractJavaFilesAndProcess(path,source_class_file, new_class_file):
     try:
@@ -931,8 +679,6 @@ def extractJavaFilesAndProcess(path,source_class_file, new_class_file):
                     files_to_refactor.append(os.path.join(path,entry))
     except:
         print("error to read")
-
-
 
 if __name__ == '__main__':
     main()
