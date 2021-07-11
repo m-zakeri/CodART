@@ -79,7 +79,7 @@ public class JSONWriter {
     /**
      * The object/array stack.
      */
-    private static final JSONObject stack[];
+    private static JSONObject stack[];
 
     /**
      * The stack top index. A value of 0 indicates that the stack is empty.

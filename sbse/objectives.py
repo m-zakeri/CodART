@@ -1,5 +1,8 @@
 """
 Project's objectives
+
+## Reference
+[1] J. Bansiya and C. G. Davis, “A hierarchical model for object-oriented design quality assessment,” IEEE Trans. Softw. Eng., vol. 28, no. 1, pp. 4–17, 2002.
 """
 
 __version__ = '0.1.0'

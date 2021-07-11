@@ -5,20 +5,25 @@ from gen.java.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
+# get method parameters with formalParameters().formalParameterList()
+# formal parameters are those which are in method declaration
+# parameter in method call are from expressionList/expression
+"""
+To implement replace parameter with query refactoring:
+with consider of removable parameters, find new object in method declaration
+Delete target parameters in both method call and declaration
+Insert removed parameters in method body.
+"""
 
-class ReplaceParameterWithQueryRefactoringListener(JavaParserLabeledListener):
-    """
-    To implement replace parameter with query refactoring based on its actors.
-    Find usages of target method and remove target parameters from these and add the removed parameters to
-    top of target method.
-    """
 
+class ReplaceParameterWithQueryListener(JavaParserLabeledListener):
+    # constructor
     def __init__(self, common_token_stream: CommonTokenStream = None,
                  target_class: str = None, target_method: str = None,
                  target_parameters: list = None):
 
         if common_token_stream is None:
-            raise ValueError("common_token_stream is None")
+            raise ValueError("common token stream is None")
         else:
             self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
 
@@ -40,14 +45,11 @@ class ReplaceParameterWithQueryRefactoringListener(JavaParserLabeledListener):
         self.current_class = None
         self.current_method = None
         self.current_method_call = None
-        self.target_method_ctx = None
+        self.target_method_obj = None
         self.removed_expressions = []
-        self.all_local_variable_declarators = []
-        self.add_to_top_of_target_method = []
-
-        self.TAB = "\t"
-        self.NEW_LINE = "\n"
-        self.code = ""
+        self.local_variables = []
+        self.add_to_target_method = []
+        self.index_of_parameter = 0
 
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
         self.current_class = ctx.IDENTIFIER().getText()
@@ -58,66 +60,72 @@ class ReplaceParameterWithQueryRefactoringListener(JavaParserLabeledListener):
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
         self.current_method = ctx.IDENTIFIER().getText()
         if self.current_method == self.target_method and self.current_class == self.target_class:
-            self.target_method_ctx = ctx
+            self.target_method_obj = ctx
 
     def exitMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
-        self.exit_method_or_constructor()
+        self.FindObjrctIndex()
 
     def enterConstructorDeclaration(self, ctx: JavaParserLabeled.ConstructorDeclarationContext):
         self.current_method = ctx.IDENTIFIER().getText()
         if self.current_method == self.target_method and self.current_class == self.target_class:
-            self.target_method_ctx = ctx
+            self.target_method_obj = ctx
 
     def exitConstructorDeclaration(self, ctx: JavaParserLabeled.ConstructorDeclarationContext):
-        self.exit_method_or_constructor()
+        self.FindObjrctIndex()
+
+    def FindObjrctIndex(self):
+        i = 0
+        for expression in self.removed_expressions:
+            # print("expression",expression.getText())
+            if type(expression) is JavaParserLabeled.Expression0Context and \
+                    type(expression.primary()) is JavaParserLabeled.Primary4Context:
+                self.removeExpression(expression)
+            else:
+                self.add_to_target_method.append(expression.getText())
+                # find index of target object
+                self.index_of_parameter = i
+            i += 1
+        self.removed_expressions = []
+        self.local_variables = []
+        self.current_method = None
 
     def enterLocalVariableDeclaration(self, ctx: JavaParserLabeled.LocalVariableDeclarationContext):
-        self.all_local_variable_declarators.append(ctx)
+        self.local_variables.append(ctx.getText())
+        # print(self.local_variables)
 
-    def remove_expression_declaration(self, expression):
-        for lvd in self.all_local_variable_declarators:
+    # delete in method call
+    def removeExpression(self, expression):
+        for local_variable in self.local_variables:
             flag = False
-            vds = lvd.variableDeclarators()
-            survived_vds = []
-            for i in range(len(vds.children)):
+            variable_declarator = local_variable.variableDeclarators()
+            # print("$" ,variable_declarator.children)
+            remaining_variables = []
+            for i in range(len(variable_declarator.children)):
                 if i % 2 == 0:
-                    vd = vds.children[i]
+                    vd = variable_declarator.children[i]
                     if expression.getText() != vd.variableDeclaratorId().getText():
-                        survived_vds.append(vd.getText())
+                        remaining_variables.append(vd.getText())
                     else:
-                        self.add_to_top_of_target_method.append(vd.variableInitializer().getText())
+                        self.add_to_target_method.append(vd.variableInitializer().getText())
                         flag = True
 
-            if len(survived_vds) == 0:
-                parent_ctx = lvd.parentCtx
-                print(type(parent_ctx))
+            if len(remaining_variables) == 0:
+                parent_ctx = local_variable.parentCtx
+                # print("parent",parent_ctx)
                 self.token_stream_rewriter.delete(
                     program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
                     from_idx=parent_ctx.start.tokenIndex,
                     to_idx=parent_ctx.stop.tokenIndex
                 )
-            elif len(survived_vds) < (len(vds.children) + 1) // 2:
+            elif len(remaining_variables) < (len(variable_declarator.children) + 1) // 2:
                 self.token_stream_rewriter.replaceRange(
-                    from_idx=vds.start.tokenIndex,
-                    to_idx=vds.stop.tokenIndex,
-                    text=f"{', '.join(survived_vds)}"
+                    from_idx=variable_declarator.start.tokenIndex,
+                    to_idx=variable_declarator.stop.tokenIndex,
+                    text=f"{', '.join(remaining_variables)}"
                 )
 
             if flag:
                 break
-
-    def exit_method_or_constructor(self):
-        for expression in self.removed_expressions:
-            if type(expression) is JavaParserLabeled.Expression0Context and\
-                    type(expression.primary()) is JavaParserLabeled.Primary4Context:
-                self.remove_expression_declaration(expression)
-
-            else:
-                self.add_to_top_of_target_method.append(expression.getText())
-
-        self.removed_expressions = []
-        self.all_local_variable_declarators = []
-        self.current_method = None
 
     def enterMethodCall0(self, ctx: JavaParserLabeled.MethodCall0Context):
         self.current_method_call = ctx.IDENTIFIER().getText()
@@ -125,47 +133,63 @@ class ReplaceParameterWithQueryRefactoringListener(JavaParserLabeledListener):
     def exitMethodCall0(self, ctx: JavaParserLabeled.MethodCall0Context):
         self.current_method_call = None
 
+    # in method call
     def enterExpressionList(self, ctx: JavaParserLabeled.ExpressionListContext):
         if self.current_method_call == self.target_method:
-
-            parameters = []
+            # print("ex",ctx.getText())
+            expressions = []
             for i in range(len(ctx.children)):
                 if i % 2 == 0:
-                    if ((i // 2) + 1) in self.target_parameters:
+                    if (i // 2) in self.target_parameters:
                         self.removed_expressions.append(ctx.children[i])
                     else:
-                        parameters.append(ctx.children[i].getText())
-
+                        expressions.append(ctx.children[i].getText())
+                        # print(expressions)
+                # else => ctx.children = ,
             self.token_stream_rewriter.replaceRange(
                 from_idx=ctx.start.tokenIndex,
                 to_idx=ctx.stop.tokenIndex,
-                text=f"{', '.join(parameters)}"
+                text=f"{', '.join(expressions)}"
             )
 
+    # method body
     def exitCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
-        if self.target_method_ctx is not None:
-            ctx = self.target_method_ctx
+        temp = ""
+        if self.target_method_obj is not None:
+            print("self", self.index_of_parameter)
+            # declaration
+            ctx = self.target_method_obj
             text = ''
             formal_parameter_list = ctx.formalParameters().formalParameterList()
+            print("b", ctx.formalParameters().formalParameterList().getText()[1])
             survived_parameters = []
+            for j in range(len(formal_parameter_list.children)):
+                # find object name to gain the name, insetr obj name in local variables
+                if j % 2 == 0:
+                    if (j // 2) not in self.target_parameters:
+                        if j // 2 == self.index_of_parameter:
+                            parameter = formal_parameter_list.children[j]
+                            parameter_vdi = parameter.variableDeclaratorId().getText()
+                            temp = parameter_vdi
             for i in range(len(formal_parameter_list.children)):
                 if i % 2 == 0:
-                    if ((i // 2) + 1) in self.target_parameters:
+                    if (i // 2) in self.target_parameters:
                         parameter = formal_parameter_list.children[i]
                         parameter_type = parameter.typeType().getText()
                         parameter_vdi = parameter.variableDeclaratorId().getText()
-                        parameter_initializer = self.add_to_top_of_target_method[0]
-                        text += \
-                            parameter_type + ' ' + parameter_vdi + ' = ' + parameter_initializer +\
-                            ';' + self.NEW_LINE + self.TAB + self.TAB
-                        self.add_to_top_of_target_method.remove(parameter_initializer)
+                        print("i", i)
+                        print("target", parameter_vdi)
+                        parameter_initializer = self.add_to_target_method[0]
+                        text += parameter_type + ' ' + parameter_vdi + ' = ' + temp + '.' + parameter_vdi \
+                                + ';' + "\n" + "\t" + "\t"
+                        self.add_to_target_method.remove(parameter_initializer)
 
                     else:
                         parameter = formal_parameter_list.children[i]
                         parameter_type = parameter.typeType().getText()
                         parameter_vdi = parameter.variableDeclaratorId().getText()
                         survived_parameters.append(parameter_type + ' ' + parameter_vdi)
-
+            # delete in declarition
             self.token_stream_rewriter.replaceRange(
                 from_idx=formal_parameter_list.start.tokenIndex,
                 to_idx=formal_parameter_list.stop.tokenIndex,
@@ -180,7 +204,6 @@ class ReplaceParameterWithQueryRefactoringListener(JavaParserLabeledListener):
 
 
 class ReplaceParameterWithQueryAPI:
-
     def __init__(self, file_path, target_class, target_method, target_parameters):
         self.file_path = file_path
         self.new_file_path = file_path
@@ -195,7 +218,7 @@ class ReplaceParameterWithQueryAPI:
         self.walker = ParseTreeWalker()
 
     def do_refactor(self):
-        listener = ReplaceParameterWithQueryRefactoringListener(
+        listener = ReplaceParameterWithQueryListener(
             common_token_stream=self.token_stream,
             target_class=self.target_class,
             target_method=self.target_method,
@@ -205,21 +228,17 @@ class ReplaceParameterWithQueryAPI:
             listener=listener,
             t=self.tree
         )
-
-        print(listener.add_to_top_of_target_method)
+        print(listener.add_to_target_method)
         print(listener.token_stream_rewriter.getDefaultText())
-
-        print(type(self.new_file_path))
-
         with open(self.new_file_path, mode="w", newline="") as f:
             f.write(listener.token_stream_rewriter.getDefaultText())
 
 
 if __name__ == '__main__':
     ReplaceParameterWithQueryAPI(
-        file_path="C:\\Users\\asus\\Desktop\\desk\\University\\99002-CD (compiler)\\Project\\CodART\\"
-                  "benchmark_projects\\JSON\\src\\main\\java\\org\\json\\JSONArray.java",
-        target_class='JSONArray',
-        target_method="optDouble",
-        target_parameters=[2],
+        file_path="/data/Dev/JavaSample/src/ReplaceParameterWithQuery.java",
+        target_class='ReplaceParameterWithQuery',
+        target_method="availableVacation",
+        target_parameters=[1, ],
+        # index from 0
     ).do_refactor()

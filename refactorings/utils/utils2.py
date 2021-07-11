@@ -31,6 +31,27 @@ def get_program(source_files: list, print_status=False) -> Program:
     return program
 
 
+def get_objects(source_files: str) -> FileInfo:
+    objects = {}
+    for filename in source_files:
+        stream = FileStream(filename, encoding='utf8')
+        lexer = JavaLexer(stream)
+        token_stream = CommonTokenStream(lexer)
+        parser = JavaParser(token_stream)
+        tree = parser.compilationUnit()
+        listener = UtilsListener(filename)
+        walker = ParseTreeWalker()
+        walker.walk(listener, tree)
+
+        if not listener.package.name in objects:
+            objects[listener.package.name] = listener.objects_declaration
+        else:
+            for class_name in listener.objects_declaration:
+                objects[listener.package.name][class_name] = listener.objects_declaration[class_name]
+
+    return objects
+
+
 def get_filenames_in_dir(directory_name: str, filter=lambda x: x.endswith(".java")) -> list:
     result = []
     for (dirname, dirnames, filenames) in os.walk(directory_name):
@@ -83,3 +104,25 @@ class Rewriter:
                 os.makedirs(path)
             with open(new_filename, mode='w', newline='') as file:
                 file.write(token_stream_rewriter.getDefaultText())
+
+
+def get_program_with_field_usage(source_files: list, field_name: str, source_class: str, print_status=False) -> Program:
+    program = Program()
+    for filename in source_files:
+        if print_status:
+            print("Parsing " + filename)
+        stream = FileStream(filename, encoding='utf8')
+        lexer = JavaLexer(stream)
+        token_stream = CommonTokenStream(lexer)
+        parser = JavaParser(token_stream)
+        tree = parser.compilationUnit()
+        listener = FieldUsageListener(filename, field_name, source_class)
+        walker = ParseTreeWalker()
+        walker.walk(listener, tree)
+
+        if not listener.package.name in program.packages:
+            program.packages[listener.package.name] = listener.package
+        else:
+            for classes_name in listener.package.classes:
+                program.packages[listener.package.name].classes[classes_name]=listener.package.classes[classes_name]
+    return program
