@@ -61,6 +61,7 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
         self.assigning_value_post = False
         self.method_stop_line = 0
         self.return_variable = None
+        self.return_variable_type = None
 
 
     ######################################
@@ -257,34 +258,60 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
         # checks if we are in target method
         if self.is_in_target_method:
 
+            # print('entering:',ctx.getText())
+            # print(self.assigning_value_pre)
+            # print(self.assigning_value_mid)
+            # print(self.assigning_value_post)
+
             # writing value to a variable in mid
             if self.assigning_value_mid:
 
                 # adding variable
+                action = 'write'
+                if (isinstance(ctx.parentCtx.parentCtx,
+                              JavaParserLabeled.Expression1Context) and ctx.parentCtx.parentCtx.DOT() )or\
+                        (isinstance(ctx.parentCtx.parentCtx,
+                              JavaParserLabeled.Expression2Context) and ctx.parentCtx.parentCtx.LBRACK()):
+                    # print("exiting:", ctx.getText())
+                    action = 'read'
                 if self.mid_variables.keys().__contains__(str(ctx.IDENTIFIER())):
-                    self.mid_variables[ctx.IDENTIFIER()]['write'] = True
+                    self.mid_variables[str(ctx.IDENTIFIER())][action] = True
                 else:
-                    self.mid_variables[ctx.IDENTIFIER()] = {'write': True}
+                    self.mid_variables[str(ctx.IDENTIFIER())] = {action: True}
                 self.assigning_value_mid=False
 
             # writing value to a variable in pre
             elif self.assigning_value_pre:
 
                 # adding variable
+                action = 'write'
+                if (isinstance(ctx.parentCtx.parentCtx,
+                              JavaParserLabeled.Expression1Context) and ctx.parentCtx.parentCtx.DOT() )or\
+                        (isinstance(ctx.parentCtx.parentCtx,
+                              JavaParserLabeled.Expression2Context) and ctx.parentCtx.parentCtx.LBRACK()):
+                    # print("exiting:", ctx.getText())
+                    action = 'read'
                 if self.pre_variables.keys().__contains__(str(ctx.IDENTIFIER())):
-                    self.pre_variables[str(ctx.IDENTIFIER())]['write'] = True
+                    self.pre_variables[str(ctx.IDENTIFIER())][action] = True
                 else:
-                    self.pre_variables[str(ctx.IDENTIFIER())] = {'write': True}
+                    self.pre_variables[str(ctx.IDENTIFIER())] = {action: True}
                 self.assigning_value_pre = False
 
             # writing value to a variable in post
             elif self.assigning_value_post:
 
                 # adding variable
+                action = 'write'
+                if (isinstance(ctx.parentCtx.parentCtx,
+                              JavaParserLabeled.Expression1Context) and ctx.parentCtx.parentCtx.DOT() )or\
+                        (isinstance(ctx.parentCtx.parentCtx,
+                              JavaParserLabeled.Expression2Context) and ctx.parentCtx.parentCtx.LBRACK()):
+                    # print("exiting:", ctx.getText())
+                    action = 'read'
                 if self.post_variables.keys().__contains__(str(ctx.IDENTIFIER())):
-                    self.post_variables[str(ctx.IDENTIFIER())]['write'] = True
+                    self.post_variables[str(ctx.IDENTIFIER())][action] = True
                 else:
-                    self.post_variables[str(ctx.IDENTIFIER())] = {'write' : True}
+                    self.post_variables[str(ctx.IDENTIFIER())] = {action : True}
                 self.assigning_value_post = False
 
             # reading a variable value not in extracting lines
@@ -314,6 +341,7 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
     # helper functions
     # get method arguments for function call
     def get_args(self, include_type : bool):
+        print(self.pre_variables)
         result = '('
         first = True
         for key in self.mid_variables.keys():
@@ -321,7 +349,8 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
                 continue
             if self.pre_variables.keys().__contains__(key) and\
                     self.pre_variables[key].keys().__contains__('write') and \
-                    self.pre_variables[key]['write']:
+                    self.pre_variables[key]['write'] and \
+                    self.pre_variables[key].keys().__contains__('type'):
                 if not first:
                     result += ', '
                 else:
@@ -330,7 +359,7 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
                     result += self.pre_variables[key]['type'] + ' ' + key
                 else:
                     result += key
-        result += ');'
+        result += ')' + ("" if include_type else ";")
         return result
 
 
@@ -340,16 +369,20 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
             if self.mid_variables.__contains__(key) and self.mid_variables[key].__contains__('type') and self.mid_variables[key]['type']:
                 if result is None:
                     self.return_variable = key
+                    self.return_variable_type = self.mid_variables[key]['type']
                     result = self.mid_variables[key]['type'] + ' ' + key + ' = '
                 else:
+                    print('assignments on :',self.return_variable,",",key)
                     self.return_variable = None
                     raise Exception('only one assignment in extracting lines is acceptable!')
 
-            if self.pre_variables.__contains__(key) and self.pre_variables[key].__contains__('type') and self.pre_variables[key]['type']:
+            elif self.pre_variables.__contains__(key) and self.pre_variables[key].__contains__('type') and self.pre_variables[key]['type'] and self.mid_variables.__contains__(key) and self.mid_variables[key].__contains__('write') and self.mid_variables[key]['write']:
                 if result is None:
                     result = key + ' = '
                     self.return_variable = key
+                    self.return_variable_type = self.pre_variables[key]['type']
                 else:
+                    print('assignments on :', self.return_variable, ",", key)
                     self.return_variable = None
                     raise Exception('only one assignment in extracting lines is acceptable!')
         return '' if result is None else result
@@ -397,13 +430,14 @@ def extract_method(conf):
         elif line_num == listener.method_stop_line:
             output.append(line)
             output.append(get_tabs(line)+'private '+ ('static ' if listener.is_target_method_static else '')+
-                          'void ' + conf['new_method_name'] + listener.get_args(True) +
+                          (listener.return_variable_type if listener.return_variable_type else 'void') + ' '+
+                          conf['new_method_name'] + listener.get_args(True) +
                           ((' throws '+listener.exception_thrown_in_target_method)
                            if listener.exception_thrown_in_target_method is not None else '') + '\n')
             output.append(get_tabs(line)+'{\n')
             for item in listener.pre_variables.keys():
                 var = listener.pre_variables[item]
-                if not var['write']:
+                if var.keys().__contains__('write') and not var['write']:
                     output.append(get_tabs(line)+'\t'+var['type']+' '+item+';\n')
             output = output + func
             if listener.return_variable is not None:
@@ -430,7 +464,7 @@ def main():
     _conf = {
         'target_file': "/mnt/d/Sajad/Uni/Spring00/Compiler/CodART/tests/extract_method/in/ExtractMethodTest.java",
         'output_file': "/mnt/d/Sajad/Uni/Spring00/Compiler/CodART/tests/extract_method/out/ExtractMethodTest.java",
-        'lines': [10, 11],
+        'lines': [23,24],
         'new_method_name': 'printDetails',
     }
     extract_method(_conf)

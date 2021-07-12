@@ -117,7 +117,7 @@ public class Cookie {
                 throw new JSONException("Illegal attribute name: 'value'");
             }
             // check to see if it's a flag property
-		value = getObject(x);
+            value = getObject(x);
             // only store non-blank attributes
             if(!"".equals(name) && !"".equals(value)) {
                 jo.put(name, value);
@@ -125,17 +125,17 @@ public class Cookie {
         }
         return jo;
     }
-	private static void getObject(JSONTokener x)
-	{
-		Object value;
+    private static Object getObject(JSONTokener x)
+    {
+    	Object value;
             if (x.next() != '=') {
                 value = Boolean.TRUE;
             } else {
                 value = unescape(x.nextTo(';')).trim();
                 x.next();
             }
-		return value;
-	}
+    	return value;
+    }
 
 
     /**
