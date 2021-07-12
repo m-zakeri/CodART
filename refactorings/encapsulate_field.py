@@ -264,7 +264,7 @@ def main(directory_path, package_name, source_class, field_name):
     for root, dirs, files in os.walk(directory_path):
         for file in files:
             if file.endswith('.java'):
-                stream = FileStream(os.path.join(root, file), encoding='utf8')
+                stream = FileStream(os.path.join(root, file), encoding='utf8', errors='ignore')
                 lexer = JavaLexer(stream)
                 token_stream = CommonTokenStream(lexer)
                 parser = JavaParserLabeled(token_stream)
