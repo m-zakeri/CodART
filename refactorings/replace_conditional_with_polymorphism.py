@@ -1,6 +1,6 @@
 from antlr4 import *
 from gen.javaLabeled.JavaLexer import JavaLexer
-
+import os
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
@@ -15,6 +15,7 @@ returntype = []
 clas = []
 found_class = []
 found_func = []
+params = ""
 
 class ReplaceConditionalWithPolymorphism(JavaParserLabeledListener):
 
@@ -35,6 +36,19 @@ class ReplaceConditionalWithPolymorphism(JavaParserLabeledListener):
         else:
             self.method_name = method_name
 
+    def get_java_files(directory):
+        """
+        A generator that gives you all java files (*.java) in a specific directory.
+        :param directory: The directory's absolute path you want to traverse.
+        :return: Yields a *.java that exists in the directory
+        """
+        if not os.path.isdir(directory):
+            raise ValueError("directory should be an absolute path of a directory!")
+        for root, dirs, files in os.walk(directory):
+            for file in files:
+                if file.split('.')[-1] == 'java':
+                    yield os.path.join(root, file)
+
     def enterSwitchBlockStatementGroup(self, ctx: JavaParserLabeled.SwitchBlockStatementGroupContext):
         switches.append(ctx.getText())
         notfound.append("doo")
@@ -45,9 +59,19 @@ class ReplaceConditionalWithPolymorphism(JavaParserLabeledListener):
 
     def enterMethodDeclaration(self, ctx:JavaParserLabeled.MethodDeclarationContext):
         methods.append(f"{ctx.IDENTIFIER()} ")
+
         returntype.append(ctx.typeTypeOrVoid().getText())
         if ctx.IDENTIFIER().getText() == self.method_name:
             found_func.append(ctx.IDENTIFIER())
+
+    def enterFormalParameter(self, ctx:JavaParserLabeled.FormalParameterList0Context):
+        global params
+        params=ctx.getText()
+        if "String" in params:
+            params=params.replace("String", " String ")
+
+        if "int" in params:
+            params=params.replace("int", " int ")
 
     def exitClassDeclaration(self, ctx:JavaParserLabeled.ClassDeclarationContext):
         clas.append(ctx.getText())
@@ -126,6 +150,10 @@ if __name__ == '__main__':
         last = last.replace(')', lcl)
         lcl = " ( "
         last = last.replace('(', lcl)
+        if "int" in last:
+            last = last.replace("int", " int ")
+        if "String" in last:
+            last = last.replace("String", " String ")
         if "return" in last:
             last.replace("return", " return ") \
                 # print(last)
@@ -152,7 +180,7 @@ if __name__ == '__main__':
         if 'return' in switches[0]:
             method_type = returntype[0]
         # answer.write('\t' + "abstract public " + method_type + " " + func + "(" + classname + ' input_class ' + ") ;" + '\n' + "}")
-        whole += '\t' + "abstract public " + method_type + " " + func + "(" + classname + ' input_class ' + ") ;" + '\n' + "}"
+        whole += '\t' + "abstract public " + method_type + " " + func + "(" + classname + ' input_class '+ "," +params + ") ;" + '\n' + "}"
         for case in switches:
             # answer.write('\n')
             whole += '\n'
@@ -164,7 +192,7 @@ if __name__ == '__main__':
             # answer.write('\t' + "public " + classname + "_" + ar[0] + "()" + '{' + '\n' + '\t' + '}' + '\n')
             whole += '\t' + "public " + classname + "_" + ar[0] + "()" + '{' + '\n' + '\t' + '}' + '\n'
             # answer.write('\t' + "public " + returntype[0] + " " + func + "(" + classname + ' input_class ' + ") {" + '\n')
-            whole += '\t' + "public " + returntype[0] + " " + func + "(" + classname + ' input_class ' + ") {" + '\n'
+            whole += '\t' + "public " + returntype[0] + " " + func + "(" + classname + ' input_class '+','+params + ") {" + '\n'
             index = case.find(':')
             rp = " {" + '\n' + '\t' + '\t' + '\t'
             case = case.replace('{', rp)
@@ -178,6 +206,12 @@ if __name__ == '__main__':
             case = case.replace('(', rp)
             rp = " % "
             case = case.replace('%', rp)
+            if "String" in case:
+                case = case.replace("String", " String ")
+            if "int" in case:
+                case=case.replace("int", " int ")
+            blue=case
+
             if "return" in case:
                 rr = case.find("return")
                 blue = case[0:rr]+" return "+ case[rr+6:]

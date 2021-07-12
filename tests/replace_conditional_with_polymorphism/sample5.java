@@ -1,18 +1,9 @@
-public class SwitchDemo {
+public class SwitchDemo5 {
     public int myMethod(int numb) {
 
-        int mnth = 8;
+        int mnth = 5;
         String monthString;
         switch (mnth) {
-            case 1:  monthString = "January";
-                     int s = 2;
-                     break;
-            case 2:  monthString = "February";
-                     break;
-            case 3:  monthString = "March";
-                     break;
-            case 4:  monthString = "April";
-                     break;
             case 5:  monthString = "May";
                      break;
             case 6:  monthString = "June";

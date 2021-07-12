@@ -1,8 +1,7 @@
-public class SwitchDemo {
-    public int myMethod(int numb) {
-
-        int mnth = 8;
+public class SwitchDemo2 {
+    public int myMethod() {
         String monthString;
+        int mnth = 8;
         switch (mnth) {
             case 1:  monthString = "January";
                      int s = 2;
