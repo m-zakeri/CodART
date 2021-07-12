@@ -146,6 +146,8 @@ class FieldUsageListener(UtilsListener):
                 ctx.parentCtx.parentCtx.stop.tokenIndex, "")
 
     def exitConstructorDeclaration(self, ctx: JavaParser.ConstructorDeclarationContext):
+        if self.current_method is None:
+            return
         self.current_method.name = ctx.IDENTIFIER().getText()
         self.current_method.returntype = self.current_method.class_name
         self.handleMethodUsage(ctx, True)
