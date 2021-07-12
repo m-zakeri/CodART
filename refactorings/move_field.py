@@ -53,7 +53,8 @@ class FieldUsageListener(UtilsListener):
     """
     FieldUsageListener finds all the usage of
     an specified field f, from a class c in
-    package pkg.
+    package pkg, and redirect them to use f
+    from the target class.
     """
 
     def __init__(self, filename: str, source_class: str, source_package: str, target_class: str, target_package: str,
@@ -155,6 +156,12 @@ class FieldUsageListener(UtilsListener):
         self.handleMethodUsage(ctx, False)
 
     def handleMethodUsage(self, ctx, is_constructor: bool):
+        """
+        :param ctx: Method or constructor context
+        :param is_constructor: Whether the given context if for a constructor or not
+        Usages of the field in the method is found and redirected to the target class instance
+        As a result, an instance of target class is passed as the last parameter of the method
+        """
         method_identifier = ctx.IDENTIFIER().getText() if is_constructor else ctx.parentCtx.IDENTIFIER().getText()
         formal_params = ctx.formalParameters() if is_constructor else ctx.parentCtx.formalParameters()
         target_added = False
@@ -256,6 +263,12 @@ class FieldUsageListener(UtilsListener):
                     self.propagate_getter_setter(var_or_exprs.parser_context, target_param_name)
 
     def is_getter_or_setter(self, first_id: str, second_id: str, local_candidates: set):
+        """
+        :param first_id: identifier of a field
+        :param second_id: identifier of a method
+        :return: whether it demonstrate a getter or a setter
+        Checks the field and the method's identifiers to see if they form a setter or a getter.
+        """
         return (first_id in local_candidates or first_id in self.field_candidates) and (
                 second_id == f"set{self.field_name[0].upper() + self.field_name[1:-1]}" or
                 second_id == f"get{self.field_name[0].upper() + self.field_name[1:-1]}" or
@@ -264,6 +277,11 @@ class FieldUsageListener(UtilsListener):
         )
 
     def is_method_getter_or_setter(self, method: str):
+        """
+        :param method: identifier of a method
+        :return: whether it demonstrate a getter or a setter
+        Check the method's name to see if it's a setter or a getter.
+        """
         return (
                 method == f"set{self.field_name[0].upper() + self.field_name[1:-1]}" or
                 method == f"get{self.field_name[0].upper() + self.field_name[1:-1]}" or
@@ -272,20 +290,39 @@ class FieldUsageListener(UtilsListener):
         )
 
     def propagate_getter_setter(self, ctx: JavaParser.ExpressionContext, target_name: str):
+        """
+        :param ctx: The context with the help of which, we redirect the usage to the target class instance
+        :param target_name: target instance name
+        Redirect a getter or a setter to use the field from the target class instance.
+        In this case, the getter or setter is already accessed from another class.
+        """
         index = ctx.DOT().symbol.tokenIndex
         self.rewriter.replaceRange(ctx.start.tokenIndex, index - 1, target_name)
 
     def propagate_getter_setter_form2(self, ctx: JavaParser.ExpressionContext, target_name: str):
         """
-        form 2 is getA() setA()...
+        :param ctx: The context with the help of which, we redirect the usage to the target class instance
+        :param target_name: target instance name
+        Redirect a getter or a setter to use the field from the target class instance.
+        In this case, the getter or setter is not accessed from any class beforehand.
         """
         self.rewriter.insertBeforeIndex(ctx.start.tokenIndex, f"{target_name}.")
 
     def propagate_field(self, ctx: JavaParser.ExpressionContext, target_name: str):
+        """
+        :param ctx: The context with the help of which, we redirect the usage to the target class instance
+        :param target_name: target instance name
+        Redirect a direct usage of the field to use the field from the target class instance.
+        """
         index = ctx.DOT().symbol.tokenIndex
         self.rewriter.replaceRange(ctx.start.tokenIndex, index - 1, target_name)
 
     def save(self, overwrite: bool, filename_mapping=lambda x: x + ".rewritten.java"):
+        """
+        :param overwrite: Whether it should overwrite an existing file
+        :param filename_mapping: How to generate the new file's name
+        Save the rewriter result in file.
+        """
         if overwrite:
             new_filename = self.filename
         else:
@@ -300,6 +337,11 @@ class FieldUsageListener(UtilsListener):
 
 
 class MethodUsageListener(UtilsListener):
+    """
+    MethodUsageListener finds all the usage of
+    specified methods, and passes a new instance
+    of target as their last parameter.
+    """
     def __init__(self, filename: str, methods: str, target_class: str, source_class: str):
         super().__init__(filename)
         self.methods = methods
@@ -337,7 +379,11 @@ class MethodUsageListener(UtilsListener):
         # self.save(self.rewriter, self.filename)
 
     def save(self, overwrite: bool, filename_mapping=lambda x: x + ".rewritten.java"):
-
+        """
+        :param overwrite: Whether it should overwrite an existing file
+        :param filename_mapping: How to generate the new file's name
+        Save the rewriter result in file.
+        """
         if overwrite:
             new_filename = self.filename
         else:
@@ -414,32 +460,61 @@ class PreConditionListener(UtilsListener):
             self.empty_constructor = False
 
     def has_null_method(self) -> bool:
+        """
+        :returns: if method is null
+        """
         return self.null_method
 
     def has_inner_class(self) -> bool:
+        """
+        :returns: if the classes include nested classes
+        """
         return self.inner_class
 
     def has_empty_constructor(self) -> bool:
+        """
+        :returns: if the classes include nested classes
+        """
         return self.empty_constructor
 
     def should_ignore_class(self) -> bool:
+        """
+        :returns: if the class should be ignored in refactoring
+        """
         return self.should_ignore
 
     def can_refactor_project(self) -> bool:
+        """
+        :returns: if we can refactor the given project based on
+        the preconditions
+        """
         return self.can_refactor
 
     def is_field_inside_class(self) -> bool:
+        """
+        :returns: if provided field exists in the source class
+        """
         return self.contains_field
 
     def does_target_exists(self) -> bool:
+        """
+        :returns: if the specified target package and
+        target class exists
+        """
         return self.target_exists
 
     def duplicate_field_exists_in_target(self):
+        """
+        :returns: if there is a field in the target
+        with a similar name
+        """
         return self.duplicate_field
 
 
 class MoveField:
-
+    """
+    Refactoring is done here.
+    """
     def __init__(self,
                  src_package: str,
                  src_class: str,
@@ -465,12 +540,23 @@ class MoveField:
     def get_filenames_in_dir(dir: Union[str, Path],
                              filter=lambda x: x.endswith(".java")
                              ) -> List[str]:
+        """
+        :param dir: the directory we should get the files from
+        :param filter: how to filter the files
+        :return: filtered files in the given directory
+        Finds all the java files in the directory
+        """
         result = []
         for (dirname, dirnames, filenames) in os.walk(dir):
             result.extend([dirname + '/' + name for name in filenames if filter(name)])
         return result
 
     def change_file_order(self):
+        """
+        Changes the order of files in the list,
+        so that the source class is the first and
+        the target class is next on the list.
+        """
         found_src = found_target = False
         for i, f in enumerate(self.files):
             p = Path(f).name
@@ -484,6 +570,10 @@ class MoveField:
                 return
 
     def check_file_exists(self):
+        """
+        :return: if source and target file exists
+        Checks if the source and target class files exists
+        """
         src_file = False
         target_file = False
 
@@ -509,6 +599,12 @@ class MoveField:
         self.files = original_files
 
     def transfer_field(self):
+        """
+        :return: list of the methods for which we should find and update their usages
+        Preconditions are checked.
+        If all conditions are met, each file is refactored after determining
+        the field candidates.
+        """
         methods_tobe_update = []
         walker = ParseTreeWalker()
         utils_listeners = []
@@ -605,7 +701,9 @@ class MoveField:
         return methods_tobe_update
 
     def update_method_calls(self, methods):
-
+        """
+        Update the method calls with MethodUsageListener.
+        """
         if not self.overwrite:
             files_to_apply = [self.filename_map(file) for file in self.files]
 
@@ -625,6 +723,9 @@ class MoveField:
                 listener.save(overwrite=self.overwrite, filename_mapping=self.filename_map)
 
     def refactor(self):
+        """
+        Refactor the files after checking if the target and source files exists.
+        """
         self.clean_up_dir()
         if not self.check_file_exists():
             raise FileNotFoundError("Names of source and target must match the file name or they does not exist")
