@@ -99,7 +99,7 @@ class FieldUsageListener(UtilsListener):
                 ctx.variableDeclarators().children[0].children[0].IDENTIFIER().getText()]
             if field.name == self.field_name:
                 self.field_tobe_moved = field
-            self.rewriter.replaceRange(ctx.parentCtx.parentCtx.start.tokenIndex,ctx.parentCtx.parentCtx.stop.tokenIndex, "")
+                self.rewriter.replaceRange(ctx.parentCtx.parentCtx.start.tokenIndex,ctx.parentCtx.parentCtx.stop.tokenIndex, "")
 
     def exitClassBody(self, ctx: JavaParser.ClassBodyContext):
         super().exitClassBody(ctx)
@@ -272,12 +272,13 @@ class FieldUsageListener(UtilsListener):
 
 
 class MethodUsageListener(UtilsListener):
-    def __init__(self, filename: str, methods: str, target_class: str):
+    def __init__(self, filename: str, methods: str, target_class: str, source_class: str):
         super().__init__(filename)
         self.methods = methods
         self.method_names = set(map(lambda m: m.name, methods))
         self.rewriter = None
         self.target_class = target_class
+        self.source_class = source_class
 
     def enterCompilationUnit(self, ctx: JavaParser.CompilationUnitContext):
         super().enterCompilationUnit(ctx)
@@ -588,7 +589,7 @@ class MoveField:
             token_stream = CommonTokenStream(lexer)
             parser = JavaParser(token_stream)
             tree = parser.compilationUnit()
-            listener = MethodUsageListener(file, methods, self.target_class)
+            listener = MethodUsageListener(file, methods, self.target_class, self.src_class)
             walker = ParseTreeWalker()
             walker.walk(listener, tree)
             listener.save(overwrite=self.overwrite, filename_mapping=self.filename_map)
@@ -604,17 +605,17 @@ class MoveField:
 
 if __name__ == "__main__":
     move_field = MoveField(
-        src_class="XMLParserConfiguration",
+        src_class="JSONWriter",
         src_package="org.json",
         target_class="JSONStringer",
         target_package="org.json",
-        field_name="keepStrings",
+        field_name="top",
+        project_dir="/home/loop/Desktop/Ass/Compiler/new-codeart/CodART/benchmark_projects/JSON",
         # src_class="Source",
         # src_package="source",
         # target_class="Target",
         # target_package="target",
         # field_name="a",
-        project_dir="/home/loop/Desktop/Ass/Compiler/new-codeart/CodART/benchmark_projects/JSON",
         # project_dir="/home/loop/IdeaProjects/move-field"
     )
 
