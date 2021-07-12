@@ -43,14 +43,28 @@ class MoveMethodRefactoring:
         method_declaration_info = TokensInfo(_method.method_declaration_context)
         exp = []  # برای نگه داری متغیرهایی که داخل کلاس تعریف شدند و در بدنه متد استفاده شدند
         exps = tokens_info.get_token_index(tokens_info.token_stream.tokens, tokens_info.start, tokens_info.stop)
+        static_exps=[]
         # check that method is static or not
         for modifier in _method.modifiers:
             if modifier == "static":
                 static = 1
 
         for token in exps:
-            if token.text in _sourceclass.fields:
-                exp.append(token.tokenIndex)
+            for fields in _sourceclass.fields:
+                fields_dic = _sourceclass.fields[fields]
+                if token.text == fields_dic.name:
+                    try:
+                        if fields_dic.modifiers[0] == 'private':
+                            print("The target method is using the private variable , so cannot refactoring")
+                            return
+                        if fields_dic.modifiers[1] == 'static':
+                            static_exps.append(token.tokenIndex)
+                            continue
+                        exp.append(token.tokenIndex)
+                    except:
+                        continue
+
+
             # check that where this method is call
         for package_names in program.packages:
             package = program.packages[package_names]
@@ -80,8 +94,10 @@ class MoveMethodRefactoring:
 
         # insert name of source.java class befor param that define in body of classe (that use in method)
         for index in exp:
-            token_stream_rewriter.insertBeforeIndex(index=index, text=str.lower(self.class_name)+ str(
-                        int(time.time())) + ".")
+            token_stream_rewriter.insertBeforeIndex(index=index, text=str.lower(self.class_name) + str(
+                int(time.time())) + ".")
+        for index in static_exps:
+            token_stream_rewriter.insertBeforeIndex(index=index, text=self.class_name+ ".")
 
         for inv in _method.body_method_invocations:
             if inv.getText() == self.target_class_name:
@@ -122,7 +138,7 @@ class MoveMethodRefactoring:
         self.propagate(program.packages, Rewriter_)
         self.__reformat(_sourceclass)
         self.__reformat(_targetclass)
-        #its not efficient for big project ! :
+        # its not efficient for big project ! :
         # for package_item in program.packages:
         #     package_item_dic = program.packages[package_item]
         #     for classes_item in package_item_dic.classes:
@@ -139,7 +155,7 @@ class MoveMethodRefactoring:
                 if classes_item == self.class_name:  # check any method in source class use that function or not
                     sourceClass = package[self.package_name].classes[self.class_name]
                     for method_item in sourceClass.methods:
-                        if method_item==self.method_key:
+                        if method_item == self.method_key:
                             continue
                         method_item_dict = sourceClass.methods[method_item]
                         for i in method_item_dict.body_method_invocations_without_typename:
