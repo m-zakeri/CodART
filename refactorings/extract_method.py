@@ -62,6 +62,7 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
         self.method_stop_line = 0
         self.return_variable = None
         self.return_variable_type = None
+        self.methods_name = []
 
 
     ######################################
@@ -70,7 +71,7 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
 
 
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
-
+        self.methods_name.append(ctx.IDENTIFIER().getText())
         #checks if this is the method containing target lines
         if ctx.start.line <= self.first_line and ctx.stop.line >= self.last_line:
             print("Found method containing target lines.")
@@ -413,6 +414,9 @@ def extract_method(conf):
     if not listener.is_result_valid:
         raise Exception('Some problem happened!')
 
+    if listener.methods_name.__contains__(conf['new_method_name']):
+        raise Exception('New method name already exists.')
+
     output = []
     file1 = open(conf['target_file'], 'r', encoding="utf-8")
     lines = file1.readlines()
@@ -465,7 +469,7 @@ def main():
         'target_file': "/mnt/d/Sajad/Uni/Spring00/Compiler/CodART/tests/extract_method/in/ExtractMethodTest.java",
         'output_file': "/mnt/d/Sajad/Uni/Spring00/Compiler/CodART/tests/extract_method/out/ExtractMethodTest.java",
         'lines': [23,24],
-        'new_method_name': 'printDetails',
+        'new_method_name': 'method1',
     }
     extract_method(_conf)
 
