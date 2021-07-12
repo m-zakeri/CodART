@@ -81,7 +81,7 @@ class FieldUsageListener(UtilsListener):
 
             # add getter and setter
             name = self.field_tobe_moved.name
-            method_name = self.field_tobe_moved.name.upper() + self.field_tobe_moved.name[1:-1]
+            method_name = self.field_tobe_moved.name[0].upper() + self.field_tobe_moved.name[1:-1]
             type = self.field_tobe_moved.datatype
 
             getter = f"\tpublic {type} get{method_name}() {{ return this.{name}; }}\n"
@@ -99,6 +99,7 @@ class FieldUsageListener(UtilsListener):
                 ctx.variableDeclarators().children[0].children[0].IDENTIFIER().getText()]
             if field.name == self.field_name:
                 self.field_tobe_moved = field
+            self.rewriter.replaceRange(ctx.parentCtx.parentCtx.start.tokenIndex,ctx.parentCtx.parentCtx.stop.tokenIndex, "")
 
     def exitClassBody(self, ctx: JavaParser.ClassBodyContext):
         super().exitClassBody(ctx)
@@ -603,18 +604,18 @@ class MoveField:
 
 if __name__ == "__main__":
     move_field = MoveField(
-        # src_class="XMLParserConfiguration",
-        # src_package="org.json",
-        # target_class="JSONStringer",
-        # target_package="org.json",
-        # field_name="keepStrings",
-        src_class="Source",
-        src_package="source",
-        target_class="Target",
-        target_package="target",
-        field_name="a",
-        # project_dir="/home/loop/Desktop/Ass/Compiler/new-codeart/CodART/benchmark_projects/JSON",
-        project_dir="/home/loop/IdeaProjects/move-field"
+        src_class="XMLParserConfiguration",
+        src_package="org.json",
+        target_class="JSONStringer",
+        target_package="org.json",
+        field_name="keepStrings",
+        # src_class="Source",
+        # src_package="source",
+        # target_class="Target",
+        # target_package="target",
+        # field_name="a",
+        project_dir="/home/loop/Desktop/Ass/Compiler/new-codeart/CodART/benchmark_projects/JSON",
+        # project_dir="/home/loop/IdeaProjects/move-field"
     )
 
     move_field.refactor()
