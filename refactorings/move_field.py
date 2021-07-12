@@ -6,9 +6,8 @@ from antlr4 import CommonTokenStream, FileStream, ParseTreeWalker
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
 from gen.java.JavaLexer import JavaLexer
-from gen.java.JavaParser import JavaParser
+from gen.java.JavaParser import JavaParser, TokenStream
 from refactorings.utils.utils_listener_fast import ExpressionName, MethodInvocation, LocalVariable, Field, UtilsListener
-
 
 class FieldNotFound(Exception):
     pass
@@ -23,6 +22,32 @@ class DuplicateField(Exception):
 
 class TargetNoEmptyConstructor(Exception):
     pass
+
+class RewriterInterceptor(TokenStreamRewriter):
+    def __init__(self, tokens):
+        super().__init__(tokens)
+        self.modified = False
+
+    def insertAfter(self, index, text, program_name=TokenStreamRewriter.DEFAULT_PROGRAM_NAME):
+        self.modified = True
+        super().insertAfter(index, text, program_name)
+
+    def insertBefore(self, program_name, index, text):
+        self.modified = True
+        super().insertBefore(program_name, index, text)
+
+    def insertBeforeIndex(self, index, text):
+        self.modified = True
+        super().insertBeforeIndex(index, text)
+
+    def insertAfterToken(self, token, text, program_name=TokenStreamRewriter.DEFAULT_PROGRAM_NAME):
+        self.modified = True
+        super().insertAfterToken(token, text, program_name)
+
+    def replaceRange(self, from_idx, to_idx, text):
+        self.modified = True
+        super().replaceRange(from_idx, to_idx, text)
+
 
 class FieldUsageListener(UtilsListener):
     """
@@ -49,10 +74,11 @@ class FieldUsageListener(UtilsListener):
         # this represents the text to be added in target i.e. public int a;
         self.field_tobe_moved = field_tobe_moved
         self.methods_tobe_updated = []
+        self.has_been_modified = False
 
     def enterCompilationUnit(self, ctx: JavaParser.CompilationUnitContext):
         super().enterCompilationUnit(ctx)
-        self.rewriter = TokenStreamRewriter(ctx.parser.getTokenStream())
+        self.rewriter = RewriterInterceptor(ctx.parser.getTokenStream())
 
     def enterClassDeclaration(self, ctx: JavaParser.ClassDeclarationContext):
         super().enterClassDeclaration(ctx)
@@ -65,13 +91,13 @@ class FieldUsageListener(UtilsListener):
                                    self.file_info.has_imported_class(self.package.name, self.source_class)
 
         # import target if we're not in Target and have not imported before
-        if self.current_class_name != self.target_class:
+        if self.current_class_name != self.target_class or self.package.name != self.target_package:
             self.rewriter.insertBeforeIndex(ctx.parentCtx.start.tokenIndex,
                                             f"import {self.target_package}.{self.target_class};\n")
 
     def enterClassBody(self, ctx: JavaParser.ClassBodyContext):
         super().exitClassBody(ctx)
-        if self.current_class_name == self.target_class:
+        if self.current_class_name == self.target_class and self.package.name == self.target_package:
             replacement_text = ""
             if self.field_tobe_moved.name == self.field_name:
                 for mod in self.field_tobe_moved.modifiers:
@@ -91,10 +117,10 @@ class FieldUsageListener(UtilsListener):
 
     def exitFieldDeclaration(self, ctx: JavaParser.FieldDeclarationContext):
         super().exitFieldDeclaration(ctx)
-        if self.current_class_name != self.source_class:
+        if self.current_class_name != self.source_class or self.package.name != self.source_package:
             return
 
-        if self.field_tobe_moved is None:
+        if self.field_tobe_moved is None and self.package.name == self.source_package:
             field = self.package.classes[self.current_class_name].fields[
                 ctx.variableDeclarators().children[0].children[0].IDENTIFIER().getText()]
             if field.name == self.field_name:
@@ -132,10 +158,12 @@ class FieldUsageListener(UtilsListener):
         method_identifier = ctx.IDENTIFIER().getText() if is_constructor else ctx.parentCtx.IDENTIFIER().getText()
         formal_params = ctx.formalParameters() if is_constructor else ctx.parentCtx.formalParameters()
         target_added = False
-        target_param_name = "$$target"
-        target_param = f"Target {target_param_name}" if \
+        if self.current_method is None:
+            return
+        target_param_name = f"$${self.target_class.lower()}"
+        target_param = f"{self.target_class} {target_param_name}" if \
             len(self.current_method.parameters) == 0 \
-            else f", Target {target_param_name}"
+            else f", {self.target_class} {target_param_name}"
 
         # if we have not imported source package or
         # Source class just ignore this
@@ -267,7 +295,7 @@ class FieldUsageListener(UtilsListener):
         if not os.path.exists(path):
             os.makedirs(path)
         with open(new_filename, mode='w', newline='') as file:
-            print("write?", new_filename)
+            # print("write?", new_filename)
             file.write(self.rewriter.getDefaultText())
 
 
@@ -282,7 +310,7 @@ class MethodUsageListener(UtilsListener):
 
     def enterCompilationUnit(self, ctx: JavaParser.CompilationUnitContext):
         super().enterCompilationUnit(ctx)
-        self.rewriter = TokenStreamRewriter(ctx.parser.getTokenStream())
+        self.rewriter = RewriterInterceptor(ctx.parser.getTokenStream())
 
     def enterClassCreatorRest(self, ctx: JavaParser.ClassCreatorRestContext):
         if type(ctx.parentCtx) is JavaParser.CreatorContext:
@@ -319,7 +347,7 @@ class MethodUsageListener(UtilsListener):
         if not os.path.exists(path):
             os.makedirs(path)
         with open(new_filename, mode='w', newline='') as file:
-            print("write?", new_filename)
+            # print("write?", new_filename)
             file.write(self.rewriter.getDefaultText())
 
 
@@ -362,9 +390,8 @@ class PreConditionListener(UtilsListener):
         super().exitMethodBody(ctx)
         if self.current_method is None:
             self.null_method = True
-
-    def exitCompilationUnit(self, ctx: JavaParser.CompilationUnitContext):
-        super().exitCompilationUnit(ctx)
+    def exitClassBody(self, ctx:JavaParser.ClassBodyContext):
+        super().exitClassBody(ctx)
         if self.package.name == self.src_package:
             if self.src_class in self.package.classes:
                 if self.field_name in self.package.classes[self.src_class].fields:
@@ -377,7 +404,7 @@ class PreConditionListener(UtilsListener):
 
     # make sure target has empty constructor
     def enterConstructorDeclaration(self, ctx: JavaParser.ConstructorDeclarationContext):
-        if self.current_class_identifier != self.target_class:
+        if self.current_class_identifier != self.target_class and self.package.name != self.target_package:
             return
 
         if ctx.formalParameters().formalParameterList() is None:
@@ -432,7 +459,7 @@ class MoveField:
         self.files = MoveField.get_filenames_in_dir(project_dir)
         self.overwrite = overwrite
         self.filename_map = filename_map
-        self.rewriters = {}
+
 
     @staticmethod
     def get_filenames_in_dir(dir: Union[str, Path],
@@ -446,10 +473,11 @@ class MoveField:
     def change_file_order(self):
         found_src = found_target = False
         for i, f in enumerate(self.files):
-            if f.endswith(f"{self.src_class}.java"):
+            p = Path(f).name
+            if p == f"{self.src_class}.java":
                 self.files.insert(0, self.files.pop(i))
                 continue
-            if f.endswith(f"{self.target_class}.java"):
+            if p == f"{self.target_class}.java":
                 self.files.insert(1, self.files.pop(i))
 
             if found_src and found_target:
@@ -496,8 +524,8 @@ class MoveField:
                                                   self.target_class,
                                                   self.target_package)
             walker.walk(utils_listener, tree)
-
-            if file.endswith(f"{self.src_class}.java"):
+            p = Path(file).name
+            if p == f"{self.src_class}.java" and utils_listener.package.name == self.src_package:
                 # todo for sina
                 if not utils_listener.is_field_inside_class():
                     raise FieldNotFound("Provided field is not found")
@@ -505,7 +533,7 @@ class MoveField:
                 if utils_listener.has_inner_class():
                     raise Exception("nested class is not supported in source")
 
-            if file.endswith(f"{self.target_class}.java"):
+            elif p == f"{self.target_class}.java" and utils_listener.package.name == self.target_package:
                 # todo for sina
                 if not utils_listener.does_target_exists():
                     raise TargetDoesNotExist("Specified target does not exits")
@@ -527,9 +555,9 @@ class MoveField:
             if utils_listener.is_interface:
                 print(f"ignoring file: {file} because it is an interface")
                 continue
-            if utils_listener.has_null_method():
-                print(f"ignoring file: {file} because current_method is None and we rely on that property")
-                continue
+            # if utils_listener.has_null_method():
+            #     print(f"ignoring file: {file} because current_method is None and we rely on that property")
+            #     continue
 
             utils_listeners.append((file, utils_listener))
 
@@ -555,7 +583,7 @@ class MoveField:
             token_stream = CommonTokenStream(lexer)
             parser = JavaParser(token_stream)
             tree = parser.compilationUnit()
-
+            print(field, file)
             listener = FieldUsageListener(
                 file,
                 self.src_class,
@@ -566,7 +594,8 @@ class MoveField:
                 field_candidate,
                 field)
             walker.walk(listener, tree)
-            listener.save(overwrite=self.overwrite, filename_mapping=self.filename_map)
+            if listener.rewriter.modified:
+                listener.save(overwrite=self.overwrite, filename_mapping=self.filename_map)
 
             methods_tobe_update = listener.methods_tobe_updated + methods_tobe_update
 
@@ -592,7 +621,8 @@ class MoveField:
             listener = MethodUsageListener(file, methods, self.target_class, self.src_class)
             walker = ParseTreeWalker()
             walker.walk(listener, tree)
-            listener.save(overwrite=self.overwrite, filename_mapping=self.filename_map)
+            if listener.rewriter.modified:
+                listener.save(overwrite=self.overwrite, filename_mapping=self.filename_map)
 
     def refactor(self):
         self.clean_up_dir()
@@ -605,12 +635,18 @@ class MoveField:
 
 if __name__ == "__main__":
     move_field = MoveField(
-        src_class="JSONWriter",
-        src_package="org.json",
-        target_class="JSONStringer",
-        target_package="org.json",
-        field_name="top",
-        project_dir="/home/loop/Desktop/Ass/Compiler/new-codeart/CodART/benchmark_projects/JSON",
+        # src_class="JSONWriter",
+        # src_package="org.json",
+        # target_class="JSONStringer",
+        # target_package="org.json",
+        # field_name="top",
+        # project_dir="/home/loop/Desktop/Ass/Compiler/new-codeart/CodART/benchmark_projects/JSON",
+        src_class="PertChart",
+        src_package="org.ganttproject.chart.pert",
+        target_class="WebStartIDClass",
+        target_package="org.ganttproject.chart.pert",
+        field_name="myTaskManager",
+        project_dir="/home/loop/Desktop/Ass/Compiler/new-codeart/CodART/benchmark_projects/ganttproject/",
         # src_class="Source",
         # src_package="source",
         # target_class="Target",
