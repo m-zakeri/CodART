@@ -4,6 +4,34 @@ from refactorings.utils.utils_listener_fast import TokensInfo, SingleFileElement
 import subprocess
 import os
 import time
+import csv
+
+
+def parse_csv_file(csv_file_name):
+    def extract_package_class_method(raw_data, has_method = False):
+        items = raw_data.split('::')
+        package_class = items[0].split('.')
+        class_nm = package_class.pop()
+        package = '.'.join(package_class)
+        if has_method:
+            method = items[1]
+            return {'package_name': package, 'class_name': class_nm, 'method_key': method}
+        else:
+            package_class.pop()
+            package = '.'.join(package_class)
+            return {'target_class_name': class_nm, 'target_package_name': package}
+
+
+    with open(csv_file_name) as csv_file:
+        result = list()
+        csv_reader = csv.reader(csv_file, delimiter=';')
+        for row in csv_reader:
+            method = row[0]
+            move_to = row[1]
+            source_items = extract_package_class_method(method, True)
+            destination_items = extract_package_class_method(move_to)
+            result.append({**source_items, **destination_items})
+        return result
 
 
 class MoveMethodRefactoring:
@@ -59,6 +87,13 @@ class MoveMethodRefactoring:
         for token in exps:
             if token.text in _sourceclass.fields:
                 exp.append(token.tokenIndex)
+
+        # check if source class has constructor with params
+        if len(_method.body_method_invocations_without_typename) or exp:
+            for method_ in _sourceclass.methods:
+                __method = _sourceclass.methods[method_]
+                if __method.is_constructor and (__method.parameters) > 0:
+                    return False
 
         source_object_name = str.lower(self.class_name)
         target_object_name = str.lower(self.target_class_name)
@@ -239,11 +274,13 @@ class MoveMethodRefactoring:
 
 
 if __name__ == "__main__":
-    mylist = get_filenames_in_dir('/data/Dev/JavaSample/')
-    # mylist = get_filenames_in_dir('tests/movemethod_test')
+    # mylist = get_filenames_in_dir('/home/mohamad/projects/vuze-remote-for-android')
+    mylist = get_filenames_in_dir('/home/mohamad/projects/benchmark_projects/JSON/src')
     print("Testing move_method...")
-    if MoveMethodRefactoring(mylist, "my_package", "Source", "getNumber2()", "Target",
-                             "my_package").do_refactor():  # if move_method_refactoring(mylist, "ss", "source", "m(int)","target","sss"):
-        print("Success!")
-    else:
-        print("Cannot refactor.")
+    results = parse_csv_file('/home/mohamad/projects/compiler/test.csv')
+    for result in results:
+        move_method = MoveMethodRefactoring(mylist, **result)
+        if move_method.do_refactor():
+            print("Success!")
+        else:
+            print("Cannot refactor.")
