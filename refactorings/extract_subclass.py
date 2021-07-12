@@ -468,13 +468,13 @@ def main():
 
 
 
-    # source_class = "JSONArray"
-    # moved_methods = ['put']
-    # moved_fields = []
-    # father_path_file = "C:\\Users\\asus\\Desktop\\test_project\\JSONArray.java"
-    # father_path_directory = "C:\\Users\\asus\\Desktop\\test_project"
-    # path_to_refactor = "C:\\Users\\asus\\Desktop\\test_project"
-    # new_class_file = "C:\\Users\\asus\\Desktop\\test_project\\JSONArrayextracted.java"
+    source_class = "JSONArray"
+    moved_methods = ['put']
+    moved_fields = []
+    father_path_file = "C:\\Users\\asus\\Desktop\\test_project\\JSONArray.java"
+    father_path_directory = "C:\\Users\\asus\\Desktop\\test_project"
+    path_to_refactor = "C:\\Users\\asus\\Desktop\\test_project"
+    new_class_file = "C:\\Users\\asus\\Desktop\\test_project\\JSONArrayextracted.java"
 
 
     # source_class = "TaskNode"
@@ -502,13 +502,13 @@ def main():
     # path_to_refactor = "C:\\Users\\asus\\Desktop\\benchmark_projects\\xerces2-j"
     # new_class_file = "C:\\Users\\asus\\Desktop\\benchmark_projects\\xerces2-j\\src\\org\\apache\\xml\\serialize\\BaseMarkupSerializerextracted.java"
 
-    source_class = "Piece"
-    moved_methods = ['setX']
-    moved_fields = []
-    father_path_file = "C:\\Users\\asus\\Desktop\\benchmark_projects\\Chess_master\\src\\game\\Piece.java"
-    father_path_directory = "C:\\Users\\asus\\Desktop\\benchmark_projects\\Chess_master\\src\\game"
-    path_to_refactor = "C:\\Users\\asus\\Desktop\\benchmark_projects\\Chess_master"
-    new_class_file = "C:\\Users\\asus\\Desktop\\benchmark_projects\\Chess_master\\src\\game\\Pieceextracted.java"
+    # source_class = "Piece"
+    # moved_methods = ['setX']
+    # moved_fields = []
+    # father_path_file = "C:\\Users\\asus\\Desktop\\benchmark_projects\\Chess_master\\src\\game\\Piece.java"
+    # father_path_directory = "C:\\Users\\asus\\Desktop\\benchmark_projects\\Chess_master\\src\\game"
+    # path_to_refactor = "C:\\Users\\asus\\Desktop\\benchmark_projects\\Chess_master"
+    # new_class_file = "C:\\Users\\asus\\Desktop\\benchmark_projects\\Chess_master\\src\\game\\Pieceextracted.java"
 
 
 
