@@ -21,6 +21,8 @@ class TargetDoesNotExist(Exception):
 class DuplicateField(Exception):
     pass
 
+class TargetNoEmptyConstructor(Exception):
+    pass
 
 class FieldUsageListener(UtilsListener):
     """
@@ -54,8 +56,7 @@ class FieldUsageListener(UtilsListener):
 
     def enterClassDeclaration(self, ctx: JavaParser.ClassDeclarationContext):
         super().enterClassDeclaration(ctx)
-
-        if ctx.parentCtx.classOrInterfaceModifier()[0].getText() == "public":
+        if "public" in [a.getText() for a in ctx.parentCtx.classOrInterfaceModifier()]:
             self.current_class_name = ctx.IDENTIFIER().getText()
         else:
             return
@@ -293,6 +294,10 @@ class MethodUsageListener(UtilsListener):
         super().exitMethodCall(ctx)
         if ctx.THIS() is not None:
             return
+
+        if ctx.SUPER() is not None:
+            return
+
         if ctx.IDENTIFIER().getText() in self.method_names:
             text = f"new {self.target_class}()" if ctx.expressionList() is None else f", new {self.target_class}()"
             self.rewriter.insertBeforeIndex(ctx.RPAREN().symbol.tokenIndex, text)
@@ -325,7 +330,8 @@ class PreConditionListener(UtilsListener):
                  target_package: str
                  ):
         super().__init__(filename)
-        self.can_convert = True
+        self.can_refactor = True
+        self.should_ignore = False
         self.field_name = field_name
         self.contains_field = False
         self.target_exists = False
@@ -334,21 +340,26 @@ class PreConditionListener(UtilsListener):
         self.src_package = src_package
         self.target_class = target_class
         self.target_package = target_package
+        self.empty_constructor = True
+        self.found_empty_constructor = False
+        self.inner_class = False
+        self.is_interface = False
+        self.null_method = False
 
     def enterInterfaceDeclaration(self, ctx: JavaParser.InterfaceDeclarationContext):
         super().enterInterfaceDeclaration(ctx)
         if ctx.INTERFACE() is not None:
-            self.can_convert = False
+            self.is_interface = True
 
     def enterClassDeclaration(self, ctx: JavaParser.ClassDeclarationContext):
         super().enterClassDeclaration(ctx)
         if self.nest_count > 0:
-            self.can_convert = False
+            self.inner_class = True
 
     def exitMethodBody(self, ctx: JavaParser.MethodBodyContext):
         super().exitMethodBody(ctx)
         if self.current_method is None:
-            self.can_convert = False
+            self.null_method = True
 
     def exitCompilationUnit(self, ctx: JavaParser.CompilationUnitContext):
         super().exitCompilationUnit(ctx)
@@ -361,6 +372,32 @@ class PreConditionListener(UtilsListener):
             self.target_exists = True
             if self.field_name in self.package.classes[self.target_class].fields:
                 self.duplicate_field = True
+
+    # make sure target has empty constructor
+    def enterConstructorDeclaration(self, ctx: JavaParser.ConstructorDeclarationContext):
+        if self.current_class_identifier != self.target_class:
+            return
+
+        if ctx.formalParameters().formalParameterList() is None:
+            self.empty_constructor = True
+            self.found_empty_constructor = True
+        elif not self.found_empty_constructor:
+            self.empty_constructor = False
+
+    def has_null_method(self) -> bool:
+        return self.null_method
+
+    def has_inner_class(self) -> bool:
+        return self.inner_class
+
+    def has_empty_constructor(self) -> bool:
+        return self.empty_constructor
+
+    def should_ignore_class(self) -> bool:
+        return self.should_ignore
+
+    def can_refactor_project(self) -> bool:
+        return self.can_refactor
 
     def is_field_inside_class(self) -> bool:
         return self.contains_field
@@ -393,6 +430,7 @@ class MoveField:
         self.files = MoveField.get_filenames_in_dir(project_dir)
         self.overwrite = overwrite
         self.filename_map = filename_map
+        self.rewriters = {}
 
     @staticmethod
     def get_filenames_in_dir(dir: Union[str, Path],
@@ -404,9 +442,15 @@ class MoveField:
         return result
 
     def change_file_order(self):
+        found_src = found_target = False
         for i, f in enumerate(self.files):
             if f.endswith(f"{self.src_class}.java"):
                 self.files.insert(0, self.files.pop(i))
+                continue
+            if f.endswith(f"{self.target_class}.java"):
+                self.files.insert(1, self.files.pop(i))
+
+            if found_src and found_target:
                 return
 
     def check_file_exists(self):
@@ -436,7 +480,8 @@ class MoveField:
 
     def transfer_field(self):
         methods_tobe_update = []
-        field = None
+        walker = ParseTreeWalker()
+        utils_listeners = []
         for file in self.files:
             stream = FileStream(file, encoding='utf8')
             lexer = JavaLexer(stream)
@@ -448,13 +493,15 @@ class MoveField:
                                                   self.src_package,
                                                   self.target_class,
                                                   self.target_package)
-            walker = ParseTreeWalker()
             walker.walk(utils_listener, tree)
 
             if file.endswith(f"{self.src_class}.java"):
                 # todo for sina
                 if not utils_listener.is_field_inside_class():
                     raise FieldNotFound("Provided field is not found")
+
+                if utils_listener.has_inner_class():
+                    raise Exception("nested class is not supported in source")
 
             if file.endswith(f"{self.target_class}.java"):
                 # todo for sina
@@ -465,18 +512,47 @@ class MoveField:
                 if utils_listener.duplicate_field_exists_in_target():
                     raise DuplicateField("Target has a field similar to source")
 
-            if not utils_listener.can_convert:
+                if not utils_listener.has_empty_constructor():
+                    raise TargetNoEmptyConstructor("Target must have an empty constructor")
+
+                if utils_listener.has_inner_class():
+                    raise Exception("nested class is not supported in target")
+
+            if utils_listener.has_inner_class():
+                print(f"ignoring file: {file} because it has nested class")
                 continue
 
-            if len(utils_listener.package.classes) > 1:
-                exit(1)
+            if utils_listener.is_interface:
+                print(f"ignoring file: {file} because it is an interface")
+                continue
+            if utils_listener.has_null_method():
+                print(f"ignoring file: {file} because current_method is None and we rely on that property")
+                continue
+
+            utils_listeners.append((file, utils_listener))
+
+
+            # if len(utils_listener.package.classes) > 1:
+            #     print(f"file has more than one class in")
+            #     exit(1)
 
             # find fields with the type Source first and store it
+
+        field = None
+        self.files = []
+        for file, utils_listener in utils_listeners:
             field_candidate = set()
+            self.files.append(file)
             for klass in utils_listener.package.classes.values():
                 for f in klass.fields.values():
                     if f.datatype == self.src_class:
                         field_candidate.add(f.name)
+
+            stream = FileStream(file, encoding='utf8')
+            lexer = JavaLexer(stream)
+            token_stream = CommonTokenStream(lexer)
+            parser = JavaParser(token_stream)
+            tree = parser.compilationUnit()
 
             listener = FieldUsageListener(
                 file,
@@ -527,12 +603,18 @@ class MoveField:
 
 if __name__ == "__main__":
     move_field = MoveField(
+        # src_class="XMLParserConfiguration",
+        # src_package="org.json",
+        # target_class="JSONStringer",
+        # target_package="org.json",
+        # field_name="keepStrings",
         src_class="Source",
         src_package="source",
         target_class="Target",
         target_package="target",
         field_name="a",
-        project_dir="/home/amiresm/Projects/personal/src",
+        # project_dir="/home/loop/Desktop/Ass/Compiler/new-codeart/CodART/benchmark_projects/JSON",
+        project_dir="/home/loop/IdeaProjects/move-field"
     )
 
     move_field.refactor()
