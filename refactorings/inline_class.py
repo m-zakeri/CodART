@@ -97,6 +97,8 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
                     text=text
                 )
                 self.is_complete = True
+                print(self.target_class_data['constructors'])
+                print(final_constructors)
             else:
                 self.is_target_class = False
         elif self.is_source_class:
