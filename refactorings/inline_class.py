@@ -91,13 +91,12 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
                     text += constructor.text + '\n'
                 for method in final_methods:
                     text += method.text + '\n'
+                    print(method.text)
                 self.token_stream_rewriter.insertBeforeIndex(
                     index=ctx.stop.tokenIndex,
                     text=text
                 )
                 self.is_complete = True
-                print(self.target_class_data['constructors'])
-                print(final_constructors)
             else:
                 self.is_target_class = False
         elif self.is_source_class:
@@ -170,7 +169,7 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
             constructor_text = ''
             for modifier in ctx.parentCtx.parentCtx.modifier():
                 constructor_text += modifier.getText() + ' '
-
+            
             if self.is_source_class:
                 constructor_text += self.target_class
             else:
@@ -235,7 +234,24 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
             method_text = ''
             for modifier in ctx.parentCtx.parentCtx.modifier():
                 method_text += modifier.getText() + ' '
-            method_text += ctx.typeTypeOrVoid().getText() + ' ' + ctx.IDENTIFIER().getText()
+                
+            type_text  = ctx.typeTypeOrVoid().getText()
+            
+            if (type_text == self.source_class):
+                type_text = self.target_class
+                
+                if self.is_target_class:
+                    self.token_stream_rewriter.replace(
+                        program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                        from_idx=ctx.typeTypeOrVoid().start.tokenIndex,
+                        to_idx=ctx.typeTypeOrVoid().stop.tokenIndex,
+                        text=type_text
+                    )
+            
+            # print(type_text)
+            # print(ctx.IDENTIFIER().getText())
+            
+            method_text += type_text + ' ' + ctx.IDENTIFIER().getText()
             method_text += ' ( '
             for parameter in method_parameters:
                 method_text += parameter.typeType().getText() + ' '
@@ -270,7 +286,7 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
 
 
     def enterExpression1(self, ctx:JavaParserLabeled.Expression1Context):
-        if ctx.IDENTIFIER().getText() in self.field_that_has_source:
+        if ctx.IDENTIFIER() != None and ctx.IDENTIFIER().getText() in self.field_that_has_source:
             # print(dir(ctx.expression()))
             # print(ctx.expression().getText())
             field_text = ctx.expression().getText()
@@ -292,10 +308,10 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
             self.token_stream_rewriter.delete(
                 program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
                 from_idx=ctx.start.tokenIndex,
-                to_idx=ctx.stop.tokenIndex
+                to_idx=ctx.stop.tokenIndex + 1
             )
 
-
+    
     def enterExpression4(self, ctx:JavaParserLabeled.Expression4Context):
         if ctx.children[-1].children[0].getText() == self.source_class:
             self.has_source_new = True
@@ -422,5 +438,5 @@ def get_proper_constructor(target_constructor: ConstructorOrMethod, source_const
     for source_constructor in source_constructors:
         if is_equal_constructor(source_constructor, target_constructor):
             return source_constructor
-
+    
     return None
