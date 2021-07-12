@@ -12,7 +12,7 @@ from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 
 class IncreaseMethodVisibilityRefactoringListener(JavaParserLabeledListener):
-    def __init__(self, common_token_stream: CommonTokenStream = None, source_class=None, method_name:str = None):
+    def __init__(self, common_token_stream: CommonTokenStream = None, source_class=None, method_name: str = None):
 
         if method_name is None:
             self.method_name = ""
@@ -30,15 +30,15 @@ class IncreaseMethodVisibilityRefactoringListener(JavaParserLabeledListener):
 
         self.is_source_class = False
 
-    def enterClassDeclaration(self, ctx:JavaParserLabeled.ClassDeclarationContext):
-        print("Refactoring started, please wait...")
+    def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
+
         class_identifier = ctx.IDENTIFIER().getText()
         if class_identifier == self.source_class:
             self.is_source_class = True
         else:
             self.is_source_class = False
 
-    def exitMethodDeclaration(self, ctx:JavaParserLabeled.MethodDeclarationContext):
+    def exitMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
         if not self.is_source_class:
             return None
         grand_parent_ctx = ctx.parentCtx.parentCtx
@@ -46,11 +46,11 @@ class IncreaseMethodVisibilityRefactoringListener(JavaParserLabeledListener):
         # print("method_identifier",method_identifier)
         if self.method_name in method_identifier:
             # print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
-            if grand_parent_ctx.modifier()==[]:
+            if grand_parent_ctx.modifier() == []:
                 self.token_stream_rewriter.replaceRange(
                     from_idx=ctx.typeTypeOrVoid().start.tokenIndex,
                     to_idx=ctx.typeTypeOrVoid().stop.tokenIndex,
-                    text='private '+ ctx.typeTypeOrVoid().getText()
+                    text='private ' + ctx.typeTypeOrVoid().getText()
                 )
             elif grand_parent_ctx.modifier(0).getText() == 'public':
                 self.token_stream_rewriter.replaceRange(
@@ -61,12 +61,10 @@ class IncreaseMethodVisibilityRefactoringListener(JavaParserLabeledListener):
                 self.token_stream_rewriter.replaceRange(
                     from_idx=grand_parent_ctx.modifier(0).start.tokenIndex,
                     to_idx=grand_parent_ctx.modifier(0).stop.tokenIndex,
-                    text='private '+grand_parent_ctx.modifier(0).getText())
-
-        print("Finished Processing...")
+                    text='private ' + grand_parent_ctx.modifier(0).getText())
 
 
-if __name__ == '__main__':
+def main():
     udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
     source_class = "App"
     method_name = "testMethod"

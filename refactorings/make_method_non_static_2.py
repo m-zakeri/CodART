@@ -1,3 +1,5 @@
+import os
+
 from gen.javaLabeled.JavaLexer import JavaLexer
 
 try:
@@ -37,7 +39,7 @@ class MakeMethodNonStaticRefactoringListener(JavaParserLabeledListener):
         self.is_static = False
 
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
-        print("Refactoring started, please wait...")
+
         class_identifier = ctx.IDENTIFIER().getText()
         if class_identifier == self.source_class:
             self.is_source_class = True
@@ -62,19 +64,18 @@ class MakeMethodNonStaticRefactoringListener(JavaParserLabeledListener):
                         text=''
                     )
 
-        print("Finished Processing...")
 
-
-if __name__ == '__main__':
-    udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
-    source_class = "App"
-    method_name = "testMethod"
-    # initialize with understand
+def main(udb_path, source_class, method_name):
+    print("Make Method Non Static")
     main_file = ""
     db = und.open(udb_path)
     for cls in db.ents("class"):
         if cls.simplename() == source_class:
-            main_file = cls.parent().longname()
+            main_file = cls.parent().longname(True)
+            if not os.path.isfile(main_file):
+                continue
+    if main_file is None:
+        return
 
     stream = FileStream(main_file, encoding='utf8')
     lexer = JavaLexer(stream)
@@ -90,3 +91,11 @@ if __name__ == '__main__':
 
     with open(main_file, mode='w', newline='') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
+
+
+if __name__ == '__main__':
+    udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
+    source_class = "App"
+    method_name = "testMethod"
+    # initialize with understand
+    main(udb_path, source_class, method_name)

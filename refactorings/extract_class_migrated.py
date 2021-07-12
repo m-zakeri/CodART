@@ -60,7 +60,7 @@ class myExtractClassRefactoringListener(JavaParserLabeledListener):
         self.code = ""
 
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
-        print("Refactoring started, please wait...")
+
         class_identifier = ctx.IDENTIFIER().getText()
         if class_identifier == self.source_class:
             self.is_source_class = True
@@ -76,7 +76,6 @@ class myExtractClassRefactoringListener(JavaParserLabeledListener):
             self.is_source_class = False
 
     def exitCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
-        print("Finished Processing...")
         self.token_stream_rewriter.insertAfter(
             index=ctx.stop.tokenIndex,
             text=self.code

@@ -1,0 +1,47 @@
+buildscript {
+    ext.kotlin_version = '1.5.0'
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+apply plugin: 'kotlin'
+apply plugin: 'maven-publish'
+
+dependencies {
+    providedCompile project(':biz.ganttproject.core')
+    providedCompile project(':ganttproject')
+
+    compile 'com.github.vlsi.mxgraph:jgraphx:4.2.+'
+    direct 'com.github.vlsi.mxgraph:jgraphx:4.2.+'
+
+    compile configurations.providedCompile
+}
+
+jar {
+    manifest {
+        attributes('Class-Path': configurations.direct.files.collect {"$it.name"}.join(' '))
+    }
+    from {
+        configurations.direct.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+}
+
+addPublishing(project)
+publishing {
+    publications {
+        core(MavenPublication) {
+            artifactId = 'biz.ganttproject.mxgraph'
+            artifact jar
+        }
+    }
+}

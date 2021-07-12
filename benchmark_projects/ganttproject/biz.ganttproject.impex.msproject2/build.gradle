@@ -1,0 +1,36 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+
+dependencies {
+    providedCompile project(path: ':ganttproject', configuration: 'exported')
+    compile('net.sf.mpxj:mpxj:9.+') {
+        exclude group: 'org.xerial', module: 'sqlite-jdbc'
+        exclude group: 'com.jgoodies'
+    }
+    compile 'javax.xml.bind:jaxb-api:2.3.+'
+    compile 'javax.xml:jaxb-impl:2.1'
+
+    compile configurations.providedCompile
+    compile fileTree(dir: project.ext.libDir, include: ['*.jar'])
+}
+
+task copyPlugin(dependsOn: assemble) {
+    doLast {
+        println ">>> Installing $project.name"
+        copy {
+            into(new File(rootProject.pluginsDir, project.name))
+            from(fileTree(".")) {
+                include "plugin.xml"
+            }
+        }
+        copy {
+            into(new File(rootProject.pluginsDir, "${project.name}/lib/"))
+            from(jar.outputs.getFiles().getFiles().flatten())
+            from(configurations.compileClasspath.minus(configurations.providedCompile.resolve())) {
+                include "*.jar"
+            }
+            rename { filename -> filename + ".lib" }
+        }
+        println "<<< $project.name"
+    }
+}

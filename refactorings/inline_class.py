@@ -1,7 +1,5 @@
 """
 The scripts implements different refactoring operations
-
-
 """
 __version__ = '0.1.0'
 __author__ = 'Morteza'
@@ -53,6 +51,9 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
         else:
             self.target_class_data = {'fields': [], 'methods': [], 'constructors': []}
 
+        self.field_that_has_source = []
+        self.has_source_new = False
+
         self.is_complete = is_complete
         self.is_target_class = False
         self.is_source_class = False
@@ -79,7 +80,7 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
                                      self.source_class_data['constructors'] or
                                      self.source_class_data['methods']):
             if not self.is_complete:
-                final_fields = merge_fields(self.source_class_data['fields'], self.target_class_data['fields'])
+                final_fields = merge_fields(self.source_class_data['fields'], self.target_class_data['fields'], self.target_class)
                 final_constructors = merge_constructors(self.source_class_data['constructors'],
                                                         self.target_class_data['constructors'])
                 final_methods = merge_methods(self.source_class_data['methods'], self.target_class_data['methods'])
@@ -95,9 +96,13 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
                     text=text
                 )
                 self.is_complete = True
+                print(self.target_class_data['constructors'])
+                print(final_constructors)
             else:
                 self.is_target_class = False
         elif self.is_source_class:
+            if ctx.parentCtx.classOrInterfaceModifier(0) == None:
+                return
             self.is_source_class = False
             self.token_stream_rewriter.delete(
                 program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
@@ -128,7 +133,13 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
                     field_text = field_text[:len(field_text) - 1] + ';'
                     break
                 field_text += child.getText() + ' '
+
             name = ctx.variableDeclarators().variableDeclarator(0).variableDeclaratorId().IDENTIFIER().getText()
+
+            if ctx.typeType().classOrInterfaceType() != None and ctx.typeType().classOrInterfaceType().getText() == self.source_class:
+                self.field_that_has_source.append(name)
+                return
+
             modifier_text = ''
             for modifier in ctx.parentCtx.parentCtx.modifier():
                 modifier_text += modifier.getText() + ' '
@@ -137,6 +148,17 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
                 self.source_class_data['fields'].append(Field(name=name, text=field_text))
             else:
                 self.target_class_data['fields'].append(Field(name=name, text=field_text))
+
+    def exitFieldDeclaration(self, ctx: JavaParserLabeled.FieldDeclarationContext):
+        if self.is_target_class:
+            if ctx.typeType().classOrInterfaceType().getText() == self.source_class:
+                grand_parent_ctx = ctx.parentCtx.parentCtx
+                self.token_stream_rewriter.delete(
+                    program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                    from_idx=grand_parent_ctx.start.tokenIndex,
+                    to_idx=grand_parent_ctx.stop.tokenIndex)
+
+
 
     def enterConstructorDeclaration(self, ctx: JavaParserLabeled.ConstructorDeclarationContext):
         if self.is_source_class or self.is_target_class:
@@ -148,7 +170,11 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
             constructor_text = ''
             for modifier in ctx.parentCtx.parentCtx.modifier():
                 constructor_text += modifier.getText() + ' '
-            constructor_text += ctx.IDENTIFIER().getText()
+
+            if self.is_source_class:
+                constructor_text += self.target_class
+            else:
+                constructor_text += ctx.IDENTIFIER().getText()
             constructor_text += ' ( '
             for parameter in constructor_parameters:
                 constructor_text += parameter.typeType().getText() + ' '
@@ -162,18 +188,42 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
                 stop=ctx.block().stop.tokenIndex - 1
             )
             constructor_text += '}\n'
+            # print(constructor_text)
+            # print("------")
             if self.is_source_class:
                 self.source_class_data['constructors'].append(ConstructorOrMethod(
                     name=self.target_class, parameters=[Parameter(parameterType=p.typeType().getText(),
                                                                   name=p.variableDeclaratorId().IDENTIFIER().getText())
                                                         for p in constructor_parameters],
-                    text=constructor_text))
+                    text=constructor_text, constructorBody=self.token_stream_rewriter.getText(
+                program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                start=ctx.block().start.tokenIndex + 1,
+                stop=ctx.block().stop.tokenIndex - 1
+                )))
             else:
                 self.target_class_data['constructors'].append(ConstructorOrMethod(
                     name=self.target_class, parameters=[Parameter(parameterType=p.typeType().getText(),
                                                                   name=p.variableDeclaratorId().IDENTIFIER().getText())
                                                         for p in constructor_parameters],
-                    text=constructor_text))
+                    text=constructor_text, constructorBody=self.token_stream_rewriter.getText(
+                program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                start=ctx.block().start.tokenIndex + 1,
+                stop=ctx.block().stop.tokenIndex - 1
+                )))
+
+                # print("aaslkdjflksdjflksd")
+                # print(self.source_class_data['constructors'])
+                # print(self.target_class_data['constructors'][-1])
+                # print("aaslkdjflks45345djflksd")
+                proper_constructor = get_proper_constructor(self.target_class_data['constructors'][-1], self.source_class_data['constructors'])
+
+                if proper_constructor == None:
+                    return
+
+                self.token_stream_rewriter.insertBeforeIndex(
+                    index=ctx.stop.tokenIndex,
+                    text=proper_constructor.constructorBody
+                )
 
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
         if self.is_source_class or self.is_target_class:
@@ -217,6 +267,39 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
                         for p in
                         method_parameters],
                     text=method_text))
+
+
+    def enterExpression1(self, ctx:JavaParserLabeled.Expression1Context):
+        if ctx.IDENTIFIER().getText() in self.field_that_has_source:
+            # print(dir(ctx.expression()))
+            # print(ctx.expression().getText())
+            field_text = ctx.expression().getText()
+            # self.token_stream_rewriter.replaceIndex(
+            #     index=ctx.start.tokenIndex,
+            #     text=field_text
+            # )
+
+            self.token_stream_rewriter.replace(
+                program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                from_idx=ctx.start.tokenIndex,
+                to_idx=ctx.stop.tokenIndex,
+                text=field_text
+            )
+
+    def exitExpression21(self, ctx:JavaParserLabeled.Expression21Context):
+        if self.has_source_new:
+            self.has_source_new = False
+            self.token_stream_rewriter.delete(
+                program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                from_idx=ctx.start.tokenIndex,
+                to_idx=ctx.stop.tokenIndex
+            )
+
+
+    def enterExpression4(self, ctx:JavaParserLabeled.Expression4Context):
+        if ctx.children[-1].children[0].getText() == self.source_class:
+            self.has_source_new = True
+
 
     def enterCreatedName0(self, ctx: JavaParserLabeled.CreatedName0Context):
         if ctx.IDENTIFIER(0).getText() == self.source_class and self.target_class:
@@ -267,9 +350,10 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
 
 
 class Field:
-    def __init__(self, text: str = None, name: str = None):
+    def __init__(self, text: str = None, name: str = None, fieldType: str = None):
         self.text = text
         self.name = name
+        self.fieldType = fieldType
 
 
 class Parameter:
@@ -279,20 +363,32 @@ class Parameter:
 
 
 class ConstructorOrMethod:
-    def __init__(self, text: str = None, name: str = None, parameters: Parameter = None):
+    def __init__(self, text: str = None, name: str = None, parameters: Parameter = None, constructorBody: str = None):
         self.text = text
         self.name = name
         self.parameters = parameters
+        self.constructorBody = constructorBody
 
 
-def merge_fields(source_fields: Field, target_fields):
+def merge_fields(source_fields: Field, target_fields, target_class_type):
     final_fields = []
     target_field_names = [target_field.name for target_field in target_fields]
     for field in source_fields:
-        if field.name in target_field_names:
+        if (field.name in target_field_names) or (field.fieldType == target_class_type):
             continue
         final_fields.append(field)
     return final_fields
+
+
+def is_equal_constructor(first_constructor: ConstructorOrMethod, second_constructor: ConstructorOrMethod):
+    if len(first_constructor.parameters) == len(
+                        second_constructor.parameters):
+                        second_constructor_params = [param.parameterType for param in second_constructor.parameters]
+                        for param in first_constructor.parameters:
+                            if param not in second_constructor_params:
+                                # if first_constructor.text == second_constructor.text:
+                                return True
+    return False
 
 
 def merge_constructors(source_constructors: ConstructorOrMethod, target_constructors: ConstructorOrMethod):
@@ -301,8 +397,7 @@ def merge_constructors(source_constructors: ConstructorOrMethod, target_construc
         flag = True
         for target_constructor in target_constructors:
             if source_constructor.name == target_constructor.name:
-                if len(source_constructor.parameters) == len(
-                        target_constructor.parameters):  # check equality of two constructor
+                if is_equal_constructor(source_constructor, target_constructor): # check equality of two constructor
                     flag = False
         if flag:
             final_constructors.append(source_constructor)
@@ -320,3 +415,12 @@ def merge_methods(source_methods: ConstructorOrMethod, target_methods: Construct
         if flag:
             final_methods.append(source_method)
     return final_methods
+
+
+def get_proper_constructor(target_constructor: ConstructorOrMethod, source_constructors: ConstructorOrMethod):
+
+    for source_constructor in source_constructors:
+        if is_equal_constructor(source_constructor, target_constructor):
+            return source_constructor
+
+    return None

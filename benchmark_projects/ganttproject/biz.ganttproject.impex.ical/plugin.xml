@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin
+        id="biz.ganttproject.impex.ical"
+        name="GanttProject ICal import/export"
+        version="2.8.4"
+        provider-name="">
+
+    <runtime>
+        <library name="lib/*">
+            <export name="*"/>
+        </library>
+    </runtime>
+    <requires>
+        <import plugin="biz.ganttproject.core"/>
+        <import plugin="org.eclipse.core.runtime"/>
+        <import plugin="net.sourceforge.ganttproject"/>
+    </requires>
+    <extension
+            point="net.sourceforge.ganttproject.importer">
+        <importer class="biz.ganttproject.impex.ical.IcsFileImporter"/>
+    </extension>
+</plugin>

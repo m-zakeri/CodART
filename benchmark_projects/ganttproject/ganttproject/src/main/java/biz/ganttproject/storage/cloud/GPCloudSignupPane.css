@@ -1,0 +1,73 @@
+/*.btn-secondary {*/
+/*    -fx-alignment: center;*/
+/*    -fx-background-color: -gp-light-gray;*/
+/*    -fx-padding: 0.5ex 1em;*/
+/*    -fx-font-size: 90%;*/
+/*}*/
+
+/*.btn-secondary .glyph-icon {*/
+/*    -fx-alignment: center;*/
+/*    -fx-fill: -gp-medium-gray;*/
+/*    -glyph-size: 16px;*/
+/*}*/
+
+/*.btn-secondary:hover {*/
+/*    -fx-fill: white;*/
+/*    -fx-text-fill: white;*/
+/*    -fx-cursor: hand;*/
+/*    -fx-background-color: -gp-medium-gray;*/
+/*}*/
+
+/*.btn-secondary:hover .glyph-icon {*/
+/*    -fx-fill: white;*/
+/*    -fx-text-fill: white;*/
+/*}*/
+
+
+/*.btn-secondary:pressed, .btn-secondary:hover:pressed {*/
+/*    -fx-background-color: -gp-dark-gray;*/
+/*    -fx-fill: white;*/
+/*    -fx-text-fill: white;*/
+/*}*/
+
+
+.signup-pane {
+    -fx-padding: 20px;
+    -fx-background-color: transparent;
+    -fx-fill-width: true;
+    -fx-fill-height: true;
+}
+
+.signup-pane .btnbar {
+    -fx-font-size: 100%;
+}
+.signup-pane .img {
+    -fx-padding: 30px 0 0 20px;
+    -fx-fill: -gp-medium-gray;
+    -glyph-size: 64px;
+}
+
+
+.signup-pane .signup-body {
+    -fx-padding: 2ex 1em;
+    -fx-font-size: 120%;
+}
+
+.signup-pane TextField {
+    -fx-fill: -gp-medium-gray;
+    -fx-font-size: 80%;
+    -fx-border-color: -gp-light-gray;
+    -fx-border-radius: 0;
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-background-insets: none;
+    -fx-effect: none;
+}
+
+.signup-pane TextField:hover {
+    -fx-border-color: -gp-medium-gray;
+}
+
+.signin-pane .indicator-pane {
+    -fx-padding: 30px;
+}

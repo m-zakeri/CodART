@@ -14,7 +14,7 @@ from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 from refactorings.remove_class import RemoveClassRefactoringListener
 
-from utilization.setup_understand import *
+# from utilization.setup_understand import *
 
 
 class CollapseHierarchyRefactoringGetFieldTextListener(JavaParserLabeledListener):
@@ -38,7 +38,7 @@ class CollapseHierarchyRefactoringGetFieldTextListener(JavaParserLabeledListener
         self.fieldcode = ""
 
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
-        print("Refactoring started, please wait...")
+
         class_identifier = ctx.IDENTIFIER().getText()
         if class_identifier == self.child_class:
             self.is_source_class = True
@@ -52,7 +52,6 @@ class CollapseHierarchyRefactoringGetFieldTextListener(JavaParserLabeledListener
             self.is_source_class = False
 
     def exitCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
-        print("Finished Processing...")
         self.token_stream_rewriter.insertAfter(
             index=ctx.stop.tokenIndex,
             text=self.fieldcode
@@ -98,7 +97,7 @@ class CollapseHierarchyRefactoringGetMethodTextListener(JavaParserLabeledListene
         self.methodcode = ""
 
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
-        print("Refactoring started, please wait...")
+
         class_identifier = ctx.IDENTIFIER().getText()
         if class_identifier == self.child_class:
             self.is_source_class = True
@@ -112,7 +111,6 @@ class CollapseHierarchyRefactoringGetMethodTextListener(JavaParserLabeledListene
             self.is_source_class = False
 
     def exitCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
-        print("Finished Processing...")
         self.token_stream_rewriter.insertAfter(
             index=ctx.stop.tokenIndex,
             text=self.methodcode
@@ -240,7 +238,7 @@ class CollapseHierarchyRefactoringListener(JavaParserLabeledListener):
         self.detected_field = None
 
     def exitCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
-        print("Finished Processing...")
+        pass
 
 
 class PropagationCollapseHierarchyListener(JavaParserLabeledListener):
@@ -308,19 +306,20 @@ class PropagationCollapseHierarchyListener(JavaParserLabeledListener):
 
 def main(udb, child, parent):
     # initialize with understand
+    udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
     child_path_file = ""
     father_path_file = ""
     file_list_to_be_propagate = set()
     propagate_classes = set()
-    db = und.open(udb)
-    for cls in db.ents("class"):
-        if cls.simplename() == child:
-            child_path_file = cls.parent().longname()
-            for ref in cls.refs("Coupleby"):
-                propagate_classes.add(ref.ent().longname())
-                file_list_to_be_propagate.add(ref.ent().parent().longname())
-        if cls.simplename() == parent:
-            father_path_file = cls.parent().longname()
+    # db = und.open(udb)
+    # for cls in db.ents("class"):
+    #     if cls.simplename() == child:
+    #         child_path_file = cls.parent().longname()
+    #         for ref in cls.refs("Coupleby"):
+    #             propagate_classes.add(ref.ent().longname())
+    #             file_list_to_be_propagate.add(ref.ent().parent().longname())
+    #     if cls.simplename() == parent:
+    #         father_path_file = cls.parent().longname()
 
     file_list_to_be_propagate = list(file_list_to_be_propagate)
     propagate_classes = list(propagate_classes)
@@ -384,10 +383,3 @@ def main(udb, child, parent):
 
         with open(file, mode='w', newline='') as f:
             f.write(my_listener_propagate.token_stream_rewriter.getDefaultText())
-
-
-if __name__ == '__main__':
-    udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
-    child_class = "StudentWebsite"
-    father_class = "Website"
-    main(udb_path, child_class, father_class)

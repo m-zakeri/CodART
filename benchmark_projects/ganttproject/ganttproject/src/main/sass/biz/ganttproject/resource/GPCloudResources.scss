@@ -1,0 +1,54 @@
+/*
+Copyright 2021 Dmitry Barashev, BarD Software s.r.o
+
+This file is part of GanttProject, an open-source project management tool.
+
+GanttProject is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+GanttProject is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GanttProject.  If not, see <http://www.gnu.org/licenses/>.
+*/
+@import "../app/dialogs";
+@import "../app/theme";
+@import "../app/typography";
+
+.dlg-cloud-resource-list {
+  -fx-min-height: 400;
+  .header {
+    @include dialog-header($gp-orange);
+  }
+  .content-pane {
+    @include dialog-scrollable-content-padding();
+    .list-cell:selected {
+      -fx-background-color: $gp-light-gray;
+    }
+    .resource-cell {
+      -fx-padding: 3 5;
+      .labels {
+        -fx-padding: 0 0 0 5;
+        .name {
+          -fx-font-size: 110%;
+          -fx-text-fill: $gp-dark-gray;
+        }
+
+        .email {
+          @include text-secondary();
+        }
+      }
+      &:selected, &:focused {
+
+      }
+    }
+  }
+  .button-pane {
+    @include dialog-button-pane();
+  }
+}

@@ -40,7 +40,7 @@ class MakeFinalClassRefactoringListener(JavaParserLabeledListener):
         self.code = ""
 
     def enterClassDeclaration(self, ctx:JavaParserLabeled.ClassDeclarationContext):
-        print("Refactoring started, please wait...")
+
         if self.objective_class == ctx.IDENTIFIER().getText():
             self.token_stream_rewriter.replaceRange(
                 from_idx=0,
@@ -48,7 +48,7 @@ class MakeFinalClassRefactoringListener(JavaParserLabeledListener):
                 text= "final "+ctx.CLASS().getText()
             )
     # def enterTypeDeclaration(self, ctx:JavaParserLabeled.TypeDeclarationContext):
-    #     print("Refactoring started, please wait...")
+    #
     #     if self.objective_class == ctx.classDeclaration().IDENTIFIER().getText():
     #
     #         self.token_stream_rewriter.replaceRange(

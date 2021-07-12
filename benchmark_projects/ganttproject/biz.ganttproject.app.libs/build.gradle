@@ -1,0 +1,90 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+}
+
+apply plugin: 'java'
+
+ext {
+    libDir = 'lib'
+}
+
+configurations {
+    exported
+}
+
+dependencies {
+    exported 'org.slf4j:slf4j-api:1.7.30'
+    compile 'org.slf4j:slf4j-jdk14:1.7.30'
+    compile "com.vladsch.flexmark:flexmark-ext-gfm-strikethrough:0.62.+"
+    compile "com.vladsch.flexmark:flexmark-ext-tables:0.62.+"
+    compile "com.vladsch.flexmark:flexmark-ext-attributes:0.62.+"
+
+    exported 'commons-codec:commons-codec:1.+'
+    exported 'commons-io:commons-io:2.+'
+
+    exported 'com.googlecode.concurrentlinkedhashmap:concurrentlinkedhashmap-lru:1.4.2'
+    exported 'com.evanlennick:retry4j:0.+'
+    exported 'com.fasterxml.jackson.core:jackson-core:2.12.+'
+    exported 'com.fasterxml.jackson.core:jackson-databind:2.12.+'
+    exported 'com.jgoodies:jgoodies-common:1.8.+'
+    exported 'com.jgoodies:jgoodies-looks:2.7.+'
+    exported 'com.squareup.okhttp3:okhttp:3.+'
+
+    exported 'de.jensd:fontawesomefx-commons:11.+'
+    exported 'de.jensd:fontawesomefx-fontawesome:4.7.0-11'
+    exported 'de.jensd:fontawesomefx-materialicons:2.2.0-11'
+
+    exported 'net.java.balloontip:balloontip:1.2.4.1'
+    exported 'org.apache.commons:commons-lang3:3.+'
+
+    exported 'org.apache.httpcomponents:httpclient:4.5.+'
+    exported 'org.apache.httpcomponents:httpmime:4.5.+'
+    exported 'org.apache.poi:poi:5.+'
+    exported 'org.controlsfx:controlsfx:11.+'
+    exported 'org.nanohttpd:nanohttpd:2.3.+'
+    exported 'org.jdom:jdom:2.+'
+    exported 'org.swinglabs:jxlayer:3.0.4'
+
+    exported fileTree(dir: project.ext.libDir, include: ['*.jar'])
+    exported configurations.compileClasspath
+}
+
+task copyPluginFiles(dependsOn: jar) {
+    doLast {
+        println ">>> Installing $project.name"
+        copy {
+            into(new File(rootProject.pluginsDir, project.name))
+            from(fileTree(".")) {
+                include "plugin.xml"
+            }
+        }
+        copy {
+            into(new File(rootProject.pluginsDir, "${project.name}/lib"))
+            from(configurations.exported) {
+                include "*.jar"
+                exclude "javafx*.jar"
+            }
+        }
+        if (project.hasProperty("withJavafx")) {
+            copy {
+                into(new File(rootProject.pluginsDir, "${project.name}/lib"))
+                from(fileTree("javafx")) {
+                    include "*"
+                }
+            }
+        }
+
+        println "<<< $project.name"
+    }
+}
+
+task copyPlugin(dependsOn: ['copyPluginFiles']) {
+    doFirst {
+        println "Copying $project.name to $rootProject.pluginsDir"
+    }
+}

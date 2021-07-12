@@ -12,6 +12,8 @@ from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 
+
+
 class PullUpFieldGetTextFieldListener(JavaParserLabeledListener):
     def __init__(self, common_token_stream: CommonTokenStream, child=None, field=None):
         if common_token_stream is None:
@@ -97,7 +99,7 @@ class PullUpFieldRefactoringListener(JavaParserLabeledListener):
         # self.iscopyfieldtext=False
 
     def enterFieldDeclaration(self, ctx: JavaParserLabeled.FieldDeclarationContext):
-        print("Refactoring started, please wait...")
+
         # if self.is_source_class:
         ctx1 = ctx.parentCtx.parentCtx.parentCtx.parentCtx
         class_identifier = ctx1.IDENTIFIER().getText()
@@ -178,7 +180,7 @@ class PullUpFieldRefactoringListener(JavaParserLabeledListener):
         #     my_listener = movefieldupRefactoringListener(common_token_stream=self.token_stream_rewriter, destination_class='A',
         #                                                  children_class=["B", "S"], moved_fields=['a'],)
 
-        print("Finished Processing...")
+
         self.token_stream_rewriter.insertAfter(
             index=ctx.stop.tokenIndex,
             text=self.code

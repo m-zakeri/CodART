@@ -39,7 +39,7 @@ class MakeConcreteClassRefactoringListener(JavaParserLabeledListener):
         self.code = ""
 
     def enterTypeDeclaration(self, ctx: JavaParserLabeled.TypeDeclarationContext):
-        print("Refactoring started, please wait...")
+
         if self.objective_class == ctx.classDeclaration().IDENTIFIER().getText():
             for i in range(0, len(ctx.classOrInterfaceModifier())):
                 if ctx.classOrInterfaceModifier(i).getText() == "abstract":

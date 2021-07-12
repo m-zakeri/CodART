@@ -18,6 +18,8 @@ Pull up field refactoring removes the repetitive field from subclasses and moves
 
 2. There will be children and parents having their desired fields added or removed.
 
+3. Check for multilevel inheritance.
+
 """
 
 from refactorings.utils import utils_listener_fast, utils2
@@ -55,7 +57,7 @@ class PullUpFieldRefactoring:
 
     def do_refactor(self):
         program = utils2.get_program(self.source_filenames, print_status=True)
-        print(program.packages)
+        # print(program.packages)
         if self.package_name not in program.packages \
                 or self.class_name not in program.packages[self.package_name].classes \
                 or self.field_name not in program.packages[self.package_name].classes[self.class_name].fields:
@@ -151,23 +153,31 @@ class PullUpFieldRefactoring:
                     body_start = utils_listener_fast.TokensInfo(body)
                     body_start.stop = body_start.start  # Start and stop both point to the '{'
                     rewriter.insert_after(body_start,
-                                          "\n    " + _class.name + "() { " + initializer_statement + " }"
+                                          "\n    " + _class.modifiers[
+                                              0] + " " + _class.name + "() { " + initializer_statement + " }"
                                           )
 
         rewriter.apply()
+
+        # check for multilevel inheritance recursively.
+
+        if _class.superclass_name is not None:
+            PullUpFieldRefactoring(self.source_filenames, self.package_name, _class.superclass_name, "id").do_refactor()
         return True
 
 
 def test():
     print("Testing pullup_field...")
     filenames = [
-        "../benchmark_projects/tests/pullup_field/test1.java",
-        "../benchmark_projects/tests/pullup_field/test2.java",
-        "../benchmark_projects/tests/pullup_field/test3.java",
-        "../benchmark_projects/tests/pullup_field/test4.java"
+        "D:/archive/uni/CD/project/CodART/tests/pullup_field/test5.java",
+        "D:/archive/uni/CD/project/CodART/tests/pullup_field/test6.java",
+        # "../benchmark_projects/tests/pullup_field/test1.java",
+        # "../benchmark_projects/tests/pullup_field/test2.java",
+        # "../benchmark_projects/tests/pullup_field/test3.java",
+        # "../benchmark_projects/tests/pullup_field/test4.java"
     ]
 
-    if PullUpFieldRefactoring(filenames, "pullup_field_test1", "B", "a").do_refactor():
+    if PullUpFieldRefactoring(filenames, "pullup_field_test5", "C", "id").do_refactor():
         print("Success!")
     else:
         print("Cannot refactor.")
@@ -182,14 +192,16 @@ def test_ant():
     ]
     """
     ant_dir = "/home/ali/Desktop/code/TestProject/"
+def main(project_dir: str, package_name: str, children_class: str, field_name: str):
+    print("Pullup Field")
     print("Success!" if PullUpFieldRefactoring(
-        utils2.get_filenames_in_dir(ant_dir),
-        "test_package",
-        "AppChild1",
-        "TEST",
+        utils2.get_filenames_in_dir(project_dir),
+        package_name,
+        children_class,
+        field_name
         # lambda x: "tests/pullup_field_ant/" + x[len(ant_dir):]
     ).do_refactor() else "Cannot refactor.")
 
 
 if __name__ == "__main__":
-    test_ant()
+    test()
