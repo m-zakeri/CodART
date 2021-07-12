@@ -19,6 +19,7 @@ class MoveMethodRefactoring:
         self.filename_mapping = filename_mapping
         self.formatter = os.path.abspath("../assets/formatter/google-java-format-1.10.0-all-deps.jar")
 
+    propagation_class_changed = []  # classes that changed with the propagation
     def do_refactor(self):
         program = get_program(self.source_filenames)
 
@@ -33,6 +34,7 @@ class MoveMethodRefactoring:
         _sourceclass = program.packages[self.package_name].classes[self.class_name]
         _targetclass = program.packages[self.target_package_name].classes[self.target_class_name]
         _method = program.packages[self.package_name].classes[self.class_name].methods[self.method_key]
+
 
         if _method.is_constructor:
             return False
@@ -138,6 +140,8 @@ class MoveMethodRefactoring:
         self.propagate(program.packages, Rewriter_)
         self.__reformat(_sourceclass)
         self.__reformat(_targetclass)
+        for class_chaned in self.propagation_class_changed:
+            self.__reformat(class_chaned)
         # its not efficient for big project ! :
         # for package_item in program.packages:
         #     package_item_dic = program.packages[package_item]
@@ -186,6 +190,7 @@ class MoveMethodRefactoring:
                         instance_name = method_item_dict.body_text[tempIndex2:tempIndex]
                         my_line = instance_name + '.' + self.method_key
                         if my_line in method_item_dict.body_text:  # check that class use our target method or not ***
+                            self.propagation_class_changed.append(class_item_dic)
                             if self.target_package_name != class_item_dic.package_name:  # check to dont import self package
                                 import_parser = TokensInfo(class_item_dic.modifiers_parser_contexts[0])
                                 rewriter.insert_before_start(import_parser,
@@ -221,7 +226,7 @@ if __name__ == "__main__":
     mylist = get_filenames_in_dir('/home/pouorix/Desktop/compilerProject/javaTest/src/propagationTest')
     # mylist = get_filenames_in_dir('tests/movemethod_test')
     print("Testing move_method...")
-    if MoveMethodRefactoring(mylist, "my_package", "Source", "printTest2()", "Target",
+    if MoveMethodRefactoring(mylist, "my_package", "Source", "printTest()", "Target",
                              "my_package").do_refactor():  # if move_method_refactoring(mylist, "ss", "source", "m(int)","target","sss"):
         print("Success!")
     else:
