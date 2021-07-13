@@ -91,8 +91,10 @@ class FieldUsageListener(UtilsListener):
         else:
             return
 
-        self.has_imported_source = self.file_info.has_imported_package(self.package.name) or \
-                                   self.file_info.has_imported_class(self.package.name, self.source_class)
+        has_import_package = self.file_info.has_imported_package(self.package.name)
+        has_import_class = self.file_info.has_imported_class(self.package.name, self.source_class)
+        self.has_imported_source = has_import_package or has_import_class
+
 
         # import target if we're not in Target and have not imported before
         if self.current_class_name != self.target_class or self.package.name != self.target_package:
@@ -112,10 +114,10 @@ class FieldUsageListener(UtilsListener):
             # add getter and setter
             name = self.field_tobe_moved.name
             method_name = self.field_tobe_moved.name[0].upper() + self.field_tobe_moved.name[1:-1]
-            type = self.field_tobe_moved.datatype
+            data_type = self.field_tobe_moved.datatype
 
-            getter = f"\tpublic {type} get{method_name}() {{ return this.{name}; }}\n"
-            setter = f"\tpublic void set{method_name}({type} {name}) {{ this.{name} = {name}; }}\n"
+            getter = f"\tpublic {data_type} get{method_name}() {{ return this.{name}; }}\n"
+            setter = f"\tpublic void set{method_name}({data_type} {name}) {{ this.{name} = {name}; }}\n"
             self.rewriter.insertBeforeIndex(ctx.stop.tokenIndex, getter)
             self.rewriter.insertBeforeIndex(ctx.stop.tokenIndex, setter)
 
@@ -741,30 +743,12 @@ class MoveField:
 
 if __name__ == "__main__":
     move_field = MoveField(
-        # src_class="JSONWriter",
-        # src_package="org.json",
-        # target_class="JSONStringer",
-        # target_package="org.json",
-        # field_name="top",
-        # project_dir="/home/loop/Desktop/Ass/Compiler/new-codeart/CodART/benchmark_projects/JSON",
-        # src_class="PertChart",
-        # src_package="org.ganttproject.chart.pert",
-        # target_class="WebStartIDClass",
-        # target_package="org.ganttproject.chart.pert",
-        # field_name="myTaskManager",
-        # project_dir="/home/loop/Desktop/Ass/Compiler/new-codeart/CodART/benchmark_projects/ganttproject/",
         src_class="Source",
         src_package="source",
         target_class="Target",
         target_package="target",
         field_name="a",
         project_dir="/home/loop/IdeaProjects/move-field"
-        # src_class="JSONWriter",
-        # src_package="org.json",
-        # target_class="JSONStringer",
-        # target_package="org.json",
-        # field_name="comma",
-        # project_dir="/home/loop/Desktop/Ass/Compiler/new-codeart/CodART/benchmark_projects/JSON",
     )
 
     move_field.refactor()
