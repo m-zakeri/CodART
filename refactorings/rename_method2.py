@@ -14,6 +14,7 @@ class RenameMethodRefactoringListener(JavaParserLabeledListener):
 
     def __init__(self,
                  common_token_stream: CommonTokenStream = None,
+                 package_name: str = None,
                  scope_class_name: str = None,
                  method_identifier: str = None,
                  method_new_name: str = None):
@@ -21,67 +22,103 @@ class RenameMethodRefactoringListener(JavaParserLabeledListener):
         :param common_token_stream:
         """
         self.token_stream = common_token_stream
-        self.scope_class_name = scope_class_name
+        self.class_identifier = scope_class_name
         self.method_identifier = method_identifier
         self.method_new_name = method_new_name
+        self.package_identifier = package_name
 
-        self.is_in_scope = False
+        self.is_package_imported = False
+        self.in_class = False
+        self.in_selected_package = False
         # Move all the tokens in the source code in a buffer, token_stream_rewriter.
         if common_token_stream is not None:
             self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
         else:
             raise TypeError('common_token_stream is None')
 
-    def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
 
-        if ctx.IDENTIFIER().getText() == self.scope_class_name:
-            self.is_in_scope = True
-        print("class scope detected")
+    def enterPackageDeclaration(self, ctx: JavaParserLabeled.PackageDeclarationContext):
+        if self.package_identifier == ctx.qualifiedName().getText():
+            self.in_selected_package = True
+            print("Package " + self.package_identifier + " Found")
+
+    def enterImportDeclaration(self, ctx: JavaParserLabeled.ImportDeclarationContext):
+        if ctx.getText() == "import" + self.package_identifier + "." + self.class_identifier + ";" \
+                or ctx.getText() == "import" + self.package_identifier + ".*" + ";" \
+                or ctx.getText() == "import" + self.package_identifier + ";":
+            self.is_package_imported = True
+            print("package " + self.package_identifier + " imported")
+
+    def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
+        if self.is_package_imported or self.in_selected_package:
+            if ctx.IDENTIFIER().getText() == self.class_identifier:
+                self.in_class = True
 
     def exitClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
-        if ctx.IDENTIFIER().getText() == self.scope_class_name:
-            self.is_in_scope = False
-        print("class scope exited")
+        if self.is_package_imported or self.in_selected_package:
+            if ctx.IDENTIFIER().getText() == self.class_identifier:
+                self.in_class = False
 
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
-        if self.is_in_scope:
-            if ctx.IDENTIFIER().getText() == self.method_identifier:
-                self.token_stream_rewriter.replaceIndex(
-                    index=ctx.start.tokenIndex+ 2,
-                    text=self.method_new_name)
-                print("method name changed !")
+        if self.is_package_imported or self.in_selected_package:
+            if self.in_class:
+                if ctx.IDENTIFIER().getText() == self.method_identifier:
+                    self.token_stream_rewriter.replaceIndex(
+                        index=ctx.start.tokenIndex+ 2,
+                        text=self.method_new_name)
+                    print("method name changed !")
 
     def enterMethodCall0(self, ctx: JavaParserLabeled.MethodCall0Context):
-        if self.is_in_scope:
-            if ctx.IDENTIFIER().getText() == self.method_identifier:
-                self.token_stream_rewriter.replaceIndex(
-                    index=ctx.start.tokenIndex,
-                    text=self.method_new_name)
-                print("method call name changed !")
+        if self.is_package_imported or self.in_selected_package:
+            if self.in_class:
+                if ctx.IDENTIFIER().getText() == self.method_identifier:
+                    self.token_stream_rewriter.replaceIndex(
+                        index=ctx.start.tokenIndex,
+                        text=self.method_new_name)
+                    print("method call name changed !")
+
 
 def main():
-    Path = "../tests/rename_tests/"
-    rename_method_test_file = FileStream(str(Path + "rename_method_test.java"))
-    print("file opened")
+    Path = "../tests/rename_tests/benchmark"
+    Package_name = "org.json"
+    class_identifier = "CDL"
+    method_identifier = "getValue"
+    method_new_name = "test"
 
-    Refactored = open(os.path.join(Path, "rename_method_test_Refactored.java"), 'w', newline='')
+    FolderPath = os.listdir(Path)
+    testsPath = os.listdir(Path + "/refactoredFiles/")
 
-    Lexer = JavaLexer(rename_method_test_file)
+    # delete last refactored files
+    for t in testsPath:
+        os.remove(os.path.join(Path + "/refactoredFiles/", t))
 
-    TokenStream = CommonTokenStream(Lexer)
+    for File in FolderPath:
+        # We have all of the java files in this folder now
+        if File.endswith('.java'):
+            EachFilePath = Path + "/" + File
+            print(" ****************" + " in file : " + File + " ****************")
+            EachFile = FileStream(str(EachFilePath))
+            FileName = File.split(".")[0]
+            Refactored = open(Path + "/refactoredFiles/" + FileName + "_Refactored.java", 'w', newline='')
 
-    Parser = JavaParserLabeled(TokenStream)
+            Lexer = JavaLexer(EachFile)
 
-    Tree = Parser.compilationUnit()
+            TokenStream = CommonTokenStream(Lexer)
 
-    ListenerForReRename = RenameMethodRefactoringListener(TokenStream, "SuggestedRoomsByFollowingsListViewAdapter", "RoomModel", "RoomModel_changed")
+            Parser = JavaParserLabeled(TokenStream)
 
-    Walker = ParseTreeWalker()
+            Tree = Parser.compilationUnit()
 
-    Walker.walk(ListenerForReRename, Tree)
+            ListenerForReRenameClass = \
+                RenameMethodRefactoringListener(TokenStream, Package_name, class_identifier, method_identifier, method_new_name)
 
-    Refactored.write(ListenerForReRename.token_stream_rewriter.getDefaultText())
-    print("tamam shod")
+            Walker = ParseTreeWalker()
+
+            Walker.walk(ListenerForReRenameClass, Tree)
+
+            Refactored.write(ListenerForReRenameClass.token_stream_rewriter.getDefaultText())
+
+    print(" %%%%%%%%%%%%%" + " all files finished " + "****************")
 
 
 if __name__ == "__main__":
