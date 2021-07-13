@@ -1,16 +1,19 @@
-// File Class.java
-public class Employee {
-    public Employee(String s, int r) {
-        this.s = s;
-    }
-}
-
 // File AnotherClass.java
 public class AnotherClass {
     public void method() {
         Employee aClass = new Employee("string");
     }
 }
+
+// File Class.java
+public class Employee {
+    public Employee(String s) {
+        super( );
+        this.s = s;
+    }
+}
+
+
 
 
 /*

@@ -1,19 +1,24 @@
-class Employee {
-  private Employee(int type) {
-    this.type = type;
+class OuterClass {
+  int x = 10;
+
+  class Employee {
+    int y ;
+
+    private Employee(){
+    y = 2+100;
+    }
+    public static Employee Create( ){
+       return new Employee()}
+    public int myInnerMethod() {
+      return x;
+    }
   }
-    public static Employee Create( int type){
-       return new Employee(type)}
-  // ...
 }
 
-/*
-class Employee {
-  static Employee create(int type) {
-    employee = new Employee(type);
-    // do some heavy lifting.
-    return employee;
+public class Main {
+  public static void main(String[] args) {
+    OuterClass myOuter = new OuterClass();
+    OuterClass.Employee myInner = Employee.Create();
+    System.out.println(myInner.myInnerMethod());
   }
-  // ...
 }
-*/
