@@ -79,6 +79,9 @@ class RemoveDeadCodeClass(JavaParserLabeledListener):
         self.IsSourceClassForParameters = [None] * len(self.Parameters)
         self.IsSourceMethodForParameters = [None] * len(self.Parameters)
 
+        self.ParameterIndexCall = 0
+        self.IsSourceClassForParametersCall = [None] * len(self.Parameters)
+
         if len(Identifier["Classes"]) != 0:
             self.Class = True
 
@@ -209,26 +212,41 @@ class RemoveDeadCodeClass(JavaParserLabeledListener):
         if self.Parameter and self.ParameterIndex < len(self.Parameters) and self.Parameters[self.ParameterIndex].split('/')[2] == parameterIdentifier:
             if self.IsSourceClassForParameters[self.ParameterIndex] and self.IsSourceMethodForParameters[
                 self.ParameterIndex]:
-                self.CodeRewrite.delete(
-                    self.CodeRewrite.DEFAULT_PROGRAM_NAME,
-                    start,
-                    stop
-                )
-                self.ParameterIndex += 1
+                if self.Parameters[self.ParameterIndex].split('/')[3] != 0:
+                    self.CodeRewrite.delete(
+                        self.CodeRewrite.DEFAULT_PROGRAM_NAME,
+                        start - 2,
+                        stop
+                    )
 
-    def enterMethodCall0(self, ctx:JavaParserLabeled.MethodCall0Context):
-        parametersList = ctx.expressionList()
-        # print(parametersList.parentCtx.IDENTIFIER().getText())
-        if self.Parameter and parametersList.parentCtx.IDENTIFIER().getText() in self.Parameters:
-            pass
+                else:
+                    self.CodeRewrite.delete(
+                        self.CodeRewrite.DEFAULT_PROGRAM_NAME,
+                        start,
+                        stop + 1
+                    )
+                self.ParameterIndex += 1
 
     def exitMethodCall0(self, ctx:JavaParserLabeled.MethodCall0Context):
         pass
+        # if self.Parameter and self.ParameterIndexCall < len(self.Parameters):
+        #     if ctx.IDENTIFIER() in self.Parameters:
+        #         Ind = self.Parameters[self.ParameterIndexCall].split('/')[3]
+        #         parametersList = ctx.expressionList().expression(Ind).STRING_LITERAL()
+        #         print(parametersList)
+        #         start = parametersList.start.tokenIndex
+        #         stop = parametersList.stop.tokenIndex
+        #         self.CodeRewrite.delete(
+        #             self.CodeRewrite.DEFAULT_PROGRAM_NAME,
+        #             start,
+        #             stop
+        #         )
+        #         self.ParameterIndexCall += 1
 
 
 def main():
-    Path = "../tests/remove_dead_code/json"
     # Path = "../tests/remove_dead_code"
+    Path = "../tests/remove_dead_code/json"
     FolderPath = os.listdir(Path)
 
     Identifier = [
@@ -236,22 +254,22 @@ def main():
          "Methods": [],
          "Variables": [],
          "Parameters": [],
-         "Fields": []},
-        {"Classes": [],
+         "Fields": ["CDL/Field"]},
+        {"Classes": ["Cookie"],
          "Methods": [],
          "Variables": [],
          "Parameters": [],
          "Fields": []},
         # This useless variable is just written to test this code on real project
         {"Classes": [],
-         "Methods": [],
+         "Methods": ["CookieList/toJSONObject"],
          "Variables": ["CookieList/toString/c"],
          "Parameters": [],
          "Fields": []},
         {"Classes": [],
          "Methods": [],
          "Variables": [],
-         "Parameters": [],
+         "Parameters": ["HTTP/toJSONObject/Par/2"],
          "Fields": []},
         {"Classes": [],
          "Methods": [],
@@ -354,14 +372,14 @@ def main():
         #            "Fields": [],
         #            "Variables": ["Car/main/dead", "Car/Run/number", "Engine/SetName/what",
         #                          "Engine/main2/variable", "Engine/main2/dead"],
-        #            "Parameters": ["Car/Drive/wheels", "Engine/main/k", "Engine/SetName/last"]},
+        #            "Parameters": ["Car/Drive/wheels/2", "Engine/main/k/2", "Engine/SetName/last/2"]},
         #
         # {"Classes": ["Airplane"],
         #            "Methods": ["Car/Fly", "Engine/main2"],
         #            "Fields": ["Car/noway", "Engine/model"],
         #            "Variables": ["Car/main/dead", "Car/Run/number", "Engine/SetName/what",
         #                          "Engine/main2/variable", "Engine/main2/dead"],
-        #            "Parameters": ["Car/Drive/wheels", "Engine/main/k", "Engine/SetName/last"]}
+        #            "Parameters": ["Car/Drive/wheels/2", "Engine/main/k/2", "Engine/SetName/last/2"]}
                   ]
 
     i = 0

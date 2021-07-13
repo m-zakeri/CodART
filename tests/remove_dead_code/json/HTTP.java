@@ -68,7 +68,7 @@ public class HTTP {
      * of the XML string.
      * @throws JSONException if a called function fails
      */
-    public static JSONObject toJSONObject(String string) throws JSONException {
+    public static JSONObject toJSONObject(String string, int Par) throws JSONException {
         JSONObject     jo = new JSONObject();
         HTTPTokener    x = new HTTPTokener(string);
         String         token;

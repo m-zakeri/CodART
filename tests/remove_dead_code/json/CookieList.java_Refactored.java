@@ -44,17 +44,7 @@ public class CookieList {
      * @return A JSONObject
      * @throws JSONException if a called function fails
      */
-    public static JSONObject toJSONObject(String string) throws JSONException {
-        JSONObject jo = new JSONObject();
-        JSONTokener x = new JSONTokener(string);
-        while (x.more()) {
-            String name = Cookie.unescape(x.nextTo('='));
-            x.next('=');
-            jo.put(name, Cookie.unescape(x.nextTo(';')));
-            x.next();
-        }
-        return jo;
-    }
+    
 
     /**
      * Convert a JSONObject into a cookie list. A cookie list is a sequence
