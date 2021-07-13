@@ -670,12 +670,10 @@ class MoveField:
         self.files = []
         for file, utils_listener in utils_listeners:
             field_candidate = set()
-            self.files.append(file)
             for klass in utils_listener.package.classes.values():
                 for f in klass.fields.values():
                     if f.datatype == self.src_class:
                         field_candidate.add(f.name)
-
             stream = FileStream(file, encoding='utf8')
             lexer = JavaLexer(stream)
             token_stream = CommonTokenStream(lexer)
@@ -693,9 +691,9 @@ class MoveField:
                 field)
             walker.walk(listener, tree)
             if listener.rewriter.modified:
+                self.files.append(file)
                 listener.save(overwrite=self.overwrite, filename_mapping=self.filename_map)
-
-            methods_tobe_update = listener.methods_tobe_updated + methods_tobe_update
+                methods_tobe_update = listener.methods_tobe_updated + methods_tobe_update
 
             if file.__contains__(self.src_class):
                 field = listener.field_tobe_moved
@@ -744,18 +742,24 @@ if __name__ == "__main__":
         # target_package="org.json",
         # field_name="top",
         # project_dir="/home/loop/Desktop/Ass/Compiler/new-codeart/CodART/benchmark_projects/JSON",
-        src_class="PertChart",
-        src_package="org.ganttproject.chart.pert",
-        target_class="WebStartIDClass",
-        target_package="org.ganttproject.chart.pert",
-        field_name="myTaskManager",
-        project_dir="/home/loop/Desktop/Ass/Compiler/new-codeart/CodART/benchmark_projects/ganttproject/",
+        # src_class="PertChart",
+        # src_package="org.ganttproject.chart.pert",
+        # target_class="WebStartIDClass",
+        # target_package="org.ganttproject.chart.pert",
+        # field_name="myTaskManager",
+        # project_dir="/home/loop/Desktop/Ass/Compiler/new-codeart/CodART/benchmark_projects/ganttproject/",
         # src_class="Source",
         # src_package="source",
         # target_class="Target",
         # target_package="target",
         # field_name="a",
         # project_dir="/home/loop/IdeaProjects/move-field"
+        src_class="JSONWriter",
+        src_package="org.json",
+        target_class="JSONStringer",
+        target_package="org.json",
+        field_name="comma",
+        project_dir="/home/loop/Desktop/Ass/Compiler/new-codeart/CodART/benchmark_projects/JSON",
     )
 
     move_field.refactor()
