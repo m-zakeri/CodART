@@ -6,8 +6,9 @@ from antlr4 import CommonTokenStream, FileStream, ParseTreeWalker
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
 from gen.java.JavaLexer import JavaLexer
-from gen.java.JavaParser import JavaParser, TokenStream
+from gen.java.JavaParser import JavaParser
 from refactorings.utils.utils_listener_fast import ExpressionName, MethodInvocation, LocalVariable, Field, UtilsListener
+
 
 class FieldNotFound(Exception):
     pass
@@ -20,8 +21,10 @@ class TargetDoesNotExist(Exception):
 class DuplicateField(Exception):
     pass
 
+
 class TargetNoEmptyConstructor(Exception):
     pass
+
 
 class RewriterInterceptor(TokenStreamRewriter):
     def __init__(self, tokens):
@@ -126,7 +129,8 @@ class FieldUsageListener(UtilsListener):
                 ctx.variableDeclarators().children[0].children[0].IDENTIFIER().getText()]
             if field.name == self.field_name:
                 self.field_tobe_moved = field
-                self.rewriter.replaceRange(ctx.parentCtx.parentCtx.start.tokenIndex,ctx.parentCtx.parentCtx.stop.tokenIndex, "")
+                self.rewriter.replaceRange(ctx.parentCtx.parentCtx.start.tokenIndex,
+                                           ctx.parentCtx.parentCtx.stop.tokenIndex, "")
 
     def exitClassBody(self, ctx: JavaParser.ClassBodyContext):
         super().exitClassBody(ctx)
@@ -344,6 +348,7 @@ class MethodUsageListener(UtilsListener):
     specified methods, and passes a new instance
     of target as their last parameter.
     """
+
     def __init__(self, filename: str, methods: str, target_class: str, source_class: str):
         super().__init__(filename)
         self.methods = methods
@@ -438,7 +443,8 @@ class PreConditionListener(UtilsListener):
         super().exitMethodBody(ctx)
         if self.current_method is None:
             self.null_method = True
-    def exitClassBody(self, ctx:JavaParser.ClassBodyContext):
+
+    def exitClassBody(self, ctx: JavaParser.ClassBodyContext):
         super().exitClassBody(ctx)
         if self.package.name == self.src_package:
             if self.src_class in self.package.classes:
@@ -517,6 +523,7 @@ class MoveField:
     """
     Refactoring is done here.
     """
+
     def __init__(self,
                  src_package: str,
                  src_class: str,
@@ -536,7 +543,6 @@ class MoveField:
         self.files = MoveField.get_filenames_in_dir(project_dir)
         self.overwrite = overwrite
         self.filename_map = filename_map
-
 
     @staticmethod
     def get_filenames_in_dir(dir: Union[str, Path],
@@ -658,7 +664,6 @@ class MoveField:
             #     continue
 
             utils_listeners.append((file, utils_listener))
-
 
             # if len(utils_listener.package.classes) > 1:
             #     print(f"file has more than one class in")
