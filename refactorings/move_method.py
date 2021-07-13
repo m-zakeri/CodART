@@ -1,5 +1,5 @@
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
-from refactorings.utils.utils2 import get_program, Rewriter, get_filenames_in_dir, get_objects
+from refactorings.utils.utils2 import get_program, Rewriter, get_filenames_in_dir, get_objects, get_file_info
 from refactorings.utils.utils_listener_fast import TokensInfo, SingleFileElement, Class
 import subprocess
 import os
@@ -17,7 +17,7 @@ def parse_csv_file(csv_file_name):
             method = items[1]
             return {'package_name': package, 'class_name': class_nm, 'method_key': method}
         else:
-            package_class.pop()
+            # package_class.pop()
             package = '.'.join(package_class)
             return {'target_class_name': class_nm, 'target_package_name': package}
 
@@ -92,7 +92,7 @@ class MoveMethodRefactoring:
         if len(_method.body_method_invocations_without_typename) or exp:
             for method_ in _sourceclass.methods:
                 __method = _sourceclass.methods[method_]
-                if __method.is_constructor and (__method.parameters) > 0:
+                if __method.is_constructor and len(__method.parameters) > 0:
                     return False
 
         source_object_name = str.lower(self.class_name)
@@ -193,6 +193,15 @@ class MoveMethodRefactoring:
             Rewriter_.insert_before_start(target_class_modifier_token,"import " + self.package_name + "." + self.class_name + ";\n")
             Rewriter_.apply()
 
+        # add imported class in destination file
+        file_info = get_file_info(_sourceclass.filename)
+        imports_exp = ''
+        for imported_class in file_info.all_imports:
+            target_class_modifier_token = TokensInfo(_targetclass.modifiers_parser_contexts[0])
+            imports_exp += "import " + imported_class.package_name + "." + (imported_class.class_name if hasattr(imported_class, 'class_name') else '*') + ";\n"
+        Rewriter_.insert_before_start(target_class_modifier_token, imports_exp)
+        Rewriter_.apply()
+
         Rewriter_.replace(tokens_info, "")
         Rewriter_.apply()
 
@@ -274,10 +283,9 @@ class MoveMethodRefactoring:
 
 
 if __name__ == "__main__":
-    # mylist = get_filenames_in_dir('/home/mohamad/projects/vuze-remote-for-android')
-    mylist = get_filenames_in_dir('/home/mohamad/projects/benchmark_projects/JSON/src')
+    mylist = get_filenames_in_dir('/path/to/project')
     print("Testing move_method...")
-    results = parse_csv_file('/home/mohamad/projects/compiler/test.csv')
+    results = parse_csv_file('/path/to/deodorant_exported.csv/')
     for result in results:
         move_method = MoveMethodRefactoring(mylist, **result)
         if move_method.do_refactor():
