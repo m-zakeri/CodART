@@ -70,7 +70,7 @@ class RemoveFlagArgumentListener(JavaParserLabeledListener):
         self.is_source_class = (ctx.IDENTIFIER().getText() == self.source_class)
 
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
-        """check if this is the intended method if so capture signature and remove boolean argument
+        """check if this is the intended method if so capture `signature` and remove boolean argument
             
         Args:
             ctx (JavaParserLabeled.MethodDeclarationContext): 
@@ -101,36 +101,54 @@ class RemoveFlagArgumentListener(JavaParserLabeledListener):
                 self.token_stream_rewriter = TokenStreamRewriter(self.common_token_stream)
                 self.token_stream_rewriter_changed = True
 
-
     def exitMethodBody(self, ctx: JavaParserLabeled.MethodBodyContext):
         """after exiting the soure method create two new method for new method logics and call these in if and
         else block in the source method
         Args:
             ctx (JavaParserLabeled.MethodBodyContext)
         """
-        if self.is_source_method:
-            signature1 = self.signature.split('(')[0].rstrip() + 'IsTrue' + ' (' + ''.join(
-                self.signature.split('(')[1:])
-            signature2 = self.signature.split('(')[0].rstrip() + 'IsFalse' + ' (' + ''.join(
-                self.signature.split('(')[1:])
+        try:
+            if self.is_source_method:
+                signature1 = self.signature.split('(')[0].rstrip() + 'IsTrue' + ' (' + ''.join(
+                    self.signature.split('(')[1:-1])
+                signature2 = self.signature.split('(')[0].rstrip() + 'IsFalse' + ' (' + ''.join(
+                    self.signature.split('(')[1:-1])
 
-            res = '\n\t' + signature1 + self.body_1 + '\n\t' + signature2 + self.body_2
-            self.token_stream_rewriter.insertAfter(index=ctx.stop.tokenIndex, text=res)
-            # self.token_stream_rewriter.insertAfter(index=ctx.stop.tokenIndex, text=self.body_2)
-            # self.token_stream_rewriter.insertAfter(index=ctx.stop.tokenIndex, text=self.signature)
-            # print(self.signature)
+                if self.body_1 is not None and self.body_2 is not None:
+                    res = '\n\t' + signature1 + self.body_1 + '\n\t' + signature2 + self.body_2
+                    self.token_stream_rewriter.insertAfter(index=ctx.stop.tokenIndex, text=res)
+                    # self.token_stream_rewriter.insertAfter(index=ctx.stop.tokenIndex, text=self.body_2)
+                    # self.token_stream_rewriter.insertAfter(index=ctx.stop.tokenIndex, text=self.signature)
+                    # print(self.signature)
 
-            arguments = [s.rstrip().split(' ')[-1] for s in signature1.split('(')[1].split(')')[0].split(',')]
-            print("exit method")
-            signature1_name = signature1.split('(')[0].rstrip().split()[-1]
-            signature2_name = signature2.split('(')[0].rstrip().split()[-1]
+                    arguments = [s.rstrip().split(' ')[-1] for s in signature1.split('(')[1].split(')')[0].split(',')]
+                    print("exit method")
+                    signature1_name = signature1.split('(')[0].rstrip().split()[-1]
+                    signature2_name = signature2.split('(')[0].rstrip().split()[-1]
 
-            self.token_stream_rewriter.replaceRange(self.body_1_token.start.tokenIndex,
-                                                    self.body_1_token.stop.tokenIndex,
-                                                    '\t' + signature1_name + '( ' + ','.join(arguments) + ')')
-            self.token_stream_rewriter.replaceRange(self.body_2_token.start.tokenIndex,
-                                                    self.body_2_token.stop.tokenIndex,
-                                                    '\t' + signature2_name + '( ' + ','.join(arguments) + ')')
+                    self.token_stream_rewriter.replaceRange(self.body_1_token.start.tokenIndex,
+                                                            self.body_1_token.stop.tokenIndex,
+                                                            '\t' + signature1_name + '( ' + ','.join(arguments) + ')')
+                    self.token_stream_rewriter.replaceRange(self.body_2_token.start.tokenIndex,
+                                                            self.body_2_token.stop.tokenIndex,
+                                                            '\t' + signature2_name + '( ' + ','.join(arguments) + ')')
+
+        except:
+
+            if self.is_source_method:
+                signature1 = self.signature.split('(')[0].rstrip() + ' (' + ''.join(
+                    self.signature.split('(')[1:-1])
+
+                res = '\n\t' + signature1 + self.body
+                self.token_stream_rewriter.insertAfter(index=ctx.stop.tokenIndex, text=res)
+
+                arguments = [s.rstrip().split(' ')[-1] for s in signature1.split('(')[1].split(')')[0].split(',')]
+
+                signature1_name = signature1.split('(')[0].rstrip().split()[-1]
+
+                self.token_stream_rewriter.replaceRange(self.body_token.start.tokenIndex,
+                                                        self.body_token.stop.tokenIndex,
+                                                        '\t' + signature1_name + '( ' + ','.join(arguments) + ')')
 
     def enterStatement0(self, ctx: JavaParserLabeled.Statement0Context):
         if self.is_source_method:
@@ -143,30 +161,28 @@ class RemoveFlagArgumentListener(JavaParserLabeledListener):
             ctx (JavaParserLabeled.Statement2Context)
         """
         if self.is_source_method:
+            try:
 
-            try :
                 primary = ctx.parExpression().expression().primary()
+
                 if hasattr(primary, "IDENTIFIER"):
                     if ctx.parExpression().expression().primary().IDENTIFIER().getText() == self.argument_name:
-                        iterator = iter(ctx.statement())
-
                         # TODO : handle on statements blocks .e.g. {}
 
-                        self.body_1, self.body_2 = [self.common_token_stream.getText(s.block().start, s.block().stop)[1:]
-                                                    for s
-                                                    in ctx.statement()]
+                        self.body_1, self.body_2 = [
+                            self.common_token_stream.getText(s.block().start, s.block().stop)[1:]
+                            for s
+                            in ctx.statement()]
 
                         self.body_1_token, self.body_2_token = [s.block() for s in ctx.statement()]
 
-                        # print(ctx.getPayload())
-                        # print(self.common_token_stream.getText(ctx.start, ctx.stop))
-                        # print(dir(ctx.statement()[0].block()))
+            except:
 
-                        # for s in ctx.statement():
-                        #     print(s.block().getText())
+                s = ctx.statement()[0]
+                self.body = self.common_token_stream.getText(s.block().start, s.block().stop)[1:]
 
-            except :
-                pass
+                s = ctx.statement()[0]
+                self.body_token = s.block()
 
 
 class RemoveFlagArgument:
@@ -214,8 +230,52 @@ class RemoveFlagArgument:
             f.write(self.my_listener.token_stream_rewriter.getDefaultText())
 
 
+def check_for_flag_arg(input_directory):
+    # input_directory = r"/data/Dev/JavaSample"
+    # for root, dirs, files in os.walk(input_directory):
+    #     for input_file in files:
+    #         if input_file.endswith(".java"):
+
+    # stream = FileStream(os.path.join(root, input_file), encoding='utf8')
+    stream = FileStream("playground.java", encoding="UTF8")
+    lexer = JavaLexer(stream)
+    token_stream = CommonTokenStream(lexer)
+    parser = JavaParserLabeled(token_stream)
+    parser.getTokenStream()
+    parse_tree = parser.compilationUnit()
+    my_listener = check_for_flag_argument()
+    walker = ParseTreeWalker()
+    walker.walk(t=parse_tree, listener=my_listener)
+
+    # else:
+    #     continue
+
+
+class check_for_flag_argument(JavaParserLabeledListener):
+
+    def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
+
+        if ctx.formalParameters().formalParameterList() is not None:
+            # if ctx.formalParameters().formalParameterList().formalParameter() is not None :
+            # print(ctx.formalParameters().formalParameterList().getChildCount())
+            for i in range(len(ctx.formalParameters().formalParameterList().children)):
+                c = ctx.formalParameters().formalParameterList().children[i].variableDeclaratorId().IDENTIFIER()
+                print(c)
+            #         print(formal_param.formalParameter.variableDeclaratorId )
+
+            # if ctx.formalParameters().formalParameterList():
+            #     constructor_parameters = [ctx.formalParameters().formalParameterList().children[i] for i in
+            #                               range(len(ctx.formalParameters().formalParameterList().children)) if
+        # print(formal_param)
+
+        pass
+
+
 if __name__ == '__main__':
     RemoveFlagArgument().do_refactor()
 
-    RemoveFlagArgument("JSONArray", "addAll", "wrap",r"D:\Uni\Compiler\project\CodART\benchmark_projects\JSON\src\main\java\org\json\JSONArray.java" ).do_refactor()
+    # RemoveFlagArgument("JSONArray", "addAll", "wrap",r"D:\Uni\Compiler\project\CodART\benchmark_projects\JSON\src\main\java\org\json\JSONArray.java" ).do_refactor()
+    # RemoveFlagArgument("TestTimelineLabelRendererImpl", "testHasTimelineLabel", "condition",
+    #                    r"D:\Uni\Compiler\project\CodART\benchmark_projects\ganttproject\ganttproject-tester\test\net\sourceforge\ganttproject\chart\TestTimelineLabelRendererImpl.java").do_refactor()
 
+    # check_for_flag_arg(r"C:\Users")
