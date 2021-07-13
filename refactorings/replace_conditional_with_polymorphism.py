@@ -81,8 +81,8 @@ class ReplaceConditionalWithPolymorphism(JavaParserLabeledListener):
 
 
 if __name__ == '__main__':
-    listener = ReplaceConditionalWithPolymorphism("../tests/replace_conditional_with_polymorphism/sample.java",
-                                                  "SwitchDemo", "myMethod")
+    listener = ReplaceConditionalWithPolymorphism("../tests/replace_conditional_with_polymorphism/sample2.java",
+                                                  "SwitchDemo2", "myMethod")
     try:
         stream = FileStream(listener.file)
     except:
