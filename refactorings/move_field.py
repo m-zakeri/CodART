@@ -690,10 +690,10 @@ class MoveField:
                 field_candidate,
                 field)
             walker.walk(listener, tree)
-            if listener.rewriter.modified:
-                self.files.append(file)
-                listener.save(overwrite=self.overwrite, filename_mapping=self.filename_map)
-                methods_tobe_update = listener.methods_tobe_updated + methods_tobe_update
+            # if listener.rewriter.modified:
+            self.files.append(file)
+            listener.save(overwrite=self.overwrite, filename_mapping=self.filename_map)
+            methods_tobe_update = listener.methods_tobe_updated + methods_tobe_update
 
             if file.__contains__(self.src_class):
                 field = listener.field_tobe_moved
@@ -748,18 +748,18 @@ if __name__ == "__main__":
         # target_package="org.ganttproject.chart.pert",
         # field_name="myTaskManager",
         # project_dir="/home/loop/Desktop/Ass/Compiler/new-codeart/CodART/benchmark_projects/ganttproject/",
-        # src_class="Source",
-        # src_package="source",
-        # target_class="Target",
-        # target_package="target",
-        # field_name="a",
-        # project_dir="/home/loop/IdeaProjects/move-field"
-        src_class="JSONWriter",
-        src_package="org.json",
-        target_class="JSONStringer",
-        target_package="org.json",
-        field_name="comma",
-        project_dir="/home/loop/Desktop/Ass/Compiler/new-codeart/CodART/benchmark_projects/JSON",
+        src_class="Source",
+        src_package="source",
+        target_class="Target",
+        target_package="target",
+        field_name="a",
+        project_dir="/home/loop/IdeaProjects/move-field"
+        # src_class="JSONWriter",
+        # src_package="org.json",
+        # target_class="JSONStringer",
+        # target_package="org.json",
+        # field_name="comma",
+        # project_dir="/home/loop/Desktop/Ass/Compiler/new-codeart/CodART/benchmark_projects/JSON",
     )
 
     move_field.refactor()
