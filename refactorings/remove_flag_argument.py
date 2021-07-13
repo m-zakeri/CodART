@@ -231,51 +231,65 @@ class RemoveFlagArgument:
 
 
 def check_for_flag_arg(input_directory):
-    # input_directory = r"/data/Dev/JavaSample"
-    # for root, dirs, files in os.walk(input_directory):
-    #     for input_file in files:
-    #         if input_file.endswith(".java"):
+    input_directory = r"D:\Uni\Compiler\project\CodART\benchmark_projects\xerces2-j"
+    for root, dirs, files in os.walk(input_directory):
+        for input_file in files:
+            if input_file.endswith(".java"):
+                print("looking for refactoring on " , input_file)
+                stream = FileStream(os.path.join(root, input_file), encoding='utf8')
+                lexer = JavaLexer(stream)
+                token_stream = CommonTokenStream(lexer)
+                parser = JavaParserLabeled(token_stream)
+                parser.getTokenStream()
+                parse_tree = parser.compilationUnit()
+                my_listener = check_for_flag_argument(input_file)
+                walker = ParseTreeWalker()
+                walker.walk(t=parse_tree, listener=my_listener)
 
-    # stream = FileStream(os.path.join(root, input_file), encoding='utf8')
-    stream = FileStream("playground.java", encoding="UTF8")
-    lexer = JavaLexer(stream)
-    token_stream = CommonTokenStream(lexer)
-    parser = JavaParserLabeled(token_stream)
-    parser.getTokenStream()
-    parse_tree = parser.compilationUnit()
-    my_listener = check_for_flag_argument()
-    walker = ParseTreeWalker()
-    walker.walk(t=parse_tree, listener=my_listener)
-
-    # else:
-    #     continue
+            else:
+                continue
 
 
 class check_for_flag_argument(JavaParserLabeledListener):
 
+    def __init__(self, filename):
+        self.method_args = []
+        self.filename = filename
+
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
 
         if ctx.formalParameters().formalParameterList() is not None:
-            # if ctx.formalParameters().formalParameterList().formalParameter() is not None :
-            # print(ctx.formalParameters().formalParameterList().getChildCount())
             for i in range(len(ctx.formalParameters().formalParameterList().children)):
-                c = ctx.formalParameters().formalParameterList().children[i].variableDeclaratorId().IDENTIFIER()
-                print(c)
-            #         print(formal_param.formalParameter.variableDeclaratorId )
+                if hasattr(ctx.formalParameters().formalParameterList().children[i] , 'variableDeclaratorId' ) :
+                    self.method_args.append(ctx.formalParameters().formalParameterList().children[i].variableDeclaratorId().IDENTIFIER().getText())
 
-            # if ctx.formalParameters().formalParameterList():
-            #     constructor_parameters = [ctx.formalParameters().formalParameterList().children[i] for i in
-            #                               range(len(ctx.formalParameters().formalParameterList().children)) if
-        # print(formal_param)
+        # print(self.method_args)
 
         pass
 
+    def exitMethodDeclaration(self, ctx:JavaParserLabeled.MethodDeclarationContext):
+        self.method_args = []
+
+    def enterStatement2(self, ctx:JavaParserLabeled.Statement2Context):
+
+        if hasattr(ctx.parExpression().expression() , "primary" ) :
+            a = None
+            cond = ctx.parExpression().expression().primary()
+
+            if hasattr(cond, 'IDENTIFIER'):
+                a = cond.IDENTIFIER().getText()
+
+            if a and a in self.method_args:
+                print("refactoring needed in ", self.filename )
+
+
+
 
 if __name__ == '__main__':
-    RemoveFlagArgument().do_refactor()
+    # RemoveFlagArgument().do_refactor()
 
     # RemoveFlagArgument("JSONArray", "addAll", "wrap",r"D:\Uni\Compiler\project\CodART\benchmark_projects\JSON\src\main\java\org\json\JSONArray.java" ).do_refactor()
     # RemoveFlagArgument("TestTimelineLabelRendererImpl", "testHasTimelineLabel", "condition",
     #                    r"D:\Uni\Compiler\project\CodART\benchmark_projects\ganttproject\ganttproject-tester\test\net\sourceforge\ganttproject\chart\TestTimelineLabelRendererImpl.java").do_refactor()
 
-    # check_for_flag_arg(r"C:\Users")
+    check_for_flag_arg(r"C:\Users")
