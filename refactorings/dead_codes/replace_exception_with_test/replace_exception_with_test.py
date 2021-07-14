@@ -24,7 +24,7 @@ class ReplaceExceptionWithPrecheckListener(JavaParserLabeledListener):
         self.returnedValue0=''
         self.name=''
         self.index=''
-        self.VFE=False #throwwrongValueFormatException
+        self.NFE=False #throwwrongValueFormatException
         with open(filename, 'r') as file:
             self.lines = file.readlines()
             file.close()
@@ -44,11 +44,53 @@ class ReplaceExceptionWithPrecheckListener(JavaParserLabeledListener):
         else:
             raise ValueError("filename is None")
 
+    def isInt(self,inp: str):
+        new_code='\rBoolean flag = true\n'
+        new_code+=f"\tfor (int a=0 ;a < {inp}.length() ;a++)"
+        new_code+="\t{"
+        new_code+=f"\t\tif (a == 0 & & {inp}.charAt(a) == '-')\n"
+        new_code+="\t\t\tcontinue;"
+        new_code+=f"\t\tif (!Character.isDigit({inp}.charAt(a)))\n" \
+                                                    "\t\t\tflag = false;" \
+                                                    "}"
+        return new_code
+
+    def isFloat(self,inp: str):
+        new_code = '' \
+                   '\tBoolean flag = true\n'
+        new_code+=f"\t\tif ({inp}.matches("+"\"[-+]?[0-9]*\\.?[0-9]+\""+")) {\n"
+        new_code+="\t\t\tflag = true\n;"
+        new_code+="\t\t}"
+        return new_code
+
+
+
+    def isDouble(self,inp: str):
+        new_code = '' \
+                   '\tBoolean flag = true\n'
+        new_code+=f"\t\tif ({inp}.matches("+"\"[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?[fF]\""+")) {\n"
+        new_code+="\t\t\tflag = true\n;"
+        new_code+="\t\t}"
+        return new_code
+
+
+
+
 
 
     def exitStatement6(self, ctx: JavaParserLabeled.Statement6Context):
         # TODO ctx.finally...
         if (self.IOOBE and len(ctx.catchClause()) == 1 and ctx.finallyBlock() is None):
+            tryExp=ctx.block().getText()
+            self.returnedValue0=tryExp
+            if (tryExp.__contains__('this.')):
+                start = tryExp.find('this.') +5
+                stop  = tryExp.find('.get')
+                self.name=tryExp[start:stop]
+                start = tryExp.find('.get(') +5
+                stop  = tryExp.find(')')
+                self.index=tryExp[start:stop]
+
             ctx.TRY().getText()
             tryline = ctx.TRY().symbol.line-1
             self.lines[tryline] = self.lines[tryline].replace('try', '')
@@ -60,26 +102,54 @@ class ReplaceExceptionWithPrecheckListener(JavaParserLabeledListener):
             head, _sep, tail = self.lines[rbraceline].rpartition('}')
             self.lines[rbraceline] = self.lines[rbraceline] = head + '' + tail
             new_code = ''
-            new_code += (f' return ({self.index} >= {self.name}.length) ? {self.returnedValue} : {self.returnedValue0}')
+            new_code += f' if ({self.index} >= {self.name}.length)'+self.returnedValue
+            new_code+=f'else' + self.returnedValue0
+            new_code = new_code.replace('{','{\n')
+            new_code = new_code.replace('}','}\n')
+            new_code = new_code.replace(';',';\n')
+            new_code = new_code.replace('return','return ')
+            self.token_stream_rewriter.replace(program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                                               from_idx=ctx.start.tokenIndex,
+                                               to_idx=ctx.stop.tokenIndex,
+                                               text=new_code)
+        if (self.NFE and len(ctx.catchClause()) == 1 and ctx.finallyBlock() is None):
+            new_code=''
+            tryExp=ctx.block().getText()
+            self.returnedValue0=tryExp
+            start = tryExp.find('.parse') + 6
+            stop = tryExp.find('(')
+            self.name = tryExp[start:stop]
+            start = tryExp.find('(')+1
+            stop = tryExp.find(';')-1
+            self.index = tryExp[start:stop]
+            if(self.name=='Int'):
+                new_code+=self.isInt(self.index)
+            if(self.name=='Float'):
+                new_code+=self.isFloat(self.index)
+            if(self.name=='Double'):
+                new_code+=self.isDouble(self.index)
+            new_code += f' if (flag==false)' + self.returnedValue
+            new_code += f'else' + self.returnedValue0
+            new_code = new_code.replace('{', '{\n')
+            new_code = new_code.replace('}', '}\n')
+            # new_code = new_code.replace(';', ';\n')
+            new_code = new_code.replace('return', 'return ')
+            print(new_code)
             self.token_stream_rewriter.replace(program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
                                                from_idx=ctx.start.tokenIndex,
                                                to_idx=ctx.stop.tokenIndex,
                                                text=new_code)
 
+
         file = open(self.filename, 'w')
         file.writelines(self.lines)
         file.close()
-
-
-    def exitExpression0(self, ctx: JavaParserLabeled.Expression0Context):
-        self.returnedValue=ctx.getText()
-
 
     def exitExpression2(self, ctx: JavaParserLabeled.Expression2Context):
         start = ctx.start.tokenIndex
         stop = ctx.stop.tokenIndex
 
-        self.returnedValue0=ctx.getText()+";"
+        # self.returnedValue0=ctx.getText()+";"
         self.name = ctx.expression(0).getText()
         self.index = ctx.expression(1).getText()
         currentline = ctx.start.line-1
@@ -89,26 +159,15 @@ class ReplaceExceptionWithPrecheckListener(JavaParserLabeledListener):
         after = self.lines[currentline][idx + len(f'{array}'):]
        # self.lines[currentline]=f"if ({self.index} >= {self.name}.length) {{\n "
 
-
     def enterCatchClause(self, ctx:JavaParserLabeled.CatchClauseContext):
-        print(ctx.getText())
+        print(ctx.catchType().getText())
         if ctx.catchType().getText()=='ArrayIndexOutOfBoundsException':
             self.IOOBE = True
-            start = ctx.getText().find('return') + 6
-            stop = ctx.getText().find(';')
-            rbraceline = ctx.block().children[-1].symbol.line
-            self.returnedValue = ctx.getText()[start:stop]
-            # for i in range(self.currentLine,self.lines.__len__()):
-            #     if(self.lines[self.currentLine].__contains__('catch')):
-            #         self.lines[self.currentLine]=f" return {self.returnedValue};\n}}"
-            #         for j in range(self.currentLine+1,rbraceline):
-            #             self.lines[i]=''
-            #         break
-            #     else:
-            #         if (self.lines[self.currentLine].__contains__('return')):
-            #             self.lines[i]=''
-        elif ctx.getText().__contains__('throwwrongValueFormatException'):
-            self.VFE=True
+            self.returnedValue = ctx.block().getText()
+
+        elif ctx.getText().__contains__('NumberFormatException'):
+            self.NFE=True
+            self.returnedValue = ctx.block().getText()
 
 
 
@@ -123,22 +182,9 @@ class ReplaceExceptionWithPrecheckListener(JavaParserLabeledListener):
 
 
 
-    # def exitCompilationUnit(self, ctx:JavaParserLabeled.CompilationUnitContext):
-    #     if not self.IOOBE:
-    #         return
-    #     else:
-    #         new_code=''
-    #         for i in range(0,self.lines.__len__()):
-    #             new_code+=self.lines[i]
-    #         self.token_stream_rewriter.replace(program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-    #                                            from_idx=ctx.start.tokenIndex,
-    #                                            to_idx=ctx.stop.tokenIndex,
-    #                                            text=new_code)
 
 
-
-
-directory = "C:\\Users\\asus\\Desktop\\TestProject"
+directory = "C:\\Users\\asus\\Desktop\\TestProject2"
 
 
 def main(args):
@@ -154,10 +200,9 @@ def main(args):
     parser = JavaParserLabeled(token_stream)
     parser.getTokenStream()
 
-    print("=====Enter Create ParseTree=====")
     # Step 5: Create parse tree
     parse_tree = parser.compilationUnit()
-    print("=====Create ParseTree Finished=====")
+
 
     # Step 6: Create an instance of AssignmentStListener
     my_listener = ReplaceExceptionWithPrecheckListener(common_token_stream=token_stream, class_identifier='GodClass',
@@ -173,9 +218,6 @@ def main(args):
 
 def process_file(file):
     argparser = argparse.ArgumentParser()
-    # argparser.add_argument(
-    #     '-n', '--file',
-    #     help='Input source', default=r'refactorings/test/test1.java')
     argparser.add_argument(
         '-n', '--file',
         help='Input source', default=file)
@@ -188,5 +230,6 @@ if __name__ == '__main__':
         for file in files:
             name, extension = os.path.splitext(file)
             if extension == '.java':
+                print(dirname)
                 print(name)
                 process_file("{}/{}".format(dirname, file))
