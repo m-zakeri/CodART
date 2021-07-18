@@ -21,7 +21,7 @@ from refactorings.class_refactorings.extract_Subclass import myExtractSubClassRe
 from refactorings.extract_class_migrated import myExtractClassRefactoringListener
 from refactorings.field_refactorings.DecreaseFieldVisibility import DecreaseFieldVisibilityRefactoringListener
 # from refactorings.field_refactorings.IncreaseFieldVisibility import IncreaseFieldVisibilityRefactoringListener, \
-#     PropagationIncreaseFieldVisibility_GetObjects_RefactoringListener, \
+#     PropagationIncreaseFieldVisibility, \
 #     PropagationIncreaseFieldVisibilityRefactoringListener
 from refactorings.field_refactorings.IncreaseFieldVisibility import IncreaseFieldVisibilityRefactoringListener, \
     PropagationIncreaseFieldVisibility_GetObjects_RefactoringListener, \

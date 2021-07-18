@@ -1,22 +1,13 @@
-"""
-
-"""
-__version__ = '0.1.0'
-__author__ = 'Morteza'
-
-import os
+from gen.javaLabeled.JavaLexer import JavaLexer
 
 try:
     import understand as und
-except ModuleNotFoundError:
-    # Error handling
-    pass
+except ImportError as e:
+    print(e)
 
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
-from gen.java.JavaParser import JavaParser
-from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
@@ -90,7 +81,7 @@ class IncreaseFieldVisibilityRefactoringListener(JavaParserLabeledListener):
         # field_identifier = ctx.variableDeclarators().getText().split(",")
         field_identifier = ctx.variableDeclarators().variableDeclarator(0).variableDeclaratorId().IDENTIFIER().getText()
         if self.field_name in field_identifier:
-            if grand_parent_ctx.modifier() == []:
+            if not grand_parent_ctx.modifier():
                 self.token_stream_rewriter.replaceRange(
                     from_idx=ctx.typeType().start.tokenIndex,
                     to_idx=ctx.typeType().stop.tokenIndex,
@@ -121,11 +112,9 @@ class IncreaseFieldVisibilityRefactoringListener(JavaParserLabeledListener):
             self.token_stream_rewriter.insertAfter(ctx.stop.tokenIndex, new_code)
 
 
-
-
 class PropagationIncreaseFieldVisibilityRefactoringListener(JavaParserLabeledListener):
     def __init__(self, common_token_stream: CommonTokenStream = None, using_field_name=None, object_name=None,
-                 propagated_class_name=None):
+                 propagated_class_name=None, action_to_do=None):
         """
         Used for propagation purposes in the other classes of the project: implement the propagation
 
@@ -146,6 +135,11 @@ class PropagationIncreaseFieldVisibilityRefactoringListener(JavaParserLabeledLis
         else:
             self.using_field_name = using_field_name
 
+        if action_to_do is None:
+            self.action_to_do = []
+        else:
+            self.action_to_do = action_to_do
+
         if object_name is None:
             self.object_name = []
         else:
@@ -164,48 +158,124 @@ class PropagationIncreaseFieldVisibilityRefactoringListener(JavaParserLabeledLis
         self.is_class = False
 
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
-        # print("Propagation started, please wait...")
         class_identifier = ctx.IDENTIFIER().getText()
-        if class_identifier == self.propagated_class_name:
+
+        if class_identifier in self.propagated_class_name:
             self.is_class = True
-            print("Propagation started, please wait...")
+            print("Propagation   started, please wait......")
         else:
             self.is_class = False
 
-    def enterVariableDeclarator(self, ctx: JavaParserLabeled.VariableDeclaratorContext):
-        if not self.is_class:
-            return None
-        usingfieldidentifier = ctx.variableDeclaratorId().IDENTIFIER().getText()
-        grand_child_ctx = ctx.variableInitializer().expression()
-        if usingfieldidentifier in self.using_field_name:
-            objectidentifier = grand_child_ctx.expression(0).primary().IDENTIFIER().getText()
-            if objectidentifier in self.object_name:
-                self.token_stream_rewriter.replaceRange(
-                    from_idx=grand_child_ctx.start.tokenIndex,
-                    to_idx=grand_child_ctx.stop.tokenIndex,
-                    text=grand_child_ctx.expression(0).primary().IDENTIFIER().getText() + '.' + 'get' + str.capitalize(
-                        grand_child_ctx.IDENTIFIER().getText()) + '()'
-                )
+    def is_before_equal(self, parent_ctx):
+        try:
+            if str(type(
+                    parent_ctx)) == "<class 'gen.javaLabeled.JavaParserLabeled.JavaParserLabeled.Expression21Context'>":
+                if str(type(parent_ctx.children[
+                                0])) == "<class 'gen.javaLabeled.JavaParserLabeled.JavaParserLabeled.Expression1Context'>":
+                    return True
+                return False
+        except:
+            return False
 
-    def enterExpression(self, ctx: JavaParserLabeled.ExpressionContext):
+    def getoperator(self, str):
+
+        return str[0:1]
+
+    def enterExpression1(self, ctx: JavaParserLabeled.Expression1Context):
+
         if not self.is_class:
             return
-        if ctx.expression(0) != None:
-            if ctx.expression(0).primary() != None:
-                if ctx.expression(0).primary().IDENTIFIER().getText() in self.object_name:
-                    parent_ctx = ctx.parentCtx
-                    count = parent_ctx.getChildCount()
-                    if count == 3:
-                        expressiontext = parent_ctx.children[2].getText()
+        parent_ctx = ctx.parentCtx
+
+        if self.is_before_equal(parent_ctx):
+
+            # print("going to set")
+            if self.action_to_do == "Get":
+                return None
+            # {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+
+            if isinstance(parent_ctx, JavaParserLabeled.Expression21Context):
+                # print("parent_ctx.children[1]:", str(parent_ctx.children[1]))
+                if (str(parent_ctx.children[1]) in ["+=", "-=", "*=", "/=", "&=", "|=", "^=", ">>=", ">>>=", "<<=",
+                                                    "%="]):
+                    if self.action_to_do == "Get":
+                        return None
+                    if ctx.expression() is not None:
+                        if ctx.expression().primary() is not None:
+                            if ctx.expression().primary().IDENTIFIER().getText() in self.object_name:
+                                parent_ctx = ctx.parentCtx
+                                count = parent_ctx.getChildCount()
+                                if count == 3:
+                                    expressiontext = parent_ctx.children[2].getText()
+
+                                    self.token_stream_rewriter.replaceRange(
+                                        from_idx=parent_ctx.start.tokenIndex,
+                                        to_idx=parent_ctx.stop.tokenIndex,
+                                        text=ctx.expression().primary().IDENTIFIER().getText() + '.' + 'set' + str.capitalize(
+                                            ctx.IDENTIFIER().getText()) + '(' + ctx.expression().primary().IDENTIFIER().getText() + '.get' + str.capitalize(
+                                            ctx.IDENTIFIER().getText()) + '() ' + self.getoperator(
+                                            str(parent_ctx.children[1])) + "( " + expressiontext + ') )'
+                                    )
+                                    return True
+
+            if ctx.expression() is not None:
+                if ctx.expression().primary() is not None:
+                    if ctx.expression().primary().IDENTIFIER().getText() in self.object_name:
+                        # print("ctx.expression().primary().IDENTIFIER().getText()=",ctx.expression().primary().IDENTIFIER().getText())
+                        parent_ctx = ctx.parentCtx
+                        count = parent_ctx.getChildCount()
+                        if count == 3:
+                            expressiontext = parent_ctx.children[2].getText()
+
+                            self.token_stream_rewriter.replaceRange(
+                                from_idx=parent_ctx.start.tokenIndex,
+                                to_idx=parent_ctx.stop.tokenIndex,
+                                text=ctx.expression().primary().IDENTIFIER().getText() + '.' + 'set' + str.capitalize(
+                                    ctx.IDENTIFIER().getText()) + '(' + expressiontext + ')'
+                            )
+
+        else:  # expression is after =
+            if self.action_to_do == "Set":
+                return None
+            if ctx.expression() is not None:
+                if ctx.expression().primary() is not None:
+                    if (
+                            ctx.expression().primary().IDENTIFIER().getText() in self.object_name and ctx.IDENTIFIER().getText() == self.using_field_name):
                         self.token_stream_rewriter.replaceRange(
-                            from_idx=parent_ctx.start.tokenIndex,
-                            to_idx=parent_ctx.stop.tokenIndex,
-                            text=ctx.expression(0).primary().IDENTIFIER().getText() + '.' + 'set' + str.capitalize(
-                                ctx.IDENTIFIER().getText()) + '(' + expressiontext + ')'
+                            from_idx=ctx.start.tokenIndex,
+                            to_idx=ctx.stop.tokenIndex,
+                            text=ctx.expression().primary().IDENTIFIER().getText() + '.' + 'get' + str.capitalize(
+                                ctx.IDENTIFIER().getText()) + '()'
                         )
 
+    def enterVariableDeclarator(self, ctx: JavaParserLabeled.VariableDeclaratorContext):
+        if self.action_to_do == "Set":
+            return None
+        try:
+            if not self.is_class:
+                return None
 
-class PropagationIncreaseFieldVisibility_GetObjects_RefactoringListener(JavaParserLabeledListener):
+            grand_child_ctx = ctx.variableInitializer().expression()
+            if (str(type(
+                    grand_child_ctx)) == "<class 'gen.javaLabeled.JavaParserLabeled.JavaParserLabeled.Expression1Context'>"):
+                usingfieldidentifier = grand_child_ctx.IDENTIFIER().getText()
+
+                if usingfieldidentifier == self.using_field_name:
+                    object_identifier = grand_child_ctx.expression().primary().IDENTIFIER().getText()
+
+                    if object_identifier in self.object_name:
+                        self.token_stream_rewriter.replaceRange(
+                            from_idx=grand_child_ctx.start.tokenIndex,
+                            to_idx=grand_child_ctx.stop.tokenIndex,
+                            text=grand_child_ctx.expression().primary().IDENTIFIER().getText() + '.' + 'get' + str.capitalize(
+                                grand_child_ctx.IDENTIFIER().getText()) + '()'
+                        )
+        except:
+            print("propagation of refactoring increasefiledvisibility ", self.propagated_class_name, self.object_name
+                  , self.using_field_name, " is failed")
+
+
+class PropagationIncreaseFieldVisibility(JavaParserLabeledListener):
     def __init__(self, common_token_stream: CommonTokenStream = None, source_class=None,
                  propagated_class_name=None):
         """Used for propagation purposes in the other classes of the project:
@@ -240,79 +310,76 @@ class PropagationIncreaseFieldVisibility_GetObjects_RefactoringListener(JavaPars
         self.objects = list()
 
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
-        # print("Propagation started, please wait...")
         class_identifier = ctx.IDENTIFIER().getText()
         if class_identifier in self.propagated_class_name:
             self.is_class = True
-            print("Propagation started, please wait...")
+            print("Propagation get object started, please wait...")
             self.current_class = class_identifier
         else:
             self.is_class = False
 
     def enterVariableDeclarator(self, ctx: JavaParserLabeled.VariableDeclaratorContext):
+
         if not self.is_class:
             return None
         grand_parent_ctx = ctx.parentCtx.parentCtx
-        if grand_parent_ctx.typeType().classOrInterfaceType() != None:
-            className = grand_parent_ctx.typeType().classOrInterfaceType().IDENTIFIER(0).getText()
-            if className in self.source_class:
-                objectname = ctx.variableDeclaratorId().IDENTIFIER().getText()
-                self.objects.append(objectname)
+        if grand_parent_ctx.typeType().classOrInterfaceType() is not None:
+            class_name = grand_parent_ctx.typeType().classOrInterfaceType().IDENTIFIER(0).getText()
+            if class_name in self.source_class:
+                object_name = ctx.variableDeclaratorId().IDENTIFIER().getText()
+                self.objects.append(object_name)
 
 
 def main():
     print("Increase Field Visibility")
-    udb_path = "/home/ali/Documents/compiler/Research/xerces2-j/xerces2-j3.udb"
-    class_name = "ListNode"
-    field_name = "uri"
+    udb_path = "/data/Dev/JavaSample/JavaSample.udb"
+    class_name = "Source"
+    field_name = "number3"
 
     file_list_to_be_propagate = set()
     propagate_classes = set()
+    file_list_to_be_propagate_for_setby = set()
+    propagate_classes_for_setby = set()
+    file_list_to_be_propagate_for_getby = set()
+    propagate_classes_for_getby = set()
+
     file_list_include_file_name_that_edited = ""
-    mainfile = ""
+    main_file = ""
     db = und.open(udb_path)
+
     for field in db.ents("public variable"):
-        if (str(field) == str(class_name + "." + field_name)):
-            # get path file include this field.
-            print(field)
-            if (field.parent().parent().relname() is not None):
-                mainfile = field.parent().parent().longname()
-                print(mainfile)
-                print(field.parent().parent().longname())
+
+        if str(field) == str(class_name + "." + field_name):
+            if field.parent().parent().relname() is not None:
+                main_file = field.parent().parent().longname(True)
+
             else:
                 for ref in field.refs("Definein"):
-                    mainfile = (ref.file().longname())
-                    print(mainfile)
-                    print(ref.file().relname())
-            # get propagate class and their file
-            for ref in field.refs("Setby , Useby"):
+                    main_file = (ref.file().longname())
+
+            for ref in field.refs("Setby , Modifyby"):
                 if not (str(ref.ent()) == str(field.parent())
                         or str(ref.ent().parent()) == str(field.parent())):
-                    propagate_classes.add(str(ref.ent().parent()))
-                    file_list_to_be_propagate.add(ref.file().longname())
+                    propagate_classes_for_setby.add(str(ref.ent().parent().simplename()))
+
+                    file_list_to_be_propagate_for_setby.add(ref.file().longname(True))
+            for ref in field.refs("Useby"):
+                if not (str(ref.ent()) == str(field.parent())
+                        or str(ref.ent().parent()) == str(field.parent())):
+                    propagate_classes_for_getby.add(str(ref.ent().parent().simplename()))
+
+                    file_list_to_be_propagate_for_getby.add(ref.file().longname(True))
 
     file_list_to_be_propagate = list(file_list_to_be_propagate)
     propagate_classes = list(propagate_classes)
-    flag_file_is_refatored = False
-    corpus = open(
-        r"../filename_status_database.txt", encoding="utf-8").read()
-    if corpus.find("name:" + mainfile) == -1:
-        with open("../filename_status_database.txt", mode='w', encoding="utf-8", newline='') as f:
-            f.write(corpus + "\nname:" + mainfile)
-            f.flush()
-            os.fsync(f.fileno())
-        file_list_include_file_name_that_edited += mainfile + "\n"
-    else:
-        flag_file_is_refatored = True
-        print("file already edited")
-    print(mainfile)
-    stream = FileStream(mainfile, encoding='utf8')
+
+    stream = FileStream(main_file, encoding='utf8')
     # Step 2: Create an instance of AssignmentStLexer
     lexer = JavaLexer(stream)
     # Step 3: Convert the input source into a list of tokens
     token_stream = CommonTokenStream(lexer)
     # Step 4: Create an instance of the AssignmentStParser
-    parser = JavaParser(token_stream)
+    parser = JavaParserLabeled(token_stream)
     parser.getTokenStream()
     parse_tree = parser.compilationUnit()
     my_listener = IncreaseFieldVisibilityRefactoringListener(common_token_stream=token_stream,
@@ -320,24 +387,13 @@ def main():
                                                              field_name=field_name)
     walker = ParseTreeWalker()
     walker.walk(t=parse_tree, listener=my_listener)
-
-    with open(mainfile, "w") as f:
+    print("my_listener is walked")
+    with open(main_file, mode='w', encoding="utf-8", newline='') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
 
-    print(file_list_to_be_propagate)
-    for file in file_list_to_be_propagate:
-        flag_file_edited = False
-        corpus = open(
-            r"filename_status_database.txt", encoding="utf-8").read()
-        if (corpus.find("name:" + file) == -1):
-            with open("filename_status_database.txt", mode='w', encoding="utf-8", newline='') as f:
-                f.write(corpus + "\nname:" + file)
-                f.flush()
-                os.fsync(f.fileno())
-            file_list_include_file_name_that_edited += file + "\n"
-        else:
-            flag_file_edited = True
-        print(file)
+    print("file_list_to_be_propagate:", file_list_to_be_propagate)
+
+    for file in file_list_to_be_propagate_for_getby:
         stream = FileStream(file, encoding='utf8')
         # input_stream = StdinStream()
         # Step 2: Create an instance of AssignmentStLexer
@@ -345,23 +401,54 @@ def main():
         # Step 3: Convert the input source into a list of tokens
         token_stream = CommonTokenStream(lexer)
         # Step 4: Create an instance of the AssignmentStParser
-        parser = JavaParser(token_stream)
+        parser = JavaParserLabeled(token_stream)
         parser.getTokenStream()
         parse_tree = parser.compilationUnit()
-
-        # get object
-        my_listener_get_object = PropagationIncreaseFieldVisibility_GetObjects_RefactoringListener(token_stream,
-                                                                                                   source_class=class_name,
-                                                                                                   propagated_class_name=propagate_classes)
+        my_listener_get_object = PropagationIncreaseFieldVisibility(token_stream,
+                                                                    source_class=class_name,
+                                                                    propagated_class_name=propagate_classes_for_getby)
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener_get_object)
+        print("my_listener_get_object.objects:", my_listener_get_object.objects)
 
         my_listener = PropagationIncreaseFieldVisibilityRefactoringListener(common_token_stream=token_stream,
                                                                             using_field_name=field_name,
                                                                             object_name=my_listener_get_object.objects,
-                                                                            propagated_class_name=propagate_classes)
+                                                                            propagated_class_name=propagate_classes_for_getby,
+                                                                            action_to_do="Get")
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener)
-
-        with open(file, "w") as f:
+        with open(file, mode='w', encoding="utf-8", newline='') as f:
             f.write(my_listener.token_stream_rewriter.getDefaultText())
+
+    for file in file_list_to_be_propagate_for_setby:
+        stream = FileStream(file, encoding='utf8')
+        # input_stream = StdinStream()
+        # Step 2: Create an instance of AssignmentStLexer
+        lexer = JavaLexer(stream)
+        # Step 3: Convert the input source into a list of tokens
+        token_stream = CommonTokenStream(lexer)
+        # Step 4: Create an instance of the AssignmentStParser
+        parser = JavaParserLabeled(token_stream)
+        parser.getTokenStream()
+        parse_tree = parser.compilationUnit()
+        my_listener_get_object = PropagationIncreaseFieldVisibility(token_stream,
+                                                                    source_class=class_name,
+                                                                    propagated_class_name=propagate_classes_for_setby)
+        walker = ParseTreeWalker()
+        walker.walk(t=parse_tree, listener=my_listener_get_object)
+        print("my_listener_get_object.objects:", my_listener_get_object.objects)
+
+        my_listener = PropagationIncreaseFieldVisibilityRefactoringListener(common_token_stream=token_stream,
+                                                                            using_field_name=field_name,
+                                                                            object_name=my_listener_get_object.objects,
+                                                                            propagated_class_name=propagate_classes_for_setby,
+                                                                            action_to_do="Set")
+        walker = ParseTreeWalker()
+        walker.walk(t=parse_tree, listener=my_listener)
+        with open(file, mode='w', encoding="utf-8", newline='') as f:
+            f.write(my_listener.token_stream_rewriter.getDefaultText())
+
+
+if __name__ == '__main__':
+    main()
