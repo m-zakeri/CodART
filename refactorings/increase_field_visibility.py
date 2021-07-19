@@ -363,7 +363,7 @@ def main():
     file_list_include_file_name_that_edited = ""
     main_file = ""
     db = und.open(udb_path)
-    # TODO: Check filter
+    # TODO: Check filter for public modifiers
     for field in db.ents("public variable"):
 
         if (str(field) == str(class_name + "." + field_name) and str(
