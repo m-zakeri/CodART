@@ -101,3 +101,10 @@ def main(udb_path, source_class, field_name):
     with open(main_file, mode='w', newline='') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
 
+
+if __name__ == '__main__':
+    udb_path = "/data/Dev/JavaSample/JavaSample.udb"
+    source_class = "Source"
+    field_name = "number3"
+    # initialize with understand
+    main(udb_path, source_class, field_name)
