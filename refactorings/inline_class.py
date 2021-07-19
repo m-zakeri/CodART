@@ -4,17 +4,12 @@ The scripts implements different refactoring operations
 __version__ = '0.1.0'
 __author__ = 'Morteza'
 
-import networkx as nx
-
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
-
-import visualization.graph_visualization
-
 
 class InlineClassRefactoringListener(JavaParserLabeledListener):
     """
@@ -96,8 +91,6 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
                     text=text
                 )
                 self.is_complete = True
-                print(self.target_class_data['constructors'])
-                print(final_constructors)
             else:
                 self.is_target_class = False
         elif self.is_source_class:
@@ -188,8 +181,6 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
                 stop=ctx.block().stop.tokenIndex - 1
             )
             constructor_text += '}\n'
-            # print(constructor_text)
-            # print("------")
             if self.is_source_class:
                 self.source_class_data['constructors'].append(ConstructorOrMethod(
                     name=self.target_class, parameters=[Parameter(parameterType=p.typeType().getText(),
@@ -210,11 +201,6 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
                 start=ctx.block().start.tokenIndex + 1,
                 stop=ctx.block().stop.tokenIndex - 1
                 )))
-
-                # print("aaslkdjflksdjflksd")
-                # print(self.source_class_data['constructors'])
-                # print(self.target_class_data['constructors'][-1])
-                # print("aaslkdjflks45345djflksd")
                 proper_constructor = get_proper_constructor(self.target_class_data['constructors'][-1], self.source_class_data['constructors'])
 
                 if proper_constructor == None:
@@ -235,7 +221,20 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
             method_text = ''
             for modifier in ctx.parentCtx.parentCtx.modifier():
                 method_text += modifier.getText() + ' '
-            method_text += ctx.typeTypeOrVoid().getText() + ' ' + ctx.IDENTIFIER().getText()
+
+            type_text  = ctx.typeTypeOrVoid().getText()
+
+            if (type_text == self.source_class):
+                type_text = self.target_class
+
+                if self.is_target_class:
+                    self.token_stream_rewriter.replace(
+                        program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
+                        from_idx=ctx.typeTypeOrVoid().start.tokenIndex,
+                        to_idx=ctx.typeTypeOrVoid().stop.tokenIndex,
+                        text=type_text
+                    )
+            method_text += type_text + ' ' + ctx.IDENTIFIER().getText()
             method_text += ' ( '
             for parameter in method_parameters:
                 method_text += parameter.typeType().getText() + ' '
@@ -270,15 +269,8 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
 
 
     def enterExpression1(self, ctx:JavaParserLabeled.Expression1Context):
-        if ctx.IDENTIFIER().getText() in self.field_that_has_source:
-            # print(dir(ctx.expression()))
-            # print(ctx.expression().getText())
+        if ctx.IDENTIFIER() != None and ctx.IDENTIFIER().getText() in self.field_that_has_source:
             field_text = ctx.expression().getText()
-            # self.token_stream_rewriter.replaceIndex(
-            #     index=ctx.start.tokenIndex,
-            #     text=field_text
-            # )
-
             self.token_stream_rewriter.replace(
                 program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
                 from_idx=ctx.start.tokenIndex,
@@ -292,7 +284,7 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
             self.token_stream_rewriter.delete(
                 program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
                 from_idx=ctx.start.tokenIndex,
-                to_idx=ctx.stop.tokenIndex
+                to_idx=ctx.stop.tokenIndex + 1
             )
 
 
@@ -386,7 +378,6 @@ def is_equal_constructor(first_constructor: ConstructorOrMethod, second_construc
                         second_constructor_params = [param.parameterType for param in second_constructor.parameters]
                         for param in first_constructor.parameters:
                             if param not in second_constructor_params:
-                                # if first_constructor.text == second_constructor.text:
                                 return True
     return False
 
