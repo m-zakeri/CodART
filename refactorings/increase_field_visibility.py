@@ -15,6 +15,11 @@ from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 class IncreaseFieldVisibilityRefactoringListener(JavaParserLabeledListener):
     """
     ## Introduction
+    # TODO: Change name to decrease
+    1. Private
+    2. Protected
+    3. Package (no modifier)
+    4. Public
 
     Increase the visibility of a field from private to package, package to protected or protected to public.
 
@@ -358,7 +363,7 @@ def main():
     file_list_include_file_name_that_edited = ""
     main_file = ""
     db = und.open(udb_path)
-
+    # TODO: Check filter
     for field in db.ents("public variable"):
 
         if (str(field) == str(class_name + "." + field_name) and str(
