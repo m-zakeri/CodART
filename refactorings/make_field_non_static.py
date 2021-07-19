@@ -22,7 +22,12 @@ class MakeFieldNonStaticRefactoringListener(JavaParserLabeledListener):
     Creates a new class and move fields and methods from the old class to the new one
     """
 
-    def __init__(self, common_token_stream: CommonTokenStream = None, source_class=None, field_name: str = None):
+    def __init__(self, common_token_stream: CommonTokenStream = None, source_class=None, field_name: str = None , have_Non_Parameter_cunstrutor_flag=None):
+
+        if have_Non_Parameter_cunstrutor_flag is None:
+            self.have_Non_Parameter_cunstrutor_flag=False
+        else:
+            self.have_Non_Parameter_cunstrutor_flag=have_Non_Parameter_cunstrutor_flag
 
         if field_name is None:
             self.field_name = ""
@@ -46,9 +51,21 @@ class MakeFieldNonStaticRefactoringListener(JavaParserLabeledListener):
         class_identifier = ctx.IDENTIFIER().getText()
         if class_identifier == self.source_class:
             self.is_source_class = True
+
+
+
         else:
             self.is_source_class = False
-
+    def enterClassBody(self, ctx:JavaParserLabeled.ClassBodyContext):
+        if not self.is_source_class:
+            return None
+        temtext="\n\tpublic "+self.source_class+"() {}\n"
+        if self.have_Non_Parameter_cunstrutor_flag is False:
+            self.token_stream_rewriter.replaceRange(
+                from_idx=ctx.start.tokenIndex + 1,
+                to_idx=ctx.start.tokenIndex + 1,
+                text=temtext
+            )
     def exitFieldDeclaration(self, ctx: JavaParserLabeled.FieldDeclarationContext):
         if not self.is_source_class:
             return None
@@ -96,18 +113,12 @@ class PropagationMakeFieldNonStaticRefactoringListener(JavaParserLabeledListener
     def enterClassBody(self, ctx:JavaParserLabeled.ClassBodyContext):
         if(self.is_class == True):
             text="\n"+self.mainclass+" "+self.mainclass+"obj = new "+self.mainclass+"();\n"
-            print("enterClassBodyDeclaration2")
             self.token_stream_rewriter.replaceRange(
             from_idx=ctx.start.tokenIndex+1,
             to_idx=ctx.start.tokenIndex+1,
             text=text)
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
-        # print("Propagation started,11111111111111111 please wait...")
         class_identifier = ctx.IDENTIFIER().getText()
-        # print("class_identifier:",class_identifier)
-        # print(self.propagated_class_name)
-
-        # if class_identifier == self.propagated_class_name:
         if (class_identifier in self.propagated_class_name):
             self.is_class = True
             print("Propagation started, please wait...")
@@ -116,71 +127,55 @@ class PropagationMakeFieldNonStaticRefactoringListener(JavaParserLabeledListener
     def exitClassDeclaration(self, ctx:JavaParserLabeled.ClassDeclarationContext):
         if (self.is_class == True):
             self.is_class=False
-    # def enterVariableDeclarator(self, ctx:JavaParserLabeled.VariableDeclaratorContext):
-    #     if not self.is_class:
-    #         return None
-    #     usingfieldidentifier=ctx.variableDeclaratorId().IDENTIFIER().getText()
-    #     grand_child_ctx = ctx.variableInitializer().expression()
-    #     if usingfieldidentifier in self.using_field_name:
-    #         objectidentifier = grand_child_ctx.expression(0).primary().IDENTIFIER().getText()
-    #         if objectidentifier in self.object_name:
-    #             self.token_stream_rewriter.replaceRange(
-    #                 from_idx=grand_child_ctx.start.tokenIndex,
-    #                 to_idx=grand_child_ctx.stop.tokenIndex,
-    #                 text=grand_child_ctx.expression(0).primary().IDENTIFIER().getText()+'.'
-    #                      +'get' + str.capitalize(grand_child_ctx.IDENTIFIER().getText())+'()'
-    #             )
+
 
     def enterExpression1(self, ctx:JavaParserLabeled.Expression1Context):
 
         if not self.is_class:
             return
-        print("ctx.expression()",ctx.expression())
+        # print("ctx.expression()",ctx.expression())
         if ctx.expression()!=None:
-            print("ctx.expression().primary()",ctx.expression().primary())
+            # print("ctx.expression().primary()",ctx.expression().primary())
             if ctx.expression().primary() != None:
-                print("ctx.expression().primary().IDENTIFIER().getText()",ctx.expression().primary().IDENTIFIER().getText())
-                print(ctx.DOT())
-                print(ctx.IDENTIFIER().getText())
+                # print("ctx.expression().primary().IDENTIFIER().getText()",ctx.expression().primary().IDENTIFIER().getText())
+                # print(ctx.DOT())
+                # print(ctx.IDENTIFIER().getText())
                 if ctx.expression().primary().IDENTIFIER().getText() == self.mainclass\
                         and ctx.DOT().getText()=="." and ctx.IDENTIFIER().getText()==self.using_field_name:
-                    print("111111111111111111111111111111111")
+                    # print("111111111111111111111111111111111")
                     text = self.mainclass + "obj"
-                    print("enterClassBodyDeclaration2")
+                    # print("enterClassBodyDeclaration2")
                     self.token_stream_rewriter.replaceRange(
                         from_idx=ctx.start.tokenIndex ,
                         to_idx=ctx.start.tokenIndex ,
                         text=text)
-                    # parent_ctx = ctx.parentCtx
-                    # count=parent_ctx.getChildCount()
-                    # if count==3:
-                    #     expressiontext=parent_ctx.children[2].getText()
-                    #     self.token_stream_rewriter.replaceRange(
-                    #         from_idx=parent_ctx.start.tokenIndex,
-                    #         to_idx=parent_ctx.stop.tokenIndex,
-                    #         text=ctx.expression(0).primary().IDENTIFIER().getText() +
-                    #              '.' + 'set' + str.capitalize(ctx.IDENTIFIER().getText()) +'(' +expressiontext+')'
-                    #     )
 
 
 def main(udb_path, source_class, field_name):
     print("Make Field Non Static")
     main_file = None
     db = und.open(udb_path)
+    have_Non_Parameter_cunstrutor_flag=False
     for cls in db.ents("class"):
         if cls.simplename() == source_class:
             main_file = cls.parent().longname(True)
-            print(main_file)
+            # print(main_file)
             #
-            print("counstructor {{{")
+            # print("counstructor {{{")
             for mth in cls.ents('Define', 'Java Method Constructor'):
                 print("mth=",mth)
-            print("counstructor }}}}")
+                print("parameters:", mth.parameters())
+                if(str(mth.parameters()) ==""):
+                    print("is nonnnnnnnnnnnnnnnnnnnnnnn")
+                    have_Non_Parameter_cunstrutor_flag=True
+
+            if (len(cls.ents('Define', 'Java Method Constructor')) == 0):
+                have_Non_Parameter_cunstrutor_flag = True
+            # print("counstructor }}}}")
             #
             if not os.path.isfile(main_file):
                 continue
-    # for cun in db.ents("Java Method Constructor"):
-    #     print(cun)
+
 
 
     if main_file is None:
@@ -193,7 +188,8 @@ def main(udb_path, source_class, field_name):
     parser.getTokenStream()
     parse_tree = parser.compilationUnit()
     my_listener = MakeFieldNonStaticRefactoringListener(common_token_stream=token_stream, source_class=source_class,
-                                                        field_name=field_name)
+                                                        field_name=field_name,
+                                                        have_Non_Parameter_cunstrutor_flag=have_Non_Parameter_cunstrutor_flag)
     walker = ParseTreeWalker()
     walker.walk(t=parse_tree, listener=my_listener)
 
@@ -213,18 +209,18 @@ def main(udb_path, source_class, field_name):
             for ref in fld.refs("Definein"):
                 # print(ref.ent().simplename())
                 if (ref.ent().simplename()==source_class):
-                    print(fld.refs())
+                    # print(fld.refs())
                     for ref in fld.refs("Setby , Useby"):
                         if not (str(ref.ent()) == str(fld.parent())
                                 or str(ref.ent().parent()) == str(fld.parent())):
                             propagate_classes.add(str(ref.ent().parent().simplename()))
                             # file_list_to_be_propagate.add( ref.file().relname())
                             file_list_to_be_propagate.add( ref.file().longname(True))
-                            print(propagate_classes)
-                            print(file_list_to_be_propagate)
+                            # print(propagate_classes)
+                            # print(file_list_to_be_propagate)
 
     for file in file_list_to_be_propagate:
-        print(file)
+        # print(file)
         argparser = argparse.ArgumentParser()
         argparser.add_argument('-n', '--file', help='Input source', default= file)
         args = argparser.parse_args()
@@ -239,7 +235,7 @@ def main(udb_path, source_class, field_name):
                                                                             propagated_class_name=propagate_classes,mainclass=source_class)
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener)
-        print(my_listener.token_stream_rewriter.getDefaultText())
+        # print(my_listener.token_stream_rewriter.getDefaultText())
 
         with open(main_file, mode='w', encoding="utf-8", newline='') as f:
             f.write(my_listener.token_stream_rewriter.getDefaultText())
@@ -247,7 +243,7 @@ def main(udb_path, source_class, field_name):
 
 if __name__ == '__main__':
     # udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
-    udb_path = "D:\CodART\\benchmark_projects\\myhesabdari.udb"
+    udb_path = "D:\CodART\\benchmark_projects\\testerproject.udb"
     source_class = "mainclass"
     field_name = "staticfield"
 
