@@ -16,7 +16,7 @@ public class Car{
     public void Fly(String args[]){
         return;
     }
-    public void Drive(String args, ){
+    public void Drive(String args){
         this.engine.SetName("Yamaha", "last");
     }
 }
@@ -42,11 +42,11 @@ class Engine{
     public String Name;
     private String model;
 
-    public static void main(String args[], ){
+    public static void main(String args[]){
      String text = "Hello Java";
      System.out.println(text);
     }
-    public void SetName(String X, ){
+    public void SetName(String X){
         
         this.Name = X;
     }
