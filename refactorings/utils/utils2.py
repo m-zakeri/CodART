@@ -116,7 +116,7 @@ def get_program_with_field_usage(source_files: list, field_name: str, source_cla
         token_stream = CommonTokenStream(lexer)
         parser = JavaParser(token_stream)
         tree = parser.compilationUnit()
-        listener = FieldUsageListener(filename, field_name, source_class)
+        listener = StaticFieldUsageListener(filename, field_name, source_class)
         walker = ParseTreeWalker()
         walker.walk(listener, tree)
 
