@@ -8,10 +8,6 @@ response to `Deficient Encapsulation` design smell.
 
 
 """
-
-__version__ = '0.1.0'
-__author__ = 'Morteza'
-
 import os
 
 from antlr4 import *
@@ -69,7 +65,8 @@ class EncapsulateFiledRefactoringListener(JavaParserLabeledListener):
 
     def exitFieldDeclaration(self, ctx: JavaParserLabeled.FieldDeclarationContext):
         if self.in_source_class and self.in_selected_package:
-            if ctx.variableDeclarators().variableDeclarator(0).variableDeclaratorId().getText() == self.field_identifier:
+            if ctx.variableDeclarators().variableDeclarator(
+                    0).variableDeclaratorId().getText() == self.field_identifier:
                 if not ctx.parentCtx.parentCtx.modifier(0):
                     self.token_stream_rewriter.insertBeforeIndex(
                         index=ctx.typeType().stop.tokenIndex,
@@ -216,12 +213,11 @@ class InstancePropagationEncapsulateFieldListener(JavaParserLabeledListener):
     def exitLocalVariableDeclaration(self, ctx: JavaParserLabeled.LocalVariableDeclarationContext):
         try:
             instance_class_name = ctx.variableDeclarators().variableDeclarator(0) \
-                    .variableInitializer().expression().creator() \
-                    .createdName().getText()
+                .variableInitializer().expression().creator() \
+                .createdName().getText()
 
             if (self.has_access_to_class and instance_class_name == self.source_class_name) \
                     or instance_class_name == self.package_name + '.' + self.source_class_name:
-
                 self.instances.append(ctx.variableDeclarators().variableDeclarator(0).variableDeclaratorId().getText())
         except:
             pass
@@ -277,9 +273,9 @@ def main(directory_path, package_name, source_class, field_name):
                 walker.walk(t=tree, listener=ef_listener)
 
                 ip_listener = InstancePropagationEncapsulateFieldListener(ef_listener.token_stream_rewriter,
-                                                                  package_name,
-                                                                  source_class,
-                                                                  field_name)
+                                                                          package_name,
+                                                                          source_class,
+                                                                          field_name)
                 walker.walk(t=tree, listener=ip_listener)
 
                 refactored = open(os.path.join(root, file), 'w', newline='')
