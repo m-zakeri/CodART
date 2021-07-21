@@ -105,18 +105,7 @@ public class Style {
   }
 
   private static BasicStroke parseStroke(String[] components) {
-    boolean solid = true;
-    for (int i = 0; i < components.length; i++) {
-      if ("dashed".equalsIgnoreCase(components[i])) {
-        solid = false;
-        components[i] = null;
-        break;
-      } else if ("solid".equalsIgnoreCase(components[i])) {
-        solid = true;
-        components[i] = null;
-        break;
-      }
-    }
+		components = checkResult(components);
     int width = 1;
     for (int i = 0; i < components.length; i++) {
       String s = components[i];
@@ -130,6 +119,22 @@ public class Style {
     }
     return new BasicStroke(width, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1f, new float[] { 2.5f }, 0f);
   }
+	private static void checkResult(String[] components)
+	{
+    boolean solid = true;
+    for (int i = 0; i < components.length; i++) {
+      if ("dashed".equalsIgnoreCase(components[i])) {
+        solid = false;
+        components[i] = null;
+        break;
+      } else if ("solid".equalsIgnoreCase(components[i])) {
+        solid = true;
+        components[i] = null;
+        break;
+      }
+    }
+		return components;
+	}
   /**
    * Border style. Property name is 'border' and in the value only color is supported,
    * and it should be a 6-digit hex RGB value prefixed with #

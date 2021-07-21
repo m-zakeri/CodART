@@ -7,14 +7,12 @@
 from refactorings.extract_method import extract_method
 
 def main():
+    base_dir = '/mnt/d/Sajad/Uni/Spring00/Compiler/CodART/'
     _conf = {
-        'target_package': None,
-        'target_file': "/mnt/d/Sajad/Uni/Spring00/Compiler/CodART/tests/extract_method/in/ExtractMethodTest.java",
-        'output_file': "/mnt/d/Sajad/Uni/Spring00/Compiler/CodART/tests/extract_method/out/ExtractMethodTest.java",
-        'target_class': 'ExtractMethodTest',
-        'target_method': 'printOwing',
-        'lines': [4, 5 ],
-        'new_method_name': 'printDetails',
+        'target_file': base_dir +"tests/extract_method/in/ExtractMethodTest.java",
+        'output_file': base_dir +"tests/extract_method/out/ExtractMethodTest.java",
+        'lines': [7,8 ],
+        'new_method_name': 'printAllDetails',
     }
     extract_method(_conf)
 

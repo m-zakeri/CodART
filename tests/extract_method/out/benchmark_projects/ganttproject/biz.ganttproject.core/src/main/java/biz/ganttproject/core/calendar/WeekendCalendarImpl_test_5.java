@@ -84,7 +84,8 @@ public class WeekendCalendarImpl extends GPCalendarBase implements GPCalendarCal
   }
 
   public void reset() {
-		clearMap();
+    myRecurringEvents.clear();
+    myOneOffEvents.clear();
     for (int i = 0; i < myTypes.length; i++) {
       myTypes[i] = GPCalendar.DayType.WORKING;
     }
@@ -92,11 +93,6 @@ public class WeekendCalendarImpl extends GPCalendarBase implements GPCalendarCal
     setWeekDayType(GregorianCalendar.SUNDAY, GPCalendar.DayType.WEEKEND);
     fireCalendarChanged();
   }
-	private void clearMap()
-	{
-    myRecurringEvents.clear();
-    myOneOffEvents.clear();
-	}
   
   @Override
   public List<GPCalendarActivity> getActivities(Date startDate, final Date endDate) {
@@ -295,15 +291,7 @@ public class WeekendCalendarImpl extends GPCalendarBase implements GPCalendarCal
   public void setPublicHolidays(Collection<CalendarEvent> holidays) {
     myRecurringEvents.clear();
     myOneOffEvents.clear();
-    for (CalendarEvent h : holidays) {
-      if (h.isRecurring) {
-        myCalendar.setTime(h.myDate);
-        myCalendar.set(Calendar.YEAR, 1);
-        myRecurringEvents.put(myCalendar.getTime(), h);
-      } else {
-        myOneOffEvents.put(h.myDate, h);
-      }
-    }
+		iterateOnCalender(holidays);
     fireCalendarChanged();
 //    myCalendarUrl = calendarUrl;
 //    clearPublicHolidays();
@@ -321,6 +309,18 @@ public class WeekendCalendarImpl extends GPCalendarBase implements GPCalendarCal
 //      }
 //    }
   }
+	private void iterateOnCalender(Collection<CalendarEvent> holidays)
+	{
+    for (CalendarEvent h : holidays) {
+      if (h.isRecurring) {
+        myCalendar.setTime(h.myDate);
+        myCalendar.set(Calendar.YEAR, 1);
+        myRecurringEvents.put(myCalendar.getTime(), h);
+      } else {
+        myOneOffEvents.put(h.myDate, h);
+      }
+    }
+	}
 
   @Override
   public Collection<CalendarEvent> getPublicHolidays() {
