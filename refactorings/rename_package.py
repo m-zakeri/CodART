@@ -20,7 +20,6 @@ class FindPackages(JavaParserLabeledListener):
         """
         self.token_stream = common_token_stream
 
-        self.packages = []
         # Move all the tokens in the source code in a buffer, token_stream_rewriter.
         if common_token_stream is not None:
             self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
@@ -28,9 +27,12 @@ class FindPackages(JavaParserLabeledListener):
             raise TypeError('common_token_stream is None')
 
     def enterPackageDeclaration(self, ctx: JavaParserLabeled.PackageDeclarationContext):
-        if ctx.qualifiedName().IDENTIFIER()[-1].getText() not in self.packages:
-            self.packages.append(ctx.qualifiedName().IDENTIFIER()[-1].getText())
+        if ctx.qualifiedName().IDENTIFIER()[-1].getText() not in packages:
+            packages.append(ctx.qualifiedName().IDENTIFIER()[-1].getText())
             print("package", ctx.qualifiedName().IDENTIFIER()[-1].getText(), "added to list")
+
+
+packages = []
 
 
 class RenamePackageRefactoringListener(JavaParserLabeledListener):
@@ -62,10 +64,23 @@ class RenamePackageRefactoringListener(JavaParserLabeledListener):
                     text=self.package_new_name)
                 print("package changed")
 
+    def enterImportDeclaration(self, ctx: JavaParserLabeled.ImportDeclarationContext):
+        if ctx.qualifiedName().IDENTIFIER()[-1].getText() == self.package_identifier:
+            if self.package_new_name not in self.packages_name:
+                self.token_stream_rewriter.replaceIndex(
+                    index=ctx.qualifiedName().start.tokenIndex + (2 * len(ctx.qualifiedName().IDENTIFIER()) - 2),
+                    text=self.package_new_name)
+                print("package name in import changed")
+
+
 
 def main():
-    Path = "../tests/rename_tests/"
+    Path = "../tests/rename_tests/benchmark"
+    package_identifier = "json"
+    new_package_name = "test"
+
     FolderPath = os.listdir(Path)
+    testsPath = os.listdir(Path + "/refactoredFiles/")
 
     for File in FolderPath:
         # We have all of the java files in this folder now
@@ -85,29 +100,38 @@ def main():
             Walker = ParseTreeWalker()
             Walker.walk(find_packages, Tree)
 
+    # delete last refactored files
+    for t in testsPath:
+        os.remove(os.path.join(Path + "/refactoredFiles/", t))
 
-    rename_method_test_file = FileStream(str(Path + "rename_package_test.java"))
-    print("file opened")
+    for File in FolderPath:
+        # We have all of the java files in this folder now
+        if File.endswith('.java'):
+            EachFilePath = Path + "/" + File
+            print(" ****************" + " in file : " + File + " ****************")
+            EachFile = FileStream(str(EachFilePath))
+            FileName = File.split(".")[0]
+            Refactored = open(Path + "/refactoredFiles/" + FileName + "_Refactored.java", 'w', newline='')
 
-    Refactored = open(os.path.join(Path, "rename_package_test_Refactored.java"), 'w', newline='')
+            Lexer = JavaLexer(EachFile)
 
-    Lexer = JavaLexer(rename_method_test_file)
+            TokenStream = CommonTokenStream(Lexer)
 
-    TokenStream = CommonTokenStream(Lexer)
+            Parser = JavaParserLabeled(TokenStream)
 
-    Parser = JavaParserLabeled(TokenStream)
+            Tree = Parser.compilationUnit()
 
-    Tree = Parser.compilationUnit()
+            ListenerForReRenameClass = \
+                RenamePackageRefactoringListener(TokenStream, package_identifier, new_package_name,
+                                                 packages)
 
-    ListenerForReRename = RenamePackageRefactoringListener(TokenStream, "jsoniter", "jsoniter_new",
-                                                           find_packages.packages)
+            Walker = ParseTreeWalker()
 
-    Walker = ParseTreeWalker()
+            Walker.walk(ListenerForReRenameClass, Tree)
 
-    Walker.walk(ListenerForReRename, Tree)
+            Refactored.write(ListenerForReRenameClass.token_stream_rewriter.getDefaultText())
 
-    Refactored.write(ListenerForReRename.token_stream_rewriter.getDefaultText())
-    print("tamam shod")
+    print(" %%%%%%%%%%%%%" + " all files finished " + "****************")
 
 
 if __name__ == "__main__":
