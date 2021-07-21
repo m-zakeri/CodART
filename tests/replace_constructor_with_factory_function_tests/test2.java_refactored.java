@@ -1,18 +1,21 @@
-// File Class.java
-public class Employee {
-    private Employee(String s, int r) {
-        this.s = s;
-    }
-    public static Employee Create( String s, int r){
-       return new Employee(s, r)}
-}
-
 // File AnotherClass.java
 public class AnotherClass {
     public void method() {
         Employee aClass = Employee.Create("string");
     }
 }
+
+// File Class.java
+public class Employee {
+    private Employee(String s) {
+        super( );
+        this.s = s;
+    }
+    public static Employee Create( String s){
+       return new Employee(s)}
+}
+
+
 
 
 /*

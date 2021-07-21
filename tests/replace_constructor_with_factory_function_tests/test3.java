@@ -1,21 +1,18 @@
-class Employee
-{
-  public Employee()
-  {
-    // instance initialization
-  }
-}
+public class Employee {
+  int modelYear;
+  String modelName;
 
-/*
-class Employee
-{
-  public static Employee CreateFoo()
-  {
-    return new Employee();
+  public Employee(int year, String name) {
+    modelYear = year;
+    modelName = name;
   }
-  private Employee()
-  {
-    // instance initialization
+
+  public static void main(String[] args) {
+    Main myCar = new Employee(1969, "Mustang");
+    System.out.println(myCar.modelYear + " " + myCar.modelName);
+
+    int x = 5;
+    int y = 6;
+    int sum = x + y;
   }
 }
-*/

@@ -1,17 +1,22 @@
-class Employee {
-  Employee(int type) {
-    this.type = type;
+class OuterClass {
+  int x = 10;
+
+  class Employee {
+    int y ;
+
+    Employee(){
+    y = 2+100;
+    }
+    public int myInnerMethod() {
+      return x;
+    }
   }
-  // ...
 }
 
-/*
-class Employee {
-  static Employee create(int type) {
-    employee = new Employee(type);
-    // do some heavy lifting.
-    return employee;
+public class Main {
+  public static void main(String[] args) {
+    OuterClass myOuter = new OuterClass();
+    OuterClass.Employee myInner = new Employee();
+    System.out.println(myInner.myInnerMethod());
   }
-  // ...
 }
-*/
