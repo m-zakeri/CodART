@@ -20,6 +20,7 @@ class MoveMethodRefactoring:
         self.formatter = os.path.abspath("../assets/formatter/google-java-format-1.10.0-all-deps.jar")
 
     propagation_class_changed = []  # classes that changed with the propagation
+
     def do_refactor(self):
         program = get_program(self.source_filenames)
 
@@ -35,7 +36,6 @@ class MoveMethodRefactoring:
         _targetclass = program.packages[self.target_package_name].classes[self.target_class_name]
         _method = program.packages[self.package_name].classes[self.class_name].methods[self.method_key]
 
-
         if _method.is_constructor:
             return False
 
@@ -45,7 +45,7 @@ class MoveMethodRefactoring:
         method_declaration_info = TokensInfo(_method.method_declaration_context)
         exp = []  # برای نگه داری متغیرهایی که داخل کلاس تعریف شدند و در بدنه متد استفاده شدند
         exps = tokens_info.get_token_index(tokens_info.token_stream.tokens, tokens_info.start, tokens_info.stop)
-        static_exps=[]
+        static_exps = []
         # check that method is static or not
         for modifier in _method.modifiers:
             if modifier == "static":
@@ -66,7 +66,6 @@ class MoveMethodRefactoring:
                     except:
                         continue
 
-
             # check that where this method is call
         for package_names in program.packages:
             package = program.packages[package_names]
@@ -81,12 +80,14 @@ class MoveMethodRefactoring:
                             inv_tokens_info = TokensInfo(inv)
                             if static == 0:
                                 class_token_info = TokensInfo(_class.body_context)
-                                Rewriter_.insert_after_start(class_token_info, self.target_class_name + " " + str.lower(
-                                    self.target_class_name) + "=" + "new " + self.target_class_name + "();")
-                                Rewriter_.apply()
-                            Rewriter_.insert_before_start(class_token_info,
-                                                          "import " + self.target_package_name + "." + self.target_class_name + ";")
-                            Rewriter_.replace(inv_tokens_info, self.target_class_name)
+                                Rewriter_.insert_after_start(class_token_info,
+                                                             "\n" + self.target_class_name + " " + str.lower(
+                                                                 self.target_class_name) + "=" + "new " + self.target_class_name + "();")
+                            else:
+                                class_token_info = TokensInfo(_class.modifiers_parser_contexts[0])
+                                Rewriter_.insert_before_start(class_token_info,
+                                                              "import " + self.target_package_name + "." + self.target_class_name + ";\n")
+                                Rewriter_.replace(inv_tokens_info, self.target_class_name)
                         Rewriter_.apply()
 
         class_tokens_info = TokensInfo(_targetclass.parser_context)
@@ -99,7 +100,7 @@ class MoveMethodRefactoring:
             token_stream_rewriter.insertBeforeIndex(index=index, text=str.lower(self.class_name) + str(
                 int(time.time())) + ".")
         for index in static_exps:
-            token_stream_rewriter.insertBeforeIndex(index=index, text=self.class_name+ ".")
+            token_stream_rewriter.insertBeforeIndex(index=index, text=self.class_name + ".")
 
         for inv in _method.body_method_invocations:
             if inv.getText() == self.target_class_name:
@@ -138,10 +139,10 @@ class MoveMethodRefactoring:
         Rewriter_.replace(tokens_info, "")
         Rewriter_.apply()
         self.propagate(program.packages, Rewriter_)
-        self.__reformat(_sourceclass)
-        self.__reformat(_targetclass)
-        for class_chaned in self.propagation_class_changed:
-            self.__reformat(class_chaned)
+        # self.__reformat(_sourceclass)
+        # self.__reformat(_targetclass)
+        # for class_chaned in self.propagation_class_changed:
+        #     self.__reformat(class_chaned)
         # its not efficient for big project ! :
         # for package_item in program.packages:
         #     package_item_dic = program.packages[package_item]
@@ -167,7 +168,7 @@ class MoveMethodRefactoring:
                                 if self.target_package_name != self.package_name:  # 1-import package-check to don't import self package
                                     import_parser = TokensInfo(sourceClass.modifiers_parser_contexts[0])
                                     rewriter.insert_before_start(import_parser,
-                                                                 '\nimport ' + self.target_package_name + '.' + self.target_class_name + ';')
+                                                                 '\nimport ' + self.target_package_name + '.' + self.target_class_name + ';\n')
                                 ii = method_item_dict.body_method_invocations_without_typename[
                                     i]  # create instance before where our target function usage
                                 for j in ii:
@@ -194,7 +195,7 @@ class MoveMethodRefactoring:
                             if self.target_package_name != class_item_dic.package_name:  # check to dont import self package
                                 import_parser = TokensInfo(class_item_dic.modifiers_parser_contexts[0])
                                 rewriter.insert_before_start(import_parser,
-                                                             '\nimport ' + self.target_package_name + '.' + self.target_class_name + ';')
+                                                             '\nimport ' + self.target_package_name + '.' + self.target_class_name + ';\n')
                             new_instance_name = self.target_class_name.lower() + str(
                                 int(time.time()))  # this trick will create a unique name
                             method_parser = TokensInfo(
@@ -216,7 +217,7 @@ class MoveMethodRefactoring:
                                 except:
                                     continue
                             rewriter.apply()
-                self.__reformat(class_item_dic)
+                # self.__reformat(class_item_dic)
 
     def __reformat(self, src_class: Class):
         subprocess.call(["java", "-jar", self.formatter, "--replace", src_class.filename])
