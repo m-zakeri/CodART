@@ -71,13 +71,13 @@ class PropagationListener(JavaParserLabeledListener):
     def exitClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
         self.is_safe = not self.is_safe
 
-    def exitCreatedName0(self, ctx:JavaParserLabeled.CreatedName0Context):
+    def exitCreatedName0(self, ctx: JavaParserLabeled.CreatedName0Context):
         if ctx.IDENTIFIER(0).getText() == self.source_class and self.is_safe:
             self.detected_class = True
             self.start = ctx.start
             self.stop = ctx.stop
 
-    def exitVariableDeclarator(self, ctx:JavaParserLabeled.VariableDeclaratorContext):
+    def exitVariableDeclarator(self, ctx: JavaParserLabeled.VariableDeclaratorContext):
         if self.detected_class and self.is_safe:
             self.variable = ctx.variableDeclaratorId().IDENTIFIER().getText()
             self.detected_class = False
@@ -96,7 +96,7 @@ class PropagationListener(JavaParserLabeledListener):
         if ctx.start.line == self.ref_line and self.is_safe:
             self.need_cast = True
 
-    def exitExpression21(self, ctx:JavaParserLabeled.Expression21Context):
+    def exitExpression21(self, ctx: JavaParserLabeled.Expression21Context):
         if ctx.start.line == self.ref_line and self.is_safe:
             self.need_cast = False
 
