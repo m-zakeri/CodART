@@ -13,17 +13,25 @@ from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 
 class PushDownMethodRefactoringListener(JavaParserLabeledListener):
-    def __init__(self, common_token_stream: CommonTokenStream, source_method_text: str):
-        self.common_token_stream = common_token_stream
+    def __init__(self, common_token_stream: CommonTokenStream, source_class: str, source_method_text: str):
         self.source_method_text = source_method_text
+        self.source_class = source_class
         self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
+        self.is_safe = False
+
+    def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
+        self.is_safe = ctx.IDENTIFIER().getText() == self.source_class
+
+    def exitClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
+        self.is_safe = not self.is_safe
 
     def enterClassBody(self, ctx: JavaParserLabeled.ClassBodyContext):
-        self.token_stream_rewriter.insertBefore(
-            index=ctx.stop.tokenIndex,
-            text=self.source_method_text + "\n",
-            program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME
-        )
+        if self.is_safe:
+            self.token_stream_rewriter.insertBefore(
+                index=ctx.stop.tokenIndex,
+                text=self.source_method_text + "\n",
+                program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME
+            )
 
 
 class DeleteSourceListener(JavaParserLabeledListener):
@@ -40,6 +48,69 @@ class DeleteSourceListener(JavaParserLabeledListener):
             )
 
 
+class PropagationListener(JavaParserLabeledListener):
+    def __init__(self, common_token_stream: CommonTokenStream, source_class: str, child_class: str, class_name: str,
+                 method_name: str, ref_line: int):
+        self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
+        self.source_class = source_class
+        self.child_class = child_class
+        self.class_name = class_name
+        self.method_name = method_name
+        self.ref_line = ref_line
+
+        self.start = None
+        self.stop = None
+        self.is_safe = False
+        self.need_cast = False
+        self.variable = None
+        self.detected_class = False
+
+    def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
+        self.is_safe = ctx.IDENTIFIER().getText() == self.class_name
+
+    def exitClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
+        self.is_safe = not self.is_safe
+
+    def exitCreatedName0(self, ctx:JavaParserLabeled.CreatedName0Context):
+        if ctx.IDENTIFIER(0).getText() == self.source_class and self.is_safe:
+            self.detected_class = True
+            self.start = ctx.start
+            self.stop = ctx.stop
+
+    def exitVariableDeclarator(self, ctx:JavaParserLabeled.VariableDeclaratorContext):
+        if self.detected_class and self.is_safe:
+            self.variable = ctx.variableDeclaratorId().IDENTIFIER().getText()
+            self.detected_class = False
+
+    def enterMethodCall0(self, ctx: JavaParserLabeled.MethodCall0Context):
+        if ctx.IDENTIFIER().getText() == self.method_name and self.is_safe:
+            # Change Name
+            if ctx.start.line == self.ref_line:
+                self.token_stream_rewriter.replaceRange(
+                    from_idx=self.start.tokenIndex,
+                    to_idx=self.stop.tokenIndex,
+                    text=self.child_class
+                )
+
+    def enterExpression21(self, ctx: JavaParserLabeled.Expression21Context):
+        if ctx.start.line == self.ref_line and self.is_safe:
+            self.need_cast = True
+
+    def exitExpression21(self, ctx:JavaParserLabeled.Expression21Context):
+        if ctx.start.line == self.ref_line and self.is_safe:
+            self.need_cast = False
+
+    def exitExpression1(self, ctx: JavaParserLabeled.Expression1Context):
+        if self.is_safe and self.need_cast and self.variable is not None:
+            # Type casting
+            child = ctx.getChild(0).getChild(0)
+            self.token_stream_rewriter.replaceRange(
+                from_idx=child.start.tokenIndex,
+                to_idx=child.stop.tokenIndex,
+                text=f"(({self.child_class}) {self.variable})"
+            )
+
+
 if __name__ == '__main__':
     udb_path = "/data/Dev/JavaSample/JavaSample.udb"
     source_package = "your_package"
@@ -48,13 +119,15 @@ if __name__ == '__main__':
     source_method_entity = None
     target_package = "your_package"
     target_classes = ["Tank", ]
-    passed_preconditions = True
-    # initialize with understand
+
     main_file = ""
     propagation_files = []
     propagation_classes = []
+    propagation_lines = []
     children_classes = []
     children_files = []
+
+    # initialize with understand
     db = und.open(udb_path)
     for mth in db.ents("Java Method"):
         if mth.longname() == source_package + "." + source_class + "." + source_method:
@@ -66,10 +139,10 @@ if __name__ == '__main__':
                     children_files.append(child_ref.parent().longname())
             print("mainfile : ", mth.parent().parent().longname())
             main_file = mth.parent().parent().longname()
-            print(mth)
             for ref in mth.refs("Callby"):
                 propagation_files.append(ref.ent().parent().parent().longname())
                 propagation_classes.append(ref.ent().parent().simplename())
+                propagation_lines.append(ref.line())
 
     print("propagation_files :", propagation_files)
     print("propagation_classes : ", propagation_classes)
@@ -77,6 +150,7 @@ if __name__ == '__main__':
     print("children_files :", children_files)
     print("==============================================================================")
     # Check pre-condition
+    assert len(target_classes) == 1
     for mth in db.ents("Java Method"):
         if mth.simplename() == source_method:
             if mth.parent().simplename() in target_classes:
@@ -86,9 +160,7 @@ if __name__ == '__main__':
                             raise Exception("Duplicate method")
     #  get text
     method_text = source_method_entity.contents()
-    # print(method_text)
-    # end get text
-
+    # Delete source method
     stream = FileStream(main_file, encoding='utf8')
     lexer = JavaLexer(stream)
     token_stream = CommonTokenStream(lexer)
@@ -98,11 +170,11 @@ if __name__ == '__main__':
     my_listener = DeleteSourceListener(common_token_stream=token_stream, source_method=source_method)
     walker = ParseTreeWalker()
     walker.walk(t=parse_tree, listener=my_listener)
-    print(my_listener.token_stream_rewriter.getDefaultText())
-    # with open(main_file, mode='w', newline='') as f:
-    #     f.write(my_listener.token_stream_rewriter.getDefaultText())
+    # print(my_listener.token_stream_rewriter.getDefaultText())
+    with open(main_file, mode='w', newline='') as f:
+        f.write(my_listener.token_stream_rewriter.getDefaultText())
 
-    # begin refactoring...
+    # Do the push down
     for child_file, child_class in zip(children_files, children_classes):
         stream = FileStream(child_file, encoding='utf8')
         lexer = JavaLexer(stream)
@@ -111,9 +183,27 @@ if __name__ == '__main__':
         parser.getTokenStream()
         parse_tree = parser.compilationUnit()
         my_listener = PushDownMethodRefactoringListener(common_token_stream=token_stream,
+                                                        source_class=child_class,
                                                         source_method_text=method_text)
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener)
-        print(my_listener.token_stream_rewriter.getDefaultText())
-        # with open(child_file, mode='w', newline='') as f:
-        #     f.write(my_listener.token_stream_rewriter.getDefaultText())
+        # print(my_listener.token_stream_rewriter.getDefaultText())
+        with open(child_file, mode='w', newline='') as f:
+            f.write(my_listener.token_stream_rewriter.getDefaultText())
+
+    # Propagation
+    for file, _class, line in zip(propagation_files, propagation_classes, propagation_lines):
+        stream = FileStream(file, encoding='utf8')
+        lexer = JavaLexer(stream)
+        token_stream = CommonTokenStream(lexer)
+        parser = JavaParserLabeled(token_stream)
+        parser.getTokenStream()
+        parse_tree = parser.compilationUnit()
+        my_listener = PropagationListener(common_token_stream=token_stream, source_class=source_class,
+                                          child_class=children_classes[0], class_name=_class, method_name=source_method,
+                                          ref_line=line)
+        walker = ParseTreeWalker()
+        walker.walk(t=parse_tree, listener=my_listener)
+        # print(my_listener.token_stream_rewriter.getDefaultText())
+        with open(file, mode='w', newline='') as f:
+            f.write(my_listener.token_stream_rewriter.getDefaultText())
