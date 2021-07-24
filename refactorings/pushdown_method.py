@@ -74,19 +74,34 @@ class PropagationListener(JavaParserLabeledListener):
     def exitClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
         self.is_safe = not self.is_safe
 
+    def enterPackageDeclaration(self, ctx: JavaParserLabeled.PackageDeclarationContext):
+        if self.target_package in ctx.getText():
+            self.detected_package = True
+        self.import_end = ctx.stop
+
+    def enterImportDeclaration(self, ctx: JavaParserLabeled.ImportDeclarationContext):
+        if f"{self.target_package}.{self.child_class}" in ctx.getText():
+            self.detected_package = True
+        self.import_end = ctx.stop
+
+    def exitCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
+        if not self.detected_package and self.import_end is not None:
+            self.token_stream_rewriter.insertAfterToken(
+                token=self.import_end,
+                text=f"\nimport {self.target_package}.{self.child_class};\n",
+                program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME
+            )
+
+
+class PropagationNonStaticListener(PropagationListener):
     def exitCreatedName0(self, ctx: JavaParserLabeled.CreatedName0Context):
         if ctx.IDENTIFIER(0).getText() == self.source_class and self.is_safe:
             self.detected_class = True
             self.start = ctx.start
             self.stop = ctx.stop
 
-    def exitVariableDeclarator(self, ctx: JavaParserLabeled.VariableDeclaratorContext):
-        if self.detected_class and self.is_safe:
-            self.variable = ctx.variableDeclaratorId().IDENTIFIER().getText()
-            self.detected_class = False
-
     def enterMethodCall0(self, ctx: JavaParserLabeled.MethodCall0Context):
-        if ctx.IDENTIFIER().getText() == self.method_name and self.is_safe:
+        if ctx.IDENTIFIER().getText() == self.method_name and self.is_safe and self.detected_class:
             # Change Name
             if ctx.start.line == self.ref_line:
                 self.token_stream_rewriter.replaceRange(
@@ -94,6 +109,12 @@ class PropagationListener(JavaParserLabeledListener):
                     to_idx=self.stop.tokenIndex,
                     text=self.child_class
                 )
+            self.detected_class = False
+
+    def exitVariableDeclarator(self, ctx: JavaParserLabeled.VariableDeclaratorContext):
+        if self.detected_class and self.is_safe:
+            self.variable = ctx.variableDeclaratorId().IDENTIFIER().getText()
+            self.detected_class = False
 
     def enterExpression21(self, ctx: JavaParserLabeled.Expression21Context):
         if ctx.start.line == self.ref_line and self.is_safe:
@@ -117,23 +138,34 @@ class PropagationListener(JavaParserLabeledListener):
             )
             self.need_cast = False
 
-    def enterPackageDeclaration(self, ctx: JavaParserLabeled.PackageDeclarationContext):
-        if self.target_package in ctx.getText():
-            self.detected_package = True
-        self.import_end = ctx.stop
 
-    def enterImportDeclaration(self, ctx: JavaParserLabeled.ImportDeclarationContext):
-        if f"{self.target_package}.{self.child_class}" in ctx.getText():
-            self.detected_package = True
-        self.import_end = ctx.stop
+class PropagationStaticListener(PropagationListener):
+    def __init__(self, *args, **kwargs):
+        super(PropagationStaticListener, self).__init__(*args, **kwargs)
+        self.detected_method = False
 
-    def exitCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
-        if not self.detected_package and self.import_end is not None:
-            self.token_stream_rewriter.insertAfterToken(
-                token=self.import_end,
-                text=f"\nimport {self.target_package}.{self.child_class};\n",
-                program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME
+    def enterPrimary4(self, ctx:JavaParserLabeled.Primary4Context):
+        if self.is_safe:
+            self.start = ctx.start
+            self.stop = ctx.stop
+            self.detected_class = True
+
+    def enterMethodCall0(self, ctx: JavaParserLabeled.MethodCall0Context):
+        method_name = ctx.IDENTIFIER().getText()
+        if method_name == self.method_name and self.is_safe:
+            self.detected_method = True
+
+    def exitMethodCall0(self, ctx:JavaParserLabeled.MethodCall0Context):
+        if self.detected_method and self.detected_class:
+            self.detected_class = False
+            self.detected_method = False
+            self.token_stream_rewriter.replaceRange(
+                from_idx=self.start.tokenIndex,
+                to_idx=self.stop.tokenIndex,
+                text=f"{self.child_class}"
             )
+
+
 
 
 if __name__ == '__main__':
@@ -142,6 +174,7 @@ if __name__ == '__main__':
     source_class = "Unit"
     source_method = "getFuel"
     source_method_entity = None
+    is_static = False
     target_package = "your_package"
     target_classes = ["Soldier", ]
 
@@ -163,6 +196,7 @@ if __name__ == '__main__':
                     children_classes.append(child_ref.simplename())
                     children_files.append(child_ref.parent().longname())
             print("mainfile : ", mth.parent().parent().longname())
+            is_static = mth.kind().check("static")
             main_file = mth.parent().parent().longname()
             for ref in mth.refs("Callby"):
                 propagation_files.append(ref.ent().parent().parent().longname())
@@ -226,9 +260,16 @@ if __name__ == '__main__':
         parser = JavaParserLabeled(token_stream)
         parser.getTokenStream()
         parse_tree = parser.compilationUnit()
-        my_listener = PropagationListener(common_token_stream=token_stream, source_class=source_class,
-                                          child_class=children_classes[0], class_name=_class, method_name=source_method,
-                                          ref_line=line, target_package=target_package)
+        if is_static:
+            my_listener = PropagationStaticListener(common_token_stream=token_stream, source_class=source_class,
+                                                    child_class=children_classes[0], class_name=_class,
+                                                    method_name=source_method,
+                                                    ref_line=line, target_package=target_package)
+        else:
+            my_listener = PropagationNonStaticListener(common_token_stream=token_stream, source_class=source_class,
+                                                       child_class=children_classes[0], class_name=_class,
+                                                       method_name=source_method,
+                                                       ref_line=line, target_package=target_package)
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener)
         # print(my_listener.token_stream_rewriter.getDefaultText())
