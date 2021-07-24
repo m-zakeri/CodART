@@ -50,13 +50,14 @@ class DeleteSourceListener(JavaParserLabeledListener):
 
 class PropagationListener(JavaParserLabeledListener):
     def __init__(self, common_token_stream: CommonTokenStream, source_class: str, child_class: str, class_name: str,
-                 method_name: str, ref_line: int):
+                 method_name: str, ref_line: int, target_package: str):
         self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
         self.source_class = source_class
         self.child_class = child_class
         self.class_name = class_name
         self.method_name = method_name
         self.ref_line = ref_line
+        self.target_package = target_package
 
         self.start = None
         self.stop = None
@@ -64,6 +65,8 @@ class PropagationListener(JavaParserLabeledListener):
         self.need_cast = False
         self.variable = None
         self.detected_class = False
+        self.detected_package = False
+        self.import_end = None
 
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
         self.is_safe = ctx.IDENTIFIER().getText() == self.class_name
@@ -100,6 +103,9 @@ class PropagationListener(JavaParserLabeledListener):
         if ctx.start.line == self.ref_line and self.is_safe:
             self.need_cast = False
 
+    def enterExpression1(self, ctx: JavaParserLabeled.Expression1Context):
+        self.enterExpression21(ctx)
+
     def exitExpression1(self, ctx: JavaParserLabeled.Expression1Context):
         if self.is_safe and self.need_cast and self.variable is not None:
             # Type casting
@@ -108,6 +114,25 @@ class PropagationListener(JavaParserLabeledListener):
                 from_idx=child.start.tokenIndex,
                 to_idx=child.stop.tokenIndex,
                 text=f"(({self.child_class}) {self.variable})"
+            )
+            self.need_cast = False
+
+    def enterPackageDeclaration(self, ctx: JavaParserLabeled.PackageDeclarationContext):
+        if self.target_package in ctx.getText():
+            self.detected_package = True
+        self.import_end = ctx.stop
+
+    def enterImportDeclaration(self, ctx: JavaParserLabeled.ImportDeclarationContext):
+        if f"{self.target_package}.{self.child_class}" in ctx.getText():
+            self.detected_package = True
+        self.import_end = ctx.stop
+
+    def exitCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
+        if not self.detected_package and self.import_end is not None:
+            self.token_stream_rewriter.insertAfterToken(
+                token=self.import_end,
+                text=f"\nimport {self.target_package}.{self.child_class};\n",
+                program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME
             )
 
 
@@ -201,7 +226,7 @@ if __name__ == '__main__':
         parse_tree = parser.compilationUnit()
         my_listener = PropagationListener(common_token_stream=token_stream, source_class=source_class,
                                           child_class=children_classes[0], class_name=_class, method_name=source_method,
-                                          ref_line=line)
+                                          ref_line=line, target_package=target_package)
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener)
         # print(my_listener.token_stream_rewriter.getDefaultText())
