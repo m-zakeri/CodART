@@ -143,7 +143,7 @@ if __name__ == '__main__':
     source_method = "getFuel"
     source_method_entity = None
     target_package = "your_package"
-    target_classes = ["Tank", ]
+    target_classes = ["Soldier", ]
 
     main_file = ""
     propagation_files = []
@@ -176,6 +176,8 @@ if __name__ == '__main__':
     print("==============================================================================")
     # Check pre-condition
     assert len(target_classes) == 1
+    assert len(children_classes) == 1
+    assert len(children_files) == 1
     for mth in db.ents("Java Method"):
         if mth.simplename() == source_method:
             if mth.parent().simplename() in target_classes:
