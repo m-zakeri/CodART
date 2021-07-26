@@ -352,13 +352,14 @@ class ExtractClassAPI:
                 f.write(my_listener.token_stream_rewriter.getDefaultText())
             self.reformat(file_path)
 
-    def reformat(self, file_path: str):
+    @staticmethod
+    def reformat(file_path: str):
         formatter = os.path.abspath("../assets/formatter/google-java-format-1.10.0-all-deps.jar")
         subprocess.call(["java", "-jar", formatter, "--replace", file_path])
 
     def do_refactor(self):
         self.check_dependency_graph()
-        if (self.checked):
+        if self.checked:
             listener = ExtractClassRefactoringListener(
                 common_token_stream=self.token_stream,
                 new_class=self.new_class,
@@ -416,7 +417,7 @@ def get_java_files(directory):
     for root, dirs, files in os.walk(directory):
         for file in files:
             if file.split('.')[-1] == 'java':
-                yield (os.path.join(root, file), file)
+                yield os.path.join(root, file), file
 
 
 if __name__ == "__main__":
