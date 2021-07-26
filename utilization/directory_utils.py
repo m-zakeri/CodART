@@ -39,7 +39,7 @@ def create_understand_database(project_dir, und_path='/home/ali/scitools/bin/lin
     return db_path
 
 
-def update_understand_database(udb_path, project_dir=None, und_path='/home/ali/scitools/bin/linux64/'):
+def update_understand_database(udb_path, project_dir=None, und_path='/data/Dev/scitools/bin/linux64'):
     """
     This function updates database due to file changes.
     :param project_dir: If understand database file is not in project directory you can specify the project directory.
@@ -53,7 +53,8 @@ def update_understand_database(udb_path, project_dir=None, und_path='/home/ali/s
         project_dir = os.path.dirname(os.path.normpath(udb_path))
 
     process = subprocess.Popen(
-        ['und', 'analyze', '-all', udb_path],
+        ['./und', 'analyze', '-all', udb_path],
         cwd=und_path
     )
     process.wait()
+    print("Finished updating...")
