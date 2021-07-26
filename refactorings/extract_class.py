@@ -2,6 +2,12 @@ __version__ = '0.2.0'
 __author__ = 'Seyyed Ali Ayati'
 
 import os
+import subprocess
+
+try:
+    import understand as und
+except ImportError as e:
+    print(e)
 
 import networkx as nx
 from antlr4 import *
@@ -164,7 +170,7 @@ class ExtractClassRefactoringListener(JavaParserLabeledListener):
         else:
             self.is_source_class = False
 
-    def enterClassBody(self, ctx:JavaParserLabeled.ClassBodyContext):
+    def enterClassBody(self, ctx: JavaParserLabeled.ClassBodyContext):
         if self.is_source_class:
             self.token_stream_rewriter.insertAfterToken(
                 token=ctx.start,
@@ -275,6 +281,25 @@ class ExtractClassRefactoringListener(JavaParserLabeledListener):
                     )
 
 
+class PropagateFieldUsageListener(JavaParserLabeledListener):
+    def __init__(self, common_token_stream: CommonTokenStream, object_name: str, field_name: str, class_name: str,
+                 line_number: int):
+        self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
+        self.field_name = field_name
+        self.class_name = class_name
+        self.line_number = line_number
+        self.object_name = object_name
+
+    def enterExpression1(self, ctx: JavaParserLabeled.Expression1Context):
+        identifier = ctx.IDENTIFIER()
+        if ctx.start.line == self.line_number and identifier is not None:
+            if identifier.getText() == self.field_name:
+                self.token_stream_rewriter.replaceSingleToken(
+                    token=ctx.expression().primary().start,
+                    text=f"{ctx.expression().primary().getText()}.{self.object_name}"
+                )
+
+
 class ExtractClassAPI:
     def __init__(self, project_dir, file_path, source_class, new_class, moved_fields, moved_methods,
                  new_file_path=None):
@@ -293,6 +318,7 @@ class ExtractClassAPI:
         self.walker = ParseTreeWalker()
         self.checked = False
         self.TAB = "\t"
+        self.object_name = ""
 
     def check_dependency_graph(self):
         listener = DependencyPreConditionListener(
@@ -309,6 +335,27 @@ class ExtractClassAPI:
         if (len(listener.connected_components) == 0):
             self.checked = True
 
+    def propagate_fields(self, usages):
+        for usage in usages:
+            file_path = usage.pop('file_path')
+            stream = FileStream(file_path, encoding='utf8')
+            lexer = JavaLexer(stream)
+            token_stream = CommonTokenStream(lexer)
+            parser = JavaParserLabeled(token_stream)
+            parse_tree = parser.compilationUnit()
+            my_listener = PropagateFieldUsageListener(common_token_stream=token_stream, object_name=self.object_name,
+                                                      **usage)
+            walker = ParseTreeWalker()
+            walker.walk(t=parse_tree, listener=my_listener)
+
+            with open(file_path, 'w') as f:
+                f.write(my_listener.token_stream_rewriter.getDefaultText())
+            self.reformat(file_path)
+
+    def reformat(self, file_path: str):
+        formatter = os.path.abspath("../assets/formatter/google-java-format-1.10.0-all-deps.jar")
+        subprocess.call(["java", "-jar", formatter, "--replace", file_path])
+
     def do_refactor(self):
         self.check_dependency_graph()
         if (self.checked):
@@ -324,15 +371,41 @@ class ExtractClassAPI:
                 t=self.tree
             )
 
-            print(listener.token_stream_rewriter.getDefaultText())
-            print("=" * 25)
-            print(listener.code)
+            # Find Field and Method Usages
+            field_usages = []
+            method_usages = []
+
+            udb_path = "/data/Dev/JavaSample/JavaSample.udb"
+            db = und.open(udb_path)
+            for field in self.moved_fields:
+                for ent in db.lookup(f"{self.source_class}.{field}"):
+                    # print(ent.name(), "  [", ent.kindname(), "]", sep="", end="\n")
+                    for ref in ent.refs("Useby"):
+                        if self.source_class not in ref.ent().name():
+                            ref_ent = ref.ent()
+                            field_usages.append({
+                                'field_name': field,
+                                'class_name': ref_ent.simplename(),
+                                'file_path': ref.file().longname(),
+                                'line_number': ref.line()
+                            })
+
+            # print(listener.token_stream_rewriter.getDefaultText())
+            # print("=" * 25)
+            # print(listener.code)
+            self.object_name = listener.object_name
+
             # Write Changes
-            # with open(self.file_path, 'w') as f:
-            #     f.write(listener.token_stream_rewriter.getDefaultText())
-            #
-            # with open(self.new_file_path, 'w') as f:
-            #     f.write(listener.code)
+            with open(self.file_path, 'w') as f:
+                f.write(listener.token_stream_rewriter.getDefaultText())
+            self.reformat(self.file_path)
+
+            with open(self.new_file_path, 'w') as f:
+                f.write(listener.code)
+            self.reformat(self.new_file_path)
+
+            # Propagate
+            self.propagate_fields(field_usages)
         else:
             print("Can not refactor!")
 
