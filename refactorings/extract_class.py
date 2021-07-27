@@ -116,12 +116,13 @@ class DependencyPreConditionListener(JavaParserLabeledListener):
             x = 0
 
 
-class MethodFieldMapListener(JavaParserLabeledListener):
-    def __init__(self, moved_fields: []):
+class MethodMapListener(JavaParserLabeledListener):
+    def __init__(self, moved_fields: list, moved_methods: list):
         self.detected_usage = False
         self.detected_method = None
         self.map = {}
         self.moved_fields = moved_fields
+        self.moved_methods = moved_methods
 
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
         self.detected_method = ctx.IDENTIFIER().getText()
@@ -135,10 +136,14 @@ class MethodFieldMapListener(JavaParserLabeledListener):
             self.detected_usage = True
 
     def exitExpression1(self, ctx: JavaParserLabeled.Expression1Context):
-        if ctx.IDENTIFIER():
-            if self.detected_method and self.detected_usage:
+        if self.detected_method and self.detected_usage:
+            if ctx.IDENTIFIER():
                 if ctx.IDENTIFIER().getText() not in self.moved_fields:
                     self.map[self.detected_method].add(ctx.IDENTIFIER().getText())
+                self.detected_usage = False
+            elif ctx.methodCall():
+                if ctx.methodCall().IDENTIFIER().getText() not in self.moved_methods:
+                    self.map[self.detected_method].add(ctx.methodCall().IDENTIFIER().getText())
                 self.detected_usage = False
 
 
@@ -405,7 +410,7 @@ class ExtractClassAPI:
             self.checked = True
 
     def get_source_class_map(self):
-        listener = MethodFieldMapListener(moved_fields=self.moved_fields)
+        listener = MethodMapListener(moved_fields=self.moved_fields, moved_methods=self.moved_methods)
         self.walker.walk(
             listener=listener,
             t=self.tree
@@ -515,10 +520,6 @@ def get_java_files(directory):
 
 
 if __name__ == "__main__":
-    # TODO: Pass this to used unmoved fields and methods
-    # TODO: in (new modules):
-    # TODO: Check and fix extract subclass (1. Has children, 2. Has no children)
-    # TODO: Check and fix move method
     ExtractClassAPI(
         project_dir="/data/Dev/JavaSample/",
         file_path="/data/Dev/JavaSample/src/GodClass.java",
