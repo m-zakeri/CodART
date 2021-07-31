@@ -19,9 +19,10 @@ No specific Post Condition
 """
 
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
-from refactorings.utils.utils_listener_fast import TokensInfo, SingleFileElement
+
 from refactorings.pullup_constructor_get_cons import get_cons
 from refactorings.utils.utils2 import Rewriter, get_program, get_filenames_in_dir
+from refactorings.utils.utils_listener_fast import TokensInfo, SingleFileElement
 
 
 class PullUpConstructorRefactoring:
@@ -68,6 +69,7 @@ class PullUpConstructorRefactoring:
             return False
         param_dict = {}
         len_params = {}
+        _methodds = ""
 
         Rewriter_ = Rewriter(program, self.filename_mapping)
         for remove in removemethod:
@@ -107,11 +109,10 @@ class PullUpConstructorRefactoring:
         parent_cons = []
         for method in _targetclass.methods:
             meth = _targetclass.methods[method]
-            if meth.is_constructor:
+            if meth.is_constructor and _methodds == method:
                 parent_cons = meth
                 has_cons = True
                 break
-
         if has_cons:
             for class_body_decl in _targetclass.parser_context.classBody().getChildren():
                 if class_body_decl.getText() in ['{', '}']:
@@ -134,7 +135,7 @@ class PullUpConstructorRefactoring:
                             program_name=token_stream_rewriter.DEFAULT_PROGRAM_NAME,
                             start=tokens_info.start,
                             stop=tokens_info.stop)
-                        strofmethod = strofmethod.replace(_method_name1.class_name, target_class_name)\
+                        strofmethod = strofmethod.replace(_method_name1.class_name, target_class_name) \
                             .replace("{", "").replace("}", "")
                         a1 = parent_cons.body_text.replace("{", "").replace("}", "")
                         a2 = _method_name1.body_text.replace("}", "").replace("{", "")
@@ -164,8 +165,8 @@ class PullUpConstructorRefactoring:
 
 
 if __name__ == "__main__":
-    mylist = get_filenames_in_dir('/data/Dev/JavaSample/')
-    if PullUpConstructorRefactoring(mylist, "", "Manager").do_refactor():
+    my_list = get_filenames_in_dir('/data/Dev/JavaSample/')
+    if PullUpConstructorRefactoring(my_list, "", "Manager").do_refactor():
         print("Success!")
     else:
         print("Cannot refactor.")
