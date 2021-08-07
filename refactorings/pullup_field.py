@@ -192,6 +192,8 @@ def test_ant():
     ]
     """
     ant_dir = "/home/ali/Desktop/code/TestProject/"
+
+
 def main(project_dir: str, package_name: str, children_class: str, field_name: str):
     print("Pullup Field")
     print("Success!" if PullUpFieldRefactoring(
@@ -204,4 +206,9 @@ def main(project_dir: str, package_name: str, children_class: str, field_name: s
 
 
 if __name__ == "__main__":
-    test()
+    main(
+        project_dir="/data/Dev/JavaSample/",
+        package_name="your_package",
+        children_class="Soldier",
+        field_name="has_baby"
+    )

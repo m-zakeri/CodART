@@ -12,8 +12,6 @@ from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 
-
-
 class PushDownGetTextFieldListener(JavaParserLabeledListener):
     def __init__(self, common_token_stream: CommonTokenStream, father: str = None, field=None):
         if common_token_stream is None:
@@ -33,6 +31,7 @@ class PushDownGetTextFieldListener(JavaParserLabeledListener):
         self.field_text = ""
 
     def enterFieldDeclaration(self, ctx: JavaParserLabeled.FieldDeclarationContext):
+        print("enterFieldDeclaration", "PushDownGetTextFieldListener")
         ctx1 = ctx.parentCtx.parentCtx.parentCtx.parentCtx
         class_identifier = ctx1.IDENTIFIER().getText()
         if class_identifier in self.father:
@@ -102,7 +101,6 @@ class PushDownFieldRefactoringListener(JavaParserLabeledListener):
             # field_identifier = ctx.variableDeclarators().getText().split(",")
             field_identifier = ctx.variableDeclarators().variableDeclarator(
                 0).variableDeclaratorId().IDENTIFIER().getText()
-            print(field_identifier)
             if self.moved_fields[0] in field_identifier:
                 ctx1 = ctx.parentCtx.parentCtx
                 start_index = ctx1.start.tokenIndex
@@ -117,100 +115,16 @@ class PushDownFieldRefactoringListener(JavaParserLabeledListener):
                     to_idx=ctx1.stop.tokenIndex
                 )
 
-            print(self.field_text)
-
-    def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
-        class_identifier = ctx.IDENTIFIER().getText()
-        if class_identifier == self.source_class:
-            self.is_source_class = True
-
-        elif class_identifier == "B":
-            print("enter B class")
-
-            self.is_source_class = False
-
     def enterClassBody(self, ctx: JavaParserLabeled.ClassBodyContext):
         ctx1 = ctx.parentCtx
         class_identifier = ctx1.IDENTIFIER().getText()
         if class_identifier in self.children_class:
+            print("Here")
             self.token_stream_rewriter.replaceRange(
                 from_idx=ctx.start.tokenIndex + 1,
                 to_idx=ctx.start.tokenIndex + 1,
                 text="\n" + self.fieldtext + "\n"
             )
-
-    def exitClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
-        if self.is_source_class:
-            # self.code += "}"
-            self.is_source_class = False
-
-    def exitCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
-
-        self.token_stream_rewriter.insertAfter(
-            index=ctx.stop.tokenIndex,
-            text=self.code
-        )
-
-    def enterVariableDeclaratorId(self, ctx: JavaParserLabeled.VariableDeclaratorIdContext):
-        if not self.is_source_class:
-            return None
-        field_identifier = ctx.IDENTIFIER().getText()
-        if field_identifier in self.moved_fields:
-            self.detected_field = field_identifier
-
-    # def exitFieldDeclaration(self, ctx:JavaParserLabeled.FieldDeclarationContext):
-    #     if not self.is_source_class:
-    #         return None
-    #     field_names = ctx.variableDeclarators().getText().split(",")
-    #     print("Here")
-    #     grand_parent_ctx = ctx.parentCtx.parentCtx
-    #     if self.detected_field in field_names:
-    #         modifier = grand_parent_ctx.modifier(0).getText()
-    #         field_type = ctx.typeType().getText()
-    #         self.code += f"{self.TAB}{modifier} {field_type} {self.detected_field};{self.NEW_LINE}"
-    #         # delete field from source class
-    #         field_names.remove(self.detected_field)
-    #         if field_names:
-    #             self.token_stream_rewriter.replaceRange(
-    #                 from_idx=grand_parent_ctx.start.tokenIndex,
-    #                 to_idx=grand_parent_ctx.stop.tokenIndex,
-    #                 text=f"{modifier} {field_type} {','.join(field_names)};"
-    #             )
-    #         else:
-    #             self.token_stream_rewriter.delete(
-    #                 program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-    #                 from_idx=grand_parent_ctx.start.tokenIndex,
-    #                 to_idx=grand_parent_ctx.stop.tokenIndex
-    #             )
-    #         self.detected_field = None
-
-    # def enterMethodDeclaration(self, ctx:JavaParserLabeled.MethodDeclarationContext):
-    #     if not self.is_source_class:
-    #         return None
-    #     method_identifier = ctx.IDENTIFIER().getText()
-    #     if method_identifier in self.moved_methods:
-    #         self.detected_method = method_identifier
-
-    # def exitMethodDeclaration(self, ctx:JavaParserLabeled.MethodDeclarationContext):
-    #     if not self.is_source_class:
-    #         return None
-    #     method_identifier = ctx.IDENTIFIER().getText()
-    #     if self.detected_method == method_identifier:
-    #         start_index = ctx.start.tokenIndex
-    #         stop_index = ctx.stop.tokenIndex
-    #         method_text = self.token_stream_rewriter.getText(
-    #             program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-    #             start=start_index,
-    #             stop=stop_index
-    #         )
-    #         self.code += (self.NEW_LINE + self.TAB + method_text + self.NEW_LINE)
-    #         # delete method from source class
-    #         self.token_stream_rewriter.delete(
-    #             program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-    #             from_idx=start_index,
-    #             to_idx=stop_index
-    #         )
-    #         self.detected_method = None
 
 
 class PropagationPushDownFieldRefactoringListener(JavaParserLabeledListener):
@@ -277,9 +191,9 @@ class PropagationPushDownFieldRefactoringListener(JavaParserLabeledListener):
 
 
 if __name__ == '__main__':
-    udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
-    source_class = "App"
-    moved_fields = ["push_down_field", ]
+    udb_path = "/data/Dev/JavaSample/JavaSample.udb"
+    source_class = "Unit"
+    moved_fields = ["fuel", ]
     # initialize with understand
     fileslist_to_be_propagate = set()
     propagation_classes = set()
@@ -301,7 +215,7 @@ if __name__ == '__main__':
     for classname in db.ents("class"):
         if classname.simplename() == source_class:
             for childcls in classname.refs("Extendby"):
-                children_class.add(childcls.ent().longname())
+                children_class.add(childcls.ent().simplename())
                 fileslist_to_be_rafeactored.add(childcls.ent().parent().longname())
 
     fileslist_to_be_propagate = list(fileslist_to_be_propagate)
@@ -319,7 +233,6 @@ if __name__ == '__main__':
     lexer = JavaLexer(stream)
     token_stream = CommonTokenStream(lexer)
     parser = JavaParserLabeled(token_stream)
-    parser.getTokenStream()
     parse_tree = parser.compilationUnit()
     get_text = PushDownGetTextFieldListener(common_token_stream=token_stream, father=source_class,
                                             field=moved_fields[0])
@@ -327,18 +240,20 @@ if __name__ == '__main__':
     walker.walk(t=parse_tree, listener=get_text)
 
     field_text = get_text.field_text
-    print(field_text)
+    print("field text -->", field_text)
     # begin refactoring
     for file in fileslist_to_be_rafeactored:
+        print(file)
         stream = FileStream(file, encoding='utf8')
         lexer = JavaLexer(stream)
         token_stream = CommonTokenStream(lexer)
         parser = JavaParserLabeled(token_stream)
-        parser.getTokenStream()
         parse_tree = parser.compilationUnit()
+        print(parse_tree)
         my_listener = PushDownFieldRefactoringListener(common_token_stream=token_stream, source_class=source_class,
                                                        children_class=children_class, moved_fields=moved_fields,
                                                        fieldtext=field_text)
+
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener)
 
