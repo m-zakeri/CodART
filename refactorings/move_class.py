@@ -417,12 +417,12 @@ class ReplaceDependentObjectsListener(JavaParserLabeledListener):
     # Exit a parse tree produced by JavaParserLabeled#typeDeclaration.
     def exitTypeDeclaration(self, ctx: JavaParserLabeled.TypeDeclarationContext):
         if ctx.classDeclaration() is not None:
-            if not self.has_import or self.need_import:
+            if not self.has_import and self.need_import:
                 index = ctx.start.tokenIndex
 
                 # return if the file has already imported the package
-                if (self.source_package + '.' + self.class_identifier not in self.exact_imports) \
-                        or (self.target_package + '.' + self.class_identifier in self.exact_imports):
+                print(self.exact_imports)
+                if self.target_package + '.' + self.class_identifier in self.exact_imports:
                     return
 
                 # delete class declaration from source class
@@ -433,11 +433,12 @@ class ReplaceDependentObjectsListener(JavaParserLabeledListener):
                 )
 
 
-filename = 'MoveClass.java'
-class_identifier = 'MoveClass'
-source_package = 'source_package'
-target_package = 'target_package'
-directory = '/home/ali/Desktop/JavaTestProject/src/'
+
+filename = 'Source.java'
+class_identifier = 'Source'
+source_package = 'my_package'
+target_package = 'your_package'
+directory = '/data/Dev/JavaSample/src/'
 file_counter = 0
 
 

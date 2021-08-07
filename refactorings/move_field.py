@@ -325,7 +325,7 @@ class FieldUsageListener(UtilsListener):
         index = ctx.DOT().symbol.tokenIndex
         self.rewriter.replaceRange(ctx.start.tokenIndex, index - 1, target_name)
 
-    def save(self, overwrite: bool, filename_mapping=lambda x: x + ".rewritten.java"):
+    def save(self, overwrite: bool, filename_mapping=lambda x: x):
         """
         :param overwrite: Whether it should overwrite an existing file
         :param filename_mapping: How to generate the new file's name
@@ -387,7 +387,7 @@ class MethodUsageListener(UtilsListener):
         super().exitClassBody(ctx)
         # self.save(self.rewriter, self.filename)
 
-    def save(self, overwrite: bool, filename_mapping=lambda x: x + ".rewritten.java"):
+    def save(self, overwrite: bool, filename_mapping=lambda x: x):
         """
         :param overwrite: Whether it should overwrite an existing file
         :param filename_mapping: How to generate the new file's name
@@ -534,7 +534,7 @@ class MoveField:
                  target_class: str,
                  project_dir: Union[str, Path],
                  overwrite: bool = False,
-                 filename_map: Callable = lambda x: x + ".rewritten.java"
+                 filename_map: Callable = lambda x: x
                  ) -> None:
 
         self.src_package = src_package
@@ -744,11 +744,11 @@ class MoveField:
 if __name__ == "__main__":
     move_field = MoveField(
         src_class="Source",
-        src_package="source",
+        src_package="my_package",
         target_class="Target",
-        target_package="target",
-        field_name="a",
-        project_dir="/home/loop/IdeaProjects/move-field"
+        target_package="my_package",
+        field_name="number2",
+        project_dir="/data/Dev/JavaSample/"
     )
 
     move_field.refactor()
