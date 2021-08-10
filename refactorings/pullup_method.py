@@ -101,7 +101,7 @@ class PullUpMethodRefactoring:
                     for inv in __method.body_method_invocations:
                         invc = __method.body_method_invocations[inv]
                         method_name = self.method_key[:self.method_key.find('(')]
-                        if invc[0] == method_name & package_names == self.package_name:
+                        if invc[0] == method_name and package_names == self.package_name:
                             inv_tokens_info = TokensInfo(inv)
                             if static == 0:
                                 class_token_info = TokensInfo(_class.body_context)
@@ -114,9 +114,9 @@ class PullUpMethodRefactoring:
 
 
 if __name__ == "__main__":
-    mylist = get_filenames_in_dir('/home/ali/Desktop/code/TestProject/src/')
+    mylist = get_filenames_in_dir('/data/Dev/JavaSample/')
     print("Testing pullup_method...")
-    if PullUpMethodRefactoring(mylist, "test_package", "AppChild1", "methodToPullUp()").do_refactor():
+    if PullUpMethodRefactoring(mylist, "your_package", "Tank", "getHealth()").do_refactor():
         print("Success!")
     else:
         print("Cannot refactor.")
