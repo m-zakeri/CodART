@@ -214,13 +214,13 @@ def test_ant():
         "tests/apache-ant/main/org/apache/tools/ant/types/ZipFileSet.java"
     ]
     """
-    ant_dir = "/home/ali/Desktop/code/TestProject/"
+    ant_dir = "/data/Dev/JavaSample/"
     print("Success!" if PushDownField(
         utils2.get_filenames_in_dir(ant_dir),
-        "test_package",
-        "App",
-        "push_down",
-        [],
+        "your_package",
+        "Unit",
+        "fuel",
+        ["Tank"],
         # lambda x: "tests/pushdown_field_ant/" + x[len(ant_dir):]
     ).do_refactor() else "Cannot refactor.")
 
