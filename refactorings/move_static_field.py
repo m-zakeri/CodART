@@ -254,7 +254,7 @@ if __name__ == '__main__':
 
     filtered = clean_up_dir(my_list)
 
-    refactoring = MoveFieldRefactoring(filtered, 'my_package', 'Source', 'number', 'Target', 'my_package')
+    refactoring = MoveFieldRefactoring(filtered, 'my_package', 'Source', 'number2', 'Target', 'my_package')
 
     result = refactoring.move()
     print(result)
