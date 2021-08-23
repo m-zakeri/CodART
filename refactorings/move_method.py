@@ -1,234 +1,204 @@
+"""
+Seyyed Ali Ayati
+"""
+
+from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
-from refactorings.utils.utils2 import get_program, Rewriter, get_filenames_in_dir
-from refactorings.utils.utils_listener_fast import TokensInfo, SingleFileElement, Class
-import subprocess
-import os
-import time
+
+from gen.javaLabeled.JavaLexer import JavaLexer
+from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
+from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
+from refactorings.move_field import CheckCycleListener
+
+try:
+    import understand as und
+except ImportError as e:
+    print(e)
 
 
-class MoveMethodRefactoring:
-    def __init__(self, source_filenames: list, package_name: str, class_name: str, method_key: str,
-                 target_class_name: str, target_package_name: str,
-                 filename_mapping=lambda x: x + ".rewritten.java"):
-        self.source_filenames = source_filenames
-        self.package_name = package_name
+class CutMethodListener(JavaParserLabeledListener):
+    def __init__(self, class_name: str, method_name: str, rewriter: TokenStreamRewriter):
         self.class_name = class_name
-        self.method_key = method_key
-        self.target_class_name = target_class_name
-        self.target_package_name = target_package_name
-        self.filename_mapping = filename_mapping
-        self.formatter = os.path.abspath("../assets/formatter/google-java-format-1.10.0-all-deps.jar")
+        self.method_name = method_name
+        self.rewriter = rewriter
+        self.instance_name = class_name.lower() + "ByCodArt"
+        self.is_member = False
+        self.do_delete = False
+        self.method_text = ""
 
-    propagation_class_changed = []  # classes that changed with the propagation
+    def enterMemberDeclaration0(self, ctx: JavaParserLabeled.MemberDeclaration0Context):
+        self.is_member = True
 
-    def do_refactor(self):
-        program = get_program(self.source_filenames)
+    def exitMemberDeclaration0(self, ctx: JavaParserLabeled.MemberDeclaration0Context):
+        self.is_member = False
 
-        static = 0
-        if self.class_name not in program.packages[self.package_name].classes:
-            return False
-        if self.target_class_name not in program.packages[self.target_package_name].classes:
-            return False
-        if self.method_key not in program.packages[self.package_name].classes[self.class_name].methods:
-            return False
+    def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
+        if self.is_member and ctx.IDENTIFIER().getText() == self.method_name:
+            self.do_delete = True
 
-        _sourceclass = program.packages[self.package_name].classes[self.class_name]
-        _targetclass = program.packages[self.target_package_name].classes[self.target_class_name]
-        _method = program.packages[self.package_name].classes[self.class_name].methods[self.method_key]
+    def exitClassBodyDeclaration2(self, ctx: JavaParserLabeled.ClassBodyDeclaration2Context):
+        if self.do_delete:
+            self.method_text = self.rewriter.getText(
+                program_name=self.rewriter.DEFAULT_PROGRAM_NAME,
+                start=ctx.start.tokenIndex,
+                stop=ctx.stop.tokenIndex
+            )
+            self.rewriter.replace(
+                program_name=self.rewriter.DEFAULT_PROGRAM_NAME,
+                from_idx=ctx.start.tokenIndex,
+                to_idx=ctx.stop.tokenIndex,
+                text=f"public {self.class_name} {self.instance_name} = new {self.class_name}();"
+            )
 
-        if _method.is_constructor:
-            return False
-
-        Rewriter_ = Rewriter(program, lambda x: x)
-        tokens_info = TokensInfo(_method.parser_context)  # tokens of ctx method
-        param_tokens_info = TokensInfo(_method.formalparam_context)
-        method_declaration_info = TokensInfo(_method.method_declaration_context)
-        exp = []  # برای نگه داری متغیرهایی که داخل کلاس تعریف شدند و در بدنه متد استفاده شدند
-        exps = tokens_info.get_token_index(tokens_info.token_stream.tokens, tokens_info.start, tokens_info.stop)
-        static_exps = []
-        # check that method is static or not
-        for modifier in _method.modifiers:
-            if modifier == "static":
-                static = 1
-
-        for token in exps:
-            for fields in _sourceclass.fields:
-                fields_dic = _sourceclass.fields[fields]
-                if token.text == fields_dic.name:
-                    try:
-                        if fields_dic.modifiers[0] == 'private':
-                            print("The target method is using the private variable , so cannot refactoring")
-                            return
-                        if fields_dic.modifiers[1] == 'static':
-                            static_exps.append(token.tokenIndex)
-                            continue
-                        exp.append(token.tokenIndex)
-                    except:
-                        continue
-
-            # check that where this method is call
-        for package_names in program.packages:
-            package = program.packages[package_names]
-            for class_ in package.classes:
-                _class = package.classes[class_]
-                for method_ in _class.methods:
-                    __method = _class.methods[method_]
-                    for inv in __method.body_method_invocations:
-                        invc = __method.body_method_invocations[inv]
-                        method_name = self.method_key[:self.method_key.find('(')]
-                        if invc[0] == method_name:
-                            inv_tokens_info = TokensInfo(inv)
-                            if static == 0:
-                                class_token_info = TokensInfo(_class.body_context)
-                                Rewriter_.insert_after_start(class_token_info,
-                                                             "\n" + self.target_class_name + " " + str.lower(
-                                                                 self.target_class_name) + "=" + "new " + self.target_class_name + "();")
-                            else:
-                                class_token_info = TokensInfo(_class.modifiers_parser_contexts[0])
-                                Rewriter_.insert_before_start(class_token_info,
-                                                              "import " + self.target_package_name + "." + self.target_class_name + ";\n")
-                                Rewriter_.replace(inv_tokens_info, self.target_class_name)
-                        Rewriter_.apply()
-
-        class_tokens_info = TokensInfo(_targetclass.parser_context)
-        package_tokens_info = TokensInfo(program.packages[self.target_package_name].package_ctx)
-        singlefileelement = SingleFileElement(_method.parser_context, _method.filename)
-        token_stream_rewriter = TokenStreamRewriter(singlefileelement.get_token_stream())
-
-        # insert name of source.java class befor param that define in body of classe (that use in method)
-        for index in exp:
-            token_stream_rewriter.insertBeforeIndex(index=index, text=str.lower(self.class_name) + str(
-                int(time.time())) + ".")
-        for index in static_exps:
-            token_stream_rewriter.insertBeforeIndex(index=index, text=self.class_name + ".")
-
-        for inv in _method.body_method_invocations:
-            if inv.getText() == self.target_class_name:
-                inv_tokens_info_target = TokensInfo(inv)
-                token_stream_rewriter.replaceRange(from_idx=inv_tokens_info_target.start,
-                                                   to_idx=inv_tokens_info_target.stop + 1, text=" ")
-
-            # insert source.java class befor methods of sourcr class that used in method
-        for i in _method.body_method_invocations_without_typename:
-            if i.getText() == self.class_name:
-                ii = _method.body_method_invocations_without_typename[i]
-                for j in ii:
-                    i_tokens = TokensInfo(j)
-                    token_stream_rewriter.insertBeforeIndex(index=i_tokens.start, text=str.lower(self.class_name) + str(
-                        int(time.time())) + ".")
-        # Rewriter_.insert_before_start(target_method_parser,'sdsddsds')
-        # pass object of source.java class to method
-        # if param_tokens_info.start is not None:
-        #     token_stream_rewriter.insertBeforeIndex(param_tokens_info.start,
-        #                                             text=self.class_name + " " + str.lower(self.class_name) + ",")
-        # else:
-        token_stream_rewriter.insertBeforeIndex(method_declaration_info.stop + 3,
-                                                text='\n' + self.class_name + " " + str.lower(
-                                                    self.class_name) + str(
-                                                    int(time.time())) + ' = new ' + self.class_name + '();')
-
-        strofmethod = token_stream_rewriter.getText(program_name=token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-                                                    start=tokens_info.start,
-                                                    stop=tokens_info.stop)
-
-        Rewriter_.insert_before(tokens_info=class_tokens_info, text=strofmethod)
-        if self.target_package_name != self.package_name:
-            target_class_modifier_token = TokensInfo(_targetclass.modifiers_parser_contexts[0])
-            Rewriter_.insert_before_start(target_class_modifier_token,
-                                          "import " + self.package_name + "." + self.class_name + ";\n")
-        Rewriter_.replace(tokens_info, "")
-        Rewriter_.apply()
-        self.propagate(program.packages, Rewriter_)
-        # self.__reformat(_sourceclass)
-        # self.__reformat(_targetclass)
-        # for class_chaned in self.propagation_class_changed:
-        #     self.__reformat(class_chaned)
-        # its not efficient for big project ! :
-        # for package_item in program.packages:
-        #     package_item_dic = program.packages[package_item]
-        #     for classes_item in package_item_dic.classes:
-        #         class_item_dic = package_item_dic.classes[classes_item]
-        #         self.__reformat(class_item_dic)
-
-        return True
-
-    def propagate(self, package, rewriter):
-        for package_item in package:
-            package_item_dic = package[package_item]
-            for classes_item in package_item_dic.classes:
-                class_item_dic = package_item_dic.classes[classes_item]
-                if classes_item == self.class_name:  # check any method in source class use that function or not
-                    sourceClass = package[self.package_name].classes[self.class_name]
-                    for method_item in sourceClass.methods:
-                        if method_item == self.method_key:
-                            continue
-                        method_item_dict = sourceClass.methods[method_item]
-                        for i in method_item_dict.body_method_invocations_without_typename:
-                            if i.getText() == self.class_name:
-                                if self.target_package_name != self.package_name:  # 1-import package-check to don't import self package
-                                    import_parser = TokensInfo(sourceClass.modifiers_parser_contexts[0])
-                                    rewriter.insert_before_start(import_parser,
-                                                                 '\nimport ' + self.target_package_name + '.' + self.target_class_name + ';\n')
-                                ii = method_item_dict.body_method_invocations_without_typename[
-                                    i]  # create instance before where our target function usage
-                                for j in ii:
-                                    i_tokens = TokensInfo(j)
-                                    rewriter.insert_before_start(i_tokens,
-                                                                 self.target_class_name + ' ' + self.target_class_name.lower() + str(
-                                                                     int(
-                                                                         time.time())) + ' = new ' + self.target_class_name + '();\n' + self.target_class_name.lower() + str(
-                                                                     int(
-                                                                         time.time())) + '.')
-                                    rewriter.apply()
-
-                else:
-                    for method_item in class_item_dic.methods:
-                        method_item_dict = class_item_dic.methods[
-                            method_item]  # check that class use our target method or not ***
-                        tempIndex = method_item_dict.body_text.find('=new' + self.class_name + '()')
-                        tempIndex2 = method_item_dict.body_text[:tempIndex].find(self.class_name)
-                        tempIndex2 = tempIndex2 + len(self.class_name)
-                        instance_name = method_item_dict.body_text[tempIndex2:tempIndex]
-                        my_line = instance_name + '.' + self.method_key
-                        if my_line in method_item_dict.body_text:  # check that class use our target method or not ***
-                            self.propagation_class_changed.append(class_item_dic)
-                            if self.target_package_name != class_item_dic.package_name:  # check to dont import self package
-                                import_parser = TokensInfo(class_item_dic.modifiers_parser_contexts[0])
-                                rewriter.insert_before_start(import_parser,
-                                                             '\nimport ' + self.target_package_name + '.' + self.target_class_name + ';\n')
-                            new_instance_name = self.target_class_name.lower() + str(
-                                int(time.time()))  # this trick will create a unique name
-                            method_parser = TokensInfo(
-                                method_item_dict.body_local_vars_and_expr_names[0].parser_context)
-                            if self.target_class_name != class_item_dic.name:  # dont create a instace of self class ( if target class is our selecting class )
-                                rewriter.insert_before_start(method_parser,
-                                                             self.target_class_name + ' ' + new_instance_name + ' = new ' + self.target_class_name + '();\n')
-                            for body_item in method_item_dict.body_local_vars_and_expr_names:
-                                try:
-                                    if body_item.dot_separated_identifiers[0] == instance_name and \
-                                            body_item.dot_separated_identifiers[1] == \
-                                            self.method_key.split('(')[0]:
-                                        instance_parser = TokensInfo(body_item.parser_context)
-                                        if self.target_class_name != class_item_dic.name:  # if target class is our selecting class dont write myClass.function instead of function
-                                            rewriter.replace(instance_parser,
-                                                             new_instance_name + '.' + self.method_key)
-                                        else:
-                                            rewriter.replace(instance_parser, self.method_key)
-                                except:
-                                    continue
-                            rewriter.apply()
-                # self.__reformat(class_item_dic)
-
-    def __reformat(self, src_class: Class):
-        subprocess.call(["java", "-jar", self.formatter, "--replace", src_class.filename])
+            self.do_delete = False
 
 
-if __name__ == "__main__":
-    mylist = get_filenames_in_dir('/data/Dev/JavaSample')
-    # mylist = get_filenames_in_dir('tests/movemethod_test')
-    print("Testing move_method...")
-    if MoveMethodRefactoring(mylist, "my_package", "Source", "printTest()", "Target",
-                             "my_package").do_refactor():  # if move_method_refactoring(mylist, "ss", "source", "m(int)","target","sss"):
-        print("Success!")
-    else:
-        print("Cannot refactor.")
+class PasteMethodListener(JavaParserLabeledListener):
+    def __init__(self, method_text: str, rewriter: TokenStreamRewriter):
+        self.method_text = method_text
+        self.rewriter = rewriter
+
+    def enterClassBody(self, ctx: JavaParserLabeled.ClassBodyContext):
+        self.rewriter.insertAfterToken(
+            token=ctx.start,
+            text="\n" + self.method_text + "\n",
+            program_name=self.rewriter.DEFAULT_PROGRAM_NAME
+        )
+
+
+class PropagateListener(JavaParserLabeledListener):
+    def __init__(self, method_name: str, new_name: str, lines: list, rewriter: TokenStreamRewriter):
+        self.method_name = method_name
+        self.new_name = new_name
+        self.lines = lines
+        self.rewriter = rewriter
+
+    def enterMethodCall0(self, ctx: JavaParserLabeled.MethodCall0Context):
+        identifier = ctx.IDENTIFIER()
+        if identifier and ctx.start.line in self.lines and identifier.getText() == self.method_name:
+            self.rewriter.replaceSingleToken(
+                token=ctx.start,
+                text=self.new_name
+            )
+
+
+def main():
+    STATIC = "Static Method"
+    src_class = "Source"
+    src_package = "my_package"
+    target_class = "Target"
+    target_package = "my_package"
+    method_name = "printTest"
+    udb_path = "/data/Dev/JavaSample/JavaSample.udb"
+    db = und.open(udb_path)
+
+    # Check if method is static
+    method_ent = db.lookup(f"{src_package}.{src_class}.{method_name}")
+    assert len(method_ent) == 1
+    method_ent = method_ent[0]
+    is_static = STATIC in method_ent.kindname()
+
+    # Find usages
+    usages = {}
+
+    for ref in method_ent.refs("callby"):
+        file = ref.file().longname()
+        if file in usages:
+            usages[file].append(ref.line())
+        else:
+            usages[file] = [ref.line(), ]
+
+    src_class_file = db.lookup(f"{src_package}/{src_class}.java")[0].longname()
+    target_class_file = db.lookup(f"{src_package}/{target_class}.java")[0].longname()
+
+    # Check if there is an cycle
+    # TODO: Can we check cycle with understand ?
+    stream = FileStream(target_class_file)
+    lexer = JavaLexer(stream)
+    tokens = CommonTokenStream(lexer)
+    parser = JavaParserLabeled(tokens)
+    tree = parser.compilationUnit()
+    listener = CheckCycleListener(
+        class_name=src_class,
+    )
+    ParseTreeWalker().walk(
+        listener,
+        tree
+    )
+
+    assert listener.is_valid, f"Can not move method because there is a cycle between {src_class}, {target_class}"
+
+    # Do the cut and paste!
+    # Cut
+    stream = FileStream(src_class_file)
+    lexer = JavaLexer(stream)
+    tokens = CommonTokenStream(lexer)
+    rewriter = TokenStreamRewriter(tokens)
+    parser = JavaParserLabeled(tokens)
+    tree = parser.compilationUnit()
+    listener = CutMethodListener(
+        class_name=target_class,
+        method_name=method_name,
+        rewriter=rewriter
+    )
+    ParseTreeWalker().walk(
+        listener,
+        tree
+    )
+    instance_name = listener.instance_name
+    method_text = listener.method_text
+    assert len(method_text) > 1
+    with open(src_class_file, 'w') as f:
+        f.write(listener.rewriter.getDefaultText())
+    # print("=" * 30)
+    # print(listener.rewriter.getDefaultText())
+    # print("=" * 30)
+
+    # Paste
+    stream = FileStream(target_class_file)
+    lexer = JavaLexer(stream)
+    tokens = CommonTokenStream(lexer)
+    rewriter = TokenStreamRewriter(tokens)
+    parser = JavaParserLabeled(tokens)
+    tree = parser.compilationUnit()
+    listener = PasteMethodListener(
+        method_text=method_text,
+        rewriter=rewriter
+    )
+    ParseTreeWalker().walk(
+        listener,
+        tree
+    )
+    with open(target_class_file, 'w') as f:
+        f.write(listener.rewriter.getDefaultText())
+    # print(listener.rewriter.getDefaultText())
+    # print("=" * 30)
+
+    # Propagate Changes
+    for file in usages.keys():
+        stream = FileStream(file)
+        lexer = JavaLexer(stream)
+        tokens = CommonTokenStream(lexer)
+        rewriter = TokenStreamRewriter(tokens)
+        parser = JavaParserLabeled(tokens)
+        tree = parser.compilationUnit()
+        listener = PropagateListener(
+            method_name=method_name,
+            new_name=f"{instance_name}.{method_name}",
+            lines=usages[file],
+            rewriter=rewriter
+        )
+        ParseTreeWalker().walk(
+            listener,
+            tree
+        )
+
+        with open(file, 'w') as f:
+            f.write(listener.rewriter.getDefaultText())
+
+        # print(listener.rewriter.getDefaultText())
+        # print("=" * 30)
+
+
+if __name__ == '__main__':
+    main()

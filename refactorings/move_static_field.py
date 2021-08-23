@@ -1,8 +1,10 @@
 import os
 import subprocess
-from refactorings.utils.utils2 import get_program, Rewriter, get_filenames_in_dir, get_program_with_field_usage
-from refactorings.utils.utils_listener_fast import TokensInfo, Field, Class, Method, LocalVariable, ClassImport, Program
+
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
+
+from refactorings.utils.utils2 import Rewriter, get_filenames_in_dir, get_program_with_field_usage
+from refactorings.utils.utils_listener_fast import TokensInfo, Field, Class, Program
 
 
 class UnResolvedMetaError(Exception):
@@ -231,7 +233,6 @@ class MoveFieldRefactoring:
 
 
 def clean_up_dir(files: list) -> list:
-
     """
     :param files: List of files in the project directory
     :return: list
@@ -248,13 +249,18 @@ def clean_up_dir(files: list) -> list:
     return original_files
 
 
-if __name__ == '__main__':
-    path = "/data/Dev/JavaSample/"
-    my_list = get_filenames_in_dir(path)
-
+def main(project_dir, src_package: str,
+         src_class: str, field_name: str, target_class: str,
+         target_package: str):
+    my_list = get_filenames_in_dir(project_dir)
     filtered = clean_up_dir(my_list)
-
-    refactoring = MoveFieldRefactoring(filtered, 'my_package', 'Source', 'number2', 'Target', 'my_package')
-
+    refactoring = MoveFieldRefactoring(filtered, src_package, src_class, field_name, target_class, target_package)
     result = refactoring.move()
     print(result)
+
+
+if __name__ == '__main__':
+    main(
+        "/data/Dev/JavaSample/",
+        'my_package', 'Source', 'number2', 'Target', 'my_package'
+    )

@@ -9,6 +9,8 @@ from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
+from . import move_static_field
+
 try:
     import understand as und
 except ImportError as e:
@@ -107,6 +109,7 @@ def main():
     target_class = "Target"
     target_package = "my_package"
     field_name = "number3"
+    project_dir = "/data/Dev/JavaSample/"
     udb_path = "/data/Dev/JavaSample/JavaSample.udb"
     db = und.open(udb_path)
 
@@ -118,7 +121,14 @@ def main():
 
     if is_static:
         print("Field is static")
-        # TODO: Use move_field_static
+        move_static_field.main(
+            project_dir,
+            src_package,
+            src_class,
+            field_name,
+            target_class,
+            target_package
+        )
     else:
         print("Finding usages...")
         # Find usages
