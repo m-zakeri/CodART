@@ -2,7 +2,7 @@
 QMOOD Design Metrics
 """
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 __author__ = 'Seyyed Ali Ayati'
 
 import os
@@ -11,8 +11,9 @@ import understand as und
 
 class QMOOD:
     def __init__(self, udb_path):
-        if not os.path.isfile(udb_path):
-            raise ValueError("Project directory is not valid.")
+        # To be used with Sci-tools Undrstand 6.x the following two line should be commented.
+        # if not os.path.isfile(udb_path):
+        #     raise ValueError("Project directory is not valid.")
         self.db = und.open(udb_path)
         self.metrics = self.db.metric(self.db.metrics())
 
@@ -259,7 +260,10 @@ class QMOOD:
 
 
 if __name__ == '__main__':
-    db_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
+    # Use the relative path point to CodART benchmark projects
+    db_path = "../benchmark_projects/JSON/JSON.und"
+    db_path = "../benchmark_projects/ganttproject/biz.ganttproject.core/biz.ganttproject.core.und"
+
     metric = QMOOD(db_path)
     # metric.print_all()
     # print(metric.MOA)
