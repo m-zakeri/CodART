@@ -3,7 +3,7 @@
 This script contains 281 (as version 0.3.0) names of different (object-oriented) source code metric
 for Java programming language
 
-To be used in CodART project
+Update from ADFEST2
 
 """
 __version__ = '0.4.0'
@@ -147,7 +147,7 @@ metric_map = {
     'CSORD_CountStmtDecl': 'CSNOSTD',
     'CSORD_CountStmtExe': 'CSNOSTE',
     'CSORD_AvgStmt': 'CSNOST_AVG',
-    'CSORD_AvgStmtDecl': 'CSNOST_AVG',
+    'CSORD_AvgStmtDecl': 'CSNOSTD_AVG',
     'CSORD_AvgStmtExe': 'CSNOSTE_AVG',
     'CSORD_MaxStmt': 'CSNOST_MAX',
     'CSORD_MaxStmtDecl': 'CSNOSTD_MAX',
@@ -292,6 +292,10 @@ metric_map = {
     'Tests': 'TESTS',
     'Label_Combine1': 'COMBINE',
     'Coverageability1': 'TETSTABILITY',
+
+    # 'CoverageabilityNominal': 'CoverageabilityNominal',
+    # 'TestabilityNominal': 'TestabilityNominal',
+    # 'TestabilityBinary': 'TestabilityBinary'
 }
 
 # -----------------------------------------------
@@ -665,6 +669,33 @@ project_metrics_names = [
 
     # 'CountSemicolon', Eliminated in new version of dataset (version 0.3.0)
 
+]
+
+
+# Top 20 metrics based-on permutation importance (DS4) [Used in our ISC-paper, 2021]
+top20_metrics3 = [
+    # Five of this metrics are also available in Table 4.
+    # Correlation coefficient between coverageability and source code metrics.
+    'NODOT',
+    'NOIDU',
+    'CBO',
+    'CSCCE',
+    'PKNOSM',
+    'CSLOCE_AVG',
+    'PKNOPRM',
+    'CSNOMNAMM',
+    'PKCCM_MIN',
+    'DAC',
+    'CSLOC_MIN',
+    'CSCC_AVG',
+    'CSLOCNAMM',
+    'NOID',
+    'CSCCENAMM_MAX',
+    'CSLOCE_SD',
+    'PKLOCE_MAX',
+    'CSNOIA',
+    'PKNOPM',
+    'NIM',
 ]
 
 # Top 20 metrics based-on univariate feature selection (DS4)
