@@ -155,7 +155,9 @@ class UnderstandUtility(object):
             # raise UserWarning('Java class with name {0} is not found in project'.format(class_name))
             return None
         if len(entity_list) > 1:
-            raise ValueError('There is more than one Java class with name {0} in the project'.format(class_name))
+            # print('######', len(entity_list))
+            # raise ValueError('There is more than one Java class with name {0} in the project'.format(class_name))
+            return entity_list[0]
         else:
             return entity_list[0]
 
