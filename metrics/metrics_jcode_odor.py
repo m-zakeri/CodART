@@ -4,11 +4,7 @@ Implementation of JCodeOdor metrics.
 
 """
 
-
-
-
 import sys
-
 
 try:
     sys.path.insert(0, "D:/program files/scitools/bin/pc-win64/python")
@@ -20,7 +16,7 @@ except ModuleNotFoundError:
 from naming import UnderstandUtility
 
 
-class cls_main:
+class MainDriver:
     def main(self):
         db = und.open('CodeSmell.udb')
         obj_get_metrics = JCodeOdorMetric()
@@ -56,7 +52,6 @@ class cls_main:
 
 __version__ = '0.3.0'
 __author__ = 'Morteza'
-
 
 
 class JCodeOdorMetric:
@@ -540,8 +535,6 @@ class JCodeOdorMetric:
         self.get_metrics(db)
         return [self.class_metrics, self.method_metrics]
         # return a list consist of classes and methods and thier metrics value
-
-
 
     def ATFD(self, class_entity):
         foreign_data = class_entity.ents('Useby', 'Java Variable')
