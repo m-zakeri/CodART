@@ -56,7 +56,7 @@ class PullUpFieldRefactoring:
         self.filename_mapping = filename_mapping
 
     def do_refactor(self):
-        program = utils2.get_program(self.source_filenames, print_status=True)
+        program = utils2.get_program(self.source_filenames, print_status=False)
         # print(program.packages)
         if self.package_name not in program.packages \
                 or self.class_name not in program.packages[self.package_name].classes \

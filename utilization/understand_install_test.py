@@ -1,10 +1,9 @@
 # Test script to verify that the Understand Python API is setup correctly
 
-import sys
 import struct
 import shutil
 import re
-from utilization.setup_understand import *
+from setup_understand import *
 
 # Verify Python 3
 

@@ -17,7 +17,7 @@ def git_restore(project_dir):
     process.wait()
 
 
-def create_understand_database(project_dir, und_path='/home/ali/scitools/bin/linux64/'):
+def create_understand_database(project_dir):
     """
     This function creates understand database for the given project directory.
     :param und_path: The path of und binary file for executing understand command-line
@@ -25,7 +25,6 @@ def create_understand_database(project_dir, und_path='/home/ali/scitools/bin/lin
     :return: String path of created database.
     """
     assert os.path.isdir(project_dir)
-    assert os.path.isdir(und_path)
     db_name = os.path.basename(os.path.normpath(project_dir)) + ".udb"
     db_path = os.path.join(project_dir, db_name)
     assert os.path.exists(db_path) is False
@@ -33,28 +32,20 @@ def create_understand_database(project_dir, und_path='/home/ali/scitools/bin/lin
     # und create -languages c++ add @myFiles.txt analyze -all myDb.udb
     process = subprocess.Popen(
         ['und', 'create', '-languages', 'Java', 'add', project_dir, 'analyze', '-all', db_path],
-        cwd=und_path
     )
     process.wait()
     return db_path
 
 
-def update_understand_database(udb_path, project_dir=None, und_path='/data/Dev/scitools/bin/linux64'):
+def update_understand_database(udb_path):
     """
     This function updates database due to file changes.
-    :param project_dir: If understand database file is not in project directory you can specify the project directory.
-    :param und_path: The path of und binary file for executing understand command-line
     :param udb_path: The absolute path of understand database.
     :return: None
     """
-    assert os.path.isfile(udb_path)
-    assert os.path.isdir(und_path)
-    if project_dir is None:
-        project_dir = os.path.dirname(os.path.normpath(udb_path))
 
     process = subprocess.Popen(
-        ['./und', 'analyze', '-all', udb_path],
-        cwd=und_path
+        ['und', 'analyze', '-all', udb_path],
     )
     process.wait()
     print("Finished updating...")

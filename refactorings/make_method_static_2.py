@@ -82,6 +82,8 @@ def main(udb_path, source_class, method_name):
                 continue
     if main_file is None:
         return
+    if not os.path.isfile(main_file):
+        return
 
     stream = FileStream(main_file, encoding='utf8')
     lexer = JavaLexer(stream)
