@@ -4,9 +4,15 @@ This module contains testability prediction script
 to be used in refactoring process in addition to qmood metrics
 
 ## Reference
-ADAFEST2 paper
+[1] ADAFEST2 paper
+[2] TsDD paper
+
 
 """
+
+__version__ = '0.1.0'
+__author__ = 'Morteza Zakeri'
+
 
 import os
 import math
