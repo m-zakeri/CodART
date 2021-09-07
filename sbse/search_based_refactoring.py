@@ -11,7 +11,6 @@ using pymoo framework
 __version__ = '0.1.0'
 __author__ = 'Morteza Zakeri'
 
-
 import os
 import random
 import string
@@ -42,6 +41,7 @@ class Gene:
     """
     The base class for the Gene in genetic algorithms
     """
+
     def __init__(self, **kwargs):
         self.params = kwargs
 
@@ -50,6 +50,7 @@ class RefactoringOperation(Gene):
     """
     The class define a data structure (dictionary) to hold a refactoring operation
     """
+
     def __init__(self, **kwargs):
         """
         Each refactoring operation hold as a dictionary contains the required parameters.
@@ -81,6 +82,7 @@ class Individual(List):
     is an array of refactoring operations
     where the order of their execution is accorded by their positions in the array.
     """
+
     def __init__(self):
         super(Individual, self).__init__()
         self.refactoring_operations = list()
@@ -90,6 +92,45 @@ class Individual(List):
         pass
 
 
+class ProblemSingleObjective(Problem):
+    """
+        The CodART single-objective optimization work with only one objective, testability:
+        """
+
+    def __init__(self, n_refactorings_lowerbound=50, n_refactorings_upperbound=75):
+        super(ProblemSingleObjective, self).__init__(n_var=1,
+                                                    n_obj=1,
+                                                    n_constr=0,
+                                                    elementwise_evaluation=True)
+        self.n_refactorings_lowerbound = n_refactorings_lowerbound
+        self.n_refactorings_upperbound = n_refactorings_upperbound
+
+    def _evaluate(self,
+                  x,  #
+                  out,
+                  *args,
+                  **kwargs):
+        """
+        This method iterate over an Individual, execute the refactoring operation sequentially,
+        and compute quality attributes for the refactored version of the program, as objectives of the search
+
+        params:
+        x (Individual): x is an instance of Individual (i.e., a list of refactoring operations)
+
+        """
+        # Stage 1: Execute all refactoring operations in the sequence x
+        for refactoring_operation in x.refactoring_operations:
+            refactoring_operation.do_refactoring()
+
+        # Stage 2: Computing quality attributes
+        # Todo: Add testability and modularity objectives
+        # o1 = testability  ## Our only objective for testability improvement
+
+        # Stage 3: Marshal objectives into vector
+        #out["F"] = np.array([-1 * o1], dtype=float)
+
+
+
 class ProblemMultiObjective(Problem):
     """
     The CodART multi-objective optimization work with three objective:
@@ -97,11 +138,12 @@ class ProblemMultiObjective(Problem):
         Objective 2: Testability
         Objective 3: Modularity
     """
+
     def __init__(self, n_refactorings_lowerbound=50, n_refactorings_upperbound=75):
         super(ProblemMultiObjective, self).__init__(n_var=1,
-                                        n_obj=2,
-                                        n_constr=0,
-                                        elementwise_evaluation=True)
+                                                    n_obj=3,
+                                                    n_constr=0,
+                                                    elementwise_evaluation=True)
         self.n_refactorings_lowerbound = n_refactorings_lowerbound
         self.n_refactorings_upperbound = n_refactorings_upperbound
         # self.ALPHABET = [c for c in string.ascii_lowercase]
@@ -134,8 +176,7 @@ class ProblemMultiObjective(Problem):
         # o3 = modularity   ## Our new objective
 
         # Stage 3: Marshal objectives into vector
-        out["F"] = np.array([-1*o1, -1*o2], dtype=float)
-
+        out["F"] = np.array([-1 * o1, -1 * o2], dtype=float)
 
 
 class ProblemManyObjective(Problem):
@@ -145,11 +186,12 @@ class ProblemManyObjective(Problem):
         Objective 7: Testability
         Objective 8: Modularity
     """
+
     def __init__(self, n_refactorings_lowerbound=50, n_refactorings_upperbound=75):
         super(ProblemManyObjective, self).__init__(n_var=1,
-                                        n_obj=8,
-                                        n_constr=0,
-                                        elementwise_evaluation=True)
+                                                   n_obj=8,
+                                                   n_constr=0,
+                                                   elementwise_evaluation=True)
         self.n_refactorings_lowerbound = n_refactorings_lowerbound
         self.n_refactorings_upperbound = n_refactorings_upperbound
 
@@ -183,7 +225,7 @@ class ProblemManyObjective(Problem):
         # o8 = modularity   ## Our new objective
 
         # Stage 3: Marshal objectives into vector
-        out["F"] = np.array([-1*o1, -1*o2, -1*o3, -1*o4, -1*o5, -1*o6, ], dtype=float)
+        out["F"] = np.array([-1 * o1, -1 * o2, -1 * o3, -1 * o4, -1 * o5, -1 * o6, ], dtype=float)
 
 
 class SudoRandomInitialization(Sampling):
@@ -194,6 +236,7 @@ class SudoRandomInitialization(Sampling):
     The selected refactoring operations are randomly arranged in each individual.
     Assigning randomly a sequence of refactorings to certain code fragments generates the initial population
     """
+
     def _do(self, problem, n_samples, **kwargs):
         """
         Since the problem having only one variable, we return a matrix with the shape (n,1)
@@ -239,6 +282,7 @@ class AdaptiveSinglePointCrossover(Crossover):
     Params:
         prob (float): crossover probability
     """
+
     def __init__(self, prob=0.9):
 
         # Define the crossover: number of parents, number of offsprings, and cross-over probability
@@ -293,6 +337,7 @@ class BitStringMutation(Mutation):
     if x<0.2 we change the refactoring operation in that dimension, otherwise no change is took into account.
 
     """
+
     def __init__(self, prob=0.2):
         super().__init__()
         self.mutation_probability = prob
@@ -322,6 +367,7 @@ class RefactoringSequenceDuplicateElimination(ElementwiseDuplicateElimination):
     Only one instance is held to speed up the search algorithm
 
     """
+
     def is_equal(self, a, b):
         """
         # Calling the equal method of individual class
@@ -331,19 +377,19 @@ class RefactoringSequenceDuplicateElimination(ElementwiseDuplicateElimination):
 
 def main():
     # Define search algorithms
-    algorithms = []
-    # GA
+    algorithms = list()
+    # 1: GA
     algorithm = GA(
-                pop_size=100,
-                sampling=SudoRandomInitialization(),
-                # crossover=AdaptiveSinglePointCrossover(prob=0.8),
-                crossover=get_crossover("real_k_point", n_points=2),
-                mutation=BitStringMutation(),
-                eliminate_duplicates=RefactoringSequenceDuplicateElimination()
+        pop_size=100,
+        sampling=SudoRandomInitialization(),
+        # crossover=AdaptiveSinglePointCrossover(prob=0.8),
+        crossover=get_crossover("real_k_point", n_points=2),
+        mutation=BitStringMutation(),
+        eliminate_duplicates=RefactoringSequenceDuplicateElimination()
     )
     algorithms.append(algorithm)
 
-    # NSGA II
+    # 2: NSGA II
     algorithm = NSGA2(pop_size=100,
                       sampling=SudoRandomInitialization(),
                       # crossover=AdaptiveSinglePointCrossover(prob=0.8),
@@ -353,7 +399,7 @@ def main():
                       )
     algorithms.append(algorithm)
 
-    # NSGA III
+    # 3: NSGA III
     # Todo: Ask for best practices in determining ref_dirs
     ref_dirs = get_reference_directions("energy", 8, 90, seed=1)
     algorithm = NSGA3(ref_dirs=ref_dirs,
@@ -366,8 +412,14 @@ def main():
                       )
     algorithms.append(algorithm)
 
-    # do optimization
-    res = minimize(problem=ProblemMultiObjective(n_refactorings_lowerbound=50, n_refactorings_upperbound=75),
+    # Define problems
+    problems = list()
+    problems.append(ProblemSingleObjective(n_refactorings_lowerbound=50, n_refactorings_upperbound=75))
+    problems.append(ProblemMultiObjective(n_refactorings_lowerbound=50, n_refactorings_upperbound=75))
+    problems.append(ProblemManyObjective(n_refactorings_lowerbound=50, n_refactorings_upperbound=75))
+
+    # Do optimization for various problems with various algorithms
+    res = minimize(problem=problems[1],
                    algorithm=algorithms[1],
                    termination=('n_gen', 100),
                    seed=1,
@@ -378,5 +430,3 @@ def main():
     results = res.X[np.argsort(res.F[:, 0])]
     count = [np.sum([e == "a" for e in r]) for r in results[:, 0]]
     print(np.column_stack([results, count]))
-
-
