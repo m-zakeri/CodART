@@ -249,12 +249,12 @@ def clean_up_dir(files: list) -> list:
     return original_files
 
 
-def main(project_dir, src_package: str,
-         src_class: str, field_name: str, target_class: str,
+def main(project_dir, source_package: str,
+         source_class: str, field_name: str, target_class: str,
          target_package: str):
     my_list = get_filenames_in_dir(project_dir)
     filtered = clean_up_dir(my_list)
-    refactoring = MoveFieldRefactoring(filtered, src_package, src_class, field_name, target_class, target_package)
+    refactoring = MoveFieldRefactoring(filtered, source_package, source_class, field_name, target_class, target_package)
     result = refactoring.move()
     print(result)
 

@@ -3,8 +3,8 @@ from pathlib import Path
 import progressbar
 from config import *
 from utilization.setup_understand import *
-from refactorings import make_field_non_static, make_field_static, make_method_static_2, make_method_non_static, \
-    make_method_non_static_2, pullup_field
+from refactorings import make_field_non_static, make_field_static, make_method_static_2, \
+    make_method_non_static_2, pullup_field, move_static_field
 from utilization.directory_utils import update_understand_database
 
 
@@ -70,10 +70,16 @@ class Initialization(object):
                 continue
             if not parent.kind().check("class") or parent.kind().check("anonymous"):
                 continue
-            source_class = parent.simplename()
-            field_name = ent.simplename()
-            # print("Variable", source_class, parent.kindname(), field_name)
-            candidates.append({'source_class': source_class, 'field_name': field_name})
+            source_package = None
+            long_name = ent.longname().split(".")
+            if len(long_name) >= 3:
+                source_package = '.'.join(long_name[:-2])
+                source_class, field_name = long_name[-2:]
+            elif len(long_name) == 2:
+                source_class, field_name = long_name
+            else:
+                continue
+            candidates.append({'source_package': source_package, 'source_class': source_class, 'field_name': field_name})
         return candidates
 
     def get_all_class_entities(self):
@@ -111,13 +117,17 @@ class Initialization(object):
     def init_pullup_field(self):
         pass
 
+    def init_move_static_field(self):
+        pass
+
     def generate_population(self):
         initializers = (
-            self.init_make_field_non_static,
-            self.inti_make_field_static,
+            # self.init_make_field_non_static,
+            # self.inti_make_field_static,
             # self.init_make_method_static,
             # self.init_make_method_non_static,
             # self.init_pullup_field,
+            self.init_move_static_field,
         )
         population = []
         for _ in progressbar.progressbar(range(self.population_size)):
@@ -187,12 +197,36 @@ class RandomInitialization(Initialization):
         params.update(random.choice(candidates))
         return refactoring_main, params
 
+    def init_move_static_field(self):
+        """
+        Finds static fields with a class to move
+
+        Returns: refactoring main method and its parameters.
+        """
+        refactoring_main = move_static_field.main
+        params = {"project_dir": str(Path(self.udb_path).parent)}
+        random_field = random.choice(self._static_variables)
+        params.update(random_field)
+        random_class = random.choice(self.get_all_class_entities()).longname().split(".")
+        target_package = None
+
+        if len(random_class) == 1:
+            target_class = random_class[0]
+        elif len(random_class) == 2:
+            target_package, target_class = random_class
+        else:
+            return self.init_move_static_field()
+
+        if params.get('source_class') == target_class and params.get('source_package') == target_package:
+            return self.init_move_static_field()
+        params.update({"target_package": target_package, "target_class": target_class})
+        return refactoring_main, params
+
+
 if __name__ == '__main__':
     rand_pop = RandomInitialization(
-        "/data/Dev/CodART/benchmark_projects/JSON/JSON.udb",
+        "D:\Dev\JavaSample\JavaSample1.udb",
         population_size=POPULATION_SIZE,
         individual_size=INDIVIDUAL_SIZE
     )
-    rand_pop.find_pullup_field_candidates()
     population = rand_pop.generate_population()
-
