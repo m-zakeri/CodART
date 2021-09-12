@@ -19,7 +19,6 @@ class Objectives:
         Implements Project Objectives due to QMOOD design metrics
         :param udb_path: The understand database path
         """
-        assert os.path.isfile(udb_path)
         self.udb_path = udb_path
         self.qmood = QMOOD(udb_path=udb_path)
 
