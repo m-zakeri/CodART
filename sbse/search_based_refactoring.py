@@ -11,18 +11,14 @@ using pymoo framework
 __version__ = '0.1.0'
 __author__ = 'Morteza Zakeri'
 
-import os
 import random
-import string
-from abc import ABC, abstractmethod
 from typing import List
 
 import numpy as np
-
-from pymoo.algorithms.so_genetic_algorithm import GA
 from pymoo.algorithms.nsga2 import NSGA2
 from pymoo.algorithms.nsga3 import NSGA3
-from pymoo.factory import get_problem, get_reference_directions, get_crossover, get_visualization
+from pymoo.algorithms.so_genetic_algorithm import GA
+from pymoo.factory import get_reference_directions, get_crossover
 from pymoo.model.crossover import Crossover
 from pymoo.model.duplicate import ElementwiseDuplicateElimination
 from pymoo.model.mutation import Mutation
@@ -30,9 +26,6 @@ from pymoo.model.problem import Problem
 from pymoo.model.sampling import Sampling
 from pymoo.optimize import minimize
 from pymoo.visualization.scatter import Scatter
-
-import pymoo.operators.crossover.point_crossover
-from pymoo.interface import crossover
 
 from sbse.objectives import Objectives
 
@@ -69,6 +62,8 @@ class RefactoringOperation(Gene):
         super(RefactoringOperation, self).__init__(**kwargs)
 
     def do_refactoring(self):
+        # TODO:  Make this better
+        self.params['api'](**self.api_params)
         if self.params['refactoring_name'] == 'make_field_static':
             self.params['api'](source_class=self.params['source_class'], )
         elif self.params['refactoring_name'] == 'make_field_non_static':
@@ -99,9 +94,9 @@ class ProblemSingleObjective(Problem):
 
     def __init__(self, n_refactorings_lowerbound=50, n_refactorings_upperbound=75):
         super(ProblemSingleObjective, self).__init__(n_var=1,
-                                                    n_obj=1,
-                                                    n_constr=0,
-                                                    elementwise_evaluation=True)
+                                                     n_obj=1,
+                                                     n_constr=0,
+                                                     elementwise_evaluation=True)
         self.n_refactorings_lowerbound = n_refactorings_lowerbound
         self.n_refactorings_upperbound = n_refactorings_upperbound
 
@@ -122,13 +117,13 @@ class ProblemSingleObjective(Problem):
         for refactoring_operation in x.refactoring_operations:
             refactoring_operation.do_refactoring()
 
+        # Update Understand DB
         # Stage 2: Computing quality attributes
         # Todo: Add testability and modularity objectives
         # o1 = testability  ## Our only objective for testability improvement
-
+        # Git restore
         # Stage 3: Marshal objectives into vector
-        #out["F"] = np.array([-1 * o1], dtype=float)
-
+        # out["F"] = np.array([-1 * o1], dtype=float)
 
 
 class ProblemMultiObjective(Problem):
@@ -353,7 +348,8 @@ class BitStringMutation(Mutation):
             if r < self.mutation_probability:
                 pass
                 # Todo: Select a refactoring operation randomly and put in X[i, 0]
-                # X[i, 0] =
+                # j --> random. max: len(X[i])
+                # X[i, j] = new refactoring op.
 
         return X
 

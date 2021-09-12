@@ -1265,6 +1265,7 @@ def main():
     """
     A demo of using testability_prediction module to measure testability quality attribute with machine learning
     """
+    # TODO: project_path as input + return value
     # project_path = '../benchmark_projects/ganttproject/biz.ganttproject.core/biz.ganttproject.core.und'  # T=52.53%
     project_path = '../benchmark_projects/JSON/JSON.und'  # T=45.31%
     db = understand.open(project_path)
