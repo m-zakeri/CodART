@@ -1,9 +1,6 @@
-import os
+from gen.javaLabeled.JavaLexer import JavaLexer
+from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 
-from antlr4 import FileStream, ParseTreeWalker
-from antlr4.TokenStreamRewriter import TokenStreamRewriter
-
-from gen.java.JavaLexer import JavaLexer
 from refactorings.utils.utils_listener_fast import *
 
 
@@ -124,5 +121,27 @@ def get_program_with_field_usage(source_files: list, field_name: str, source_cla
             program.packages[listener.package.name] = listener.package
         else:
             for classes_name in listener.package.classes:
-                program.packages[listener.package.name].classes[classes_name]=listener.package.classes[classes_name]
+                program.packages[listener.package.name].classes[classes_name] = listener.package.classes[classes_name]
     return program
+
+
+def parse_and_walk(file_path: str, listener_class, has_write=False, **kwargs):
+    stream = FileStream(file_path)
+    lexer = JavaLexer(stream)
+    tokens = CommonTokenStream(lexer)
+    rewriter = TokenStreamRewriter(tokens)
+    if has_write:
+        kwargs.update({'rewriter': rewriter})
+    parser = JavaParserLabeled(tokens)
+    tree = parser.compilationUnit()
+    listener = listener_class(**kwargs)
+    ParseTreeWalker().walk(
+        listener,
+        tree
+    )
+
+    if has_write:
+        with open(file_path, 'w') as f:
+            f.write(listener.rewriter.getDefaultText())
+
+    return listener

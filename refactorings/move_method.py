@@ -1,25 +1,29 @@
-"""
-Seyyed Ali Ayati
-"""
-
-from antlr4 import *
+import logging
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
-from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 from refactorings.move_field import CheckCycleListener
+from refactorings.utils.utils2 import parse_and_walk
 
 try:
     import understand as und
 except ImportError as e:
     print(e)
 
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__file__)
+STATIC = "Static Method"
+
+__author__ = "Seyyed Ali Ayati"
+logger.info("You can find developer at: https://www.linkedin.com/in/seyyedaliayati/")
+
 
 class CutMethodListener(JavaParserLabeledListener):
-    def __init__(self, class_name: str, method_name: str, rewriter: TokenStreamRewriter):
+    def __init__(self, class_name: str, method_name: str, is_static: bool, rewriter: TokenStreamRewriter):
         self.class_name = class_name
         self.method_name = method_name
+        self.is_static = is_static
         self.rewriter = rewriter
         self.instance_name = class_name.lower() + "ByCodArt"
         self.is_member = False
@@ -43,11 +47,15 @@ class CutMethodListener(JavaParserLabeledListener):
                 start=ctx.start.tokenIndex,
                 stop=ctx.stop.tokenIndex
             )
+            if self.is_static:
+                replace_text = f"public static {self.class_name} {self.instance_name} = new {self.class_name}();"
+            else:
+                replace_text = f"public {self.class_name} {self.instance_name} = new {self.class_name}();"
             self.rewriter.replace(
                 program_name=self.rewriter.DEFAULT_PROGRAM_NAME,
                 from_idx=ctx.start.tokenIndex,
                 to_idx=ctx.stop.tokenIndex,
-                text=f"public {self.class_name} {self.instance_name} = new {self.class_name}();"
+                text=replace_text
             )
 
             self.do_delete = False
@@ -82,22 +90,18 @@ class PropagateListener(JavaParserLabeledListener):
             )
 
 
-def main():
-    STATIC = "Static Method"
-    src_class = "Source"
-    src_package = "my_package"
-    target_class = "Target"
-    target_package = "my_package"
-    method_name = "printTest"
-    udb_path = "/data/Dev/JavaSample/JavaSample.udb"
+def main(source_class: str, source_package: str, target_class: str, target_package: str, method_name: str,
+         udb_path: str):
     db = und.open(udb_path)
 
     # Check if method is static
-    method_ent = db.lookup(f"{src_package}.{src_class}.{method_name}")
-    assert len(method_ent) == 1
+    method_ent = db.lookup(f"{source_package}.{source_class}.{method_name}")
+    if len(method_ent) != 1:
+        logger.error("Can not move method duo to duplicated entities.")
+        return None
+
     method_ent = method_ent[0]
     is_static = STATIC in method_ent.kindname()
-
     # Find usages
     usages = {}
 
@@ -108,97 +112,61 @@ def main():
         else:
             usages[file] = [ref.line(), ]
 
-    src_class_file = db.lookup(f"{src_package}/{src_class}.java")[0].longname()
-    target_class_file = db.lookup(f"{src_package}/{target_class}.java")[0].longname()
+    src_class_file = db.lookup(f"{source_package}.{source_class}.java")[0].longname()
+    target_class_file = db.lookup(f"{source_package}.{target_class}.java")[0].longname()
 
     # Check if there is an cycle
-    # TODO: Can we check cycle with understand ?
-    stream = FileStream(target_class_file)
-    lexer = JavaLexer(stream)
-    tokens = CommonTokenStream(lexer)
-    parser = JavaParserLabeled(tokens)
-    tree = parser.compilationUnit()
-    listener = CheckCycleListener(
-        class_name=src_class,
-    )
-    ParseTreeWalker().walk(
-        listener,
-        tree
+    listener = parse_and_walk(
+        file_path=target_class_file,
+        listener_class=CheckCycleListener,
+        class_name=source_class
     )
 
-    assert listener.is_valid, f"Can not move method because there is a cycle between {src_class}, {target_class}"
+    if not listener.is_valid:
+        logger.error(f"Can not move method because there is a cycle between {source_class}, {target_class}")
+        return None
 
     # Do the cut and paste!
     # Cut
-    stream = FileStream(src_class_file)
-    lexer = JavaLexer(stream)
-    tokens = CommonTokenStream(lexer)
-    rewriter = TokenStreamRewriter(tokens)
-    parser = JavaParserLabeled(tokens)
-    tree = parser.compilationUnit()
-    listener = CutMethodListener(
+    listener = parse_and_walk(
+        file_path=src_class_file,
+        listener_class=CutMethodListener,
+        has_write=True,
         class_name=target_class,
         method_name=method_name,
-        rewriter=rewriter
+        is_static=is_static
     )
-    ParseTreeWalker().walk(
-        listener,
-        tree
-    )
+
     instance_name = listener.instance_name
     method_text = listener.method_text
-    assert len(method_text) > 1
-    with open(src_class_file, 'w') as f:
-        f.write(listener.rewriter.getDefaultText())
-    # print("=" * 30)
-    # print(listener.rewriter.getDefaultText())
-    # print("=" * 30)
 
     # Paste
-    stream = FileStream(target_class_file)
-    lexer = JavaLexer(stream)
-    tokens = CommonTokenStream(lexer)
-    rewriter = TokenStreamRewriter(tokens)
-    parser = JavaParserLabeled(tokens)
-    tree = parser.compilationUnit()
-    listener = PasteMethodListener(
-        method_text=method_text,
-        rewriter=rewriter
+    parse_and_walk(
+        file_path=target_class_file,
+        listener_class=PasteMethodListener,
+        has_write=True,
+        method_text=method_text
     )
-    ParseTreeWalker().walk(
-        listener,
-        tree
-    )
-    with open(target_class_file, 'w') as f:
-        f.write(listener.rewriter.getDefaultText())
-    # print(listener.rewriter.getDefaultText())
-    # print("=" * 30)
 
     # Propagate Changes
     for file in usages.keys():
-        stream = FileStream(file)
-        lexer = JavaLexer(stream)
-        tokens = CommonTokenStream(lexer)
-        rewriter = TokenStreamRewriter(tokens)
-        parser = JavaParserLabeled(tokens)
-        tree = parser.compilationUnit()
-        listener = PropagateListener(
+        parse_and_walk(
+            file_path=file,
+            listener_class=PropagateListener,
+            has_write=True,
             method_name=method_name,
             new_name=f"{instance_name}.{method_name}",
             lines=usages[file],
-            rewriter=rewriter
         )
-        ParseTreeWalker().walk(
-            listener,
-            tree
-        )
-
-        with open(file, 'w') as f:
-            f.write(listener.rewriter.getDefaultText())
-
-        # print(listener.rewriter.getDefaultText())
-        # print("=" * 30)
+    db.close()
 
 
 if __name__ == '__main__':
-    main()
+    main(
+        source_class="Source",
+        source_package="my_package",
+        target_class="Target",
+        target_package="my_package",
+        method_name="printTest",
+        udb_path="D:\Dev\JavaSample\JavaSample1.udb"
+    )
