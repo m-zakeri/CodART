@@ -1,31 +1,46 @@
-"""
-Seyyed Ali Ayati
-"""
+import logging
 
-from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
-from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
-
-from . import move_static_field
+from utils.utils2 import parse_and_walk
 
 try:
     import understand as und
 except ImportError as e:
     print(e)
 
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__file__)
+STATIC = "Public Static Variable"
+__author__ = "Seyyed Ali Ayati"
+logger.info("You can find me at: https://www.linkedin.com/in/seyyedaliayati/")
+
 
 class CutFieldListener(JavaParserLabeledListener):
-    def __init__(self, class_name: str, field_name: str, rewriter: TokenStreamRewriter):
+    def __init__(self, class_name: str, instance_name: str, field_name: str, is_static: bool, import_statement: str,
+                 rewriter: TokenStreamRewriter):
         self.class_name = class_name
         self.field_name = field_name
+        self.is_static = is_static
+        self.import_statement = import_statement
         self.rewriter = rewriter
+        self.instance_name = instance_name
+
         self.instance_name = class_name.lower() + "ByCodArt"
         self.is_member = False
         self.do_delete = False
         self.field_text = ""
+
+    def exitPackageDeclaration(self, ctx: JavaParserLabeled.PackageDeclarationContext):
+        if self.import_statement:
+            self.rewriter.insertAfterToken(
+                token=ctx.stop,
+                text=self.import_statement,
+                program_name=self.rewriter.DEFAULT_PROGRAM_NAME
+            )
+            self.import_statement = None
 
     def enterMemberDeclaration2(self, ctx: JavaParserLabeled.MemberDeclaration2Context):
         self.is_member = True
@@ -44,11 +59,16 @@ class CutFieldListener(JavaParserLabeledListener):
                 start=ctx.start.tokenIndex,
                 stop=ctx.stop.tokenIndex
             )
+            if self.is_static:
+                replace_text = f"public static {self.class_name} {self.instance_name} = new {self.class_name}();"
+            else:
+                replace_text = f"public {self.class_name} {self.instance_name} = new {self.class_name}();"
+
             self.rewriter.replace(
                 program_name=self.rewriter.DEFAULT_PROGRAM_NAME,
                 from_idx=ctx.start.tokenIndex,
                 to_idx=ctx.stop.tokenIndex,
-                text=f"public {self.class_name} {self.instance_name} = new {self.class_name}();"
+                text=replace_text
             )
 
             self.do_delete = False
@@ -82,6 +102,14 @@ class PropagateListener(JavaParserLabeledListener):
                 text=self.new_name
             )
 
+    def enterExpression0(self, ctx: JavaParserLabeled.Expression0Context):
+        identifier = ctx.getText()
+        if identifier and ctx.start.line in self.lines and identifier == self.field_name:
+            self.rewriter.replaceSingleToken(
+                token=ctx.stop,
+                text=self.new_name
+            )
+
 
 class CheckCycleListener(JavaParserLabeledListener):
     def __init__(self, class_name: str):
@@ -102,135 +130,89 @@ class CheckCycleListener(JavaParserLabeledListener):
                 self.is_valid = False
 
 
-def main():
-    STATIC = "Public Static Variable"
-    src_class = "Source"
-    src_package = "my_package"
-    target_class = "Target"
-    target_package = "my_package"
-    field_name = "number3"
-    project_dir = "/data/Dev/JavaSample/"
-    udb_path = "/data/Dev/JavaSample/JavaSample.udb"
+def main(source_class: str, source_package: str, target_class: str, target_package: str, field_name: str,
+         udb_path: str):
+    import_statement = None
+    if source_package != target_package:
+        import_statement = f"\nimport {target_package}.{target_class};"
+    instance_name = target_class.lower() + "ByCodArt"
     db = und.open(udb_path)
 
     # Check if field is static
-    field_ent = db.lookup(f"{src_package}.{src_class}.{field_name}")
+    field_ent = db.lookup(f"{source_package}.{source_class}.{field_name}")
     assert len(field_ent) == 1
     field_ent = field_ent[0]
     is_static = field_ent.kindname() == STATIC
 
     if is_static:
-        print("Field is static")
-        move_static_field.main(
-            project_dir,
-            src_package,
-            src_class,
-            field_name,
-            target_class,
-            target_package
-        )
-    else:
-        print("Finding usages...")
-        # Find usages
-        usages = {}
+        logger.warning("Field is static!")
 
-        for ref in field_ent.refs("setby,useby"):
-            file = ref.file().longname()
-            if file in usages:
-                usages[file].append(ref.line())
-            else:
-                usages[file] = [ref.line(), ]
+    # Find usages
+    usages = {}
 
-        src_class_file = db.lookup(f"{src_package}/{src_class}.java")[0].longname()
-        target_class_file = db.lookup(f"{src_package}/{target_class}.java")[0].longname()
+    for ref in field_ent.refs("setby,useby"):
+        file = ref.file().longname()
+        if file in usages:
+            usages[file].append(ref.line())
+        else:
+            usages[file] = [ref.line(), ]
 
-        # Check if there is an cycle
-        # TODO: Can we check cycle with understand ?
-        stream = FileStream(target_class_file)
-        lexer = JavaLexer(stream)
-        tokens = CommonTokenStream(lexer)
-        parser = JavaParserLabeled(tokens)
-        tree = parser.compilationUnit()
-        listener = CheckCycleListener(
-            class_name=src_class,
-        )
-        ParseTreeWalker().walk(
-            listener,
-            tree
-        )
+    src_class_file = db.lookup(f"{source_package}.{source_class}.java")[0].longname()
+    target_class_file = db.lookup(f"{target_package}.{target_class}.java")[0].longname()
 
-        assert listener.is_valid, f"Can not move field because there is a cycle between {src_class}, {target_class}"
+    # Check if there is an cycle
+    listener = parse_and_walk(
+        file_path=target_class_file,
+        listener_class=CheckCycleListener,
+        class_name=source_class,
+    )
 
-        # Do the cut and paste!
-        # Cut
-        stream = FileStream(src_class_file)
-        lexer = JavaLexer(stream)
-        tokens = CommonTokenStream(lexer)
-        rewriter = TokenStreamRewriter(tokens)
-        parser = JavaParserLabeled(tokens)
-        tree = parser.compilationUnit()
-        listener = CutFieldListener(
-            class_name=target_class,
+    if not listener.is_valid:
+        logger.error(f"Can not move field because there is a cycle between {source_class}, {target_class}")
+        return
+
+    # Propagate Changes
+    for file in usages.keys():
+        parse_and_walk(
+            file_path=file,
+            listener_class=PropagateListener,
+            has_write=True,
             field_name=field_name,
-            rewriter=rewriter
+            new_name=f"{instance_name}.{field_name}",
+            lines=usages[file],
         )
-        ParseTreeWalker().walk(
-            listener,
-            tree
-        )
-        instance_name = listener.instance_name
-        field_text = listener.field_text
-        assert len(field_text) > 1
-        with open(src_class_file, 'w') as f:
-            f.write(listener.rewriter.getDefaultText())
-        # print("=" * 30)
-        # print(listener.rewriter.getDefaultText())
-        # print("=" * 30)
-        # Paste
-        stream = FileStream(target_class_file)
-        lexer = JavaLexer(stream)
-        tokens = CommonTokenStream(lexer)
-        rewriter = TokenStreamRewriter(tokens)
-        parser = JavaParserLabeled(tokens)
-        tree = parser.compilationUnit()
-        listener = PasteFieldListener(
-            field_text=field_text,
-            rewriter=rewriter
-        )
-        ParseTreeWalker().walk(
-            listener,
-            tree
-        )
-        with open(target_class_file, 'w') as f:
-            f.write(listener.rewriter.getDefaultText())
-        # print(listener.rewriter.getDefaultText())
-        # print("=" * 30)
 
-        # Propagate Changes
-        for file in usages.keys():
-            stream = FileStream(file)
-            lexer = JavaLexer(stream)
-            tokens = CommonTokenStream(lexer)
-            rewriter = TokenStreamRewriter(tokens)
-            parser = JavaParserLabeled(tokens)
-            tree = parser.compilationUnit()
-            listener = PropagateListener(
-                field_name=field_name,
-                new_name=f"{instance_name}.{field_name}",
-                lines=usages[file],
-                rewriter=rewriter
-            )
-            ParseTreeWalker().walk(
-                listener,
-                tree
-            )
+    # Do the cut and paste!
+    # Cut
 
-            with open(file, 'w') as f:
-                f.write(listener.rewriter.getDefaultText())
+    listener = parse_and_walk(
+        file_path=src_class_file,
+        listener_class=CutFieldListener,
+        has_write=True,
+        class_name=target_class,
+        instance_name=instance_name,
+        field_name=field_name,
+        is_static=is_static,
+        import_statement=import_statement
+    )
 
-            # print(listener.rewriter.getDefaultText())
-            # print("=" * 30)
+    field_text = listener.field_text
+
+    # Paste
+    parse_and_walk(
+        file_path=target_class_file,
+        listener_class=PasteFieldListener,
+        has_write=True,
+        field_text=field_text,
+    )
 
 
 if __name__ == '__main__':
-    main()
+    main(
+        source_class="Source",
+        source_package="my_package",
+        target_class="TargetNew",
+        target_package="your_package",
+        field_name="number3",
+        udb_path="D:\Dev\JavaSample\JavaSample1.udb"
+    )
