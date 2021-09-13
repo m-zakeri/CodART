@@ -1,4 +1,5 @@
 import logging
+
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
@@ -20,15 +21,26 @@ logger.info("You can find developer at: https://www.linkedin.com/in/seyyedaliaya
 
 
 class CutMethodListener(JavaParserLabeledListener):
-    def __init__(self, class_name: str, method_name: str, is_static: bool, rewriter: TokenStreamRewriter):
+    def __init__(self, class_name: str, instance_name: str, method_name: str, is_static: bool, import_statement: str, rewriter: TokenStreamRewriter):
         self.class_name = class_name
         self.method_name = method_name
         self.is_static = is_static
         self.rewriter = rewriter
-        self.instance_name = class_name.lower() + "ByCodArt"
+        self.import_statement = import_statement
+
+        self.instance_name = instance_name
         self.is_member = False
         self.do_delete = False
         self.method_text = ""
+
+    def exitPackageDeclaration(self, ctx:JavaParserLabeled.PackageDeclarationContext):
+        if self.import_statement:
+            self.rewriter.insertAfterToken(
+                token=ctx.stop,
+                text=self.import_statement,
+                program_name=self.rewriter.DEFAULT_PROGRAM_NAME
+            )
+            self.import_statement = None
 
     def enterMemberDeclaration0(self, ctx: JavaParserLabeled.MemberDeclaration0Context):
         self.is_member = True
@@ -92,6 +104,10 @@ class PropagateListener(JavaParserLabeledListener):
 
 def main(source_class: str, source_package: str, target_class: str, target_package: str, method_name: str,
          udb_path: str):
+    import_statement = None
+    if source_package != target_package:
+        import_statement = f"\nimport {target_package}.{target_class};"
+    instance_name = target_class.lower() + "ByCodArt"
     db = und.open(udb_path)
 
     # Check if method is static
@@ -125,29 +141,6 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
     if not listener.is_valid:
         logger.error(f"Can not move method because there is a cycle between {source_class}, {target_class}")
         return None
-
-    # Do the cut and paste!
-    # Cut
-    listener = parse_and_walk(
-        file_path=src_class_file,
-        listener_class=CutMethodListener,
-        has_write=True,
-        class_name=target_class,
-        method_name=method_name,
-        is_static=is_static
-    )
-
-    instance_name = listener.instance_name
-    method_text = listener.method_text
-
-    # Paste
-    parse_and_walk(
-        file_path=target_class_file,
-        listener_class=PasteMethodListener,
-        has_write=True,
-        method_text=method_text
-    )
-
     # Propagate Changes
     for file in usages.keys():
         parse_and_walk(
@@ -158,6 +151,28 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
             new_name=f"{instance_name}.{method_name}",
             lines=usages[file],
         )
+    # Do the cut and paste!
+    # Cut
+    listener = parse_and_walk(
+        file_path=src_class_file,
+        listener_class=CutMethodListener,
+        has_write=True,
+        class_name=target_class,
+        instance_name=instance_name,
+        method_name=method_name,
+        is_static=is_static,
+        import_statement=import_statement
+    )
+
+    method_text = listener.method_text
+
+    # Paste
+    parse_and_walk(
+        file_path=target_class_file,
+        listener_class=PasteMethodListener,
+        has_write=True,
+        method_text=method_text
+    )
     db.close()
 
 
