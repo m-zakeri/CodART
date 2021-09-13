@@ -19,15 +19,26 @@ logger.info("You can find me at: https://www.linkedin.com/in/seyyedaliayati/")
 
 
 class CutFieldListener(JavaParserLabeledListener):
-    def __init__(self, class_name: str, field_name: str, is_static: bool, rewriter: TokenStreamRewriter):
+    def __init__(self, class_name: str, field_name: str, is_static: bool, import_statement: str, rewriter: TokenStreamRewriter):
         self.class_name = class_name
         self.field_name = field_name
         self.is_static = is_static
+        self.import_statement = import_statement
         self.rewriter = rewriter
+
         self.instance_name = class_name.lower() + "ByCodArt"
         self.is_member = False
         self.do_delete = False
         self.field_text = ""
+
+    def exitPackageDeclaration(self, ctx:JavaParserLabeled.PackageDeclarationContext):
+        if self.import_statement:
+            self.rewriter.insertAfterToken(
+                token=ctx.stop,
+                text=self.import_statement,
+                program_name=self.rewriter.DEFAULT_PROGRAM_NAME
+            )
+            self.import_statement = None
 
     def enterMemberDeclaration2(self, ctx: JavaParserLabeled.MemberDeclaration2Context):
         self.is_member = True
@@ -119,6 +130,10 @@ class CheckCycleListener(JavaParserLabeledListener):
 
 def main(source_class: str, source_package: str, target_class: str, target_package: str, field_name: str,
          udb_path: str):
+    import_statement = None
+    if source_package != target_package:
+        import_statement = f"\nimport {target_package}.{target_class};"
+
     db = und.open(udb_path)
 
     # Check if field is static
@@ -163,7 +178,8 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
         has_write=True,
         class_name=target_class,
         field_name=field_name,
-        is_static=is_static
+        is_static=is_static,
+        import_statement=import_statement
     )
 
     instance_name = listener.instance_name
@@ -194,8 +210,8 @@ if __name__ == '__main__':
     main(
         source_class="Source",
         source_package="my_package",
-        target_class="Target",
-        target_package="my_package",
-        field_name="number2",
+        target_class="TargetNew",
+        target_package="your_package",
+        field_name="number3",
         udb_path="D:\Dev\JavaSample\JavaSample1.udb"
     )
