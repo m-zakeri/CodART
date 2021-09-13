@@ -113,7 +113,7 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
             usages[file] = [ref.line(), ]
 
     src_class_file = db.lookup(f"{source_package}.{source_class}.java")[0].longname()
-    target_class_file = db.lookup(f"{source_package}.{target_class}.java")[0].longname()
+    target_class_file = db.lookup(f"{target_package}.{target_class}.java")[0].longname()
 
     # Check if there is an cycle
     listener = parse_and_walk(
@@ -165,8 +165,8 @@ if __name__ == '__main__':
     main(
         source_class="Source",
         source_package="my_package",
-        target_class="Target",
-        target_package="my_package",
+        target_class="TargetNew",
+        target_package="your_package",
         method_name="printTest",
         udb_path="D:\Dev\JavaSample\JavaSample1.udb"
     )
