@@ -4,8 +4,7 @@ import progressbar
 from config import *
 from utilization.setup_understand import *
 from refactorings import make_field_non_static, make_field_static, make_method_static_2, \
-    make_method_non_static_2, pullup_field, move_static_field
-from utilization.directory_utils import update_understand_database
+    make_method_non_static_2, pullup_field, move_field, move_method
 
 
 # TODO: check pymoo (framework) if possible
@@ -117,7 +116,10 @@ class Initialization(object):
     def init_pullup_field(self):
         pass
 
-    def init_move_static_field(self):
+    def init_move_field(self):
+        pass
+
+    def init_move_method(self):
         pass
 
     def generate_population(self):
@@ -127,7 +129,8 @@ class Initialization(object):
             # self.init_make_method_static,
             # self.init_make_method_non_static,
             # self.init_pullup_field,
-            self.init_move_static_field,
+            self.init_move_field,
+            self.init_move_method
         )
         population = []
         for _ in progressbar.progressbar(range(self.population_size)):
@@ -197,29 +200,60 @@ class RandomInitialization(Initialization):
         params.update(random.choice(candidates))
         return refactoring_main, params
 
-    def init_move_static_field(self):
+    def init_move_field(self):
         """
-        Finds static fields with a class to move
+        Finds fields with a class to move
 
         Returns: refactoring main method and its parameters.
         """
-        refactoring_main = move_static_field.main
-        params = {"project_dir": str(Path(self.udb_path).parent)}
-        random_field = random.choice(self._static_variables)
+        refactoring_main = move_field.main
+        params = {"udb_path": str(Path(self.udb_path))}
+        random_field = random.choice(self._variables)
         params.update(random_field)
         random_class = random.choice(self.get_all_class_entities()).longname().split(".")
         target_package = None
-
+        """
+        target_class: str, target_package: str,
+        """
         if len(random_class) == 1:
             target_class = random_class[0]
-        elif len(random_class) == 2:
-            target_package, target_class = random_class
+        elif len(random_class) > 1:
+            target_package = '.'.join(random_class[:-1])
+            target_class = random_class[-1]
         else:
-            return self.init_move_static_field()
+            return self.init_move_field()
+        params.update({
+            "target_class": target_class,
+            "target_package": target_package
+        })
+        return refactoring_main, params
 
-        if params.get('source_class') == target_class and params.get('source_package') == target_package:
-            return self.init_move_static_field()
-        params.update({"target_package": target_package, "target_class": target_class})
+    def init_move_method(self):
+        """
+        Finds methods with a class to move
+
+        Returns: refactoring main method and its parameters.
+        """
+        refactoring_main = move_method.main
+        params = {"udb_path": str(Path(self.udb_path))}
+        random_field = random.choice(self._methods)
+        params.update(random_field)
+        random_class = random.choice(self.get_all_class_entities()).longname().split(".")
+        target_package = None
+        """
+        target_class: str, target_package: str,
+        """
+        if len(random_class) == 1:
+            target_class = random_class[0]
+        elif len(random_class) > 1:
+            target_package = '.'.join(random_class[:-1])
+            target_class = random_class[-1]
+        else:
+            return self.init_move_field()
+        params.update({
+            "target_class": target_class,
+            "target_package": target_package
+        })
         return refactoring_main, params
 
 

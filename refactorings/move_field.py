@@ -4,7 +4,7 @@ from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
-from utils.utils2 import parse_and_walk
+from refactorings.utils.utils2 import parse_and_walk
 
 try:
     import understand as und
@@ -140,7 +140,13 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
 
     # Check if field is static
     field_ent = db.lookup(f"{source_package}.{source_class}.{field_name}")
-    assert len(field_ent) == 1
+    if len(field_ent) != 1:
+        logger.error("Entity not found.")
+        return None
+
+    if source_package == target_package and source_class == target_class:
+        logger.error("Can not move to self.")
+        return None
     field_ent = field_ent[0]
     is_static = field_ent.kindname() == STATIC
 

@@ -115,7 +115,9 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
     if len(method_ent) != 1:
         logger.error("Can not move method duo to duplicated entities.")
         return None
-
+    if source_package == target_package and source_class == target_class:
+        logger.error("Can not move to self.")
+        return None
     method_ent = method_ent[0]
     is_static = STATIC in method_ent.kindname()
     # Find usages
