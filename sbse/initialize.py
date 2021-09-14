@@ -46,10 +46,18 @@ class Initialization(object):
                 continue
             if not parent.kind().check("class") or parent.kind().check("anonymous"):
                 continue
-            source_class = parent.simplename()
+            long_name = parent.longname().split('.')
             method_name = ent.simplename()
+            if len(long_name) == 1:
+                source_class = long_name[-1]
+                source_package = None
+            elif len(long_name) > 1:
+                source_class = long_name[-1]
+                source_package = ".".join(long_name[:-1])
+            else:
+                continue
             # print("Method", source_class, parent.kindname(), method_name)
-            candidates.append({'source_class': source_class, 'method_name': method_name})
+            candidates.append({'source_package': source_package, 'source_class': source_class, 'method_name': method_name})
         return candidates
 
     def get_all_variables(self, static=False):
@@ -236,8 +244,8 @@ class RandomInitialization(Initialization):
         """
         refactoring_main = move_method.main
         params = {"udb_path": str(Path(self.udb_path))}
-        random_field = random.choice(self._methods)
-        params.update(random_field)
+        random_method = random.choice(self._methods)
+        params.update(random_method)
         random_class = random.choice(self.get_all_class_entities()).longname().split(".")
         target_package = None
         """
