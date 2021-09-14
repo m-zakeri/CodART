@@ -162,9 +162,14 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
             usages[file].append(ref.line())
         else:
             usages[file] = [ref.line(), ]
-
-    src_class_file = db.lookup(f"{source_package}.{source_class}.java")[0].longname()
-    target_class_file = db.lookup(f"{target_package}.{target_class}.java")[0].longname()
+    try:
+        src_class_file = db.lookup(f"{source_package}.{source_class}.java")[0].longname()
+        target_class_file = db.lookup(f"{target_package}.{target_class}.java")[0].longname()
+    except IndexError:
+        logger.error("This is a nested class.")
+        logger.info(f"{source_package}.{source_class}.java")
+        logger.info(f"{target_package}.{target_class}.java")
+        return None
 
     # Check if there is an cycle
     listener = parse_and_walk(
@@ -211,6 +216,8 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
         has_write=True,
         field_text=field_text,
     )
+
+    db.close()
 
 
 if __name__ == '__main__':

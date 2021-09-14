@@ -6,8 +6,8 @@ from initialize import RandomInitialization
 from objectives import Objectives
 from utilization.directory_utils import update_understand_database, git_restore, create_understand_database
 
-udb_path = "/data/Dev/CodART/benchmark_projects/JSON/JSON.udb"
-project_dir = "/data/Dev/CodART/benchmark_projects/JSON/"
+udb_path = "D:\Dev\ganttproject\ganttproject.udb"
+project_dir = "D:\Dev\ganttproject"
 
 rand_init = RandomInitialization(
         udb_path=udb_path,
@@ -15,7 +15,10 @@ rand_init = RandomInitialization(
         individual_size=INDIVIDUAL_SIZE
     )
 rand_pop = rand_init.generate_population()
-score = Objectives(udb_path=udb_path).reusability
+rand_init._und.close()
+objectives = Objectives(udb_path=udb_path)
+score = objectives.reusability
+objectives.qmood.db.close()
 k = 0
 limit = len(rand_pop)
 best_answer = None

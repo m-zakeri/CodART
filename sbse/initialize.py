@@ -89,8 +89,8 @@ class Initialization(object):
             candidates.append({'source_package': source_package, 'source_class': source_class, 'field_name': field_name})
         return candidates
 
-    def get_all_class_entities(self):
-        query = self._und.ents("class ~Unknown ~Anonymous ~TypeVariable")
+    def get_all_class_entities(self, filter="class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static"):
+        query = self._und.ents(filter)
         class_entities = []
         for ent in query:
             class_entities.append(ent)
@@ -138,7 +138,7 @@ class Initialization(object):
             # self.init_make_method_non_static,
             # self.init_pullup_field,
             self.init_move_field,
-            self.init_move_method
+            # self.init_move_method
         )
         population = []
         for _ in progressbar.progressbar(range(self.population_size)):
