@@ -39,7 +39,9 @@ while k < MAX_ITERATIONS and limit > 0:
     # update understand database
     update_understand_database(udb_path)
     # calculate objective
-    obj_score = Objectives(udb_path=udb_path).reusability
+    obj = Objectives(udb_path=udb_path)
+    obj_score = obj.reusability
+    objectives.qmood.db.close()
     print("Objective Score", obj_score)
     if obj_score < score:
         score = obj_score
