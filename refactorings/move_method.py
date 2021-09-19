@@ -111,14 +111,21 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
     db = und.open(udb_path)
 
     # Check if method is static
-    method_ent = db.lookup(f"{source_package}.{source_class}.{method_name}")
-    if len(method_ent) != 1:
-        logger.error("Can not move method duo to duplicated entities.")
+    method_ent = db.lookup(f"{source_package}.{source_class}.{method_name}", "Method")
+    if len(method_ent) >= 1:
+        method_ent = method_ent[0]
+    else:
+        logger.error("Entity not found.")
         return None
+
+    if method_ent.simplename() != method_name:
+        logger.error("Can not move method duo to duplicated entities.")
+        logger.info(f"{method_ent}, {method_ent.kindname()}")
+        return None
+
     if source_package == target_package and source_class == target_class:
         logger.error("Can not move to self.")
         return None
-    method_ent = method_ent[0]
     is_static = STATIC in method_ent.kindname()
     # Find usages
     usages = {}
@@ -134,7 +141,9 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
         src_class_file = db.lookup(f"{source_package}.{source_class}.java")[0].longname()
         target_class_file = db.lookup(f"{target_package}.{target_class}.java")[0].longname()
     except IndexError:
-        logger.error("This is a nested class.")
+        logger.error("This is a nested method.")
+        logger.info(f"{source_package}.{source_class}.java")
+        logger.info(f"{target_package}.{target_class}.java")
         return None
 
     # Check if there is an cycle

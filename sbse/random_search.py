@@ -15,10 +15,7 @@ rand_init = RandomInitialization(
         individual_size=INDIVIDUAL_SIZE
     )
 rand_pop = rand_init.generate_population()
-rand_init._und.close()
-objectives = Objectives(udb_path=udb_path)
-score = objectives.reusability
-objectives.qmood.db.close()
+score = Objectives(udb_path=udb_path).reusability
 k = 0
 limit = len(rand_pop)
 best_answer = None
@@ -39,9 +36,7 @@ while k < MAX_ITERATIONS and limit > 0:
     # update understand database
     update_understand_database(udb_path)
     # calculate objective
-    obj = Objectives(udb_path=udb_path)
-    obj_score = obj.reusability
-    objectives.qmood.db.close()
+    obj_score = Objectives(udb_path=udb_path).reusability
     print("Objective Score", obj_score)
     if obj_score < score:
         score = obj_score

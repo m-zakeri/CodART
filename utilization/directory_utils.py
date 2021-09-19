@@ -33,7 +33,7 @@ def create_understand_database(project_dir):
     process = subprocess.Popen(
         ['und', 'create', '-languages', 'Java', 'add', project_dir, 'analyze', '-all', db_path],
     )
-    process.wait()
+    process.communicate()
     return db_path
 
 
@@ -47,5 +47,5 @@ def update_understand_database(udb_path):
     process = subprocess.Popen(
         ['und', 'analyze', '-all', udb_path],
     )
-    process.wait()
+    process.communicate()
     print("Finished updating...")
