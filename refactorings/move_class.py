@@ -26,6 +26,7 @@ Moving a class in a file from source package to target package
 
 import argparse
 import os
+from pathlib import Path
 
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
@@ -34,6 +35,10 @@ from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
+try:
+    import understand as und
+except ImportError as e:
+    print(e)
 
 def log_error(title, message):
     """
@@ -75,7 +80,6 @@ class MoveClassPreConditionListener(JavaParserLabeledListener):
         field_type = ctx.typeType().getText()
         if field_type in self.file_classes:
             log_error("Forbidden", "This class has fields that dependent on other classes")
-            exit(0)
 
     # Exit a parse tree produced by Expression0Context
     def exitExpression0(self, ctx: JavaParserLabeled.Expression0Context):
@@ -85,7 +89,6 @@ class MoveClassPreConditionListener(JavaParserLabeledListener):
         expression = ctx.primary().getText()
         if expression in self.file_classes:
             log_error("Forbidden", "This class has dependencies on other classes")
-            exit(0)
 
     # Exit a parse tree produced by LocalVariableDeclarationContext
     def exitLocalVariableDeclaration(self, ctx: JavaParserLabeled.LocalVariableDeclarationContext):
@@ -95,7 +98,6 @@ class MoveClassPreConditionListener(JavaParserLabeledListener):
         local_variable_type = ctx.typeType().getText()
         if local_variable_type in self.file_classes:
             log_error("Forbidden", "This class has local variables that dependent on other classes")
-            exit(0)
 
 
 class MoveClassRefactoringListener(JavaParserLabeledListener):
@@ -435,12 +437,17 @@ class ReplaceDependentObjectsListener(JavaParserLabeledListener):
 
 
 class MoveClassAPI:
-    def __init__(self, class_identifier: str, source_package: str, target_package: str, directory: str):
+    def __init__(self, class_identifier: str, source_package: str, target_package: str, udb_path: str):
         self.class_identifier = class_identifier
         self.source_package = source_package
         self.target_package = target_package
-        self.directory = directory
-        self.filename = f'{self.class_identifier}.java'
+        self.directory = ""
+        self.udb_path = udb_path
+        self.db = und.open(udb_path)
+        self.source_file_path = self.db.lookup(f"{source_package}.{class_identifier}.java")[0].longname()
+        for ent in self.db.ents("package"):
+            if ent.name() == "(Unnamed_Package)":
+                self.directory = str(Path(ent.parent().longname()).parent)
         self.file_counter = 0
 
     def check_preconditions(self):
@@ -547,12 +554,12 @@ class MoveClassAPI:
 
         return parse_tree, token_stream
 
-    def recursive_walk(self, dir_path, source_file_path):
+    def recursive_walk(self, dir_path):
         """
         walks through the specified directory files to implement refactoring
         :param dir_path: directory path
         """
-        args = self.get_argument_parser(source_file_path)
+        args = self.get_argument_parser(self.source_file_path)
         parse_tree, token_stream = self.get_parse_tree_token_stream(args)
 
         # check if the class has dependencies on other classes in the same class
@@ -560,7 +567,7 @@ class MoveClassAPI:
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=pre_condition_listener)
 
-        filename_without_extension, extension = os.path.splitext(self.filename)
+        filename_without_extension, extension = os.path.splitext(self.source_file_path)
         if extension == '.java':
             self.move_class(token_stream, parse_tree, args)
         else:
@@ -568,7 +575,7 @@ class MoveClassAPI:
 
         for dirname, dirs, files in os.walk(dir_path):
             for file in files:
-                if file == self.filename or file == self.class_identifier + '.java':
+                if file == self.source_file_path or file == self.class_identifier + '.java':
                     continue
                 file_without_extension, extension = os.path.splitext(file)
                 if extension == '.java':
@@ -590,7 +597,6 @@ class MoveClassAPI:
         else:
             target_package_directory = self.directory
 
-        source_file_path = os.path.join(source_package_directory, self.filename)
         target_file_path = os.path.join(target_package_directory, f"{self.class_identifier}.java")
 
         if not os.path.exists(source_package_directory):
@@ -599,30 +605,31 @@ class MoveClassAPI:
         if not os.path.exists(target_package_directory):
             raise NotADirectoryError(f"The package \"{self.target_package}\" NOT FOUND!")
 
-        if not os.path.isfile(source_file_path):
-            raise FileNotFoundError(f"The file \"{self.filename}\" NOT FOUND in package {self.source_package}!")
+        if not os.path.isfile(self.source_file_path):
+            raise FileNotFoundError(f"The file \"{self.source_file_path}\" NOT FOUND in package {self.source_package}!")
 
         if os.path.isfile(target_file_path):
             log_error("Redundant",
                       f"The class \"{self.class_identifier}\" already exists in package \"{self.target_package}\"!")
-            exit(0)
 
         # start refactoring
-        self.recursive_walk(self.directory, source_file_path)
+        self.recursive_walk(self.directory)
 
 
-def main(project_dir: str, class_name: str, source_package: str, target_package: str):
-    MoveClassAPI(
-        directory=project_dir,
+def main(udb_path: str, class_name: str, source_package: str, target_package: str):
+    mc = MoveClassAPI(
+        udb_path=udb_path,
         class_identifier=class_name,
         source_package=source_package,
         target_package=target_package
-    ).do_refactor()
+    )
+    mc.do_refactor()
+    mc.db.close()
 
 
 if __name__ == '__main__':
     main(
-        project_dir="D:\Dev\JavaSample\src",
+        udb_path="D:\Dev\JavaSample\JavaSample1.udb",
         class_name="Target",
         source_package="my_package",
         target_package="your_package",

@@ -270,7 +270,7 @@ class RandomInitialization(Initialization):
 
     def init_move_class(self):
         refactoring_main = move_class.main
-        params = {"project_dir": str(Path(self.udb_path).parent)}
+        params = {"udb_path": str(Path(self.udb_path))}
         random_class = random.choice(self.get_all_class_entities()).longname().split(".")
         random_class_2 = random.choice(self.get_all_class_entities()).longname().split(".")
         if len(random_class) == 1:
