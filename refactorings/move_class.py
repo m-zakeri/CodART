@@ -149,7 +149,7 @@ class MoveClassRefactoringListener(JavaParserLabeledListener):
 
         self.TAB = "\t"
         self.NEW_LINE = "\n"
-        self.code = f"package {self.target_package};{self.NEW_LINE}{self.NEW_LINE}"
+        self.code = f"package {self.target_package};{self.NEW_LINE}{self.NEW_LINE}" if self.target_package else ""
 
     # Exit a parse tree produced by JavaParserLabeled#importDeclaration.
     def exitImportDeclaration(self, ctx: JavaParserLabeled.ImportDeclarationContext):
@@ -359,7 +359,8 @@ class ReplaceDependentObjectsListener(JavaParserLabeledListener):
             imported_package += '.' + ctx.MUL().getText()
 
         # return if the current import statement is not relevant to source package
-        if self.source_package not in imported_package or (self.class_identifier not in imported_package and '*' not in imported_package):
+        if self.source_package not in imported_package or (
+                self.class_identifier not in imported_package and '*' not in imported_package):
             return
 
         start_index = ctx.start.tokenIndex
@@ -433,157 +434,196 @@ class ReplaceDependentObjectsListener(JavaParserLabeledListener):
                 )
 
 
+class MoveClassAPI:
+    def __init__(self, class_identifier: str, source_package: str, target_package: str, directory: str):
+        self.class_identifier = class_identifier
+        self.source_package = source_package
+        self.target_package = target_package
+        self.directory = directory
+        self.filename = f'{self.class_identifier}.java'
+        self.file_counter = 0
 
-filename = 'Source.java'
-class_identifier = 'Source'
-source_package = 'my_package'
-target_package = 'your_package'
-directory = '/data/Dev/JavaSample/src/'
-file_counter = 0
+    def check_preconditions(self):
+        sp = self.source_package.split(".")
+        tp = self.target_package.split(".")
 
+        if len(sp) != len(tp):
+            return False
+        else:
+            if len(sp) > 1:
+                if sp[-2] != tp[-2]:
+                    return False
+        return True
 
-def move_class(token_stream, parse_tree, args):
-    """
-    move_class method uses MoveClassRefactorListener to move the class to the target package
-    :param token_stream: common token stream
-    :param parse_tree: generated parse tree
-    :param args: file arguments
-    :return: None
-    """
-    move_class_listener = MoveClassRefactoringListener(
-        common_token_stream=token_stream, source_package=source_package, target_package=target_package,
-        class_identifier=class_identifier, filename=args.file, dirname=directory
-    )
-    walker = ParseTreeWalker()
-    walker.walk(t=parse_tree, listener=move_class_listener)
-
-    with open(args.file, mode='w', newline='') as f:
-        f.write(move_class_listener.token_stream_rewriter.getDefaultText().replace("\r", ""))
-
-
-def post_move_class_propagation(token_stream, parse_tree, args):
-    """
-    post_move_class_propagation method is used to propagate post-conditions after moving the class
-    :param token_stream: common token stream
-    :param parse_tree: generated parse tree
-    :param args: file arguments
-    :return: None
-    """
-    has_import = False
-    has_exact_import = False
-
-    file_to_check = open(file=args.file, mode='r')
-    for line in file_to_check.readlines():
-        text_line = line.replace('\n', '').replace('\r', '').strip()
-        if (text_line.startswith('import') and text_line.endswith(source_package + '.' + class_identifier + ';')) \
-                or (text_line.startswith('import') and text_line.endswith(source_package + '.*;')):
-            has_import = True
-            break
-        if (text_line.startswith('import') and text_line.endswith(target_package + '.' + class_identifier + ';')) \
-                or (text_line.startswith('import') and text_line.endswith(target_package + '.*;')):
-            has_exact_import = True
-            break
-
-    if not has_exact_import:
-        print(f"Start checking file \"{file_to_check.name}\" *** {file_counter}/100")
-
-        replace_dependent_object_listener = ReplaceDependentObjectsListener(
-            common_token_stream=token_stream, source_package=source_package, target_package=target_package,
-            class_identifier=class_identifier, filename=args.file, has_import=has_import
+    def move_class(self, token_stream, parse_tree, args):
+        """
+        move_class method uses MoveClassRefactorListener to move the class to the target package
+        :param token_stream: common token stream
+        :param parse_tree: generated parse tree
+        :param args: file arguments
+        :return: None
+        """
+        move_class_listener = MoveClassRefactoringListener(
+            common_token_stream=token_stream, source_package=self.source_package, target_package=self.target_package,
+            class_identifier=self.class_identifier, filename=args.file, dirname=self.directory
         )
         walker = ParseTreeWalker()
-        walker.walk(t=parse_tree, listener=replace_dependent_object_listener)
+        walker.walk(t=parse_tree, listener=move_class_listener)
 
         with open(args.file, mode='w', newline='') as f:
-            f.write(replace_dependent_object_listener.token_stream_rewriter.getDefaultText().replace("\r", ""))
+            f.write(move_class_listener.token_stream_rewriter.getDefaultText().replace("\r", ""))
 
-        print(f"Finish checking file \"{file_to_check.name}\" *** {file_counter}/100")
+    def post_move_class_propagation(self, token_stream, parse_tree, args):
+        """
+        post_move_class_propagation method is used to propagate post-conditions after moving the class
+        :param token_stream: common token stream
+        :param parse_tree: generated parse tree
+        :param args: file arguments
+        :return: None
+        """
+        has_import = False
+        has_exact_import = False
+
+        file_to_check = open(file=args.file, mode='r')
+        for line in file_to_check.readlines():
+            text_line = line.replace('\n', '').replace('\r', '').strip()
+            if (text_line.startswith('import') and text_line.endswith(
+                    self.source_package + '.' + self.class_identifier + ';')) \
+                    or (text_line.startswith('import') and text_line.endswith(self.source_package + '.*;')):
+                has_import = True
+                break
+            if (text_line.startswith('import') and text_line.endswith(
+                    self.target_package + '.' + self.class_identifier + ';')) \
+                    or (text_line.startswith('import') and text_line.endswith(self.target_package + '.*;')):
+                has_exact_import = True
+                break
+
+        if not has_exact_import:
+            print(f"Start checking file \"{file_to_check.name}\" *** {self.file_counter}/100")
+
+            replace_dependent_object_listener = ReplaceDependentObjectsListener(
+                common_token_stream=token_stream, source_package=self.source_package,
+                target_package=self.target_package,
+                class_identifier=self.class_identifier, filename=args.file, has_import=has_import
+            )
+            walker = ParseTreeWalker()
+            walker.walk(t=parse_tree, listener=replace_dependent_object_listener)
+
+            with open(args.file, mode='w', newline='') as f:
+                f.write(replace_dependent_object_listener.token_stream_rewriter.getDefaultText().replace("\r", ""))
+
+            print(f"Finish checking file \"{file_to_check.name}\" *** {self.file_counter}/100")
+
+    def get_argument_parser(self, file):
+        """
+        get_argument_parser method used to parse the arguments
+        :param file: file name
+        """
+        arg_parser = argparse.ArgumentParser()
+        arg_parser.add_argument(
+            '-n', '--file',
+            help='Input source', default=file)
+
+        args = arg_parser.parse_args()
+        return args
+
+    def get_parse_tree_token_stream(self, args):
+        """
+        returns parse tree and token stream base on the file stream
+        :param args: file arguments
+        """
+
+        # Step 1: Load input source into stream
+        stream = FileStream(args.file, encoding='utf8')
+        # Step 2: Create an instance of AssignmentStLexer
+        lexer = JavaLexer(stream)
+        # Step 3: Convert the input source into a list of tokens
+        token_stream = CommonTokenStream(lexer)
+        # Step 4: Create an instance of the AssignmentStParser
+        parser = JavaParserLabeled(token_stream)
+        parser.getTokenStream()
+        # Step 5: Create parse tree
+        parse_tree = parser.compilationUnit()
+
+        return parse_tree, token_stream
+
+    def recursive_walk(self, dir_path, source_file_path):
+        """
+        walks through the specified directory files to implement refactoring
+        :param dir_path: directory path
+        """
+        args = self.get_argument_parser(source_file_path)
+        parse_tree, token_stream = self.get_parse_tree_token_stream(args)
+
+        # check if the class has dependencies on other classes in the same class
+        pre_condition_listener = MoveClassPreConditionListener()
+        walker = ParseTreeWalker()
+        walker.walk(t=parse_tree, listener=pre_condition_listener)
+
+        filename_without_extension, extension = os.path.splitext(self.filename)
+        if extension == '.java':
+            self.move_class(token_stream, parse_tree, args)
+        else:
+            raise ValueError(f"The filename format must be \".java\", but found {extension}!")
+
+        for dirname, dirs, files in os.walk(dir_path):
+            for file in files:
+                if file == self.filename or file == self.class_identifier + '.java':
+                    continue
+                file_without_extension, extension = os.path.splitext(file)
+                if extension == '.java':
+                    args = self.get_argument_parser(os.path.join(dirname, file))
+                    parse_tree, token_stream = self.get_parse_tree_token_stream(args)
+                    self.post_move_class_propagation(token_stream, parse_tree, args)
+
+    def do_refactor(self):
+        if not self.check_preconditions():
+            log_error("Move Class Preconditions", "This error is from line 578 in move_class.py")
+            return None
+        if self.source_package:
+            source_package_directory = os.path.join(self.directory, self.source_package.replace('.', '/'))
+        else:
+            source_package_directory = self.directory
+
+        if self.target_package:
+            target_package_directory = os.path.join(self.directory, self.target_package.replace('.', '/'))
+        else:
+            target_package_directory = self.directory
+
+        source_file_path = os.path.join(source_package_directory, self.filename)
+        target_file_path = os.path.join(target_package_directory, f"{self.class_identifier}.java")
+
+        if not os.path.exists(source_package_directory):
+            raise NotADirectoryError(f"The package \"{self.source_package}\" NOT FOUND!")
+
+        if not os.path.exists(target_package_directory):
+            raise NotADirectoryError(f"The package \"{self.target_package}\" NOT FOUND!")
+
+        if not os.path.isfile(source_file_path):
+            raise FileNotFoundError(f"The file \"{self.filename}\" NOT FOUND in package {self.source_package}!")
+
+        if os.path.isfile(target_file_path):
+            log_error("Redundant",
+                      f"The class \"{self.class_identifier}\" already exists in package \"{self.target_package}\"!")
+            exit(0)
+
+        # start refactoring
+        self.recursive_walk(self.directory, source_file_path)
 
 
-def get_argument_parser(file):
-    """
-    get_argument_parser method used to parse the arguments
-    :param file: file name
-    """
-    arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument(
-        '-n', '--file',
-        help='Input source', default=file)
-
-    args = arg_parser.parse_args()
-    return args
-
-
-def get_parse_tree_token_stream(args):
-    """
-    returns parse tree and token stream base on the file stream
-    :param args: file arguments
-    """
-
-    # Step 1: Load input source into stream
-    stream = FileStream(args.file, encoding='utf8')
-    # Step 2: Create an instance of AssignmentStLexer
-    lexer = JavaLexer(stream)
-    # Step 3: Convert the input source into a list of tokens
-    token_stream = CommonTokenStream(lexer)
-    # Step 4: Create an instance of the AssignmentStParser
-    parser = JavaParserLabeled(token_stream)
-    parser.getTokenStream()
-    # Step 5: Create parse tree
-    parse_tree = parser.compilationUnit()
-
-    return parse_tree, token_stream
-
-
-def recursive_walk(dir_path):
-    """
-    walks through the specified directory files to implement refactoring
-    :param dir_path: directory path
-    """
-    global filename
-    args = get_argument_parser(source_file_path)
-    parse_tree, token_stream = get_parse_tree_token_stream(args)
-
-    # check if the class has dependencies on other classes in the same class
-    pre_condition_listener = MoveClassPreConditionListener()
-    walker = ParseTreeWalker()
-    walker.walk(t=parse_tree, listener=pre_condition_listener)
-
-    filename_without_extension, extension = os.path.splitext(filename)
-    if extension == '.java':
-        move_class(token_stream, parse_tree, args)
-    else:
-        raise ValueError(f"The filename format must be \".java\", but found {extension}!")
-
-    for dirname, dirs, files in os.walk(dir_path):
-        for file in files:
-            if file == filename or file == class_identifier + '.java':
-                continue
-            file_without_extension, extension = os.path.splitext(file)
-            if extension == '.java':
-                args = get_argument_parser(os.path.join(dirname, file))
-                parse_tree, token_stream = get_parse_tree_token_stream(args)
-                post_move_class_propagation(token_stream, parse_tree, args)
+def main(project_dir: str, class_name: str, source_package: str, target_package: str):
+    MoveClassAPI(
+        directory=project_dir,
+        class_identifier=class_name,
+        source_package=source_package,
+        target_package=target_package
+    ).do_refactor()
 
 
 if __name__ == '__main__':
-    source_package_directory = os.path.join(directory, source_package.replace('.', '/'))
-    target_package_directory = os.path.join(directory, target_package.replace('.', '/'))
-    source_file_path = os.path.join(source_package_directory, filename)
-    target_file_path = os.path.join(target_package_directory, f"{class_identifier}.java")
-
-    if not os.path.exists(source_package_directory):
-        raise NotADirectoryError(f"The package \"{source_package}\" NOT FOUND!")
-
-    if not os.path.exists(target_package_directory):
-        raise NotADirectoryError(f"The package \"{target_package}\" NOT FOUND!")
-
-    if not os.path.isfile(source_file_path):
-        raise FileNotFoundError(f"The file \"{filename}\" NOT FOUND in package {source_package}!")
-
-    if os.path.isfile(target_file_path):
-        log_error("Redundant", f"The class \"{class_identifier}\" already exists in package \"{target_package}\"!")
-        exit(0)
-
-    # start refactoring
-    recursive_walk(directory)
+    main(
+        project_dir="D:\Dev\JavaSample\src",
+        class_name="Target",
+        source_package="my_package",
+        target_package="your_package",
+    )
