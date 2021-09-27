@@ -144,7 +144,8 @@ class UnderstandUtility(object):
         entity_list = list()
 
         # entities = db.ents('Type')  ## Use this for evo-suite SF110 already measured class
-        entities = db.ents('Java Class ~Enum ~Unknown ~Unresolved ~Jar ~Library')
+        # entities = db.ents('Java Class ~Enum ~Unknown ~Unresolved ~Jar ~Library')
+        entities = db.ents('Java Class ~Jar ~Library, Java Interface')
         if entities is not None:
             for entity_ in entities:
                 if entity_.longname() == class_name:
@@ -302,9 +303,18 @@ class UnderstandUtility(object):
         class_entity = UnderstandUtility.get_class_entity_by_name(db, class_name)
         # print(class_entity.parent())
         # print('class_name', class_entity.longname())
+        # print('class_name', class_name)
+
         package_list = class_entity.ents('Containin', 'Java Package')
+        while not package_list and class_entity.parent() is not None:
+            package_list = class_entity.parent().ents('Containin', 'Java Package')
+            class_entity = class_entity.parent()
+
         # print('package_name', package_list)
-        return package_list[0]
+        if len(package_list) < 1:
+            return None, 'default'
+        else:
+            return package_list[0], package_list[0].longname()
 
     @classmethod
     def get_package_clasess_java(cls, db=None, package_entity=None):
