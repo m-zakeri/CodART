@@ -101,7 +101,7 @@ def main(project_path='../benchmark_projects/JSON/JSON.und'):
     """
     A demo of using modularity module to measure modularity quality attribute based on graph-analysis
     """
-    project_path = '../benchmark_projects/ganttproject/biz.ganttproject.core/biz.ganttproject.core.und'
+    # project_path = '../benchmark_projects/ganttproject/biz.ganttproject.core/biz.ganttproject.core.und'
     db = understand.open(project_path)
     # entities = db.ents('Java Class')
     cmd_ = 'und export -dependencies class csv {0} {1}'.format('mdg/MDG.csv', project_path)
