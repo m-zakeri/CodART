@@ -110,6 +110,7 @@ def main(project_path='../benchmark_projects/JSON/JSON.und'):
     modulo = Modularity(graph_path=r'mdg/MDG.csv', db=db)
     q = modulo.compute_modularity_newman_leicht()
     print(q)
+    return q
 
 
 if __name__ == '__main__':
