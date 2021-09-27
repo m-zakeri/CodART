@@ -25,12 +25,13 @@ from matplotlib import pyplot as plt
 
 from naming import UnderstandUtility
 
+
 class Modularity:
     def __init__(self, graph_path, db, **kwargs):
         self.mdg_df = pandas.read_csv(graph_path)
         self.mdg_graph = nx.from_pandas_edgelist(self.mdg_df, source='From Class', target='To Class',
                                                  edge_attr='References', create_using=nx.DiGraph())
-        self.db=db
+        self.db = db
 
         # self.show_mdg()
 
@@ -95,7 +96,6 @@ class Modularity:
         return package_longname
 
 
-
 # Modularity API
 def main(project_path='../benchmark_projects/JSON/JSON.und'):
     """
@@ -104,8 +104,8 @@ def main(project_path='../benchmark_projects/JSON/JSON.und'):
     project_path = '../benchmark_projects/ganttproject/biz.ganttproject.core/biz.ganttproject.core.und'
     db = understand.open(project_path)
     # entities = db.ents('Java Class')
-
-    # Todo: use und to export class dependencies to csv
+    cmd_ = 'und export -dependencies class csv {0} {1}'.format('mdg/MDG.csv', project_path)
+    os.system('cmd /c "{0}"'.format(cmd_))
 
     modulo = Modularity(graph_path=r'mdg/MDG.csv', db=db)
     q = modulo.compute_modularity_newman_leicht()
