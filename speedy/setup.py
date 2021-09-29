@@ -1,7 +1,7 @@
 """
 
 """
-__version__ = '0.2.0'
+__version__ = '0.3.0'
 __author__ = 'Morteza'
 
 
@@ -32,15 +32,15 @@ def run_setup(with_binary):
 
         # Define an Extension object that describes the Antlr accelerator
         parser_ext = setuptools.Extension(
-            # Extension name shall be at the same level as the sa_java9_v2_parser.py module
-            name='java9speedy.parser.sa_java9_v2_cpp_parser',
+            # Extension name shall be at the same level as the sa_java8_parser.py module
+            name='java8speedy.parser.sa_java8labeled',
 
             # Add the Antlr runtime source directory to the include search path
-            include_dirs=["src/java9speedy/parser/cpp_src/antlr4-cpp-runtime"],
+            include_dirs=["src/java8speedy/parser/cpp_src/antlr4-cpp-runtime"],
 
             # Rather than listing each C++ file (Antlr has a lot!), discover them automatically
-            sources=get_files("src/java9speedy/parser/cpp_src", "*.cpp"),
-            depends=get_files("src/java9speedy/parser/cpp_src", "*.h"),
+            sources=get_files("src/java8speedy/parser/cpp_src", "*.cpp"),
+            depends=get_files("src/java8speedy/parser/cpp_src", "*.h"),
 
             extra_compile_args=extra_compile_args.get(target, [])
         )
@@ -50,7 +50,7 @@ def run_setup(with_binary):
 
     # Define a package
     setuptools.setup (
-        name='java9speedy',
+        name='java8speedy',
         version='1.0.0',
         description='Java Speedup Parser',
         packages=setuptools.find_packages("src"),
