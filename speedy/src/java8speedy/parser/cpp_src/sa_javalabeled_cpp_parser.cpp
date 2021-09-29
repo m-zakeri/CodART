@@ -9,11 +9,11 @@
 #include <cstring>
 
 #include "antlr4-runtime.h"
-#include "Java9_v2Lexer.h"
-#include "Java9_v2Parser.h"
+#include "JavaLexer.h"
+#include "JavaParserLabeled.h"
 #include "speedy_antlr.h"
 
-#include "sa_java9_v2_translator.h"
+#include "sa_javalabeled_translator.h"
 
 /*
  * Python function prototype:
@@ -60,7 +60,7 @@ PyObject* do_parse(PyObject *self, PyObject *args) {
         speedy_antlr::ErrorTranslatorListener err_listener(&translator, sa_err_listener);
 
         // Lex
-        Java9_v2Lexer lexer(&cpp_stream);
+        JavaLexer lexer(&cpp_stream);
         if(sa_err_listener != Py_None){
             lexer.removeErrorListeners();
             lexer.addErrorListener(&err_listener);
@@ -69,31 +69,25 @@ PyObject* do_parse(PyObject *self, PyObject *args) {
         token_stream.fill();
 
         // Parse
-        Java9_v2Parser parser(&token_stream);
+        JavaParserLabeled parser(&token_stream);
         if(sa_err_listener != Py_None){
             parser.removeErrorListeners();
             parser.addErrorListener(&err_listener);
         }
         antlr4::tree::ParseTree *parse_tree;
-        if(!strcmp(entry_rule_name, "literal")){
-            parse_tree = parser.literal();
-
-        } else if(!strcmp(entry_rule_name, "compilationUnit")){
+        if(!strcmp(entry_rule_name, "compilationUnit")){
             parse_tree = parser.compilationUnit();
 
-        } else if(!strcmp(entry_rule_name, "ordinaryCompilation")){
-            parse_tree = parser.ordinaryCompilation();
-
-        } else if(!strcmp(entry_rule_name, "modularCompilation")){
-            parse_tree = parser.modularCompilation();
-
+        } else if(!strcmp(entry_rule_name, "packageDeclaration")){
+            parse_tree = parser.packageDeclaration();
+			
         } else {
             PyErr_SetString(PyExc_ValueError, "Invalid entry_rule_name");
             throw speedy_antlr::PythonException();
         }
 
         // Translate Parse tree to Python
-        SA_Java9_v2Translator visitor(&translator);
+        SA_JavaLabeledTranslator visitor(&translator);
         result = visitor.visit(parse_tree);
 
         // Clean up data
@@ -138,7 +132,7 @@ extern "C" {
 
     static struct PyModuleDef module = {
         PyModuleDef_HEAD_INIT,
-        "sa_java9_v2_cpp_parser",   /* name of module */
+        "sa_javalabeled_cpp_parser",   /* name of module */
         NULL, /* module documentation, may be NULL */
         -1,       /* size of per-interpreter state of the module,
                     or -1 if the module keeps state in global variables. */
@@ -148,7 +142,7 @@ extern "C" {
 
 
 PyMODINIT_FUNC
-PyInit_sa_java9_v2_cpp_parser(void) {
+PyInit_sa_javalabeled_cpp_parser(void) {
     PyObject *m = PyModule_Create(&module);
     return m;
 }
