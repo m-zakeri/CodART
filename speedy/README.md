@@ -3,9 +3,11 @@
 # Speedy module
 
 Thanks to Speedy Antlr Tool, CodART is now using C++ in the backend to parse JAVA source codes. 
-To use the speedy module, named `java9speedy` first, you must build and install `java9speedy` module using:
+To use the speedy module, named `java8speedy` first, you must build and install `java8speedy` module using:
 
 `python setup.py install` with the right privileges.
+
+`python setup.py develop --uninstall`
 
 On windows  >= MVC++11 is required.
 
