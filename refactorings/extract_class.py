@@ -3,6 +3,7 @@ __author__ = 'Seyyed Ali Ayati'
 
 import os
 import subprocess
+from pathlib import Path
 
 try:
     import understand as und
@@ -196,6 +197,7 @@ class ExtractClassRefactoringListener(JavaParserLabeledListener):
         self.new_file_cons = ""
         self.parameters = []
         self.object_name = self.new_class.replace(self.new_class, self.new_class[0].lower() + self.new_class[1:])
+        self.modifiers = ""
 
     def enterPackageDeclaration(self, ctx: JavaParserLabeled.PackageDeclarationContext):
         if ctx.qualifiedName() and not self.package_name:
@@ -342,7 +344,7 @@ class PropagateFieldUsageListener(JavaParserLabeledListener):
             if identifier.getText() == self.field_name:
                 self.token_stream_rewriter.replaceSingleToken(
                     token=ctx.expression().primary().start,
-                    text=f"{ctx.expression().primary().getText()}.{self.object_name}"
+                    text=f"this.{self.object_name}"
                 )
 
 
@@ -381,10 +383,10 @@ class NewClassPropagation(JavaParserLabeledListener):
 
 
 class ExtractClassAPI:
-    def __init__(self, project_dir, file_path, source_class, new_class, moved_fields, moved_methods,
+    def __init__(self, udb_path, file_path, source_class, new_class, moved_fields, moved_methods,
                  new_file_path=None):
-        self.project_dir = project_dir
         self.file_path = file_path
+        self.udb_path = udb_path
         self.new_file_path = new_file_path
         self.source_class = source_class
         self.new_class = new_class
@@ -449,72 +451,67 @@ class ExtractClassAPI:
 
     def do_refactor(self):
         self.get_source_class_map()
-        self.checked = True
-        if self.checked:
-            listener = ExtractClassRefactoringListener(
-                common_token_stream=self.token_stream,
-                new_class=self.new_class,
-                source_class=self.source_class,
-                moved_fields=self.moved_fields,
-                moved_methods=self.moved_methods,
-                method_map=self.method_usage_map
-            )
-            self.object_name = listener.object_name
-            self.walker.walk(
-                listener=listener,
-                t=self.tree
-            )
+        listener = ExtractClassRefactoringListener(
+            common_token_stream=self.token_stream,
+            new_class=self.new_class,
+            source_class=self.source_class,
+            moved_fields=self.moved_fields,
+            moved_methods=self.moved_methods,
+            method_map=self.method_usage_map
+        )
+        self.object_name = listener.object_name
+        self.walker.walk(
+            listener=listener,
+            t=self.tree
+        )
 
-            # Find Field and Method Usages
-            field_usages = []
-            method_usages = []
+        # Find Field and Method Usages
+        field_usages = []
+        method_usages = []
 
-            udb_path = "/data/Dev/JavaSample/JavaSample.udb"
-            db = und.open(udb_path)
-            for field in self.moved_fields:
-                for ent in db.lookup(f"{self.source_class}.{field}"):
-                    # print(ent.name(), "  [", ent.kindname(), "]", sep="", end="\n")
-                    for ref in ent.refs("Useby"):
-                        if self.source_class in ref.ent().name():
-                            referencer = ref.ent().simplename()
-                            if referencer in self.moved_methods:
-                                continue
-                        ref_ent = ref.ent()
-                        field_usages.append({
-                            'field_name': field,
-                            'class_name': ref_ent.simplename(),
-                            'file_path': ref.file().longname(),
-                            'line_number': ref.line()
-                        })
+        db = und.open(self.udb_path)
+        for field in self.moved_fields:
+            for ent in db.lookup(f"{self.source_class}.{field}"):
+                # print(ent.name(), "  [", ent.kindname(), "]", sep="", end="\n")
+                for ref in ent.refs("Useby"):
+                    if self.source_class in ref.ent().name():
+                        referencer = ref.ent().simplename()
+                        if referencer in self.moved_methods:
+                            continue
+                    ref_ent = ref.ent()
+                    field_usages.append({
+                        'field_name': field,
+                        'class_name': ref_ent.simplename(),
+                        'file_path': ref.file().longname(),
+                        'line_number': ref.line()
+                    })
 
-            # print(listener.token_stream_rewriter.getDefaultText())
-            # print("=" * 25)
-            # print(listener.code)
-            stream = InputStream(listener.code)
-            lexer = JavaLexer(stream)
-            token_stream = CommonTokenStream(lexer)
-            parser = JavaParserLabeled(token_stream)
-            parser.getTokenStream()
-            parse_tree = parser.compilationUnit()
-            my_listener = NewClassPropagation(common_token_stream=token_stream, method_map=self.method_usage_map,
-                                              source_class=self.source_class)
-            walker = ParseTreeWalker()
-            walker.walk(t=parse_tree, listener=my_listener)
-            # print(my_listener.token_stream_rewriter.getDefaultText())
+        # print(listener.token_stream_rewriter.getDefaultText())
+        # print("=" * 25)
+        # print(listener.code)
+        stream = InputStream(listener.code)
+        lexer = JavaLexer(stream)
+        token_stream = CommonTokenStream(lexer)
+        parser = JavaParserLabeled(token_stream)
+        parser.getTokenStream()
+        parse_tree = parser.compilationUnit()
+        my_listener = NewClassPropagation(common_token_stream=token_stream, method_map=self.method_usage_map,
+                                          source_class=self.source_class)
+        walker = ParseTreeWalker()
+        walker.walk(t=parse_tree, listener=my_listener)
+        # print(my_listener.token_stream_rewriter.getDefaultText())
 
-            # Write Changes
-            with open(self.file_path, 'w') as f:
-                f.write(listener.token_stream_rewriter.getDefaultText())
+        # Write Changes
+        with open(self.file_path, 'w') as f:
+            f.write(listener.token_stream_rewriter.getDefaultText())
 
-            with open(self.new_file_path, 'w') as f:
-                f.write(my_listener.token_stream_rewriter.getDefaultText())
+        with open(self.new_file_path, 'w') as f:
+            f.write(my_listener.token_stream_rewriter.getDefaultText())
 
-            # Propagate and reformat
-            self.propagate_fields(field_usages)
-            self.reformat(self.file_path)
-            self.reformat(self.new_file_path)
-        else:
-            print("Can not refactor!")
+        # Propagate and reformat
+        self.propagate_fields(field_usages)
+        self.reformat(self.file_path)
+        self.reformat(self.new_file_path)
 
 
 def get_java_files(directory):
@@ -526,13 +523,26 @@ def get_java_files(directory):
                 yield os.path.join(root, file), file
 
 
-if __name__ == "__main__":
+def main(udb_path, file_path, source_class, moved_fields, moved_methods):
+    new_class = f"{source_class}Extracted"
+    new_file_path = os.path.join(Path(file_path).parent, f"{new_class}.java")
+
     ExtractClassAPI(
-        project_dir="/data/Dev/JavaSample/",
-        file_path="/data/Dev/JavaSample/src/your_package/Unit.java",
-        source_class="Unit",
-        new_class="UnitExtracted",
-        moved_fields=["fuel", "field2", ],
-        moved_methods=[],
-        new_file_path="/data/Dev/JavaSample/src/your_package/UnitExtracted.java"
+        udb_path=udb_path,
+        file_path=file_path,
+        source_class=source_class,
+        new_class=new_class,
+        moved_fields=moved_fields,
+        moved_methods=moved_methods,
+        new_file_path=new_file_path
     ).do_refactor()
+
+
+if __name__ == "__main__":
+    main(
+        udb_path="D:\Dev\JavaSample\JavaSample1.udb",
+        file_path="D:\Dev\JavaSample\src\your_package\Soldier.java",
+        source_class="Soldier",
+        moved_fields=["health", ],
+        moved_methods=[],
+    )

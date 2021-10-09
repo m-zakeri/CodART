@@ -1,10 +1,13 @@
 import random
 from pathlib import Path
+from pprint import pprint
+
 import progressbar
 from config import *
 from utilization.setup_understand import *
 from refactorings import make_field_non_static, make_field_static, make_method_static_2, \
-    make_method_non_static_2, pullup_field, move_field, move_method, move_class, pushdown_field
+    make_method_non_static_2, pullup_field, move_field, move_method, move_class, pushdown_field, \
+    extract_class
 
 
 # TODO: check pymoo (framework) if possible
@@ -172,6 +175,9 @@ class Initialization(object):
     def init_move_class(self):
         pass
 
+    def init_extract_class(self):
+        pass
+
     def generate_population(self):
         initializers = (
             # self.init_make_field_non_static,
@@ -182,7 +188,8 @@ class Initialization(object):
             # self.init_move_field,
             # self.init_move_method,
             # self.init_move_class,
-            self.init_push_down_field,
+            # self.init_push_down_field,
+            self.init_extract_class,
         )
         population = []
         for _ in progressbar.progressbar(range(self.population_size)):
@@ -341,6 +348,33 @@ class RandomInitialization(Initialization):
             })
         return refactoring_main, params
 
+    def init_extract_class(self):
+        refactoring_main = extract_class.main
+        params = {"udb_path": str(Path(self.udb_path))}
+        random_class = random.choice(self.get_all_class_entities())
+        params.update(
+            {
+                "source_class": random_class.simplename(),
+                "file_path": random_class.parent().longname()
+            }
+        )
+        class_fields = []
+        class_methods = []
+
+        for ref in random_class.refs("define", "variable"):
+            class_fields.append(ref.ent())
+
+        for ref in random_class.refs("define", "method"):
+            class_methods.append(ref.ent())
+
+        params.update(
+            {
+                "moved_fields": [ent.simplename() for ent in random.sample(class_fields, random.randint(0, len(class_fields)))],
+                "moved_methods": [ent.simplename() for ent in random.sample(class_methods, random.randint(0, len(class_methods)))],
+            }
+        )
+        return refactoring_main, params
+
 
 if __name__ == '__main__':
     rand_pop = RandomInitialization(
@@ -349,4 +383,3 @@ if __name__ == '__main__':
         individual_size=INDIVIDUAL_SIZE
     )
     population = rand_pop.generate_population()
-    print(population)
