@@ -57,8 +57,6 @@ class PushDownField:
         self.class_names = class_names
         self.filename_mapping = filename_mapping
 
-
-
     def pre_condition_check(self, program, superclass):
         if self.package_name not in program.packages \
                 or self.superclass_name not in program.packages[self.package_name].classes \
@@ -94,7 +92,8 @@ class PushDownField:
                 c: utils_listener_fast.Class = p.classes[cn]
                 if ((c.superclass_name == self.superclass_name and c.file_info.has_imported_class(self.package_name,
                                                                                                   self.superclass_name)) \
-                        or (self.package_name is not None and c.superclass_name == self.package_name + '.' + self.superclass_name)):
+                        or (
+                                self.package_name is not None and c.superclass_name == self.package_name + '.' + self.superclass_name)):
                     # all_derived_classes.append(c)
 
                     if len(self.class_names) == 0 or cn in self.class_names:
@@ -105,7 +104,7 @@ class PushDownField:
                             classes_to_add_to.append(c)
                     else:
                         other_derived_classes.append(c)
-                        
+
         # Check if the field is used from the superclass or other derived classes
         for pn in program.packages:
             p: utils_listener_fast.Package = program.packages[pn]
@@ -206,24 +205,22 @@ def test():
             print("1, 2, " + str(i + 1) + ": Cannot refactor.")
 
 
-def test_ant():
-    """
-    target_files = [
-        "tests/apache-ant/main/org/apache/tools/ant/types/ArchiveFileSet.java",
-        "tests/apache-ant/main/org/apache/tools/ant/types/TarFileSet.java",
-        "tests/apache-ant/main/org/apache/tools/ant/types/ZipFileSet.java"
-    ]
-    """
-    ant_dir = "/data/Dev/JavaSample/"
+def main(project_dir, source_package, source_class, field_name, target_classes: list):
     print("Success!" if PushDownField(
-        utils2.get_filenames_in_dir(ant_dir),
-        "your_package",
-        "Unit",
-        "fuel",
-        ["Tank"],
-        # lambda x: "tests/pushdown_field_ant/" + x[len(ant_dir):]
+        utils2.get_filenames_in_dir(project_dir),
+        package_name=source_package,
+        superclass_name=source_class,
+        field_name=field_name,
+        class_names=target_classes,
     ).do_refactor() else "Cannot refactor.")
 
 
 if __name__ == "__main__":
-    test_ant()
+    ant_dir = "D:\Dev\JavaSample"
+    main(
+        ant_dir,
+        "your_package",
+        "Unit",
+        "fuel",
+        ["Tank", ],
+    )

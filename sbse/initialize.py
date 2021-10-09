@@ -4,7 +4,7 @@ import progressbar
 from config import *
 from utilization.setup_understand import *
 from refactorings import make_field_non_static, make_field_static, make_method_static_2, \
-    make_method_non_static_2, pullup_field, move_field, move_method, move_class
+    make_method_non_static_2, pullup_field, move_field, move_method, move_class, pushdown_field
 
 
 # TODO: check pymoo (framework) if possible
@@ -28,6 +28,7 @@ class Initialization(object):
         self._methods = self.get_all_methods()
         self._static_methods = self.get_all_methods(static=True)
         self._pullup_field_candidates = self.find_pullup_field_candidates()
+        self._push_down_field_candidates = self.find_push_down_field_candidates()
 
     def get_all_methods(self, static=False):
         candidates = []
@@ -109,6 +110,41 @@ class Initialization(object):
                 candidates.append(candidate)
         return candidates
 
+    def find_push_down_field_candidates(self):
+        candidates = []
+        class_entities = self.get_all_class_entities()
+
+        for ent in class_entities:
+            params = {
+                "source_class": "",
+                "source_package": "",
+                "field_name": "",
+                "target_classes": []
+            }
+            field_names = []
+
+            for ref in ent.refs("ExtendBy ~Implicit"):
+                params["source_class"] = ent.simplename()
+                ln = ent.longname().split(".")
+                params["source_package"] = ln[0] if len(ln) > 1 else ""
+                if len(params["target_classes"]) >= 1:
+                    rnd = random.randint(0, 1)
+                    if rnd == 0:
+                        params["target_classes"].append(ref.ent().simplename())
+                else:
+                    params["target_classes"].append(ref.ent().simplename())
+
+            for ref in ent.refs("define", "variable"):
+                field_names.append(ref.ent().simplename())
+
+            if field_names:
+                params["field_name"] = random.choice(field_names)
+            else:
+                continue
+            if params["source_class"] != "":
+                candidates.append(params)
+        return candidates
+
     def init_make_field_non_static(self):
         pass
 
@@ -122,6 +158,9 @@ class Initialization(object):
         pass
 
     def init_pullup_field(self):
+        pass
+
+    def init_push_down_field(self):
         pass
 
     def init_move_field(self):
@@ -142,7 +181,8 @@ class Initialization(object):
             # self.init_pullup_field,
             # self.init_move_field,
             # self.init_move_method,
-            self.init_move_class,
+            # self.init_move_class,
+            self.init_push_down_field,
         )
         population = []
         for _ in progressbar.progressbar(range(self.population_size)):
@@ -209,6 +249,13 @@ class RandomInitialization(Initialization):
         refactoring_main = pullup_field.main
         params = {"project_dir": str(Path(self.udb_path).parent)}
         candidates = self._pullup_field_candidates
+        params.update(random.choice(candidates))
+        return refactoring_main, params
+
+    def init_push_down_field(self):
+        refactoring_main = pushdown_field.main
+        params = {"project_dir": str(Path(self.udb_path).parent)}
+        candidates = self._push_down_field_candidates
         params.update(random.choice(candidates))
         return refactoring_main, params
 
@@ -302,3 +349,4 @@ if __name__ == '__main__':
         individual_size=INDIVIDUAL_SIZE
     )
     population = rand_pop.generate_population()
+    print(population)
