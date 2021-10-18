@@ -10,13 +10,13 @@
       
       
       
-        <meta name="author" content="Zakeri, Tahaei, Ayati">
+        <meta name="author" content="Morteza Zakeri, Ali Ayati, Saeed Parsa">
       
       
         <link rel="canonical" href="https://m-zakeri.github.io/refactorings/pull_up_method/">
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.0.6">
+      <meta name="generator" content="mkdocs-1.2.2, mkdocs-material-7.2.5">
     
     
       
@@ -24,10 +24,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.2c0c5eaf.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.be71726b.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.7fa14f5b.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.3f5d1f46.min.css">
         
       
     
@@ -46,6 +46,8 @@
     
     
       
+
+
     
     
   </head>
@@ -53,12 +55,17 @@
   
     
     
-    
-    
-    
-    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
       
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent="">
   
+    
+    <script>function __prefix(e){return new URL("../..",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    
+      <script>var palette=__get("__palette");if(null!==palette&&"object"==typeof palette.color)for(var key in palette.color)document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
@@ -102,9 +109,30 @@
         </div>
       </div>
     </div>
-    <div class="md-header__options">
-      
-    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent=""  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Dark mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7 10a2 2 0 0 1 2 2 2 2 0 0 1-2 2 2 2 0 0 1-2-2 2 2 0 0 1 2-2m10-3a5 5 0 0 1 5 5 5 5 0 0 1-5 5H7a5 5 0 0 1-5-5 5 5 0 0 1 5-5h10M7 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3h10a3 3 0 0 0 3-3 3 3 0 0 0-3-3H7z"/></svg>
+            </label>
+          
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="" data-md-color-accent=""  aria-label="Light mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Light mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
     
       <label class="md-header__button md-icon" for="__search">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
@@ -114,14 +142,18 @@
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active" required>
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
       </label>
-      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
-      </button>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        </button>
+      </nav>
+      
     </form>
     <div class="md-search__output">
       <div class="md-search__scrollwrap" data-md-scrollfix>
@@ -142,7 +174,7 @@
 <a href="https://github.com/m-zakeri/CodART/" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
     GitHub
@@ -185,7 +217,7 @@
 <a href="https://github.com/m-zakeri/CodART/" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
     GitHub
@@ -453,6 +485,7 @@
       
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
+      
         
       
       
@@ -469,6 +502,7 @@
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
+  
     
   
   
@@ -483,51 +517,11 @@
     refactorings.pullup_method
   </a>
   
-    <nav class="md-nav" aria-label="refactorings.pullup_method">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#refactorings.pullup_method--introduction" class="md-nav__link">
-    Introduction
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#refactorings.pullup_method--pre-and-post-conditions" class="md-nav__link">
-    Pre and Post Conditions
-  </a>
-  
-    <nav class="md-nav" aria-label="Pre and Post Conditions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#refactorings.pullup_method--pre-conditions" class="md-nav__link">
-    Pre Conditions:
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#refactorings.pullup_method--post-conditions" class="md-nav__link">
-    Post Conditions:
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
-  <a href="#refactorings.pullup_method.pullup_method_refactoring" class="md-nav__link">
-    pullup_method_refactoring()
+  <a href="#refactorings.pullup_method.PullUpMethodRefactoringListener" class="md-nav__link">
+    PullUpMethodRefactoringListener
   </a>
   
 </li>
@@ -765,6 +759,7 @@
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
+  
     
   
   
@@ -779,51 +774,11 @@
     refactorings.pullup_method
   </a>
   
-    <nav class="md-nav" aria-label="refactorings.pullup_method">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#refactorings.pullup_method--introduction" class="md-nav__link">
-    Introduction
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#refactorings.pullup_method--pre-and-post-conditions" class="md-nav__link">
-    Pre and Post Conditions
-  </a>
-  
-    <nav class="md-nav" aria-label="Pre and Post Conditions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#refactorings.pullup_method--pre-conditions" class="md-nav__link">
-    Pre Conditions:
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#refactorings.pullup_method--post-conditions" class="md-nav__link">
-    Post Conditions:
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
-  <a href="#refactorings.pullup_method.pullup_method_refactoring" class="md-nav__link">
-    pullup_method_refactoring()
+  <a href="#refactorings.pullup_method.PullUpMethodRefactoringListener" class="md-nav__link">
+    PullUpMethodRefactoringListener
   </a>
   
 </li>
@@ -853,22 +808,6 @@
 <a id="refactorings.pullup_method"></a>
     <div class="doc doc-contents first">
 
-      <h3 id="refactorings.pullup_method--introduction">Introduction</h3>
-<p>When subclasses grow and get developed separately, your code may have methods that perform similar work.
-Pull up method refactoring removes the repetitive method from subclasses and moves it to a superclass.</p>
-<h3 id="refactorings.pullup_method--pre-and-post-conditions">Pre and Post Conditions</h3>
-<h4 id="refactorings.pullup_method--pre-conditions">Pre Conditions:</h4>
-<ol>
-<li>
-<p>The source package, class and method should exist.</p>
-</li>
-<li>
-<p>If the method uses attributes and methods that are defined in the body of the classes,
-   The refactoring should not be implemented.</p>
-</li>
-</ol>
-<h4 id="refactorings.pullup_method--post-conditions">Post Conditions:</h4>
-<p>No specific Post Condition</p>
 
 
 
@@ -881,163 +820,50 @@ Pull up method refactoring removes the repetitive method from subclasses and mov
 
 
 
-  <div class="doc doc-object doc-function">
+  <div class="doc doc-object doc-class">
 
 
 
-<h2 id="refactorings.pullup_method.pullup_method_refactoring" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">pullup_method_refactoring</span><span class="p">(</span><span class="n">source_filenames</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">class_name</span><span class="p">,</span> <span class="n">method_key</span><span class="p">,</span> <span class="n">filename_mapping</span><span class="o">=&lt;</span><span class="n">function</span> <span class="o">&lt;</span><span class="k">lambda</span><span class="o">&gt;</span> <span class="n">at</span> <span class="mh">0x0000015D7484B8B0</span><span class="o">&gt;</span><span class="p">)</span></code>
+<h2 id="refactorings.pullup_method.PullUpMethodRefactoringListener" class="doc doc-heading">
+        <code>PullUpMethodRefactoringListener</code>
+
 
 
 </h2>
 
     <div class="doc doc-contents ">
 
-      <p>The main function that does the process of pull up method refactoring.
-Removes the necessary methods from the subclasses and moves them to a superclass.</p>
+      <p>To implement extract class refactoring based on its actors.
+Creates a new class and move fields and methods from the old class to the new one</p>
 
-<p><strong>Parameters:</strong></p>
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Type</th>
-      <th>Description</th>
-      <th>Default</th>
-    </tr>
-  </thead>
-  <tbody>
-      <tr>
-        <td><code>source_filenames</code></td>
-        <td><code>list</code></td>
-        <td><p>A list of file names to be processed</p></td>
-        <td><em>required</em></td>
-      </tr>
-      <tr>
-        <td><code>package_name</code></td>
-        <td><code>str</code></td>
-        <td><p>The name of the package in which the refactoring has to be done(contains the classes)</p></td>
-        <td><em>required</em></td>
-      </tr>
-      <tr>
-        <td><code>class_name</code></td>
-        <td><code>str</code></td>
-        <td><p>Name of the class in which the refactoring has to be done (pulling up the field from here)</p></td>
-        <td><em>required</em></td>
-      </tr>
-      <tr>
-        <td><code>method_key</code></td>
-        <td><code>str</code></td>
-        <td><p>Name of the method which needs to be removed from the subclasses/pulled up</p></td>
-        <td><em>required</em></td>
-      </tr>
-      <tr>
-        <td><code>filename_mapping</code></td>
-        <td><code>str</code></td>
-        <td><p>Mapping the file's name to the correct format so that it can be processed</p></td>
-        <td><code>&lt;function &lt;lambda&gt; at 0x0000015D7484B8B0&gt;</code></td>
-      </tr>
-  </tbody>
-</table>
-<p><strong>Returns:</strong></p>
-<table>
-  <thead>
-    <tr>
-      <th>Type</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><code></code></td>
-      <td><p>No returns</p></td>
-    </tr>
-  </tbody>
-</table>
-        <details class="quote">
-          <summary>Source code in <code>refactorings\pullup_method.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">pullup_method_refactoring</span><span class="p">(</span><span class="n">source_filenames</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">package_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">class_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">method_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                              <span class="n">filename_mapping</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The main function that does the process of pull up method refactoring.</span>
-<span class="sd">       Removes the necessary methods from the subclasses and moves them to a superclass.</span>
 
-<span class="sd">       Args:</span>
-<span class="sd">              source_filenames (list): A list of file names to be processed</span>
 
-<span class="sd">              package_name (str): The name of the package in which the refactoring has to be done(contains the classes)</span>
 
-<span class="sd">              class_name (str): Name of the class in which the refactoring has to be done (pulling up the field from here)</span>
+  <div class="doc doc-children">
 
-<span class="sd">              method_key (str): Name of the method which needs to be removed from the subclasses/pulled up</span>
 
-<span class="sd">              filename_mapping (str): Mapping the file&#39;s name to the correct format so that it can be processed</span>
 
-<span class="sd">       Returns:</span>
-<span class="sd">           No returns</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">program</span> <span class="o">=</span> <span class="n">get_program</span><span class="p">(</span><span class="n">source_filenames</span><span class="p">)</span>  <span class="c1"># getting the program packages</span>
-    <span class="n">_sourceclass</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">packages</span><span class="p">[</span><span class="n">package_name</span><span class="p">]</span><span class="o">.</span><span class="n">classes</span><span class="p">[</span><span class="n">class_name</span><span class="p">]</span>
-    <span class="n">target_class_name</span> <span class="o">=</span> <span class="n">_sourceclass</span><span class="o">.</span><span class="n">superclass_name</span>
-    <span class="n">static</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">removemethod</span> <span class="o">=</span> <span class="n">get_removemethods</span><span class="p">(</span><span class="n">program</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">target_class_name</span><span class="p">,</span> <span class="n">method_key</span><span class="p">,</span>
-                                     <span class="n">class_name</span><span class="p">)</span>  <span class="c1"># Similar methods in other classes</span>
-    <span class="n">_targetclass</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">packages</span><span class="p">[</span><span class="n">package_name</span><span class="p">]</span><span class="o">.</span><span class="n">classes</span><span class="p">[</span><span class="n">target_class_name</span><span class="p">]</span>
-    <span class="n">_method_name</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">packages</span><span class="p">[</span><span class="n">package_name</span><span class="p">]</span><span class="o">.</span><span class="n">classes</span><span class="p">[</span><span class="n">class_name</span><span class="p">]</span><span class="o">.</span><span class="n">methods</span><span class="p">[</span><span class="n">method_key</span><span class="p">]</span>
-    <span class="n">tokens_info</span> <span class="o">=</span> <span class="n">TokensInfo</span><span class="p">(</span><span class="n">_method_name</span><span class="o">.</span><span class="n">parser_context</span><span class="p">)</span>
-    <span class="n">exps</span> <span class="o">=</span> <span class="n">tokens_info</span><span class="o">.</span><span class="n">get_token_index</span><span class="p">(</span><span class="n">tokens_info</span><span class="o">.</span><span class="n">token_stream</span><span class="o">.</span><span class="n">tokens</span><span class="p">,</span> <span class="n">tokens_info</span><span class="o">.</span><span class="n">start</span><span class="p">,</span>
-                                       <span class="n">tokens_info</span><span class="o">.</span><span class="n">stop</span><span class="p">)</span>  <span class="c1"># list of class variables that are used in the method</span>
-    <span class="k">if</span> <span class="n">_method_name</span><span class="o">.</span><span class="n">is_constructor</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">False</span>
-    <span class="c1"># if method use param of class body return false</span>
-    <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">exps</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">token</span><span class="o">.</span><span class="n">text</span> <span class="ow">in</span> <span class="n">_sourceclass</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">False</span>
 
-    <span class="k">if</span> <span class="nb">bool</span><span class="p">(</span><span class="n">_method_name</span><span class="o">.</span><span class="n">body_method_invocations_without_typename</span><span class="p">)</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">False</span>
 
-    <span class="n">Rewriter_</span> <span class="o">=</span> <span class="n">Rewriter</span><span class="p">(</span><span class="n">program</span><span class="p">,</span> <span class="n">filename_mapping</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">remove</span> <span class="ow">in</span> <span class="n">removemethod</span><span class="p">:</span>
-        <span class="n">_methodd</span> <span class="o">=</span> <span class="n">removemethod</span><span class="p">[</span><span class="n">remove</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">_methodd</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">_methodds</span> <span class="o">=</span> <span class="n">_methodd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">_method</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">packages</span><span class="p">[</span><span class="n">package_name</span><span class="p">]</span><span class="o">.</span><span class="n">classes</span><span class="p">[</span><span class="n">remove</span><span class="p">]</span><span class="o">.</span><span class="n">methods</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">_methodds</span><span class="p">)]</span>
-            <span class="n">_method_token_info</span> <span class="o">=</span> <span class="n">TokensInfo</span><span class="p">(</span><span class="n">_method</span><span class="o">.</span><span class="n">parser_context</span><span class="p">)</span>
-            <span class="n">Rewriter_</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">_method_token_info</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
 
-    <span class="n">class_tokens_info</span> <span class="o">=</span> <span class="n">TokensInfo</span><span class="p">(</span><span class="n">_targetclass</span><span class="o">.</span><span class="n">parser_context</span><span class="p">)</span>
-    <span class="n">singlefileelement</span> <span class="o">=</span> <span class="n">SingleFileElement</span><span class="p">(</span><span class="n">_method_name</span><span class="o">.</span><span class="n">parser_context</span><span class="p">,</span> <span class="n">_method_name</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
-    <span class="n">token_stream_rewriter</span> <span class="o">=</span> <span class="n">TokenStreamRewriter</span><span class="p">(</span><span class="n">singlefileelement</span><span class="o">.</span><span class="n">get_token_stream</span><span class="p">())</span>
-    <span class="n">strofmethod</span> <span class="o">=</span> <span class="n">token_stream_rewriter</span><span class="o">.</span><span class="n">getText</span><span class="p">(</span><span class="n">program_name</span><span class="o">=</span><span class="n">token_stream_rewriter</span><span class="o">.</span><span class="n">DEFAULT_PROGRAM_NAME</span><span class="p">,</span>
-                                                <span class="n">start</span><span class="o">=</span><span class="n">tokens_info</span><span class="o">.</span><span class="n">start</span><span class="p">,</span>
-                                                <span class="n">stop</span><span class="o">=</span><span class="n">tokens_info</span><span class="o">.</span><span class="n">stop</span><span class="p">)</span>
-    <span class="n">Rewriter_</span><span class="o">.</span><span class="n">insert_before</span><span class="p">(</span><span class="n">tokens_info</span><span class="o">=</span><span class="n">class_tokens_info</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">strofmethod</span><span class="p">)</span>
-    <span class="n">Rewriter_</span><span class="o">.</span><span class="n">apply</span><span class="p">()</span>
-    <span class="c1"># The Method has to be updated anywhere else that it&#39;s used</span>
-    <span class="k">for</span> <span class="n">package_names</span> <span class="ow">in</span> <span class="n">program</span><span class="o">.</span><span class="n">packages</span><span class="p">:</span>
-        <span class="n">package</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">packages</span><span class="p">[</span><span class="n">package_names</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">class_</span> <span class="ow">in</span> <span class="n">package</span><span class="o">.</span><span class="n">classes</span><span class="p">:</span>
-            <span class="n">_class</span> <span class="o">=</span> <span class="n">package</span><span class="o">.</span><span class="n">classes</span><span class="p">[</span><span class="n">class_</span><span class="p">]</span>
-            <span class="k">for</span> <span class="n">method_</span> <span class="ow">in</span> <span class="n">_class</span><span class="o">.</span><span class="n">methods</span><span class="p">:</span>
-                <span class="n">__method</span> <span class="o">=</span> <span class="n">_class</span><span class="o">.</span><span class="n">methods</span><span class="p">[</span><span class="n">method_</span><span class="p">]</span>
-                <span class="k">for</span> <span class="n">inv</span> <span class="ow">in</span> <span class="n">__method</span><span class="o">.</span><span class="n">body_method_invocations</span><span class="p">:</span>
-                    <span class="n">invc</span> <span class="o">=</span> <span class="n">__method</span><span class="o">.</span><span class="n">body_method_invocations</span><span class="p">[</span><span class="n">inv</span><span class="p">]</span>
-                    <span class="n">method_name</span> <span class="o">=</span> <span class="n">method_key</span><span class="p">[:</span><span class="n">method_key</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">)]</span>
-                    <span class="k">if</span> <span class="p">(</span><span class="n">invc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">method_name</span> <span class="o">&amp;</span> <span class="n">package_names</span> <span class="o">==</span> <span class="n">package_name</span><span class="p">):</span>
-                        <span class="n">inv_tokens_info</span> <span class="o">=</span> <span class="n">TokensInfo</span><span class="p">(</span><span class="n">inv</span><span class="p">)</span>
-                        <span class="k">if</span> <span class="p">(</span><span class="n">static</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
-                            <span class="n">class_token_info</span> <span class="o">=</span> <span class="n">TokensInfo</span><span class="p">(</span><span class="n">_class</span><span class="o">.</span><span class="n">body_context</span><span class="p">)</span>
-                            <span class="n">Rewriter_</span><span class="o">.</span><span class="n">insert_after_start</span><span class="p">(</span><span class="n">class_token_info</span><span class="p">,</span> <span class="n">target_class_name</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="o">.</span><span class="n">lower</span><span class="p">(</span>
-                                <span class="n">target_class_name</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">+</span> <span class="s2">&quot;new &quot;</span> <span class="o">+</span> <span class="n">target_class_name</span> <span class="o">+</span> <span class="s2">&quot;();&quot;</span><span class="p">)</span>
-                            <span class="n">Rewriter_</span><span class="o">.</span><span class="n">apply</span><span class="p">()</span>
-                        <span class="n">Rewriter_</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">inv_tokens_info</span><span class="p">,</span> <span class="n">target_class_name</span><span class="p">)</span>
-                        <span class="n">Rewriter_</span><span class="o">.</span><span class="n">apply</span><span class="p">()</span>
-    <span class="k">return</span> <span class="kc">True</span>
-</code></pre></div>
-        </details>
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
     </div>
 
   </div>
+
+
 
 
 
@@ -1059,6 +885,7 @@ Removes the necessary methods from the subclasses and moves them to a superclass
             </article>
           </div>
         </div>
+        
       </main>
       
         
@@ -1066,7 +893,8 @@ Removes the necessary methods from the subclasses and moves them to a superclass
   
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
-        <a href="../push_down_field/" class="md-footer__link md-footer__link--prev" rel="prev">
+        
+        <a href="../push_down_field/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Push-down field" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -1081,7 +909,8 @@ Removes the necessary methods from the subclasses and moves them to a superclass
         </a>
       
       
-        <a href="../rename_method/" class="md-footer__link md-footer__link--next" rel="next">
+        
+        <a href="../rename_method/" class="md-footer__link md-footer__link--next" aria-label="Next: Rename method" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
@@ -1120,10 +949,10 @@ Removes the necessary methods from the subclasses and moves them to a superclass
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../../assets/javascripts/workers/search.fb4a9340.min.js", "version": null}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../../assets/javascripts/workers/search.409db549.min.js", "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.a1c7c35e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.56a63758.min.js"></script>
       
     
   </body>
