@@ -168,10 +168,10 @@ class PropagationPullUpMethodRefactoringListener(JavaParserLabeledListener):
             self.is_class = False
 
 
-if __name__ == '__main__':
-    udb_path = "D:\Dev\JavaSample\JavaSample1.udb"
-    children_class = ["Tank", "Soldier"]
-    moved_method = "getHealth"
+def main(udb_path: str, children_classes: list, method_name: str):
+    if len(children_classes) <= 1:
+        print("len(children_classes) should be gte 2")
+        return None
 
     # initialize with understand
     destination_class = ""
@@ -180,7 +180,7 @@ if __name__ == '__main__':
     propagation_classes = set()
     db = und.open(udb_path)
     i = 0
-    method_ents = [db.lookup(i + "." + moved_method, "method")[0] for i in children_class]
+    method_ents = [db.lookup(i + "." + method_name, "method")[0] for i in children_class]
     print(method_ents)
 
     for method_ent in method_ents:
@@ -190,7 +190,7 @@ if __name__ == '__main__':
 
     for mth in db.ents("Java Method"):
         for child in children_class:
-            if mth.longname().endswith(child + "." + moved_method):
+            if mth.longname().endswith(child + "." + method_name):
                 fileslist_to_be_rafeactored.add(mth.parent().parent().longname())
                 for fth in mth.parent().refs("Extend"):
                     destination_class = fth.ent().longname()
@@ -251,3 +251,15 @@ if __name__ == '__main__':
         with open(file, mode='w', newline='') as f:
             f.write(my_listener_propagate.token_stream_rewriter.getDefaultText())
     # end of propagate
+
+
+if __name__ == '__main__':
+    udb_path = "D:\Dev\JavaSample\JavaSample1.udb"
+    children_class = ["Tank", "Soldier"]
+    moved_method = "getHealth"
+    main(
+        udb_path=udb_path,
+        children_classes=children_class,
+        method_name=moved_method
+    )
+
