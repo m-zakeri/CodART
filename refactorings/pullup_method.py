@@ -180,13 +180,17 @@ def main(udb_path: str, children_classes: list, method_name: str):
     propagation_classes = set()
     db = und.open(udb_path)
     i = 0
-    method_ents = [db.lookup(i + "." + method_name, "method")[0] for i in children_class]
-    print(method_ents)
+    try:
+        method_ents = [db.lookup(i + "." + method_name, "method")[0] for i in children_class]
+    except IndexError:
+        print(f"Method {method_name} does not exists in all children_classes.")
+        return None
 
     for method_ent in method_ents:
         for ref in method_ent.refs("Use,Call"):
             if ref.ent().parent().simplename() in children_class:
-                raise ValueError("Replace this later")
+                print("Method has internal dependencies.")
+                return None
 
     for mth in db.ents("Java Method"):
         for child in children_class:
@@ -256,7 +260,7 @@ def main(udb_path: str, children_classes: list, method_name: str):
 if __name__ == '__main__':
     udb_path = "D:\Dev\JavaSample\JavaSample1.udb"
     children_class = ["Tank", "Soldier"]
-    moved_method = "getHealth"
+    moved_method = "getHealth2"
     main(
         udb_path=udb_path,
         children_classes=children_class,
