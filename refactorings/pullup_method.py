@@ -12,60 +12,6 @@ from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 
-class GetMethodTextPullUpMethodRefactoringListener(JavaParserLabeledListener):
-
-    def __init__(self, common_token_stream: CommonTokenStream = None, child_class=None, moved_methods=None):
-
-        if moved_methods is None:
-            self.moved_methods = []
-        else:
-            self.moved_methods = moved_methods
-        if child_class is None:
-            self.moved_methods = []
-        else:
-            self.children_class = child_class
-        if common_token_stream is None:
-            raise ValueError('common_token_stream is None')
-        else:
-            self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
-
-        self.is_children_class = False
-        self.detected_field = None
-        self.detected_method = None
-        self.TAB = "\t"
-        self.NEW_LINE = "\n"
-        self.code = ""
-        self.tempdeclarationcode = ""
-        self.method_text = ""
-
-    def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
-
-        if self.is_children_class:
-
-            method_identifier = ctx.IDENTIFIER().getText()
-            if self.moved_methods == method_identifier:
-                methodDefctx = ctx.parentCtx.parentCtx
-                start_index = methodDefctx.start.tokenIndex
-                stop_index = methodDefctx.stop.tokenIndex
-                self.method_text = self.token_stream_rewriter.getText(
-                    program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-                    start=start_index,
-                    stop=stop_index)
-
-        else:
-            return None
-
-    def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
-        print("children class in get text refactor:", self.children_class)
-        class_identifier = ctx.IDENTIFIER().getText()
-        if class_identifier in self.children_class:
-            self.is_children_class = True
-
-        else:
-            print("enter other class")
-            self.is_children_class = False
-
-
 class PullUpMethodRefactoringListener(JavaParserLabeledListener):
     """
     To implement extract class refactoring based on its actors.
@@ -223,22 +169,28 @@ class PropagationPullUpMethodRefactoringListener(JavaParserLabeledListener):
 
 
 if __name__ == '__main__':
-    udb_path = "/data/Dev/JavaSample/JavaSample.udb"
+    udb_path = "D:\Dev\JavaSample\JavaSample1.udb"
     children_class = ["Tank", "Soldier"]
     moved_method = "getHealth"
 
     # initialize with understand
     destination_class = ""
-    main_file = ""
     fileslist_to_be_rafeactored = set()
     fileslist_to_be_propagate = set()
     propagation_classes = set()
     db = und.open(udb_path)
     i = 0
+    method_ents = [db.lookup(i + "." + moved_method, "method")[0] for i in children_class]
+    print(method_ents)
+
+    for method_ent in method_ents:
+        for ref in method_ent.refs("Use,Call"):
+            if ref.ent().parent().simplename() in children_class:
+                raise ValueError("Replace this later")
+
     for mth in db.ents("Java Method"):
         for child in children_class:
             if mth.longname().endswith(child + "." + moved_method):
-                main_file = mth.parent().parent().longname()
                 fileslist_to_be_rafeactored.add(mth.parent().parent().longname())
                 for fth in mth.parent().refs("Extend"):
                     destination_class = fth.ent().longname()
@@ -251,26 +203,16 @@ if __name__ == '__main__':
     print("propagation_classes : ", propagation_classes)
     print("fileslist_to_be_rafeactored :", fileslist_to_be_rafeactored)
     print("father class :", destination_class)
-    print("main file:", main_file)
 
     fileslist_to_be_rafeactored = list(fileslist_to_be_rafeactored)
     fileslist_to_be_propagate = list(fileslist_to_be_propagate)
     propagation_class = list(propagation_classes)
-    # get text
-    stream = FileStream(main_file, encoding='utf8')
-    lexer = JavaLexer(stream)
-    token_stream = CommonTokenStream(lexer)
-    parser = JavaParserLabeled(token_stream)
-    parser.getTokenStream()
-    parse_tree = parser.compilationUnit()
-    get_text = GetMethodTextPullUpMethodRefactoringListener(common_token_stream=token_stream,
-                                                            child_class=children_class, moved_methods=moved_method)
-    walker = ParseTreeWalker()
-    walker.walk(t=parse_tree, listener=get_text)
 
-    method_text = get_text.method_text
+    # Get method text
+    method_text = method_ents[0].contents()
     print("method_text:", method_text)
     # end get text
+
     # refactored start
     for file in fileslist_to_be_rafeactored:
         stream = FileStream(file, encoding='utf8')
@@ -289,7 +231,8 @@ if __name__ == '__main__':
 
         with open(file, mode='w', newline='') as f:
             f.write(my_listener_refactor.token_stream_rewriter.getDefaultText())
-        # end refactoring
+    # end refactoring
+
     # beginning of propagate
     for file in fileslist_to_be_propagate:
         stream = FileStream(file, encoding='utf8')
@@ -307,3 +250,4 @@ if __name__ == '__main__':
 
         with open(file, mode='w', newline='') as f:
             f.write(my_listener_propagate.token_stream_rewriter.getDefaultText())
+    # end of propagate
