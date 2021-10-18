@@ -2,12 +2,20 @@ site_name: CodART Docs (v0.1.0dev)
 site_url: https://m-zakeri.github.io
 repo_url: https://github.com/m-zakeri/CodART
 site_description: Automated Source Code Refactoring Toolkit
-site_author: Zakeri, Tahaei, Ayati
+site_author: Morteza Zakeri, Ali Ayati, Saeed Parsa
 copyright: © 2020-2021 CodART project - Reverse engineering laboratory
 
 theme:
   name: material
-
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Dark mode
+    - scheme: slate
+      toggle:
+        icon: material/toggle-switch
+        name: Light mode
 
 plugins:
   - search
