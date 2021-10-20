@@ -144,7 +144,7 @@ class PropagationStaticListener(PropagationListener):
         super(PropagationStaticListener, self).__init__(*args, **kwargs)
         self.detected_method = False
 
-    def enterPrimary4(self, ctx:JavaParserLabeled.Primary4Context):
+    def enterPrimary4(self, ctx: JavaParserLabeled.Primary4Context):
         if self.is_safe:
             self.start = ctx.start
             self.stop = ctx.stop
@@ -155,7 +155,7 @@ class PropagationStaticListener(PropagationListener):
         if method_name == self.method_name and self.is_safe:
             self.detected_method = True
 
-    def exitMethodCall0(self, ctx:JavaParserLabeled.MethodCall0Context):
+    def exitMethodCall0(self, ctx: JavaParserLabeled.MethodCall0Context):
         if self.detected_method and self.detected_class:
             self.detected_class = False
             self.detected_method = False
@@ -166,7 +166,10 @@ class PropagationStaticListener(PropagationListener):
             )
 
 
-def main(udb_path, source_package, source_class, method_name, target_package, target_classes: list):
+def main(udb_path, source_package, source_class, method_name, target_classes: list):
+    target_package = source_package
+    source_method = method_name
+
     main_file = ""
     source_method_entity = None
     is_static = False
@@ -288,11 +291,4 @@ def main(udb_path, source_package, source_class, method_name, target_package, ta
 
 
 if __name__ == '__main__':
-    udb_path = "D:\Dev\JavaSample\JavaSample1.udb"
-    source_package = "your_package"
-    source_class = "Unit"
-    source_method = "getFuel"
-    target_package = "your_package"
-    target_classes = ["Tank", ]
-
-    main(udb_path, source_package, source_class, source_method, target_package, target_classes)
+    main("D:\Dev\JavaSample\JavaSample1.udb", "your_package", "Unit", "getFuel", ["Tank", ])
