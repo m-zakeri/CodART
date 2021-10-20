@@ -12,6 +12,9 @@ from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 
+class CheckOverrideListener(JavaParserLabeledListener):
+    pass
+
 class PullUpMethodRefactoringListener(JavaParserLabeledListener):
     """
     To implement extract class refactoring based on its actors.
@@ -179,21 +182,30 @@ def main(udb_path: str, children_classes: list, method_name: str):
     fileslist_to_be_propagate = set()
     propagation_classes = set()
     db = und.open(udb_path)
-    i = 0
     try:
-        method_ents = [db.lookup(i + "." + method_name, "method")[0] for i in children_class]
+        method_ents = [db.lookup(i + "." + method_name, "method")[0] for i in children_classes]
     except IndexError:
+        print([db.lookup(i + "." + method_name, "method") for i in children_classes])
         print(f"Method {method_name} does not exists in all children_classes.")
         return None
 
+    # Get method text
+    method_text = method_ents[0].contents().strip()
+    print("method_text:", method_text)
+    # end get text
+
     for method_ent in method_ents:
+        if method_ent.contents().strip() != method_text:
+            print("Method content is different.")
+            return None
+
         for ref in method_ent.refs("Use,Call"):
-            if ref.ent().parent().simplename() in children_class:
+            if ref.ent().parent().simplename() in children_classes:
                 print("Method has internal dependencies.")
                 return None
 
     for mth in db.ents("Java Method"):
-        for child in children_class:
+        for child in children_classes:
             if mth.longname().endswith(child + "." + method_name):
                 fileslist_to_be_rafeactored.add(mth.parent().parent().longname())
                 for fth in mth.parent().refs("Extend"):
@@ -212,11 +224,6 @@ def main(udb_path: str, children_classes: list, method_name: str):
     fileslist_to_be_propagate = list(fileslist_to_be_propagate)
     propagation_class = list(propagation_classes)
 
-    # Get method text
-    method_text = method_ents[0].contents()
-    print("method_text:", method_text)
-    # end get text
-
     # refactored start
     for file in fileslist_to_be_rafeactored:
         stream = FileStream(file, encoding='utf8')
@@ -227,8 +234,8 @@ def main(udb_path: str, children_classes: list, method_name: str):
         parse_tree = parser.compilationUnit()
         my_listener_refactor = PullUpMethodRefactoringListener(common_token_stream=token_stream,
                                                                destination_class=destination_class,
-                                                               children_class=children_class,
-                                                               moved_methods=moved_method,
+                                                               children_class=children_classes,
+                                                               moved_methods=method_name,
                                                                method_text=method_text)
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener_refactor)
@@ -246,7 +253,7 @@ def main(udb_path: str, children_classes: list, method_name: str):
         parser.getTokenStream()
         parse_tree = parser.compilationUnit()
         my_listener_propagate = PropagationPullUpMethodRefactoringListener(token_stream_rewriter=token_stream,
-                                                                           old_class_name=children_class,
+                                                                           old_class_name=children_classes,
                                                                            new_class_name=destination_class,
                                                                            propagated_class_name=propagation_class)
         walker = ParseTreeWalker()
@@ -260,7 +267,7 @@ def main(udb_path: str, children_classes: list, method_name: str):
 if __name__ == '__main__':
     udb_path = "D:\Dev\JavaSample\JavaSample1.udb"
     children_class = ["Tank", "Soldier"]
-    moved_method = "getHealth2"
+    moved_method = "getHealth"
     main(
         udb_path=udb_path,
         children_classes=children_class,

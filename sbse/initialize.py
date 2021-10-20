@@ -1,4 +1,5 @@
 import random
+from collections import Counter
 from pathlib import Path
 from pprint import pprint
 
@@ -7,7 +8,7 @@ from config import *
 from utilization.setup_understand import *
 from refactorings import make_field_non_static, make_field_static, make_method_static_2, \
     make_method_non_static_2, pullup_field, move_field, move_method, move_class, pushdown_field, \
-    extract_class
+    extract_class, pullup_method
 
 
 # TODO: check pymoo (framework) if possible
@@ -32,6 +33,7 @@ class Initialization(object):
         self._static_methods = self.get_all_methods(static=True)
         self._pullup_field_candidates = self.find_pullup_field_candidates()
         self._push_down_field_candidates = self.find_push_down_field_candidates()
+        self._pullup_method_candidates = self.find_pullup_method_candidates()
 
     def get_all_methods(self, static=False):
         candidates = []
@@ -148,6 +150,52 @@ class Initialization(object):
                 candidates.append(params)
         return candidates
 
+    def find_pullup_method_candidates(self):
+        candidates = []
+        class_entities = self.get_all_class_entities()
+        common_methods = []
+
+        for ent in class_entities:
+            children = []
+            class_method_dict = {}
+            father_methods = []
+
+            for met_ref in ent.refs("define", "method ~override"):
+                method = met_ref.ent()
+                father_methods.append(method.simplename())
+
+            for ref in ent.refs("extendby"):
+                child = ref.ent()
+                if not child.kind().check("public class"):
+                    continue
+                child_name = child.simplename()
+                children.append(child_name)
+                if child_name not in class_method_dict:
+                    class_method_dict[child_name] = []
+
+                for met_ref in child.refs("define", "method"):
+                    method = met_ref.ent()
+                    method_name = method.simplename()
+
+                    if method.ents("override"):
+                        continue
+
+                    if method_name not in father_methods:
+                        common_methods.append(method_name)
+                        class_method_dict[child_name].append(method_name)
+
+            counts = Counter(common_methods)
+            common_methods = [value for value, count in counts.items() if count > 1]
+            if len(common_methods) > 0:
+                random_method = random.choice(common_methods)
+                children = [k for k, v in class_method_dict.items() if random_method in v]
+                if len(children) > 1:
+                    candidates.append({
+                        "method_name": random.choice(common_methods),
+                        "children_classes": children
+                    })
+        return candidates
+
     def init_make_field_non_static(self):
         pass
 
@@ -164,6 +212,9 @@ class Initialization(object):
         pass
 
     def init_push_down_field(self):
+        pass
+
+    def init_pullup_method(self):
         pass
 
     def init_move_field(self):
@@ -189,7 +240,8 @@ class Initialization(object):
             # self.init_move_method,
             # self.init_move_class,
             # self.init_push_down_field,
-            self.init_extract_class,
+            # self.init_extract_class,
+            self.init_pullup_method,
         )
         population = []
         for _ in progressbar.progressbar(range(self.population_size)):
@@ -263,6 +315,13 @@ class RandomInitialization(Initialization):
         refactoring_main = pushdown_field.main
         params = {"project_dir": str(Path(self.udb_path).parent)}
         candidates = self._push_down_field_candidates
+        params.update(random.choice(candidates))
+        return refactoring_main, params
+
+    def init_pullup_method(self):
+        refactoring_main = pullup_method.main
+        params = {"udb_path": str(Path(self.udb_path))}
+        candidates = self._pullup_method_candidates
         params.update(random.choice(candidates))
         return refactoring_main, params
 
@@ -378,8 +437,9 @@ class RandomInitialization(Initialization):
 
 if __name__ == '__main__':
     rand_pop = RandomInitialization(
-        "D:\Dev\JavaSample\JavaSample1.udb",
+        "D:\Dev\ganttproject\ganttproject.udb",
         population_size=POPULATION_SIZE,
         individual_size=INDIVIDUAL_SIZE
     )
-    population = rand_pop.generate_population()
+    population = rand_pop.find_pullup_method_candidates()
+    print(population)
