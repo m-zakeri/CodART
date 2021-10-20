@@ -88,13 +88,15 @@ class PullUpMethodRefactoringListener(JavaParserLabeledListener):
 
     def enterClassBody(self, ctx: JavaParserLabeled.ClassBodyContext):
         classDecctx = ctx.parentCtx
-        class_identifier = classDecctx.IDENTIFIER().getText()
-        if class_identifier in self.destination_class:
-            self.token_stream_rewriter.replaceRange(
-                from_idx=ctx.start.tokenIndex + 1,
-                to_idx=ctx.start.tokenIndex + 1,
-                text="\n" + self.method_text + "\n"
-            )
+        if hasattr(classDecctx, "IDENTIFIER"):
+            class_identifier = classDecctx.IDENTIFIER().getText()
+
+            if class_identifier in self.destination_class:
+                self.token_stream_rewriter.replaceRange(
+                    from_idx=ctx.start.tokenIndex + 1,
+                    to_idx=ctx.start.tokenIndex + 1,
+                    text="\n" + self.method_text + "\n"
+                )
 
     def exitClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
         if self.is_children_class:
@@ -265,9 +267,9 @@ def main(udb_path: str, children_classes: list, method_name: str):
 
 
 if __name__ == '__main__':
-    udb_path = "D:\Dev\JavaSample\JavaSample1.udb"
-    children_class = ["Tank", "Soldier"]
-    moved_method = "getHealth"
+    udb_path = "D:\Dev\ganttproject\ganttproject.udb"
+    children_class = ['ResourceLoadGraphicArea', 'GanttGraphicArea']
+    moved_method = "getPreferredSize"
     main(
         udb_path=udb_path,
         children_classes=children_class,
