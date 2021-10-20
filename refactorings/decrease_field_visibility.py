@@ -107,11 +107,9 @@ class DecreaseFieldVisibilityRefactoringListener(JavaParserLabeledListener):
                     text='public ' + grand_parent_ctx.modifier(0).getText())
 
 
-def main():
+def main(udb_path, source_class, field_name):
     print("Decrease Field Visibility")
-    udb_path = "/home/ali/Documents/compiler/Research/xerces2-j/xerces2-j.udb"
-    class_name = "AttributesImpl"
-    field_name = "length"
+    class_name = source_class
     mainfile = ""
     db = und.open(udb_path)
     for cls in db.ents("class"):
@@ -136,5 +134,6 @@ def main():
 
     with open(mainfile, mode='w', newline='') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
+    return None
 
 

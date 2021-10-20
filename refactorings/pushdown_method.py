@@ -166,19 +166,10 @@ class PropagationStaticListener(PropagationListener):
             )
 
 
-
-
-if __name__ == '__main__':
-    udb_path = "/data/Dev/JavaSample/JavaSample.udb"
-    source_package = "your_package"
-    source_class = "Unit"
-    source_method = "getFuel"
+def main(udb_path, source_package, source_class, method_name, target_package, target_classes: list):
+    main_file = ""
     source_method_entity = None
     is_static = False
-    target_package = "your_package"
-    target_classes = ["Soldier", ]
-
-    main_file = ""
     propagation_files = []
     propagation_classes = []
     propagation_lines = []
@@ -208,20 +199,39 @@ if __name__ == '__main__':
     print("children_classes :", children_classes)
     print("children_files :", children_files)
     print("==============================================================================")
+
     # Check pre-condition
-    assert len(target_classes) == 1
-    assert len(children_classes) == 1
-    assert len(children_files) == 1
+    if not len(target_classes) == 1:
+        print(f"len(target_classes) is not 1.")
+        return None
+    if not len(children_classes) == 1:
+        print(f"len(children_classes) is not 1.")
+        return None
+    if not len(children_files) == 1:
+        print(f"len(children_files) is not 1.")
+        return None
+
     for mth in db.ents("Java Method"):
         if mth.simplename() == source_method:
             if mth.parent().simplename() in target_classes:
                 if mth.type() == source_method_entity.type():
                     if mth.kind() == source_method_entity.kind():
                         if mth.parameters() == source_method_entity.parameters():
-                            raise Exception("Duplicate method")
+                            print("Duplicate method")
+                            return None
+
+    for ref in source_method_entity.refs("use, call"):
+        ref_ent = ref.ent()
+        is_public = ref_ent.kind().check("public")
+
+        if not is_public:
+            print("Has internal dependencies.")
+            return None
+
     #  get text
     method_text = source_method_entity.contents()
     # Delete source method
+
     stream = FileStream(main_file, encoding='utf8')
     lexer = JavaLexer(stream)
     token_stream = CommonTokenStream(lexer)
@@ -275,3 +285,14 @@ if __name__ == '__main__':
         # print(my_listener.token_stream_rewriter.getDefaultText())
         with open(file, mode='w', newline='') as f:
             f.write(my_listener.token_stream_rewriter.getDefaultText())
+
+
+if __name__ == '__main__':
+    udb_path = "D:\Dev\JavaSample\JavaSample1.udb"
+    source_package = "your_package"
+    source_class = "Unit"
+    source_method = "getFuel"
+    target_package = "your_package"
+    target_classes = ["Tank", ]
+
+    main(udb_path, source_package, source_class, source_method, target_package, target_classes)

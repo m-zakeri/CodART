@@ -68,10 +68,7 @@ class DecreaseMethodVisibilityRefactoringListener(JavaParserLabeledListener):
                     text='public ' + grand_parent_ctx.modifier(0).getText())
 
 
-def main():
-    udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
-    source_class = "App"
-    method_name = "testMethod"
+def main(udb_path, source_class, method_name):
     # initialize with understand
     main_file = ""
     db = und.open(udb_path)
@@ -93,3 +90,11 @@ def main():
 
     with open(main_file, mode='w', newline='') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
+    return None
+
+if __name__ == '__main__':
+    main(
+        "D:\Dev\JavaSample\JavaSample1.udb",
+        "Unit",
+        "thisIsVoid"
+    )
