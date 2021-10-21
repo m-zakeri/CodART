@@ -17,156 +17,164 @@ Pull up constructor refactoring removes the repetitive method from subclasses an
 No specific Post Condition
 
 """
+import collections
+
+try:
+    import understand as und
+except ImportError as e:
+    print(e)
 
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
-from refactorings.pullup_constructor_get_cons import get_cons
-from refactorings.utils.utils2 import Rewriter, get_program, get_filenames_in_dir
-from refactorings.utils.utils_listener_fast import TokensInfo, SingleFileElement
+from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
+from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
+
+from utils.utils2 import parse_and_walk
 
 
-class PullUpConstructorRefactoring:
-    def __init__(self, source_filenames: list, package_name: str, class_name: str,
-                 filename_mapping=lambda x: x):
-        """
-        The main function that does the process of pull up constructor refactoring.
-               Removes the necessary constructor from the subclasses and moves them to a superclass.
-
-               Args:
-                      source_filenames (list): A list of file names to be processed
-
-                      package_name (str): The name of the package in which the refactoring has to be done(contains the classes)
-
-                      class_name (str): Name of the class in which the refactoring has to be done (pulling up the field from here)
-
-                      filename_mapping (str): Mapping the file's name to the correct format so that it can be processed
-
-               Returns:
-                   No returns
-        """
-        self.source_filenames = source_filenames
-        self.package_name = package_name
+class PullUpConstructorListener(JavaParserLabeledListener):
+    def __init__(self, rewriter: TokenStreamRewriter, is_father: bool, class_name: str, has_father_con: bool,
+                 common_sets: [], params: str):
+        self.rewriter = rewriter
+        self.is_father = is_father
+        self.has_father_con = has_father_con
         self.class_name = class_name
-        self.filename_mapping = filename_mapping
+        self.common_sets = common_sets
+        self.params = params
 
-    def do_refactor(self):
-        program = get_program(self.source_filenames)  # getting the program packages
-        package = self.package_name
-        _sourceclass = program.packages[package].classes[self.class_name]
-        target_class_name = _sourceclass.superclass_name
-        removemethod, removemethod1 = get_cons(program, package, target_class_name,
-                                               self.class_name)  # Similar cons in other classes
-        _targetclass = program.packages[package].classes[target_class_name]
-        mets = program.packages[package].classes[self.class_name].methods
-        _method_name = []
-        for methodName, method in mets.items():
-            if method.is_constructor:
-                _method_name = method
+        self.in_con = False
+        self.delete = False
+
+    def exitClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
+        if self.is_father:
+            code = ""
+            for var in self.common_sets:
+                code += f"this.{var} = {var};\n"
+            if self.has_father_con:
+                pass
+            else:
+                self.rewriter.insertBeforeToken(
+                    token=ctx.stop,
+                    text=f"public {self.class_name}({self.params})" + "{\n" + code + "}"
+                )
+
+    def enterConstructorDeclaration(self, ctx:JavaParserLabeled.ConstructorDeclarationContext):
+        if not self.is_father:
+            self.in_con = True
+
+    def exitConstructorDeclaration(self, ctx:JavaParserLabeled.ConstructorDeclarationContext):
+        is_valid = False
+        for i in self.common_sets:
+            if i in ctx.getText():
+                is_valid = True
                 break
-        tokens_info = TokensInfo(_method_name.parser_context)
+        if self.is_father and self.has_father_con and is_valid:
+            code = ""
+            for var in self.common_sets:
+                code += f"this.{var} = {var};\n"
+            self.rewriter.insertBeforeToken(
+                token=ctx.stop,
+                text=code
+            )
+        self.in_con = False
 
-        if not _method_name.is_constructor:
-            return False
-        param_dict = {}
-        len_params = {}
-        _methodds = ""
+    def enterExpression1(self, ctx:JavaParserLabeled.Expression1Context):
+        if self.in_con:
+            identifier = str(ctx.IDENTIFIER())
+            print(identifier, self.common_sets)
+            if identifier in self.common_sets:
+                self.delete = True
 
-        Rewriter_ = Rewriter(program, self.filename_mapping)
-        for remove in removemethod:
-            flag2 = False
-            _methodd = removemethod[remove]
-            len_params[remove] = len(_methodd[0].split(","))
-            not_present = removemethod1
-            if _methodd is not None:
-                _methodds = _methodd[0]
-                _method = program.packages[package].classes[remove].methods[str(_methodds)]
-                params = ""
-                params2 = ""
-                for param in _method.parameters:
-                    flag = False
-                    for x in not_present:
-                        for y in x:
-                            if param[1] in y:
-                                flag = True
-                                flag2 = True
-                    if not flag:
-                        params += param[1] + ","
-                    params2 += param[0] + " " + param[1] + ","
-                    flag = False
-                param_dict[remove] = params2[:-1]
-                _method_token_info = TokensInfo(_method.parser_context)
-                if flag2:
-                    str1 = ""
-                    for x in not_present:
-                        for y in x:
-                            str1 += y + ";" + "\n\t"
-                    Rewriter_.replace(_method_token_info, "public " + remove + "(" + params2[:-1] + ")"
-                                      + "{\n\t" + "super(" + params[:-1] + ");" + "\n\t " + str1 + "}")
-                else:
-                    Rewriter_.replace(_method_token_info, "public " + remove + "(" + params2[:-1] + ")"
-                                      + "{\n\t" + "super(" + params[:-1] + ");" + "\n\t}")
-        has_cons = False
-        parent_cons = []
-        for method in _targetclass.methods:
-            meth = _targetclass.methods[method]
-            if meth.is_constructor and _methodds == method:
-                parent_cons = meth
-                has_cons = True
-                break
-        if has_cons:
-            for class_body_decl in _targetclass.parser_context.classBody().getChildren():
-                if class_body_decl.getText() in ['{', '}']:
-                    continue
-                member_decl = class_body_decl.memberDeclaration()
-                if member_decl is not None:
-                    constructor = member_decl.constructorDeclaration()
-                    if constructor is not None:
-                        body = constructor.constructorBody  # Start token = '{'
-                        class_tokens_info = TokensInfo(body)
-                        class_tokens_info.stop = class_tokens_info.start  # Start and stop both point to the '{'
-                        key = min(len_params, key=len_params.get)
-                        _method_name1 = program.packages[package].classes[key].methods[removemethod[key][0]]
-                        tokens_info = TokensInfo(_method_name1.parser_context.memberDeclaration()
-                                                 .constructorDeclaration()
-                                                 .constructorBody)
-                        singlefileelement = SingleFileElement(_method_name1.parser_context, _method_name1.filename)
-                        token_stream_rewriter = TokenStreamRewriter(singlefileelement.get_token_stream())
-                        strofmethod = token_stream_rewriter.getText(
-                            program_name=token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-                            start=tokens_info.start,
-                            stop=tokens_info.stop)
-                        strofmethod = strofmethod.replace(_method_name1.class_name, target_class_name) \
-                            .replace("{", "").replace("}", "")
-                        a1 = parent_cons.body_text.replace("{", "").replace("}", "")
-                        a2 = _method_name1.body_text.replace("}", "").replace("{", "")
-                        if a2 not in a1:
-                            Rewriter_.insert_after(tokens_info=class_tokens_info, text=strofmethod)
-                            Rewriter_.apply()
-                            break
-            Rewriter_.apply()
+    def exitExpression21(self, ctx:JavaParserLabeled.Expression21Context):
+        if self.delete:
+            self.rewriter.delete(
+                program_name=self.rewriter.DEFAULT_PROGRAM_NAME,
+                from_idx=ctx.start.tokenIndex,
+                to_idx=ctx.stop.tokenIndex + 1
+            )
+        self.delete = False
 
-        else:
-            class_tokens_info = TokensInfo(_targetclass.parser_context.classBody())
-            class_tokens_info.stop = class_tokens_info.start
-            key = min(len_params, key=len_params.get)
-            _method_name1 = program.packages[package].classes[key].methods[removemethod[key][0]]
-            tokens_info = TokensInfo(_method_name1.parser_context)
-            singlefileelement = SingleFileElement(_method_name1.parser_context, _method_name1.filename)
-            token_stream_rewriter = TokenStreamRewriter(singlefileelement.get_token_stream())
-            strofmethod = token_stream_rewriter.getText(program_name=token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-                                                        start=tokens_info.start,
-                                                        stop=tokens_info.stop)
-            strofmethod = strofmethod.replace(_method_name1.class_name, target_class_name)
 
-            Rewriter_.insert_after(tokens_info=class_tokens_info, text=strofmethod)
-            Rewriter_.apply()
 
-        return True
+def main(udb_path, source_package, target_class, class_names: list):
+    if len(class_names) < 2:
+        print("class_names is empty.")
+        return None
+    db = und.open(udb_path)
+    parent_cons = []
+
+    # Check children
+    parent = db.lookup(f"{target_class}", "Class")
+    if len(parent) != 1:
+        print("Something is wrong!")
+        return
+    parent = parent[0]
+    parent_file = db.lookup(f"{target_class}.java", "File")[0].longname()
+
+    for i in parent.ents("Define", "Constructor"):
+        parent_cons.append(i.parameters())
+
+    # Find constructor entities group by signature
+    constructors = {}
+
+    for child in class_names:
+        cons = db.lookup(f"{child}.{child}", "Constructor")
+        for con in cons:
+            if source_package not in con.parent().longname():
+                print("Source package does not match.")
+                return
+            parameters = con.parameters()
+            if parameters in constructors:
+                constructors[parameters].append(con)
+            else:
+                constructors[parameters] = [con]
+
+    # Find common statements
+    for k in constructors:
+        meta_data = {
+            parent_file: {'is_father': True, 'has_father_con': k in parent_cons, 'class_name': parent.simplename()},
+        }
+        con = constructors[k][0]
+        ents = []
+
+        for ref in con.refs("Set"):
+            data = {'is_father': False, 'has_father_con': k in parent_cons,
+                    'class_name': con.parent().simplename()}
+            if ref.file().longname() not in meta_data.keys():
+                meta_data[ref.file().longname()] = data
+            if target_class in ref.ent().longname():
+                ents.append(ref.ent().simplename())
+
+        for i in range(1, len(constructors[k])):
+            con2 = constructors[k][i]
+            for ref in con2.refs("Set"):
+                data = {'is_father': False, 'has_father_con': k in parent_cons,
+                        'class_name': con2.parent().simplename()}
+                if ref.file().longname() not in meta_data.keys():
+                    meta_data[ref.file().longname()] = data
+                if target_class in ref.ent().longname():
+                    ents.append(ref.ent().simplename())
+
+        ents = [item for item, count in collections.Counter(ents).items() if count > 1]
+        if len(meta_data.keys()) > 1:
+            for file_name in meta_data:
+                data = meta_data[file_name]
+                parse_and_walk(
+                    file_name,
+                    PullUpConstructorListener,
+                    has_write=True,
+                    is_father=data['is_father'],
+                    has_father_con=data['has_father_con'],
+                    common_sets=ents,
+                    class_name=data['class_name'],
+                    params=k
+                )
 
 
 if __name__ == "__main__":
-    my_list = get_filenames_in_dir('/data/Dev/JavaSample/')
-    if PullUpConstructorRefactoring(my_list, "", "Manager").do_refactor():
-        print("Success!")
-    else:
-        print("Cannot refactor.")
+    main(
+        "D:\Dev\JavaSample\JavaSample1.udb",
+        "",
+        "Employee",
+        class_names=["Admin", "Manager", ]
+    )
