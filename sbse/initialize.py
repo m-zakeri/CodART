@@ -214,12 +214,11 @@ class Initialization(object):
                 children.append(child_name)
 
             ln = ent.longname().split(".")
-            params["source_package"] = ln[0] if len(ln) > 1 else ""
+            params["source_package"] = ".".join(ln[:-1]) if len(ln) > 1 else ""
             params["target_class"] = ent.simplename()
             if len(children) >= 2:
                 params["class_names"] = random.sample(children, random.randint(2, len(children)))
                 candidates.append(params)
-
         return candidates
 
     def find_push_down_method_candidates(self):
@@ -315,7 +314,7 @@ class Initialization(object):
             # self.init_extract_class,
             # self.init_pullup_method,
             # self.init_push_down_method,
-            self.init_extract_method,
+            # self.init_extract_method,
             self.init_pullup_constructor,
         )
         population = []
@@ -549,9 +548,9 @@ class RandomInitialization(Initialization):
 
 if __name__ == '__main__':
     rand_pop = RandomInitialization(
-        "D:\Dev\JavaSample\JavaSample1.udb",
+        "D:\\\Dev\\\JSON-java\\JSON-java.udb",
         population_size=POPULATION_SIZE,
         individual_size=INDIVIDUAL_SIZE
     )
-    population = rand_pop.find_pullup_constructor_candidates()
+    population = rand_pop.generate_population()
     print(population)

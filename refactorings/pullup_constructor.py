@@ -81,7 +81,6 @@ class PullUpConstructorListener(JavaParserLabeledListener):
     def enterExpression1(self, ctx: JavaParserLabeled.Expression1Context):
         if self.in_con:
             identifier = str(ctx.IDENTIFIER())
-            print(identifier, self.common_sets)
             if identifier in self.common_sets:
                 self.delete = True
 
@@ -103,7 +102,7 @@ def main(udb_path, source_package, target_class, class_names: list):
     parent_cons = []
 
     # Check children
-    parent = db.lookup(f"{target_class}", "Class")
+    parent = db.lookup(f"{target_class}", "Public Class")
     if len(parent) != 1:
         print("Something is wrong!")
         return
