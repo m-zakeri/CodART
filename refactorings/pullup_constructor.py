@@ -29,7 +29,7 @@ from antlr4.TokenStreamRewriter import TokenStreamRewriter
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
-from utils.utils2 import parse_and_walk
+from refactorings.utils.utils2 import parse_and_walk
 
 
 class PullUpConstructorListener(JavaParserLabeledListener):
@@ -58,11 +58,11 @@ class PullUpConstructorListener(JavaParserLabeledListener):
                     text=f"public {self.class_name}({self.params})" + "{\n" + code + "}"
                 )
 
-    def enterConstructorDeclaration(self, ctx:JavaParserLabeled.ConstructorDeclarationContext):
+    def enterConstructorDeclaration(self, ctx: JavaParserLabeled.ConstructorDeclarationContext):
         if not self.is_father:
             self.in_con = True
 
-    def exitConstructorDeclaration(self, ctx:JavaParserLabeled.ConstructorDeclarationContext):
+    def exitConstructorDeclaration(self, ctx: JavaParserLabeled.ConstructorDeclarationContext):
         is_valid = False
         for i in self.common_sets:
             if i in ctx.getText():
@@ -78,14 +78,14 @@ class PullUpConstructorListener(JavaParserLabeledListener):
             )
         self.in_con = False
 
-    def enterExpression1(self, ctx:JavaParserLabeled.Expression1Context):
+    def enterExpression1(self, ctx: JavaParserLabeled.Expression1Context):
         if self.in_con:
             identifier = str(ctx.IDENTIFIER())
             print(identifier, self.common_sets)
             if identifier in self.common_sets:
                 self.delete = True
 
-    def exitExpression21(self, ctx:JavaParserLabeled.Expression21Context):
+    def exitExpression21(self, ctx: JavaParserLabeled.Expression21Context):
         if self.delete:
             self.rewriter.delete(
                 program_name=self.rewriter.DEFAULT_PROGRAM_NAME,
@@ -93,7 +93,6 @@ class PullUpConstructorListener(JavaParserLabeledListener):
                 to_idx=ctx.stop.tokenIndex + 1
             )
         self.delete = False
-
 
 
 def main(udb_path, source_package, target_class, class_names: list):

@@ -9,7 +9,7 @@ from candidate_reader import CandidateReader
 from utilization.setup_understand import *
 from refactorings import make_field_non_static, make_field_static, make_method_static_2, \
     make_method_non_static_2, pullup_field, move_field, move_method, move_class, pushdown_field, \
-    extract_class, pullup_method, pushdown_method, extract_method
+    extract_class, pullup_method, pushdown_method, extract_method, pullup_constructor
 
 
 class Initialization(object):
@@ -32,6 +32,7 @@ class Initialization(object):
         self._pullup_field_candidates = self.find_pullup_field_candidates()
         self._push_down_field_candidates = self.find_push_down_field_candidates()
         self._pullup_method_candidates = self.find_pullup_method_candidates()
+        self._pullup_constructor_candidates = self.find_pullup_constructor_candidates()
         self._push_down_method_candidates = self.find_push_down_method_candidates()
 
     def get_all_methods(self, static=False):
@@ -197,6 +198,30 @@ class Initialization(object):
                     })
         return candidates
 
+    def find_pullup_constructor_candidates(self):
+        candidates = []
+        class_entities = self.get_all_class_entities()
+
+        for ent in class_entities:
+            children = []
+            params = {}
+
+            for ref in ent.refs("extendby"):
+                child = ref.ent()
+                if not child.kind().check("public class"):
+                    continue
+                child_name = child.simplename()
+                children.append(child_name)
+
+            ln = ent.longname().split(".")
+            params["source_package"] = ln[0] if len(ln) > 1 else ""
+            params["target_class"] = ent.simplename()
+            if len(children) >= 2:
+                params["class_names"] = random.sample(children, random.randint(2, len(children)))
+                candidates.append(params)
+
+        return candidates
+
     def find_push_down_method_candidates(self):
         candidates = []
         class_entities = self.get_all_class_entities()
@@ -255,6 +280,9 @@ class Initialization(object):
     def init_pullup_method(self):
         pass
 
+    def init_pullup_constructor(self):
+        pass
+
     def init_push_down_method(self):
         pass
 
@@ -288,6 +316,7 @@ class Initialization(object):
             # self.init_pullup_method,
             # self.init_push_down_method,
             self.init_extract_method,
+            self.init_pullup_constructor,
         )
         population = []
         for _ in progressbar.progressbar(range(self.population_size)):
@@ -368,6 +397,13 @@ class RandomInitialization(Initialization):
         refactoring_main = pullup_method.main
         params = {"udb_path": str(Path(self.udb_path))}
         candidates = self._pullup_method_candidates
+        params.update(random.choice(candidates))
+        return refactoring_main, params
+
+    def init_pullup_constructor(self):
+        refactoring_main = pullup_constructor.main
+        params = {"udb_path": str(Path(self.udb_path))}
+        candidates = self._pullup_constructor_candidates
         params.update(random.choice(candidates))
         return refactoring_main, params
 
@@ -513,9 +549,9 @@ class RandomInitialization(Initialization):
 
 if __name__ == '__main__':
     rand_pop = RandomInitialization(
-        "D:\\Dev\\JSON-java\\JSON-java.udb",
+        "D:\Dev\JavaSample\JavaSample1.udb",
         population_size=POPULATION_SIZE,
         individual_size=INDIVIDUAL_SIZE
     )
-    population = rand_pop.generate_population()
+    population = rand_pop.find_pullup_constructor_candidates()
     print(population)
