@@ -5,14 +5,12 @@ from pprint import pprint
 
 import progressbar
 from config import *
+from candidate_reader import CandidateReader
 from utilization.setup_understand import *
 from refactorings import make_field_non_static, make_field_static, make_method_static_2, \
     make_method_non_static_2, pullup_field, move_field, move_method, move_class, pushdown_field, \
-    extract_class, pullup_method, pushdown_method
+    extract_class, pullup_method, pushdown_method, extract_method
 
-
-# TODO: check pymoo (framework) if possible
-# TODO: Simple GA
 
 class Initialization(object):
     def __init__(self, udb_path, population_size=50, individual_size=4):
@@ -64,7 +62,8 @@ class Initialization(object):
             else:
                 continue
             # print("Method", source_class, parent.kindname(), method_name)
-            candidates.append({'source_package': source_package, 'source_class': source_class, 'method_name': method_name})
+            candidates.append(
+                {'source_package': source_package, 'source_class': source_class, 'method_name': method_name})
         return candidates
 
     def get_all_variables(self, static=False):
@@ -93,7 +92,8 @@ class Initialization(object):
                 source_class, field_name = long_name
             else:
                 continue
-            candidates.append({'source_package': source_package, 'source_class': source_class, 'field_name': field_name})
+            candidates.append(
+                {'source_package': source_package, 'source_class': source_class, 'field_name': field_name})
         return candidates
 
     def get_all_class_entities(self, filter="class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static"):
@@ -270,6 +270,9 @@ class Initialization(object):
     def init_extract_class(self):
         pass
 
+    def init_extract_method(self):
+        pass
+
     def generate_population(self):
         initializers = (
             # self.init_make_field_non_static,
@@ -283,7 +286,8 @@ class Initialization(object):
             # self.init_push_down_field,
             # self.init_extract_class,
             # self.init_pullup_method,
-            self.init_push_down_method,
+            # self.init_push_down_method,
+            self.init_extract_method,
         )
         population = []
         for _ in progressbar.progressbar(range(self.population_size)):
@@ -477,16 +481,39 @@ class RandomInitialization(Initialization):
 
         params.update(
             {
-                "moved_fields": [ent.simplename() for ent in random.sample(class_fields, random.randint(0, len(class_fields)))],
-                "moved_methods": [ent.simplename() for ent in random.sample(class_methods, random.randint(0, len(class_methods)))],
+                "moved_fields": [ent.simplename() for ent in
+                                 random.sample(class_fields, random.randint(0, len(class_fields)))],
+                "moved_methods": [ent.simplename() for ent in
+                                  random.sample(class_methods, random.randint(0, len(class_methods)))],
             }
         )
+        return refactoring_main, params
+
+    def init_extract_method(self, file_path="C:\\Users\\RGY\\Desktop\\Long-Method.csv"):
+        """
+        Uses jDodorant csv output and candidate_reader.py
+        """
+        refactoring_main = extract_method.main
+        candidates = []
+        cr = CandidateReader(file_path)
+        for i in range(len(cr)):
+            params = {}
+            conf = cr.get_conf(i)
+            longname = conf.get("target_file")
+            lookup = self._und.lookup(longname + ".java", "File")
+            if lookup and os.path.basename(lookup[0].longname()) == longname.split(".")[-1] + ".java":
+                params["file_path"] = lookup[0].longname()
+                params["lines"] = conf.get("lines", [])
+                candidates.append(params)
+            else:
+                continue
+        params = random.choice(candidates)
         return refactoring_main, params
 
 
 if __name__ == '__main__':
     rand_pop = RandomInitialization(
-        "D:\Dev\ganttproject\ganttproject.udb",
+        "D:\\Dev\\JSON-java\\JSON-java.udb",
         population_size=POPULATION_SIZE,
         individual_size=INDIVIDUAL_SIZE
     )

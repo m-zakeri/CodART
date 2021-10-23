@@ -16,6 +16,9 @@ class CandidateReader:
         }
         return _conf
 
+    def __len__(self):
+        return len(self.data)
+
 
 if __name__ == '__main__':
     _addr = '/mnt/d/Sajad/Uni/Spring00/Compiler/CodART/tests/extract_method/benchmark_projects_test/JSON/Long-Method.csv'

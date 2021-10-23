@@ -447,18 +447,15 @@ def extract_method(conf):
 """
 
 
-def main():
+def main(file_path, lines: list):
     print("Started Extract Method")
     _conf = {
-        'target_file': "/data/Dev/JavaSample/src/GodClass.java",
-        'output_file': "/data/Dev/JavaSample/src/GodClass.java",
-        'lines': [23, 24],
-        'new_method_name': 'printTest',
+        'target_file': file_path,
+        'output_file': file_path,
+        'lines': lines,
+        'new_method_name': 'newMethodByCodArt',
     }
     extract_method(_conf)
 
     print("Finished Extract Method")
 
-
-if __name__ == '__main__':
-    main()
