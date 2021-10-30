@@ -91,6 +91,26 @@ class Individual(List):
         for ref in self.refactoring_operations:
             yield ref
 
+    def __len__(self):
+        return len(self.refactoring_operations)
+
+    def __getitem__(self, item):
+        return self.refactoring_operations[item]
+
+    def __delitem__(self, key):
+        del self.refactoring_operations[key]
+
+    def __setitem__(self, key, value):
+        self.refactoring_operations[key] = value
+
+    def __str__(self):
+        return str(self.refactoring_operations)
+
+    def insert(self, __index: int, __object: RefactoringOperation) -> None:
+        self.refactoring_operations.insert(__index, __object)
+
+    def append(self, __object: RefactoringOperation) -> None:
+        self.insert(len(self.refactoring_operations), __object)
 
 class ProblemSingleObjective(Problem):
     """
@@ -253,14 +273,16 @@ class SudoRandomInitialization(Sampling):
             n_samples (int): the same population size, pop_size
 
         """
-        X = np.full((n_samples, 1), None, dtype=Individual)
+        individual_size = random.randint(problem.n_refactorings_lowerbound, problem.n_refactorings_upperbound)
+        X = np.full((n_samples, 1, individual_size), None, dtype=Individual)
+
         print("X shape:", X.shape)
         # TODO: Clean following code
         udb_path = "D:\Dev\JavaSample\JavaSample1.udb"
         rand_init = RandomInitialization(
             udb_path=udb_path,
             population_size=n_samples,
-            individual_size=random.randint(problem.n_refactorings_lowerbound, problem.n_refactorings_upperbound)
+            individual_size=individual_size
         )
         rand_pop = rand_init.generate_population()
 
@@ -275,7 +297,8 @@ class SudoRandomInitialization(Sampling):
                     main=gene[0],
                     params=gene[1]
                 )
-                individual_object.refactoring_operations.append(refactoring_operation)
+                individual_object.append(refactoring_operation)
+            print(np.array(individual_object).shape)
             X[i, 0] = individual_object
         print("X", X)
         return X
