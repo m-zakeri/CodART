@@ -9,7 +9,7 @@ using pymoo framework
 """
 
 __version__ = '0.1.0'
-__author__ = 'Morteza Zakeri'
+__author__ = 'Morteza Zakeri, Seyyed Ali Ayati'
 
 import random
 from typing import List
@@ -27,7 +27,15 @@ from pymoo.model.sampling import Sampling
 from pymoo.optimize import minimize
 from pymoo.visualization.scatter import Scatter
 
+from sbse.initialize import RandomInitialization
 from sbse.objectives import Objectives
+from utilization.directory_utils import update_understand_database, git_restore
+
+"""
+Gene, RefactoringOperation: One refactoring with params
+Individual: A list of RefactoringOperation
+SudoRandomInitialization: Population, list of Individual
+"""
 
 
 class Gene:
@@ -36,7 +44,8 @@ class Gene:
     """
 
     def __init__(self, **kwargs):
-        self.params = kwargs
+        self.params = kwargs.get('params')
+        self.main = kwargs.get('main')
 
 
 class RefactoringOperation(Gene):
@@ -62,12 +71,8 @@ class RefactoringOperation(Gene):
         super(RefactoringOperation, self).__init__(**kwargs)
 
     def do_refactoring(self):
-        # TODO:  Make this better
-        self.params['api'](**self.api_params)
-        if self.params['refactoring_name'] == 'make_field_static':
-            self.params['api'](source_class=self.params['source_class'], )
-        elif self.params['refactoring_name'] == 'make_field_non_static':
-            pass
+        # TODO: Make this better.
+        self.main(**self.params)
 
 
 class Individual(List):
@@ -80,11 +85,11 @@ class Individual(List):
 
     def __init__(self):
         super(Individual, self).__init__()
-        self.refactoring_operations = list()
+        self.refactoring_operations = []
 
-    def __eq__(self, other):
-        # Todo: Compare to instance of individual class to detect the equality
-        pass
+    def __iter__(self):
+        for ref in self.refactoring_operations:
+            yield ref
 
 
 class ProblemSingleObjective(Problem):
@@ -113,17 +118,25 @@ class ProblemSingleObjective(Problem):
         x (Individual): x is an instance of Individual (i.e., a list of refactoring operations)
 
         """
+        # TODO: Clean following code
+        udb_path = "D:\Dev\JavaSample\JavaSample1.udb"
+        project_dir = "D:\Dev\JavaSample"
+        print(x)
+        # Git restore
+        git_restore(project_dir)
         # Stage 1: Execute all refactoring operations in the sequence x
         for refactoring_operation in x.refactoring_operations:
             refactoring_operation.do_refactoring()
-
-        # Update Understand DB
+            # Update Understand DB
+            update_understand_database("D:\Dev\JavaSample\JavaSample1.udb")
         # Stage 2: Computing quality attributes
-        # Todo: Add testability and modularity objectives
+        # TODO: Add testability and modularity objectives
         # o1 = testability  ## Our only objective for testability improvement
-        # Git restore
+        score = Objectives(udb_path=udb_path).reusability
+
         # Stage 3: Marshal objectives into vector
         # out["F"] = np.array([-1 * o1], dtype=float)
+        out["F"] = np.array([-1 * score], dtype=float)
 
 
 class ProblemMultiObjective(Problem):
@@ -240,20 +253,31 @@ class SudoRandomInitialization(Sampling):
             n_samples (int): the same population size, pop_size
 
         """
-        X = np.full((n_samples, 1), None, dtype=np.object)
+        X = np.full((n_samples, 1), None, dtype=Individual)
+        print("X shape:", X.shape)
+        # TODO: Clean following code
+        udb_path = "D:\Dev\JavaSample\JavaSample1.udb"
+        rand_init = RandomInitialization(
+            udb_path=udb_path,
+            population_size=n_samples,
+            individual_size=random.randint(problem.n_refactorings_lowerbound, problem.n_refactorings_upperbound)
+        )
+        rand_pop = rand_init.generate_population()
 
-        for i in range(n_samples):
+        for i, individual in enumerate(rand_pop):
             # we generate the solution length randomly between the lower and upper bounds of the solution length
-            individual_length = random.randint(problem.n_refactorings_lowerbound, problem.n_refactorings_upperbound)
-            individual = Individual()
-            for j in range(0, individual_length):
+            # individual_length =
+            individual_object = Individual()
+            for gene in individual:
                 # Todo: Choose a random refactoring opportunity and fill the refactoring_params dict
-                refactoring_params = dict()
 
-                refactoring_operation = RefactoringOperation(**refactoring_params)
-                individual.refactoring_operations.append(refactoring_operation)
-            X[i, 0] = individual
-
+                refactoring_operation = RefactoringOperation(
+                    main=gene[0],
+                    params=gene[1]
+                )
+                individual_object.refactoring_operations.append(refactoring_operation)
+            X[i, 0] = individual_object
+        print("X", X)
         return X
 
 
@@ -415,8 +439,8 @@ def main():
     problems.append(ProblemManyObjective(n_refactorings_lowerbound=50, n_refactorings_upperbound=75))
 
     # Do optimization for various problems with various algorithms
-    res = minimize(problem=problems[1],
-                   algorithm=algorithms[1],
+    res = minimize(problem=problems[0],
+                   algorithm=algorithms[0],
                    termination=('n_gen', 100),
                    seed=1,
                    verbose=True)
@@ -426,3 +450,6 @@ def main():
     results = res.X[np.argsort(res.F[:, 0])]
     count = [np.sum([e == "a" for e in r]) for r in results[:, 0]]
     print(np.column_stack([results, count]))
+
+if __name__ == '__main__':
+    main()
