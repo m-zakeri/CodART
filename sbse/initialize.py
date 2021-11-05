@@ -23,6 +23,22 @@ class Initialization(object):
         self.udb_path = udb_path
         self.population_size = population_size
         self.individual_size = individual_size
+        self.initializers = (
+            # self.init_make_field_non_static,
+            # self.inti_make_field_static,
+            # self.init_make_method_static,
+            # self.init_make_method_non_static,
+            # self.init_pullup_field,
+            # self.init_move_field,
+            # self.init_move_method,
+            # self.init_move_class,
+            # self.init_push_down_field,
+            # self.init_extract_class,
+            # self.init_pullup_method,
+            # self.init_push_down_method,
+            # self.init_extract_method,
+            self.init_pullup_constructor,
+        )
 
         self._und = und.open(self.udb_path)
         self._variables = self.get_all_variables()
@@ -301,31 +317,14 @@ class Initialization(object):
         pass
 
     def generate_population(self):
-        initializers = (
-            # self.init_make_field_non_static,
-            # self.inti_make_field_static,
-            # self.init_make_method_static,
-            # self.init_make_method_non_static,
-            # self.init_pullup_field,
-            # self.init_move_field,
-            # self.init_move_method,
-            # self.init_move_class,
-            # self.init_push_down_field,
-            # self.init_extract_class,
-            # self.init_pullup_method,
-            # self.init_push_down_method,
-            # self.init_extract_method,
-            self.init_pullup_constructor,
-        )
         population = []
         for _ in progressbar.progressbar(range(self.population_size)):
             individual = []
             for j in range(self.individual_size):
                 individual.append(
-                    random.choice(initializers)()
+                    random.choice(self.initializers)()
                 )
             population.append(individual)
-        print(f"len of population is: {len(population)}")
         return population
 
 
@@ -339,7 +338,7 @@ class RandomInitialization(Initialization):
         params = {"udb_path": self.udb_path}
         candidates = self._static_variables
         params.update(random.choice(candidates))
-        return refactoring_main, params
+        return refactoring_main, params, 'Make Field Non-Static'
 
     def inti_make_field_static(self):
         """
@@ -350,7 +349,7 @@ class RandomInitialization(Initialization):
         params = {"udb_path": self.udb_path}
         candidates = self._variables
         params.update(random.choice(candidates))
-        return refactoring_main, params
+        return refactoring_main, params, 'Make Field Static'
 
     def init_make_method_static(self):
         """
@@ -361,7 +360,7 @@ class RandomInitialization(Initialization):
         params = {"udb_path": self.udb_path}
         candidates = self._methods
         params.update(random.choice(candidates))
-        return refactoring_main, params
+        return refactoring_main, params, 'Make Method Static'
 
     def init_make_method_non_static(self):
         """
@@ -372,7 +371,7 @@ class RandomInitialization(Initialization):
         params = {"udb_path": self.udb_path}
         candidates = self._static_methods
         params.update(random.choice(candidates))
-        return refactoring_main, params
+        return refactoring_main, params, 'Make Method Non-Static'
 
     def init_pullup_field(self):
         """
@@ -383,35 +382,35 @@ class RandomInitialization(Initialization):
         params = {"project_dir": str(Path(self.udb_path).parent)}
         candidates = self._pullup_field_candidates
         params.update(random.choice(candidates))
-        return refactoring_main, params
+        return refactoring_main, params, 'Pull Up Field'
 
     def init_push_down_field(self):
         refactoring_main = pushdown_field.main
         params = {"project_dir": str(Path(self.udb_path).parent)}
         candidates = self._push_down_field_candidates
         params.update(random.choice(candidates))
-        return refactoring_main, params
+        return refactoring_main, params, 'Push Down Field'
 
     def init_pullup_method(self):
         refactoring_main = pullup_method.main
         params = {"udb_path": str(Path(self.udb_path))}
         candidates = self._pullup_method_candidates
         params.update(random.choice(candidates))
-        return refactoring_main, params
+        return refactoring_main, params, 'Pull Up Method'
 
     def init_pullup_constructor(self):
         refactoring_main = pullup_constructor.main
         params = {"udb_path": str(Path(self.udb_path))}
         candidates = self._pullup_constructor_candidates
         params.update(random.choice(candidates))
-        return refactoring_main, params
+        return refactoring_main, params, 'Pull Up Constructor'
 
     def init_push_down_method(self):
         refactoring_main = pushdown_method.main
         params = {"udb_path": str(Path(self.udb_path))}
         candidates = self._push_down_method_candidates
         params.update(random.choice(candidates))
-        return refactoring_main, params
+        return refactoring_main, params, 'Push Down Method'
 
     def init_move_field(self):
         """
@@ -439,7 +438,7 @@ class RandomInitialization(Initialization):
             "target_class": target_class,
             "target_package": target_package
         })
-        return refactoring_main, params
+        return refactoring_main, params, 'Move Field'
 
     def init_move_method(self):
         """
@@ -467,7 +466,7 @@ class RandomInitialization(Initialization):
             "target_class": target_class,
             "target_package": target_package
         })
-        return refactoring_main, params
+        return refactoring_main, params, 'Move Method'
 
     def init_move_class(self):
         refactoring_main = move_class.main
@@ -493,7 +492,7 @@ class RandomInitialization(Initialization):
             params.update({
                 "target_package": ".".join(random_class[:-1])
             })
-        return refactoring_main, params
+        return refactoring_main, params, 'Move Class'
 
     def init_extract_class(self):
         refactoring_main = extract_class.main
@@ -522,7 +521,7 @@ class RandomInitialization(Initialization):
                                   random.sample(class_methods, random.randint(0, len(class_methods)))],
             }
         )
-        return refactoring_main, params
+        return refactoring_main, params, 'Extract Class'
 
     def init_extract_method(self, file_path="C:\\Users\\RGY\\Desktop\\Long-Method.csv"):
         """
@@ -543,7 +542,7 @@ class RandomInitialization(Initialization):
             else:
                 continue
         params = random.choice(candidates)
-        return refactoring_main, params
+        return refactoring_main, params, 'Extract Method'
 
 
 if __name__ == '__main__':

@@ -1261,13 +1261,13 @@ class TestabilityModel(object):
 
 
 # Test driver
-def main():
+def main(project_path):
     """
     A demo of using testability_prediction module to measure testability quality attribute with machine learning
     """
     # TODO: project_path as input + return value
     # project_path = '../benchmark_projects/ganttproject/biz.ganttproject.core/biz.ganttproject.core.und'  # T=52.53%
-    project_path = '../benchmark_projects/JSON/JSON.und'  # T=45.31%
+    # project_path = '../benchmark_projects/JSON/JSON.und'  # T=45.31%
     db = understand.open(project_path)
     p = PreProcess()
     classes_longnames_list = p.extract_project_classes(db=db)
@@ -1275,7 +1275,8 @@ def main():
     model = TestabilityModel(df_path=r'data_model/DS07012.csv')
     testability_ = model.inference(model_path='data_model/VR1_DS1.joblib', df_predict_data=df)
     print('testability=', testability_)
+    return testability_
 
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()

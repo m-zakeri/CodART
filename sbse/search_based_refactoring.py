@@ -1,6 +1,10 @@
 """
 This module implements the search-based refactoring with various search strategy
-using pymoo framework
+using pymoo framework.
+
+Gene, RefactoringOperation: One refactoring with params
+Individual: A list of RefactoringOperation
+SudoRandomInitialization: Population, list of Individual
 
 ## References
 [1] https://pymoo.org/customization/custom.html
@@ -11,6 +15,7 @@ using pymoo framework
 __version__ = '0.1.0'
 __author__ = 'Morteza Zakeri, Seyyed Ali Ayati'
 
+import logging
 import random
 from typing import List
 
@@ -25,17 +30,16 @@ from pymoo.model.mutation import Mutation
 from pymoo.model.problem import Problem
 from pymoo.model.sampling import Sampling
 from pymoo.optimize import minimize
-from pymoo.visualization.scatter import Scatter
 
+from sbse import config
 from sbse.initialize import RandomInitialization
 from sbse.objectives import Objectives
+from metrics.testability_prediction import main as testability_main
+from metrics.modularity import main as modularity_main
 from utilization.directory_utils import update_understand_database, git_restore
 
-"""
-Gene, RefactoringOperation: One refactoring with params
-Individual: A list of RefactoringOperation
-SudoRandomInitialization: Population, list of Individual
-"""
+# Config logging
+logging.basicConfig(filename='result.log', level=logging.INFO)
 
 
 class Gene:
@@ -44,8 +48,12 @@ class Gene:
     """
 
     def __init__(self, **kwargs):
+        self.name = kwargs.get('name')
         self.params = kwargs.get('params')
         self.main = kwargs.get('main')
+
+    def __str__(self):
+        return self.name
 
 
 class RefactoringOperation(Gene):
@@ -67,12 +75,22 @@ class RefactoringOperation(Gene):
             }
 
         """
-
         super(RefactoringOperation, self).__init__(**kwargs)
 
     def do_refactoring(self):
-        # TODO: Make this better.
+        logging.info(f"Running {self.name}")
+        logging.info(f"Parameters {self.params}")
         self.main(**self.params)
+
+    @classmethod
+    def generate_randomly(cls):
+        initializer = RandomInitialization(udb_path=config.UDB_PATH)
+        item = random.choice(initializer.initializers)()
+        return cls(
+            name=item[2],
+            params=item[1],
+            main=item[0]
+        )
 
 
 class Individual(List):
@@ -112,6 +130,14 @@ class Individual(List):
     def append(self, __object: RefactoringOperation) -> None:
         self.insert(len(self.refactoring_operations), __object)
 
+    @classmethod
+    def generate_randomly(cls, individual_size) -> list:
+        refactoring_operations = list()
+        for i in range(individual_size):
+            refactoring_operations.append(RefactoringOperation.generate_randomly())
+        return refactoring_operations
+
+
 class ProblemSingleObjective(Problem):
     """
         The CodART single-objective optimization work with only one objective, testability:
@@ -135,25 +161,20 @@ class ProblemSingleObjective(Problem):
         and compute quality attributes for the refactored version of the program, as objectives of the search
 
         params:
-        x (Individual): x is an instance of Individual (i.e., a list of refactoring operations)
+        x[0] (Individual): x[0] is an instance of Individual (i.e., a list of refactoring operations)
 
         """
-        # TODO: Clean following code
-        udb_path = "D:\Dev\JavaSample\JavaSample1.udb"
-        project_dir = "D:\Dev\JavaSample"
-        print(x)
-        # Git restore
-        git_restore(project_dir)
+        # Stage 0: Git restore
+        git_restore(config.PROJECT_PATH)
         # Stage 1: Execute all refactoring operations in the sequence x
-        for refactoring_operation in x.refactoring_operations:
+        for refactoring_operation in x[0]:
             refactoring_operation.do_refactoring()
             # Update Understand DB
-            update_understand_database("D:\Dev\JavaSample\JavaSample1.udb")
+            update_understand_database(config.UDB_PATH)
         # Stage 2: Computing quality attributes
         # TODO: Add testability and modularity objectives
-        # o1 = testability  ## Our only objective for testability improvement
-        score = Objectives(udb_path=udb_path).reusability
-
+        score = Objectives(udb_path=config.UDB_PATH).reusability
+        logging.info(f"Reusability score is {score}")
         # Stage 3: Marshal objectives into vector
         # out["F"] = np.array([-1 * o1], dtype=float)
         out["F"] = np.array([-1 * score], dtype=float)
@@ -174,7 +195,6 @@ class ProblemMultiObjective(Problem):
                                                     elementwise_evaluation=True)
         self.n_refactorings_lowerbound = n_refactorings_lowerbound
         self.n_refactorings_upperbound = n_refactorings_upperbound
-        # self.ALPHABET = [c for c in string.ascii_lowercase]
 
     def _evaluate(self,
                   x,  #
@@ -189,9 +209,13 @@ class ProblemMultiObjective(Problem):
         x (Individual): x is an instance of Individual (i.e., a list of refactoring operations)
 
         """
+        # Stage 0: Git restore
+        git_restore(config.PROJECT_PATH)
         # Stage 1: Execute all refactoring operations in the sequence x
-        for refactoring_operation in x.refactoring_operations:
+        for refactoring_operation in x[0]:
             refactoring_operation.do_refactoring()
+            # Update Understand DB
+            update_understand_database(config.UDB_PATH)
 
         # Stage 2: Computing quality attributes
         # Todo: Add testability and modularity objectives
@@ -236,24 +260,29 @@ class ProblemManyObjective(Problem):
         x (Individual): x is an instance of Individual (i.e., a list of refactoring operations)
 
         """
+        # Git restore
+        git_restore(config.PROJECT_PATH)
         # Stage 1: Execute all refactoring operations in the sequence x
-        for refactoring_operation in x.refactoring_operations:
+        for refactoring_operation in x[0]:
             refactoring_operation.do_refactoring()
+            # Update Understand DB
+            update_understand_database(config.UDB_PATH)
 
         # Stage 2: Computing quality attributes
         # Todo: Add testability and modularity objectives
         # Todo: Normalize objective values in a standard range
-        o1 = Objectives.reusability
-        o2 = Objectives.understandability
-        o3 = Objectives.flexibility
-        o4 = Objectives.functionality
-        o5 = Objectives.effectiveness
-        o6 = Objectives.extendability
-        # o7 = testability  ## Our new objective
-        # o8 = modularity   ## Our new objective
+        qmood = Objectives(udb_path=config.UDB_PATH)
+        o1 = qmood.reusability
+        o2 = qmood.understandability
+        o3 = qmood.flexibility
+        o4 = qmood.functionality
+        o5 = qmood.effectiveness
+        o6 = qmood.extendability
+        o7 = testability_main(config.PROJECT_PATH)
+        o8 = modularity_main(config.PROJECT_PATH)
 
         # Stage 3: Marshal objectives into vector
-        out["F"] = np.array([-1 * o1, -1 * o2, -1 * o3, -1 * o4, -1 * o5, -1 * o6, ], dtype=float)
+        out["F"] = np.array([-1 * o1, -1 * o2, -1 * o3, -1 * o4, -1 * o5, -1 * o6, -1 * o7, -1 * o8], dtype=float)
 
 
 class SudoRandomInitialization(Sampling):
@@ -273,34 +302,14 @@ class SudoRandomInitialization(Sampling):
             n_samples (int): the same population size, pop_size
 
         """
-        individual_size = random.randint(problem.n_refactorings_lowerbound, problem.n_refactorings_upperbound)
-        X = np.full((n_samples, 1, individual_size), None, dtype=Individual)
 
-        print("X shape:", X.shape)
-        # TODO: Clean following code
-        udb_path = "D:\Dev\JavaSample\JavaSample1.udb"
-        rand_init = RandomInitialization(
-            udb_path=udb_path,
-            population_size=n_samples,
-            individual_size=individual_size
-        )
-        rand_pop = rand_init.generate_population()
+        X = np.full((n_samples, 1), None, dtype=Individual)
 
-        for i, individual in enumerate(rand_pop):
+        for i in range(n_samples):
             # we generate the solution length randomly between the lower and upper bounds of the solution length
-            # individual_length =
-            individual_object = Individual()
-            for gene in individual:
-                # Todo: Choose a random refactoring opportunity and fill the refactoring_params dict
-
-                refactoring_operation = RefactoringOperation(
-                    main=gene[0],
-                    params=gene[1]
-                )
-                individual_object.append(refactoring_operation)
-            print(np.array(individual_object).shape)
+            individual_size = random.randint(problem.n_refactorings_lowerbound, problem.n_refactorings_upperbound)
+            individual_object = Individual.generate_randomly(individual_size)
             X[i, 0] = individual_object
-        print("X", X)
         return X
 
 
@@ -334,6 +343,7 @@ class AdaptiveSinglePointCrossover(Crossover):
         """
         Todo: Implementing adaptive single-point-cross-over
         """
+        print("Running crossover")
         # The input of has the following shape (n_parents, n_matings, n_var)
         # print(X.shape)
         # print(X)
@@ -388,15 +398,27 @@ class BitStringMutation(Mutation):
         """
 
         """
+        print("Running mutation")
+        # print(X)  # list of list
+        # print(f"len(X): {len(X[0])}")
         # for each individual
-        for i in range(0, len(X)):
+        # [ I1, I2, I3]
+        for i, individual in enumerate(X):
             r = np.random.random()
             # with a probability of `mutation_probability` replace the refactoring operation with new one
             if r < self.mutation_probability:
-                pass
                 # Todo: Select a refactoring operation randomly and put in X[i, 0]
+                print("i", i)
+                # j is a random index in individual
+                j = random.randint(0, len(individual[0]))
+                # todo: create a new refactoring operation
+                # X[i][0][j] = new_ref_op
+
                 # j --> random. max: len(X[i])
+                # j = random.choice(X)
+                # X[i, 0] = j
                 # X[i, j] = new refactoring op.
+                pass
 
         return X
 
@@ -423,7 +445,7 @@ def main():
     algorithms = list()
     # 1: GA
     algorithm = GA(
-        pop_size=100,
+        pop_size=2,
         sampling=SudoRandomInitialization(),
         # crossover=AdaptiveSinglePointCrossover(prob=0.8),
         crossover=get_crossover("real_k_point", n_points=2),
@@ -468,11 +490,12 @@ def main():
                    seed=1,
                    verbose=True)
 
-    Scatter().add(res.F).show()
+    # Scatter().add(res.F).show()
 
     results = res.X[np.argsort(res.F[:, 0])]
     count = [np.sum([e == "a" for e in r]) for r in results[:, 0]]
     print(np.column_stack([results, count]))
+
 
 if __name__ == '__main__':
     main()
