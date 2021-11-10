@@ -2,33 +2,26 @@
 Script for detecting naming smells in the source code.
 
 """
-import sys
-from copy import deepcopy
-import re as re
 import random
+import re as re
 from collections import Counter
+from copy import deepcopy
 from typing import List
 
+import matplotlib.pyplot as plt
+import nltk
 import numpy as np
+from gensim.models.word2vec import Word2Vec
 from scipy.spatial import distance
-
 from sklearn.decomposition import PCA
 from sklearn.neighbors import LocalOutlierFactor
 from sklearn.neighbors import NearestNeighbors
-
-import nltk
-from nltk.corpus import wordnet
-from nltk.stem.wordnet import WordNetLemmatizer
-import gensim.downloader as api
-from gensim.models.word2vec import Word2Vec
-
 from spellchecker import SpellChecker
 
-import matplotlib.pyplot as plt
-
-sys.path.insert(0, "D:/program files/scitools/bin/pc-win64/python")
-import understand
-
+try:
+    import understand as und
+except ImportError as e:
+    print(e)
 
 __version__ = '0.2.0'
 __author__ = 'Morteza'
@@ -166,7 +159,6 @@ class UnderstandUtility(object):
     def get_base_metric(cls, db, class_name):
         class_entity = UnderstandUtility.get_entity_by_name(db=db, class_name=class_name)
 
-
     @classmethod
     def get_method_of_class_java(cls, db, class_name):
         method_list = list()
@@ -279,7 +271,8 @@ class UnderstandUtility(object):
         if class_entity is None:
             class_entity = cls.get_class_entity_by_name(db=db, class_name=class_name)
 
-        number_of_class_in_class_file = class_entity.parent().ents('Define', 'Java Class ~Unknown ~Unresolved ~Jar ~Library')
+        number_of_class_in_class_file = class_entity.parent().ents('Define',
+                                                                   'Java Class ~Unknown ~Unresolved ~Jar ~Library')
         # print('number_of_class_in_class_file:', len(number_of_class_in_class_file))
         return number_of_class_in_class_file
 
@@ -383,15 +376,14 @@ class UnderstandUtility(object):
         # for file_entity in files:
         #     print(file_entity.longname(),
         #           file_entity.kind(),
-                  # file_entity.metric(['CountLineCode'])['CountLineCode'],
-                  # file_entity.metric(['CountLineCodeDecl'])['CountLineCodeDecl'],
-                  # file_entity.metric(['CountLineCodeExe'])['CountLineCodeExe'],
-                  # file_entity.metric(['AvgLineCode'])['AvgLineCode'],
-                  # file_entity.metric(['CountStmtDecl'])['CountStmtDecl'],
-                  # file_entity.metric(['CountStmtDecl'])['CountStmtDecl'],
-                  # file_entity.metric(['SumCyclomatic'])['SumCyclomatic'],
-                  # )
-
+        # file_entity.metric(['CountLineCode'])['CountLineCode'],
+        # file_entity.metric(['CountLineCodeDecl'])['CountLineCodeDecl'],
+        # file_entity.metric(['CountLineCodeExe'])['CountLineCodeExe'],
+        # file_entity.metric(['AvgLineCode'])['AvgLineCode'],
+        # file_entity.metric(['CountStmtDecl'])['CountStmtDecl'],
+        # file_entity.metric(['CountStmtDecl'])['CountStmtDecl'],
+        # file_entity.metric(['SumCyclomatic'])['SumCyclomatic'],
+        # )
 
         return files
 
@@ -488,7 +480,6 @@ class UnderstandUtility(object):
         return str.lower(ent.longname())
 
 
-
 class Identifier(object):
     """
     Represent a programmer identifier
@@ -563,6 +554,7 @@ class NamingSmell(object):
     """
 
     """
+
     def __init__(self, model: Word2Vec = None, ):
         self.model = model
         self.identifiers = list()
@@ -803,8 +795,8 @@ class NamingSmell(object):
 
             recommended_name = recommended_names[0][0]
             rank = 1
-            while recommended_name in [identifier.id_name for identifier in identifiers_with_vector]\
-                    or len(recommended_name) < 4\
+            while recommended_name in [identifier.id_name for identifier in identifiers_with_vector] \
+                    or len(recommended_name) < 4 \
                     or recommended_name in ['char', 'int', 'float', 'double', 'string', 'class']:
                 recommended_name = recommended_names[rank][0]
                 rank += 1
@@ -955,7 +947,7 @@ if __name__ == '__main__':
     path = '../testability/sf110_without_test/110_firebird.udb'
     path = '../testability/sf110_without_test/107_weka.udb'
     # path = '../testability/sf110_without_test/101_netweaver.udb'
-    db = understand.open(path)
+    db = und.open(path)
 
     # Word2Vec model
     # model = Word2Vec.load('../codeembedding/text8_model')
@@ -984,14 +976,14 @@ if __name__ == '__main__':
     # UnderstandUtility.NOII(db=db)
     # UnderstandUtility.number_of_method_call(db=db, class_name=r'org.firebirdsql.jdbc.AbstractDriver')
 
-    print('-'*75)
+    print('-' * 75)
 
     # pk = UnderstandUtility.get_package_of_given_class(db=db,
     #                                              class_name=r'org.firebirdsql.jdbc.FBDataSource')
     # UnderstandUtility.get_package_of_given_class_2(db=db,
-                                                   # class_name=r'org.firebirdsql.jdbc.FBDataSource'
-                                                   # class_name=r'org.firebirdsql.jdbc.parser.StatementParser'
-                                                   # )
+    # class_name=r'org.firebirdsql.jdbc.FBDataSource'
+    # class_name=r'org.firebirdsql.jdbc.parser.StatementParser'
+    # )
 
     # UnderstandUtility.get_package_interfaces_java(package_entity=pk)
     # UnderstandUtility.get_package_abstract_class_java(package_entity=pk)
@@ -1010,6 +1002,7 @@ if __name__ == '__main__':
     # l8 = UnderstandUtility.get_constructor_of_class_java(db=db, class_name='weka.gui.graphvisualizer.DotParser')
 
     method_list = UnderstandUtility.get_method_of_class_java2(db=db, class_name='weka.gui.graphvisualizer.DotParser')
+    db.close()
     # for i, method in enumerate(method_list):
     #     print(i+1, method.longname())
     #     for j, m in enumerate(method.metrics()):

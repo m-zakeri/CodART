@@ -4,16 +4,12 @@ Implementation of JCodeOdor metrics.
 
 """
 
-import sys
-
 try:
-    sys.path.insert(0, "D:/program files/scitools/bin/pc-win64/python")
     import understand as und
-except ModuleNotFoundError:
-    # Error handling
-    pass
+except ImportError as e:
+    print(e)
 
-from naming import UnderstandUtility
+from metrics.naming import UnderstandUtility
 
 
 class MainDriver:
@@ -32,7 +28,7 @@ class MainDriver:
                 #  for b in a.refs('call'):
                 #   print(b.ent().name())
                 print(obj_get_metrics.NOAV(a))
-
+        db.close()
     # list = [1, 2, 3, 1, 1, 2]
     # s = set(list)
 

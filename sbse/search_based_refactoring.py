@@ -34,8 +34,8 @@ from pymoo.optimize import minimize
 from sbse import config
 from sbse.initialize import RandomInitialization
 from sbse.objectives import Objectives
-from metrics.testability_prediction import main as testability_main
-from metrics.modularity import main as modularity_main
+# from metrics.testability_prediction import main as testability_main
+# from metrics.modularity import main as modularity_main
 from utilization.directory_utils import update_understand_database, git_restore
 
 # Config logging
@@ -395,30 +395,14 @@ class BitStringMutation(Mutation):
         self.mutation_probability = prob
 
     def _do(self, problem, X, **kwargs):
-        """
-
-        """
-        print("Running mutation")
-        # print(X)  # list of list
-        # print(f"len(X): {len(X[0])}")
-        # for each individual
-        # [ I1, I2, I3]
         for i, individual in enumerate(X):
             r = np.random.random()
             # with a probability of `mutation_probability` replace the refactoring operation with new one
             if r < self.mutation_probability:
-                # Todo: Select a refactoring operation randomly and put in X[i, 0]
-                print("i", i)
                 # j is a random index in individual
                 j = random.randint(0, len(individual[0]))
-                # todo: create a new refactoring operation
-                # X[i][0][j] = new_ref_op
-
-                # j --> random. max: len(X[i])
-                # j = random.choice(X)
-                # X[i, 0] = j
-                # X[i, j] = new refactoring op.
-                pass
+                random_refactoring_operation = RefactoringOperation.generate_randomly()
+                X[i][0][j] = random_refactoring_operation
 
         return X
 

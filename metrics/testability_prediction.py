@@ -13,41 +13,30 @@ to be used in refactoring process in addition to qmood metrics
 __version__ = '0.1.0'
 __author__ = 'Morteza Zakeri'
 
-
-import os
 import math
-import datetime
+import os
 import warnings
 
-import pandas as pd
-import numpy as np
-
-from sklearnex import patch_sklearn
-
-# patch_sklearn()
-
-
 import joblib
-from joblib import dump, load
+import numpy as np
+import pandas as pd
 
-from sklearn.metrics import *
-from sklearn.preprocessing import QuantileTransformer
-from sklearn.inspection import permutation_importance
-from sklearn.neural_network import MLPRegressor
-from sklearn import linear_model
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import ShuffleSplit, GridSearchCV
-from sklearn import tree, preprocessing
+try:
+    import understand as und
+except ImportError as e:
+    print(e)
+
 from sklearn.experimental import enable_hist_gradient_boosting  # noqa
-from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor, HistGradientBoostingRegressor, \
-    VotingRegressor
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import QuantileTransformer
 
 import metrics
 from metrics import metrics_names
-from metrics_jcode_odor import JCodeOdorMetric
-from naming import UnderstandUtility
+from metrics.metrics_jcode_odor import JCodeOdorMetric
+from metrics.naming import UnderstandUtility
 
-import understand
+
+# patch_sklearn()
 
 
 class TestabilityMetrics:
@@ -1025,8 +1014,9 @@ class PreProcess:
         files = [f for f in os.listdir(udbs_path) if os.path.isfile(os.path.join(udbs_path, f))]
         for f in files:
             print('processing understand db file {0}:'.format(f))
-            db = understand.open(os.path.join(udbs_path, f))
+            db = und.open(os.path.join(udbs_path, f))
             cls.write_project_classes(project_name=f[:-4], db=db, csv_path=class_list_csv_path_root + f[:-4] + '.csv')
+            db.close()
             print('processing understand db file {0} was finished'.format(f))
 
     @classmethod
@@ -1055,10 +1045,12 @@ class PreProcess:
                     class_entities.append(class_entity_)
                 else:
                     # We do not need a class without any method!
-                    warnings.warn('Requested class entity with name "{0}" does not have any method!'.format(class_name_))
+                    warnings.warn(
+                        'Requested class entity with name "{0}" does not have any method!'.format(class_name_))
             else:
                 # if class not found it may be an enum, or interface so we simply ignore it for metric computation
-                warnings.warn('Requested class entity with name "{0}" was not found int the project!'.format(class_name_))
+                warnings.warn(
+                    'Requested class entity with name "{0}" was not found int the project!'.format(class_name_))
         return class_entities
 
     @classmethod
@@ -1073,7 +1065,7 @@ class PreProcess:
         p = list()
         for i, f in enumerate(files):
             print('processing understand db file {0}:'.format(f))
-            db = understand.open(os.path.join(udbs_path, f))
+            db = und.open(os.path.join(udbs_path, f))
 
             # cls.check_compute_metrics_by_class_list(project_name=f[:-4], database=db, class_list=df, csv_path=csvs_path)
             # t.append(threading.Thread(target=cls.check_compute_metrics_by_class_list, args=(f[:-4], db, df, csvs_path, )))
@@ -1083,7 +1075,7 @@ class PreProcess:
             # p[i].start()
 
             cls.compute_metrics_by_class_list(project_name=f[:-4], database=db, class_list=df, csv_path=csvs_path)
-
+            db.close()
             print('processing understand db file {0} was finished'.format(f))
 
     @classmethod
@@ -1162,7 +1154,7 @@ class PreProcess:
     @classmethod
     def compute_metrics_for_single_class(cls, class_name, und_path, result_csv):
         all_class_metrics_value = list()
-        database_ = understand.open(und_path)
+        database_ = und.open(und_path)
         class_entity = UnderstandUtility.get_class_entity_by_name(db=database_, class_name=class_name)
 
         one_class_metrics_value = [class_entity.longname()]
@@ -1201,6 +1193,7 @@ class PreProcess:
         df.drop(columns=['NOCLINFILE'], inplace=True)
         df['CSNOM'] = df['CSNOIM'] + df['CSNOSM']
         # df.to_csv(result_csv, index=False)
+        database_.close()
         return df
 
 
@@ -1268,15 +1261,15 @@ def main(project_path):
     # TODO: project_path as input + return value
     # project_path = '../benchmark_projects/ganttproject/biz.ganttproject.core/biz.ganttproject.core.und'  # T=52.53%
     # project_path = '../benchmark_projects/JSON/JSON.und'  # T=45.31%
-    db = understand.open(project_path)
+    db = und.open(project_path)
     p = PreProcess()
     classes_longnames_list = p.extract_project_classes(db=db)
     df = p.compute_metrics_by_class_list(db=db, class_list=classes_longnames_list)
+    db.close()
     model = TestabilityModel(df_path=r'data_model/DS07012.csv')
     testability_ = model.inference(model_path='data_model/VR1_DS1.joblib', df_predict_data=df)
     print('testability=', testability_)
     return testability_
-
 
 # if __name__ == '__main__':
 #     main()

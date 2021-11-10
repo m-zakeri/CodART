@@ -104,7 +104,7 @@ if __name__ == '__main__':
     for cls in db.ents("class"):
         if cls.simplename() == source_class:
             main_file = cls.parent().longname()
-
+    db.close()
     stream = FileStream(main_file, encoding='utf8')
     lexer = JavaLexer(stream)
     token_stream = CommonTokenStream(lexer)

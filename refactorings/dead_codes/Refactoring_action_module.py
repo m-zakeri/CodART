@@ -80,7 +80,7 @@ class Main_Refactors_Action():
             # if(cls.longname()==fatherclass):
             #     print(cls.parent().relname())
             #     father_path_file=cls.parent().relname()
-
+        db.close()
         print("propagate_classes :", propagate_classes)
         print("file_list_to_be_propagate:", file_list_to_be_propagate)
         #     ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
