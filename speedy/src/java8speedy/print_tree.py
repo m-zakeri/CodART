@@ -1,9 +1,9 @@
 import antlr4
 
-from .parser import sa_java8labeled
+from .parser import sa_java
 
 
-class ExampleErrorListener(sa_java8labeled.SA_ErrorListener):
+class ExampleErrorListener(sa_java.SA_ErrorListener):
     def syntaxError(self, input_stream,
                     offendingSymbol,
                     char_index: int,
@@ -21,7 +21,7 @@ class ExampleErrorListener(sa_java8labeled.SA_ErrorListener):
 
 
 def print_tree(input_file: str):
-    if sa_java8labeled.USE_CPP_IMPLEMENTATION:
+    if sa_java.USE_CPP_IMPLEMENTATION:
         print("Using C++ implementation of parser")
     else:
         print("Using Python implementation of parser")
@@ -31,6 +31,6 @@ def print_tree(input_file: str):
 
     # Create an Antlr InputStream and parse it!
     stream = antlr4.FileStream(input_file)
-    tree = sa_java8labeled.parse(stream, 'compilationUnit', sa_err_listener)
+    tree = sa_java.parse(stream, 'compilationUnit', sa_err_listener)
 
     print(tree.toStringTree())

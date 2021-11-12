@@ -2,13 +2,13 @@ import timeit
 
 import antlr4
 
-from .parser import sa_java8labeled
+from .parser import sa_java
 
 
 def benchmark(input_file: str, count=100):
-    cpp_elapsed = timeit.timeit(lambda: sa_java8labeled._cpp_parse(antlr4.FileStream(input_file), 'compilationUnit'),
+    cpp_elapsed = timeit.timeit(lambda: sa_java._cpp_parse(antlr4.FileStream(input_file), 'compilationUnit'),
                                 number=count)
-    py_elapsed = timeit.timeit(lambda: sa_java8labeled._py_parse(antlr4.FileStream(input_file), 'compilationUnit'),
+    py_elapsed = timeit.timeit(lambda: sa_java._py_parse(antlr4.FileStream(input_file), 'compilationUnit'),
                                number=count)
 
     py_elapsed = py_elapsed / count
