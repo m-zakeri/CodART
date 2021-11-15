@@ -20,15 +20,15 @@ import random
 from typing import List
 
 import numpy as np
-from pymoo.algorithms.nsga2 import NSGA2
-from pymoo.algorithms.nsga3 import NSGA3
-from pymoo.algorithms.so_genetic_algorithm import GA
+from pymoo.algorithms.moo.nsga2 import NSGA2
+from pymoo.algorithms.moo.nsga3 import NSGA3
+from pymoo.algorithms.soo.nonconvex.ga import GA
 from pymoo.factory import get_reference_directions, get_crossover
-from pymoo.model.crossover import Crossover
-from pymoo.model.duplicate import ElementwiseDuplicateElimination
-from pymoo.model.mutation import Mutation
-from pymoo.model.problem import Problem
-from pymoo.model.sampling import Sampling
+from pymoo.core.crossover import Crossover
+from pymoo.core.duplicate import ElementwiseDuplicateElimination
+from pymoo.core.mutation import Mutation
+from pymoo.core.problem import ElementwiseProblem
+from pymoo.core.sampling import Sampling
 from pymoo.optimize import minimize
 
 from sbse import config
@@ -138,7 +138,7 @@ class Individual(List):
         return refactoring_operations
 
 
-class ProblemSingleObjective(Problem):
+class ProblemSingleObjective(ElementwiseProblem):
     """
         The CodART single-objective optimization work with only one objective, testability:
         """
@@ -146,8 +146,7 @@ class ProblemSingleObjective(Problem):
     def __init__(self, n_refactorings_lowerbound=50, n_refactorings_upperbound=75):
         super(ProblemSingleObjective, self).__init__(n_var=1,
                                                      n_obj=1,
-                                                     n_constr=0,
-                                                     elementwise_evaluation=True)
+                                                     n_constr=0)
         self.n_refactorings_lowerbound = n_refactorings_lowerbound
         self.n_refactorings_upperbound = n_refactorings_upperbound
 
@@ -180,7 +179,7 @@ class ProblemSingleObjective(Problem):
         out["F"] = np.array([-1 * score], dtype=float)
 
 
-class ProblemMultiObjective(Problem):
+class ProblemMultiObjective(ElementwiseProblem):
     """
     The CodART multi-objective optimization work with three objective:
         Objective 1: Mean value of QMOOD metrics
@@ -191,8 +190,7 @@ class ProblemMultiObjective(Problem):
     def __init__(self, n_refactorings_lowerbound=50, n_refactorings_upperbound=75):
         super(ProblemMultiObjective, self).__init__(n_var=1,
                                                     n_obj=3,
-                                                    n_constr=0,
-                                                    elementwise_evaluation=True)
+                                                    n_constr=0)
         self.n_refactorings_lowerbound = n_refactorings_lowerbound
         self.n_refactorings_upperbound = n_refactorings_upperbound
 
@@ -231,7 +229,7 @@ class ProblemMultiObjective(Problem):
         out["F"] = np.array([-1 * o1, -1 * o2], dtype=float)
 
 
-class ProblemManyObjective(Problem):
+class ProblemManyObjective(ElementwiseProblem):
     """
     The CodART many-objective optimization work with eight objective:
         Objective 1 to 6: QMOOD metrics
@@ -242,8 +240,7 @@ class ProblemManyObjective(Problem):
     def __init__(self, n_refactorings_lowerbound=50, n_refactorings_upperbound=75):
         super(ProblemManyObjective, self).__init__(n_var=1,
                                                    n_obj=8,
-                                                   n_constr=0,
-                                                   elementwise_evaluation=True)
+                                                   n_constr=0)
         self.n_refactorings_lowerbound = n_refactorings_lowerbound
         self.n_refactorings_upperbound = n_refactorings_upperbound
 
@@ -278,11 +275,11 @@ class ProblemManyObjective(Problem):
         o4 = qmood.functionality
         o5 = qmood.effectiveness
         o6 = qmood.extendability
-        o7 = testability_main(config.PROJECT_PATH)
-        o8 = modularity_main(config.PROJECT_PATH)
+        # o7 = testability_main(config.PROJECT_PATH)
+        # o8 = modularity_main(config.PROJECT_PATH)
 
         # Stage 3: Marshal objectives into vector
-        out["F"] = np.array([-1 * o1, -1 * o2, -1 * o3, -1 * o4, -1 * o5, -1 * o6, -1 * o7, -1 * o8], dtype=float)
+        out["F"] = np.array([-1 * o1, -1 * o2, -1 * o3, -1 * o4, -1 * o5, -1 * o6, ], dtype=float)
 
 
 class SudoRandomInitialization(Sampling):
