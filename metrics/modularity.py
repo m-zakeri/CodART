@@ -13,17 +13,15 @@ to be used in refactoring process in addition to qmood metrics
 __version__ = '0.1.0'
 __author__ = 'Morteza Zakeri'
 
-import sys
 import os
-import pandas
-import pandas as pd
+
 import networkx as nx
 import networkx.algorithms.community as nx_comm
-
+import pandas
 import understand
 from matplotlib import pyplot as plt
 
-from naming import UnderstandUtility
+from metrics.naming import UnderstandUtility
 
 
 class Modularity:
