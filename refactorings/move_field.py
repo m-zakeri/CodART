@@ -14,8 +14,6 @@ except ImportError as e:
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__file__)
 STATIC = "Public Static Variable"
-__author__ = "Seyyed Ali Ayati"
-logger.info("You can find me at: https://www.linkedin.com/in/seyyedaliayati/")
 
 
 class CutFieldListener(JavaParserLabeledListener):
@@ -142,10 +140,12 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
     field_ent = db.lookup(f"{source_package}.{source_class}.{field_name}")
     if len(field_ent) != 1:
         logger.error("Entity not found.")
+        db.close()
         return None
 
     if source_package == target_package and source_class == target_class:
         logger.error("Can not move to self.")
+        db.close()
         return None
     field_ent = field_ent[0]
     is_static = field_ent.kindname() == STATIC
@@ -169,6 +169,7 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
         logger.error("This is a nested class.")
         logger.info(f"{source_package}.{source_class}.java")
         logger.info(f"{target_package}.{target_class}.java")
+        db.close()
         return None
 
     # Check if there is an cycle
@@ -180,6 +181,7 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
 
     if not listener.is_valid:
         logger.error(f"Can not move field because there is a cycle between {source_class}, {target_class}")
+        db.close()
         return
 
     # Propagate Changes

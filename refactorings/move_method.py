@@ -16,12 +16,10 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__file__)
 STATIC = "Static Method"
 
-__author__ = "Seyyed Ali Ayati"
-logger.info("You can find developer at: https://www.linkedin.com/in/seyyedaliayati/")
-
 
 class CutMethodListener(JavaParserLabeledListener):
-    def __init__(self, class_name: str, instance_name: str, method_name: str, is_static: bool, import_statement: str, rewriter: TokenStreamRewriter):
+    def __init__(self, class_name: str, instance_name: str, method_name: str, is_static: bool, import_statement: str,
+                 rewriter: TokenStreamRewriter):
         self.class_name = class_name
         self.method_name = method_name
         self.is_static = is_static
@@ -33,7 +31,7 @@ class CutMethodListener(JavaParserLabeledListener):
         self.do_delete = False
         self.method_text = ""
 
-    def exitPackageDeclaration(self, ctx:JavaParserLabeled.PackageDeclarationContext):
+    def exitPackageDeclaration(self, ctx: JavaParserLabeled.PackageDeclarationContext):
         if self.import_statement:
             self.rewriter.insertAfterToken(
                 token=ctx.stop,
@@ -116,15 +114,18 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
         method_ent = method_ent[0]
     else:
         logger.error("Entity not found.")
+        db.close()
         return None
 
     if method_ent.simplename() != method_name:
         logger.error("Can not move method duo to duplicated entities.")
         logger.info(f"{method_ent}, {method_ent.kindname()}")
+        db.close()
         return None
 
     if source_package == target_package and source_class == target_class:
         logger.error("Can not move to self.")
+        db.close()
         return None
     is_static = STATIC in method_ent.kindname()
     # Find usages
@@ -144,6 +145,7 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
         logger.error("This is a nested method.")
         logger.info(f"{source_package}.{source_class}.java")
         logger.info(f"{target_package}.{target_class}.java")
+        db.close()
         return None
 
     # Check if there is an cycle
@@ -155,6 +157,7 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
 
     if not listener.is_valid:
         logger.error(f"Can not move method because there is a cycle between {source_class}, {target_class}")
+        db.close()
         return None
     # Propagate Changes
     for file in usages.keys():

@@ -83,8 +83,10 @@ def main(udb_path, source_class, field_name):
             if not os.path.isfile(main_file):
                 continue
     if main_file is None:
+        db.close()
         return
     if not os.path.isfile(main_file):
+        db.close()
         return
     print(f"Main File {main_file}", os.path.isfile(main_file))
     stream = FileStream(main_file, encoding='utf8')
@@ -100,6 +102,7 @@ def main(udb_path, source_class, field_name):
 
     with open(main_file, mode='w', newline='') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
+    db.close()
 
 
 if __name__ == '__main__':

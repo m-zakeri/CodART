@@ -6,7 +6,12 @@ __version__ = '0.1.1'
 __author__ = 'Seyyed Ali Ayati'
 
 import os
+import logging
 import understand as und
+
+# Config logging
+logging.basicConfig(filename='codart_result.log', level=logging.DEBUG)
+logger = logging.getLogger(os.path.basename(__file__))
 
 
 class QMOOD:
@@ -16,6 +21,10 @@ class QMOOD:
         #     raise ValueError("Project directory is not valid.")
         self.db = und.open(udb_path)
         self.metrics = self.db.metric(self.db.metrics())
+
+    def __del__(self):
+        logger.debug("Database closed after calculating metrics.")
+        self.db.close()
 
     @property
     def DSC(self):

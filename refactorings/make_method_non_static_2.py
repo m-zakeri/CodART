@@ -73,9 +73,11 @@ def main(udb_path, source_class, method_name):
         if cls.simplename() == source_class:
             main_file = cls.parent().longname(True)
     if main_file is None:
+        db.close()
         return
 
     if not os.path.isfile(main_file):
+        db.close()
         return
     stream = FileStream(main_file, encoding='utf8')
     lexer = JavaLexer(stream)
@@ -91,6 +93,7 @@ def main(udb_path, source_class, method_name):
 
     with open(main_file, mode='w', newline='') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
+    db.close()
 
 
 if __name__ == '__main__':

@@ -1,4 +1,5 @@
-from gen.javaLabeled.JavaLexer import JavaLexer
+import os
+import logging
 
 try:
     import understand as und
@@ -7,9 +8,13 @@ except ImportError as e:
 
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
-
+from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
+
+# Config logging
+logging.basicConfig(filename='codart_result.log', level=logging.DEBUG)
+logger = logging.getLogger(os.path.basename(__file__))
 
 
 class PushDownMethodRefactoringListener(JavaParserLabeledListener):
@@ -206,12 +211,15 @@ def main(udb_path, source_package, source_class, method_name, target_classes: li
     # Check pre-condition
     if not len(target_classes) == 1:
         print(f"len(target_classes) is not 1.")
+        db.close()
         return None
     if not len(children_classes) == 1:
         print(f"len(children_classes) is not 1.")
+        db.close()
         return None
     if not len(children_files) == 1:
         print(f"len(children_files) is not 1.")
+        db.close()
         return None
 
     for mth in db.ents("Java Method"):
@@ -221,6 +229,7 @@ def main(udb_path, source_package, source_class, method_name, target_classes: li
                     if mth.kind() == source_method_entity.kind():
                         if mth.parameters() == source_method_entity.parameters():
                             print("Duplicate method")
+                            db.close()
                             return None
 
     for ref in source_method_entity.refs("use, call"):
@@ -229,6 +238,7 @@ def main(udb_path, source_package, source_class, method_name, target_classes: li
 
         if not is_public:
             print("Has internal dependencies.")
+            db.close()
             return None
 
     #  get text
@@ -288,6 +298,7 @@ def main(udb_path, source_package, source_class, method_name, target_classes: li
         # print(my_listener.token_stream_rewriter.getDefaultText())
         with open(file, mode='w', newline='') as f:
             f.write(my_listener.token_stream_rewriter.getDefaultText())
+    db.close()
 
 
 if __name__ == '__main__':

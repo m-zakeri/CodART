@@ -512,6 +512,7 @@ class ExtractClassAPI:
         self.propagate_fields(field_usages)
         self.reformat(self.file_path)
         self.reformat(self.new_file_path)
+        db.close()
 
 
 def get_java_files(directory):

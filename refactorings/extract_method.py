@@ -1,8 +1,15 @@
+import os
+import logging
+
 from antlr4 import *
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 import numpy as np
+
+# Config logging
+logging.basicConfig(filename='codart_result.log', level=logging.DEBUG)
+logger = logging.getLogger(os.path.basename(__file__))
 
 """
     An Extraction method refactoring class for using compiler listeners 

@@ -3,5 +3,7 @@ import os
 POPULATION_SIZE = os.environ.get("POPULATION_SIZE", 100)
 INDIVIDUAL_SIZE = os.environ.get("INDIVIDUAL_SIZE", 3)
 MAX_ITERATIONS = 1000
-UDB_PATH = "D:\\Dev\\JavaSample\\JavaSample.udb"
-PROJECT_PATH = "D:\\Dev\\JavaSample"
+LOWER_BAND = 2
+UPPER_BAND = 4
+UDB_PATH = "/home/ali/PycharmProjects/ganttproject/ganttproject.und"
+PROJECT_PATH = "/home/ali/PycharmProjects/ganttproject"

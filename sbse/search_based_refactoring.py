@@ -16,6 +16,7 @@ __version__ = '0.1.0'
 __author__ = 'Morteza Zakeri, Seyyed Ali Ayati'
 
 import logging
+import os
 import random
 from typing import List
 
@@ -39,7 +40,8 @@ from sbse.objectives import Objectives
 from utilization.directory_utils import update_understand_database, git_restore
 
 # Config logging
-logging.basicConfig(filename='result.log', level=logging.INFO)
+logging.basicConfig(filename='codart_result.log', level=logging.DEBUG)
+logger = logging.getLogger(os.path.basename(__file__))
 
 
 class Gene:
@@ -78,14 +80,16 @@ class RefactoringOperation(Gene):
         super(RefactoringOperation, self).__init__(**kwargs)
 
     def do_refactoring(self):
-        logging.info(f"Running {self.name}")
-        logging.info(f"Parameters {self.params}")
+        logger.info(f"Running {self.name}")
+        logger.info(f"Parameters {self.params}")
         self.main(**self.params)
 
     @classmethod
     def generate_randomly(cls):
         initializer = RandomInitialization(udb_path=config.UDB_PATH)
         item = random.choice(initializer.initializers)()
+        initializer.und.close()
+        logger.info("Database close after generating a single refactoring.")
         return cls(
             name=item[2],
             params=item[1],
@@ -130,13 +134,6 @@ class Individual(List):
     def append(self, __object: RefactoringOperation) -> None:
         self.insert(len(self.refactoring_operations), __object)
 
-    @classmethod
-    def generate_randomly(cls, individual_size) -> list:
-        refactoring_operations = list()
-        for i in range(individual_size):
-            refactoring_operations.append(RefactoringOperation.generate_randomly())
-        return refactoring_operations
-
 
 class ProblemSingleObjective(ElementwiseProblem):
     """
@@ -164,8 +161,10 @@ class ProblemSingleObjective(ElementwiseProblem):
 
         """
         # Stage 0: Git restore
+        logger.debug("Executing git restore.")
         git_restore(config.PROJECT_PATH)
         # Stage 1: Execute all refactoring operations in the sequence x
+        logger.debug(f"Individual size is {len(x[0])}")
         for refactoring_operation in x[0]:
             refactoring_operation.do_refactoring()
             # Update Understand DB
@@ -173,7 +172,7 @@ class ProblemSingleObjective(ElementwiseProblem):
         # Stage 2: Computing quality attributes
         # TODO: Add testability and modularity objectives
         score = Objectives(udb_path=config.UDB_PATH).reusability
-        logging.info(f"Reusability score is {score}")
+        logger.info(f"Reusability score is {score}")
         # Stage 3: Marshal objectives into vector
         # out["F"] = np.array([-1 * o1], dtype=float)
         out["F"] = np.array([-1 * score], dtype=float)
@@ -301,11 +300,23 @@ class SudoRandomInitialization(Sampling):
         """
 
         X = np.full((n_samples, 1), None, dtype=Individual)
+        population = RandomInitialization(
+            udb_path=config.UDB_PATH,
+            population_size=n_samples,
+            lower_band=problem.n_refactorings_lowerbound,
+            upper_band=problem.n_refactorings_upperbound
+        ).generate_population()
 
         for i in range(n_samples):
-            # we generate the solution length randomly between the lower and upper bounds of the solution length
-            individual_size = random.randint(problem.n_refactorings_lowerbound, problem.n_refactorings_upperbound)
-            individual_object = Individual.generate_randomly(individual_size)
+            individual_object = []  # list of refactoring operations
+            for ref in population[i]:
+                individual_object.append(
+                    RefactoringOperation(
+                        name=ref[2],
+                        params=ref[1],
+                        main=ref[0]
+                    )
+                )
             X[i, 0] = individual_object
         return X
 
@@ -426,7 +437,7 @@ def main():
     algorithms = list()
     # 1: GA
     algorithm = GA(
-        pop_size=2,
+        pop_size=config.POPULATION_SIZE,
         sampling=SudoRandomInitialization(),
         # crossover=AdaptiveSinglePointCrossover(prob=0.8),
         crossover=get_crossover("real_k_point", n_points=2),
@@ -436,7 +447,7 @@ def main():
     algorithms.append(algorithm)
 
     # 2: NSGA II
-    algorithm = NSGA2(pop_size=100,
+    algorithm = NSGA2(pop_size=config.POPULATION_SIZE,
                       sampling=SudoRandomInitialization(),
                       # crossover=AdaptiveSinglePointCrossover(prob=0.8),
                       crossover=get_crossover("real_k_point", n_points=2),
@@ -449,7 +460,7 @@ def main():
     # Todo: Ask for best practices in determining ref_dirs
     ref_dirs = get_reference_directions("energy", 8, 90, seed=1)
     algorithm = NSGA3(ref_dirs=ref_dirs,
-                      pop_size=100,
+                      pop_size=config.POPULATION_SIZE,
                       sampling=SudoRandomInitialization(),
                       # crossover=AdaptiveSinglePointCrossover(prob=0.8),
                       crossover=get_crossover("real_k_point", n_points=2),
@@ -460,14 +471,20 @@ def main():
 
     # Define problems
     problems = list()
-    problems.append(ProblemSingleObjective(n_refactorings_lowerbound=50, n_refactorings_upperbound=75))
-    problems.append(ProblemMultiObjective(n_refactorings_lowerbound=50, n_refactorings_upperbound=75))
-    problems.append(ProblemManyObjective(n_refactorings_lowerbound=50, n_refactorings_upperbound=75))
+    problems.append(
+        ProblemSingleObjective(n_refactorings_lowerbound=config.LOWER_BAND, n_refactorings_upperbound=config.UPPER_BAND)
+    )
+    problems.append(
+        ProblemMultiObjective(n_refactorings_lowerbound=config.LOWER_BAND, n_refactorings_upperbound=config.UPPER_BAND)
+    )
+    problems.append(
+        ProblemManyObjective(n_refactorings_lowerbound=config.LOWER_BAND, n_refactorings_upperbound=config.UPPER_BAND)
+    )
 
     # Do optimization for various problems with various algorithms
     res = minimize(problem=problems[0],
                    algorithm=algorithms[0],
-                   termination=('n_gen', 100),
+                   termination=('n_gen', config.MAX_ITERATIONS),
                    seed=1,
                    verbose=True)
 

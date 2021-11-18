@@ -13,8 +13,7 @@ def git_restore(project_dir):
     :return: None
     """
     assert os.path.isdir(project_dir)
-    process = subprocess.Popen(["git", "restore", "."], cwd=project_dir)
-    process.wait()
+    subprocess.Popen(["git", "restore", "."], cwd=project_dir).wait()
 
 
 def create_understand_database(project_dir):
@@ -25,16 +24,15 @@ def create_understand_database(project_dir):
     :return: String path of created database.
     """
     assert os.path.isdir(project_dir)
-    db_name = os.path.basename(os.path.normpath(project_dir)) + ".udb"
+    db_name = os.path.basename(os.path.normpath(project_dir)) + ".und"
     db_path = os.path.join(project_dir, db_name)
     assert os.path.exists(db_path) is False
     # An example of command-line is:
     # und create -languages c++ add @myFiles.txt analyze -all myDb.udb
-    process = subprocess.Popen(
+    subprocess.Popen(
         ['und', 'create', '-languages', 'Java', 'add', project_dir, 'analyze', '-all', db_path],
         stdout=open(os.devnull, 'wb')
-    )
-    process.communicate()
+    ).wait()
     return db_path
 
 
@@ -45,9 +43,8 @@ def update_understand_database(udb_path):
     :return: None
     """
 
-    process = subprocess.Popen(
+    subprocess.Popen(
         ['und', 'analyze', '-all', udb_path],
         stdout=open(os.devnull, 'wb')
-    )
-    process.communicate()
+    ).wait()
     print("Finished updating...")

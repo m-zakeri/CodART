@@ -18,6 +18,8 @@ No specific Post Condition
 
 """
 import collections
+import logging
+import os
 
 try:
     import understand as und
@@ -30,6 +32,10 @@ from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 from refactorings.utils.utils2 import parse_and_walk
+
+# Config logging
+logging.basicConfig(filename='codart_result.log', level=logging.DEBUG)
+logger = logging.getLogger(os.path.basename(__file__))
 
 
 class PullUpConstructorListener(JavaParserLabeledListener):
@@ -96,7 +102,7 @@ class PullUpConstructorListener(JavaParserLabeledListener):
 
 def main(udb_path, source_package, target_class, class_names: list):
     if len(class_names) < 2:
-        print("class_names is empty.")
+        logger.error("class_names is empty.")
         return None
     db = und.open(udb_path)
     parent_cons = []
@@ -104,7 +110,8 @@ def main(udb_path, source_package, target_class, class_names: list):
     # Check children
     parent = db.lookup(f"{target_class}", "Public Class")
     if len(parent) != 1:
-        print("Something is wrong!")
+        logger.error("Count of target class is not 1.")
+        db.close()
         return
     parent = parent[0]
     parent_file = db.lookup(f"{target_class}.java", "File")[0].longname()
@@ -119,7 +126,8 @@ def main(udb_path, source_package, target_class, class_names: list):
         cons = db.lookup(f"{child}.{child}", "Constructor")
         for con in cons:
             if source_package not in con.parent().longname():
-                print("Source package does not match.")
+                logger.error("Source package does not match.")
+                db.close()
                 return
             parameters = con.parameters()
             if parameters in constructors:
@@ -167,6 +175,7 @@ def main(udb_path, source_package, target_class, class_names: list):
                     class_name=data['class_name'],
                     params=k
                 )
+    db.close()
 
 
 if __name__ == "__main__":

@@ -1,19 +1,23 @@
 import random
 from collections import Counter
 from pathlib import Path
-from pprint import pprint
 
 import progressbar
-from config import *
+
 from candidate_reader import CandidateReader
-from utilization.setup_understand import *
+from config import *
 from refactorings import make_field_non_static, make_field_static, make_method_static_2, \
     make_method_non_static_2, pullup_field, move_field, move_method, move_class, pushdown_field, \
     extract_class, pullup_method, pushdown_method, extract_method, pullup_constructor
+from utilization.setup_understand import *
+
+# Config logging
+logging.basicConfig(filename='codart_result.log', level=logging.DEBUG)
+logger = logging.getLogger(os.path.basename(__file__))
 
 
 class Initialization(object):
-    def __init__(self, udb_path, population_size=50, individual_size=4):
+    def __init__(self, udb_path, population_size=50, lower_band=50, upper_band=75):
         """
         The superclass of initialization contains init_refactoring modules
         :param udb_path: Path for understand database file.
@@ -22,20 +26,21 @@ class Initialization(object):
         """
         self.udb_path = udb_path
         self.population_size = population_size
-        self.individual_size = individual_size
+        self.lower_band = lower_band
+        self.upper_band = upper_band
         self.initializers = (
-            # self.init_make_field_non_static,
-            # self.inti_make_field_static,
-            # self.init_make_method_static,
-            # self.init_make_method_non_static,
-            # self.init_pullup_field,
-            # self.init_move_field,
-            # self.init_move_method,
-            # self.init_move_class,
-            # self.init_push_down_field,
-            # self.init_extract_class,
-            # self.init_pullup_method,
-            # self.init_push_down_method,
+            self.init_make_field_non_static,
+            self.inti_make_field_static,
+            self.init_make_method_static,
+            self.init_make_method_non_static,
+            self.init_pullup_field,
+            self.init_move_field,
+            self.init_move_method,
+            self.init_move_class,
+            self.init_push_down_field,
+            self.init_extract_class,
+            self.init_pullup_method,
+            self.init_push_down_method,
             # self.init_extract_method,
             self.init_pullup_constructor,
         )
@@ -78,7 +83,6 @@ class Initialization(object):
                 source_package = ".".join(long_name[:-1])
             else:
                 continue
-            # print("Method", source_class, parent.kindname(), method_name)
             candidates.append(
                 {'source_package': source_package, 'source_class': source_class, 'method_name': method_name})
         return candidates
@@ -320,12 +324,19 @@ class Initialization(object):
         population = []
         for _ in progressbar.progressbar(range(self.population_size)):
             individual = []
-            for j in range(self.individual_size):
+            individual_size = random.randint(self.lower_band, self.upper_band)
+            for j in range(individual_size):
                 individual.append(
                     random.choice(self.initializers)()
                 )
             population.append(individual)
+        self._und.close()
+        logger.debug("Database closed after initialization.")
         return population
+
+    @property
+    def und(self):
+        return self._und
 
 
 class RandomInitialization(Initialization):

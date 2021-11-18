@@ -15,6 +15,7 @@ from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 class CheckOverrideListener(JavaParserLabeledListener):
     pass
 
+
 class PullUpMethodRefactoringListener(JavaParserLabeledListener):
     """
     To implement extract class refactoring based on its actors.
@@ -189,6 +190,7 @@ def main(udb_path: str, children_classes: list, method_name: str):
     except IndexError:
         print([db.lookup(i + "." + method_name, "method") for i in children_classes])
         print(f"Method {method_name} does not exists in all children_classes.")
+        db.close()
         return None
 
     # Get method text
@@ -199,11 +201,13 @@ def main(udb_path: str, children_classes: list, method_name: str):
     for method_ent in method_ents:
         if method_ent.contents().strip() != method_text:
             print("Method content is different.")
+            db.close()
             return None
 
         for ref in method_ent.refs("Use,Call"):
             if ref.ent().parent().simplename() in children_classes:
                 print("Method has internal dependencies.")
+                db.close()
                 return None
 
     for mth in db.ents("Java Method"):
@@ -264,6 +268,7 @@ def main(udb_path: str, children_classes: list, method_name: str):
         with open(file, mode='w', newline='') as f:
             f.write(my_listener_propagate.token_stream_rewriter.getDefaultText())
     # end of propagate
+    db.close()
 
 
 if __name__ == '__main__':
@@ -275,4 +280,3 @@ if __name__ == '__main__':
         children_classes=children_class,
         method_name=moved_method
     )
-
