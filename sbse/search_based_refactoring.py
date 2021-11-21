@@ -35,8 +35,8 @@ from pymoo.optimize import minimize
 from sbse import config
 from sbse.initialize import RandomInitialization
 from sbse.objectives import Objectives
-# from metrics.testability_prediction import main as testability_main
-# from metrics.modularity import main as modularity_main
+from metrics.testability_prediction import main as testability_main
+from metrics.modularity import main as modularity_main
 from utilization.directory_utils import update_understand_database, git_restore
 
 # Config logging
@@ -82,7 +82,10 @@ class RefactoringOperation(Gene):
     def do_refactoring(self):
         logger.info(f"Running {self.name}")
         logger.info(f"Parameters {self.params}")
-        self.main(**self.params)
+        try:
+            self.main(**self.params)
+        except Exception as e:
+            logger.error(f"Error in executing refactoring:\n {e}")
 
     @classmethod
     def generate_randomly(cls):
@@ -274,11 +277,11 @@ class ProblemManyObjective(ElementwiseProblem):
         o4 = qmood.functionality
         o5 = qmood.effectiveness
         o6 = qmood.extendability
-        # o7 = testability_main(config.PROJECT_PATH)
-        # o8 = modularity_main(config.PROJECT_PATH)
+        o7 = testability_main(config.UDB_PATH)
+        o8 = modularity_main(config.UDB_PATH)
 
         # Stage 3: Marshal objectives into vector
-        out["F"] = np.array([-1 * o1, -1 * o2, -1 * o3, -1 * o4, -1 * o5, -1 * o6, ], dtype=float)
+        out["F"] = np.array([-1 * o1, -1 * o2, -1 * o3, -1 * o4, -1 * o5, -1 * o6, -1 * o7, -1 * o8, ], dtype=float)
 
 
 class SudoRandomInitialization(Sampling):
@@ -482,8 +485,8 @@ def main():
     )
 
     # Do optimization for various problems with various algorithms
-    res = minimize(problem=problems[0],
-                   algorithm=algorithms[0],
+    res = minimize(problem=problems[2],
+                   algorithm=algorithms[2],
                    termination=('n_gen', config.MAX_ITERATIONS),
                    seed=1,
                    verbose=True)
