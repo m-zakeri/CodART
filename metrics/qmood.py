@@ -269,11 +269,28 @@ class QMOOD:
 
 
 if __name__ == '__main__':
-    # Use the relative path point to CodART benchmark projects
-    db_path = "../benchmark_projects/JSON/JSON.und"
-    db_path = "../benchmark_projects/ganttproject/biz.ganttproject.core/biz.ganttproject.core.und"
+    understand_paths = [
+        "D:\\Final Project\\IdeaProjects\\104_vuze\\104_vuze.und",
+        "D:\\Final Project\\IdeaProjects\\105_freemind\\105_freemind.und",
+        "D:\\Final Project\\IdeaProjects\\107_weka\\107_weka.und",
+        "D:\\Final Project\\IdeaProjects\\ganttproject_1_11_1_original\\ganttproject_1_11_1_original.und",
+        "D:\\Final Project\\IdeaProjects\\jfreechart-master\\jfreechart-master.und",
+        "D:\\Final Project\\IdeaProjects\\JSON20201115\\JSON20201115.und",
+        "D:\\Final Project\\IdeaProjects\\jvlt-1.3.2\\jvlt-1.3.2.und",
 
-    metric = QMOOD(db_path)
-    # metric.print_all()
-    # print(metric.MOA)
-    metric.test()
+    ]
+    for udb_path in understand_paths:
+        print(f"Path: {udb_path}")
+        metric = QMOOD(udb_path)
+        print(f"DSC: ", metric.DSC)
+        print(f"NOH: ", metric.NOH)
+        print(f"ANA: ", metric.ANA)
+        print(f"MOA: ", metric.MOA)
+        print(f"DAM: ", metric.DAM)
+        print(f"CAMC: ", metric.CAMC)
+        print(f"CIS: ", metric.CIS)
+        print(f"NOM: ", metric.NOM)
+        print(f"DCC: ", metric.DCC)
+        print(f"MFA: ", metric.MFA)
+        print(f"NOP: ", metric.NOP)
+

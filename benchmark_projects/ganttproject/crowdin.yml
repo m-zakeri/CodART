@@ -1,3 +1,0 @@
-files:
-  - source: /ganttproject/src/main/resources/language/i18n.properties
-    translation: /ganttproject/src/main/resources/language/i18n_%two_letters_code%.properties
