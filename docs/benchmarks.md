@@ -21,7 +21,7 @@ Refactorings are applied to the software systems listed in Table 3. Benchmark pr
 |     [JSON](https://github.com/stleary/JSON-java)              	|     v1.1                        	|      --                    	|   software packages for parsing JSON                            |     [4]              
 |     [JFlex](https://github.com/jflex-de/jflex)            	  |     v1.4.1                      	|      --                    	|   lexical analyzer generator                                    |     [4]              
 |     [Mango](https://github.com/jfaster/mango)             	|     v2.0.1                           	|      --                   	|              --                                                   |     [4]              
-|     [Weka](https://github.com/ohmrefresh/Weka-Android-3.9.1-SNAPSHOT)              	|     v3.9                	|              --            	|   data mining tool                                              |     New              
+|     [Weka](https://github.com/Waikato/weka-3.8)              	|     v3.8                	|              --            	|   data mining tool                                              |     New              
 |     [ANTLR](https://github.com/antlr/antlr4)             	|     v4.8.0                      	|             --             	|   parser generator tool                                         |     New              
 
 
