@@ -1,6 +1,6 @@
 """
 
-This module contains modularity measurement script
+This module contains modularity measurement script at package-level
 to be used in refactoring process in addition to qmood metrics
 
 ## Reference
@@ -99,7 +99,6 @@ def main(project_path='../benchmark_projects/JSON/JSON.und'):
     """
     A demo of using modularity module to measure modularity quality attribute based on graph-analysis
     """
-    # project_path = '../benchmark_projects/ganttproject/biz.ganttproject.core/biz.ganttproject.core.und'
     db = understand.open(project_path)
     # entities = db.ents('Java Class')
     cmd_ = 'und export -dependencies class csv {0} {1}'.format('mdg/MDG.csv', project_path)
@@ -111,5 +110,9 @@ def main(project_path='../benchmark_projects/JSON/JSON.und'):
     return q
 
 
+# Test module
 if __name__ == '__main__':
-    main()
+    project_path = r'../benchmark_projects/ganttproject/biz.ganttproject.core/biz.ganttproject.core.und'
+    # project_path = r'D:/IdeaProjects/JSON20201115/JSON.und'
+    project_path = r'D:/IdeaProjects/jvlt-1.3.2/src.und'
+    main(project_path)
