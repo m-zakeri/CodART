@@ -23,7 +23,7 @@ try:
 except ImportError as e:
     print(e)
 
-__version__ = '0.2.0'
+__version__ = '0.3.0'
 __author__ = 'Morteza'
 
 
@@ -136,9 +136,9 @@ class UnderstandUtility(object):
         # Find relevant 'class' entity
         entity_list = list()
 
-        # entities = db.ents('Type')  ## Use this for evo-suite SF110 already measured class
+        entities = db.ents('Type')  ## Use this for evo-suite SF110 already measured class
         # entities = db.ents('Java Class ~Enum ~Unknown ~Unresolved ~Jar ~Library')
-        entities = db.ents('Java Class ~Jar ~Library, Java Interface')
+        # entities = db.ents('Java Class ~Jar ~Library, Java Interface')
         if entities is not None:
             for entity_ in entities:
                 if entity_.longname() == class_name:
@@ -297,6 +297,9 @@ class UnderstandUtility(object):
         # print(class_entity.parent())
         # print('class_name', class_entity.longname())
         # print('class_name', class_name)
+
+        if class_entity is None:
+            return None, 'default'
 
         package_list = class_entity.ents('Containin', 'Java Package')
         while not package_list and class_entity.parent() is not None:
