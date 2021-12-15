@@ -15,8 +15,6 @@ SudoRandomInitialization: Population, list of Individual
 __version__ = '0.1.0'
 __author__ = 'Morteza Zakeri, Seyyed Ali Ayati'
 
-import logging
-import os
 import random
 from typing import List
 
@@ -33,16 +31,15 @@ from pymoo.core.sampling import Sampling
 from pymoo.optimize import minimize
 
 from sbse import config
+from sbse.config import logger
 from sbse.initialize import RandomInitialization
 from sbse.objectives import Objectives
 from metrics.testability_prediction import main as testability_main
 from metrics.modularity import main as modularity_main
 from utilization.directory_utils import update_understand_database, git_restore
 
-# Config logging
-logging.basicConfig(filename='codart_result.log', level=logging.DEBUG)
-logger = logging.getLogger(os.path.basename(__file__))
 
+# TODO: Final Results, Best Solution
 
 class Gene:
     """
@@ -167,7 +164,7 @@ class ProblemSingleObjective(ElementwiseProblem):
         logger.debug("Executing git restore.")
         git_restore(config.PROJECT_PATH)
         # Stage 1: Execute all refactoring operations in the sequence x
-        logger.debug(f"Individual size is {len(x[0])}")
+        logger.debug(f"Reached Individual with Size {len(x[0])}")
         for refactoring_operation in x[0]:
             refactoring_operation.do_refactoring()
             # Update Understand DB
@@ -175,7 +172,7 @@ class ProblemSingleObjective(ElementwiseProblem):
         # Stage 2: Computing quality attributes
         # TODO: Add testability and modularity objectives
         score = Objectives(udb_path=config.UDB_PATH).reusability
-        logger.info(f"Reusability score is {score}")
+        logger.info(f"Reusability Score: {score}")
         # Stage 3: Marshal objectives into vector
         # out["F"] = np.array([-1 * o1], dtype=float)
         out["F"] = np.array([-1 * score], dtype=float)
@@ -210,8 +207,10 @@ class ProblemMultiObjective(ElementwiseProblem):
 
         """
         # Stage 0: Git restore
+        logger.debug("Executing git restore.")
         git_restore(config.PROJECT_PATH)
         # Stage 1: Execute all refactoring operations in the sequence x
+        logger.debug(f"Reached Individual with Size {len(x[0])}")
         for refactoring_operation in x[0]:
             refactoring_operation.do_refactoring()
             # Update Understand DB
@@ -221,8 +220,11 @@ class ProblemMultiObjective(ElementwiseProblem):
         # Todo: Add testability and modularity objectives
         # Todo: Normalize objective values in a standard range
         # Todo: Reduce QMOOD metrics to one objective by averaging them
-        o1 = Objectives.reusability
-        o2 = Objectives.understandability
+        obj = Objectives(udb_path=config.UDB_PATH)
+        o1 = obj.reusability
+        o2 = obj.understandability
+        logger.info(f"Reusability Score: {o1}")
+        logger.info(f"Understandability Score: {o2}")
         # o1 = 1/6 * sum qmood metrics
         # o2 = testability  ## Our new objective
         # o3 = modularity   ## Our new objective
@@ -260,8 +262,10 @@ class ProblemManyObjective(ElementwiseProblem):
 
         """
         # Git restore
+        logger.debug("Executing git restore.")
         git_restore(config.PROJECT_PATH)
         # Stage 1: Execute all refactoring operations in the sequence x
+        logger.debug(f"Reached Individual with Size {len(x[0])}")
         for refactoring_operation in x[0]:
             refactoring_operation.do_refactoring()
             # Update Understand DB
@@ -279,6 +283,15 @@ class ProblemManyObjective(ElementwiseProblem):
         o6 = qmood.extendability
         o7 = testability_main(config.UDB_PATH)
         o8 = modularity_main(config.UDB_PATH)
+
+        logger.info(f"Reusability Score: {o1}")
+        logger.info(f"Understandability Score: {o2}")
+        logger.info(f"Flexibility Score: {o3}")
+        logger.info(f"Functionality Score: {o4}")
+        logger.info(f"Effectiveness Score: {o5}")
+        logger.info(f"Extendability Score: {o6}")
+        logger.info(f"Testability Score: {o7}")
+        logger.info(f"Modularity_main Score: {o8}")
 
         # Stage 3: Marshal objectives into vector
         out["F"] = np.array([-1 * o1, -1 * o2, -1 * o3, -1 * o4, -1 * o5, -1 * o6, -1 * o7, -1 * o8, ], dtype=float)
@@ -485,8 +498,8 @@ def main():
     )
 
     # Do optimization for various problems with various algorithms
-    res = minimize(problem=problems[2],
-                   algorithm=algorithms[2],
+    res = minimize(problem=problems[0],
+                   algorithm=algorithms[0],
                    termination=('n_gen', config.MAX_ITERATIONS),
                    seed=1,
                    verbose=True)
@@ -499,4 +512,5 @@ def main():
 
 
 if __name__ == '__main__':
+    config.log_project_info()
     main()

@@ -41,6 +41,7 @@ MANIFEST
 
 # Installer logs
 *.log
+logs/
 pip-log.txt
 pip-delete-this-directory.txt
 
