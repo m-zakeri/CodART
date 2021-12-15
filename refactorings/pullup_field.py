@@ -21,8 +21,11 @@ Pull up field refactoring removes the repetitive field from subclasses and moves
 3. Check for multilevel inheritance.
 
 """
-
+import logging
+import os
 from refactorings.utils import utils_listener_fast, utils2
+
+logger = logging.getLogger(os.path.basename(__file__))
 
 
 class PullUpFieldRefactoring:
@@ -61,10 +64,12 @@ class PullUpFieldRefactoring:
         if self.package_name not in program.packages \
                 or self.class_name not in program.packages[self.package_name].classes \
                 or self.field_name not in program.packages[self.package_name].classes[self.class_name].fields:
+            logger.warning("Inputs are not valid!")
             return False
 
         _class: utils_listener_fast.Class = program.packages[self.package_name].classes[self.class_name]
         if _class.superclass_name is None:
+            logger.warning("Super class is none.")
             return False
 
         superclass_name = _class.superclass_name
@@ -74,6 +79,7 @@ class PullUpFieldRefactoring:
         superclass_body_start.stop = superclass_body_start.start  # Start and stop both point to the '{'
 
         if self.field_name in superclass.fields:
+            logger.warning("Field is in superclass fields.")
             return False
 
         datatype = _class.fields[self.field_name].datatype
@@ -86,12 +92,13 @@ class PullUpFieldRefactoring:
                 if ((c.superclass_name == superclass_name and c.file_info.has_imported_class(self.package_name,
                                                                                              superclass_name))
                     or (
-                            self.package_name is not None and c.superclass_name == self.package_name + '.' + superclass_name)) \
+                            self.package_name is not None and c.superclass_name == superclass_name)) \
                         and self.field_name in c.fields \
                         and c.fields[self.field_name].datatype == datatype:
                     fields_to_remove.append(c.fields[self.field_name])
 
         if len(fields_to_remove) == 0:
+            logger.warning("No fields to remove.")
             return False
 
         is_public = False

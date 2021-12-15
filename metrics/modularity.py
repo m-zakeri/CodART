@@ -101,7 +101,7 @@ def main(project_path='../benchmark_projects/JSON/JSON.und'):
     """
     db = understand.open(project_path)
     # entities = db.ents('Java Class')
-    cmd_ = 'und export -format long -dependencies class csv {0} {1}'.format('mdg/MDG.csv', project_path)
+    cmd_ = 'und export -format long -dependencies class csv {0} "{1}"'.format('mdg/MDG.csv', project_path)
     os.system('cmd /c "{0}"'.format(cmd_))
 
     modulo = Modularity(graph_path=r'mdg/MDG.csv', db=db)
