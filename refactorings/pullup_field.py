@@ -64,12 +64,12 @@ class PullUpFieldRefactoring:
         if self.package_name not in program.packages \
                 or self.class_name not in program.packages[self.package_name].classes \
                 or self.field_name not in program.packages[self.package_name].classes[self.class_name].fields:
-            logger.warning("Inputs are not valid!")
+            logger.error("Inputs are not valid!")
             return False
 
         _class: utils_listener_fast.Class = program.packages[self.package_name].classes[self.class_name]
         if _class.superclass_name is None:
-            logger.warning("Super class is none.")
+            logger.error("Super class is none.")
             return False
 
         superclass_name = _class.superclass_name
@@ -79,7 +79,7 @@ class PullUpFieldRefactoring:
         superclass_body_start.stop = superclass_body_start.start  # Start and stop both point to the '{'
 
         if self.field_name in superclass.fields:
-            logger.warning("Field is in superclass fields.")
+            logger.error("Field is in superclass fields.")
             return False
 
         datatype = _class.fields[self.field_name].datatype
@@ -98,7 +98,7 @@ class PullUpFieldRefactoring:
                     fields_to_remove.append(c.fields[self.field_name])
 
         if len(fields_to_remove) == 0:
-            logger.warning("No fields to remove.")
+            logger.error("No fields to remove.")
             return False
 
         is_public = False

@@ -137,9 +137,9 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
     db = und.open(udb_path)
 
     # Check if field is static
-    field_ent = db.lookup(f"{source_package}.{source_class}.{field_name}")
-    if len(field_ent) != 1:
-        logger.error("Entity not found.")
+    field_ent = db.lookup(f"{source_package}.{source_class}.{field_name}", "Variable")
+    if len(field_ent) == 0:
+        logger.error(f"Entity not found with query: {source_package}.{source_class}.{field_name}.")
         db.close()
         return None
 
