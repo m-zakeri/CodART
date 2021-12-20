@@ -1,3 +1,7 @@
+import logging
+
+logger = logging.getLogger()
+
 from gen.javaLabeled.JavaLexer import JavaLexer
 
 try:
@@ -84,7 +88,7 @@ class PullUpMethodRefactoringListener(JavaParserLabeledListener):
             self.is_children_class = True
 
         else:
-            print("enter other class")
+            # Enter another class
             self.is_children_class = False
 
     def enterClassBody(self, ctx: JavaParserLabeled.ClassBodyContext):
@@ -146,7 +150,6 @@ class PropagationPullUpMethodRefactoringListener(JavaParserLabeledListener):
         self.method_text = ""
 
     def enterVariableDeclarator(self, ctx: JavaParserLabeled.VariableDeclaratorContext):
-        print("Propagation started, please wait...")
         if not self.is_class:
             return None
         grand_parent_ctx = ctx.parentCtx.parentCtx
@@ -170,13 +173,13 @@ class PropagationPullUpMethodRefactoringListener(JavaParserLabeledListener):
             self.is_class = True
 
         else:
-            print("enter other class")
+            # Enter other class
             self.is_class = False
 
 
 def main(udb_path: str, children_classes: list, method_name: str):
     if len(children_classes) <= 1:
-        print("len(children_classes) should be gte 2")
+        logger.error("len(children_classes) should be gte 2")
         return None
 
     # initialize with understand
@@ -188,25 +191,26 @@ def main(udb_path: str, children_classes: list, method_name: str):
     try:
         method_ents = [db.lookup(i + "." + method_name, "method")[0] for i in children_classes]
     except IndexError:
-        print([db.lookup(i + "." + method_name, "method") for i in children_classes])
-        print(f"Method {method_name} does not exists in all children_classes.")
+        # print([db.lookup(i + "." + method_name, "method") for i in children_classes])
+        logger.error(f"Method {method_name} does not exists in all children_classes.")
         db.close()
         return None
 
     # Get method text
     method_text = method_ents[0].contents().strip()
-    print("method_text:", method_text)
     # end get text
 
     for method_ent in method_ents:
         if method_ent.contents().strip() != method_text:
-            print("Method content is different.")
+            logger.error("Method content is different.")
             db.close()
             return None
 
         for ref in method_ent.refs("Use,Call"):
+            print(ref)
+            print(ref.ent())
             if ref.ent().parent().simplename() in children_classes:
-                print("Method has internal dependencies.")
+                logger.error("Method has internal dependencies.")
                 db.close()
                 return None
 
@@ -220,11 +224,12 @@ def main(udb_path: str, children_classes: list, method_name: str):
                 for ref in mth.refs("Java Callby"):
                     propagation_classes.add(ref.ent().parent().longname())
                     fileslist_to_be_propagate.add(ref.ent().parent().parent().longname())
-    print("=========================================")
-    print("fileslist_to_be_propagate :", fileslist_to_be_propagate)
-    print("propagation_classes : ", propagation_classes)
-    print("fileslist_to_be_rafeactored :", fileslist_to_be_rafeactored)
-    print("father class :", destination_class)
+
+    # print("=========================================")
+    # print("fileslist_to_be_propagate :", fileslist_to_be_propagate)
+    # print("propagation_classes : ", propagation_classes)
+    # print("fileslist_to_be_rafeactored :", fileslist_to_be_rafeactored)
+    # print("father class :", destination_class)
 
     fileslist_to_be_rafeactored = list(fileslist_to_be_rafeactored)
     fileslist_to_be_propagate = list(fileslist_to_be_propagate)
@@ -272,9 +277,9 @@ def main(udb_path: str, children_classes: list, method_name: str):
 
 
 if __name__ == '__main__':
-    udb_path = "D:\Dev\ganttproject\ganttproject.udb"
-    children_class = ['ResourceLoadGraphicArea', 'GanttGraphicArea']
-    moved_method = "getPreferredSize"
+    udb_path = "D:\\Final Project\\IdeaProjects\\JSON20201115\\JSON20201115.und"
+    children_class = ['XMLTokener', 'HTTPTokener']
+    moved_method = "nextToken"
     main(
         udb_path=udb_path,
         children_classes=children_class,
