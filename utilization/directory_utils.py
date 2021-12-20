@@ -14,6 +14,7 @@ def git_restore(project_dir):
     """
     assert os.path.isdir(project_dir)
     subprocess.Popen(["git", "restore", "."], cwd=project_dir).wait()
+    subprocess.Popen(["git", "clean", "-f", "-d"], cwd=project_dir).wait()
 
 
 def create_understand_database(project_dir):
