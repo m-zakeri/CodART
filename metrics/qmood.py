@@ -7,11 +7,27 @@ __author__ = 'Seyyed Ali Ayati'
 
 import os
 import logging
-import understand as und
+
+try:
+    import understand as und
+except ImportError:
+    print("Cannot import understand.")
 
 # Config logging
 logging.basicConfig(filename='codart_result.log', level=logging.DEBUG)
 logger = logging.getLogger(os.path.basename(__file__))
+
+from sbse.config import CURRENT_QMOOD_METRICS
+
+
+def divide_by_initial_value(func):
+    def wrapper(*args, **kwargs):
+        value = func(*args, **kwargs)
+        initial = CURRENT_QMOOD_METRICS.get(func.__name__)
+        print(value, initial)
+        return round(value / initial, 2)
+
+    return wrapper
 
 
 class QMOOD:
@@ -27,6 +43,7 @@ class QMOOD:
         self.db.close()
 
     @property
+    @divide_by_initial_value
     def DSC(self):
         """
         DSC - Design Size in Classes
@@ -35,6 +52,7 @@ class QMOOD:
         return self.metrics.get('CountDeclClass', 0)
 
     @property
+    @divide_by_initial_value
     def NOH(self):
         """
         NOH - Number Of Hierarchies
@@ -51,6 +69,7 @@ class QMOOD:
         return count
 
     @property
+    @divide_by_initial_value
     def ANA(self):
         """
         ANA - Average Number of Ancestors
@@ -65,6 +84,7 @@ class QMOOD:
         return sum(MITs) / len(MITs)
 
     @property
+    @divide_by_initial_value
     def MOA(self):
         """
         MOA - Measure of Aggregation
@@ -82,6 +102,7 @@ class QMOOD:
         return counter
 
     @property
+    @divide_by_initial_value
     def DAM(self):
         """
         DAM - The Average of Direct Access Metric for all classes
@@ -90,6 +111,7 @@ class QMOOD:
         return self.get_class_average(self.ClassLevelDAM)
 
     @property
+    @divide_by_initial_value
     def CAMC(self):
         """
         CAMC - Cohesion Among Methods of class
@@ -98,6 +120,7 @@ class QMOOD:
         return self.get_class_average(self.ClassLevelCAMC)
 
     @property
+    @divide_by_initial_value
     def CIS(self):
         """
         CIS - Class Interface Size
@@ -106,6 +129,7 @@ class QMOOD:
         return self.get_class_average(self.ClassLevelCIS)
 
     @property
+    @divide_by_initial_value
     def NOM(self):
         """
         NOM - Number of Methods
@@ -114,6 +138,7 @@ class QMOOD:
         return self.get_class_average(self.ClassLevelNOM)
 
     @property
+    @divide_by_initial_value
     def DCC(self):
         """
         DCC - Direct Class Coupling
@@ -122,6 +147,7 @@ class QMOOD:
         return self.get_class_average(self.ClassLevelDCC)
 
     @property
+    @divide_by_initial_value
     def MFA(self):
         """
         MFA - Measure of Functional Abstraction
@@ -130,6 +156,7 @@ class QMOOD:
         return self.get_class_average(self.ClassLevelMFA)
 
     @property
+    @divide_by_initial_value
     def NOP(self):
         """
         NOP - Number of Polymorphic Methods
@@ -270,18 +297,19 @@ class QMOOD:
 
 if __name__ == '__main__':
     understand_paths = [
+        "D:\\Final Project\\IdeaProjects\\JSON20201115\\JSON20201115.und",
         "D:\\Final Project\\IdeaProjects\\104_vuze\\104_vuze.und",
         "D:\\Final Project\\IdeaProjects\\105_freemind\\105_freemind.und",
         "D:\\Final Project\\IdeaProjects\\107_weka\\107_weka.und",
         "D:\\Final Project\\IdeaProjects\\ganttproject_1_11_1_original\\ganttproject_1_11_1_original.und",
         "D:\\Final Project\\IdeaProjects\\jfreechart-master\\jfreechart-master.und",
-        "D:\\Final Project\\IdeaProjects\\JSON20201115\\JSON20201115.und",
         "D:\\Final Project\\IdeaProjects\\jvlt-1.3.2\\jvlt-1.3.2.und",
 
     ]
     for udb_path in understand_paths:
         print(f"Path: {udb_path}")
         metric = QMOOD(udb_path)
+        print("Object created.")
         print(f"DSC: ", metric.DSC)
         print(f"NOH: ", metric.NOH)
         print(f"ANA: ", metric.ANA)
@@ -293,4 +321,3 @@ if __name__ == '__main__':
         print(f"DCC: ", metric.DCC)
         print(f"MFA: ", metric.MFA)
         print(f"NOP: ", metric.NOP)
-
