@@ -49,3 +49,19 @@ def update_understand_database(udb_path):
         stdout=open(os.devnull, 'wb')
     ).wait()
     print("Finished updating...")
+
+
+def export_understand_dependencies_csv(csv_path: str, db_path: str):
+    """
+    Exports understand dependencies into a csv file.
+
+    :param csv_path: The absolute address of csv file to generate.
+    :param db_path: The absolute address of project path.
+    :return: None
+    """
+    command = ['und', 'export', '-format', 'long', '-dependencies', 'class', 'csv', csv_path, db_path]
+    subprocess.Popen(
+        command,
+        stdout=open(os.devnull, 'wb')
+    ).wait()
+    print("CSV Exported...")

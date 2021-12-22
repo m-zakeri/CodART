@@ -39,7 +39,7 @@ from metrics.modularity import main as modularity_main
 from utilization.directory_utils import update_understand_database, git_restore
 
 
-# TODO: Parallelism, Handle index errors, NSGA, Server
+# TODO: Parallelism, Double Check Befor Run on Server
 
 class Gene:
     """
@@ -223,6 +223,7 @@ class ProblemMultiObjective(ElementwiseProblem):
         # Stage 2: Computing quality attributes
         obj = Objectives(udb_path=config.UDB_PATH)
         o1 = obj.average
+        del obj
         o2 = testability_main(config.UDB_PATH)
         o3 = modularity_main(config.UDB_PATH)
         logger.info(f"QMOOD AVG Score: {o1}")
@@ -279,6 +280,7 @@ class ProblemManyObjective(ElementwiseProblem):
         o4 = qmood.functionality
         o5 = qmood.effectiveness
         o6 = qmood.extendability
+        del qmood
         o7 = testability_main(config.UDB_PATH)
         o8 = modularity_main(config.UDB_PATH)
 
@@ -289,7 +291,7 @@ class ProblemManyObjective(ElementwiseProblem):
         logger.info(f"Effectiveness Score: {o5}")
         logger.info(f"Extendability Score: {o6}")
         logger.info(f"Testability Score: {o7}")
-        logger.info(f"Modularity_main Score: {o8}")
+        logger.info(f"Modularity Score: {o8}")
 
         # Stage 3: Marshal objectives into vector
         out["F"] = np.array([-1 * o1, -1 * o2, -1 * o3, -1 * o4, -1 * o5, -1 * o6, -1 * o7, -1 * o8, ], dtype=float)
@@ -496,8 +498,8 @@ def main():
     )
 
     # Do optimization for various problems with various algorithms
-    res = minimize(problem=problems[1],
-                   algorithm=algorithms[1],
+    res = minimize(problem=problems[2],
+                   algorithm=algorithms[2],
                    termination=('n_gen', config.MAX_ITERATIONS),
                    seed=1,
                    verbose=True)

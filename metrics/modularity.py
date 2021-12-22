@@ -14,6 +14,10 @@ __version__ = '0.1.0'
 __author__ = 'Morteza Zakeri'
 
 import os
+import time
+import logging
+
+logger = logging.getLogger()
 
 import networkx as nx
 import networkx.algorithms.community as nx_comm
@@ -22,6 +26,7 @@ import understand
 from matplotlib import pyplot as plt
 
 from metrics.naming import UnderstandUtility
+from utilization.directory_utils import export_understand_dependencies_csv
 
 
 class Modularity:
@@ -99,14 +104,20 @@ def main(project_path='../benchmark_projects/JSON/JSON.und'):
     """
     A demo of using modularity module to measure modularity quality attribute based on graph-analysis
     """
-    db = understand.open(project_path)
-    # entities = db.ents('Java Class')
-    cmd_ = 'und export -format long -dependencies class csv {0} "{1}"'.format('mdg/MDG.csv', project_path)
-    os.system('cmd /c "{0}"'.format(cmd_))
+    csv_path = os.path.abspath('./mdg/MDG.csv')
+    export_understand_dependencies_csv(
+        csv_path=csv_path,
+        db_path=project_path
+    )
+    while not os.path.exists(csv_path):
+        logger.debug("Waiting 0.05s for the file to be created...")
+        time.sleep(0.05)
 
-    modulo = Modularity(graph_path=r'mdg/MDG.csv', db=db)
+    db = understand.open(project_path)
+    modulo = Modularity(graph_path=csv_path, db=db)
     q = modulo.compute_modularity_newman_leicht()
-    print(q)
+    os.remove(csv_path)
+    db.close()
     return q
 
 
@@ -115,5 +126,5 @@ if __name__ == '__main__':
     project_path = r'../benchmark_projects/ganttproject/biz.ganttproject.core/biz.ganttproject.core.und'
     # project_path = r'D:/IdeaProjects/JSON20201115/JSON.und'
     # project_path = r'D:/IdeaProjects/jvlt-1.3.2/src.und'
-    project_path = 'D:/IdeaProjects/ganttproject_1_11_1_original/ganttproject_1_11_1_original.und'
-    main(project_path)
+    project_path = 'D:\\Final Project\\IdeaProjects\\JSON20201115\\JSON20201115.und'
+    print(main(project_path))
