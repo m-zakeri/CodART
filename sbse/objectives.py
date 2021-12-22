@@ -6,7 +6,7 @@ Project's objectives
 """
 
 __version__ = '0.1.0'
-__author__ = 'Mina Tahaei'
+__author__ = 'Seyyed Ali Ayati'
 
 import os
 
@@ -79,3 +79,11 @@ class Objectives:
         score = 0.2 * self.qmood.ANA + 0.2 * self.qmood.DAM + 0.2 * self.qmood.MOA + 0.2 * \
                 self.qmood.MFA + 0.2 * self.qmood.NOP
         return score
+
+    @property
+    def average(self):
+        objs = [
+            self.reusability, self.flexibility, self.understandability,
+            self.functionality, self.extendability, self.effectiveness
+        ]
+        return sum(objs) / len(objs)
