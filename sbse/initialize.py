@@ -1,3 +1,12 @@
+"""
+This module implements finding candidates for the genetic algorithms!
+
+Initialization: The abstract class and common utility functions.
+RandomInitialization: For initialling random candidates.
+"""
+
+__author__ = 'Seyyed Ali Ayati'
+
 import random
 from collections import Counter
 from pathlib import Path
@@ -11,9 +20,23 @@ from refactorings import make_field_non_static, make_field_static, make_method_s
     extract_class, pullup_method, pushdown_method, extract_method, pullup_constructor
 from utilization.setup_understand import *
 
-# Config logging
-logging.basicConfig(filename='codart_result.log', level=logging.DEBUG)
-logger = logging.getLogger(os.path.basename(__file__))
+
+def get_package_from_class(class_longname: str):
+    parts = class_longname.split(".")
+    if len(parts) > 1:
+        parts = parts[:-1]
+        return ".".join(parts)
+    else:
+        return ""
+
+
+def handle_index_error(func):
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except IndexError:
+            return None, None, None
+    return wrapper
 
 
 class Initialization(object):
@@ -130,7 +153,7 @@ class Initialization(object):
         for ent in class_entities:
             for ref in ent.refs("define", "variable"):
                 candidate = {
-                    "package_name": ent.parent().simplename(),
+                    "package_name": get_package_from_class(ent.longname()),
                     "children_class": ent.simplename(),
                     "field_name": ref.ent().simplename()
                 }
@@ -152,8 +175,7 @@ class Initialization(object):
 
             for ref in ent.refs("ExtendBy ~Implicit"):
                 params["source_class"] = ent.simplename()
-                ln = ent.longname().split(".")
-                params["source_package"] = ln[0] if len(ln) > 1 else ""
+                params["source_package"] = get_package_from_class(ent.longname())
                 if len(params["target_classes"]) >= 1:
                     rnd = random.randint(0, 1)
                     if rnd == 0:
@@ -320,6 +342,22 @@ class Initialization(object):
     def init_extract_method(self):
         pass
 
+    def select_random(self):
+        """
+        Randomly selects a refactoring. If there are no candidates it tries again!
+
+        Returns:
+            main_function: function
+            params: dict
+            name: str
+        """
+        initializer = random.choice(self.initializers)
+        main_function, params, name = handle_index_error(initializer)()
+        if main_function is None:
+            return self.select_random()
+        else:
+            return main_function, params, name
+
     def generate_population(self):
         population = []
         for _ in progressbar.progressbar(range(self.population_size)):
@@ -327,7 +365,7 @@ class Initialization(object):
             individual_size = random.randint(self.lower_band, self.upper_band)
             for j in range(individual_size):
                 individual.append(
-                    random.choice(self.initializers)()
+                    self.select_random()
                 )
             population.append(individual)
         self._und.close()
@@ -349,6 +387,7 @@ class RandomInitialization(Initialization):
         params = {"udb_path": self.udb_path}
         candidates = self._static_variables
         params.update(random.choice(candidates))
+        params.pop("source_package")
         return refactoring_main, params, 'Make Field Non-Static'
 
     def inti_make_field_static(self):
@@ -360,6 +399,7 @@ class RandomInitialization(Initialization):
         params = {"udb_path": self.udb_path}
         candidates = self._variables
         params.update(random.choice(candidates))
+        params.pop("source_package")
         return refactoring_main, params, 'Make Field Static'
 
     def init_make_method_static(self):
@@ -371,6 +411,7 @@ class RandomInitialization(Initialization):
         params = {"udb_path": self.udb_path}
         candidates = self._methods
         params.update(random.choice(candidates))
+        params.pop("source_package")
         return refactoring_main, params, 'Make Method Static'
 
     def init_make_method_non_static(self):
@@ -382,6 +423,7 @@ class RandomInitialization(Initialization):
         params = {"udb_path": self.udb_path}
         candidates = self._static_methods
         params.update(random.choice(candidates))
+        params.pop("source_package")
         return refactoring_main, params, 'Make Method Non-Static'
 
     def init_pullup_field(self):
@@ -558,9 +600,10 @@ class RandomInitialization(Initialization):
 
 if __name__ == '__main__':
     rand_pop = RandomInitialization(
-        "D:\\\Dev\\\JSON-java\\JSON-java.udb",
+        "D:\Final Project\IdeaProjects\JSON20201115\JSON20201115.und",
         population_size=POPULATION_SIZE,
-        individual_size=INDIVIDUAL_SIZE
+        lower_band=LOWER_BAND,
+        upper_band=UPPER_BAND
     )
     population = rand_pop.generate_population()
     print(population)
