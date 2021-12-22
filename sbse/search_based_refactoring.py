@@ -39,7 +39,7 @@ from metrics.modularity import main as modularity_main
 from utilization.directory_utils import update_understand_database, git_restore
 
 
-# TODO: Final Results, Best Solution
+# TODO: Parallelism, Handle index errors, NSGA, Server
 
 class Gene:
     """
@@ -87,14 +87,18 @@ class RefactoringOperation(Gene):
     @classmethod
     def generate_randomly(cls):
         initializer = RandomInitialization(udb_path=config.UDB_PATH)
-        item = random.choice(initializer.initializers)()
-        initializer.und.close()
-        logger.info("Database close after generating a single refactoring.")
+        item = initializer.select_random()
         return cls(
             name=item[2],
             params=item[1],
             main=item[0]
         )
+
+    def __str__(self):
+        return f"\n{self.name}\n{self.params}\n"
+
+    def __repr__(self):
+        return self.__str__()
 
 
 class Individual(List):
@@ -163,6 +167,7 @@ class ProblemSingleObjective(ElementwiseProblem):
         # Stage 0: Git restore
         logger.debug("Executing git restore.")
         git_restore(config.PROJECT_PATH)
+        update_understand_database(config.UDB_PATH)
         # Stage 1: Execute all refactoring operations in the sequence x
         logger.debug(f"Reached Individual with Size {len(x[0])}")
         for refactoring_operation in x[0]:
@@ -170,11 +175,9 @@ class ProblemSingleObjective(ElementwiseProblem):
             # Update Understand DB
             update_understand_database(config.UDB_PATH)
         # Stage 2: Computing quality attributes
-        # TODO: Add testability and modularity objectives
-        score = Objectives(udb_path=config.UDB_PATH).reusability
-        logger.info(f"Reusability Score: {score}")
+        score = testability_main(config.UDB_PATH)
+        logger.info(f"Testability Score: {score}")
         # Stage 3: Marshal objectives into vector
-        # out["F"] = np.array([-1 * o1], dtype=float)
         out["F"] = np.array([-1 * score], dtype=float)
 
 
@@ -209,6 +212,7 @@ class ProblemMultiObjective(ElementwiseProblem):
         # Stage 0: Git restore
         logger.debug("Executing git restore.")
         git_restore(config.PROJECT_PATH)
+        update_understand_database(config.UDB_PATH)
         # Stage 1: Execute all refactoring operations in the sequence x
         logger.debug(f"Reached Individual with Size {len(x[0])}")
         for refactoring_operation in x[0]:
@@ -217,20 +221,15 @@ class ProblemMultiObjective(ElementwiseProblem):
             update_understand_database(config.UDB_PATH)
 
         # Stage 2: Computing quality attributes
-        # Todo: Add testability and modularity objectives
-        # Todo: Normalize objective values in a standard range
-        # Todo: Reduce QMOOD metrics to one objective by averaging them
         obj = Objectives(udb_path=config.UDB_PATH)
-        o1 = obj.reusability
-        o2 = obj.understandability
-        logger.info(f"Reusability Score: {o1}")
-        logger.info(f"Understandability Score: {o2}")
-        # o1 = 1/6 * sum qmood metrics
-        # o2 = testability  ## Our new objective
-        # o3 = modularity   ## Our new objective
-
+        o1 = obj.average
+        o2 = testability_main(config.UDB_PATH)
+        o3 = modularity_main(config.UDB_PATH)
+        logger.info(f"QMOOD AVG Score: {o1}")
+        logger.info(f"Testability Score: {o2}")
+        logger.info(f"Modularity Score: {o3}")
         # Stage 3: Marshal objectives into vector
-        out["F"] = np.array([-1 * o1, -1 * o2], dtype=float)
+        out["F"] = np.array([-1 * o1, -1 * o2, -1 * o3], dtype=float)
 
 
 class ProblemManyObjective(ElementwiseProblem):
@@ -261,9 +260,10 @@ class ProblemManyObjective(ElementwiseProblem):
         x (Individual): x is an instance of Individual (i.e., a list of refactoring operations)
 
         """
-        # Git restore
+        # Git restore`
         logger.debug("Executing git restore.")
         git_restore(config.PROJECT_PATH)
+        update_understand_database(config.UDB_PATH)
         # Stage 1: Execute all refactoring operations in the sequence x
         logger.debug(f"Reached Individual with Size {len(x[0])}")
         for refactoring_operation in x[0]:
@@ -272,8 +272,6 @@ class ProblemManyObjective(ElementwiseProblem):
             update_understand_database(config.UDB_PATH)
 
         # Stage 2: Computing quality attributes
-        # Todo: Add testability and modularity objectives
-        # Todo: Normalize objective values in a standard range
         qmood = Objectives(udb_path=config.UDB_PATH)
         o1 = qmood.reusability
         o2 = qmood.understandability
@@ -424,7 +422,7 @@ class BitStringMutation(Mutation):
             # with a probability of `mutation_probability` replace the refactoring operation with new one
             if r < self.mutation_probability:
                 # j is a random index in individual
-                j = random.randint(0, len(individual[0]))
+                j = random.randint(0, len(individual[0]) - 1)
                 random_refactoring_operation = RefactoringOperation.generate_randomly()
                 X[i][0][j] = random_refactoring_operation
 
@@ -498,17 +496,28 @@ def main():
     )
 
     # Do optimization for various problems with various algorithms
-    res = minimize(problem=problems[0],
-                   algorithm=algorithms[0],
+    res = minimize(problem=problems[1],
+                   algorithm=algorithms[1],
                    termination=('n_gen', config.MAX_ITERATIONS),
                    seed=1,
                    verbose=True)
+    logger.info("** FINISHED **")
 
-    # Scatter().add(res.F).show()
+    logger.info("Best Individual:")
+    logger.info(res.X)
+    logger.info("Objective Values:")
+    logger.info(res.F)
 
-    results = res.X[np.argsort(res.F[:, 0])]
-    count = [np.sum([e == "a" for e in r]) for r in results[:, 0]]
-    print(np.column_stack([results, count]))
+    logger.info("==================")
+    logger.info("Other Solutions:")
+    for ind in res.opt:
+        logger.info(ind.X)
+        logger.info(ind.F)
+        logger.info("==================")
+
+    logger.info(f"Start Time: {res.start_time}")
+    logger.info(f"End Time: {res.end_time}")
+    logger.info(f"Execution Time in Seconds: {res.exec_time}")
 
 
 if __name__ == '__main__':
