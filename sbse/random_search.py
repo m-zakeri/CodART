@@ -14,7 +14,8 @@ project_dir = "D:\Dev\JavaSample"
 rand_init = RandomInitialization(
         udb_path=udb_path,
         population_size=POPULATION_SIZE,
-        individual_size=INDIVIDUAL_SIZE
+        lower_band=LOWER_BAND,
+        upper_band=UPPER_BAND
     )
 rand_pop = rand_init.generate_population()
 score = Objectives(udb_path=udb_path).reusability
