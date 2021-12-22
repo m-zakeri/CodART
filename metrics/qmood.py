@@ -24,7 +24,6 @@ def divide_by_initial_value(func):
     def wrapper(*args, **kwargs):
         value = func(*args, **kwargs)
         initial = CURRENT_QMOOD_METRICS.get(func.__name__)
-        print(value, initial)
         return round(value / initial, 2)
 
     return wrapper
