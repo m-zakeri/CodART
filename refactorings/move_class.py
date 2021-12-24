@@ -50,6 +50,7 @@ class UpdateImportsListener(JavaParserLabeledListener):
         self.import_loc = ctx.stop
 
     def enterImportDeclaration(self, ctx: JavaParserLabeled.ImportDeclarationContext):
+        # import source_package.Sample;
         if self.target_package in ctx.getText():
             self.imported = True
             if self.class_name in ctx.getText():
@@ -64,9 +65,15 @@ class UpdateImportsListener(JavaParserLabeledListener):
                     text=replace_text,
                     program_name=self.rewriter.DEFAULT_PROGRAM_NAME
                 )
+        elif f"{self.source_package}.{self.class_name}" in ctx.getText():
+            self.rewriter.delete(
+                program_name=self.rewriter.DEFAULT_PROGRAM_NAME,
+                from_idx=ctx.start.tokenIndex,
+                to_idx=ctx.stop.tokenIndex
+            )
 
     def exitCompilationUnit(self, ctx:JavaParserLabeled.CompilationUnitContext):
-        if not self.imported:
+        if not self.imported and self.current_package != self.target_package:
             self.rewriter.insertAfterToken(
                 token=self.import_loc,
                 text=f"\nimport {self.target_package}.{self.class_name};\n",
@@ -200,8 +207,8 @@ def main(udb_path: str, source_package: str, target_package: str, class_name: st
 
 if __name__ == '__main__':
     main(
-        udb_path="D:\Dev\JavaSample\JavaSample1.udb",
-        class_name="RemoveFlagArg",
-        source_package="my_package",
-        target_package="your_package",  # "(Unnamed_Package)"
+        udb_path="D:\\Dev\\JavaSample\\JavaSample\\JavaSample.und",
+        class_name="Sample",
+        source_package="source_package",
+        target_package="target_package",  # "(Unnamed_Package)"
     )
