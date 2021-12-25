@@ -3,7 +3,7 @@ QMOOD Design Metrics
 """
 
 __version__ = '0.1.1'
-__author__ = 'Seyyed Ali Ayati'
+__author__ = 'Seyyed Ali Ayati, Mina Tahaei'
 
 import os
 import logging
@@ -23,8 +23,8 @@ from sbse.config import CURRENT_QMOOD_METRICS
 def divide_by_initial_value(func):
     def wrapper(*args, **kwargs):
         value = func(*args, **kwargs)
-        initial = CURRENT_QMOOD_METRICS.get(func.__name__)
-        return round(value / initial, 2)
+        # initial = CURRENT_QMOOD_METRICS.get(func.__name__)
+        return value  # round(value / initial, 2)
 
     return wrapper
 
@@ -36,6 +36,8 @@ class QMOOD:
         #     raise ValueError("Project directory is not valid.")
         self.db = und.open(udb_path)
         self.metrics = self.db.metric(self.db.metrics())
+        self.user_defined_classes = self.get_user_defined_classes()
+        self.all_classes = self.get_all_classes()
 
     def __del__(self):
         logger.debug("Database closed after calculating metrics.")
@@ -59,11 +61,14 @@ class QMOOD:
         :return: Total number of 'root' classes in the design.
         """
         count = 0
-        for ent in sorted(self.db.ents(kindstring='class'), key=lambda ent: ent.name()):
-            if ent.kindname() == "Unknown Class":
-                continue
+        for ent in self.db.ents(kindstring='Class ~Unknown'):
+            is_tree = False
+            for ref in ent.refs("ExtendBy"):
+                if ref:
+                    is_tree = True
+                    break
             mit = ent.metric(['MaxInheritanceTree'])['MaxInheritanceTree']
-            if mit == 1:
+            if mit == 1 and is_tree:
                 count += 1
         return count
 
@@ -75,11 +80,9 @@ class QMOOD:
         :return: Average number of classes in the inheritance tree for each class
         """
         MITs = []
-        for ent in sorted(self.db.ents(kindstring='class'), key=lambda ent: ent.name()):
-            if ent.kindname() == "Unknown Class":
-                continue
+        for ent in self.db.ents(kindstring='class ~Unknown'):
             mit = ent.metric(['MaxInheritanceTree'])['MaxInheritanceTree']
-            MITs.append(mit)
+            MITs.append(mit - 1)
         return sum(MITs) / len(MITs)
 
     @property
@@ -87,18 +90,9 @@ class QMOOD:
     def MOA(self):
         """
         MOA - Measure of Aggregation
-        :return: Count of number of attributes whose type is user defined class(es).
+        :return: AVG(All Class's MOA).
         """
-        counter = 0
-        user_defined_classes = []
-        for ent in sorted(self.db.ents(kindstring="class"), key=lambda ent: ent.name()):
-            if ent.kindname() == "Unknown Class":
-                continue
-            user_defined_classes.append(ent.simplename())
-        for ent in sorted(self.db.ents(kindstring="variable"), key=lambda ent: ent.name()):
-            if ent.type() in user_defined_classes:
-                counter += 1
-        return counter
+        return self.get_class_average(self.ClassLevelMOA)
 
     @property
     @divide_by_initial_value
@@ -163,6 +157,23 @@ class QMOOD:
         """
         return self.get_class_average(self.ClassLevelNOP)
 
+    def ClassLevelMOA(self, class_longname):
+        """
+        MOA - Class Level Measure of Aggregation
+        :param class_longname: The longname of a class. For examole: package_name.ClassName
+        :return: Count of number of attributes whose type is user defined class(es).
+        """
+        class_entity = self.get_class_entity(class_longname)
+        counter = 0
+        for ref in class_entity.refs("Define", "Variable"):
+            if ref.ent().type() in self.user_defined_classes:
+                counter += 1
+        for ref in class_entity.refs("Define", "Method"):
+            for ref2 in ref.ent().refs("Define", "Variable"):
+                if ref2.ent().type() in self.user_defined_classes:
+                    counter += 1
+        return counter
+
     def ClassLevelDAM(self, class_longname):
         """
         DAM - Class Level Direct Access Metric
@@ -174,14 +185,14 @@ class QMOOD:
         private_variables = 0
 
         class_entity = self.get_class_entity(class_longname)
-        for ref in class_entity.refs(refkindstring="define"):
+        for ref in class_entity.refs("Define", "Variable"):
             define = ref.ent()
             kind_name = define.kindname()
-            if kind_name == "Public Variable":
+            if "Public" in kind_name:
                 public_variables += 1
-            elif kind_name == "Private Variable":
+            elif "Private" in kind_name:
                 private_variables += 1
-            elif kind_name == "Protected Variable":
+            elif "Protected" in kind_name:
                 protected_variables += 1
 
         try:
@@ -234,14 +245,18 @@ class QMOOD:
         :param class_longname: The longname of a class. For examole: package_name.ClassName
         :return: Number of other classes a class relates to, either through a shared attribute or a parameter in a method.
         """
-        counter = 0
         class_entity = self.get_class_entity(class_longname)
-        for ref in class_entity.refs():
-            if ref.kindname() == "Couple":
-                if ref.isforward():
-                    if "class" in ref.ent().kindname().lower():
-                        counter += 1
-        return counter
+        others = set()
+        for ref in class_entity.refs("Define", "Variable"):
+            if ref.ent().type() in self.all_classes:
+                others.add(ref.ent().type())
+
+        for ref in class_entity.refs("Define", "Method"):
+            for ref2 in ref.ent().refs("Define", "Parameter"):
+                if ref2.ent().type() in self.all_classes:
+                    others.add(ref2.ent().type())
+
+        return len(others)
 
     def ClassLevelMFA(self, class_longname):
         """
@@ -254,7 +269,7 @@ class QMOOD:
         local_methods = metrics.get('CountDeclMethod')
         all_methods = metrics.get('CountDeclMethodAll')
         if all_methods == 0:
-            all_methods = 1
+            return 0
         return (all_methods - local_methods) / all_methods
 
     def ClassLevelNOP(self, class_longname):
@@ -265,9 +280,15 @@ class QMOOD:
         :return: Counts of the number of methods in a class excluding private, static and final ones.
         """
         class_entity = self.get_class_entity(class_longname)
+        if "Final" in class_entity.kindname():
+            return 0
         instance_methods = class_entity.metric(['CountDeclInstanceMethod']).get('CountDeclInstanceMethod', 0)
         private_methods = class_entity.metric(['CountDeclMethodPrivate']).get('CountDeclMethodPrivate', 0)
-        return instance_methods - private_methods
+        final_methods = 0
+        for ref in class_entity.refs("Define", "Method"):
+            if "Final" in ref.ent().kindname():
+                final_methods += 1
+        return instance_methods - (private_methods + final_methods)
 
     def test(self):
         print("Entity:", "Project")
@@ -282,16 +303,28 @@ class QMOOD:
     def get_class_average(self, class_level_metric):
         scores = []
         for ent in self.db.ents(kindstring='class ~unknown'):
-            if ent.kindname() == "Unknown Class":
-                continue
-            else:
-                class_metric = class_level_metric(ent.longname())
-                scores.append(class_metric)
+            class_metric = class_level_metric(ent.longname())
+            scores.append(class_metric)
         return sum(scores) / len(scores)
 
     def print_all(self):
         for k, v in sorted(self.metrics.items()):
             print(k, "=", v)
+
+    def get_user_defined_classes(self):
+        """
+        :return: String list of user defined classes.
+        """
+        classes = []
+        for ent in self.db.ents(kindstring="Class ~Unknown ~TypeVariable ~Anonymous"):
+            classes.append(ent.simplename())
+        return classes
+
+    def get_all_classes(self):
+        classes = []
+        for ent in self.db.ents(kindstring="Class"):
+            classes.append(ent.simplename())
+        return classes
 
 
 if __name__ == '__main__':
