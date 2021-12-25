@@ -46,7 +46,7 @@ class Objectives:
         The degree of understanding and the easiness of learning the design implementation details.
         :return: understandability score
         """
-        score = 0.33 * self.qmood.ANA + 0.33 * self.qmood.DAM - 0.33 * self.qmood.DCC + \
+        score = -0.33 * self.qmood.ANA + 0.33 * self.qmood.DAM - 0.33 * self.qmood.DCC + \
                 0.33 * self.qmood.CAMC - 0.33 * self.qmood.NOP - 0.33 * self.qmood.NOM - \
                 0.33 * self.qmood.DSC
         return score
