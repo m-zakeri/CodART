@@ -1263,8 +1263,8 @@ def main(project_path):
     classes_longnames_list = p.extract_project_classes(db=db)
     df = p.compute_metrics_by_class_list(db=db, class_list=classes_longnames_list)
     db.close()
-    model = TestabilityModel(df_path=r'data_model/DS07012.csv')
-    testability_ = model.inference(model_path='data_model/VR1_DS1.joblib', df_predict_data=df)
+    model = TestabilityModel(df_path=r'../metrics/data_model/DS07012.csv')
+    testability_ = model.inference(model_path='../metrics/data_model/VR1_DS1.joblib', df_predict_data=df)
     print('testability=', testability_)
     return testability_
 
