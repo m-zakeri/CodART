@@ -17,27 +17,28 @@ except ImportError:
 logging.basicConfig(filename='codart_result.log', level=logging.DEBUG)
 logger = logging.getLogger(os.path.basename(__file__))
 
-from sbse.config import CURRENT_QMOOD_METRICS
+from sbse.config import CURRENT_QMOOD_METRICS, UDB_PATH
 
 
 def divide_by_initial_value(func):
     def wrapper(*args, **kwargs):
         value = func(*args, **kwargs)
-        # initial = CURRENT_QMOOD_METRICS.get(func.__name__)
-        return value  # round(value / initial, 2)
+        initial = CURRENT_QMOOD_METRICS.get(func.__name__)
+        return round(value / initial, 2)
 
     return wrapper
 
 
 class QMOOD:
     def __init__(self, udb_path):
-        # To be used with Sci-tools Undrstand 6.x the following two line should be commented.
+        # To be used with Sci-tools Understand 6.x the following two line should be commented.
         # if not os.path.isfile(udb_path):
         #     raise ValueError("Project directory is not valid.")
         self.db = und.open(udb_path)
         self.metrics = self.db.metric(self.db.metrics())
-        self.user_defined_classes = self.get_user_defined_classes()
-        self.all_classes = self.get_all_classes()
+        self.user_defined_classes = self.get_classes()
+        self.all_classes = self.get_classes(filter_string="Class")
+        self.known_class_entities = self.db.ents(kindstring='Class ~Unknown')
 
     def __del__(self):
         logger.debug("Database closed after calculating metrics.")
@@ -61,7 +62,7 @@ class QMOOD:
         :return: Total number of 'root' classes in the design.
         """
         count = 0
-        for ent in self.db.ents(kindstring='Class ~Unknown'):
+        for ent in self.known_class_entities:
             is_tree = False
             for ref in ent.refs("ExtendBy"):
                 if ref:
@@ -80,7 +81,7 @@ class QMOOD:
         :return: Average number of classes in the inheritance tree for each class
         """
         MITs = []
-        for ent in self.db.ents(kindstring='class ~Unknown'):
+        for ent in self.known_class_entities:
             mit = ent.metric(['MaxInheritanceTree'])['MaxInheritanceTree']
             MITs.append(mit - 1)
         return sum(MITs) / len(MITs)
@@ -295,14 +296,14 @@ class QMOOD:
         print(self.NOP)
 
     def get_class_entity(self, class_longname):
-        for ent in self.db.ents(kindstring='class ~unknown'):
+        for ent in self.known_class_entities:
             if ent.longname() == class_longname:
                 return ent
         return None
 
     def get_class_average(self, class_level_metric):
         scores = []
-        for ent in self.db.ents(kindstring='class ~unknown'):
+        for ent in self.known_class_entities:
             class_metric = class_level_metric(ent.longname())
             scores.append(class_metric)
         return sum(scores) / len(scores)
@@ -311,45 +312,29 @@ class QMOOD:
         for k, v in sorted(self.metrics.items()):
             print(k, "=", v)
 
-    def get_user_defined_classes(self):
+    def get_classes(self, filter_string="Class ~Unknown ~TypeVariable ~Anonymous"):
         """
-        :return: String list of user defined classes.
+        :return: a set of all class names
         """
-        classes = []
-        for ent in self.db.ents(kindstring="Class ~Unknown ~TypeVariable ~Anonymous"):
-            classes.append(ent.simplename())
-        return classes
-
-    def get_all_classes(self):
-        classes = []
-        for ent in self.db.ents(kindstring="Class"):
-            classes.append(ent.simplename())
+        classes = set()
+        for ent in self.db.ents(kindstring=filter_string):
+            classes.add(ent.simplename())
         return classes
 
 
 if __name__ == '__main__':
-    understand_paths = [
-        "D:\\Final Project\\IdeaProjects\\JSON20201115\\JSON20201115.und",
-        "D:\\Final Project\\IdeaProjects\\104_vuze\\104_vuze.und",
-        "D:\\Final Project\\IdeaProjects\\105_freemind\\105_freemind.und",
-        "D:\\Final Project\\IdeaProjects\\107_weka\\107_weka.und",
-        "D:\\Final Project\\IdeaProjects\\ganttproject_1_11_1_original\\ganttproject_1_11_1_original.und",
-        "D:\\Final Project\\IdeaProjects\\jfreechart-master\\jfreechart-master.und",
-        "D:\\Final Project\\IdeaProjects\\jvlt-1.3.2\\jvlt-1.3.2.und",
-
-    ]
-    for udb_path in understand_paths:
-        print(f"Path: {udb_path}")
-        metric = QMOOD(udb_path)
-        print("Object created.")
-        print(f"DSC: ", metric.DSC)
-        print(f"NOH: ", metric.NOH)
-        print(f"ANA: ", metric.ANA)
-        print(f"MOA: ", metric.MOA)
-        print(f"DAM: ", metric.DAM)
-        print(f"CAMC: ", metric.CAMC)
-        print(f"CIS: ", metric.CIS)
-        print(f"NOM: ", metric.NOM)
-        print(f"DCC: ", metric.DCC)
-        print(f"MFA: ", metric.MFA)
-        print(f"NOP: ", metric.NOP)
+    print(f"Path: {UDB_PATH}")
+    metric = QMOOD(UDB_PATH)
+    print("Object created.")
+    print(f"DSC: ", metric.DSC)
+    print(f"NOH: ", metric.NOH)
+    print(f"ANA: ", metric.ANA)
+    print(f"MOA: ", metric.MOA)
+    print(f"DAM: ", metric.DAM)
+    print(f"CAMC: ", metric.CAMC)
+    print(f"CIS: ", metric.CIS)
+    print(f"NOM: ", metric.NOM)
+    print(f"DCC: ", metric.DCC)
+    print(f"MFA: ", metric.MFA)
+    print(f"NOP: ", metric.NOP)
+    del metric
