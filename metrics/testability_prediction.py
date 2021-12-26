@@ -677,7 +677,7 @@ class TestabilityMetrics:
             return None
         package = package_list[0]
         # print('kind:', package.kind())
-        print('Computing package metrics for class: "{0}" in package: "{1}"'.format(class_name, package.longname()))
+        # print('Computing package metrics for class: "{0}" in package: "{1}"'.format(class_name, package.longname()))
 
         # Print info
         # print('package metrics')
@@ -1013,11 +1013,11 @@ class PreProcess:
     def extract_project_classes_all(cls, udbs_path, class_list_csv_path_root=r'class_list_csvs/'):
         files = [f for f in os.listdir(udbs_path) if os.path.isfile(os.path.join(udbs_path, f))]
         for f in files:
-            print('processing understand db file {0}:'.format(f))
+            # print('processing understand db file {0}:'.format(f))
             db = und.open(os.path.join(udbs_path, f))
             cls.write_project_classes(project_name=f[:-4], db=db, csv_path=class_list_csv_path_root + f[:-4] + '.csv')
             db.close()
-            print('processing understand db file {0} was finished'.format(f))
+            # print('processing understand db file {0} was finished'.format(f))
 
     @classmethod
     def extract_project_classes(cls, db):
@@ -1081,7 +1081,7 @@ class PreProcess:
     @classmethod
     def check_compute_metrics_by_class_list(cls, db=None, class_list=None, csv_path=None):
         class_entities = cls.read_project_classes(db=db, classes_names_list=class_list)
-        print('Number of classes is: {1}'.format(len(class_entities)))
+        # print('Number of classes is: {1}'.format(len(class_entities)))
 
         columns = ['Project', 'NumberOfClass']
         columns.extend(TestabilityMetrics.get_all_metrics_names())
