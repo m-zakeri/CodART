@@ -104,7 +104,7 @@ def main(project_path='../benchmark_projects/JSON/JSON.und'):
     """
     A demo of using modularity module to measure modularity quality attribute based on graph-analysis
     """
-    csv_path = os.path.abspath('./mdg/MDG.csv')
+    csv_path = os.path.abspath('../metrics/mdg/MDG.csv')
     export_understand_dependencies_csv(
         csv_path=csv_path,
         db_path=project_path
