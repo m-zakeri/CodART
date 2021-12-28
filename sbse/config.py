@@ -1,12 +1,24 @@
 import os
 import logging
 
-POPULATION_SIZE = os.environ.get("POPULATION_SIZE", 150)
-MAX_ITERATIONS = 100
-LOWER_BAND = 3
+POPULATION_SIZE = os.environ.get("POPULATION_SIZE", 10)  # Should be set to 190, 193, 200 for NSGA-III
+MAX_ITERATIONS = 10  # Should be set to 700 or 1000 or 1400 for NSGA-III
+LOWER_BAND = 5
 UPPER_BAND = 6
-UDB_PATH = "D:\Final Project\IdeaProjects\JSON20201115\JSON20201115.und"
-PROJECT_PATH = "D:\Final Project\IdeaProjects\JSON20201115"
+
+root_dir = 'D:/IdeaProjects/'
+benchmarks = {'PROJ': ['JSON20201115',
+                      'jvlt-1.3.2',
+                      'ganttproject_1_11_1_original'],
+
+             'UDB': ['JSON20201115/JSON.und',
+                     'jvlt-1.3.2/src.und',
+                     'ganttproject_1_11_1_original/ganttproject_1_11_1_original.und']}
+
+PROJECT_PATH = root_dir + benchmarks['PROJ'][0]
+UDB_PATH = root_dir + benchmarks['UDB'][0]
+
+
 PROJECT_NAME = os.path.basename(PROJECT_PATH)
 
 INITIAL_QMOOD_METRICS = {
