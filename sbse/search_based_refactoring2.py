@@ -11,11 +11,6 @@ using pymoo framework.
     5. _evaluate function in NSGA-III is now works on population instead of an individual (population-based versus element-wise).
     6. Other setting for NSGA-III including adding energy-references point instead of Das and Dennis approach.
     ===
-    todo:
-    add _ _ equal _ _ method to individual class to compare and remove equal solutions
-    find the best individual (chromosome) length for each project under experiment.
-    improve search performance by any way.
-    ===
 
 Gene, RefactoringOperation: One refactoring with params
 Individual: A list of RefactoringOperation
@@ -123,8 +118,6 @@ class RefactoringOperation(Gene):
             params=item[1],
             main=item[0]
         )
-
-
 
 
 class Individual(List):
@@ -508,7 +501,6 @@ def is_equal_2_refactorings_list(a, b):
     return True
 
 
-
 def binary_tournament(pop, P, **kwargs):
     # The P input defines the tournaments and competitors
     n_tournaments, n_competitors = P.shape
@@ -622,7 +614,7 @@ def main():
     logger.info(f"Execution time in seconds: {res.exec_time}")
     logger.info(f"Execution time in minutes: {res.exec_time / 60}")
     logger.info(f"Execution time in hours: {res.exec_time / (60 * 60)}")
-    logger.info(f"Number of generations", res.algorithm.n_gen)
+    logger.info(f"Number of generations: {res.algorithm.n_gen}")
     # logger.info(f"Number of generations", res.algorithm.termination)
 
     pf = res.F
