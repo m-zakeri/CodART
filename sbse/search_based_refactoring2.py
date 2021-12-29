@@ -2,9 +2,24 @@
 This module implements the search-based refactoring with various search strategy
 using pymoo framework.
 
+## Changelog
+### version 2
+    1. Crossover function is added.
+    2. Termination criteria are added.
+    3. Computation of highly trade-off points is added.
+    4. Tournament-selection is added.
+    5. _evaluate function in NSGA-III is now works on population instead of an individual (population-based versus element-wise).
+    6. Other setting for NSGA-III including adding energy-references point instead of Das and Dennis approach.
+    ===
+    todo:
+    add _ _ equal _ _ method to individual class to compare and remove equal solutions
+    find the best individual (chromosome) length for each project under experiment.
+    improve search performance by any way.
+    ===
+
 Gene, RefactoringOperation: One refactoring with params
 Individual: A list of RefactoringOperation
-SudoRandomInitialization: Population, list of Individual
+PureRandomInitialization: Population, list of Individual
 
 ## References
 [1] https://pymoo.org/customization/custom.html
@@ -12,7 +27,7 @@ SudoRandomInitialization: Population, list of Individual
 
 """
 
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 __author__ = 'Morteza Zakeri, Seyyed Ali Ayati'
 
 import random
@@ -84,6 +99,12 @@ class RefactoringOperation(Gene):
         """
         super(RefactoringOperation, self).__init__(**kwargs)
 
+    def __str__(self):
+        return f'{self.name}({self.params})\n'
+
+    def __repr__(self):
+        return self.__str__()
+
     def do_refactoring(self):
         """ Check preconditions and apply refactoring operation to source code"""
         logger.info(f"Running {self.name}")
@@ -103,11 +124,7 @@ class RefactoringOperation(Gene):
             main=item[0]
         )
 
-    def __str__(self):
-        return f'\n{self.name}\n{self.params}\n'
 
-    def __repr__(self):
-        return self.__str__()
 
 
 class Individual(List):
@@ -341,7 +358,7 @@ class PureRandomInitialization(Sampling):
         ).generate_population()
 
         for i in range(n_samples):
-            individual_object = []  # list of refactoring operations
+            individual_object = []  # list of refactoring operations (Temporarily used instead of Individual class)
             for ref in population[i]:
                 individual_object.append(
                     RefactoringOperation(
@@ -382,7 +399,7 @@ class AdaptiveSinglePointCrossover(Crossover):
 
     def _do(self, problem, X, **kwargs):
         """
-        Todo: Implementing adaptive single-point-cross-over
+        For population X
         """
         print("Running crossover")
         # The input of has the following shape (n_parents, n_matings, n_var)
@@ -473,24 +490,23 @@ class BitStringMutation(Mutation):
         return X
 
 
-class RefactoringSequenceDuplicateElimination(ElementwiseDuplicateElimination):
+# Calling the equal method of individual class
+def is_equal_2_refactorings_list(a, b):
     """
-    This class implement is_equal method which should return True if two instances of Individual are equal.
+    This method implement is_equal method which should return True if two instances of Individual class are equal.
     Otherwise it return False.
-
     The duplicate instances are removed from population at each generation.
     Only one instance is held to speed up the search algorithm
-
     """
+    if len(a.X[0]) != len(b.X[0]):
+        return False
+    for i, ro in enumerate(a.X[0]):
+        if ro.name != b.X[0][i].name:
+            return False
+        if ro.params != b.X[0][i].params:
+            return False
+    return True
 
-    def is_equal(self, a, b):
-        """
-        # Calling the equal method of individual class
-        """
-        # print('@@@@@ ', type(a.X[0]))
-        # print('#####', type(b.X[0]))
-        # quit()
-        return a.X[0] == b.X[0]
 
 
 def binary_tournament(pop, P, **kwargs):
@@ -522,7 +538,7 @@ def main():
                    crossover=AdaptiveSinglePointCrossover(prob=0.9),
                    # crossover=get_crossover("real_k_point", n_points=2),
                    mutation=BitStringMutation(prob=0.1),
-                   eliminate_duplicates=RefactoringSequenceDuplicateElimination()
+                   eliminate_duplicates=ElementwiseDuplicateElimination(cmp_func=is_equal_2_refactorings_list)
                    )
     algorithms.append(algorithm)
 
@@ -532,7 +548,7 @@ def main():
                       crossover=AdaptiveSinglePointCrossover(prob=0.9),
                       # crossover=get_crossover("real_k_point", n_points=2),
                       mutation=BitStringMutation(prob=0.1),
-                      eliminate_duplicates=RefactoringSequenceDuplicateElimination()
+                      eliminate_duplicates=ElementwiseDuplicateElimination(cmp_func=is_equal_2_refactorings_list)
                       )
     algorithms.append(algorithm)
 
@@ -550,7 +566,7 @@ def main():
                       crossover=AdaptiveSinglePointCrossover(prob=0.8),
                       # crossover=get_crossover("real_k_point", n_points=2),
                       mutation=BitStringMutation(prob=0.2),
-                      eliminate_duplicates=RefactoringSequenceDuplicateElimination(),
+                      eliminate_duplicates=ElementwiseDuplicateElimination(cmp_func=is_equal_2_refactorings_list)
                       )
     algorithms.append(algorithm)
 
