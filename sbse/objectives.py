@@ -41,7 +41,6 @@ class Objectives:
         self._extendability = None
         self._effectiveness = None
 
-
     @property
     def reusability(self):
         """
@@ -67,8 +66,8 @@ class Objectives:
         :return: understandability score
         """
         self._understandability = -0.33 * self.ANA + 0.33 * self.DAM - 0.33 * self.DCC + \
-                0.33 * self.CAMC - 0.33 * self.NOP - 0.33 * self.NOM - \
-                0.33 * self.DSC
+                                  0.33 * self.CAMC - 0.33 * self.NOP - 0.33 * self.NOM - \
+                                  0.33 * self.DSC
         return self._understandability
 
     @property
@@ -78,7 +77,7 @@ class Objectives:
         :return: functionality score
         """
         self._functionality = 0.12 * self.CAMC + 0.22 * self.NOP + 0.22 * self.CIS + \
-                0.22 * self.DSC + 0.22 * self.NOH
+                              0.22 * self.DSC + 0.22 * self.NOH
         return self._functionality
 
     @property
@@ -97,7 +96,7 @@ class Objectives:
         :return: effectiveness score
         """
         self._effectiveness = 0.2 * self.ANA + 0.2 * self.DAM + 0.2 * self.MOA + 0.2 * \
-                self.MFA + 0.2 * self.NOP
+                              self.MFA + 0.2 * self.NOP
         return self._effectiveness
 
     @property
@@ -115,7 +114,6 @@ class Objectives:
             else:
                 all_metrics.append(cache)
         return sum(all_metrics) / len(all_metrics)
-
 
 
 if __name__ == '__main__':
