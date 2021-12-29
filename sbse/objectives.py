@@ -21,6 +21,26 @@ class Objectives:
         """
         self.udb_path = udb_path
         self.qmood = QMOOD(udb_path=udb_path)
+        # Calculating once and using multiple times
+        self.DSC = self.qmood.DSC
+        self.NOH = self.qmood.NOH
+        self.ANA = self.qmood.ANA
+        self.MOA = self.qmood.MOA
+        self.DAM = self.qmood.DAM
+        self.CAMC = self.qmood.CAMC
+        self.CIS = self.qmood.CIS
+        self.NOM = self.qmood.NOM
+        self.DCC = self.qmood.DCC
+        self.MFA = self.qmood.MFA
+        self.NOP = self.qmood.NOP
+        # For caching results
+        self._reusability = None
+        self._flexibility = None
+        self._understandability = None
+        self._functionality = None
+        self._extendability = None
+        self._effectiveness = None
+
 
     @property
     def reusability(self):
@@ -28,8 +48,8 @@ class Objectives:
         A design with low coupling and high cohesion is easily reused by other designs.
         :return: reusability score
         """
-        score = -0.25 * self.qmood.DCC + 0.25 * self.qmood.CAMC + 0.5 * self.qmood.CIS + 0.5 * self.qmood.DSC
-        return score
+        self._reusability = -0.25 * self.DCC + 0.25 * self.CAMC + 0.5 * self.CIS + 0.5 * self.DSC
+        return self._reusability
 
     @property
     def flexibility(self):
@@ -37,8 +57,8 @@ class Objectives:
         The degree of allowance of changes in the design.
         :return: flexibility score
         """
-        score = 0.25 * self.qmood.DAM - 0.25 * self.qmood.DCC + 0.5 * self.qmood.MOA + 0.5 * self.qmood.NOP
-        return score
+        self._flexibility = 0.25 * self.DAM - 0.25 * self.DCC + 0.5 * self.MOA + 0.5 * self.NOP
+        return self._flexibility
 
     @property
     def understandability(self):
@@ -46,10 +66,10 @@ class Objectives:
         The degree of understanding and the easiness of learning the design implementation details.
         :return: understandability score
         """
-        score = -0.33 * self.qmood.ANA + 0.33 * self.qmood.DAM - 0.33 * self.qmood.DCC + \
-                0.33 * self.qmood.CAMC - 0.33 * self.qmood.NOP - 0.33 * self.qmood.NOM - \
-                0.33 * self.qmood.DSC
-        return score
+        self._understandability = -0.33 * self.ANA + 0.33 * self.DAM - 0.33 * self.DCC + \
+                0.33 * self.CAMC - 0.33 * self.NOP - 0.33 * self.NOM - \
+                0.33 * self.DSC
+        return self._understandability
 
     @property
     def functionality(self):
@@ -57,9 +77,9 @@ class Objectives:
         Classes with given functions that are publicly stated in interfaces to be used by others.
         :return: functionality score
         """
-        score = 0.12 * self.qmood.CAMC + 0.22 * self.qmood.NOP + 0.22 * self.qmood.CIS + \
-                0.22 * self.qmood.DSC + 0.22 * self.qmood.NOH
-        return score
+        self._functionality = 0.12 * self.CAMC + 0.22 * self.NOP + 0.22 * self.CIS + \
+                0.22 * self.DSC + 0.22 * self.NOH
+        return self._functionality
 
     @property
     def extendability(self):
@@ -67,8 +87,8 @@ class Objectives:
         Measurement of design's allowance to incorporate new functional requirements.
         :return: extendability
         """
-        score = 0.5 * self.qmood.ANA - 0.5 * self.qmood.DCC + 0.5 * self.qmood.MFA + 0.5 * self.qmood.NOP
-        return score
+        self._extendability = 0.5 * self.ANA - 0.5 * self.DCC + 0.5 * self.MFA + 0.5 * self.NOP
+        return self._extendability
 
     @property
     def effectiveness(self):
@@ -76,17 +96,26 @@ class Objectives:
         Design efficiency in fulfilling the required functionality.
         :return: effectiveness score
         """
-        score = 0.2 * self.qmood.ANA + 0.2 * self.qmood.DAM + 0.2 * self.qmood.MOA + 0.2 * \
-                self.qmood.MFA + 0.2 * self.qmood.NOP
-        return score
+        self._effectiveness = 0.2 * self.ANA + 0.2 * self.DAM + 0.2 * self.MOA + 0.2 * \
+                self.MFA + 0.2 * self.NOP
+        return self._effectiveness
 
     @property
     def average(self):
-        objs = [
-            self.reusability, self.flexibility, self.understandability,
-            self.functionality, self.extendability, self.effectiveness
+        metrics = [
+            'reusability', 'flexibility', 'understandability',
+            'functionality', 'extendability', 'effectiveness',
+
         ]
-        return sum(objs) / len(objs)
+        all_metrics = []
+        for metric in metrics:
+            cache = getattr(self, f'_{metric}')
+            if cache is None:
+                all_metrics.append(getattr(self, metric))
+            else:
+                all_metrics.append(cache)
+        return sum(all_metrics) / len(all_metrics)
+
 
 
 if __name__ == '__main__':
