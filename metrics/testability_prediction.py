@@ -1004,7 +1004,7 @@ class PreProcess:
         projects = [name for name in os.listdir(root_path) if os.path.isdir(os.path.join(root_path, name))]
         for project_ in projects:
             command_ = cmd.format(root_path, project_, root_path + project_)
-            print('executing command {0}'.format(command_))
+            # print('executing command {0}'.format(command_))
             # returned_value_in_byte = subprocess.check_output(command_, shell=True)
             os.system('cmd /c "{0}"'.format(command_))
             # os.system('cmd / k "{0}"'.format(command_))
@@ -1022,7 +1022,7 @@ class PreProcess:
     @classmethod
     def extract_project_classes(cls, db):
         classes_list = UnderstandUtility.get_project_classes_longnames_java(db=db)
-        print('@understand', len(set(classes_list)), set(classes_list))
+        # print('@understand', len(set(classes_list)), set(classes_list))
         return classes_list
 
     @classmethod
@@ -1064,7 +1064,7 @@ class PreProcess:
         t = list()
         p = list()
         for i, f in enumerate(files):
-            print('processing understand db file {0}:'.format(f))
+            # print('processing understand db file {0}:'.format(f))
             db = und.open(os.path.join(udbs_path, f))
 
             # cls.check_compute_metrics_by_class_list(project_name=f[:-4], database=db, class_list=df, csv_path=csvs_path)
@@ -1076,7 +1076,7 @@ class PreProcess:
 
             cls.compute_metrics_by_class_list(project_name=f[:-4], database=db, class_list=df, csv_path=csvs_path)
             db.close()
-            print('processing understand db file {0} was finished'.format(f))
+            # print('processing understand db file {0} was finished'.format(f))
 
     @classmethod
     def check_compute_metrics_by_class_list(cls, db=None, class_list=None, csv_path=None):
@@ -1248,7 +1248,7 @@ class TestabilityModel(object):
         df_new = pd.DataFrame(df_predict_data.iloc[:, 0], columns=['Class'])
         df_new['PredictedTestability'] = list(y_pred)
 
-        print(df_new)
+        # print(df_new)
         # df_new.to_csv(r'dataset06/refactored01010_predicted_testability.csv', index=True, index_label='Row')
         return df_new['PredictedTestability'].mean()
 
@@ -1265,14 +1265,14 @@ def main(project_path):
     db.close()
     model = TestabilityModel(df_path=r'../metrics/data_model/DS07012.csv')
     testability_ = model.inference(model_path='../metrics/data_model/VR1_DS1.joblib', df_predict_data=df)
-    print('testability=', testability_)
+    # print('testability=', testability_)
     return testability_
 
 
 # Test module
 if __name__ == '__main__':
-    # project_path = r'../benchmark_projects/ganttproject/biz.ganttproject.core/biz.ganttproject.core.und'  # T=0.5253
-    # project_path = r'../benchmark_projects/JSON/JSON.und'  # T=0.4531
-    project_path = r'D:/IdeaProjects/JSON20201115/JSON.und'  # T=0.4749
-    # project_path = r'D:/IdeaProjects/jvlt-1.3.2/src.und'  # T=0.4212
-    main(project_path)
+    # project_path_ = r'../benchmark_projects/ganttproject/biz.ganttproject.core/biz.ganttproject.core.und'  # T=0.5253
+    # project_path_ = r'../benchmark_projects/JSON/JSON.und'  # T=0.4531
+    project_path_ = r'D:/IdeaProjects/JSON20201115/JSON.und'  # T=0.4749
+    # project_path_ = r'D:/IdeaProjects/jvlt-1.3.2/src.und'  # T=0.4212
+    main(project_path_)

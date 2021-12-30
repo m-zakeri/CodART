@@ -27,6 +27,7 @@ __author__ = 'Morteza Zakeri, Seyyed Ali Ayati'
 
 import random
 from copy import deepcopy
+from multiprocessing import Process, Array
 from typing import List
 
 import numpy as np
@@ -54,7 +55,6 @@ from metrics.modularity import main as modularity_main
 from utilization.directory_utils import update_understand_database, git_restore
 
 
-# TODO: Parallelism, Double Check Befor Run on Server
 
 class Gene:
     """
@@ -252,6 +252,24 @@ class ProblemMultiObjective(ElementwiseProblem):
         out["F"] = np.array([-1 * o1, -1 * o2, -1 * o3], dtype=float)
 
 
+def calc_qmood_objectives(arr_):
+    qmood = Objectives(udb_path=config.UDB_PATH)
+    arr_[0] = qmood.reusability
+    arr_[1] = qmood.understandability
+    arr_[2] = qmood.flexibility
+    arr_[3] = qmood.functionality
+    arr_[4] = qmood.effectiveness
+    arr_[5] = qmood.extendability
+
+
+def calc_testability_objective(path_, arr_):
+    arr_[6] = testability_main(path_)
+
+
+def calc_modularity_objective(path_, arr_):
+    arr_[7] = modularity_main(path_)
+
+
 class ProblemManyObjective(Problem):
     """
     The CodART many-objective optimization work with eight objective:
@@ -282,46 +300,55 @@ class ProblemManyObjective(Problem):
         """
 
         objective_values = []
-        for individual_ in x:
-            # Git restore
+        for k, individual_ in enumerate(x):
+            # Stage 0: Git restore
             logger.debug("Executing git restore.")
             git_restore(config.PROJECT_PATH)
             update_understand_database(config.UDB_PATH)
+
             # Stage 1: Execute all refactoring operations in the sequence x
-            logger.debug(f"Reached Individual with Size {len(individual_[0])}")
+            logger.debug(f"Reached an Individual with size {len(individual_[0])}")
             for refactoring_operation in individual_[0]:
                 refactoring_operation.do_refactoring()
                 # Update Understand DB
                 update_understand_database(config.UDB_PATH)
 
-            # Stage 2: Computing quality attributes
-            qmood = Objectives(udb_path=config.UDB_PATH)
-            o1 = qmood.reusability
-            o2 = qmood.understandability
-            o3 = qmood.flexibility
-            o4 = qmood.functionality
-            o5 = qmood.effectiveness
-            o6 = qmood.extendability
-            del qmood
-            o7 = testability_main(config.UDB_PATH)
-            o8 = modularity_main(config.UDB_PATH)
+            # Stage 2: Computing quality attributes in parallel
+            arr = Array('d', range(8))
+            p1 = Process(target=calc_qmood_objectives, args=(arr,))
+            p2 = Process(target=calc_testability_objective, args=(config.UDB_PATH, arr,))
+            p3 = Process(target=calc_modularity_objective, args=(config.UDB_PATH, arr,))
+            p1.start(), p2.start(), p3.start()
+            p1.join(), p2.join(), p3.join()
 
-            logger.info(f'Reusability Score: {o1}')
-            logger.info(f'Understandability Score: {o2}')
-            logger.info(f'Flexibility Score: {o3}')
-            logger.info(f'Functionality Score: {o4}')
-            logger.info(f'Effectiveness Score: {o5}')
-            logger.info(f'Extendability Score: {o6}')
-            logger.info(f'Testability Score: {o7}')
-            logger.info(f'Modularity Score: {o8}')
+            # qmood = Objectives(udb_path=config.UDB_PATH)
+            # o1 = qmood.reusability
+            # o2 = qmood.understandability
+            # o3 = qmood.flexibility
+            # o4 = qmood.functionality
+            # o5 = qmood.effectiveness
+            # o6 = qmood.extendability
+            # del qmood
+            # o7 = testability_main(config.UDB_PATH)
+            # o8 = modularity_main(config.UDB_PATH)
+
+            # logger.info(f'Reusability Score: {o1}')
+            # logger.info(f'Understandability Score: {o2}')
+            # logger.info(f'Flexibility Score: {o3}')
+            # logger.info(f'Functionality Score: {o4}')
+            # logger.info(f'Effectiveness Score: {o5}')
+            # logger.info(f'Extendability Score: {o6}')
+            # logger.info(f'Testability Score: {o7}')
+            # logger.info(f'Modularity Score: {o8}')
 
             # Stage 3: Marshal objectives into vector
-            objective_values.append([-1 * o1, -1 * o2, -1 * o3, -1 * o4, -1 * o5, -1 * o6, -1 * o7, -1 * o8, ])
+            # objective_values.append([-1 * o1, -1 * o2, -1 * o3, -1 * o4, -1 * o5, -1 * o6, -1 * o7, -1 * o8, ])
+            objective_values.append([-1 * i for i in arr])
+            logger.info(f"Objective values for individual {k}: {[i for i in arr]}")
 
         # Stage 4: Marshal all objectives into out dictionary
         out['F'] = np.array(objective_values, dtype=float)
         # print('OUT', out['F'])
-        # quit()
 
 
 class PureRandomInitialization(Sampling):
@@ -596,18 +623,19 @@ def main():
     # np.save('checkpoint', res.algorithm)
 
     # Log results
-    logger.info("** FINISHED **")
+    logger.info("\n** FINISHED **\n")
     logger.info("Best refactoring sequences (a set of non-dominated solutions):")
     logger.info(res.X)
     logger.info("Best objective values (a set of non-dominated solutions):")
     logger.info(res.F)
 
-    logger.info("==================")
+    logger.info("="*75)
     logger.info("Other solutions:")
     for ind in res.opt:
         logger.info(ind.X)
         logger.info(ind.F)
-        logger.info("==================")
+        logger.info("-"*50)
+    logger.info("=" * 75)
 
     logger.info(f"Start time: {res.start_time}")
     logger.info(f"End time: {res.end_time}")
@@ -627,7 +655,7 @@ def main():
         logger.info(f"The mean improvement of quality attributes: {np.mean(pf[I][0], axis=0)}")
         logger.info(f"The median improvement of quality attributes: {np.median(pf[I][0], axis=0)}")
     except:
-        logger.info("No multi optimal solutions or error in computing high tradeoff points!")
+        logger.info("No multi optimal solutions (error in computing high tradeoff points)!")
 
 
 

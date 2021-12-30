@@ -76,26 +76,23 @@ class PushDownField:
         return True
 
     def do_refactor(self):
-        program = utils2.get_program(self.source_filenames, print_status=True)
+        program = utils2.get_program(self.source_filenames, print_status=False)
         superclass: utils_listener_fast.Class = program.packages[self.package_name].classes[self.superclass_name]
-
         if not self.pre_condition_check(program, superclass):
-            print("Can't refactor")
+            print(f"Cannot push-down field from {superclass.name}")
             return False
 
-        # all_derived_classes = [] # Not needed
         other_derived_classes = []
         classes_to_add_to = []
         for pn in program.packages:
             p: utils_listener_fast.Package = program.packages[pn]
             for cn in p.classes:
                 c: utils_listener_fast.Class = p.classes[cn]
-                if ((c.superclass_name == self.superclass_name and c.file_info.has_imported_class(self.package_name,
-                                                                                                  self.superclass_name)) \
-                        or (
+                if ((c.superclass_name == self.superclass_name and
+                     c.file_info.has_imported_class(self.package_name, self.superclass_name)) or
+                        (
                                 self.package_name is not None and c.superclass_name == self.package_name + '.' + self.superclass_name)):
                     # all_derived_classes.append(c)
-
                     if len(self.class_names) == 0 or cn in self.class_names:
                         if self.field_name in c.fields:
                             print("some classes have same variable")
@@ -216,11 +213,10 @@ def main(project_dir, source_package, source_class, field_name, target_classes: 
 
 
 if __name__ == "__main__":
-    ant_dir = "D:\Dev\JavaSample"
-    main(
-        ant_dir,
-        "your_package",
-        "Unit",
-        "fuel",
-        ["Tank", ],
-    )
+    ant_dir = "D:/Dev/JavaSample"
+    main(ant_dir,
+         "your_package",
+         "Unit",
+         "fuel",
+         ["Tank", ],
+         )
