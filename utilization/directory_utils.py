@@ -1,9 +1,15 @@
 """
 Utilities related to project directory.
 """
-
+import datetime
 import os
 import subprocess
+from multiprocessing.dummy import Pool, Process, Value, Array, Manager
+
+from antlr4 import FileStream, CommonTokenStream
+
+from gen.java.JavaLexer import JavaLexer
+from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 
 
 def git_restore(project_dir):
@@ -65,3 +71,87 @@ def export_understand_dependencies_csv(csv_path: str, db_path: str):
         stdout=open(os.devnull, 'wb')
     ).wait()
     print("CSV Exported...")
+
+
+# -----------------------------------------------
+# trees = []
+
+def get_java_files(directory):
+    if not os.path.isdir(directory):
+        raise ValueError("directory should be an absolute path of a directory!")
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            if file.split('.')[-1] == 'java':
+                yield os.path.join(root, file)#, file
+                # print(os.path.join(root, file), file)
+                # yield FileStream(os.path.join(root, file), encoding="utf8")
+
+
+def create_project_parse_tree(java_file_path,):
+    parser = JavaParserLabeled(CommonTokenStream(JavaLexer(FileStream(java_file_path))))
+    x__ = parser.compilationUnit()
+    # print(type(x__))
+    # qu.put(x__)
+    return x__
+
+
+def parallel_parsing(directory):
+    trees = list()
+    input_files = [java_file for java_file in get_java_files(directory)]
+    # pool = Pool(processes=8)
+    # x = pool.apply_async(create_project_parse_tree, args=(input_files[0], trees))
+
+    # for java_file in get_java_files(directory):
+    #     res = pool.apply_async(create_project_parse_tree, (java_file,))  # runs in *only* one process
+    #     print(type(res.get(timeout=1)))  #
+
+    # num = Value('d', 0.0)
+    # arr = Array('i', range(500))
+    with Manager() as manager:
+        d = manager.dict()
+        q = manager.Queue(10)
+        p = Process(target=create_project_parse_tree, args=(input_files[0], q))
+        p.start()
+        p.join()
+        print(q)
+
+    # x.ready()
+    # print(len(x.get()))
+    # print(arr[0])
+
+
+def parallel_parsing2(directory):
+    for java_file in get_java_files(directory):
+        print(java_file)
+        p = Process(target=create_project_parse_tree, args=(java_file, ))
+        p.start()
+        # p.join()
+
+
+def parallel_parsing3(directory):
+    d1 = datetime.datetime.now()
+    pool = Pool()
+    x = pool.map(create_project_parse_tree, get_java_files(directory))
+    d2 = datetime.datetime.now()
+    print(d2-d1, len(x))
+    return x
+
+
+def typical_parsing(directory):
+    d1 = datetime.datetime.now()
+    x = []
+    for java_file in get_java_files(directory):
+        x.append(create_project_parse_tree(java_file))
+    d2 = datetime.datetime.now()
+    print(d2 - d1, len(x))
+    return x
+
+
+if __name__ == '__main__':
+    # directory = r'D:/IdeaProjects/JSON20201115/'
+    # directory = r'D:/IdeaProjects/jvlt-1.3.2/'
+    directory = 'D:/IdeaProjects/107_weka/'
+    parallel_parsing3(directory)
+    # parallel_parsing2(directory)
+    # typical_parsing(directory)
+    # print(len(trees))
