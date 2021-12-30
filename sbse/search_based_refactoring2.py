@@ -306,14 +306,14 @@ class ProblemManyObjective(Problem):
             o7 = testability_main(config.UDB_PATH)
             o8 = modularity_main(config.UDB_PATH)
 
-            logger.info(f'Reusability Score: {o1}')
-            logger.info(f'Understandability Score: {o2}')
-            logger.info(f'Flexibility Score: {o3}')
-            logger.info(f'Functionality Score: {o4}')
-            logger.info(f'Effectiveness Score: {o5}')
-            logger.info(f'Extendability Score: {o6}')
-            logger.info(f'Testability Score: {o7}')
-            logger.info(f'Modularity Score: {o8}')
+            # logger.info(f'Reusability Score: {o1}')
+            # logger.info(f'Understandability Score: {o2}')
+            # logger.info(f'Flexibility Score: {o3}')
+            # logger.info(f'Functionality Score: {o4}')
+            # logger.info(f'Effectiveness Score: {o5}')
+            # logger.info(f'Extendability Score: {o6}')
+            # logger.info(f'Testability Score: {o7}')
+            # logger.info(f'Modularity Score: {o8}')
 
             # Stage 3: Marshal objectives into vector
             objective_values.append([-1 * o1, -1 * o2, -1 * o3, -1 * o4, -1 * o5, -1 * o6, -1 * o7, -1 * o8, ])
