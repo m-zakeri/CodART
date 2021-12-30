@@ -1,9 +1,18 @@
+"""
+An implementation of simple symbol table for the following refactorings:
+1. `pushdown_field`
+2. `pullup_method`
+
+
+"""
+
 import os
 import re  # regular expressions
 import antlr4
 from antlr4 import FileStream
 from antlr4.Token import CommonToken
 import antlr4.tree
+from antlr4.tree import Tree
 from antlr4.CommonTokenStream import CommonTokenStream
 from gen.java.JavaParser import JavaParser
 from gen.java.JavaParserListener import JavaParserListener
@@ -45,7 +54,6 @@ class TokensInfo:
             self.stop: int = None
 
     def get_token_index(self, tokens: list, start: int, stop: int):
-
         return tokens[start:stop]
 
 
@@ -63,8 +71,7 @@ class FileInfo:
         return (
                 any(lambda x: x.package_name == package_name for package_import in self.package_imports)
                 or any(lambda x: x.package_name == package_name and x.class_name == class_name for class_import in
-                       self.class_imports)
-        )
+                       self.class_imports))
 
     def has_imported_package(self, package_name: str):
         if self.package_name == package_name:
@@ -75,7 +82,9 @@ class FileInfo:
 
 
 class SingleFileElement:
-    """The base class for those elements that are extracted from a single file"""
+    """
+    The base class for those elements that are extracted from a single file
+    """
 
     def __init__(self, parser_context, filename: str = None, _file_info: FileInfo = None):
         self.parser_context = parser_context
@@ -86,9 +95,7 @@ class SingleFileElement:
         return self.parser_context.parser.getTokenStream()
 
     def get_tokens_info(self) -> TokensInfo:
-        return TokensInfo(
-            self.parser_context
-        )
+        return TokensInfo(self.parser_context)
 
     def get_first_symbol(self) -> CommonToken:
         first_terminal = self.parser_context
@@ -105,36 +112,31 @@ class SingleFileElement:
         return last_terminal.getSymbol()
 
     def get_file_position_range(self) -> tuple:
-        return (
-            self.get_first_symbol().start,
-            self.get_last_symbol().stop
-        )
+        return self.get_first_symbol().start, self.get_last_symbol().stop
 
     def get_text_from_file(self, filename=None) -> str:
         if filename is None:
             filename = self.filename
         if filename is None:
             return None
-        file = open(filename, 'r')
-        text = file.read()
-        file.close()
+        file_ = open(filename, 'r')
+        text = file_.read()
+        file_.close()
 
         return text[self.get_first_symbol().start:self.get_last_symbol().stop + 1]
 
 
 class ClassImport(SingleFileElement):
-    """import package_name.class_name;"""
+    """
+    import package_name.class_name;
+    """
 
-    def __init__(self,
-                 package_name: str = None,
-                 class_name: str = None,
-                 parser_context: JavaParser.ImportDeclarationContext = None,
-                 filename: str = None,
+    def __init__(self, package_name: str = None, class_name: str = None,
+                 parser_context: JavaParser.ImportDeclarationContext = None, filename: str = None,
                  file_info: FileInfo = None):
+        super().__init__(parser_context, filename)
         self.package_name = package_name
         self.class_name = class_name
-        self.parser_context = parser_context
-        self.filename = filename
         self.file_info = file_info
 
     def __str__(self):
@@ -144,14 +146,10 @@ class ClassImport(SingleFileElement):
 class PackageImport(SingleFileElement):
     """import package_name.*;"""
 
-    def __init__(self,
-                 package_name: str = None,
-                 parser_context: JavaParser.ImportDeclarationContext = None,
-                 filename: str = None,
-                 file_info: FileInfo = None):
+    def __init__(self, package_name: str = None, parser_context: JavaParser.ImportDeclarationContext = None,
+                 filename: str = None, file_info: FileInfo = None):
+        super(PackageImport, self).__init__(parser_context, filename)
         self.package_name = package_name
-        self.parser_context = parser_context
-        self.filename = filename
         self.file_info = file_info
 
     def __str__(self):
@@ -159,13 +157,10 @@ class PackageImport(SingleFileElement):
 
 
 class Class(SingleFileElement):
-    def __init__(self,
-                 name: str = None,
-                 super_class_name: str = None,
-                 package_name: str = None,
-                 parser_context: JavaParser.ClassDeclarationContext = None,
-                 filename: str = None,
+    def __init__(self, name: str = None, super_class_name: str = None, package_name: str = None,
+                 parser_context: JavaParser.ClassDeclarationContext = None, filename: str = None,
                  file_info: FileInfo = None):
+        super(Class, self).__init__(parser_context, filename)
         self.modifiers = []
         self.modifiers_parser_contexts = []
         self.name = name
@@ -174,8 +169,6 @@ class Class(SingleFileElement):
         self.fields = {}
         self.methods = {}
         self.package_name = package_name
-        self.parser_context = parser_context
-        self.filename = filename
         self.file_info = file_info
         self.body_context = None
 
@@ -196,15 +189,10 @@ class Class(SingleFileElement):
 
 
 class Field(SingleFileElement):
-    def __init__(self,
-                 datatype: str = None,
-                 name: str = None,
-                 initializer: str = None,
-                 package_name: str = None,
-                 class_name: str = None,
-                 parser_context: JavaParser.FieldDeclarationContext = None,
-                 filename: str = None,
-                 file_info: FileInfo = None):
+    def __init__(self, datatype: str = None, name: str = None, initializer: str = None, package_name: str = None,
+                 class_name: str = None, parser_context: JavaParser.FieldDeclarationContext = None,
+                 filename: str = None, file_info: FileInfo = None):
+        super(Field, self).__init__(parser_context, filename)
         self.modifiers = []
         self.modifiers_parser_contexts = []
         self.datatype = datatype
@@ -224,15 +212,9 @@ class Field(SingleFileElement):
 
 
 class Method(SingleFileElement):
-    def __init__(self,
-                 returntype: str = None,
-                 name: str = None,
-                 body_text: str = None,
-                 package_name: str = None,
-                 class_name: str = None,
-                 parser_context=None,
-                 filename: str = None,
-                 file_info: FileInfo = None):
+    def __init__(self, returntype: str = None, name: str = None, body_text: str = None, package_name: str = None,
+                 class_name: str = None, parser_context=None, filename: str = None, file_info: FileInfo = None):
+        super(Method, self).__init__(parser_context, filename)
         self.modifiers = []
         self.modifiers_parser_contexts = []
         self.returntype = returntype
@@ -243,8 +225,6 @@ class Method(SingleFileElement):
         self.body_local_vars_and_expr_names = []  # Type: either LocalVariable, ExpressionName or MethodInvocation
         self.package_name = package_name
         self.class_name = class_name
-        self.parser_context = parser_context
-        self.filename = filename
         self.file_info = file_info
         self.formalparam_context = None
         self.body_method_invocations_without_typename = {}
@@ -277,7 +257,9 @@ class MethodInvocation:
 
 
 class UtilsListener(JavaParserListener):
+    """
 
+    """
     def __init__(self, filename):
         self.package = Package()
 
@@ -304,7 +286,6 @@ class UtilsListener(JavaParserListener):
         self.file_info = FileInfo(filename=filename)
 
         self.field_enter_count = 0
-
         self.objects_declaration = {}
 
     def enterPackageDeclaration(self, ctx: JavaParser.PackageDeclarationContext):
@@ -333,13 +314,11 @@ class UtilsListener(JavaParserListener):
                     c = name[dot_i + 1:]
                 else:
                     c = name
-                class_import = ClassImport(
-                    package_name=p,
-                    class_name=c,
-                    parser_context=ctx,
-                    filename=self.filename,
-                    file_info=self.file_info
-                )
+                class_import = ClassImport(package_name=p,
+                                           class_name=c,
+                                           parser_context=ctx,
+                                           filename=self.filename,
+                                           file_info=self.file_info)
                 self.file_info.all_imports.append(class_import)
                 self.file_info.class_imports.append(class_import)
 
@@ -361,12 +340,11 @@ class UtilsListener(JavaParserListener):
         if self.current_class_identifier is None and self.nest_count == 0:
             self.current_class_identifier = ctx.IDENTIFIER().getText()
             self.current_class_ctx = ctx.IDENTIFIER()
-            current_class = Class(
-                package_name=self.package.name,
-                parser_context=ctx,
-                filename=self.filename,
-                file_info=self.file_info
-            )
+            current_class = Class(package_name=self.package.name,
+                                  parser_context=ctx,
+                                  filename=self.filename,
+                                  file_info=self.file_info)
+
             current_class.modifiers = self.last_modifiers.copy()
             current_class.modifiers_parser_contexts = self.last_modifiers_contexts.copy()
             current_class.name = self.current_class_identifier
@@ -406,14 +384,11 @@ class UtilsListener(JavaParserListener):
         if self.current_class_identifier is not None:
             # method_header = ctx.methodHeader()
             self.current_method_identifier = ctx.IDENTIFIER().getText()
-
-            method = Method(
-                package_name=self.package.name,
-                class_name=self.current_class_identifier,
-                parser_context=ctx.parentCtx.parentCtx,
-                filename=self.filename,
-                file_info=self.file_info
-            )
+            method = Method(package_name=self.package.name,
+                            class_name=self.current_class_identifier,
+                            parser_context=ctx.parentCtx.parentCtx,
+                            filename=self.filename,
+                            file_info=self.file_info)
             method.modifiers = self.last_modifiers.copy()
             method.modifiers_parser_contexts = self.last_modifiers_contexts.copy()
             method.returntype = ctx.typeTypeOrVoid().getText()
@@ -432,9 +407,8 @@ class UtilsListener(JavaParserListener):
 
     def enterFormalParameter(self, ctx: JavaParser.FormalParameterContext):
         if self.current_method is not None:
-            self.current_method.parameters.append(
-                (ctx.typeType().getText(), ctx.variableDeclaratorId().IDENTIFIER().getText())
-            )
+            self.current_method.parameters.append((ctx.typeType().getText(),
+                                                   ctx.variableDeclaratorId().IDENTIFIER().getText()))
 
     def enterMethodBody(self, ctx: JavaParser.MethodBodyContext):
         if self.current_method is not None:
@@ -463,14 +437,11 @@ class UtilsListener(JavaParserListener):
     def enterConstructorDeclaration(self, ctx: JavaParser.ConstructorDeclarationContext):
         if self.current_class_identifier is not None:
             self.current_method_identifier = ctx.IDENTIFIER().getText()
-
-            method = Method(
-                package_name=self.package.name,
-                class_name=self.current_class_identifier,
-                parser_context=ctx.parentCtx.parentCtx,
-                filename=self.filename,
-                file_info=self.file_info
-            )
+            method = Method(package_name=self.package.name,
+                            class_name=self.current_class_identifier,
+                            parser_context=ctx.parentCtx.parentCtx,
+                            filename=self.filename,
+                            file_info=self.file_info)
             method.modifiers = self.last_modifiers.copy()
             method.modifiers_parser_contexts = self.last_modifiers_contexts.copy()
             method.returntype = None
@@ -504,23 +475,21 @@ class UtilsListener(JavaParserListener):
             ids = txt[:txt.find('(')].split('.')
             self.current_method.body_local_vars_and_expr_names.append(MethodInvocation(ids, ctx))
 
-    def enterCreator(self, ctx:JavaParser.CreatorContext):
+    def enterCreator(self, ctx: JavaParser.CreatorContext):
         try:
             object_name = ctx.parentCtx.parentCtx.parentCtx.children[0].IDENTIFIER().getText()
             class_name = ctx.parentCtx.parentCtx.parentCtx.parentCtx.parentCtx.children[0].children[0].getText()
-            self.objects_declaration[self.current_class_identifier][self.current_method_identifier][object_name] = class_name
+            self.objects_declaration[self.current_class_identifier][self.current_method_identifier][
+                object_name] = class_name
         except:
             pass
-
 
     def enterExpression(self, ctx: JavaParser.ExpressionContext):
         if self.current_method is not None:
             if ctx.methodCall() is not None:
                 txt = ctx.getText()
                 ids = txt[:txt.find('(')].split('.')
-                self.current_method.body_local_vars_and_expr_names.append(
-                    MethodInvocation(ids, ctx)
-                )
+                self.current_method.body_local_vars_and_expr_names.append(MethodInvocation(ids, ctx))
             else:
                 names = ctx.getText().split('.')
                 should_add = True
@@ -569,11 +538,9 @@ class UtilsListener(JavaParserListener):
         if self.current_local_var_type is not None:
             if self.current_method is not None:
                 self.current_method.body_local_vars_and_expr_names.append(
-                    LocalVariable(
-                        self.current_local_var_type + dims,
-                        ctx.variableDeclaratorId().IDENTIFIER().getText(),
-                        self.current_local_var_ctx
-                    )
+                    LocalVariable(self.current_local_var_type + dims,
+                                  ctx.variableDeclaratorId().IDENTIFIER().getText(),
+                                  self.current_local_var_ctx)
                 )
 
     def exitFieldDeclaration(self, ctx: JavaParser.FieldDeclarationContext):
@@ -584,13 +551,11 @@ class UtilsListener(JavaParserListener):
                 dims = self.current_field_dims[i]
                 field_init = self.current_field_inits[i]
                 var_ctx = self.current_field_var_ctxs[i]
-                field = Field(
-                    package_name=self.package.name,
-                    class_name=self.current_class_identifier,
-                    parser_context=self.current_field_decl[2],
-                    filename=self.filename,
-                    file_info=self.file_info
-                )
+                field = Field(package_name=self.package.name,
+                              class_name=self.current_class_identifier,
+                              parser_context=self.current_field_decl[2],
+                              filename=self.filename,
+                              file_info=self.file_info)
                 field.modifiers = self.current_field_decl[0]
                 field.modifiers_parser_contexts = self.current_field_decl[3]
                 field.datatype = self.current_field_decl[1] + dims
@@ -605,7 +570,7 @@ class UtilsListener(JavaParserListener):
 
 class StaticFieldUsageListener(UtilsListener):
     def __init__(self, filename: str, field_name: str, source_class: str):
-        super().__init__(filename)
+        super(StaticFieldUsageListener, self).__init__(filename)
         self.current_class_name = os.path.basename(filename).replace(".java", "")
         self.field_name = field_name
         self.source_class = source_class
@@ -685,7 +650,7 @@ class FieldUsageListener(UtilsListener):
 
     def __init__(self, filename: str, source_class: str, source_package: str, target_class: str, target_package: str,
                  field_name: str, field_candidates: set, field_tobe_moved: Field):
-        super().__init__(filename)
+        super(FieldUsageListener, self).__init__(filename)
         self.source_class = source_class
         self.source_package = source_package
         self.target_class = target_class
@@ -908,6 +873,7 @@ class FieldUsageListener(UtilsListener):
         index = ctx.DOT().symbol.tokenIndex
         self.rewriter.replaceRange(ctx.start.tokenIndex, index - 1, target_name)
 
+
 def save(rewriter: TokenStreamRewriter, file_name: str, filename_mapping=lambda x: x + ".rewritten.java"):
     new_filename = filename_mapping(file_name).replace("\\", "/")
     path = new_filename[:new_filename.rfind('/')]
@@ -920,7 +886,7 @@ def save(rewriter: TokenStreamRewriter, file_name: str, filename_mapping=lambda 
 
 class MethodUsageListener(UtilsListener):
     def __init__(self, filename: str, methods: str, target_class: str):
-        super().__init__(filename)
+        super(MethodUsageListener, self).__init__(filename)
         self.methods = methods
         self.method_names = set(map(lambda m: m.name, methods))
         self.rewriter = None
@@ -977,10 +943,10 @@ def clean_up_dir(files: list) -> list:
 
 class PreConditionListener(UtilsListener):
     def __init__(self, filename):
-        super().__init__(filename)
+        super(PreConditionListener, self).__init__(filename)
         self.can_convert = True
 
-    def enterInterfaceDeclaration(self, ctx:JavaParser.InterfaceDeclarationContext):
+    def enterInterfaceDeclaration(self, ctx: JavaParser.InterfaceDeclarationContext):
         super().enterInterfaceDeclaration(ctx)
         if ctx.INTERFACE() is not None:
             self.can_convert = False
@@ -990,10 +956,11 @@ class PreConditionListener(UtilsListener):
         if self.nest_count > 0:
             self.can_convert = False
 
-    def exitMethodBody(self, ctx:JavaParser.MethodBodyContext):
+    def exitMethodBody(self, ctx: JavaParser.MethodBodyContext):
         super().exitMethodBody(ctx)
         if self.current_method is None:
             self.can_convert = False
+
 
 if __name__ == '__main__':
     source_class = "JSONArray"
@@ -1015,10 +982,10 @@ if __name__ == '__main__':
         utilsListener = PreConditionListener(file)
         walker = ParseTreeWalker()
         walker.walk(utilsListener, tree)
-        
+
         if not utilsListener.can_convert:
             continue
-        
+
         if len(utilsListener.package.classes) > 1:
             exit(1)
 
@@ -1029,15 +996,14 @@ if __name__ == '__main__':
                 if f.datatype == source_class:
                     field_candidate.add(f.name)
 
-        listener = FieldUsageListener(
-            file,
-            source_class,
-            source_package,
-            target_class,
-            target_package,
-            field_name,
-            field_candidate,
-            field)
+        listener = FieldUsageListener(file,
+                                      source_class,
+                                      source_package,
+                                      target_class,
+                                      target_package,
+                                      field_name,
+                                      field_candidate,
+                                      field)
         walker.walk(listener, tree)
 
         methods_tobe_update = listener.methods_tobe_updated + methods_tobe_update
@@ -1048,9 +1014,9 @@ if __name__ == '__main__':
     # for method in methods_tobe_update:
     #     print(method.name)
 
-    filess = [f'{file.split(".")[0]}.rewritten.java' for file in files]
+    files2 = [f'{file.split(".")[0]}.rewritten.java' for file in files]
     for i, file in enumerate(files):
-        stream = FileStream(filess[i], encoding='utf8')
+        stream = FileStream(files2[i], encoding='utf8')
         lexer = JavaLexer(stream)
         token_stream = CommonTokenStream(lexer)
         parser = JavaParser(token_stream)
