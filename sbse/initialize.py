@@ -7,10 +7,13 @@ RandomInitialization: For initialling random candidates.
 
 __author__ = 'Seyyed Ali Ayati'
 
+import csv
 import random
+import codecs
 from collections import Counter
 from pathlib import Path
 
+import pandas
 import progressbar
 
 from candidate_reader import CandidateReader
@@ -18,6 +21,7 @@ from config import *
 from refactorings import make_field_non_static, make_field_static, make_method_static_2, \
     make_method_non_static_2, pullup_field, move_field, move_method, move_class, pushdown_field, \
     extract_class, pullup_method, pushdown_method, extract_method, pullup_constructor
+from sbse import config
 from utilization.setup_understand import *
 
 
@@ -36,6 +40,7 @@ def handle_index_error(func):
             return func(*args, **kwargs)
         except IndexError:
             return None, None, None
+
     return wrapper
 
 
@@ -576,34 +581,126 @@ class RandomInitialization(Initialization):
         )
         return refactoring_main, params, 'Extract Class'
 
-    def init_extract_method(self, file_path="C:\\Users\\RGY\\Desktop\\Long-Method.csv"):
+    def init_extract_method(self):
+        raise IndexError
+
+
+def get_move_method_location(row):
+    class_info, method_info = row.split("::")
+    class_info = class_info.split(".")
+    source_package = ".".join(class_info[:-1])
+    source_class = class_info[-1]
+    method_name = method_info.split("(")[0]
+    return source_package, source_class, method_name
+
+
+class SmellInitialization(RandomInitialization):
+    def __init__(self, *args, **kwargs):
+        super(SmellInitialization, self).__init__(*args, **kwargs)
+
+        self.feature_envies = pandas.read_csv(
+            config.FEATURE_ENVY_PATH, sep=None, engine='python'
+        ).iterrows()
+        self.god_classes = pandas.read_csv(
+            config.GOD_CLASS_PATH, sep="\t"
+        ).iterrows()
+        self.long_methods = pandas.read_csv(
+            config.LONG_METHOD_PATH, sep='\t', engine='python'
+        ).iterrows()
+
+    def init_move_method(self):
         """
-        Uses jDodorant csv output and candidate_reader.py
+        # TODO: Test this!
         """
-        refactoring_main = extract_method.main
         candidates = []
-        cr = CandidateReader(file_path)
-        for i in range(len(cr)):
-            params = {}
-            conf = cr.get_conf(i)
-            longname = conf.get("target_file")
-            lookup = self._und.lookup(longname + ".java", "File")
-            if lookup and os.path.basename(lookup[0].longname()) == longname.split(".")[-1] + ".java":
-                params["file_path"] = lookup[0].longname()
-                params["lines"] = conf.get("lines", [])
-                candidates.append(params)
-            else:
-                continue
+        for index, row in self.feature_envies:
+            source_package, source_class, method_name = get_move_method_location(row[1])
+            target_info = row[2].split(".")
+            target_package = ".".join(target_info[:-1])
+            target_class = target_info[-1]
+            candidates.append({
+                "source_package": source_package,
+                "source_class": source_class,
+                "method_name": method_name,
+                "target_package": target_package,
+                "target_class": target_class
+            })
         params = random.choice(candidates)
-        return refactoring_main, params, 'Extract Method'
+        params["udb_path"] = self.udb_path
+        main = move_method.main
+        return main, params, "Move Method"
+
+    def init_extract_class(self):
+        """
+        TODO: Test this!
+        """
+        candidates = []
+        for index, row in self.god_classes:
+            moved_fields, moved_methods = [], []
+            class_file = self._und.lookup(row[0].strip(), "Class")[0].parent().longname()
+            source_class = row[0].split(".")[-1]
+            data = row[1][1:-1]  # skip [ and ]
+            data = data.split(",")
+            for field_or_method in data:
+                field_or_method = field_or_method.strip()
+                if "(" in field_or_method:
+                    # Method
+                    moved_methods.append(
+                        field_or_method.split("::")[1].split("(")[0]
+                    )
+                elif len(field_or_method.split(" ")) == 2:
+                    # Field
+                    moved_fields.append(
+                        field_or_method.split(" ")[-1]
+                    )
+            candidates.append(
+                {
+                    "source_class": source_class,
+                    "moved_fields": moved_fields,
+                    "moved_methods": moved_methods,
+                    "file_path": class_file
+                }
+            )
+        main = extract_class.main
+        params = random.choice(candidates)
+        params["udb_path"] = self.udb_path
+        return main, params, "Extract Class"
+
+    def init_extract_method(self):
+        candidates = []
+        for index, row in self.long_methods:
+            lines = []
+            class_info = row[0].strip().split(".")[-1]
+            class_file = self._und.lookup(class_info + ".java", "File")[0].longname()
+            file_content = codecs.open(class_file, encoding="utf-8", mode='r').read()
+            lines_info = row[5]
+            for i in lines_info.split(")"):
+                if i == '':
+                    continue
+                char_number = i.split(",")[0][1:].strip()
+                length = i.split(",")[1].strip()
+                if char_number and length:
+                    char_number = int(char_number)
+                    length = char_number + int(length)
+                    start = len(file_content[:char_number].split("\n"))
+                    stop = len(file_content[:length].split("\n"))
+                    lines += list(range(start, stop+1))
+            candidates.append({
+                "file_path": class_file,
+                "lines": lines
+            })
+        main = extract_method.main
+        params = random.choice(candidates)
+        params["udb_path"] = self.udb_path
+        return main, params, "Extract Class"
 
 
 if __name__ == '__main__':
-    rand_pop = RandomInitialization(
-        "D:\Final Project\IdeaProjects\JSON20201115\JSON20201115.und",
+    rand_pop = SmellInitialization(
+        config.UDB_PATH,
         population_size=POPULATION_SIZE,
         lower_band=LOWER_BAND,
         upper_band=UPPER_BAND
     )
-    population = rand_pop.generate_population()
+    population = rand_pop.init_extract_method()
     print(population)

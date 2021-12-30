@@ -6,18 +6,39 @@ MAX_ITERATIONS = 10  # Should be set to 700 or 1000 or 1400 for NSGA-III
 LOWER_BAND = 5
 UPPER_BAND = 6
 
-root_dir = 'D:/IdeaProjects/'
-benchmarks = {'PROJ': ['JSON20201115',
-                      'jvlt-1.3.2',
-                      'ganttproject_1_11_1_original'],
+ROOT_DIR = 'D:\\Final Project\\IdeaProjects'
+BENCHMARK_INDEX = 0
+BENCHMARKS = {
+    # Project Path
+    'PROJ': ['JSON20201115',
+             'jvlt-1.3.2',
+             'ganttproject_1_11_1_original',
+             '104_vuze',
+             '105_freemind',
+             '107_weka',
+             'jfreechart-master'
+             ],
+    # Understand DB Path
+    'UDB': ['JSON20201115\\JSON20201115.und',
+            'jvlt-1.3.2\\src.und',
+            'ganttproject_1_11_1_original\\ganttproject_1_11_1_original.und'],
+    # CSV File Path
+    'LONG_METHOD': [
+        'D:\\Final Project\\JDeodorant\\JSON20201115\\Long-Method2_JASON-20201115.csv'
+    ],
+    'GOD_CLASS': [
+        'D:\\Final Project\\JDeodorant\\JSON20201115\\God-Class_JASON-20201115.csv'
+    ],
+    'FEATURE_ENVY': [
+        'D:\\Final Project\\JDeodorant\\JSON20201115\\Feature-Envy2_JASON-20201115.csv'
+    ],
+}
 
-             'UDB': ['JSON20201115/JSON.und',
-                     'jvlt-1.3.2/src.und',
-                     'ganttproject_1_11_1_original/ganttproject_1_11_1_original.und']}
-
-PROJECT_PATH = root_dir + benchmarks['PROJ'][0]
-UDB_PATH = root_dir + benchmarks['UDB'][0]
-
+PROJECT_PATH = os.path.join(ROOT_DIR, BENCHMARKS['PROJ'][BENCHMARK_INDEX])
+UDB_PATH = os.path.join(ROOT_DIR, BENCHMARKS['UDB'][BENCHMARK_INDEX])
+FEATURE_ENVY_PATH = BENCHMARKS['FEATURE_ENVY'][BENCHMARK_INDEX]
+GOD_CLASS_PATH = BENCHMARKS['GOD_CLASS'][BENCHMARK_INDEX]
+LONG_METHOD_PATH = BENCHMARKS['LONG_METHOD'][BENCHMARK_INDEX]
 
 PROJECT_NAME = os.path.basename(PROJECT_PATH)
 
