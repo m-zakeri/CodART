@@ -667,7 +667,7 @@ class SmellInitialization(RandomInitialization):
                 class_file = class_file[0].longname()
             else:
                 continue
-            file_content = codecs.open(class_file, encoding="utf-8", mode='r').read()
+            file_content = codecs.open(class_file, mode='r').read()
             lines_info = row[5]
             for i in lines_info.split(")"):
                 if i == '':
@@ -687,19 +687,12 @@ class SmellInitialization(RandomInitialization):
         return candidates
 
     def init_move_method(self):
-        """
-        # TODO: Test this!
-        """
         params = random.choice(self.move_method_candidates)
         params["udb_path"] = self.udb_path
         main = move_method.main
         return main, params, "Move Method"
 
     def init_extract_class(self):
-        """
-        TODO: Test this!
-        """
-
         main = extract_class.main
         params = random.choice(self.extract_class_candidates)
         params["udb_path"] = self.udb_path
