@@ -173,6 +173,21 @@ class PullUpFieldRefactoring:
         return True
 
 
+
+
+
+
+def main(project_dir: str, package_name: str, children_class: str, field_name: str):
+    # print("Pull-up field")
+    print(f"Success pull-up field {field_name}" if PullUpFieldRefactoring(
+        utils2.get_filenames_in_dir(project_dir),
+        package_name,
+        children_class,
+        field_name
+        # lambda x: "tests/pullup_field_ant/" + x[len(ant_dir):]
+    ).do_refactor() else f"Cannot  pull-up field {field_name}")
+
+
 def test():
     print("Testing pullup_field...")
     filenames = [
@@ -190,29 +205,13 @@ def test():
         print("Cannot refactor.")
 
 
-def test_ant():
-    """
-    target_files = [
-        "tests/apache-ant/main/org/apache/tools/ant/types/ArchiveFileSet.java",
-        "tests/apache-ant/main/org/apache/tools/ant/types/TarFileSet.java",
-        "tests/apache-ant/main/org/apache/tools/ant/types/ZipFileSet.java"
+if __name__ == "__main__":
+    target_files = ["tests/apache-ant/main/org/apache/tools/ant/types/ArchiveFileSet.java",
+                    "tests/apache-ant/main/org/apache/tools/ant/types/TarFileSet.java",
+                    "tests/apache-ant/main/org/apache/tools/ant/types/ZipFileSet.java"
     ]
-    """
     ant_dir = "/home/ali/Desktop/code/TestProject/"
 
-
-def main(project_dir: str, package_name: str, children_class: str, field_name: str):
-    print("Pullup Field")
-    print("Success!" if PullUpFieldRefactoring(
-        utils2.get_filenames_in_dir(project_dir),
-        package_name,
-        children_class,
-        field_name
-        # lambda x: "tests/pullup_field_ant/" + x[len(ant_dir):]
-    ).do_refactor() else "Cannot refactor.")
-
-
-if __name__ == "__main__":
     main(
         project_dir="/data/Dev/JavaSample/",
         package_name="your_package",
