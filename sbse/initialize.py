@@ -597,45 +597,17 @@ def get_move_method_location(row):
 class SmellInitialization(RandomInitialization):
     def __init__(self, *args, **kwargs):
         super(SmellInitialization, self).__init__(*args, **kwargs)
+        # Load csv files
+        self.move_method_candidates = self.load_move_method_candidates()
+        self.extract_class_candidates = self.load_extract_class_candidates()
+        self.extract_method_candidates = self.load_extract_method_candidates()
 
-        self.feature_envies = pandas.read_csv(
-            config.FEATURE_ENVY_PATH, sep=None, engine='python'
-        ).iterrows()
-        self.god_classes = pandas.read_csv(
+    def load_extract_class_candidates(self):
+        god_classes = pandas.read_csv(
             config.GOD_CLASS_PATH, sep="\t"
-        ).iterrows()
-        self.long_methods = pandas.read_csv(
-            config.LONG_METHOD_PATH, sep='\t', engine='python'
-        ).iterrows()
-
-    def init_move_method(self):
-        """
-        # TODO: Test this!
-        """
+        )
         candidates = []
-        for index, row in self.feature_envies:
-            source_package, source_class, method_name = get_move_method_location(row[1])
-            target_info = row[2].split(".")
-            target_package = ".".join(target_info[:-1])
-            target_class = target_info[-1]
-            candidates.append({
-                "source_package": source_package,
-                "source_class": source_class,
-                "method_name": method_name,
-                "target_package": target_package,
-                "target_class": target_class
-            })
-        params = random.choice(candidates)
-        params["udb_path"] = self.udb_path
-        main = move_method.main
-        return main, params, "Move Method"
-
-    def init_extract_class(self):
-        """
-        TODO: Test this!
-        """
-        candidates = []
-        for index, row in self.god_classes:
+        for index, row in god_classes.iterrows():
             moved_fields, moved_methods = [], []
             class_file = self._und.lookup(row[0].strip(), "Class")[0].parent().longname()
             source_class = row[0].split(".")[-1]
@@ -661,18 +633,41 @@ class SmellInitialization(RandomInitialization):
                     "file_path": class_file
                 }
             )
-        main = extract_class.main
-        params = random.choice(candidates)
-        params["udb_path"] = self.udb_path
-        return main, params, "Extract Class"
+        return candidates
 
-    def init_extract_method(self):
+    def load_move_method_candidates(self):
+        feature_envies = pandas.read_csv(
+            config.FEATURE_ENVY_PATH, sep=None, engine='python'
+        )
         candidates = []
-        for index, row in self.long_methods:
+        for index, row in feature_envies.iterrows():
+            source_package, source_class, method_name = get_move_method_location(row[1])
+            target_info = row[2].split(".")
+            target_package = ".".join(target_info[:-1])
+            target_class = target_info[-1]
+            candidates.append({
+                "source_package": source_package,
+                "source_class": source_class,
+                "method_name": method_name,
+                "target_package": target_package,
+                "target_class": target_class
+            })
+        return candidates
+
+    def load_extract_method_candidates(self):
+        long_methods = pandas.read_csv(
+            config.LONG_METHOD_PATH, sep='\t', engine='python'
+        )
+        candidates = []
+        for index, row in long_methods.iterrows():
             lines = []
             class_info = row[0].strip().split(".")[-1]
-            class_file = self._und.lookup(class_info + ".java", "File")[0].longname()
-            file_content = codecs.open(class_file, encoding="utf-8", mode='r').read()
+            class_file = self._und.lookup(class_info + ".java", "File")
+            if class_file:
+                class_file = class_file[0].longname()
+            else:
+                continue
+            file_content = codecs.open(class_file, mode='r').read()
             lines_info = row[5]
             for i in lines_info.split(")"):
                 if i == '':
@@ -684,13 +679,28 @@ class SmellInitialization(RandomInitialization):
                     length = char_number + int(length)
                     start = len(file_content[:char_number].split("\n"))
                     stop = len(file_content[:length].split("\n"))
-                    lines += list(range(start, stop+1))
+                    lines += list(range(start, stop + 1))
             candidates.append({
                 "file_path": class_file,
                 "lines": lines
             })
+        return candidates
+
+    def init_move_method(self):
+        params = random.choice(self.move_method_candidates)
+        params["udb_path"] = self.udb_path
+        main = move_method.main
+        return main, params, "Move Method"
+
+    def init_extract_class(self):
+        main = extract_class.main
+        params = random.choice(self.extract_class_candidates)
+        params["udb_path"] = self.udb_path
+        return main, params, "Extract Class"
+
+    def init_extract_method(self):
         main = extract_method.main
-        params = random.choice(candidates)
+        params = random.choice(self.extract_method_candidates)
         params["udb_path"] = self.udb_path
         return main, params, "Extract Class"
 
@@ -702,5 +712,10 @@ if __name__ == '__main__':
         lower_band=LOWER_BAND,
         upper_band=UPPER_BAND
     )
-    population = rand_pop.init_extract_method()
-    print(population)
+    for i in range(200):
+        population = rand_pop.init_extract_method()
+        print(population)
+        population = rand_pop.init_extract_class()
+        print(population)
+        population = rand_pop.init_move_method()
+        print(population)
