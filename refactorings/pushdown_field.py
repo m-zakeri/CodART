@@ -76,11 +76,10 @@ class PushDownField:
         return True
 
     def do_refactor(self):
-        program = utils2.get_program(self.source_filenames, print_status=True)
+        program = utils2.get_program(self.source_filenames, print_status=False)
         superclass: utils_listener_fast.Class = program.packages[self.package_name].classes[self.superclass_name]
-
         if not self.pre_condition_check(program, superclass):
-            print("Can't refactor")
+            print(f"Cannot push-down field from {superclass}")
             return False
 
         # all_derived_classes = [] # Not needed
