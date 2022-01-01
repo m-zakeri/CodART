@@ -134,6 +134,7 @@ def main(udb_path, source_class, field_name):
 
     with open(mainfile, mode='w', newline='') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
+    db.close()
     return None
 
 

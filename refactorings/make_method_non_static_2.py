@@ -66,7 +66,6 @@ class MakeMethodNonStaticRefactoringListener(JavaParserLabeledListener):
 
 
 def main(udb_path, source_class, method_name):
-    print("Make Method Non Static")
     main_file = ""
     db = und.open(udb_path)
     for cls in db.ents("class"):

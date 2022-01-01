@@ -150,6 +150,7 @@ def get_method_calls(udb_path, scope_class_name, new_name):
                     "line": ref.line(),
                     "column": ref.column()
                 })
+    db.close()
     return references
 
 

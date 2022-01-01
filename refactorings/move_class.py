@@ -170,7 +170,6 @@ class MoveClassAPI:
         if not self.check_preconditions():
             logger.error("Pre conditions failed.")
             return False
-        print(self.usages)
         # Update usages
         for file_path in self.usages:
             parse_and_walk(

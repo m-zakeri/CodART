@@ -34,26 +34,23 @@ import numpy as np
 from pymoo.algorithms.moo.nsga2 import NSGA2
 from pymoo.algorithms.moo.nsga3 import NSGA3
 from pymoo.algorithms.soo.nonconvex.ga import GA
-from pymoo.factory import get_reference_directions, get_crossover, get_decision_making
 from pymoo.core.crossover import Crossover
 from pymoo.core.duplicate import ElementwiseDuplicateElimination
 from pymoo.core.mutation import Mutation
 from pymoo.core.problem import ElementwiseProblem, Problem
 from pymoo.core.sampling import Sampling
-from pymoo.mcdm.high_tradeoff import HighTradeoffPoints
+from pymoo.factory import get_reference_directions, get_decision_making
 from pymoo.operators.selection.tournament import TournamentSelection
 from pymoo.optimize import minimize
 from pymoo.util.termination.default import MultiObjectiveDefaultTermination
-from pymoo.util.termination.f_tol import MultiObjectiveSpaceToleranceTermination
 
+from metrics.modularity import main as modularity_main
+from metrics.testability_prediction import main as testability_main
 from sbse import config
 from sbse.config import logger
 from sbse.initialize import RandomInitialization
 from sbse.objectives import Objectives
-from metrics.testability_prediction import main as testability_main
-from metrics.modularity import main as modularity_main
 from utilization.directory_utils import update_understand_database, git_restore
-
 
 
 class Gene:
@@ -194,7 +191,10 @@ class ProblemSingleObjective(ElementwiseProblem):
             # Update Understand DB
             update_understand_database(config.UDB_PATH)
         # Stage 2: Computing quality attributes
-        score = testability_main(config.UDB_PATH)
+        score = testability_main(
+            config.UDB_PATH,
+            initial_value=config.CURRENT_METRICS.get("TEST", 1.0)
+        )
         logger.info(f"Testability Score: {score}")
         # Stage 3: Marshal objectives into vector
         out["F"] = np.array([-1 * score], dtype=float)
@@ -243,8 +243,14 @@ class ProblemMultiObjective(ElementwiseProblem):
         obj = Objectives(udb_path=config.UDB_PATH)
         o1 = obj.average
         del obj
-        o2 = testability_main(config.UDB_PATH)
-        o3 = modularity_main(config.UDB_PATH)
+        o2 = testability_main(
+            config.UDB_PATH,
+            initial_value=config.CURRENT_METRICS.get("TEST", 1.0)
+        )
+        o3 = modularity_main(
+            config.UDB_PATH,
+            initial_value=config.CURRENT_METRICS.get("MODULE", 1.0)
+        )
         logger.info(f"QMOOD AVG Score: {o1}")
         logger.info(f"Testability Score: {o2}")
         logger.info(f"Modularity Score: {o3}")
@@ -262,12 +268,18 @@ def calc_qmood_objectives(arr_):
     arr_[5] = qmood.extendability
 
 
-def calc_testability_objective(path_, arr_):
-    arr_[6] = testability_main(path_)
+def calc_testability_objective(path_, initial_value, arr_):
+    arr_[6] = testability_main(
+        path_,
+        initial_value=config.CURRENT_METRICS.get("TEST", 1.0)
+    )
 
 
 def calc_modularity_objective(path_, arr_):
-    arr_[7] = modularity_main(path_)
+    arr_[7] = modularity_main(
+        path_,
+        initial_value=config.CURRENT_METRICS.get("MODULE", 1.0)
+    )
 
 
 class ProblemManyObjective(Problem):
@@ -629,12 +641,12 @@ def main():
     logger.info("Best objective values (a set of non-dominated solutions):")
     logger.info(res.F)
 
-    logger.info("="*75)
+    logger.info("=" * 75)
     logger.info("Other solutions:")
     for ind in res.opt:
         logger.info(ind.X)
         logger.info(ind.F)
-        logger.info("-"*50)
+        logger.info("-" * 50)
     logger.info("=" * 75)
 
     logger.info(f"Start time: {res.start_time}")
@@ -656,7 +668,6 @@ def main():
         logger.info(f"The median improvement of quality attributes: {np.median(pf[I][0], axis=0)}")
     except:
         logger.info("No multi optimal solutions (error in computing high tradeoff points)!")
-
 
 
 # Test driver

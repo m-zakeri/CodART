@@ -1228,7 +1228,7 @@ class TestabilityModel(object):
 
 
 # Test driver
-def main(project_path):
+def main(project_path, initial_value=1.0):
     """
     A demo of using testability_prediction module to measure testability quality attribute with machine learning
     """
@@ -1240,7 +1240,7 @@ def main(project_path):
     model = TestabilityModel(df_path=r'../metrics/data_model/DS07012.csv')
     testability_ = model.inference(model_path='../metrics/data_model/VR1_DS1.joblib', df_predict_data=df)
     # print('testability=', testability_)
-    return testability_
+    return testability_ / initial_value
 
 
 # Test module

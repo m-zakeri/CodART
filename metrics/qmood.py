@@ -17,13 +17,13 @@ except ImportError:
 logging.basicConfig(filename='codart_result.log', level=logging.DEBUG)
 logger = logging.getLogger(os.path.basename(__file__))
 
-from sbse.config import CURRENT_QMOOD_METRICS, UDB_PATH
+from sbse.config import CURRENT_METRICS, UDB_PATH
 
 
 def divide_by_initial_value(func):
     def wrapper(*args, **kwargs):
         value = func(*args, **kwargs)
-        initial = CURRENT_QMOOD_METRICS.get(func.__name__)
+        initial = CURRENT_METRICS.get(func.__name__)
         return round(value / initial, 2)
 
     return wrapper
