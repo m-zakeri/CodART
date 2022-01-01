@@ -84,6 +84,10 @@ class Initialization(object):
         self._pullup_constructor_candidates = self.find_pullup_constructor_candidates()
         self._push_down_method_candidates = self.find_push_down_method_candidates()
 
+    def __del__(self):
+        logger.info("Understand database closed after initialization.")
+        self._und.close()
+    
     def get_all_methods(self, static=False):
         candidates = []
         if static:

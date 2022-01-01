@@ -475,6 +475,7 @@ def main():
         walker.walk(t=parse_tree, listener=my_listener)
         with open(file, mode='w', encoding="utf-8", newline='') as f:
             f.write(my_listener.token_stream_rewriter.getDefaultText())
+    db.close()
 
 
 if __name__ == '__main__':

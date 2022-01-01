@@ -223,7 +223,6 @@ if __name__ == '__main__':
     # initialize with understand
     main_file = ""
     db = und.open(udb_path)
-    print("Here")
     for cls in db.ents("class"):
         if cls.simplename() == source_class:
             main_file = cls.parent().longname()
@@ -241,4 +240,5 @@ if __name__ == '__main__':
 
     with open(main_file, mode='w', newline='') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
+    db.close()
 

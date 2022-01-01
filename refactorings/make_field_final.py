@@ -130,3 +130,4 @@ if __name__ == '__main__':
 
     with open(mainfile, mode='w', newline='') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
+    db.close()

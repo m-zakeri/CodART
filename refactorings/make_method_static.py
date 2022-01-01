@@ -122,6 +122,7 @@ def main(udb_path, target_class, target_methods):
 
     with open(main_file, mode='w', newline='') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
+    db.close()
 
 
 if __name__ == '__main__':
