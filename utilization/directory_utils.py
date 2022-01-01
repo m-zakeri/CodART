@@ -1,12 +1,23 @@
 """
 Utilities related to project directory.
 """
+from numba import jit
 import datetime
 import os
+import sys
+
+# print(sys.getrecursionlimit())
+# quit()
+# sys.setrecursionlimit(sys.getrecursionlimit()*10000)
 import subprocess
 from multiprocessing.dummy import Pool, Process, Value, Array, Manager
 
 from antlr4 import FileStream, CommonTokenStream
+import traceback
+from joblib.externals.loky import set_loky_pickler
+from joblib import parallel_backend
+from joblib import Parallel, delayed
+from joblib import wrap_non_picklable_objects
 
 from gen.java.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
@@ -75,6 +86,7 @@ def export_understand_dependencies_csv(csv_path: str, db_path: str):
 
 # -----------------------------------------------
 # trees = []
+shared_set = set()
 
 def get_java_files(directory):
     if not os.path.isdir(directory):
@@ -87,12 +99,22 @@ def get_java_files(directory):
                 # yield FileStream(os.path.join(root, file), encoding="utf8")
 
 
+# @wrap_non_picklable_objects
 def create_project_parse_tree(java_file_path,):
-    parser = JavaParserLabeled(CommonTokenStream(JavaLexer(FileStream(java_file_path))))
-    x__ = parser.compilationUnit()
-    # print(type(x__))
+    from antlr4 import FileStream, CommonTokenStream
+    from java8speedy.parser import sa_javalabeled
+    # parser = JavaParserLabeled(CommonTokenStream(JavaLexer(FileStream(java_file_path))))
+    # x__ = parser.compilationUnit()
+    try:
+        x__ = sa_javalabeled._cpp_parse(FileStream(java_file_path), 'compilationUnit')
+        # print(f'parsing {type(x__)}')
+    except:
+        x__ = None
+        print(f'Encounter a parsing error on file {java_file_path}')
+
     # qu.put(x__)
-    return x__
+    # return x__
+    # shared_set.add(x__)
 
 
 def parallel_parsing(directory):
@@ -136,6 +158,18 @@ def parallel_parsing3(directory):
     print(d2-d1, len(x))
     return x
 
+# @wrap_non_picklable_objects
+def parallel_parsing4(directory):
+    d1 = datetime.datetime.now()
+    res = Parallel(n_jobs=8,)(
+        delayed(create_project_parse_tree)(java_file) for java_file in get_java_files(directory)
+    )
+    print(res)
+    d2 = datetime.datetime.now()
+    print(d2 - d1)
+    return []
+
+
 
 def typical_parsing(directory):
     d1 = datetime.datetime.now()
@@ -148,10 +182,10 @@ def typical_parsing(directory):
 
 
 if __name__ == '__main__':
-    # directory = r'D:/IdeaProjects/JSON20201115/'
-    # directory = r'D:/IdeaProjects/jvlt-1.3.2/'
+    directory = r'D:/IdeaProjects/JSON20201115/'
+    directory = r'D:/IdeaProjects/jvlt-1.3.2/'
     directory = 'D:/IdeaProjects/107_weka/'
-    parallel_parsing3(directory)
-    # parallel_parsing2(directory)
-    # typical_parsing(directory)
-    # print(len(trees))
+    trees = parallel_parsing4(directory)
+    # trees = parallel_parsing3(directory)
+    # trees = typical_parsing(directory)
+    print(f'parse successfully {len(trees)} trees')
