@@ -100,7 +100,7 @@ class Modularity:
 
 
 # Modularity API
-def main(project_path='../benchmark_projects/JSON/JSON.und'):
+def main(project_path='../benchmark_projects/JSON/JSON.und', initial_value=1.0):
     """
     A demo of using modularity module to measure modularity quality attribute based on graph-analysis
     """
@@ -118,7 +118,7 @@ def main(project_path='../benchmark_projects/JSON/JSON.und'):
     q = modulo.compute_modularity_newman_leicht()
     os.remove(csv_path)
     db.close()
-    return q
+    return q / initial_value
 
 
 # Test module
