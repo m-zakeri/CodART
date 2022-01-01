@@ -1,44 +1,69 @@
-import os
 import logging
+import os
 
-POPULATION_SIZE = os.environ.get("POPULATION_SIZE", 10)  # Should be set to 190, 193, 200 for NSGA-III
-MAX_ITERATIONS = 10  # Should be set to 700 or 1000 or 1400 for NSGA-III
-LOWER_BAND = 5
-UPPER_BAND = 6
+from dotenv import load_dotenv
 
-ROOT_DIR = 'D:\\Final Project\\IdeaProjects'
-BENCHMARK_INDEX = 0
+load_dotenv()
+
+POPULATION_SIZE = int(os.environ.get("POPULATION_SIZE"))  # Should be set to 190, 193, 200 for NSGA-III
+MAX_ITERATIONS = int(os.environ.get("MAX_ITERATIONS"))  # Should be set to 700 or 1000 or 1400 for NSGA-III
+LOWER_BAND = int(os.environ.get("LOWER_BAND"))
+UPPER_BAND = int(os.environ.get("UPPER_BAND"))
+
+PROJECT_ROOT_DIR = os.environ.get("PROJECT_ROOT_DIR")
+CSV_ROOT_DIR = os.environ.get("CSV_ROOT_DIR")
+BENCHMARK_INDEX = 5
 BENCHMARKS = {
     # Project Path
     'PROJ': ['JSON20201115',
-             'jvlt-1.3.2',
-             'ganttproject_1_11_1_original',
-             '104_vuze',
              '105_freemind',
              '107_weka',
-             'jfreechart-master'
+             'ganttproject_1_11_1_original',
+             'jfreechart-master',
+             'jvlt-1.3.2',
+             '104_vuze',
              ],
     # Understand DB Path
     'UDB': ['JSON20201115\\JSON20201115.und',
-            'jvlt-1.3.2\\src.und',
-            'ganttproject_1_11_1_original\\ganttproject_1_11_1_original.und'],
+            '105_freemind\\105_freemind.und',
+            '107_weka\\107_weka.und',
+            'ganttproject_1_11_1_original\\ganttproject_1_11_1_original.und',
+            'jfreechart-master\\jfreechart-master.und',
+            'jvlt-1.3.2\\jvlt-1.3.2.und',
+            '104_vuze\\104_vuze.und',
+            ],
     # CSV File Path
     'LONG_METHOD': [
-        'D:\\Final Project\\JDeodorant\\JSON20201115\\Long-Method2_JASON-20201115.csv'
+        'JSON20201115\\Long-Method2_JASON-20201115.csv',
+        'FreeMind-0.9.0\\Long-Method2_FreeMind-0.9.0.csv',
+        'Weka-3.8\\Long-Method2-Weka3.8.csv',
+        'GanttProject-1.11.1\\Long-Method2_ganttproject-1.11.1.csv',
+        'JFreeChart-1.0.19\\Long-Method2_JFreeChart-1.0.19.csv',
+        'jVLT-1.3.2\\Long-Method2_jvlt-1.3.2.csv',
     ],
     'GOD_CLASS': [
-        'D:\\Final Project\\JDeodorant\\JSON20201115\\God-Class_JASON-20201115.csv'
+        'JSON20201115\\God-Class_JASON-20201115.csv',
+        'FreeMind-0.9.0\\God-Class_FreeMind-0.9.0.csv',
+        'Weka-3.8\\God-Class-Weka3.8.csv',
+        'GanttProject-1.11.1\\God-Class_ganttproject-1.11.1.csv',
+        'JFreeChart-1.0.19\\God-Class-JFreeChart-1.0.19.csv',
+        'jVLT-1.3.2\\God-Class_jvlt-1.3.2.csv',
     ],
     'FEATURE_ENVY': [
-        'D:\\Final Project\\JDeodorant\\JSON20201115\\Feature-Envy2_JASON-20201115.csv'
+        'JSON20201115\\Feature-Envy2_JASON-20201115.csv',
+        'FreeMind-0.9.0\\Feature-Envy2_FreeMind-0.9.0.csv',
+        'Weka-3.8\\Feature-Envy2-Weka3.8.csv',
+        'GanttProject-1.11.1\\Feature-Envy2_ganttproject-1.11.1.csv',
+        'JFreeChart-1.0.19\\Feature-Envy2-JFreeChart-1.0.19.csv',
+        'jVLT-1.3.2\\Feature-Envy_jvlt-1.3.2.csv',
     ],
 }
 
-PROJECT_PATH = os.path.join(ROOT_DIR, BENCHMARKS['PROJ'][BENCHMARK_INDEX])
-UDB_PATH = os.path.join(ROOT_DIR, BENCHMARKS['UDB'][BENCHMARK_INDEX])
-FEATURE_ENVY_PATH = BENCHMARKS['FEATURE_ENVY'][BENCHMARK_INDEX]
-GOD_CLASS_PATH = BENCHMARKS['GOD_CLASS'][BENCHMARK_INDEX]
-LONG_METHOD_PATH = BENCHMARKS['LONG_METHOD'][BENCHMARK_INDEX]
+PROJECT_PATH = os.path.join(PROJECT_ROOT_DIR, BENCHMARKS['PROJ'][BENCHMARK_INDEX])
+UDB_PATH = os.path.join(PROJECT_ROOT_DIR, BENCHMARKS['UDB'][BENCHMARK_INDEX])
+FEATURE_ENVY_PATH = os.path.join(CSV_ROOT_DIR, BENCHMARKS['FEATURE_ENVY'][BENCHMARK_INDEX])
+GOD_CLASS_PATH = os.path.join(CSV_ROOT_DIR, BENCHMARKS['GOD_CLASS'][BENCHMARK_INDEX])
+LONG_METHOD_PATH = os.path.join(CSV_ROOT_DIR, BENCHMARKS['LONG_METHOD'][BENCHMARK_INDEX])
 
 PROJECT_NAME = os.path.basename(PROJECT_PATH)
 
@@ -55,6 +80,8 @@ INITIAL_QMOOD_METRICS = {
         "DCC": 2.8666666666666667,
         "MFA": 0.099846547314578,
         "NOP": 6.566666666666666,
+        "TEST": 0.4748841147083056,
+        "MODULE": 1,
     },
     "104_vuze": {
         "DSC": 8040,
@@ -68,6 +95,8 @@ INITIAL_QMOOD_METRICS = {
         "DCC": 1.5714899713467048,
         "MFA": 0.2091017384211249,
         "NOP": 4.3729226361031515,
+        "TEST": 0.4748841147083056,
+        "MODULE": 0.20544581966389708,
     },
     "105_freemind": {
         "DSC": 1074,
@@ -81,6 +110,8 @@ INITIAL_QMOOD_METRICS = {
         "DCC": 2.9430894308943087,
         "MFA": 0.1718928794350772,
         "NOP": 5.1138211382113825,
+        "TEST": 0.3752525309440714,
+        "MODULE": 0.28767512755806884,
     },
     "107_weka": {
         "DSC": 2338,
@@ -94,6 +125,8 @@ INITIAL_QMOOD_METRICS = {
         "DCC": 2.385107354956601,
         "MFA": 0.17212621102262438,
         "NOP": 7.14846962083143,
+        "TEST": 0.4865105816109613,
+        "MODULE": 0.32787710443044066,
     },
     "ganttproject_1_11_1_original": {
         "DSC": 555,
@@ -107,6 +140,8 @@ INITIAL_QMOOD_METRICS = {
         "DCC": 2.680894308943089,
         "MFA": 0.14711823738179727,
         "NOP": 4.1971544715447155,
+        "TEST": 0.5029896831173097,
+        "MODULE": 0.34926607015973216,
     },
     "jfreechart-master": {
         "DSC": 674,
@@ -120,6 +155,8 @@ INITIAL_QMOOD_METRICS = {
         "DCC": 3.317269076305221,
         "MFA": 0.2586029996567078,
         "NOP": 10.210174029451139,
+        "TEST": 0.4820787549441007,
+        "MODULE": 0.23642449145114441,
     },
     "jvlt-1.3.2": {
         "DSC": 420,
@@ -133,6 +170,8 @@ INITIAL_QMOOD_METRICS = {
         "DCC": 2.5585365853658537,
         "MFA": 0.22910838294407537,
         "NOP": 4.131707317073171,
+        "TEST": 0.42116082618406314,
+        "MODULE": 0.20757585289828134,
     },
 }
 
