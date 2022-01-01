@@ -1,5 +1,6 @@
-import logging
 import os
+import logging
+import datetime as dt
 
 from dotenv import load_dotenv
 
@@ -24,38 +25,38 @@ BENCHMARKS = {
              '104_vuze',
              ],
     # Understand DB Path
-    'UDB': ['JSON20201115\\JSON20201115.und',
-            '105_freemind\\105_freemind.und',
-            '107_weka\\107_weka.und',
-            'ganttproject_1_11_1_original\\ganttproject_1_11_1_original.und',
-            'jfreechart-master\\jfreechart-master.und',
-            'jvlt-1.3.2\\jvlt-1.3.2.und',
-            '104_vuze\\104_vuze.und',
+    'UDB': ['JSON20201115/JSON20201115.und',
+            '105_freemind/105_freemind.und',
+            '107_weka/107_weka.und',
+            'ganttproject_1_11_1_original/ganttproject_1_11_1_original.und',
+            'jfreechart-master/jfreechart-master.und',
+            'jvlt-1.3.2/jvlt-1.3.2.und',
+            '104_vuze/104_vuze.und',
             ],
-    # CSV File Path
+    # CSV files path containing code smells identified by JDeodorant
     'LONG_METHOD': [
-        'JSON20201115\\Long-Method2_JASON-20201115.csv',
-        'FreeMind-0.9.0\\Long-Method2_FreeMind-0.9.0.csv',
-        'Weka-3.8\\Long-Method2-Weka3.8.csv',
-        'GanttProject-1.11.1\\Long-Method2_ganttproject-1.11.1.csv',
-        'JFreeChart-1.0.19\\Long-Method2_JFreeChart-1.0.19.csv',
-        'jVLT-1.3.2\\Long-Method2_jvlt-1.3.2.csv',
+        'JSON20201115/Long-Method2_JASON-20201115.csv',
+        'FreeMind-0.9.0/Long-Method2_FreeMind-0.9.0.csv',
+        'Weka-3.8/Long-Method2-Weka3.8.csv',
+        'GanttProject-1.11.1/Long-Method2_ganttproject-1.11.1.csv',
+        'JFreeChart-1.0.19/Long-Method2_JFreeChart-1.0.19.csv',
+        'jVLT-1.3.2/Long-Method2_jvlt-1.3.2.csv',
     ],
     'GOD_CLASS': [
-        'JSON20201115\\God-Class_JASON-20201115.csv',
-        'FreeMind-0.9.0\\God-Class_FreeMind-0.9.0.csv',
-        'Weka-3.8\\God-Class-Weka3.8.csv',
-        'GanttProject-1.11.1\\God-Class_ganttproject-1.11.1.csv',
-        'JFreeChart-1.0.19\\God-Class-JFreeChart-1.0.19.csv',
-        'jVLT-1.3.2\\God-Class_jvlt-1.3.2.csv',
+        'JSON20201115/God-Class_JASON-20201115.csv',
+        'FreeMind-0.9.0/God-Class_FreeMind-0.9.0.csv',
+        'Weka-3.8/God-Class-Weka3.8.csv',
+        'GanttProject-1.11.1/God-Class_ganttproject-1.11.1.csv',
+        'JFreeChart-1.0.19/God-Class-JFreeChart-1.0.19.csv',
+        'jVLT-1.3.2/God-Class_jvlt-1.3.2.csv',
     ],
     'FEATURE_ENVY': [
-        'JSON20201115\\Feature-Envy2_JASON-20201115.csv',
-        'FreeMind-0.9.0\\Feature-Envy2_FreeMind-0.9.0.csv',
-        'Weka-3.8\\Feature-Envy2-Weka3.8.csv',
-        'GanttProject-1.11.1\\Feature-Envy2_ganttproject-1.11.1.csv',
-        'JFreeChart-1.0.19\\Feature-Envy2-JFreeChart-1.0.19.csv',
-        'jVLT-1.3.2\\Feature-Envy_jvlt-1.3.2.csv',
+        'JSON20201115/Feature-Envy2_JASON-20201115.csv',
+        'FreeMind-0.9.0/Feature-Envy2_FreeMind-0.9.0.csv',
+        'Weka-3.8/Feature-Envy2-Weka3.8.csv',
+        'GanttProject-1.11.1/Feature-Envy2_ganttproject-1.11.1.csv',
+        'JFreeChart-1.0.19/Feature-Envy2-JFreeChart-1.0.19.csv',
+        'jVLT-1.3.2/Feature-Envy_jvlt-1.3.2.csv',
     ],
 }
 
@@ -67,6 +68,7 @@ LONG_METHOD_PATH = os.path.join(CSV_ROOT_DIR, BENCHMARKS['LONG_METHOD'][BENCHMAR
 
 PROJECT_NAME = os.path.basename(PROJECT_PATH)
 
+# Initial value for qmood metrics and objectives to be used in normalization process
 INITIAL_METRICS = {
     "JSON20201115": {
         "DSC": 26,
@@ -177,12 +179,13 @@ INITIAL_METRICS = {
 
 CURRENT_METRICS = INITIAL_METRICS.get(PROJECT_NAME)
 
+date_time = dt.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S',
-    level=logging.DEBUG,
+    level=logging.INFO,  # DEBUG
     handlers=[
-        logging.FileHandler(f'../sbse/logs/{PROJECT_NAME}.log'),
+        logging.FileHandler(f'../sbse/logs/{PROJECT_NAME}-{date_time}.log'),
         logging.StreamHandler(),
     ],
 )
