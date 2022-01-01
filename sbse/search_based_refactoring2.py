@@ -193,7 +193,7 @@ class ProblemSingleObjective(ElementwiseProblem):
         # Stage 2: Computing quality attributes
         score = testability_main(
             config.UDB_PATH,
-            initial_value=config.CURRENT_QMOOD_METRICS.get("TEST", 1.0)
+            initial_value=config.CURRENT_METRICS.get("TEST", 1.0)
         )
         logger.info(f"Testability Score: {score}")
         # Stage 3: Marshal objectives into vector
@@ -245,11 +245,11 @@ class ProblemMultiObjective(ElementwiseProblem):
         del obj
         o2 = testability_main(
             config.UDB_PATH,
-            initial_value=config.CURRENT_QMOOD_METRICS.get("TEST", 1.0)
+            initial_value=config.CURRENT_METRICS.get("TEST", 1.0)
         )
         o3 = modularity_main(
             config.UDB_PATH,
-            initial_value=config.CURRENT_QMOOD_METRICS.get("MODULE", 1.0)
+            initial_value=config.CURRENT_METRICS.get("MODULE", 1.0)
         )
         logger.info(f"QMOOD AVG Score: {o1}")
         logger.info(f"Testability Score: {o2}")
@@ -271,14 +271,14 @@ def calc_qmood_objectives(arr_):
 def calc_testability_objective(path_, initial_value, arr_):
     arr_[6] = testability_main(
         path_,
-        initial_value=config.CURRENT_QMOOD_METRICS.get("TEST", 1.0)
+        initial_value=config.CURRENT_METRICS.get("TEST", 1.0)
     )
 
 
 def calc_modularity_objective(path_, arr_):
     arr_[7] = modularity_main(
         path_,
-        initial_value=config.CURRENT_QMOOD_METRICS.get("MODULE", 1.0)
+        initial_value=config.CURRENT_METRICS.get("MODULE", 1.0)
     )
 
 

@@ -67,7 +67,7 @@ LONG_METHOD_PATH = os.path.join(CSV_ROOT_DIR, BENCHMARKS['LONG_METHOD'][BENCHMAR
 
 PROJECT_NAME = os.path.basename(PROJECT_PATH)
 
-INITIAL_QMOOD_METRICS = {
+INITIAL_METRICS = {
     "JSON20201115": {
         "DSC": 26,
         "NOH": 2,
@@ -175,7 +175,7 @@ INITIAL_QMOOD_METRICS = {
     },
 }
 
-CURRENT_QMOOD_METRICS = INITIAL_QMOOD_METRICS.get(PROJECT_NAME)
+CURRENT_METRICS = INITIAL_METRICS.get(PROJECT_NAME)
 
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
