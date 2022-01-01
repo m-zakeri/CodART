@@ -1,4 +1,3 @@
-import os
 import logging
 
 try:
@@ -12,9 +11,7 @@ from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
-# Config logging
-logging.basicConfig(filename='codart_result.log', level=logging.DEBUG)
-logger = logging.getLogger(os.path.basename(__file__))
+logger = logging.getLogger()
 
 
 class PushDownMethodRefactoringListener(JavaParserLabeledListener):
@@ -202,23 +199,17 @@ def main(udb_path, source_package, source_class, method_name, target_classes: li
                 propagation_classes.append(ref.ent().parent().simplename())
                 propagation_lines.append(ref.line())
 
-    print("propagation_files :", propagation_files)
-    print("propagation_classes : ", propagation_classes)
-    print("children_classes :", children_classes)
-    print("children_files :", children_files)
-    print("==============================================================================")
-
     # Check pre-condition
     if not len(target_classes) == 1:
-        print(f"len(target_classes) is not 1.")
+        logger.error(f"len(target_classes) is not 1.")
         db.close()
         return None
     if not len(children_classes) == 1:
-        print(f"len(children_classes) is not 1.")
+        logger.error(f"len(children_classes) is not 1.")
         db.close()
         return None
     if not len(children_files) == 1:
-        print(f"len(children_files) is not 1.")
+        logger.error(f"len(children_files) is not 1.")
         db.close()
         return None
 
@@ -228,7 +219,7 @@ def main(udb_path, source_package, source_class, method_name, target_classes: li
                 if mth.type() == source_method_entity.type():
                     if mth.kind() == source_method_entity.kind():
                         if mth.parameters() == source_method_entity.parameters():
-                            print("Duplicate method")
+                            logger.error("Duplicate method")
                             db.close()
                             return None
 
@@ -237,7 +228,7 @@ def main(udb_path, source_package, source_class, method_name, target_classes: li
         is_public = ref_ent.kind().check("public")
 
         if not is_public:
-            print("Has internal dependencies.")
+            logger.error("Has internal dependencies.")
             db.close()
             return None
 

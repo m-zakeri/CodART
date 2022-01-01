@@ -74,7 +74,6 @@ class MakeFieldStaticRefactoringListener(JavaParserLabeledListener):
 
 
 def main(udb_path, source_class, field_name):
-    print("Make Field Static")
     main_file = ""
     db = und.open(udb_path)
     for cls in db.ents("class"):
@@ -88,7 +87,6 @@ def main(udb_path, source_class, field_name):
     if not os.path.isfile(main_file):
         db.close()
         return
-    print(f"Main File {main_file}", os.path.isfile(main_file))
     stream = FileStream(main_file, encoding='utf8')
     lexer = JavaLexer(stream)
     token_stream = CommonTokenStream(lexer)

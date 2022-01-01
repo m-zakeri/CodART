@@ -7,16 +7,14 @@ RandomInitialization: For initialling random candidates.
 
 __author__ = 'Seyyed Ali Ayati'
 
-import csv
-import random
 import codecs
+import random
 from collections import Counter
 from pathlib import Path
 
 import pandas
 import progressbar
 
-from candidate_reader import CandidateReader
 from config import *
 from refactorings import make_field_non_static, make_field_static, make_method_static_2, \
     make_method_non_static_2, pullup_field, move_field, move_method, move_class, pushdown_field, \
@@ -87,7 +85,7 @@ class Initialization(object):
     def __del__(self):
         logger.info("Understand database closed after initialization.")
         self._und.close()
-    
+
     def get_all_methods(self, static=False):
         candidates = []
         if static:

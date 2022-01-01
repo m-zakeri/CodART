@@ -207,8 +207,6 @@ def main(udb_path: str, children_classes: list, method_name: str):
             return None
 
         for ref in method_ent.refs("Use,Call"):
-            print(ref)
-            print(ref.ent())
             if ref.ent().parent().simplename() in children_classes:
                 logger.error("Method has internal dependencies.")
                 db.close()
