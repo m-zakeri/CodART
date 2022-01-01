@@ -1,50 +1,50 @@
 
-// Generated from D:/AnacondaProjects/CodART/grammars\JavaLexer.g4 by ANTLR 4.9.2
+// Generated from JavaLabeledLexer.g4 by ANTLR 4.9.3
 
 
-#include "JavaLexer.h"
+#include "JavaLabeledLexer.h"
 
 
 using namespace antlr4;
 
 
-JavaLexer::JavaLexer(CharStream *input) : Lexer(input) {
+JavaLabeledLexer::JavaLabeledLexer(CharStream *input) : Lexer(input) {
   _interpreter = new atn::LexerATNSimulator(this, _atn, _decisionToDFA, _sharedContextCache);
 }
 
-JavaLexer::~JavaLexer() {
+JavaLabeledLexer::~JavaLabeledLexer() {
   delete _interpreter;
 }
 
-std::string JavaLexer::getGrammarFileName() const {
-  return "JavaLexer.g4";
+std::string JavaLabeledLexer::getGrammarFileName() const {
+  return "JavaLabeledLexer.g4";
 }
 
-const std::vector<std::string>& JavaLexer::getRuleNames() const {
+const std::vector<std::string>& JavaLabeledLexer::getRuleNames() const {
   return _ruleNames;
 }
 
-const std::vector<std::string>& JavaLexer::getChannelNames() const {
+const std::vector<std::string>& JavaLabeledLexer::getChannelNames() const {
   return _channelNames;
 }
 
-const std::vector<std::string>& JavaLexer::getModeNames() const {
+const std::vector<std::string>& JavaLabeledLexer::getModeNames() const {
   return _modeNames;
 }
 
-const std::vector<std::string>& JavaLexer::getTokenNames() const {
+const std::vector<std::string>& JavaLabeledLexer::getTokenNames() const {
   return _tokenNames;
 }
 
-dfa::Vocabulary& JavaLexer::getVocabulary() const {
+dfa::Vocabulary& JavaLabeledLexer::getVocabulary() const {
   return _vocabulary;
 }
 
-const std::vector<uint16_t> JavaLexer::getSerializedATN() const {
+const std::vector<uint16_t> JavaLabeledLexer::getSerializedATN() const {
   return _serializedATN;
 }
 
-const atn::ATN& JavaLexer::getATN() const {
+const atn::ATN& JavaLabeledLexer::getATN() const {
   return _atn;
 }
 
@@ -52,14 +52,14 @@ const atn::ATN& JavaLexer::getATN() const {
 
 
 // Static vars and initialization.
-std::vector<dfa::DFA> JavaLexer::_decisionToDFA;
-atn::PredictionContextCache JavaLexer::_sharedContextCache;
+std::vector<dfa::DFA> JavaLabeledLexer::_decisionToDFA;
+atn::PredictionContextCache JavaLabeledLexer::_sharedContextCache;
 
 // We own the ATN which in turn owns the ATN states.
-atn::ATN JavaLexer::_atn;
-std::vector<uint16_t> JavaLexer::_serializedATN;
+atn::ATN JavaLabeledLexer::_atn;
+std::vector<uint16_t> JavaLabeledLexer::_serializedATN;
 
-std::vector<std::string> JavaLexer::_ruleNames = {
+std::vector<std::string> JavaLabeledLexer::_ruleNames = {
   "ABSTRACT", "ASSERT", "BOOLEAN", "BREAK", "BYTE", "CASE", "CATCH", "CHAR", 
   "CLASS", "CONST", "CONTINUE", "DEFAULT", "DO", "DOUBLE", "ELSE", "ENUM", 
   "EXTENDS", "FINAL", "FINALLY", "FLOAT", "FOR", "IF", "GOTO", "IMPLEMENTS", 
@@ -79,15 +79,15 @@ std::vector<std::string> JavaLexer::_ruleNames = {
   "HexDigits", "HexDigit", "Digits", "LetterOrDigit", "Letter"
 };
 
-std::vector<std::string> JavaLexer::_channelNames = {
+std::vector<std::string> JavaLabeledLexer::_channelNames = {
   "DEFAULT_TOKEN_CHANNEL", "HIDDEN"
 };
 
-std::vector<std::string> JavaLexer::_modeNames = {
+std::vector<std::string> JavaLabeledLexer::_modeNames = {
   "DEFAULT_MODE"
 };
 
-std::vector<std::string> JavaLexer::_literalNames = {
+std::vector<std::string> JavaLabeledLexer::_literalNames = {
   "", "'abstract'", "'assert'", "'boolean'", "'break'", "'byte'", "'case'", 
   "'catch'", "'char'", "'class'", "'const'", "'continue'", "'default'", 
   "'do'", "'double'", "'else'", "'enum'", "'extends'", "'final'", "'finally'", 
@@ -104,7 +104,7 @@ std::vector<std::string> JavaLexer::_literalNames = {
   "'::'", "'@'", "'...'"
 };
 
-std::vector<std::string> JavaLexer::_symbolicNames = {
+std::vector<std::string> JavaLabeledLexer::_symbolicNames = {
   "", "ABSTRACT", "ASSERT", "BOOLEAN", "BREAK", "BYTE", "CASE", "CATCH", 
   "CHAR", "CLASS", "CONST", "CONTINUE", "DEFAULT", "DO", "DOUBLE", "ELSE", 
   "ENUM", "EXTENDS", "FINAL", "FINALLY", "FLOAT", "FOR", "IF", "GOTO", "IMPLEMENTS", 
@@ -123,11 +123,11 @@ std::vector<std::string> JavaLexer::_symbolicNames = {
   "WS", "COMMENT", "LINE_COMMENT", "IDENTIFIER"
 };
 
-dfa::Vocabulary JavaLexer::_vocabulary(_literalNames, _symbolicNames);
+dfa::Vocabulary JavaLabeledLexer::_vocabulary(_literalNames, _symbolicNames);
 
-std::vector<std::string> JavaLexer::_tokenNames;
+std::vector<std::string> JavaLabeledLexer::_tokenNames;
 
-JavaLexer::Initializer::Initializer() {
+JavaLabeledLexer::Initializer::Initializer() {
   // This code could be in a static initializer lambda, but VS doesn't allow access to private class members from there.
 	for (size_t i = 0; i < _symbolicNames.size(); ++i) {
 		std::string name = _vocabulary.getLiteralName(i);
@@ -852,4 +852,4 @@ JavaLexer::Initializer::Initializer() {
   }
 }
 
-JavaLexer::Initializer JavaLexer::_init;
+JavaLabeledLexer::Initializer JavaLabeledLexer::_init;

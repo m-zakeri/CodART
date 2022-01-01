@@ -1,5 +1,5 @@
 
-// Generated from D:/AnacondaProjects/CodART/grammars\JavaLexer.g4 by ANTLR 4.9.2
+// Generated from JavaLabeledLexer.g4 by ANTLR 4.9.3
 
 #pragma once
 
@@ -9,7 +9,7 @@
 
 
 
-class  JavaLexer : public antlr4::Lexer {
+class  JavaLabeledLexer : public antlr4::Lexer {
 public:
   enum {
     ABSTRACT = 1, ASSERT = 2, BOOLEAN = 3, BREAK = 4, BYTE = 5, CASE = 6, 
@@ -35,8 +35,8 @@ public:
     IDENTIFIER = 111
   };
 
-  explicit JavaLexer(antlr4::CharStream *input);
-  ~JavaLexer();
+  explicit JavaLabeledLexer(antlr4::CharStream *input);
+  ~JavaLabeledLexer();
 
   virtual std::string getGrammarFileName() const override;
   virtual const std::vector<std::string>& getRuleNames() const override;

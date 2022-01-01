@@ -1,4 +1,4 @@
-# Generated from D:/AnacondaProjects/CodART/grammars\JavaLexer.g4 by ANTLR 4.9.2
+# Generated from JavaLabeledLexer.g4 by ANTLR 4.9.3
 from antlr4 import *
 from io import StringIO
 import sys
@@ -440,7 +440,7 @@ def serializedATN():
         return buf.getvalue()
 
 
-class JavaLexer(Lexer):
+class JavaLabeledLexer(Lexer):
 
     atn = ATNDeserializer().deserialize(serializedATN())
 
@@ -622,11 +622,11 @@ class JavaLexer(Lexer):
                   "EscapeSequence", "HexDigits", "HexDigit", "Digits", "LetterOrDigit", 
                   "Letter" ]
 
-    grammarFileName = "JavaLexer.g4"
+    grammarFileName = "JavaLabeledLexer.g4"
 
     def __init__(self, input=None, output:TextIO = sys.stdout):
         super().__init__(input, output)
-        self.checkVersion("4.9.2")
+        self.checkVersion("4.9.3")
         self._interp = LexerATNSimulator(self, self.atn, self.decisionsToDFA, PredictionContextCache())
         self._actions = None
         self._predicates = None
