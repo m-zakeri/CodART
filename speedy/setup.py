@@ -1,7 +1,10 @@
 """
+`java8speedy` module setup
+
+Adding support for Java 8 labeled grammar
 
 """
-__version__ = '0.4.0'
+__version__ = '0.5.0'
 __author__ = 'Morteza'
 
 import sys
@@ -30,10 +33,10 @@ def run_setup(with_binary):
         # Define an Extension object that describes the Antlr accelerator
         parser_ext = setuptools.Extension(
             # Extension name shall be at the same level as the sa_java8_parser.py module
-            name='java8speedy.parser.sa_java_cpp_parser',
+            name='java8speedy.parser.sa_javalabeled_cpp_parser',
 
             # Add the Antlr runtime source directory to the include search path
-            include_dirs=["src/java8speedy/parser/cpp_src/antlr4-cpp-runtime"],
+            include_dirs=["src/java8speedy/parser/cpp_src/antlr4_cpp_runtime"],
 
             # Rather than listing each C++ file (Antlr has a lot!), discover them automatically
             sources=get_files("src/java8speedy/parser/cpp_src", "*.cpp"),
@@ -48,7 +51,7 @@ def run_setup(with_binary):
     # Define a package
     setuptools.setup(
         name='java8speedy',
-        version='1.0.0',
+        version='1.2.0',
         description='Java Speedup Parser',
         packages=setuptools.find_packages("src"),
         package_dir={"": "src"},
