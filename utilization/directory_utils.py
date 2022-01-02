@@ -62,7 +62,7 @@ def update_understand_database(udb_path):
     """
 
     subprocess.Popen(
-        ['und', 'analyze', '-all', udb_path],
+        ['und', 'analyze', '-changed', udb_path],
         stdout=open(os.devnull, 'wb')
     ).wait()
     print("Finished updating...")
