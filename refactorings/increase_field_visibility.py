@@ -13,6 +13,7 @@ from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 logger = logging.getLogger()
+__author__ = "Seyyed Ali Ayati"
 
 
 class IncreaseFieldVisibilityListener(JavaParserLabeledListener):

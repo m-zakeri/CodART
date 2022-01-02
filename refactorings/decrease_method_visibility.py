@@ -1,101 +1,91 @@
-"""
+import logging
 
+from refactorings.utils.utils2 import parse_and_walk
 
-"""
+try:
+    import understand as und
+except ImportError as e:
+    print(e)
 
-__version__ = '0.1.0'
-__author__ = 'IUST-Students'
-
-from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
-from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
-from utilization.setup_understand import *
+logger = logging.getLogger()
+__author__ = "Seyyed Ali Ayati"
 
 
-class DecreaseMethodVisibilityRefactoringListener(JavaParserLabeledListener):
-
-    def __init__(self, common_token_stream: CommonTokenStream = None, source_class=None, method_name=None):
-
-        if method_name is None:
-            self.method_name = []
-        else:
-            self.method_name = method_name
-
-        if source_class is None:
-            self.source_class = []
-        else:
-            self.source_class = source_class
-        if common_token_stream is None:
-            raise ValueError('common_token_stream is None')
-        else:
-            self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
-
-        self.is_source_class = False
+class DecreaseMethodVisibilityListener(JavaParserLabeledListener):
+    def __init__(self, source_class, source_method, rewriter: TokenStreamRewriter):
+        self.source_class = source_class
+        self.source_method = source_method
+        self.in_class = False
+        self.detected_method = False
+        self.rewriter = rewriter
 
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
+        if ctx.IDENTIFIER().getText() == self.source_class:
+            self.in_class = True
 
-        class_identifier = ctx.IDENTIFIER().getText()
-        if class_identifier == self.source_class:
-            self.is_source_class = True
-        else:
-            self.is_source_class = False
+    def exitClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
+        if ctx.IDENTIFIER().getText() == self.source_class:
+            self.in_class = False
 
-    def exitMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
-        if not self.is_source_class:
-            return None
-        grand_parent_ctx = ctx.parentCtx.parentCtx
-        method_identifier = ctx.IDENTIFIER().getText()
-        if self.method_name in method_identifier:
-            if grand_parent_ctx.modifier() == []:
-                self.token_stream_rewriter.replaceRange(
-                    from_idx=ctx.typeTypeOrVoid().start.tokenIndex,
-                    to_idx=ctx.typeTypeOrVoid().stop.tokenIndex,
-                    text='public ' + ctx.typeTypeOrVoid().getText()
-                )
-            elif grand_parent_ctx.modifier(0).getText() == 'private':
-                self.token_stream_rewriter.replaceRange(
-                    from_idx=grand_parent_ctx.modifier(0).start.tokenIndex,
-                    to_idx=grand_parent_ctx.modifier(0).stop.tokenIndex,
-                    text='public')
-            elif grand_parent_ctx.modifier(0).getText() != 'public':
-                self.token_stream_rewriter.replaceRange(
-                    from_idx=grand_parent_ctx.modifier(0).start.tokenIndex,
-                    to_idx=grand_parent_ctx.modifier(0).stop.tokenIndex,
-                    text='public ' + grand_parent_ctx.modifier(0).getText())
+    def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
+        if ctx.IDENTIFIER().getText() == self.source_method:
+            self.detected_method = True
+
+    def exitClassBodyDeclaration2(self, ctx: JavaParserLabeled.ClassBodyDeclaration2Context):
+        if self.detected_method:
+            self.rewriter.replaceSingleToken(
+                token=ctx.modifier(0).start,
+                text="private"
+            )
+            self.detected_method = False
 
 
-def main(udb_path, source_class, method_name):
-    # initialize with understand
-    main_file = ""
+def main(udb_path, source_package, source_class, source_method):
     db = und.open(udb_path)
-    for cls in db.ents("class"):
-        if cls.simplename() == source_class:
-            main_file = cls.parent().longname()
+    method_ent = db.lookup(f"{source_package}.{source_class}.{source_method}", "Method")
 
-    stream = FileStream(main_file, encoding='utf8')
-    lexer = JavaLexer(stream)
-    token_stream = CommonTokenStream(lexer)
-    parser = JavaParserLabeled(token_stream)
-    parser.getTokenStream()
-    parse_tree = parser.compilationUnit()
-    my_listener = DecreaseMethodVisibilityRefactoringListener(common_token_stream=token_stream,
-                                                              source_class=source_class,
-                                                              method_name=method_name)
-    walker = ParseTreeWalker()
-    walker.walk(t=parse_tree, listener=my_listener)
+    if len(method_ent) == 0:
+        logger.error("Invalid inputs.")
+        return
+    method_ent = method_ent[0]
 
-    with open(main_file, mode='w', newline='') as f:
-        f.write(my_listener.token_stream_rewriter.getDefaultText())
+    if method_ent.simplename() != source_method:
+        logger.error("Invalid entity.")
+        return
+
+    if not method_ent.kind().check("Public"):
+        logger.error("Method is not public.")
+        return
+
+    for ent in method_ent.ents("CallBy"):
+        if f"{source_package}.{source_class}" not in ent.longname():
+            logger.error("Method cannot set to private.")
+            return
+
+    parent = method_ent.parent()
+    while parent.parent() is not None:
+        parent = parent.parent()
+
+    main_file = parent.longname()
+    parse_and_walk(
+        file_path=main_file,
+        listener_class=DecreaseMethodVisibilityListener,
+        has_write=True,
+        source_class=source_class,
+        source_method=source_method
+    )
     db.close()
-    return None
+
 
 if __name__ == '__main__':
     main(
-        "D:\Dev\JavaSample\JavaSample1.udb",
-        "Unit",
-        "thisIsVoid"
+        udb_path="D:\Dev\JavaSample\JavaSample\JavaSample.und",
+        source_package="source_package",
+        source_class="Sample",
+        source_method="testMethod"
     )

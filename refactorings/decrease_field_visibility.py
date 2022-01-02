@@ -13,6 +13,7 @@ from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 logger = logging.getLogger()
+__author__ = "Seyyed Ali Ayati"
 
 
 class DecreaseFieldVisibilityListener(JavaParserLabeledListener):
@@ -68,8 +69,8 @@ def main(udb_path, source_package, source_class, source_field):
         logger.error("Field is not public.")
         return
 
-    for ref in field_ent.refs():
-        if f"{source_package}.{source_class}" not in ref.ent().longname():
+    for ent in field_ent.ents("UseBy SetBy"):
+        if f"{source_package}.{source_class}" not in ent.longname():
             logger.error("Field cannot set to private.")
             return
 
