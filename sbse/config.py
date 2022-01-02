@@ -13,7 +13,7 @@ UPPER_BAND = int(os.environ.get("UPPER_BAND"))
 
 PROJECT_ROOT_DIR = os.environ.get("PROJECT_ROOT_DIR")
 CSV_ROOT_DIR = os.environ.get("CSV_ROOT_DIR")
-BENCHMARK_INDEX = 5
+BENCHMARK_INDEX = int(os.environ.get("BENCHMARK_INDEX", 0))
 BENCHMARKS = {
     # Project Path
     'PROJ': ['JSON20201115',

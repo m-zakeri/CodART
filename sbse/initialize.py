@@ -6,6 +6,11 @@ RandomInitialization: For initialling random candidates.
 """
 
 __author__ = 'Seyyed Ali Ayati'
+try:
+    import understand as und
+except ImportError as e:
+    print(e)
+    quit()
 
 import codecs
 import random
@@ -15,12 +20,12 @@ from pathlib import Path
 import pandas
 import progressbar
 
-from config import *
 from refactorings import make_field_non_static, make_field_static, make_method_static_2, \
     make_method_non_static_2, pullup_field, move_field, move_method, move_class, pushdown_field, \
     extract_class, pullup_method, pushdown_method, extract_method, pullup_constructor
 from sbse import config
-from utilization.setup_understand import *
+
+logger = config.logger
 
 
 def get_package_from_class(class_longname: str):
@@ -710,9 +715,9 @@ class SmellInitialization(RandomInitialization):
 if __name__ == '__main__':
     rand_pop = SmellInitialization(
         config.UDB_PATH,
-        population_size=POPULATION_SIZE,
-        lower_band=LOWER_BAND,
-        upper_band=UPPER_BAND
+        population_size=config.POPULATION_SIZE,
+        lower_band=config.LOWER_BAND,
+        upper_band=config.UPPER_BAND
     )
     for i in range(200):
         population = rand_pop.init_extract_method()
