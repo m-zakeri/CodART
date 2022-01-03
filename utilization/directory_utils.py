@@ -1,7 +1,7 @@
 """
 Utilities related to project directory.
 """
-from numba import jit
+# from numba import jit
 import datetime
 import os
 import sys
@@ -182,10 +182,22 @@ def typical_parsing(directory):
 
 
 if __name__ == '__main__':
+    # directory = r'D:/IdeaProjects/JSON20201115/'
+    # directory = r'D:/IdeaProjects/jvlt-1.3.2/'
+    # directory = r'D:/IdeaProjects/ganttproject_1_11_1_original/'
+    # directory = r'D:/IdeaProjects/105_freemind/'
+    # directory = r'D:/IdeaProjects/jfreechart-master_original/'
+    directory = r'D:/IdeaProjects/107_weka/'
+    directory = r'D:/IdeaProjects/104_vuze/'
+    directory = r'D:/IdeaProjects/Zarebin/'
+
+    # trees = parallel_parsing4(directory)
     directory = r'D:/IdeaProjects/JSON20201115/'
     directory = r'D:/IdeaProjects/jvlt-1.3.2/'
     directory = 'D:/IdeaProjects/107_weka/'
     trees = parallel_parsing4(directory)
     # trees = parallel_parsing3(directory)
+    trees = typical_parsing(directory)
+
     # trees = typical_parsing(directory)
     print(f'parse successfully {len(trees)} trees')
