@@ -674,7 +674,8 @@ class SmellInitialization(RandomInitialization):
                 class_file = class_file[0].longname()
             else:
                 continue
-            file_content = codecs.open(class_file, mode='r').read()
+            _bytes = open(class_file, mode='rb').read()
+            file_content = codecs.decode(_bytes, errors='strict')
             lines_info = row[5]
             for i in lines_info.split(")"):
                 if i == '':
@@ -687,6 +688,8 @@ class SmellInitialization(RandomInitialization):
                     start = len(file_content[:char_number].split("\n"))
                     stop = len(file_content[:length].split("\n"))
                     lines += list(range(start, stop + 1))
+            lines = list(set(lines))
+            lines.sort()
             candidates.append({
                 "file_path": class_file,
                 "lines": lines
