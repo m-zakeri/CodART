@@ -55,6 +55,7 @@ class Initialization(object):
         :param population_size: The length of population for GA.
         :param individual_size: The length of individual for GA.
         """
+        random.seed(None)
         self.udb_path = udb_path
         self.population_size = population_size
         self.lower_band = lower_band
