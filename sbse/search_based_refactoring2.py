@@ -531,7 +531,6 @@ def is_equal_2_refactorings_list(a, b):
 
 def binary_tournament(pop, P, **kwargs):
     # The P input defines the tournaments and competitors
-    print("TTTTTTTTT")
     n_tournaments, n_competitors = P.shape
     if n_competitors != 2:
         raise Exception("Only pressure=2 allowed for binary tournament!")
