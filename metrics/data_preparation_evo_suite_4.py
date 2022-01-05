@@ -15,22 +15,10 @@ import threading
 from collections import Counter
 from functools import wraps
 import warnings
-
 from deprecated import deprecated
 
 import re
 import math
-
-# https://scitools.com/support/python-api/
-# Python 3.8 and newer require the user add a call to os.add_dll_directory(“SciTools/bin/“
-# os.add_dll_directory('C:/Program Files/SciTools/bin/pc-win64')
-sys.path.insert(0, 'D:/program files/scitools/bin/pc-win64/python')
-
-try:
-    import understand
-except ModuleNotFoundError:
-    # Error handling
-    pass
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -44,15 +32,25 @@ from sklearn.decomposition import PCA
 from sklearn.model_selection import StratifiedShuffleSplit, train_test_split
 from sklearn.neighbors import LocalOutlierFactor
 from sklearn.ensemble import IsolationForest
-
 from imblearn.combine import SMOTEENN, SMOTETomek
 from imblearn.over_sampling import SMOTE, ADASYN
+
+# https://scitools.com/support/python-api/
+# Python 3.8 and newer require the user add a call to os.add_dll_directory(“SciTools/bin/“
+# os.add_dll_directory('C:/Program Files/SciTools/bin/pc-win64')
+sys.path.insert(0, 'D:/program files/scitools/bin/pc-win64/python')
+try:
+    import understand
+except ModuleNotFoundError:
+    # Error handling
+    pass
 
 from . import metrics_names
 from naming import UnderstandUtility
 from metrics.metrics_jcode_odor import JCodeOdorMetric
 from metrics.source_code_metrics import *
 import metrics.metrics_names
+
 
 __version__ = '0.4.0'
 __author__ = 'Morteza'
@@ -1062,6 +1060,7 @@ class PreProcess:
             db = understand.open(os.path.join(udbs_path, f))
             cls.write_project_classes(project_name=f[:-4], db=db, csv_path=class_list_csv_path_root + f[:-4] + '.csv')
             print('processing understand db file {0} was finished'.format(f))
+            db.close()
 
     @classmethod
     def extract_project_classes(cls, db):
@@ -1121,6 +1120,7 @@ class PreProcess:
             cls.compute_metrics_by_class_list(project_name=f[:-4], database=db, class_list=df, csv_path=csvs_path)
 
             print('processing understand db file {0} was finished'.format(f))
+            db.close()
 
     @classmethod
     def check_compute_metrics_by_class_list(cls, project_name: str = None, database=None, class_list=None,
@@ -2175,11 +2175,12 @@ class PreProcess:
         # df['NumberOfMethod'] = df['CSORD_CountDeclInstanceMethod'] + df['CSORD_CountDeclClassMethod']
         cls.remove_dataclasses(csv_path, csv_new_path)
 
-# Test this module
-# db_path = r'sf110_without_test/104_vuze.udb'
-# db = understand.open(db_path)
-# TestabilityMetrics.compute_java_package_metrics(db=db, class_name='org.eclipse.swt.widgets.Tree2')
-# TestabilityMetrics.compute_java_package_metrics(db=db, class_name='org.gudy.azureus2.platform.macosx.access.jnilib.OSXAccess')
 
-# class_entity = UnderstandUtility.get_class_entity_by_name(db=db, class_name='org.gudy.azureus2.platform.macosx.access.jnilib.OSXAccess')
-# TestabilityMetrics.compute_java_class_metrics2(db=db, entity=class_entity)
+# Test this module
+if __name__ == '__main__':
+    db_path = r'sf110_without_test/104_vuze.udb'
+    # db = understand.open(db_path)
+    # TestabilityMetrics.compute_java_package_metrics(db=db, class_name='org.eclipse.swt.widgets.Tree2')
+    # TestabilityMetrics.compute_java_package_metrics(db=db, class_name='org.gudy.azureus2.platform.macosx.access.jnilib.OSXAccess')
+    # class_entity = UnderstandUtility.get_class_entity_by_name(db=db, class_name='org.gudy.azureus2.platform.macosx.access.jnilib.OSXAccess')
+    # TestabilityMetrics.compute_java_class_metrics2(db=db, entity=class_entity)
