@@ -290,18 +290,13 @@ class ProblemManyObjective(Problem):
         Objective 8: Modularity
     """
 
-    def __init__(self, n_refactorings_lowerbound=50, n_refactorings_upperbound=75):
-        super(ProblemManyObjective, self).__init__(n_var=1,
-                                                   n_obj=8,
-                                                   n_constr=0)
+    def __init__(self, n_refactorings_lowerbound=50, n_refactorings_upperbound=75, evaluate_in_parallel=False):
+        super(ProblemManyObjective, self).__init__(n_var=1, n_obj=8, n_constr=0,)
         self.n_refactorings_lowerbound = n_refactorings_lowerbound
         self.n_refactorings_upperbound = n_refactorings_upperbound
+        self.evaluate_in_parallel=evaluate_in_parallel
 
-    def _evaluate(self,
-                  x,  #
-                  out,
-                  *args,
-                  **kwargs):
+    def _evaluate(self, x, out, *args, **kwargs):
         """
         By default, elementwise_evaluation is set to False, which implies the _evaluate retrieves a set of solutions.
 
@@ -325,36 +320,29 @@ class ProblemManyObjective(Problem):
                 # Update Understand DB
                 update_understand_database(config.UDB_PATH)
 
-            # Stage 2: Computing quality attributes in parallel
+            # Stage 2:
             arr = Array('d', range(8))
-            p1 = Process(target=calc_qmood_objectives, args=(arr,))
-            p2 = Process(target=calc_testability_objective, args=(config.UDB_PATH, arr,))
-            p3 = Process(target=calc_modularity_objective, args=(config.UDB_PATH, arr,))
-            p1.start(), p2.start(), p3.start()
-            p1.join(), p2.join(), p3.join()
-
-            # qmood = Objectives(udb_path=config.UDB_PATH)
-            # o1 = qmood.reusability
-            # o2 = qmood.understandability
-            # o3 = qmood.flexibility
-            # o4 = qmood.functionality
-            # o5 = qmood.effectiveness
-            # o6 = qmood.extendability
-            # del qmood
-            # o7 = testability_main(config.UDB_PATH)
-            # o8 = modularity_main(config.UDB_PATH)
-
-            # logger.info(f'Reusability Score: {o1}')
-            # logger.info(f'Understandability Score: {o2}')
-            # logger.info(f'Flexibility Score: {o3}')
-            # logger.info(f'Functionality Score: {o4}')
-            # logger.info(f'Effectiveness Score: {o5}')
-            # logger.info(f'Extendability Score: {o6}')
-            # logger.info(f'Testability Score: {o7}')
-            # logger.info(f'Modularity Score: {o8}')
+            if self.evaluate_in_parallel:
+                # Stage 2 (parallel mood): Computing quality attributes
+                p1 = Process(target=calc_qmood_objectives, args=(arr,))
+                p2 = Process(target=calc_testability_objective, args=(config.UDB_PATH, arr,))
+                p3 = Process(target=calc_modularity_objective, args=(config.UDB_PATH, arr,))
+                p1.start(), p2.start(), p3.start()
+                p1.join(), p2.join(), p3.join()
+            else:
+                # Stage 2 (sequential mood): Computing quality attributes
+                qmood = Objectives(udb_path=config.UDB_PATH)
+                arr[0] = qmood.reusability
+                arr[1] = qmood.understandability
+                arr[2] = qmood.flexibility
+                arr[3] = qmood.functionality
+                arr[4] = qmood.effectiveness
+                arr[5] = qmood.extendability
+                arr[6] = testability_main(config.UDB_PATH)
+                arr[7] = modularity_main(config.UDB_PATH)
+                del qmood
 
             # Stage 3: Marshal objectives into vector
-            # objective_values.append([-1 * o1, -1 * o2, -1 * o3, -1 * o4, -1 * o5, -1 * o6, -1 * o7, -1 * o8, ])
             objective_values.append([-1 * i for i in arr])
             logger.info(f"Objective values for individual {k}: {[i for i in arr]}")
 
@@ -530,6 +518,7 @@ def is_equal_2_refactorings_list(a, b):
     The duplicate instances are removed from population at each generation.
     Only one instance is held to speed up the search algorithm
     """
+
     if len(a.X[0]) != len(b.X[0]):
         return False
     for i, ro in enumerate(a.X[0]):
@@ -542,6 +531,7 @@ def is_equal_2_refactorings_list(a, b):
 
 def binary_tournament(pop, P, **kwargs):
     # The P input defines the tournaments and competitors
+    print("TTTTTTTTT")
     n_tournaments, n_competitors = P.shape
     if n_competitors != 2:
         raise Exception("Only pressure=2 allowed for binary tournament!")
@@ -609,7 +599,7 @@ def main():
     problems.append(ProblemMultiObjective(n_refactorings_lowerbound=config.LOWER_BAND,
                                           n_refactorings_upperbound=config.UPPER_BAND))
     problems.append(ProblemManyObjective(n_refactorings_lowerbound=config.LOWER_BAND,
-                                         n_refactorings_upperbound=config.UPPER_BAND))
+                                         n_refactorings_upperbound=config.UPPER_BAND, evaluate_in_parallel=True))
 
     # Termination of algorithms
     my_termination = MultiObjectiveDefaultTermination(
