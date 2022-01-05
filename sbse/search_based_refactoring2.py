@@ -268,7 +268,7 @@ def calc_qmood_objectives(arr_):
     arr_[5] = qmood.extendability
 
 
-def calc_testability_objective(path_, initial_value, arr_):
+def calc_testability_objective(path_, arr_):
     arr_[6] = testability_main(
         path_,
         initial_value=config.CURRENT_METRICS.get("TEST", 1.0)
