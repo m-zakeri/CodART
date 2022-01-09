@@ -1,26 +1,20 @@
 """
 Utilities related to project directory.
 """
-# from numba import jit
 import datetime
 import os
-import sys
-
-# print(sys.getrecursionlimit())
-# quit()
-# sys.setrecursionlimit(sys.getrecursionlimit()*10000)
 import subprocess
-from multiprocessing.dummy import Pool, Process, Value, Array, Manager
+from multiprocessing.dummy import Pool, Process, Manager
 
 from antlr4 import FileStream, CommonTokenStream
-import traceback
-from joblib.externals.loky import set_loky_pickler
-from joblib import parallel_backend
+from antlr4.TokenStreamRewriter import TokenStreamRewriter
 from joblib import Parallel, delayed
-from joblib import wrap_non_picklable_objects
 
 from gen.java.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
+from sbse import config
+from java8speedy.parser import sa_javalabeled
+from java8speedy.parser import JavaLabeledLexer
 
 
 def git_restore(project_dir):
@@ -100,23 +94,19 @@ def get_java_files(directory):
                 # yield FileStream(os.path.join(root, file), encoding="utf8")
 
 
-# @wrap_non_picklable_objects
-def create_project_parse_tree(java_file_path, enable_cpp=True):
+def create_project_parse_tree(java_file_path):
+    tree = None
+    rewriter = None
     try:
-        if enable_cpp:
-            from java8speedy.parser import sa_javalabeled
-            x__ = sa_javalabeled._cpp_parse(FileStream(java_file_path), 'compilationUnit')
-        else:
-            parser = JavaParserLabeled(CommonTokenStream(JavaLexer(FileStream(java_file_path))))
-            x__ = parser.compilationUnit()
-    except:
-        x__ = None
+        file_stream = FileStream(java_file_path)
+        sa_javalabeled.USE_CPP_IMPLEMENTATION = config.USE_CPP_BACKEND
+        tree = sa_javalabeled.parse(file_stream, 'compilationUnit')
+        tokens = tree.parser.getInputStream()
+        rewriter = TokenStreamRewriter(tokens)
+    except Exception as e:
         print(f'Encounter a parsing error on file {java_file_path}')
-
-    # print(f'parsing {type(x__)}')
-    # qu.put(x__)
-    # shared_set.add(x__)
-    return x__
+        print(e)
+    return tree, rewriter
 
 
 def parallel_parsing(directory):

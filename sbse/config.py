@@ -10,7 +10,7 @@ POPULATION_SIZE = int(os.environ.get("POPULATION_SIZE"))  # Should be set to 190
 MAX_ITERATIONS = int(os.environ.get("MAX_ITERATIONS"))  # Should be set to 700 or 1000 or 1400 for NSGA-III
 LOWER_BAND = int(os.environ.get("LOWER_BAND"))
 UPPER_BAND = int(os.environ.get("UPPER_BAND"))
-
+USE_CPP_BACKEND = bool(int(os.environ.get("USE_CPP_BACKEND")))
 PROJECT_ROOT_DIR = os.environ.get("PROJECT_ROOT_DIR")
 CSV_ROOT_DIR = os.environ.get("CSV_ROOT_DIR")
 BENCHMARK_INDEX = int(os.environ.get("BENCHMARK_INDEX", 0))
