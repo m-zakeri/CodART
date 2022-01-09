@@ -155,109 +155,7 @@ class Individual(List):
         self.insert(len(self.refactoring_operations), __object)
 
 
-class ProblemSingleObjective(ElementwiseProblem):
-    """
-        The CodART single-objective optimization work with only one objective, testability:
-        """
-
-    def __init__(self, n_refactorings_lowerbound=50, n_refactorings_upperbound=75):
-        super(ProblemSingleObjective, self).__init__(n_var=1,
-                                                     n_obj=1,
-                                                     n_constr=0)
-        self.n_refactorings_lowerbound = n_refactorings_lowerbound
-        self.n_refactorings_upperbound = n_refactorings_upperbound
-
-    def _evaluate(self,
-                  x,  #
-                  out,
-                  *args,
-                  **kwargs):
-        """
-        This method iterate over an Individual, execute the refactoring operation sequentially,
-        and compute quality attributes for the refactored version of the program, as objectives of the search
-
-        params:
-        x[0] (Individual): x[0] is an instance of Individual (i.e., a list of refactoring operations)
-
-        """
-        # Stage 0: Git restore
-        logger.debug("Executing git restore.")
-        git_restore(config.PROJECT_PATH)
-        update_understand_database(config.UDB_PATH)
-        # Stage 1: Execute all refactoring operations in the sequence x
-        logger.debug(f"Reached Individual with Size {len(x[0])}")
-        for refactoring_operation in x[0]:
-            refactoring_operation.do_refactoring()
-            # Update Understand DB
-            update_understand_database(config.UDB_PATH)
-        # Stage 2: Computing quality attributes
-        score = testability_main(
-            config.UDB_PATH,
-            initial_value=config.CURRENT_METRICS.get("TEST", 1.0)
-        )
-        logger.info(f"Testability Score: {score}")
-        # Stage 3: Marshal objectives into vector
-        out["F"] = np.array([-1 * score], dtype=float)
-
-
-class ProblemMultiObjective(ElementwiseProblem):
-    """
-    The CodART multi-objective optimization work with three objective:
-        Objective 1: Mean value of QMOOD metrics
-        Objective 2: Testability
-        Objective 3: Modularity
-    """
-
-    def __init__(self, n_refactorings_lowerbound=50, n_refactorings_upperbound=75):
-        super(ProblemMultiObjective, self).__init__(n_var=1,
-                                                    n_obj=3,
-                                                    n_constr=0)
-        self.n_refactorings_lowerbound = n_refactorings_lowerbound
-        self.n_refactorings_upperbound = n_refactorings_upperbound
-
-    def _evaluate(self,
-                  x,  #
-                  out,
-                  *args,
-                  **kwargs):
-        """
-        This method iterate over an Individual, execute the refactoring operation sequentially,
-        and compute quality attributes for the refactored version of the program, as objectives of the search
-
-        params:
-        x (Individual): x is an instance of Individual (i.e., a list of refactoring operations)
-
-        """
-        # Stage 0: Git restore
-        logger.debug("Executing git restore.")
-        git_restore(config.PROJECT_PATH)
-        update_understand_database(config.UDB_PATH)
-        # Stage 1: Execute all refactoring operations in the sequence x
-        logger.debug(f"Reached Individual with Size {len(x[0])}")
-        for refactoring_operation in x[0]:
-            refactoring_operation.do_refactoring()
-            # Update Understand DB
-            update_understand_database(config.UDB_PATH)
-
-        # Stage 2: Computing quality attributes
-        obj = Objectives(udb_path=config.UDB_PATH)
-        o1 = obj.average
-        del obj
-        o2 = testability_main(
-            config.UDB_PATH,
-            initial_value=config.CURRENT_METRICS.get("TEST", 1.0)
-        )
-        o3 = modularity_main(
-            config.UDB_PATH,
-            initial_value=config.CURRENT_METRICS.get("MODULE", 1.0)
-        )
-        logger.info(f"QMOOD AVG Score: {o1}")
-        logger.info(f"Testability Score: {o2}")
-        logger.info(f"Modularity Score: {o3}")
-        # Stage 3: Marshal objectives into vector
-        out["F"] = np.array([-1 * o1, -1 * o2, -1 * o3], dtype=float)
-
-
+# ---------------------- Defines objectives calculation functions -----------------------
 def calc_qmood_objectives(arr_):
     qmood = Objectives(udb_path=config.UDB_PATH)
     arr_[0] = qmood.reusability
@@ -280,6 +178,156 @@ def calc_modularity_objective(path_, arr_):
         path_,
         initial_value=config.CURRENT_METRICS.get("MODULE", 1.0)
     )
+
+
+# ---------------------- Defines problems ----------------------------
+class ProblemSingleObjective(Problem):
+    """
+        The CodART single-objective optimization work with only one objective, testability:
+    """
+
+    def __init__(self, n_refactorings_lowerbound=50, n_refactorings_upperbound=75,
+                 evaluate_in_parallel=False,
+                 mode='single'  # 'multi'
+                 ):
+        super(ProblemSingleObjective, self).__init__(n_var=1,
+                                                     n_obj=1,
+                                                     n_constr=0)
+        self.n_refactorings_lowerbound = n_refactorings_lowerbound
+        self.n_refactorings_upperbound = n_refactorings_upperbound
+        self.evaluate_in_parallel = evaluate_in_parallel
+        self.mode = mode
+
+    def _evaluate(self,
+                  x,  #
+                  out,
+                  *args,
+                  **kwargs):
+        """
+        This method iterate over an Individual, execute the refactoring operation sequentially,
+        and compute quality attributes for the refactored version of the program, as objectives of the search
+
+        params:
+        x (Population): x is a matrix where each row is an individual, and each column a variable.
+            We have one variable of type list (Individual) ==> x.shape = (len(Population), 1)
+
+        """
+        objective_values = []
+        for k, individual_ in enumerate(x):
+            # Stage 0: Git restore
+            logger.debug("Executing git restore.")
+            git_restore(config.PROJECT_PATH)
+            update_understand_database(config.UDB_PATH)
+
+            # Stage 1: Execute all refactoring operations in the sequence x
+            logger.debug(f"Reached Individual with Size {len(individual_[0])}")
+            for refactoring_operation in individual_[0]:
+                refactoring_operation.do_refactoring()
+                # Update Understand DB
+                update_understand_database(config.UDB_PATH)
+
+            # Stage 2:
+            if self.mode == 'single':
+                # Stage 2 (Single objective mode): Considering only one quality attribute, e.g., testability
+                score = testability_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("TEST", 1.0))
+            else:
+                # Stage 2 (Multi-objective mode): Considering one objective based on average of 8 objective
+                arr = Array('d', range(8))
+                if self.evaluate_in_parallel:
+                    # Stage 2 (Multi-objective mode, parallel): Computing quality attributes
+                    p1 = Process(target=calc_qmood_objectives, args=(arr,))
+                    p2 = Process(target=calc_testability_objective, args=(config.UDB_PATH, arr,))
+                    p3 = Process(target=calc_modularity_objective, args=(config.UDB_PATH, arr,))
+                    p1.start(), p2.start(), p3.start()
+                    p1.join(), p2.join(), p3.join()
+                    score = sum([i for i in arr]) / 8.
+                else:
+                    # Stage 2 (Multi-objective mode, sequential): Computing quality attributes
+                    qmoods = Objectives(udb_path=config.UDB_PATH)
+                    o1 = qmoods.average
+                    o2 = testability_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("TEST", 1.0))
+                    o3 = modularity_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("MODULE", 1.0))
+                    del qmoods
+                    score = (o1*6. + o2 + o3) / 8.
+
+            # Stage 3: Marshal objectives into vector
+            objective_values.append([-1 * score])
+            logger.info(f"Objective values for individual {k} in mode {self.mode}: {[-1* score]}")
+
+        # Stage 4: Marshal all objectives into out dictionary
+        out['F'] = np.array(objective_values, dtype=float)
+
+
+class ProblemMultiObjective(Problem):
+    """
+    The CodART multi-objective optimization work with three objective:
+        Objective 1: Mean value of QMOOD metrics
+        Objective 2: Testability
+        Objective 3: Modularity
+    """
+
+    def __init__(self, n_refactorings_lowerbound=50, n_refactorings_upperbound=75, evaluate_in_parallel=False):
+        super(ProblemMultiObjective, self).__init__(n_var=1,
+                                                    n_obj=3,
+                                                    n_constr=0)
+        self.n_refactorings_lowerbound = n_refactorings_lowerbound
+        self.n_refactorings_upperbound = n_refactorings_upperbound
+        self.evaluate_in_parallel = evaluate_in_parallel
+
+    def _evaluate(self,
+                  x,  #
+                  out,
+                  *args,
+                  **kwargs):
+        """
+        This method iterate over an Individual, execute the refactoring operation sequentially,
+        and compute quality attributes for the refactored version of the program, as objectives of the search
+
+        params:
+        x (Population): x is a matrix where each row is an individual, and each column a variable.
+            We have one variable of type list (Individual) ==> x.shape = (len(Population), 1)
+
+        """
+        objective_values = []
+        for k, individual_ in enumerate(x):
+            # Stage 0: Git restore
+            logger.debug("Executing git restore.")
+            git_restore(config.PROJECT_PATH)
+            update_understand_database(config.UDB_PATH)
+
+            # Stage 1: Execute all refactoring operations in the sequence x
+            logger.debug(f"Reached Individual with Size {len(individual_[0])}")
+            for refactoring_operation in individual_[0]:
+                refactoring_operation.do_refactoring()
+                # Update Understand DB
+                update_understand_database(config.UDB_PATH)
+
+            # Stage 2:
+            arr = Array('d', range(8))
+            if self.evaluate_in_parallel:
+                # Stage 2 (parallel mood): Computing quality attributes
+                p1 = Process(target=calc_qmood_objectives, args=(arr,))
+                p2 = Process(target=calc_testability_objective, args=(config.UDB_PATH, arr,))
+                p3 = Process(target=calc_modularity_objective, args=(config.UDB_PATH, arr,))
+                p1.start(), p2.start(), p3.start()
+                p1.join(), p2.join(), p3.join()
+                o1 = sum([i for i in arr[:6]]) / 6.
+                o2 = arr[7]
+                o3 = arr[8]
+            else:
+                # Stage 2 (sequential mood): Computing quality attributes
+                qmoods = Objectives(udb_path=config.UDB_PATH)
+                o1 = qmoods.average
+                o2 = testability_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("TEST", 1.0))
+                o3 = modularity_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("MODULE", 1.0))
+                del qmoods
+
+            # Stage 3: Marshal objectives into vector
+            objective_values.append([-1 * o1, -1 * o2, -1 * o3])
+            logger.info(f"Objective values for individual {k}: {[-1 * o1, -1 * o2, -1 * o3]}")
+
+        # Stage 4: Marshal all objectives into out dictionary
+        out['F'] = np.array(objective_values, dtype=float)
 
 
 class ProblemManyObjective(Problem):
@@ -338,8 +386,8 @@ class ProblemManyObjective(Problem):
                 arr[3] = qmood.functionality
                 arr[4] = qmood.effectiveness
                 arr[5] = qmood.extendability
-                arr[6] = testability_main(config.UDB_PATH)
-                arr[7] = modularity_main(config.UDB_PATH)
+                arr[6] = testability_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("TEST", 1.0))
+                arr[7] = modularity_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("MODULE", 1.0))
                 del qmood
 
             # Stage 3: Marshal objectives into vector
