@@ -2,6 +2,7 @@ from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 
 from refactorings.utils.utils_listener_fast import *
+from utilization.directory_utils import create_project_parse_tree
 
 
 def get_program(source_files: list, print_status=False) -> Program:
@@ -126,14 +127,11 @@ def get_program_with_field_usage(source_files: list, field_name: str, source_cla
 
 
 def parse_and_walk(file_path: str, listener_class, has_write=False, **kwargs):
-    stream = FileStream(file_path)
-    lexer = JavaLexer(stream)
-    tokens = CommonTokenStream(lexer)
-    rewriter = TokenStreamRewriter(tokens)
+    tree, rewriter = create_project_parse_tree(file_path)
     if has_write:
+        if rewriter is None:
+            raise Exception("Failed to create rewriter.")
         kwargs.update({'rewriter': rewriter})
-    parser = JavaParserLabeled(tokens)
-    tree = parser.compilationUnit()
     listener = listener_class(**kwargs)
     ParseTreeWalker().walk(
         listener,
