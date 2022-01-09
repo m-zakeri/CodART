@@ -45,7 +45,7 @@ from pymoo.optimize import minimize
 from pymoo.util.termination.default import MultiObjectiveDefaultTermination
 
 from metrics.modularity import main as modularity_main
-from metrics.testability_prediction import main as testability_main
+from metrics.testability_prediction2 import main as testability_main
 from sbse import config
 from sbse.config import logger
 from sbse.initialize import RandomInitialization
