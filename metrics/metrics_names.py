@@ -367,6 +367,7 @@ class_ordinary_metrics_names_primary = [
     'SumKnots',
     'NumberOfDepends',
     'NumberOfDependsBy',
+    'NumberOfMethods'
 ]
 
 # Package-level metrics
@@ -732,3 +733,4 @@ top20_metrics = [
 #       '\nNumber of all metrics:', all_metrics)  # 281
 
 # number of metric in version 0.2.0: 89
+# print(len(class_lexicon_metrics_names))
