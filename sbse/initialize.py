@@ -635,7 +635,7 @@ class RandomInitialization(Initialization):
             "source_class": method["source_class"],
             "source_method": method["method_name"],
         })
-        return refactoring_main, params, 'Increase Field Visibility'
+        return refactoring_main, params, 'Increase Method Visibility'
 
 
 def get_move_method_location(row):
