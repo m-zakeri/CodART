@@ -20,8 +20,9 @@ from gen.javaLabeled.JavaLexer import JavaLexer
 
 class EncapsulateFiledRefactoringListener(JavaParserLabeledListener):
     """
-    To implement the encapsulate filed refactored
-    Encapsulate field: Make a public field private and provide accessors
+    To implement the encapsulate field refactoring
+    make a public field private and provide
+    accessors and mutator methods.
     """
 
     #
@@ -30,7 +31,9 @@ class EncapsulateFiledRefactoringListener(JavaParserLabeledListener):
                  source_class_name: str = None,
                  field_identifier: str = None):
         """
-        :param common_token_stream:
+        :param common_token_stream: contains the program tokens
+        :param source_class_name: contains the enclosing class of the field
+        :param field_identifier: the field name to be encapsulated
         """
         self.token_stream = common_token_stream
         if package_name is None:
@@ -43,6 +46,7 @@ class EncapsulateFiledRefactoringListener(JavaParserLabeledListener):
         self.setter_exist = False
         self.in_source_class = False
         self.in_selected_package = True if self.package_name == '' else False
+
         # Move all the tokens in the source code in a buffer, token_stream_rewriter.
         if common_token_stream is not None:
             self.token_stream_rewriter = \
