@@ -22,7 +22,8 @@ import progressbar
 
 from refactorings import make_field_non_static, make_field_static, make_method_static_2, \
     make_method_non_static_2, pullup_field, move_field, move_method, move_class, pushdown_field, \
-    extract_class, pullup_method, pushdown_method, extract_method, pullup_constructor
+    extract_class, pullup_method, pushdown_method, extract_method, pullup_constructor, decrease_method_visibility, \
+    increase_method_visibility, decrease_field_visibility, increase_field_visibility
 from sbse import config
 
 logger = config.logger
@@ -355,6 +356,18 @@ class Initialization(object):
     def init_extract_method(self):
         pass
 
+    def init_decrease_field_visibility(self):
+        pass
+
+    def init_decrease_method_visibility(self):
+        pass
+
+    def init_increase_field_visibility(self):
+        pass
+
+    def init_increase_method_visibility(self):
+        pass
+
     def select_random(self):
         """
         Randomly selects a refactoring. If there are no candidates it tries again!
@@ -592,6 +605,22 @@ class RandomInitialization(Initialization):
     def init_extract_method(self):
         raise IndexError
 
+    def init_increase_field_visibility(self):
+        """
+        Finds a private field to increase its visibility to public.
+        Returns:
+            the refactoring main func, its parameters and its name
+        """
+        refactoring_main = increase_field_visibility
+        params = {"udb_path": str(Path(self.udb_path))}
+        field = random.choice(self._variables)
+        params.update({
+            "source_package": field["source_package"],
+            "source_class": field["source_class"],
+            "source_field": field["field_name"],
+        })
+        return refactoring_main, params, 'Increase Field Visibility'
+
 
 def get_move_method_location(row):
     class_info, method_info = row.split("::")
@@ -717,16 +746,11 @@ class SmellInitialization(RandomInitialization):
 
 
 if __name__ == '__main__':
-    rand_pop = SmellInitialization(
+    rand_pop = RandomInitialization(
         config.UDB_PATH,
         population_size=config.POPULATION_SIZE,
         lower_band=config.LOWER_BAND,
         upper_band=config.UPPER_BAND
     )
-    for i in range(200):
-        population = rand_pop.init_extract_method()
-        print(population)
-        population = rand_pop.init_extract_class()
-        print(population)
-        population = rand_pop.init_move_method()
-        print(population)
+    candidate = rand_pop.init_increase_field_visibility()
+    print(candidate)
