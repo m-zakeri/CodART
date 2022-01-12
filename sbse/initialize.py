@@ -621,6 +621,22 @@ class RandomInitialization(Initialization):
         })
         return refactoring_main, params, 'Increase Field Visibility'
 
+    def init_increase_method_visibility(self):
+        """
+        Finds a private method to increase its visibility to public.
+        Returns:
+            the refactoring main func, its parameters and its name
+        """
+        refactoring_main = increase_method_visibility
+        params = {"udb_path": str(Path(self.udb_path))}
+        method = random.choice(self._methods)
+        params.update({
+            "source_package": method["source_package"],
+            "source_class": method["source_class"],
+            "source_method": method["method_name"],
+        })
+        return refactoring_main, params, 'Increase Field Visibility'
+
 
 def get_move_method_location(row):
     class_info, method_info = row.split("::")
@@ -752,5 +768,5 @@ if __name__ == '__main__':
         lower_band=config.LOWER_BAND,
         upper_band=config.UPPER_BAND
     )
-    candidate = rand_pop.init_increase_field_visibility()
+    candidate = rand_pop.init_increase_method_visibility()
     print(candidate)
