@@ -120,8 +120,20 @@ class Initialization(object):
                 source_package = ".".join(long_name[:-1])
             else:
                 continue
+
+            is_public = ent.kind().check('public')
+            is_private = ent.kind().check('private')
+            external_references = 0
+            for ref in ent.refs('CallBy, OverrideBy'):
+                if '.'.join(long_name[:-1]) not in ref.ent().longname():
+                    external_references += 1
+
             candidates.append(
-                {'source_package': source_package, 'source_class': source_class, 'method_name': method_name})
+                {
+                    'source_package': source_package, 'source_class': source_class, 'method_name': method_name,
+                    'is_public': is_public, 'is_private': is_private, 'external_references': external_references
+                }
+            )
         return candidates
 
     def get_all_variables(self, static=False):
@@ -150,8 +162,19 @@ class Initialization(object):
                 source_class, field_name = long_name
             else:
                 continue
+
+            is_public = ent.kind().check('public')
+            is_private = ent.kind().check('private')
+            external_references = 0
+            for ref in ent.refs('SetBy, UseBy'):
+                if '.'.join(long_name[:-1]) not in ref.ent().longname():
+                    external_references += 1
             candidates.append(
-                {'source_package': source_package, 'source_class': source_class, 'field_name': field_name})
+                {
+                    'source_package': source_package, 'source_class': source_class, 'field_name': field_name,
+                    'is_public': is_public, 'is_private': is_private, 'external_references': external_references
+                }
+            )
         return candidates
 
     def get_all_class_entities(self, filter="class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static"):
@@ -613,7 +636,8 @@ class RandomInitialization(Initialization):
         """
         refactoring_main = increase_field_visibility
         params = {"udb_path": str(Path(self.udb_path))}
-        field = random.choice(self._variables)
+        candidates = list(filter(lambda d: d['is_private'] is True, self._variables))
+        field = random.choice(candidates)
         params.update({
             "source_package": field["source_package"],
             "source_class": field["source_class"],
@@ -629,13 +653,48 @@ class RandomInitialization(Initialization):
         """
         refactoring_main = increase_method_visibility
         params = {"udb_path": str(Path(self.udb_path))}
-        method = random.choice(self._methods)
+        candidates = list(filter(lambda d: d['is_private'] is True, self._methods))
+        method = random.choice(candidates)
         params.update({
             "source_package": method["source_package"],
             "source_class": method["source_class"],
             "source_method": method["method_name"],
         })
         return refactoring_main, params, 'Increase Method Visibility'
+
+    def init_decrease_field_visibility(self):
+        """
+        Finds a none-external-reference-public field to decrease its visibility to private.
+        Returns:
+            the refactoring main func, its parameters and its name
+        """
+        refactoring_main = increase_method_visibility
+        params = {"udb_path": str(Path(self.udb_path))}
+        candidates = list(filter(lambda d: d['is_public'] is True and d['external_references'] == 0, self._variables))
+        field = random.choice(candidates)
+        params.update({
+            "source_package": field["source_package"],
+            "source_class": field["source_class"],
+            "source_field": field["field_name"],
+        })
+        return refactoring_main, params, 'Decrease Field Visibility'
+
+    def init_decrease_method_visibility(self):
+        """
+        Finds a none-external-reference-public method to decrease its visibility to private.
+        Returns:
+            the refactoring main func, its parameters and its name
+        """
+        refactoring_main = decrease_method_visibility
+        params = {"udb_path": str(Path(self.udb_path))}
+        candidates = list(filter(lambda d: d['is_public'] is True and d['external_references'] == 0, self._methods))
+        method = random.choice(candidates)
+        params.update({
+            "source_package": method["source_package"],
+            "source_class": method["source_class"],
+            "source_method": method["method_name"],
+        })
+        return refactoring_main, params, 'Decrease Method Visibility'
 
 
 def get_move_method_location(row):
