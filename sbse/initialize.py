@@ -668,7 +668,7 @@ class RandomInitialization(Initialization):
         Returns:
             the refactoring main func, its parameters and its name
         """
-        refactoring_main = increase_method_visibility
+        refactoring_main = decrease_field_visibility
         params = {"udb_path": str(Path(self.udb_path))}
         candidates = list(filter(lambda d: d['is_public'] is True and d['external_references'] == 0, self._variables))
         field = random.choice(candidates)
