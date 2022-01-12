@@ -76,6 +76,10 @@ class Initialization(object):
             self.init_push_down_method,
             # self.init_extract_method,
             self.init_pullup_constructor,
+            self.init_decrease_field_visibility,
+            self.init_increase_field_visibility,
+            self.init_decrease_method_visibility,
+            self.init_increase_method_visibility
         )
 
         self._und = und.open(self.udb_path)
