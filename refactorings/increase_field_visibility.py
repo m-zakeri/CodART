@@ -52,7 +52,7 @@ class IncreaseFieldVisibilityListener(JavaParserLabeledListener):
             self.detected_field = False
 
 
-def main(udb_path, source_package, source_class, source_field):
+def main(udb_path, source_package, source_class, source_field, *args, **kwargs):
     db = und.open(udb_path)
     field_ent = db.lookup(f"{source_package}.{source_class}.{source_field}", "Variable")
 

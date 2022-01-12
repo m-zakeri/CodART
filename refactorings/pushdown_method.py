@@ -168,7 +168,7 @@ class PropagationStaticListener(PropagationListener):
             )
 
 
-def main(udb_path, source_package, source_class, method_name, target_classes: list):
+def main(udb_path, source_package, source_class, method_name, target_classes: list, *args, **kwargs):
     target_package = source_package
     source_method = method_name
 

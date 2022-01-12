@@ -177,7 +177,7 @@ class PropagationPullUpMethodRefactoringListener(JavaParserLabeledListener):
             self.is_class = False
 
 
-def main(udb_path: str, children_classes: list, method_name: str):
+def main(udb_path: str, children_classes: list, method_name: str, *args, **kwargs):
     if len(children_classes) <= 1:
         logger.error("len(children_classes) should be gte 2")
         return None

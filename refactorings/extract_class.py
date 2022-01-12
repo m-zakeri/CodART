@@ -548,7 +548,7 @@ def get_java_files(directory):
                 yield os.path.join(root, file), file
 
 
-def main(udb_path, file_path, source_class, moved_fields, moved_methods):
+def main(udb_path, file_path, source_class, moved_fields, moved_methods, *args, **kwargs):
     new_class = f"{source_class}Extracted"
     new_file_path = os.path.join(Path(file_path).parent, f"{new_class}.java")
 

@@ -202,7 +202,7 @@ def test():
             print("1, 2, " + str(i + 1) + ": Cannot refactor.")
 
 
-def main(project_dir, source_package, source_class, field_name, target_classes: list):
+def main(project_dir, source_package, source_class, field_name, target_classes: list, *args, **kwargs):
     print("Success!" if PushDownField(
         utils2.get_filenames_in_dir(project_dir),
         package_name=source_package,

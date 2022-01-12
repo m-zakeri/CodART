@@ -45,7 +45,7 @@ class DecreaseMethodVisibilityListener(JavaParserLabeledListener):
             self.detected_method = False
 
 
-def main(udb_path, source_package, source_class, source_method):
+def main(udb_path, source_package, source_class, source_method, *args, **kwargs):
     db = und.open(udb_path)
     method_ent = db.lookup(f"{source_package}.{source_class}.{source_method}", "Method")
 

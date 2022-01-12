@@ -129,7 +129,7 @@ class CheckCycleListener(JavaParserLabeledListener):
 
 
 def main(source_class: str, source_package: str, target_class: str, target_package: str, field_name: str,
-         udb_path: str):
+         udb_path: str, *args, **kwargs):
     import_statement = None
     if source_package != target_package:
         import_statement = f"\nimport {target_package}.{target_class};"

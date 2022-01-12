@@ -52,7 +52,7 @@ class DecreaseFieldVisibilityListener(JavaParserLabeledListener):
             self.detected_field = False
 
 
-def main(udb_path, source_package, source_class, source_field):
+def main(udb_path, source_package, source_class, source_field, *args, **kwargs):
     db = und.open(udb_path)
     field_ent = db.lookup(f"{source_package}.{source_class}.{source_field}", "Variable")
 
@@ -69,8 +69,10 @@ def main(udb_path, source_package, source_class, source_field):
         logger.error("Field is not public.")
         return
 
-    for ent in field_ent.ents("UseBy SetBy"):
+    for ref in field_ent.refs("UseBy,SetBy"):
+        ent = ref.ent()
         if f"{source_package}.{source_class}" not in ent.longname():
+            logger.debug(f"{source_package}.{source_class} not in {ent.longname()}")
             logger.error("Field cannot set to private.")
             return
 

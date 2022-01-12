@@ -22,7 +22,8 @@ import progressbar
 
 from refactorings import make_field_non_static, make_field_static, make_method_static_2, \
     make_method_non_static_2, pullup_field, move_field, move_method, move_class, pushdown_field, \
-    extract_class, pullup_method, pushdown_method, extract_method, pullup_constructor
+    extract_class, pullup_method, pushdown_method, extract_method, pullup_constructor, decrease_method_visibility, \
+    increase_method_visibility, decrease_field_visibility, increase_field_visibility
 from sbse import config
 
 logger = config.logger
@@ -75,6 +76,10 @@ class Initialization(object):
             self.init_push_down_method,
             # self.init_extract_method,
             self.init_pullup_constructor,
+            self.init_decrease_field_visibility,
+            self.init_increase_field_visibility,
+            self.init_decrease_method_visibility,
+            self.init_increase_method_visibility
         )
 
         self._und = und.open(self.udb_path)
@@ -119,8 +124,20 @@ class Initialization(object):
                 source_package = ".".join(long_name[:-1])
             else:
                 continue
+
+            is_public = ent.kind().check('public')
+            is_private = ent.kind().check('private')
+            external_references = 0
+            for ref in ent.refs('CallBy, OverrideBy'):
+                if '.'.join(long_name[:-1]) not in ref.ent().longname():
+                    external_references += 1
+
             candidates.append(
-                {'source_package': source_package, 'source_class': source_class, 'method_name': method_name})
+                {
+                    'source_package': source_package, 'source_class': source_class, 'method_name': method_name,
+                    'is_public': is_public, 'is_private': is_private, 'external_references': external_references
+                }
+            )
         return candidates
 
     def get_all_variables(self, static=False):
@@ -149,8 +166,19 @@ class Initialization(object):
                 source_class, field_name = long_name
             else:
                 continue
+
+            is_public = ent.kind().check('public')
+            is_private = ent.kind().check('private')
+            external_references = 0
+            for ref in ent.refs('SetBy, UseBy'):
+                if '.'.join(long_name[:-1]) not in ref.ent().longname():
+                    external_references += 1
             candidates.append(
-                {'source_package': source_package, 'source_class': source_class, 'field_name': field_name})
+                {
+                    'source_package': source_package, 'source_class': source_class, 'field_name': field_name,
+                    'is_public': is_public, 'is_private': is_private, 'external_references': external_references
+                }
+            )
         return candidates
 
     def get_all_class_entities(self, filter="class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static"):
@@ -353,6 +381,18 @@ class Initialization(object):
         pass
 
     def init_extract_method(self):
+        pass
+
+    def init_decrease_field_visibility(self):
+        pass
+
+    def init_decrease_method_visibility(self):
+        pass
+
+    def init_increase_field_visibility(self):
+        pass
+
+    def init_increase_method_visibility(self):
         pass
 
     def select_random(self):
@@ -592,6 +632,74 @@ class RandomInitialization(Initialization):
     def init_extract_method(self):
         raise IndexError
 
+    def init_increase_field_visibility(self):
+        """
+        Finds a private field to increase its visibility to public.
+        Returns:
+            the refactoring main func, its parameters and its name
+        """
+        refactoring_main = increase_field_visibility.main
+        params = {"udb_path": str(Path(self.udb_path))}
+        candidates = list(filter(lambda d: d['is_private'] is True, self._variables))
+        field = random.choice(candidates)
+        params.update({
+            "source_package": field["source_package"],
+            "source_class": field["source_class"],
+            "source_field": field["field_name"],
+        })
+        return refactoring_main, params, 'Increase Field Visibility'
+
+    def init_increase_method_visibility(self):
+        """
+        Finds a private method to increase its visibility to public.
+        Returns:
+            the refactoring main func, its parameters and its name
+        """
+        refactoring_main = increase_method_visibility.main
+        params = {"udb_path": str(Path(self.udb_path))}
+        candidates = list(filter(lambda d: d['is_private'] is True, self._methods))
+        method = random.choice(candidates)
+        params.update({
+            "source_package": method["source_package"],
+            "source_class": method["source_class"],
+            "source_method": method["method_name"],
+        })
+        return refactoring_main, params, 'Increase Method Visibility'
+
+    def init_decrease_field_visibility(self):
+        """
+        Finds a none-external-reference-public field to decrease its visibility to private.
+        Returns:
+            the refactoring main func, its parameters and its name
+        """
+        refactoring_main = decrease_field_visibility.main
+        params = {"udb_path": str(Path(self.udb_path))}
+        candidates = list(filter(lambda d: d['is_public'] is True and d['external_references'] == 0, self._variables))
+        field = random.choice(candidates)
+        params.update({
+            "source_package": field["source_package"],
+            "source_class": field["source_class"],
+            "source_field": field["field_name"],
+        })
+        return refactoring_main, params, 'Decrease Field Visibility'
+
+    def init_decrease_method_visibility(self):
+        """
+        Finds a none-external-reference-public method to decrease its visibility to private.
+        Returns:
+            the refactoring main func, its parameters and its name
+        """
+        refactoring_main = decrease_method_visibility.main
+        params = {"udb_path": str(Path(self.udb_path))}
+        candidates = list(filter(lambda d: d['is_public'] is True and d['external_references'] == 0, self._methods))
+        method = random.choice(candidates)
+        params.update({
+            "source_package": method["source_package"],
+            "source_class": method["source_class"],
+            "source_method": method["method_name"],
+        })
+        return refactoring_main, params, 'Decrease Method Visibility'
+
 
 def get_move_method_location(row):
     class_info, method_info = row.split("::")
@@ -717,16 +825,13 @@ class SmellInitialization(RandomInitialization):
 
 
 if __name__ == '__main__':
-    rand_pop = SmellInitialization(
+    rand_pop = RandomInitialization(
         config.UDB_PATH,
         population_size=config.POPULATION_SIZE,
         lower_band=config.LOWER_BAND,
         upper_band=config.UPPER_BAND
     )
-    for i in range(200):
-        population = rand_pop.init_extract_method()
-        print(population)
-        population = rand_pop.init_extract_class()
-        print(population)
-        population = rand_pop.init_move_method()
-        print(population)
+    main, params, name = rand_pop.init_increase_method_visibility()
+    print(f"Running {name}")
+    print(params)
+    main(**params)

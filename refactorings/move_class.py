@@ -198,7 +198,7 @@ class MoveClassAPI:
         return True
 
 
-def main(udb_path: str, source_package: str, target_package: str, class_name: str):
+def main(udb_path: str, source_package: str, target_package: str, class_name: str, *args, **kwargs):
     return MoveClassAPI(
         udb_path, source_package, target_package, class_name
     ).do_refactor()

@@ -177,7 +177,7 @@ class PullUpFieldRefactoring:
 
 
 
-def main(project_dir: str, package_name: str, children_class: str, field_name: str):
+def main(project_dir: str, package_name: str, children_class: str, field_name: str, *args, **kwargs):
     # print("Pull-up field")
     print(f"Success pull-up field {field_name}" if PullUpFieldRefactoring(
         utils2.get_filenames_in_dir(project_dir),
