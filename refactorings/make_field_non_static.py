@@ -67,7 +67,7 @@ class MakeFieldNonStaticRefactoringListener(JavaParserLabeledListener):
                     )
 
 
-def main(udb_path, source_class, field_name):
+def main(udb_path, source_class, field_name, *args, **kwargs):
     main_file = None
     db = und.open(udb_path)
     for cls in db.ents("class"):

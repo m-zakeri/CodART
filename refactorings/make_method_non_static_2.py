@@ -65,7 +65,7 @@ class MakeMethodNonStaticRefactoringListener(JavaParserLabeledListener):
                     )
 
 
-def main(udb_path, source_class, method_name):
+def main(udb_path, source_class, method_name, *args, **kwargs):
     main_file = ""
     db = und.open(udb_path)
     for cls in db.ents("class"):

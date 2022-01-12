@@ -100,7 +100,7 @@ class PullUpConstructorListener(JavaParserLabeledListener):
         self.delete = False
 
 
-def main(udb_path, source_package, target_class, class_names: list):
+def main(udb_path, source_package, target_class, class_names: list, *args, **kwargs):
     if len(class_names) < 2:
         logger.error("class_names is empty.")
         return None

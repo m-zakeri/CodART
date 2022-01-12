@@ -443,7 +443,7 @@ def extract_method(conf):
 """
 
 
-def main(file_path, lines: list):
+def main(file_path, lines: list, *args, **kwargs):
     _conf = {
         'target_file': file_path,
         'output_file': file_path,

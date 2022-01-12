@@ -827,5 +827,7 @@ if __name__ == '__main__':
         lower_band=config.LOWER_BAND,
         upper_band=config.UPPER_BAND
     )
-    candidate = rand_pop.init_increase_method_visibility()
-    print(candidate)
+    main, params, name = rand_pop.init_increase_method_visibility()
+    print(f"Running {name}")
+    print(params)
+    main(**params)
