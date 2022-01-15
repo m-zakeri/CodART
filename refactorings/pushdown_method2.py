@@ -16,25 +16,25 @@ logger = logging.getLogger()
 __author__ = "Seyyed Ali Ayati"
 
 
-class CutFieldListener(JavaParserLabeledListener):
-    def __init__(self, source_class, field_name, rewriter: TokenStreamRewriter):
+class CutMethodListener(JavaParserLabeledListener):
+    def __init__(self, source_class, method_name, rewriter: TokenStreamRewriter):
         """
-        Removes the field declaration from the parent class.
+        Removes the method declaration from the parent class.
 
         Args:
             source_class: (str) Parent's class name.
-            field_name: (str) Field's name.
+            method_name: (str) Method's name.
             rewriter: Antlr's token stream rewriter.
         Returns:
-            field_content: The full string of field declaration
+            field_content: The full string of method declaration
         """
         self.source_class = source_class
-        self.field_name = field_name
+        self.method_name = method_name
         self.rewriter = rewriter
-        self.field_content = ""
+        self.method_content = ""
         self.import_statements = ""
 
-        self.detected_field = False
+        self.detected_method = False
         self.is_source_class = False
 
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
@@ -55,15 +55,13 @@ class CutFieldListener(JavaParserLabeledListener):
         )
         self.import_statements += statement + "\n"
 
-    def exitVariableDeclaratorId(self, ctx: JavaParserLabeled.VariableDeclaratorIdContext):
-        variable_name = ctx.IDENTIFIER().getText()
-        if self.is_source_class:
-            if variable_name == self.field_name:
-                self.detected_field = True
+    def exitMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
+        if self.is_source_class and ctx.IDENTIFIER().getText() == self.method_name:
+            self.detected_method = True
 
     def exitClassBodyDeclaration2(self, ctx: JavaParserLabeled.ClassBodyDeclaration2Context):
-        if self.detected_field and self.is_source_class:
-            self.field_content = self.rewriter.getText(
+        if self.detected_method:
+            self.method_content = self.rewriter.getText(
                 program_name=self.rewriter.DEFAULT_PROGRAM_NAME,
                 start=ctx.start.tokenIndex,
                 stop=ctx.stop.tokenIndex
@@ -73,23 +71,23 @@ class CutFieldListener(JavaParserLabeledListener):
                 from_idx=ctx.start.tokenIndex,
                 to_idx=ctx.stop.tokenIndex
             )
-            self.detected_field = False
+            self.detected_method = False
 
 
-class PasteFieldListener(JavaParserLabeledListener):
-    def __init__(self, source_class, field_content, import_statements, rewriter: TokenStreamRewriter):
+class PasteMethodListener(JavaParserLabeledListener):
+    def __init__(self, source_class, method_content, import_statements, rewriter: TokenStreamRewriter):
         """
-        Inserts field declaration to children classes.
+        Inserts method declaration to children classes.
         Args:
             source_class: Child class name.
-            field_content: Full string of the field declaration.
+            method_content: Full string of the method declaration.
             rewriter: Antlr's token stream rewriter.
         Returns:
             None
         """
         self.source_class = source_class
         self.rewriter = rewriter
-        self.field_content = field_content
+        self.method_content = method_content
         self.import_statements = import_statements
         self.is_source_class = False
 
@@ -112,13 +110,14 @@ class PasteFieldListener(JavaParserLabeledListener):
 
     def enterClassBody(self, ctx: JavaParserLabeled.ClassBodyContext):
         if self.is_source_class:
-            self.rewriter.insertAfter(
-                index=ctx.start.tokenIndex,
-                text="\n\t" + self.field_content
+            self.rewriter.insertBefore(
+                program_name=self.rewriter.DEFAULT_PROGRAM_NAME,
+                index=ctx.stop.tokenIndex,
+                text="\n\t" + self.method_content + "\n"
             )
 
 
-def main(udb_path, source_package, source_class, field_name, target_classes: list, *args, **kwargs):
+def main(udb_path, source_package, source_class, method_name, target_classes: list, *args, **kwargs):
     db = und.open(udb_path)
     source_class_ents = db.lookup(f"{source_package}.{source_class}", "Class")
     target_class_ents = []
@@ -136,12 +135,12 @@ def main(udb_path, source_package, source_class, field_name, target_classes: lis
         logger.error(f"Cannot find source class: {source_class}")
         return
 
-    field_ent = db.lookup(f"{source_package}.{source_class}.{field_name}", "Variable")
-    if len(field_ent) == 0:
-        logger.error(f"Cannot find field to pushdown: {field_name}")
+    method_ent = db.lookup(f"{source_package}.{source_class}.{method_name}", "Method")
+    if len(method_ent) == 0:
+        logger.error(f"Cannot find method to pushdown: {method_name}")
         return
     else:
-        field_ent = field_ent[0]
+        method_ent = method_ent[0]
 
     for ref in source_class_ent.refs("extendBy"):
         if ref.ent().simplename() not in target_classes:
@@ -149,29 +148,30 @@ def main(udb_path, source_package, source_class, field_name, target_classes: lis
             return
         target_class_ents.append(ref.ent())
 
-    for ref in field_ent.refs("useBy, setBy"):
+    for ref in method_ent.refs("callBy"):
         if ref.file().simplename().split(".")[0] in target_classes:
             continue
         else:
-            logger.error("Field has dependencies.")
+            logger.error("Method has dependencies.")
             return
-            # Remove field from source class
+
+    # Remove field from source class
     listener = parse_and_walk(
         file_path=source_class_ent.parent().longname(),
-        listener_class=CutFieldListener,
+        listener_class=CutMethodListener,
         has_write=True,
         source_class=source_class,
-        field_name=field_name,
+        method_name=method_name,
         debug=False
     )
     # Insert field in children classes
     for target_class in target_class_ents:
         parse_and_walk(
             file_path=target_class.parent().longname(),
-            listener_class=PasteFieldListener,
+            listener_class=PasteMethodListener,
             has_write=True,
             source_class=target_class.simplename(),
-            field_content=listener.field_content,
+            method_content=listener.method_content,
             import_statements=listener.import_statements,
             debug=False
         )
@@ -183,6 +183,6 @@ if __name__ == '__main__':
         udb_path="D:\Dev\JavaSample\JavaSample\JavaSample.und",
         source_class="Person",
         source_package="target_package",
-        field_name="testField",
+        method_name="runTest",
         target_classes=["PersonChild"]
     )
