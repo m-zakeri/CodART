@@ -126,7 +126,7 @@ def get_program_with_field_usage(source_files: list, field_name: str, source_cla
     return program
 
 
-def parse_and_walk(file_path: str, listener_class, has_write=False, debug=True, **kwargs):
+def parse_and_walk(file_path: str, listener_class, has_write=False, debug=False, **kwargs):
     tree, rewriter = create_project_parse_tree(file_path)
     if has_write:
         if rewriter is None:
