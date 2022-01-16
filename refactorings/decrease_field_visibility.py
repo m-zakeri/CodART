@@ -93,8 +93,8 @@ def main(udb_path, source_package, source_class, source_field, *args, **kwargs):
 
 if __name__ == '__main__':
     main(
-        udb_path="D:\Dev\JavaSample\JavaSample\JavaSample.und",
-        source_package="source_package",
-        source_class="Sample",
-        source_field="privateField"
+        udb_path="D:/IdeaProjects/JSON20201115/JSON20201115.und",
+        source_package="org.json",
+        source_class="JSONObject",
+        source_field="Object"
     )
