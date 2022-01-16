@@ -217,6 +217,7 @@ class ProblemSingleObjective(Problem):
             # Stage 0: Git restore
             logger.debug("Executing git restore.")
             git_restore(config.PROJECT_PATH)
+            logger.debug("Updating understand database after git restore.")
             update_understand_database(config.UDB_PATH)
 
             # Stage 1: Execute all refactoring operations in the sequence x
@@ -224,6 +225,7 @@ class ProblemSingleObjective(Problem):
             for refactoring_operation in individual_[0]:
                 refactoring_operation.do_refactoring()
                 # Update Understand DB
+                logger.debug(f"Updating understand database after {refactoring_operation.name}.")
                 update_understand_database(config.UDB_PATH)
 
             # Stage 2:
@@ -293,6 +295,7 @@ class ProblemMultiObjective(Problem):
             # Stage 0: Git restore
             logger.debug("Executing git restore.")
             git_restore(config.PROJECT_PATH)
+            logger.debug("Updating understand database after git restore.")
             update_understand_database(config.UDB_PATH)
 
             # Stage 1: Execute all refactoring operations in the sequence x
@@ -300,6 +303,7 @@ class ProblemMultiObjective(Problem):
             for refactoring_operation in individual_[0]:
                 refactoring_operation.do_refactoring()
                 # Update Understand DB
+                logger.debug(f"Updating understand database after {refactoring_operation.name}.")
                 update_understand_database(config.UDB_PATH)
 
             # Stage 2:
@@ -359,6 +363,7 @@ class ProblemManyObjective(Problem):
             # Stage 0: Git restore
             logger.debug("Executing git restore.")
             git_restore(config.PROJECT_PATH)
+            logger.debug("Updating understand database after git restore.")
             update_understand_database(config.UDB_PATH)
 
             # Stage 1: Execute all refactoring operations in the sequence x
@@ -366,6 +371,7 @@ class ProblemManyObjective(Problem):
             for refactoring_operation in individual_[0]:
                 refactoring_operation.do_refactoring()
                 # Update Understand DB
+                logger.debug(f"Updating understand database after {refactoring_operation.name}.")
                 update_understand_database(config.UDB_PATH)
 
             # Stage 2:
@@ -469,7 +475,6 @@ class AdaptiveSinglePointCrossover(Crossover):
         """
         For population X
         """
-        print("Running crossover")
         # The input of has the following shape (n_parents, n_matings, n_var)
         _, n_matings, n_var = X.shape
 
@@ -479,7 +484,6 @@ class AdaptiveSinglePointCrossover(Crossover):
 
         # print(X.shape)
         # print(X)
-        print('=' * 50)
 
         # for each mating provided
         for k in range(n_matings):
@@ -491,15 +495,13 @@ class AdaptiveSinglePointCrossover(Crossover):
             # print('len b', len(b))
 
             len_min = min(len(a), len(b))
-            print(' int(len_min*0.30)', int(len_min * 0.30))
-            print(' int(len_min*0.70)', int(len_min * 0.70))
             cross_point_1 = random.randint(1, int(len_min * 0.30))
             cross_point_2 = random.randint(int(len_min * 0.70), len_min - 1)
             if random.random() < 0.5:
                 cross_point_final = cross_point_1
             else:
                 cross_point_final = cross_point_2
-            print('cross_point_final', cross_point_final)
+            logger.info(f'cross_point_final: {cross_point_final}')
             offspring_a = []
             offspring_b = []
             for i in range(0, cross_point_final):
