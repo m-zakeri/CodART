@@ -39,7 +39,7 @@ from pymoo.core.duplicate import ElementwiseDuplicateElimination
 from pymoo.core.mutation import Mutation
 from pymoo.core.problem import ElementwiseProblem, Problem
 from pymoo.core.sampling import Sampling
-from pymoo.factory import get_reference_directions, get_decision_making
+from pymoo.factory import get_reference_directions, get_decision_making, get_mutation
 from pymoo.operators.selection.tournament import TournamentSelection
 from pymoo.optimize import minimize
 from pymoo.util.termination.default import MultiObjectiveDefaultTermination
@@ -250,11 +250,11 @@ class ProblemSingleObjective(Problem):
                     o2 = testability_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("TEST", 1.0))
                     o3 = modularity_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("MODULE", 1.0))
                     del qmoods
-                    score = (o1*6. + o2 + o3) / 8.
+                    score = (o1 * 6. + o2 + o3) / 8.
 
             # Stage 3: Marshal objectives into vector
             objective_values.append([-1 * score])
-            logger.info(f"Objective values for individual {k} in mode {self.mode}: {[-1* score]}")
+            logger.info(f"Objective values for individual {k} in mode {self.mode}: {[-1 * score]}")
 
         # Stage 4: Marshal all objectives into out dictionary
         out['F'] = np.array(objective_values, dtype=float)
@@ -343,10 +343,10 @@ class ProblemManyObjective(Problem):
     """
 
     def __init__(self, n_refactorings_lowerbound=50, n_refactorings_upperbound=75, evaluate_in_parallel=False):
-        super(ProblemManyObjective, self).__init__(n_var=1, n_obj=8, n_constr=0,)
+        super(ProblemManyObjective, self).__init__(n_var=1, n_obj=8, n_constr=0, )
         self.n_refactorings_lowerbound = n_refactorings_lowerbound
         self.n_refactorings_upperbound = n_refactorings_upperbound
-        self.evaluate_in_parallel=evaluate_in_parallel
+        self.evaluate_in_parallel = evaluate_in_parallel
 
     def _evaluate(self, x, out, *args, **kwargs):
         """
@@ -549,6 +549,27 @@ class BitStringMutation(Mutation):
 
     def _do(self, problem, X, **kwargs):
         for i, individual in enumerate(X):
+            for j, ro in enumerate(individual):
+                r = np.random.random()
+                # with a probability of `mutation_probability` replace the refactoring operation with new one
+                if r < self.mutation_probability:
+                    random_refactoring_operation = RefactoringOperation.generate_randomly()
+                    X[i][0][j] = random_refactoring_operation
+        return X
+
+
+class BitStringMutation2(Mutation):
+    """
+        Select an individual to mutate with mutation probability.
+        Only flip one refactoring operation in the selected individual.
+    """
+
+    def __init__(self, prob=0.2):
+        super().__init__()
+        self.mutation_probability = prob
+
+    def _do(self, problem, X, **kwargs):
+        for i, individual in enumerate(X):
             r = np.random.random()
             # with a probability of `mutation_probability` replace the refactoring operation with new one
             if r < self.mutation_probability:
@@ -635,7 +656,7 @@ def main():
                       selection=TournamentSelection(func_comp=binary_tournament),
                       crossover=AdaptiveSinglePointCrossover(prob=0.8),
                       # crossover=get_crossover("real_k_point", n_points=2),
-                      mutation=BitStringMutation(prob=0.2),
+                      mutation=BitStringMutation(prob=0.1),
                       eliminate_duplicates=ElementwiseDuplicateElimination(cmp_func=is_equal_2_refactorings_list)
                       )
     algorithms.append(algorithm)
