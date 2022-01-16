@@ -18,20 +18,6 @@ logger = logging.getLogger(__file__)
 ROOT_PACKAGE = "(Unnamed_Package)"
 
 
-class DeleteSourceClassListener(JavaParserLabeledListener):
-    def __init__(self, rewriter: TokenStreamRewriter, class_name: str):
-        self.rewriter = rewriter
-        self.class_name = class_name
-
-    def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
-        if ctx.IDENTIFIER().getText() == self.class_name:
-            self.rewriter.delete(
-                program_name=self.rewriter.DEFAULT_PROGRAM_NAME,
-                from_idx=ctx.parentCtx.start.tokenIndex,
-                to_idx=ctx.parentCtx.stop.tokenIndex
-            )
-
-
 class UpdateImportsListener(JavaParserLabeledListener):
     def __init__(self, rewriter: TokenStreamRewriter, source_package: str, target_package: str, class_name: str):
         self.rewriter = rewriter
