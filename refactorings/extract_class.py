@@ -2,7 +2,6 @@ __version__ = '0.2.0'
 __author__ = 'Seyyed Ali Ayati'
 
 import os
-import subprocess
 from pathlib import Path
 
 try:
@@ -117,37 +116,6 @@ class DependencyPreConditionListener(JavaParserLabeledListener):
             x = 0
 
 
-class MethodMapListener(JavaParserLabeledListener):
-    def __init__(self, moved_fields: list, moved_methods: list):
-        self.detected_usage = False
-        self.detected_method = None
-        self.map = {}
-        self.moved_fields = moved_fields
-        self.moved_methods = moved_methods
-
-    def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
-        self.detected_method = ctx.IDENTIFIER().getText()
-        self.map[self.detected_method] = set()
-
-    def exitMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
-        self.detected_method = None
-
-    def enterPrimary1(self, ctx: JavaParserLabeled.Primary1Context):
-        if ctx.THIS():
-            self.detected_usage = True
-
-    def exitExpression1(self, ctx: JavaParserLabeled.Expression1Context):
-        if self.detected_method and self.detected_usage:
-            if ctx.IDENTIFIER():
-                if ctx.IDENTIFIER().getText() not in self.moved_fields:
-                    self.map[self.detected_method].add(ctx.IDENTIFIER().getText())
-                self.detected_usage = False
-            elif ctx.methodCall():
-                if ctx.methodCall().IDENTIFIER().getText() not in self.moved_methods:
-                    self.map[self.detected_method].add(ctx.methodCall().IDENTIFIER().getText())
-                self.detected_usage = False
-
-
 class ExtractClassRefactoringListener(JavaParserLabeledListener):
     """
     To implement extract class refactoring based on its actors.
@@ -193,18 +161,23 @@ class ExtractClassRefactoringListener(JavaParserLabeledListener):
         self.NEW_LINE = "\n"
         self.code = ""
         self.package_name = ""
-        self.file_cons = ""
-        self.new_file_cons = ""
         self.parameters = []
         self.object_name = self.new_class.replace(self.new_class, self.new_class[0].lower() + self.new_class[1:])
         self.modifiers = ""
+
+        self.do_increase_visibility = False
+
+        temp = []
+        for method in moved_methods:
+            temp.append(self.method_map.get(method))
+        self.fields_to_increase_visibility = set().union(*temp)
 
     def enterPackageDeclaration(self, ctx: JavaParserLabeled.PackageDeclarationContext):
         if ctx.qualifiedName() and not self.package_name:
             self.package_name = ctx.qualifiedName().getText()
             self.code += f"package {self.package_name};{self.NEW_LINE}"
 
-    def enterImportDeclaration(self, ctx:JavaParserLabeled.ImportDeclarationContext):
+    def enterImportDeclaration(self, ctx: JavaParserLabeled.ImportDeclarationContext):
         i = self.token_stream_rewriter.getText(
             program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
             start=ctx.start.tokenIndex,
@@ -247,6 +220,17 @@ class ExtractClassRefactoringListener(JavaParserLabeledListener):
         field_identifier = ctx.IDENTIFIER().getText()
         if field_identifier in self.moved_fields:
             self.detected_field = field_identifier
+
+    def enterFieldDeclaration(self, ctx: JavaParserLabeled.FieldDeclarationContext):
+        field_names = ctx.variableDeclarators().getText().split(",")
+        for field in field_names:
+            if field in self.fields_to_increase_visibility:
+                for modifier in ctx.parentCtx.parentCtx.modifier():
+                    if modifier.getText() == "private":
+                        self.token_stream_rewriter.replaceSingleToken(
+                            token=modifier.start,
+                            text="public"
+                        )
 
     def exitFieldDeclaration(self, ctx: JavaParserLabeled.FieldDeclarationContext):
         if not self.is_source_class:
@@ -322,60 +306,42 @@ class ExtractClassRefactoringListener(JavaParserLabeledListener):
             self.parameters = []
             self.detected_method = None
 
-    def exitConstructorDeclaration(self, ctx: JavaParserLabeled.ConstructorDeclarationContext):
-        for i in ctx.children[2].children[1:-1]:
-            text = self.token_stream_rewriter.getText(
-                program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-                start=i.start.tokenIndex,
-                stop=i.stop.tokenIndex
-            )
-            for moved in self.moved_fields:
-                if moved in text:
-                    self.new_file_cons += self.TAB + self.TAB + text + "\n"
-                    self.token_stream_rewriter.delete(
-                        program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
-                        from_idx=i.start.tokenIndex,
-                        to_idx=i.stop.tokenIndex
-                    )
+    def enterExpression1(self, ctx: JavaParserLabeled.Expression1Context):
+        identifier = ctx.IDENTIFIER()
+        if identifier is not None:
+            if identifier.getText() in self.moved_fields and self.detected_method not in self.moved_methods:
+                # Found field usage!
+                self.token_stream_rewriter.insertBeforeToken(
+                    token=ctx.stop,
+                    text=self.object_name + ".",
+                    program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME
+                )
 
 
 class PropagateFieldUsageListener(JavaParserLabeledListener):
-    def __init__(self, common_token_stream: CommonTokenStream, object_name: str, field_name: str, class_name: str,
-                 line_number: int):
+    def __init__(self, common_token_stream: CommonTokenStream, object_name: str, field_name: str):
         self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
         self.field_name = field_name
-        self.class_name = class_name
-        self.line_number = line_number
         self.object_name = object_name
 
     def enterExpression1(self, ctx: JavaParserLabeled.Expression1Context):
         identifier = ctx.IDENTIFIER()
         if identifier is not None:
             if identifier.getText() == self.field_name:
-                if hasattr(ctx.expression(), 'primary'):
-                    self.token_stream_rewriter.replaceSingleToken(
-                        token=ctx.expression().primary().start,
-                        text=f"this.{self.object_name}"
-                    )
-
-    def enterExpression0(self, ctx:JavaParserLabeled.Expression0Context):
-        if hasattr(ctx, 'primary'):
-            primary = ctx.primary()
-            if hasattr(primary, 'IDENTIFIER'):
-                identifier = primary.IDENTIFIER()
-                if identifier.getText() == self.field_name:
-                    self.token_stream_rewriter.replaceSingleToken(
-                        token=primary.start,
-                        text=f"this.{self.object_name}.{self.field_name}"
-                    )
-
+                # Found field usage!
+                self.token_stream_rewriter.insertBeforeToken(
+                    token=ctx.stop,
+                    text=self.object_name + ".",
+                    program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME
+                )
 
 
 class NewClassPropagation(JavaParserLabeledListener):
-    def __init__(self, common_token_stream: CommonTokenStream, method_map: dict, source_class: str):
+    def __init__(self, common_token_stream: CommonTokenStream, method_map: dict, source_class: str, moved_fields: list):
         self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
         self.method_map = method_map
         self.source_class = source_class
+        self.moved_fields = moved_fields
         self.fields = None
 
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
@@ -398,11 +364,21 @@ class NewClassPropagation(JavaParserLabeledListener):
     def enterExpression1(self, ctx: JavaParserLabeled.Expression1Context):
         if self.fields and ctx.expression().getText() == "this":
             for field in self.fields:
-                if field in ctx.getText():
+                if field in ctx.getText() and field not in self.moved_fields:
                     self.token_stream_rewriter.replaceSingleToken(
                         token=ctx.expression().primary().start,
                         text="ref"
                     )
+
+    def enterPrimary4(self, ctx: JavaParserLabeled.Primary4Context):
+        if self.fields:
+            field_name = ctx.getText()
+            if field_name in self.fields and field_name not in self.moved_fields:
+                self.fields.remove(field_name)
+                self.token_stream_rewriter.insertBeforeToken(
+                    token=ctx.start,
+                    text="ref."
+                )
 
 
 class ExtractClassAPI:
@@ -441,13 +417,20 @@ class ExtractClassAPI:
         if len(listener.connected_components) == 0:
             self.checked = True
 
-    def get_source_class_map(self):
-        listener = MethodMapListener(moved_fields=self.moved_fields, moved_methods=self.moved_methods)
-        self.walker.walk(
-            listener=listener,
-            t=self.tree
-        )
-        self.method_usage_map = listener.map
+    def get_source_class_map(self, db):
+        class_ents = db.lookup(self.source_class, "Class")
+        class_ent = None
+        for ent in class_ents:
+            if Path(ent.parent().longname()) == Path(self.file_path):
+                class_ent = ent
+                break
+        assert class_ent is not None
+
+        for ref in class_ent.refs("Define", "Method"):
+            method_ent = ref.ent()
+            self.method_usage_map[method_ent.simplename()] = set()
+            for use in method_ent.refs("SetBy UseBy ModifyBy", "Variable ~Unknown"):
+                self.method_usage_map[method_ent.simplename()].add(use.ent().simplename())
 
     def propagate_fields(self, usages):
         for usage in usages:
@@ -474,7 +457,8 @@ class ExtractClassAPI:
         pass
 
     def do_refactor(self):
-        self.get_source_class_map()
+        db = und.open(self.udb_path)
+        self.get_source_class_map(db=db)
         listener = ExtractClassRefactoringListener(
             common_token_stream=self.token_stream,
             new_class=self.new_class,
@@ -491,24 +475,19 @@ class ExtractClassAPI:
 
         # Find Field and Method Usages
         field_usages = []
-        method_usages = []
 
-        db = und.open(self.udb_path)
         for field in self.moved_fields:
             for ent in db.lookup(f"{self.source_class}.{field}"):
                 # print(ent.name(), "  [", ent.kindname(), "]", sep="", end="\n")
-                for ref in ent.refs("Useby"):
-                    if self.source_class in ref.ent().name():
-                        referencer = ref.ent().simplename()
-                        if referencer in self.moved_methods:
-                            continue
-                    ref_ent = ref.ent()
-                    field_usages.append({
+                for ref in ent.refs("useBy, setBy, modifyBy"):
+                    if Path(ref.file().longname()) == Path(self.file_path):
+                        continue
+                    field_usage = {
                         'field_name': field,
-                        'class_name': ref_ent.simplename(),
-                        'file_path': ref.file().longname(),
-                        'line_number': ref.line()
-                    })
+                        'file_path': ref.file().longname()
+                    }
+                    if field_usage not in field_usages:
+                        field_usages.append(field_usage)
 
         # print(listener.token_stream_rewriter.getDefaultText())
         # print("=" * 25)
@@ -520,7 +499,7 @@ class ExtractClassAPI:
         parser.getTokenStream()
         parse_tree = parser.compilationUnit()
         my_listener = NewClassPropagation(common_token_stream=token_stream, method_map=self.method_usage_map,
-                                          source_class=self.source_class)
+                                          source_class=self.source_class, moved_fields=self.moved_fields)
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener)
         # print(my_listener.token_stream_rewriter.getDefaultText())
@@ -565,9 +544,9 @@ def main(udb_path, file_path, source_class, moved_fields, moved_methods, *args, 
 
 if __name__ == "__main__":
     main(
-        udb_path="D:\\Final Project\\IdeaProjects\\JSON20201115\\JSON20201115.und",
-        file_path="D:\\Final Project\\IdeaProjects\\JSON20201115\\src\\main\\java\\org\\json\\JSONPointer.java",
-        source_class="JSONPointer",
-        moved_fields=['ENCODING', 'refTokens'],
-        moved_methods=['toURIFragment', 'unescape', 'escape'],
+        udb_path="D:\Dev\JavaSample\JavaSample\JavaSample.und",
+        file_path="D:\Dev\JavaSample\JavaSample\src\extract_class\Person.java",
+        source_class="Person",
+        moved_fields=['officeAreaCode', 'officeNumber', ],
+        moved_methods=['getTelephoneNumber', ],
     )
