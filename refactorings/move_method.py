@@ -1,4 +1,6 @@
 import logging
+import os.path
+from pathlib import Path
 
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
@@ -85,19 +87,45 @@ class PasteMethodListener(JavaParserLabeledListener):
 
 
 class PropagateListener(JavaParserLabeledListener):
-    def __init__(self, method_name: str, new_name: str, lines: list, rewriter: TokenStreamRewriter):
+    def __init__(self, method_name: str, new_name: str, lines: list, is_in_target_class: bool,
+                 rewriter: TokenStreamRewriter):
         self.method_name = method_name
         self.new_name = new_name
         self.lines = lines
         self.rewriter = rewriter
+        self.is_in_target_class = is_in_target_class
 
     def enterMethodCall0(self, ctx: JavaParserLabeled.MethodCall0Context):
         identifier = ctx.IDENTIFIER()
         if identifier and ctx.start.line in self.lines and identifier.getText() == self.method_name:
-            self.rewriter.replaceSingleToken(
-                token=ctx.start,
-                text=self.new_name
-            )
+            if self.is_in_target_class:
+                self.rewriter.replaceSingleToken(
+                    token=ctx.parentCtx.start,
+                    text="this"
+                )
+            else:
+                self.rewriter.replaceSingleToken(
+                    token=ctx.start,
+                    text=self.new_name
+                )
+
+
+def get_source_class_map(db, source_class: str):
+    method_usage_map = {}
+    class_ents = db.lookup(source_class, "Class")
+    class_ent = None
+    for ent in class_ents:
+        if Path(ent.parent().longname()).name == f"{source_class}.java":
+            class_ent = ent
+            break
+    assert class_ent is not None
+
+    for ref in class_ent.refs("Define", "Method"):
+        method_ent = ref.ent()
+        method_usage_map[method_ent.simplename()] = set()
+        for use in method_ent.refs("SetBy UseBy ModifyBy", "Variable ~Unknown"):
+            method_usage_map[method_ent.simplename()].add(use.ent().simplename())
+    return method_usage_map
 
 
 def main(source_class: str, source_package: str, target_class: str, target_package: str, method_name: str,
@@ -107,7 +135,8 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
         import_statement = f"\nimport {target_package}.{target_class};"
     instance_name = target_class.lower() + "ByCodArt"
     db = und.open(udb_path)
-
+    print(get_source_class_map(db, source_class))
+    exit(-1)
     # Check if method is static
     method_ent = db.lookup(f"{source_package}.{source_class}.{method_name}", "Method")
     if len(method_ent) >= 1:
@@ -161,6 +190,8 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
         return None
     # Propagate Changes
     for file in usages.keys():
+        public_class_name = os.path.basename(file).split(".")[0]
+        is_in_target_class = public_class_name == target_class
         parse_and_walk(
             file_path=file,
             listener_class=PropagateListener,
@@ -168,7 +199,10 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
             method_name=method_name,
             new_name=f"{instance_name}.{method_name}",
             lines=usages[file],
+            is_in_target_class=is_in_target_class,
+            debug=False
         )
+    # exit(-1)
     # Do the cut and paste!
     # Cut
     listener = parse_and_walk(
@@ -196,10 +230,10 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
 
 if __name__ == '__main__':
     main(
-        source_class="Source",
-        source_package="my_package",
-        target_class="TargetNew",
-        target_package="your_package",
-        method_name="printTest",
-        udb_path="D:\Dev\JavaSample\JavaSample1.udb"
+        source_class="Sample",
+        source_package="source_package",
+        target_class="Person",
+        target_package="target_package",
+        method_name="testMethod",
+        udb_path="D:\Dev\JavaSample\JavaSample\JavaSample.und"
     )
