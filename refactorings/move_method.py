@@ -32,6 +32,14 @@ class CutMethodListener(JavaParserLabeledListener):
         self.is_member = False
         self.do_delete = False
         self.method_text = ""
+        self.imports = ""
+
+    def enterImportDeclaration(self, ctx: JavaParserLabeled.ImportDeclarationContext):
+        self.imports += self.rewriter.getText(
+            program_name=self.rewriter.DEFAULT_PROGRAM_NAME,
+            start=ctx.start.tokenIndex,
+            stop=ctx.stop.tokenIndex
+        ) + "\n"
 
     def exitPackageDeclaration(self, ctx: JavaParserLabeled.PackageDeclarationContext):
         if self.import_statement:
@@ -74,12 +82,35 @@ class CutMethodListener(JavaParserLabeledListener):
 
 
 class PasteMethodListener(JavaParserLabeledListener):
-    def __init__(self, method_text: str, method_map: dict, source_class: str, rewriter: TokenStreamRewriter):
+    def __init__(self, method_text: str, method_map: dict, imports: str, source_class: str,
+                 rewriter: TokenStreamRewriter):
         self.method_text = method_text
         self.method_map = method_map
         self.source_class = source_class
+        self.imports = imports
         self.rewriter = rewriter
         self.fields = None
+        self.has_package = False
+        self.has_empty_cons = False
+
+    def enterPackageDeclaration(self, ctx: JavaParserLabeled.PackageDeclarationContext):
+        self.has_package = True
+
+    def exitPackageDeclaration(self, ctx: JavaParserLabeled.PackageDeclarationContext):
+        if self.has_package and self.imports:
+            self.rewriter.insertAfter(
+                index=ctx.stop.tokenIndex,
+                text="\n" + self.imports,
+                program_name=self.rewriter.DEFAULT_PROGRAM_NAME
+            )
+
+    def exitCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
+        if not self.has_package and self.imports:
+            self.rewriter.insertBefore(
+                index=ctx.start.tokenIndex,
+                text="\n" + self.imports,
+                program_name=self.rewriter.DEFAULT_PROGRAM_NAME
+            )
 
     def enterClassBody(self, ctx: JavaParserLabeled.ClassBodyContext):
         self.rewriter.insertAfterToken(
@@ -88,10 +119,28 @@ class PasteMethodListener(JavaParserLabeledListener):
             program_name=self.rewriter.DEFAULT_PROGRAM_NAME
         )
 
+    def enterConstructorDeclaration(self, ctx: JavaParserLabeled.ConstructorDeclarationContext):
+        params = ctx.formalParameters().getText()
+        if params == "()":
+            self.has_empty_cons = True
 
-class ReferenceInjectorListener(PasteMethodListener):
+
+class ReferenceInjectorAndConstructorListener(PasteMethodListener):
+    def __init__(self, *args, **kwargs):
+        self.has_empty_cons = kwargs.pop("has_empty_cons", False)
+        self.class_name = ""
+        super(ReferenceInjectorAndConstructorListener, self).__init__(*args, **kwargs)
+
+    def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
+        self.class_name = ctx.IDENTIFIER().getText()
+
     def enterClassBody(self, ctx: JavaParserLabeled.ClassBodyContext):
-        pass
+        if not self.has_empty_cons:
+            self.rewriter.insertAfterToken(
+                token=ctx.start,
+                text="\n" + f"public {self.class_name}()" + "{}\n",
+                program_name=self.rewriter.DEFAULT_PROGRAM_NAME
+            )
 
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
         self.fields = self.method_map.get(ctx.IDENTIFIER().getText())
@@ -197,7 +246,7 @@ def get_source_class_map(db, source_class: str):
         method_usage_map[method_ent.simplename()] = set()
         for use in method_ent.refs("SetBy UseBy ModifyBy", "Variable ~Unknown"):
             method_usage_map[method_ent.simplename()].add(use.ent().simplename())
-    return method_usage_map
+    return method_usage_map, class_ent
 
 
 def main(source_class: str, source_package: str, target_class: str, target_package: str, method_name: str,
@@ -207,7 +256,13 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
         import_statement = f"\nimport {target_package}.{target_class};"
     instance_name = target_class.lower() + "ByCodArt"
     db = und.open(udb_path)
-    method_map = get_source_class_map(db, source_class)
+    method_map, class_ent = get_source_class_map(db, source_class)
+
+    if class_ent.refs("Extend ~Implicit, ExtendBy, Implement"):
+        logger.error("Class is in inheritance or implements an interface.")
+        db.close()
+        return None
+
     # Check if method is static
     method_ent = db.lookup(f"{source_package}.{source_class}.{method_name}", "Method")
     if len(method_ent) >= 1:
@@ -239,8 +294,8 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
             usages[file] = [ref.line(), ]
 
     try:
-        src_class_file = db.lookup(f"{source_package}.{source_class}.java")[0].longname()
-        target_class_file = db.lookup(f"{target_package}.{target_class}.java")[0].longname()
+        src_class_file = db.lookup(f"{source_package}.{source_class}.java", "File")[0].longname()
+        target_class_file = db.lookup(f"{target_package}.{target_class}.java", "File")[0].longname()
     except IndexError:
         logger.error("This is a nested method.")
         logger.info(f"{source_package}.{source_class}.java")
@@ -272,7 +327,6 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
             lines=usages[file],
             is_in_target_class=is_in_target_class,
             method_map=method_map,
-            debug=False
         )
     # exit(-1)
     # Do the cut and paste!
@@ -285,29 +339,32 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
         instance_name=instance_name,
         method_name=method_name,
         is_static=is_static,
-        import_statement=import_statement
+        import_statement=import_statement,
     )
 
     method_text = listener.method_text
 
     # Paste
-    parse_and_walk(
+    listener = parse_and_walk(
         file_path=target_class_file,
         listener_class=PasteMethodListener,
         has_write=True,
         method_text=method_text,
         source_class=source_class,
-        method_map=method_map
+        method_map=method_map,
+        imports=listener.imports,
     )
 
     # Post-Paste: Reference Injection
     parse_and_walk(
         file_path=target_class_file,
-        listener_class=ReferenceInjectorListener,
+        listener_class=ReferenceInjectorAndConstructorListener,
         has_write=True,
         method_text=method_text,
         source_class=source_class,
-        method_map=method_map
+        method_map=method_map,
+        imports=None,
+        has_empty_cons=listener.has_empty_cons,
     )
     db.close()
 
