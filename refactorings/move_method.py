@@ -74,9 +74,12 @@ class CutMethodListener(JavaParserLabeledListener):
 
 
 class PasteMethodListener(JavaParserLabeledListener):
-    def __init__(self, method_text: str, rewriter: TokenStreamRewriter):
+    def __init__(self, method_text: str, method_map: dict, source_class: str, rewriter: TokenStreamRewriter):
         self.method_text = method_text
+        self.method_map = method_map
+        self.source_class = source_class
         self.rewriter = rewriter
+        self.fields = None
 
     def enterClassBody(self, ctx: JavaParserLabeled.ClassBodyContext):
         self.rewriter.insertAfterToken(
@@ -84,6 +87,47 @@ class PasteMethodListener(JavaParserLabeledListener):
             text="\n" + self.method_text + "\n",
             program_name=self.rewriter.DEFAULT_PROGRAM_NAME
         )
+
+
+class ReferenceInjectorListener(PasteMethodListener):
+    def enterClassBody(self, ctx: JavaParserLabeled.ClassBodyContext):
+        pass
+
+    def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
+        self.fields = self.method_map.get(ctx.IDENTIFIER().getText())
+        if self.fields:
+            if ctx.formalParameters().getText() == "()":
+                text = f"{self.source_class} ref"
+            else:
+                text = f", {self.source_class} ref"
+
+            self.rewriter.insertBeforeToken(
+                token=ctx.formalParameters().stop,
+                text=text,
+                program_name=self.rewriter.DEFAULT_PROGRAM_NAME
+            )
+
+    def exitMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
+        self.fields = None
+
+    def enterExpression1(self, ctx: JavaParserLabeled.Expression1Context):
+        if self.fields and ctx.expression().getText() == "this":
+            for field in self.fields:
+                if field in ctx.getText():
+                    self.rewriter.replaceSingleToken(
+                        token=ctx.expression().primary().start,
+                        text="ref"
+                    )
+
+    def enterPrimary4(self, ctx: JavaParserLabeled.Primary4Context):
+        if self.fields:
+            field_name = ctx.getText()
+            if field_name in self.fields:
+                self.fields.remove(field_name)
+                self.rewriter.insertBeforeToken(
+                    token=ctx.start,
+                    text="ref."
+                )
 
 
 class PropagateListener(JavaParserLabeledListener):
@@ -135,8 +179,7 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
         import_statement = f"\nimport {target_package}.{target_class};"
     instance_name = target_class.lower() + "ByCodArt"
     db = und.open(udb_path)
-    print(get_source_class_map(db, source_class))
-    exit(-1)
+    method_map = get_source_class_map(db, source_class)
     # Check if method is static
     method_ent = db.lookup(f"{source_package}.{source_class}.{method_name}", "Method")
     if len(method_ent) >= 1:
@@ -223,7 +266,19 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
         file_path=target_class_file,
         listener_class=PasteMethodListener,
         has_write=True,
-        method_text=method_text
+        method_text=method_text,
+        source_class=source_class,
+        method_map=method_map
+    )
+
+    # Post-Paste: Reference Injection
+    parse_and_walk(
+        file_path=target_class_file,
+        listener_class=ReferenceInjectorListener,
+        has_write=True,
+        method_text=method_text,
+        source_class=source_class,
+        method_map=method_map
     )
     db.close()
 
