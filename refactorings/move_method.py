@@ -131,17 +131,42 @@ class ReferenceInjectorListener(PasteMethodListener):
 
 
 class PropagateListener(JavaParserLabeledListener):
-    def __init__(self, method_name: str, new_name: str, lines: list, is_in_target_class: bool,
+    def __init__(self, method_name: str, new_name: str, lines: list, is_in_target_class: bool, method_map: dict,
                  rewriter: TokenStreamRewriter):
         self.method_name = method_name
         self.new_name = new_name
         self.lines = lines
+        self.method_map = method_map
+        self.fields = None
         self.rewriter = rewriter
         self.is_in_target_class = is_in_target_class
 
     def enterMethodCall0(self, ctx: JavaParserLabeled.MethodCall0Context):
         identifier = ctx.IDENTIFIER()
+        self.fields = self.method_map.get(identifier)
         if identifier and ctx.start.line in self.lines and identifier.getText() == self.method_name:
+            if self.fields:
+                parent = ctx.parentCtx
+                caller = parent.children[0]
+                caller = self.rewriter.getText(
+                    program_name=self.rewriter.DEFAULT_PROGRAM_NAME,
+                    start=caller.start.tokenIndex,
+                    stop=caller.stop.tokenIndex
+                )
+
+                if ctx.expressionList():
+                    self.rewriter.insertAfterToken(
+                        token=ctx.expressionList().stop,
+                        text=", " + caller,
+                        program_name=self.rewriter.DEFAULT_PROGRAM_NAME
+                    )
+                else:
+                    self.rewriter.insertAfter(
+                        index=ctx.stop.tokenIndex - 1,
+                        text=caller,
+                        program_name=self.rewriter.DEFAULT_PROGRAM_NAME
+                    )
+
             if self.is_in_target_class:
                 self.rewriter.replaceSingleToken(
                     token=ctx.parentCtx.start,
@@ -152,6 +177,9 @@ class PropagateListener(JavaParserLabeledListener):
                     token=ctx.start,
                     text=self.new_name
                 )
+
+    def exitMethodCall0(self, ctx: JavaParserLabeled.MethodCall0Context):
+        self.fields = None
 
 
 def get_source_class_map(db, source_class: str):
@@ -243,6 +271,7 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
             new_name=f"{instance_name}.{method_name}",
             lines=usages[file],
             is_in_target_class=is_in_target_class,
+            method_map=method_map,
             debug=False
         )
     # exit(-1)
