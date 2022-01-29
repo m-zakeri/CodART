@@ -429,7 +429,7 @@ class ExtractClassAPI:
         for ref in class_ent.refs("Define", "Method"):
             method_ent = ref.ent()
             self.method_usage_map[method_ent.simplename()] = set()
-            for use in method_ent.refs("SetBy UseBy ModifyBy", "Variable ~Unknown"):
+            for use in method_ent.refs("SetBy UseBy ModifyBy, Call", "Variable ~Unknown, Method ~Unknown"):
                 self.method_usage_map[method_ent.simplename()].add(use.ent().simplename())
 
     def propagate_fields(self, usages):
