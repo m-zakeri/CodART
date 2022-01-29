@@ -143,7 +143,8 @@ class ReferenceInjectorAndConstructorListener(PasteMethodListener):
             )
 
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
-        self.fields = self.method_map.get(ctx.IDENTIFIER().getText())
+        identifier = ctx.IDENTIFIER()
+        self.fields = self.method_map.get(identifier.getText())
         if self.fields:
             if ctx.formalParameters().getText() == "()":
                 text = f"{self.source_class} ref"
@@ -192,7 +193,7 @@ class PropagateListener(JavaParserLabeledListener):
 
     def enterMethodCall0(self, ctx: JavaParserLabeled.MethodCall0Context):
         identifier = ctx.IDENTIFIER()
-        self.fields = self.method_map.get(identifier)
+        self.fields = self.method_map.get(identifier.getText())
         if identifier and ctx.start.line in self.lines and identifier.getText() == self.method_name:
             if self.fields:
                 parent = ctx.parentCtx
@@ -244,7 +245,7 @@ def get_source_class_map(db, source_class: str):
     for ref in class_ent.refs("Define", "Method"):
         method_ent = ref.ent()
         method_usage_map[method_ent.simplename()] = set()
-        for use in method_ent.refs("SetBy UseBy ModifyBy", "Variable ~Unknown"):
+        for use in method_ent.refs("SetBy UseBy ModifyBy, Call", "Variable ~Unknown, Method ~Unknown"):
             method_usage_map[method_ent.simplename()].add(use.ent().simplename())
     return method_usage_map, class_ent
 
