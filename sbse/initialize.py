@@ -776,7 +776,7 @@ class SmellInitialization(RandomInitialization):
         )
         candidates = []
         for index, row in long_methods.iterrows():
-            lines = []
+            lines = {}
             class_info = row[0].strip().split(".")[-1]
             class_file = self._und.lookup(class_info + ".java", "File")
             if class_file:
@@ -789,16 +789,17 @@ class SmellInitialization(RandomInitialization):
             for i in lines_info.split(")"):
                 if i == '':
                     continue
-                char_number = i.split(",")[0][1:].strip()
-                length = i.split(",")[1].strip()
+                values = i.split(",")
+                char_number = values[0][1:].strip()
+                length = values[1].strip()
+                should_copy = False if values[2].strip() == 'F' else True
                 if char_number and length:
                     char_number = int(char_number)
                     length = char_number + int(length)
                     start = len(file_content[:char_number].split("\n"))
                     stop = len(file_content[:length].split("\n"))
-                    lines += list(range(start, stop + 1))
-            lines = list(set(lines))
-            lines.sort()
+                    for line in range(start, stop + 1):
+                        lines[line] = should_copy
             candidates.append({
                 "file_path": class_file,
                 "lines": lines
