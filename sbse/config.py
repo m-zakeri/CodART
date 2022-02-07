@@ -183,7 +183,7 @@ date_time = dt.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S',
-    level=logging.INFO,  # DEBUG
+    level=logging.DEBUG,  # DEBUG
     handlers=[
         logging.FileHandler(f'../sbse/logs/{PROJECT_NAME}-{date_time}.log'),
         logging.StreamHandler(),

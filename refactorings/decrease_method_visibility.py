@@ -51,20 +51,24 @@ def main(udb_path, source_package, source_class, source_method, *args, **kwargs)
 
     if len(method_ent) == 0:
         logger.error("Invalid inputs.")
+        db.close()
         return
     method_ent = method_ent[0]
 
     if method_ent.simplename() != source_method:
         logger.error("Invalid entity.")
+        db.close()
         return
 
     if not method_ent.kind().check("Public"):
         logger.error("Method is not public.")
+        db.close()
         return
 
     for ent in method_ent.ents("CallBy"):
         if f"{source_package}.{source_class}" not in ent.longname():
             logger.error("Method cannot set to private.")
+            db.close()
             return
 
     parent = method_ent.parent()

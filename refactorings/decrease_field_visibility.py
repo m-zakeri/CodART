@@ -58,15 +58,18 @@ def main(udb_path, source_package, source_class, source_field, *args, **kwargs):
 
     if len(field_ent) == 0:
         logger.error("Invalid inputs.")
+        db.close()
         return
     field_ent = field_ent[0]
 
     if field_ent.simplename() != source_field:
         logger.error("Invalid entity.")
+        db.close()
         return
 
     if not field_ent.kind().check("Public"):
         logger.error("Field is not public.")
+        db.close()
         return
 
     for ref in field_ent.refs("UseBy,SetBy"):
@@ -74,6 +77,7 @@ def main(udb_path, source_package, source_class, source_field, *args, **kwargs):
         if f"{source_package}.{source_class}" not in ent.longname():
             logger.debug(f"{source_package}.{source_class} not in {ent.longname()}")
             logger.error("Field cannot set to private.")
+            db.close()
             return
 
     parent = field_ent.parent()

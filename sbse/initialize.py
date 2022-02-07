@@ -66,11 +66,11 @@ class Initialization(object):
             self.inti_make_field_static,
             self.init_make_method_static,
             self.init_make_method_non_static,
-            self.init_pullup_field,
+            # self.init_pullup_field,
             self.init_move_field,
             self.init_move_method,
             self.init_move_class,
-            self.init_push_down_field,
+            # self.init_push_down_field,
             self.init_extract_class,
             self.init_pullup_method,
             self.init_push_down_method,
@@ -826,13 +826,10 @@ class SmellInitialization(RandomInitialization):
 
 
 if __name__ == '__main__':
-    rand_pop = RandomInitialization(
+    rand_pop = SmellInitialization(
         config.UDB_PATH,
         population_size=config.POPULATION_SIZE,
         lower_band=config.LOWER_BAND,
         upper_band=config.UPPER_BAND
     )
-    main, params, name = rand_pop.init_increase_method_visibility()
-    print(f"Running {name}")
-    print(params)
-    main(**params)
+    main, params, name = rand_pop.init_extract_method()

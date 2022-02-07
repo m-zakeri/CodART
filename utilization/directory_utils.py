@@ -4,17 +4,16 @@ Utilities related to project directory.
 import datetime
 import os
 import subprocess
+import time
 from multiprocessing.dummy import Pool, Process, Manager
 
-from antlr4 import FileStream, CommonTokenStream
+from antlr4 import FileStream
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
+from java8speedy.parser import sa_javalabeled
 from joblib import Parallel, delayed
 
-from gen.java.JavaLexer import JavaLexer
-from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from sbse import config
-from java8speedy.parser import sa_javalabeled
-from java8speedy.parser import JavaLabeledLexer
+from sbse.config import logger
 
 
 def git_restore(project_dir):
@@ -24,8 +23,13 @@ def git_restore(project_dir):
     :return: None
     """
     assert os.path.isdir(project_dir)
-    subprocess.Popen(["git", "restore", "."], cwd=project_dir, stdout=open(os.devnull, 'wb')).wait()
-    subprocess.Popen(["git", "clean", "-f", "-d"], cwd=project_dir, stdout=open(os.devnull, 'wb')).wait()
+    exit_code_1 = subprocess.Popen(["git", "restore", "."], cwd=project_dir, stdout=open(os.devnull, 'wb')).wait()
+    exit_code_2 = subprocess.Popen(["git", "clean", "-f", "-d"], cwd=project_dir, stdout=open(os.devnull, 'wb')).wait()
+
+    if exit_code_1 != 0 or exit_code_2 != 0:
+        logger.warning("Git restore failed. Trying again...")
+        time.sleep(1)
+        git_restore(project_dir)
 
 
 def create_understand_database(project_dir):
@@ -55,10 +59,18 @@ def update_understand_database(udb_path):
     :return: None
     """
 
-    subprocess.Popen(
-        ['und', 'analyze', '-changed', udb_path],
+    exit_code = subprocess.Popen(
+        ['und', 'analyze', '-all', udb_path],
         stdout=open(os.devnull, 'wb')
     ).wait()
+    if exit_code == 0:
+        return
+    elif exit_code == 1:
+        # The database is locked or read-only.
+        print("Attention!")
+        logger.warning("The database is locked or read-only. Trying again...")
+        time.sleep(1)
+        update_understand_database(udb_path)
 
 
 def export_understand_dependencies_csv(csv_path: str, db_path: str):

@@ -51,15 +51,18 @@ def main(udb_path, source_package, source_class, source_method, *args, **kwargs)
 
     if len(method_ent) == 0:
         logger.error("Invalid inputs.")
+        db.close()
         return
     method_ent = method_ent[0]
 
     if method_ent.simplename() != source_method:
         logger.error("Invalid entity.")
+        db.close()
         return
 
     if not method_ent.kind().check("Private"):
         logger.error("Method is not private.")
+        db.close()
         return
 
     parent = method_ent.parent()

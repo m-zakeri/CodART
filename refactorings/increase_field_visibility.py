@@ -58,15 +58,18 @@ def main(udb_path, source_package, source_class, source_field, *args, **kwargs):
 
     if len(field_ent) == 0:
         logger.error("Invalid inputs.")
+        db.close()
         return
     field_ent = field_ent[0]
 
     if field_ent.simplename() != source_field:
         logger.error("Invalid entity.")
+        db.close()
         return
 
     if not field_ent.kind().check("Private"):
         logger.error("Field is not private.")
+        db.close()
         return
 
     parent = field_ent.parent()
