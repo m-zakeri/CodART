@@ -1,20 +1,20 @@
-import os
+import json
 import logging
 
-from antlr4 import *
-from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
-from gen.javaLabeled.JavaLexer import JavaLexer
-from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 import numpy as np
+from antlr4 import *
+
+from gen.javaLabeled.JavaLexer import JavaLexer
+from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
+from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 # Config logging
-logging.basicConfig(filename='codart_result.log', level=logging.DEBUG)
-logger = logging.getLogger(os.path.basename(__file__))
+logger = logging.getLogger()
 
 """
     An Extraction method refactoring class for using compiler listeners 
     Authors: Mohammad Sajad Naghizadeh, Sadegh Jafari, Sina Ziaee, Mohammad reza babaee
-    
+
     Description about the code:
     - statements are each line of code showing an act for example a = 5; is an statement.
     - exact each method of each class.
@@ -78,6 +78,7 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
         self.methods_name.append(ctx.IDENTIFIER().getText())
         # checks if this is the method containing target lines
         if ctx.start.line <= self.first_line and ctx.stop.line >= self.last_line:
+            print("Found method containing target lines.")
             self.is_in_target_method = True
             self.is_result_valid = True
 
@@ -85,11 +86,13 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
             for modifier in ctx.parentCtx.parentCtx.modifier():
                 if modifier.getText() == 'static':
                     self.is_target_method_static = True
+                    print("Target Method is static.")
                     break
 
             # checks if method throws any exception
             if ctx.qualifiedNameList():
                 self.exception_thrown_in_target_method = ctx.qualifiedNameList().getText()
+                print("Target Method throws exception.")
                 # TODO : check extracted lines for exception occurrence instead ,
                 #  as they may not throw exception even though their parent method does
 
@@ -103,6 +106,7 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
 
         # checks if this Constructor contains target lines
         if ctx.start.line <= self.first_line and ctx.stop.line >= self.last_line:
+            print("Found Constructor containing target lines.")
             self.is_in_target_method = True
             self.is_result_valid = True
 
@@ -110,11 +114,13 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
             for modifier in ctx.parentCtx.parentCtx.modifier():
                 if modifier.getText() == 'static':
                     self.is_target_method_static = True
+                    print("Target Method is static.")
                     break
 
             # checks if Constructor throws any exception
             if ctx.qualifiedNameList():
                 self.exception_thrown_in_target_method = ctx.qualifiedNameList().getText()
+                print("Target Method throws exception.")
                 # TODO : check extracted lines for exception occurrence instead ,
                 #  as they may not throw exception even though their parent method does
 
@@ -328,6 +334,7 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
     # helper functions
     # get method arguments for function call
     def get_args(self, include_type: bool):
+        print(self.pre_variables)
         result = '('
         first = True
         for key in self.mid_variables.keys():
@@ -358,6 +365,7 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
                     self.return_variable_type = self.mid_variables[key]['type']
                     result = self.mid_variables[key]['type'] + ' ' + key + ' = '
                 else:
+                    print('assignments on :', self.return_variable, ",", key)
                     self.return_variable = None
                     raise Exception('only one assignment in extracting lines is acceptable!')
 
@@ -369,6 +377,7 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
                     self.return_variable = key
                     self.return_variable_type = self.pre_variables[key]['type']
                 else:
+                    print('assignments on :', self.return_variable, ",", key)
                     self.return_variable = None
                     raise Exception('only one assignment in extracting lines is acceptable!')
         return '' if result is None else result
@@ -386,7 +395,7 @@ def extract_method(conf):
     tokens = CommonTokenStream(lexer)
     parser = JavaParserLabeled(tokens)
     tree = parser.compilationUnit()
-    listener = ExtractMethodRefactoring(conf['lines'])
+    listener = ExtractMethodRefactoring(list(map(int, list(conf['lines'].keys()))))
     walker = ParseTreeWalker()
     walker.walk(
         listener=listener,
@@ -405,12 +414,16 @@ def extract_method(conf):
     line_num = 1
     # func_added = False
     func = []
+    print('extracting following lines:')
     for line in lines:
         if listener.lines.__contains__(line_num):
+            print(line, end='')
             if line_num == listener.last_line:
                 output.append(get_tabs(line) + listener.get_write_variable()
                               + conf['new_method_name'] + listener.get_args(False) + '\n')
             func.append(line)
+            if conf['lines'][line_num]:
+                output.append(line)
         elif line_num == listener.method_stop_line:
             output.append(line)
             output.append(get_tabs(line) + 'private ' + ('static ' if listener.is_target_method_static else '') +
@@ -443,7 +456,8 @@ def extract_method(conf):
 """
 
 
-def main(file_path, lines: list, *args, **kwargs):
+def main(file_path, lines: dict):
+    print("Started Extract Method")
     _conf = {
         'target_file': file_path,
         'output_file': file_path,
@@ -451,3 +465,16 @@ def main(file_path, lines: list, *args, **kwargs):
         'new_method_name': 'newMethodByCodArt',
     }
     extract_method(_conf)
+
+    print("Finished Extract Method")
+
+
+if __name__ == "__main__":
+    index = 0
+    print(len("D:\\Final Project\\IdeaProjects\\"))
+    json_file = json.load(open('json-extract-method.json', 'r'))
+    file_path = json_file[index]["file_path"][30:]
+    lines = json_file[index]["lines"]
+    print(file_path)
+    print(lines)
+    main(file_path, lines)
