@@ -246,11 +246,11 @@ def train_dateset_g7(ds_number=0):
     elif ds_number == 2:
         reg = Regression(df_path=r'data_model/DS07012.csv', feature_selection_mode=True)
     elif ds_number == 3:
-        reg = Regression(df_path=r'dataset07/DS07310.csv')
+        reg = Regression(df_path=r'data_model/DS07310.csv')
     elif ds_number == 4:
-        reg = Regression(df_path=r'dataset06/DS06410.csv')
+        reg = Regression(df_path=r'data_model/DS06410.csv')
     elif ds_number == 5:
-        reg = Regression(df_path=r'dataset07/DS07510.csv')
+        reg = Regression(df_path=r'data_model/DS07510.csv')
     elif ds_number == 6:
         reg = Regression(df_path=r'data_model/DS07610.csv')
 
