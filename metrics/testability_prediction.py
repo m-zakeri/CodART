@@ -1,7 +1,7 @@
 """
 
 This module contains testability prediction script
-to be used in refactoring process in addition to qmood metrics
+to be used in refactoring process in addition to QMOOD metrics
 
 ## Reference
 [1] ADAFEST2 paper
@@ -10,7 +10,7 @@ to be used in refactoring process in addition to qmood metrics
 
 """
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 __author__ = 'Morteza Zakeri'
 
 import math
@@ -1235,7 +1235,7 @@ def main(project_path, initial_value=1.0):
     # db = und.open(project_path)
     p = PreProcess()
     # classes_longnames_list = p.extract_project_classes(db=db)
-    df = p.compute_metrics_by_class_list(project_path, n_jobs=8)  # n_job must be set to number of CPU cores
+    df = p.compute_metrics_by_class_list(project_path, n_jobs=7)  # n_job must be set to number of CPU cores
     # db.close()
     model = TestabilityModel(df_path=r'../metrics/data_model/DS07012.csv')
     testability_ = model.inference(model_path='../metrics/data_model/VR1_DS1.joblib', df_predict_data=df)
