@@ -1,7 +1,12 @@
 """
 
 This module contains light-weight version of testability prediction script (with 68 metrics)
-to be used in refactoring process in addition to qmood metrics
+to be used in refactoring process in addition to QMOOD metrics.
+
+## Changelog
+### v0.2.2
+- Add scikit-learn 1 compatibility
+
 
 ## Reference
 [1] ADAFEST2 paper
@@ -10,13 +15,12 @@ to be used in refactoring process in addition to qmood metrics
 
 """
 
-__version__ = '0.2.0'
+__version__ = '0.2.2'
 __author__ = 'Morteza Zakeri'
 
 import pandas as pd
 import joblib
-from joblib import Parallel, delayed, wrap_non_picklable_objects
-from sklearn.experimental import enable_hist_gradient_boosting  # noqa
+from joblib import Parallel, delayed
 
 try:
     import understand as und
@@ -29,7 +33,6 @@ from metrics.metrics_jcode_odor import JCodeOdorMetric
 from metrics.naming import UnderstandUtility
 
 
-# patch_sklearn()
 scaler1 = joblib.load('../metrics/data_model/scaler.joblib')
 model5 = joblib.load('../metrics/data_model/VR1_DS5.joblib')
 
@@ -392,4 +395,5 @@ if __name__ == '__main__':
     # project_path_ = r'../benchmark_projects/JSON/JSON.und'  # T=0.4531
     # project_path_ = r'D:/IdeaProjects/JSON20201115/JSON20201115.und'  # T=0.4749
     project_path_ = r'D:/IdeaProjects/jvlt-1.3.2/src.und'  # T=0.3997
-    print(main(project_path_))
+    from sbse.config import UDB_PATH
+    print(main(UDB_PATH))
