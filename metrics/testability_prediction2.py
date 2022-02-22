@@ -4,6 +4,8 @@ This module contains light-weight version of testability prediction script (with
 to be used in refactoring process in addition to QMOOD metrics.
 
 ## Changelog
+### v0.2.3
+- Remove dependency to metrics_jcode_odor
 ### v0.2.2
 - Add scikit-learn 1 compatibility
 
@@ -22,16 +24,10 @@ import pandas as pd
 import joblib
 from joblib import Parallel, delayed
 
-try:
-    import understand as und
-except ImportError as e:
-    print(e)
-
+import understand as und
 
 from metrics import metrics_names
-from metrics.metrics_jcode_odor import JCodeOdorMetric
-from metrics.naming import UnderstandUtility
-
+from metrics.metrics_coverability import UnderstandUtility
 
 scaler1 = joblib.load('../metrics/data_model/scaler.joblib')
 model5 = joblib.load('../metrics/data_model/VR1_DS5.joblib')
@@ -41,6 +37,7 @@ class TestabilityMetrics:
     """
     Compute all required metrics for computing Coverageability and testability.
     """
+
     @classmethod
     def get_package_metrics_names(cls) -> list:
         return metrics_names.package_metrics_names_primary
@@ -111,10 +108,9 @@ class TestabilityMetrics:
         package_metrics = package.metric(metric_list)
         classes_and_interfaces_list = UnderstandUtility.get_package_clasess_java(package_entity=package)
         # PKNOMNAMM: Package number of not accessor or mutator methods
-        j_code_odor = JCodeOdorMetric()
         pk_accessor_and_mutator_methods_list = list()
         for type_entity in classes_and_interfaces_list:
-            pk_accessor_and_mutator_methods_list.append(j_code_odor.NOMAMM(type_entity))
+            pk_accessor_and_mutator_methods_list.append(UnderstandUtility.NOMAMM(type_entity))
         pk_accessor_and_mutator_methods_list = list(filter(None, pk_accessor_and_mutator_methods_list))
         package_metrics.update({'PKNOAMM': sum(pk_accessor_and_mutator_methods_list)})
 
@@ -235,9 +231,10 @@ class TestabilityMetrics:
 
         metrics_list = ['CountLineCode', 'CountStmt', 'CountDeclClassMethod', 'CountDeclClassVariable',
                         'CountDeclInstanceMethod', 'CountDeclInstanceVariable', 'SumCyclomatic', 'MaxNesting',
-                        'PercentLackOfCohesion', 'CountClassCoupled', 'CountDeclMethodDefault', 'CountDeclMethodPrivate',
+                        'PercentLackOfCohesion', 'CountClassCoupled', 'CountDeclMethodDefault',
+                        'CountDeclMethodPrivate',
                         'CountDeclMethodProtected', 'CountDeclMethodPublic', 'MaxInheritanceTree', 'CountClassDerived',
-                        'CountClassBase',]
+                        'CountClassBase', ]
         class_metrics = entity.metric(metrics_list)
 
         parameters_length_list = list()
@@ -253,25 +250,23 @@ class TestabilityMetrics:
         parameters_length_list = list(filter(None, parameters_length_list))
         class_metrics.update({'SumCSNOP': sum(parameters_length_list)})
 
-        # Custom (JCodeOdor) coupling metrics
-        j_code_odor_metric = JCodeOdorMetric()
-        class_metrics.update({'RFC': j_code_odor_metric.RFC(class_name=entity)})
-        class_metrics.update({'FANIN': j_code_odor_metric.FANIN(db=db, class_entity=entity)})
-        class_metrics.update({'FANOUT': j_code_odor_metric.FANOUT(db=db, class_entity=entity)})
+        class_metrics.update({'RFC': UnderstandUtility.RFC(class_name=entity)})
+        class_metrics.update({'FANIN': UnderstandUtility.FANIN(db=db, class_entity=entity)})
+        class_metrics.update({'FANOUT': UnderstandUtility.FANOUT(db=db, class_entity=entity)})
 
         class_metrics.update({'ATFD': UnderstandUtility.ATFD(db=db, class_entity=entity)})  ### not implement
 
-        class_metrics.update({'CFNAMM': j_code_odor_metric.CFNAMM_Class(class_name=entity)})
+        class_metrics.update({'CFNAMM': UnderstandUtility.CFNAMM_Class(class_name=entity)})
         class_metrics.update({'DAC': UnderstandUtility.get_data_abstraction_coupling(db=db, class_entity=entity)})
         class_metrics.update({'NumberOfMethodCalls': UnderstandUtility.number_of_method_call(class_entity=entity)})
 
         # Visibility metrics
         # Understand built-in metrics plus one custom metric.
-        class_metrics.update({'CSNOAMM': j_code_odor_metric.NOMAMM(class_entity=entity)})
+        class_metrics.update({'CSNOAMM': UnderstandUtility.NOMAMM(class_entity=entity)})
 
         # Inheritance metrics
-        class_metrics.update({'NIM': j_code_odor_metric.NIM(class_name=entity)})
-        class_metrics.update({'NMO': j_code_odor_metric.NMO(class_name=entity)})
+        class_metrics.update({'NIM': UnderstandUtility.NIM(class_name=entity)})
+        class_metrics.update({'NMO': UnderstandUtility.NMO(class_name=entity)})
 
         class_metrics.update({'NOII': UnderstandUtility.NOII(db=db)})  # Not implemented
 
@@ -282,7 +277,7 @@ class TestabilityMetrics:
             class_knots_list.append(method.metric(['Knots'])['Knots'])
         class_count_path_list = list(filter(None, class_count_path_list))
         class_metrics.update({'SumCountPath': sum(class_count_path_list)})
-        class_knots_list = list(filter(None,  class_knots_list))
+        class_knots_list = list(filter(None, class_knots_list))
         class_metrics.update({'SumKnots': sum(class_knots_list)})
 
         class_metrics.update({'NumberOfDepends': len(entity.depends())})
@@ -322,7 +317,7 @@ def do(class_entity_long_name, project_path):
     one_class_metrics_value.extend([class_lexicon_metrics_dict[metric_name] for
                                     metric_name in TestabilityMetrics.get_class_lexicon_metrics_names()])
 
-    one_class_metrics_value.extend([class_ordinary_metrics_dict[metric_name]for
+    one_class_metrics_value.extend([class_ordinary_metrics_dict[metric_name] for
                                     metric_name in TestabilityMetrics.get_class_ordinary_metrics_names()])
 
     db.close()
@@ -370,6 +365,7 @@ class TestabilityModel(object):
         self.model = model5
 
     def inference(self, df_predict_data=None):
+        df_predict_data = df_predict_data.fillna(0)
         X_test1 = df_predict_data.iloc[:, 1:]
         X_test = self.scaler.transform(X_test1)
         y_pred = self.model.predict(X_test)
@@ -396,4 +392,5 @@ if __name__ == '__main__':
     # project_path_ = r'D:/IdeaProjects/JSON20201115/JSON20201115.und'  # T=0.4749
     project_path_ = r'D:/IdeaProjects/jvlt-1.3.2/src.und'  # T=0.3997
     from sbse.config import UDB_PATH
+
     print(main(UDB_PATH))
