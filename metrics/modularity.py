@@ -123,8 +123,6 @@ def main(project_path='../benchmark_projects/JSON/JSON.und', initial_value=1.0):
 
 # Test module
 if __name__ == '__main__':
-    project_path = r'../benchmark_projects/ganttproject/biz.ganttproject.core/biz.ganttproject.core.und'
-    # project_path = r'D:/IdeaProjects/JSON20201115/JSON.und'
-    # project_path = r'D:/IdeaProjects/jvlt-1.3.2/src.und'
-    project_path = 'D:/Final Project/IdeaProjects/105_freemind/105_freemind.und'
-    print(main(project_path))
+    from sbse.config import UDB_PATH
+    print(main(UDB_PATH))
+
