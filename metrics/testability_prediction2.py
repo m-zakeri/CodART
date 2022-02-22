@@ -29,7 +29,7 @@ import understand as und
 from metrics import metrics_names
 from metrics.metrics_coverability import UnderstandUtility
 
-scaler1 = joblib.load('../metrics/data_model/scaler.joblib')
+scaler1 = joblib.load('../metrics/data_model/DS07510.joblib')
 model5 = joblib.load('../metrics/data_model/VR1_DS5.joblib')
 
 
@@ -87,8 +87,9 @@ class TestabilityMetrics:
         return primary_metrics_names
 
     @classmethod
-    def compute_java_package_metrics(cls, db=None, class_name: str = None):
+    def compute_java_package_metrics(cls, db=None, entity=None):
         # Find package: strategy 2: Dominated strategy
+        class_name = entity.longname()
         class_name_list = class_name.split('.')[:-1]
         package_name = '.'.join(class_name_list)
         # print('package_name string', package_name)
@@ -106,7 +107,7 @@ class TestabilityMetrics:
                        'SumCyclomatic', 'MaxNesting', 'CountDeclMethodDefault', 'CountDeclMethodPrivate',
                        'CountDeclMethodProtected', 'CountDeclMethodPublic', ]
         package_metrics = package.metric(metric_list)
-        classes_and_interfaces_list = UnderstandUtility.get_package_clasess_java(package_entity=package)
+        classes_and_interfaces_list = package.ents('Contain', 'Java Type ~Unknown ~Unresolved ~Jar ~Library')
         # PKNOMNAMM: Package number of not accessor or mutator methods
         pk_accessor_and_mutator_methods_list = list()
         for type_entity in classes_and_interfaces_list:
@@ -114,10 +115,10 @@ class TestabilityMetrics:
         pk_accessor_and_mutator_methods_list = list(filter(None, pk_accessor_and_mutator_methods_list))
         package_metrics.update({'PKNOAMM': sum(pk_accessor_and_mutator_methods_list)})
 
-        package_metrics.update({'PKNOI':
-                                    len(UnderstandUtility.get_package_interfaces_java(package_entity=package))})
-        package_metrics.update({'PKNOAC':
-                                    len(UnderstandUtility.get_package_abstract_class_java(package_entity=package))})
+        pknoi = len(UnderstandUtility.get_package_interfaces_java(package_entity=package))
+        pknoac = len(UnderstandUtility.get_package_abstract_class_java(package_entity=package))
+        package_metrics.update({'PKNOI': pknoi})
+        package_metrics.update({'PKNOAC': pknoac})
 
         # print('package metrics', len(package_metrics), package_metrics)
         return package_metrics
@@ -296,19 +297,18 @@ def do(class_entity_long_name, project_path):
     one_class_metrics_value = [class_entity.longname()]
 
     # print('Calculating package metrics')
-    package_metrics_dict = TestabilityMetrics.compute_java_package_metrics(db=db,
-                                                                           class_name=class_entity.longname())
-    if package_metrics_dict is None:
+    package_metrics_dict = TestabilityMetrics.compute_java_package_metrics(db=db, entity=class_entity)
+    if package_metrics_dict is None or len(package_metrics_dict) == 0:
         return None
 
     # print('Calculating class lexicon metrics')
     class_lexicon_metrics_dict = TestabilityMetrics.compute_java_class_metrics_lexicon(entity=class_entity)
-    if class_lexicon_metrics_dict is None:
+    if class_lexicon_metrics_dict is None or len(class_lexicon_metrics_dict) == 0:
         return None
 
     # print('Calculating class ordinary metrics')
     class_ordinary_metrics_dict = TestabilityMetrics.compute_java_class_metrics2(db=db, entity=class_entity)
-    if class_ordinary_metrics_dict is None:
+    if class_ordinary_metrics_dict is None or len(class_ordinary_metrics_dict) == 0:
         return None
 
     one_class_metrics_value.extend([package_metrics_dict[metric_name] for
@@ -321,6 +321,7 @@ def do(class_entity_long_name, project_path):
                                     metric_name in TestabilityMetrics.get_class_ordinary_metrics_names()])
 
     db.close()
+    del db
     # print(one_class_metrics_value)
     # quit()
     return one_class_metrics_value
@@ -338,9 +339,11 @@ class PreProcess:
 
         """
         # class_entities = cls.read_project_classes(db=db, classes_names_list=class_list, )
+        print(project_path)
         db = und.open(project_path)
         class_list = UnderstandUtility.get_project_classes_longnames_java(db=db)
         db.close()
+        del db
 
         if n_jobs == 0:  # Sequential computing
             res = [do(class_entity_long_name, project_path) for class_entity_long_name in class_list]
@@ -392,5 +395,5 @@ if __name__ == '__main__':
     # project_path_ = r'D:/IdeaProjects/JSON20201115/JSON20201115.und'  # T=0.4749
     project_path_ = r'D:/IdeaProjects/jvlt-1.3.2/src.und'  # T=0.3997
     from sbse.config import UDB_PATH
-
-    print(main(UDB_PATH))
+    for i in range(0, 10):
+        print(main(UDB_PATH))
