@@ -46,7 +46,7 @@ except ModuleNotFoundError:
     pass
 
 from . import metrics_names
-from naming import UnderstandUtility
+from metrics_coverability import UnderstandUtility
 from metrics.metrics_jcode_odor import JCodeOdorMetric
 from metrics.source_code_metrics import *
 import metrics.metrics_names

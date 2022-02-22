@@ -34,7 +34,7 @@ from sklearn.preprocessing import QuantileTransformer
 import metrics
 from metrics import metrics_names
 from metrics.metrics_jcode_odor import JCodeOdorMetric
-from metrics.naming import UnderstandUtility
+from metrics.metrics_coverability import UnderstandUtility
 
 
 # patch_sklearn()

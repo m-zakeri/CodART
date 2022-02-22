@@ -4,55 +4,18 @@ Implementation of JCodeOdor metrics.
 
 """
 
+__version__ = '0.3.0'
+__author__ = 'Morteza Zakeri'
+
 try:
     import understand as und
 except ImportError as e:
     print(e)
 
-from metrics.naming import UnderstandUtility
-
-
-class MainDriver:
-    def main(self):
-        db = und.open('CodeSmell.udb')
-        obj_get_metrics = JCodeOdorMetric()
-        # print(obj_get_metrics.NOM())
-        # for a in db.ents('Java Variable Local'):
-        # print(a)
-        # print(obj_get_metrics.NOPK(db))
-        for classname in db.ents("class"):
-            #  if(classname.name()=='Program.FANOUT'):
-            print('classname = ' + classname.name())
-            for a in classname.ents('Define', 'method'):
-                print('method name =' + a.name())
-                #  for b in a.refs('call'):
-                #   print(b.ent().name())
-                print(obj_get_metrics.NOAV(a))
-        db.close()
-    # list = [1, 2, 3, 1, 1, 2]
-    # s = set(list)
-
-
-# print(s)
-# metrics = db.metric(db.metrics())
-# for k, v in sorted(metrics.items()):
-#    print(k, "=", v)
-
-
-# print(obj_get_metrics.NOMNOPK(db))
-# for cls in db.ents('Class'):
-#    print('class name = ' + cls.name())
-#    for mth in cls.ents('Defined','method'):
-#     print(obj_get_metrics.NOAV(mth))
-
-
-__version__ = '0.3.0'
-__author__ = 'Morteza'
+from metrics.metrics_coverability import UnderstandUtility
 
 
 class JCodeOdorMetric:
-
-    # ?
     def return_name(self, method_entity=None):
         try:
             # method_name = funcname.longname()
@@ -131,11 +94,6 @@ class JCodeOdorMetric:
                     count += 1  # i.e., the method is accessor or mutator
         return count
 
-    # def NOMNAMM(self,class_name):
-    #   mth_=class_name.metric(["CountDeclMethodPublic"])
-    #   total=mth_["CountDeclMethodPublic"]
-    #   return  (total - self.NOAM(class_name))
-
     def NOMNAMM(self, class_name):
         # mth_=class_name.metric(["CountDeclClassMethod"])["CountDeclClassMethod"]     0 midad
         count = 0
@@ -202,7 +160,6 @@ class JCodeOdorMetric:
 
         N = len(method_list_visible)
         NP = N * (N - 1) / 2
-
         if (NP != 0):
             return NDC / NP
         else:
@@ -277,13 +234,6 @@ class JCodeOdorMetric:
                 count += 1
         return count
 
-    def give_Methods_that_the_measured_method_calls(self, funcname):
-        call_methods_list = set()
-        for fi in funcname.refs("call"):
-            if (fi.ent().parent().parent() == funcname.parent().parent()):
-                call_methods_list.add(fi.ent())
-        return call_methods_list
-
     def CDISP(self, db, method_name):
         cint = self.CINT(db, method_name)
         if cint == 0:
@@ -325,8 +275,6 @@ class JCodeOdorMetric:
         count = 0
         entities = class_name.ents('Define', 'Variable')
         return len(entities)
-
-    # return class_name.metric(["CountDeclClassVariable"])["CountDeclClassVariable"] + class_name.metric(["CountDeclInstanceVariable"])["CountDeclInstanceVariable"]
 
     def WMC(self, class_name):
         return class_name.metric(["SumCyclomaticStrict"])["SumCyclomaticStrict"]
@@ -384,7 +332,7 @@ class JCodeOdorMetric:
         Method for computing the fanin for a given class
         :param db: Understand database of target project
         :param class_entity: Target class entity for computing fanin
-        :return: fain: The fanin of the class
+        :return: fain: The FanIn of the class
         """
         method_list = UnderstandUtility.get_method_of_class_java(db=db, class_name=class_entity.longname())
         fanin = 0
@@ -445,15 +393,13 @@ class JCodeOdorMetric:
         return len(set(list1))
 
     def RFC(self, class_name):
-        count = 0
         list1 = list()
         for meth in class_name.refs('Call', 'Java Method'):
             if meth.ent().parent() is None:
                 continue
-            if meth.ent().parent().longname() != class_name.longname() and \
-                    meth.ent().kindname() != 'Public Constructor':
+            long_name = meth.ent().parent().longname()
+            if long_name != class_name.longname() and meth.ent().kindname() != 'Public Constructor':
                 list1.append(meth)
-
         return len(set(list1))
 
     def LAA(self, method_name):
@@ -475,16 +421,6 @@ class JCodeOdorMetric:
         if (len(set(listtotal)) != 0):
             result = len(set(listsameclass)) / len(set(listtotal))
         return result
-
-    def CFNAMM_method(self, method_name):
-        count = 0
-        list1 = list()
-        for meth in method_name.refs('call', 'method'):
-            if (
-                    meth.ent().parent().longname() != class_name.parent().longname() and meth.ent().kindname() != "Public Constructor" and not (
-                    self.is_accesor_or_mutator(meth.ent()))):
-                list1.append(meth)
-        return len(set(list1))
 
     def CFNAMM_Class(self, class_name):
         list1 = list()
@@ -536,6 +472,3 @@ class JCodeOdorMetric:
         foreign_data = class_entity.ents('Useby', 'Java Variable')
         for fd in foreign_data:
             print(fd.longname(), '| ', fd.parent(), '| ', fd.kind())
-
-# obj = cls_main()
-# obj.main()

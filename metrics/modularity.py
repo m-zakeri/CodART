@@ -25,7 +25,7 @@ import pandas
 import understand
 from matplotlib import pyplot as plt
 
-from metrics.naming import UnderstandUtility
+from metrics.metrics_coverability import UnderstandUtility
 from utilization.directory_utils import export_understand_dependencies_csv
 
 
