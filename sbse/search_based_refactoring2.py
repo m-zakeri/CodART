@@ -103,13 +103,17 @@ class RefactoringOperation(Gene):
         logger.info(f"Parameters {self.params}")
         try:
             self.main(**self.params)
+            return True
         except Exception as e:
             logger.error(f"Error in executing refactoring:\n {e}")
+            return False
+
 
     @classmethod
     def generate_randomly(cls):
-        initializer = RandomInitialization(udb_path=config.UDB_PATH)
+        initializer = SmellInitialization(udb_path=config.UDB_PATH)
         item = initializer.select_random()
+        initializer._und.close()
         return cls(
             name=item[2],
             params=item[1],
@@ -369,10 +373,11 @@ class ProblemManyObjective(Problem):
             # Stage 1: Execute all refactoring operations in the sequence x
             logger.debug(f"Reached an Individual with size {len(individual_[0])}")
             for refactoring_operation in individual_[0]:
-                refactoring_operation.do_refactoring()
+                res = refactoring_operation.do_refactoring()
                 # Update Understand DB
                 logger.debug(f"Updating understand database after {refactoring_operation.name}.")
-                update_understand_database(config.UDB_PATH)
+                if res:
+                    update_understand_database(config.UDB_PATH)
 
             # Stage 2:
             arr = Array('d', range(8))
@@ -565,7 +570,7 @@ class BitStringMutation(Mutation):
                 # with a probability of `mutation_probability` replace the refactoring operation with new one
                 if r < self.mutation_probability:
                     random_refactoring_operation = RefactoringOperation.generate_randomly()
-                    X[i][0][j] = random_refactoring_operation
+                    X[i][0][j] = deepcopy(random_refactoring_operation)
         return X
 
 
