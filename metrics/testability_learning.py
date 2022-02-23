@@ -53,7 +53,7 @@ class Regression(object):
         self.df = pd.read_csv(df_path, delimiter=',', index_col=False)
         self.X_train1, self.X_test1, self.y_train, self.y_test = train_test_split(self.df.iloc[:, 1:-1],
                                                                                   self.df.iloc[:, -1],
-                                                                                  test_size=0.25,
+                                                                                  test_size=0.10,
                                                                                   random_state=117,
                                                                                   )
 
@@ -204,10 +204,7 @@ class Regression(object):
         clf = clf.best_estimator_
         y_true, y_pred = self.y_test, clf.predict(self.X_test)
         dump(clf, model_path)
-
         self.evaluate_model(model=clf, model_path=model_path)
-        # self.evaluate_model_class(model=clf, model_path=model_path)
-        # self.inference_model(model=clf, model_path=model_path)
         print('=' * 50)
 
     def vote(self, model_path=None, dataset_number=1):
@@ -216,21 +213,15 @@ class Regression(object):
         reg2 = load(r'sklearn_models7/RFR1_DS{0}.joblib'.format(dataset_number))
         reg3 = load(r'sklearn_models7/MLPR1_DS{0}.joblib'.format(dataset_number))
         # reg4 = load(r'sklearn_models7/SGDR1_DS1.joblib')
-
         ereg = VotingRegressor(
             [('HGBR1_DS{0}'.format(dataset_number), reg1),
              ('RFR1_DS{0}'.format(dataset_number), reg2),
              ('MLPR1_DS{0}'.format(dataset_number), reg3)],
             weights=[3. / 6., 2. / 6., 1. / 6.]
         )
-
         ereg.fit(self.X_train, self.y_train)
         dump(ereg, model_path)
         self.evaluate_model(model=ereg, model_path=model_path)
-        try:
-            self.evaluate_model_class(model=ereg, model_path=model_path)
-        except:
-            print('Prediction is out of the range.')
 
 
 def train_dateset_g7(ds_number=0):
@@ -253,6 +244,8 @@ def train_dateset_g7(ds_number=0):
         reg = Regression(df_path=r'data_model/DS07510.csv')
     elif ds_number == 6:
         reg = Regression(df_path=r'data_model/DS07610.csv')
+    elif ds_number == 7:
+        reg = Regression(df_path=r'data_model/DS07710.csv')
 
     if reg is None:
         return
@@ -273,8 +266,8 @@ def create_testability_dataset_with_only_important_metrics():
     Select only top 15 important testability features
     :return:
     """
-    df_path = r'dataset07/DS07012.csv'
-    df_important_metrics_path = r'dataset07/DS07610.csv'
+    df_path = r'data_model/DS07012.csv'
+    df_important_metrics_path = r'data_model/DS07610.csv'
     df = pd.read_csv(df_path, delimiter=',', index_col=False)
     df_imp = pd.DataFrame()
     df_imp['Class'] = df['Class']  # 0
@@ -298,9 +291,20 @@ def create_testability_dataset_with_only_important_metrics():
     df_imp.to_csv(df_important_metrics_path, index=False)
 
 
+def create_testability_dataset_with_only_10_important_metrics():
+    df_path = r'data_model/DS07610.csv'
+    df_new_path = r'data_model/DS07710.csv'
+    df = pd.read_csv(df_path, delimiter=',', index_col=False)
+    df.drop(columns=['CSORD_CountDeclClassMethod','CSLEX_NumberOfNewStatements',
+                     'CSLEX_NumberOfReturnAndPrintStatements','CSORD_NumberOfClassConstructors',
+                     'PK_CountDeclClassMethod'], inplace=True)
+    df.to_csv(df_new_path, index=False)
+
+
 def main():
-    train_dateset_g7(ds_number=5)
+    train_dateset_g7(ds_number=7)
     # create_testability_dataset_with_only_important_metrics()
+    # create_testability_dataset_with_only_10_important_metrics()
 
 
 # -----------------------------------------------
