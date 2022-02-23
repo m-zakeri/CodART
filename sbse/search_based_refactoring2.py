@@ -48,7 +48,7 @@ from metrics.modularity import main as modularity_main
 from metrics.testability_prediction2 import main as testability_main
 from sbse import config
 from sbse.config import logger
-from sbse.initialize import RandomInitialization
+from sbse.initialize import RandomInitialization, SmellInitialization
 from sbse.objectives import Objectives
 from utilization.directory_utils import update_understand_database, git_restore
 
@@ -405,7 +405,7 @@ class ProblemManyObjective(Problem):
         # print('OUT', out['F'])
 
 
-class PureRandomInitialization(Sampling):
+class PopulationInitialization(Sampling):
     """
     This class create the initial population, X, consists of n_samples, pop_size.
     For each refactoring operation, a set of controlling parameters (e.g., actors and roles) is picked based on
@@ -413,6 +413,8 @@ class PureRandomInitialization(Sampling):
     The selected refactoring operations are randomly arranged in each individual.
     Assigning randomly a sequence of refactorings to certain code fragments generates the initial population
     """
+    def __init__(self,  pure_random=False):
+        self.pure_random_mode = pure_random
 
     def _do(self, problem, n_samples, **kwargs):
         """
@@ -424,12 +426,20 @@ class PureRandomInitialization(Sampling):
         """
 
         X = np.full((n_samples, 1), None, dtype=Individual)
-        population = RandomInitialization(
-            udb_path=config.UDB_PATH,
-            population_size=n_samples,
-            lower_band=problem.n_refactorings_lowerbound,
-            upper_band=problem.n_refactorings_upperbound
-        ).generate_population()
+        if self.pure_random_mode:
+            population = RandomInitialization(
+                udb_path=config.UDB_PATH,
+                population_size=n_samples,
+                lower_band=problem.n_refactorings_lowerbound,
+                upper_band=problem.n_refactorings_upperbound
+            ).generate_population()
+        else:
+            population = SmellInitialization(
+                udb_path=config.UDB_PATH,
+                population_size=n_samples,
+                lower_band=problem.n_refactorings_lowerbound,
+                upper_band=problem.n_refactorings_upperbound
+            ).generate_population()
 
         for i in range(n_samples):
             individual_object = []  # list of refactoring operations (Temporarily used instead of Individual class)
@@ -625,7 +635,7 @@ def main():
     algorithms = list()
     # 1: GA
     algorithm = GA(pop_size=config.POPULATION_SIZE,
-                   sampling=PureRandomInitialization(),
+                   sampling=PopulationInitialization(pure_random=False),
                    crossover=AdaptiveSinglePointCrossover(prob=0.9),
                    # crossover=get_crossover("real_k_point", n_points=2),
                    mutation=BitStringMutation(prob=0.1),
@@ -635,7 +645,7 @@ def main():
 
     # 2: NSGA II
     algorithm = NSGA2(pop_size=config.POPULATION_SIZE,
-                      sampling=PureRandomInitialization(),
+                      sampling=PopulationInitialization(pure_random=False),
                       crossover=AdaptiveSinglePointCrossover(prob=0.9),
                       # crossover=get_crossover("real_k_point", n_points=2),
                       mutation=BitStringMutation(prob=0.1),
@@ -652,7 +662,7 @@ def main():
                                         seed=1)
     algorithm = NSGA3(ref_dirs=ref_dirs,
                       pop_size=config.POPULATION_SIZE,  # 200
-                      sampling=PureRandomInitialization(),
+                      sampling=PopulationInitialization(pure_random=False),
                       selection=TournamentSelection(func_comp=binary_tournament),
                       crossover=AdaptiveSinglePointCrossover(prob=0.8),
                       # crossover=get_crossover("real_k_point", n_points=2),
