@@ -716,7 +716,7 @@ class SmellInitialization(RandomInitialization):
         # Load csv files
         self.move_method_candidates = self.load_move_method_candidates()
         self.extract_class_candidates = self.load_extract_class_candidates()
-        self.extract_method_candidates = self.load_extract_method_candidates()
+        # self.extract_method_candidates = self.load_extract_method_candidates() # We leave extract method for now.
 
     def load_extract_class_candidates(self):
         god_classes = pandas.read_csv(
