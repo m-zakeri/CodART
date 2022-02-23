@@ -414,6 +414,7 @@ class PopulationInitialization(Sampling):
     Assigning randomly a sequence of refactorings to certain code fragments generates the initial population
     """
     def __init__(self,  pure_random=False):
+        super(PopulationInitialization, self).__init__()
         self.pure_random_mode = pure_random
 
     def _do(self, problem, n_samples, **kwargs):
