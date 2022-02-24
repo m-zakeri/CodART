@@ -52,13 +52,15 @@ class TestabilityPredicator:
             identifiers_list = list()
             condition_count = 0
             dots_count = 0
-            for lexeme in class_entity.lexer(show_inactive=False):
-                if lexeme.token() == 'Identifier':
-                    identifiers_list.append(lexeme.text())
-                elif lexeme.text() in condition_kw_list:
+            lexeme_ = class_entity.lexer(show_inactive=False).first()
+            while lexeme_ is not None:
+                if lexeme_.token() == 'Identifier':
+                    identifiers_list.append(lexeme_.text())
+                elif lexeme_.text() in condition_kw_list:
                     condition_count += 1
-                elif lexeme.text() == '.':
+                elif lexeme_.text() == '.':
                     dots_count += 1
+                lexeme_ = lexeme_.next()
 
             dfx = pd.DataFrame()
             dfx['Class'] = [class_entity.longname()]
