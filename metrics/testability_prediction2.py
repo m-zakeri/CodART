@@ -30,7 +30,7 @@ from metrics import metrics_names
 from metrics.metrics_coverability import UnderstandUtility
 
 scaler1 = joblib.load('../metrics/data_model/DS07510.joblib')
-model5 = joblib.load('../metrics/data_model/VR1_DS5.joblib')
+model5 = joblib.load('../metrics/sklearn_models7/VR1_DS5.joblib')
 
 
 class TestabilityMetrics:
@@ -155,32 +155,30 @@ class TestabilityMetrics:
 
         dots_count = 0
 
-        try:
-            for lexeme in entity.lexer(show_inactive=False):
-                # print(lexeme.text(), ': ', lexeme.token())
-                tokens_list.append(lexeme.text())
-                if lexeme.token() == 'Identifier':
-                    identifiers_list.append(lexeme.text())
-                if lexeme.token() == 'Keyword':
-                    keywords_list.append(lexeme.text())
-                if lexeme.token() == 'Operator':
-                    operators_list.append(lexeme.text())
-                if lexeme.text() in return_and_print_kw_list:
-                    return_and_print_count += 1
-                if lexeme.text() in condition_kw_list:
-                    condition_count += 1
-                if lexeme.text() in uncondition_kw_list:
-                    uncondition_count += 1
-                if lexeme.text() in exception_kw_list:
-                    exception_count += 1
-                if lexeme.text() in new_count_kw_list:
-                    new_count += 1
-                if lexeme.text() in super_count_kw_list:
-                    super_count += 1
-                if lexeme.text() == '.':
-                    dots_count += 1
-        except:
-            raise RuntimeError('Error in computing class lexical metrics for class "{0}"'.format(entity.longname()))
+        lexeme = entity.lexer(show_inactive=False).first()
+        while lexeme is not None:
+            tokens_list.append(lexeme.text())
+            if lexeme.token() == 'Identifier':
+                identifiers_list.append(lexeme.text())
+            if lexeme.token() == 'Keyword':
+                keywords_list.append(lexeme.text())
+            if lexeme.token() == 'Operator':
+                operators_list.append(lexeme.text())
+            if lexeme.text() in return_and_print_kw_list:
+                return_and_print_count += 1
+            if lexeme.text() in condition_kw_list:
+                condition_count += 1
+            if lexeme.text() in uncondition_kw_list:
+                uncondition_count += 1
+            if lexeme.text() in exception_kw_list:
+                exception_count += 1
+            if lexeme.text() in new_count_kw_list:
+                new_count += 1
+            if lexeme.text() in super_count_kw_list:
+                super_count += 1
+            if lexeme.text() == '.':
+                dots_count += 1
+            lexeme = lexeme.next()
 
         number_of_assignments = operators_list.count('=')
         number_of_operators_without_assignments = len(operators_list) - number_of_assignments
@@ -290,9 +288,9 @@ class TestabilityMetrics:
         return class_metrics
 
 
-def do(class_entity_long_name, project_path):
+def do(class_entity_long_name, project_db_path):
     import understand as und
-    db = und.open(project_path)
+    db = und.open(project_db_path)
     class_entity = UnderstandUtility.get_class_entity_by_name(class_name=class_entity_long_name, db=db)
     one_class_metrics_value = [class_entity.longname()]
 
@@ -334,22 +332,22 @@ class PreProcess:
     """
 
     @classmethod
-    def compute_metrics_by_class_list(cls, project_path, n_jobs):
+    def compute_metrics_by_class_list(cls, project_db_path, n_jobs):
         """
 
         """
         # class_entities = cls.read_project_classes(db=db, classes_names_list=class_list, )
-        print(project_path)
-        db = und.open(project_path)
+        # print(project_db_path)
+        db = und.open(project_db_path)
         class_list = UnderstandUtility.get_project_classes_longnames_java(db=db)
         db.close()
-        del db
+        # del db
 
         if n_jobs == 0:  # Sequential computing
-            res = [do(class_entity_long_name, project_path) for class_entity_long_name in class_list]
+            res = [do(class_entity_long_name, project_db_path) for class_entity_long_name in class_list]
         else:  # Parallel computing
             res = Parallel(n_jobs=n_jobs, )(
-                delayed(do)(class_entity_long_name, project_path) for class_entity_long_name in class_list
+                delayed(do)(class_entity_long_name, project_db_path) for class_entity_long_name in class_list
             )
         res = list(filter(None, res))
 
@@ -362,7 +360,7 @@ class PreProcess:
         return df
 
 
-class TestabilityModel(object):
+class TestabilityModel:
     def __init__(self, ):
         self.scaler = scaler1
         self.model = model5
@@ -378,11 +376,11 @@ class TestabilityModel(object):
 
 
 # API
-def main(project_path, initial_value=1.0):
+def main(project_db_path, initial_value=1.0):
     """
     testability_prediction module API
     """
-    df = PreProcess().compute_metrics_by_class_list(project_path, n_jobs=0)  # n_job must be set to number of CPU cores
+    df = PreProcess().compute_metrics_by_class_list(project_db_path, n_jobs=0)  # n_job must be set to number of CPU cores
     testability_ = TestabilityModel().inference(df_predict_data=df)
     # print('testability=', testability_)
     return testability_ / initial_value
