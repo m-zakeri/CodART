@@ -117,23 +117,13 @@ class Objectives:
 
 
 if __name__ == '__main__':
-    understand_paths = [
-        "D:\\Final Project\\IdeaProjects\\JSON20201115\\JSON20201115.und",
-        "D:\\Final Project\\IdeaProjects\\104_vuze\\104_vuze.und",
-        "D:\\Final Project\\IdeaProjects\\105_freemind\\105_freemind.und",
-        "D:\\Final Project\\IdeaProjects\\107_weka\\107_weka.und",
-        "D:\\Final Project\\IdeaProjects\\ganttproject_1_11_1_original\\ganttproject_1_11_1_original.und",
-        "D:\\Final Project\\IdeaProjects\\jfreechart-master\\jfreechart-master.und",
-        "D:\\Final Project\\IdeaProjects\\jvlt-1.3.2\\jvlt-1.3.2.und",
-
-    ]
-    for udb_path in understand_paths:
-        obj = Objectives(udb_path)
-        print(udb_path)
-        print(f"reusability: {obj.reusability}")
-        print(f"flexibility: {obj.flexibility}")
-        print(f"understandability: {obj.understandability}")
-        print(f"functionality: {obj.functionality}")
-        print(f"extendability: {obj.extendability}")
-        print(f"effectiveness: {obj.effectiveness}")
-        print(f"average: {obj.average}")
+    from sbse.config import UDB_PATH
+    obj = Objectives(UDB_PATH)
+    print(UDB_PATH)
+    print(f"reusability: {obj.reusability}")
+    print(f"flexibility: {obj.flexibility}")
+    print(f"understandability: {obj.understandability}")
+    print(f"functionality: {obj.functionality}")
+    print(f"extendability: {obj.extendability}")
+    print(f"effectiveness: {obj.effectiveness}")
+    print(f"average: {obj.average}")
