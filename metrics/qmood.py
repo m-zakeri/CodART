@@ -7,6 +7,7 @@ __author__ = 'Seyyed Ali Ayati, Mina Tahaei'
 
 import os
 import logging
+from pprint import pprint
 
 try:
     import understand as und
@@ -24,7 +25,8 @@ def divide_by_initial_value(func):
     def wrapper(*args, **kwargs):
         value = func(*args, **kwargs)
         initial = CURRENT_METRICS.get(func.__name__)
-        return round(value / initial, 2)
+        value = round(value / initial, 2)
+        return value
 
     return wrapper
 
@@ -326,15 +328,18 @@ if __name__ == '__main__':
     print(f"Path: {UDB_PATH}")
     metric = QMOOD(UDB_PATH)
     print("Object created.")
-    print(f"DSC: ", metric.DSC)
-    print(f"NOH: ", metric.NOH)
-    print(f"ANA: ", metric.ANA)
-    print(f"MOA: ", metric.MOA)
-    print(f"DAM: ", metric.DAM)
-    print(f"CAMC: ", metric.CAMC)
-    print(f"CIS: ", metric.CIS)
-    print(f"NOM: ", metric.NOM)
-    print(f"DCC: ", metric.DCC)
-    print(f"MFA: ", metric.MFA)
-    print(f"NOP: ", metric.NOP)
+    obj = {
+        "DSC": metric.DSC,
+        "NOH": metric.NOH,
+        "ANA": metric.ANA,
+        "MOA": metric.MOA,
+        "DAM": metric.DAM,
+        "CAMC": metric.CAMC,
+        "CIS": metric.CIS,
+        "NOM": metric.NOM,
+        "DCC": metric.DCC,
+        "MFA": metric.MFA,
+        "NOP": metric.NOP
+    }
+    pprint(obj)
     del metric
