@@ -45,7 +45,7 @@ from pymoo.optimize import minimize
 from pymoo.util.termination.default import MultiObjectiveDefaultTermination
 
 from metrics.modularity import main as modularity_main
-from metrics.testability_prediction2 import main as testability_main
+from metrics.testability_prediction3 import main as testability_main
 from sbse import config
 from sbse.config import logger
 from sbse.initialize import RandomInitialization, SmellInitialization
@@ -190,7 +190,7 @@ class ProblemSingleObjective(Problem):
         The CodART single-objective optimization work with only one objective, testability:
     """
 
-    def __init__(self, n_refactorings_lowerbound=50, n_refactorings_upperbound=75,
+    def __init__(self, n_refactorings_lowerbound=10, n_refactorings_upperbound=50,
                  evaluate_in_parallel=False,
                  mode='single'  # 'multi'
                  ):
@@ -272,7 +272,7 @@ class ProblemMultiObjective(Problem):
         Objective 3: Modularity
     """
 
-    def __init__(self, n_refactorings_lowerbound=50, n_refactorings_upperbound=75, evaluate_in_parallel=False):
+    def __init__(self, n_refactorings_lowerbound=10, n_refactorings_upperbound=50, evaluate_in_parallel=False):
         super(ProblemMultiObjective, self).__init__(n_var=1,
                                                     n_obj=3,
                                                     n_constr=0)
@@ -346,7 +346,7 @@ class ProblemManyObjective(Problem):
         Objective 8: Modularity
     """
 
-    def __init__(self, n_refactorings_lowerbound=50, n_refactorings_upperbound=75, evaluate_in_parallel=False):
+    def __init__(self, n_refactorings_lowerbound=10, n_refactorings_upperbound=50, evaluate_in_parallel=False):
         super(ProblemManyObjective, self).__init__(n_var=1, n_obj=8, n_constr=0, )
         self.n_refactorings_lowerbound = n_refactorings_lowerbound
         self.n_refactorings_upperbound = n_refactorings_upperbound
@@ -642,9 +642,9 @@ def main():
     # 1: GA
     algorithm = GA(pop_size=config.POPULATION_SIZE,
                    sampling=PopulationInitialization(pure_random=False),
-                   crossover=AdaptiveSinglePointCrossover(prob=0.9),
+                   crossover=AdaptiveSinglePointCrossover(prob=config.CROSSOVER_PROBABILITY),
                    # crossover=get_crossover("real_k_point", n_points=2),
-                   mutation=BitStringMutation(prob=0.1),
+                   mutation=BitStringMutation(prob=config.MUTATION_PROBABILITY),
                    eliminate_duplicates=ElementwiseDuplicateElimination(cmp_func=is_equal_2_refactorings_list)
                    )
     algorithms.append(algorithm)
@@ -652,9 +652,9 @@ def main():
     # 2: NSGA II
     algorithm = NSGA2(pop_size=config.POPULATION_SIZE,
                       sampling=PopulationInitialization(pure_random=False),
-                      crossover=AdaptiveSinglePointCrossover(prob=0.9),
+                      crossover=AdaptiveSinglePointCrossover(prob=config.CROSSOVER_PROBABILITY),
                       # crossover=get_crossover("real_k_point", n_points=2),
-                      mutation=BitStringMutation(prob=0.1),
+                      mutation=BitStringMutation(prob=config.MUTATION_PROBABILITY),
                       eliminate_duplicates=ElementwiseDuplicateElimination(cmp_func=is_equal_2_refactorings_list)
                       )
     algorithms.append(algorithm)
@@ -663,29 +663,38 @@ def main():
     # pop_size must be equal or larger than the number of reference directions
     number_of_references_points = config.POPULATION_SIZE - int(config.POPULATION_SIZE * 0.20)
     ref_dirs = get_reference_directions('energy',  # algorithm
-                                        8,  # number of objectives
+                                        config.NUMBER_OBJECTIVES,  # number of objectives
                                         number_of_references_points,  # number of reference directions
                                         seed=1)
     algorithm = NSGA3(ref_dirs=ref_dirs,
                       pop_size=config.POPULATION_SIZE,  # 200
                       sampling=PopulationInitialization(pure_random=False),
                       selection=TournamentSelection(func_comp=binary_tournament),
-                      crossover=AdaptiveSinglePointCrossover(prob=0.8),
+                      crossover=AdaptiveSinglePointCrossover(prob=config.CROSSOVER_PROBABILITY),
                       # crossover=get_crossover("real_k_point", n_points=2),
-                      mutation=BitStringMutation(prob=0.1),
+                      mutation=BitStringMutation(prob=config.MUTATION_PROBABILITY),
                       eliminate_duplicates=ElementwiseDuplicateElimination(cmp_func=is_equal_2_refactorings_list)
                       )
     algorithms.append(algorithm)
 
     # -------------------------------------------
     # Define problems
-    problems = list()
-    problems.append(ProblemSingleObjective(n_refactorings_lowerbound=config.LOWER_BAND,
-                                           n_refactorings_upperbound=config.UPPER_BAND))
-    problems.append(ProblemMultiObjective(n_refactorings_lowerbound=config.LOWER_BAND,
-                                          n_refactorings_upperbound=config.UPPER_BAND))
-    problems.append(ProblemManyObjective(n_refactorings_lowerbound=config.LOWER_BAND,
-                                         n_refactorings_upperbound=config.UPPER_BAND, evaluate_in_parallel=True))
+    problems = list()  # 0: Genetic (Single), 1: NSGA-II (Multi), 2: NSGA-III (Many) objectives problems
+    problems.append(
+        ProblemSingleObjective(n_refactorings_lowerbound=config.LOWER_BAND,
+                               n_refactorings_upperbound=config.UPPER_BAND,
+                               evaluate_in_parallel=False)
+    )
+    problems.append(
+        ProblemMultiObjective(n_refactorings_lowerbound=config.LOWER_BAND,
+                              n_refactorings_upperbound=config.UPPER_BAND,
+                              evaluate_in_parallel=False)
+    )
+    problems.append(
+        ProblemManyObjective(n_refactorings_lowerbound=config.LOWER_BAND,
+                             n_refactorings_upperbound=config.UPPER_BAND,
+                             evaluate_in_parallel=False)
+    )
 
     # Termination of algorithms
     my_termination = MultiObjectiveDefaultTermination(
@@ -699,8 +708,8 @@ def main():
     )
 
     # Do optimization for various problems with various algorithms
-    res = minimize(problem=problems[2],
-                   algorithm=algorithms[2],
+    res = minimize(problem=problems[config.PROBLEM],
+                   algorithm=algorithms[config.PROBLEM],
                    termination=my_termination,
                    seed=1,
                    verbose=False,
@@ -738,10 +747,10 @@ def main():
     dm = get_decision_making("high-tradeoff")
     try:
         I = dm.do(pf)
-        logger.info(f"High tradeoff points: {pf[I][0]}")
+        logger.info(f"High tradeoff points: {pf[I]}")
         logger.info(f"High tradeoff points corresponding refactorings: {res.X[I]}")
-        logger.info(f"The mean improvement of quality attributes: {np.mean(pf[I][0], axis=0)}")
-        logger.info(f"The median improvement of quality attributes: {np.median(pf[I][0], axis=0)}")
+        logger.info(f"The mean improvement of quality attributes: {np.mean(pf[I], axis=0)}")
+        logger.info(f"The median improvement of quality attributes: {np.median(pf[I], axis=0)}")
     except:
         logger.info("No multi optimal solutions (error in computing high tradeoff points)!")
 
