@@ -107,7 +107,8 @@ INITIAL_METRICS = {
                     'NOM': 5.184210526315789,
                     'NOP': 3.210526315789474,
                     'MODULE': 0.11403752430494184,
-                    'TEST': 0.4287
+                    #'TEST': 0.4287  # Obtaind by testability_prediction2
+                    'TEST': 0.3565407040728677  # Obtaind by testability_prediction3
                     },
     "88_jopenchart": {
         "DSC": 46,
