@@ -25,6 +25,7 @@ PureRandomInitialization: Population, list of Individual
 __version__ = '0.2.0'
 __author__ = 'Morteza Zakeri, Seyyed Ali Ayati'
 
+# import logging
 import random
 from copy import deepcopy
 from multiprocessing import Process, Array
@@ -37,20 +38,21 @@ from pymoo.algorithms.soo.nonconvex.ga import GA
 from pymoo.core.crossover import Crossover
 from pymoo.core.duplicate import ElementwiseDuplicateElimination
 from pymoo.core.mutation import Mutation
-from pymoo.core.problem import ElementwiseProblem, Problem
+from pymoo.core.problem import Problem
 from pymoo.core.sampling import Sampling
-from pymoo.factory import get_reference_directions, get_decision_making, get_mutation
+from pymoo.factory import get_reference_directions, get_decision_making
 from pymoo.operators.selection.tournament import TournamentSelection
 from pymoo.optimize import minimize
 from pymoo.util.termination.default import MultiObjectiveDefaultTermination
 
 from metrics.modularity import main as modularity_main
 from metrics.testability_prediction3 import main as testability_main
-from sbse import config
-from sbse.config import logger
 from sbse.initialize import RandomInitialization, SmellInitialization
 from sbse.objectives import Objectives
-from utilization.directory_utils import update_understand_database, git_restore
+from codart.utility.directory_utils import update_understand_database, git_restore
+
+from sbse import config
+from sbse.config import logger
 
 
 class Gene:
@@ -755,7 +757,8 @@ def main():
         logger.info("No multi optimal solutions (error in computing high tradeoff points)!")
 
 
-# Test driver
+# CodART search-based refactoring module main driver
 if __name__ == '__main__':
+    # print(logger.handlers)
     config.log_project_info()
     main()

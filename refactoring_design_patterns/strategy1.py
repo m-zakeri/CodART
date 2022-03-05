@@ -1,14 +1,23 @@
 """
-The scripts implements different refactoring operations
+The script implements automated refactoring to strategy design pattern
 
 """
 __version__ = '1.4.2'
-__author__ = 'NaderMesbah'
+__author__ = 'Nader Mesbah'
+__date__ = '20210108'
+
+import os
+import argparse
+import datetime
+from time import time
+
 
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
-from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
+
+from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
+from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 
 class StrategyPatternRefactoringListener(JavaParserLabeledListener):
@@ -119,5 +128,59 @@ class StrategyPatternRefactoringListener(JavaParserLabeledListener):
                                                                 "\t" + newName + "{\n" \
                                                                                  "\t\treturn strategy.doOperation(" + self.newPara + ");\n" \
                                                                                                                                      "\t}"
-                self.token_stream_rewriter.replaceRange(ctx.parentCtx.parentCtx.start.tokenIndex, ctx.stop.tokenIndex,
-                                                        newbody)
+
+                self.token_stream_rewriter.replaceRange(
+                    ctx.parentCtx.parentCtx.start.tokenIndex,
+                    ctx.stop.tokenIndex,
+                    newbody,
+                )
+
+
+def main(args):
+    # Step 1: Load input source into stream
+    begin_time = time()
+    stream = FileStream(args.file, encoding='utf8')
+    # input_stream = StdinStream()
+    print('Input stream:')
+    print(stream)
+
+    # Step 2: Create an instance of AssignmentStLexer
+    lexer = JavaLexer(stream)
+    # Step 3: Convert the input source into a list of tokens
+    token_stream = CommonTokenStream(lexer)
+    # Step 4: Create an instance of the AssignmentStParser
+    parser = JavaParserLabeled(token_stream)
+    parser.getTokenStream()
+    # Step 5: Create parse tree
+    parse_tree = parser.compilationUnit()
+    # Step 6: Create an instance of the refactoringListener, and send as a parameter the list of tokens to the class
+    my_listener = StrategyPatternRefactoringListener(common_token_stream=token_stream,
+                                                     method_identifier='execute')
+    #                                                     method_identifier='read')
+    #                                                     method_identifier='write')
+
+    walker = ParseTreeWalker()
+    walker.walk(t=parse_tree, listener=my_listener)
+
+    print('Compiler result:')
+    print(my_listener.token_stream_rewriter.getDefaultText())
+
+    with open('../tests/strategy1/StrategyExample0.refactored.java', mode='w', newline='') as f:
+        #    with open('StrategyExample1.refactored.java', mode='w', newline='') as f:
+        #    with open('StrategyExample2.refactored.java', mode='w', newline='') as f:
+        f.write(my_listener.token_stream_rewriter.getDefaultText())
+
+    end_time = time()
+    print("execute time : ", end_time - begin_time)
+
+
+# Test driver
+if __name__ == '__main__':
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument(
+        '-n', '--file',
+        help='Input source', default=r'StrategyExample0.java')
+    #        help = 'Input source', default = r'StrategyExample1.java')
+    #        help = 'Input source', default = r'StrategyExample2.java')
+    args = argparser.parse_args()
+    main(args)

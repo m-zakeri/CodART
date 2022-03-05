@@ -1,13 +1,19 @@
 """
-The scripts implements Visitor refactoring operations
+The script implements automated refactoring to visitor design pattern
 """
 __version__ = '1.4.2'
-__author__ = 'NaderMesbah'
+__author__ = 'Nader Mesbah'
+__date__ = '20210108'
+
+import argparse
+from time import time
 
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
-from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
+
+from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
+from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 
 class VisitorPatternRefactoringListener(JavaParserLabeledListener):
@@ -15,8 +21,9 @@ class VisitorPatternRefactoringListener(JavaParserLabeledListener):
     implement the visitor pattern refactoring
     """
 
-    def __init__(self, common_token_stream: CommonTokenStream = None, SuperClass_identifier: str = None,
-                 SubClass_identifier: str = None):
+    def __init__(self, common_token_stream: CommonTokenStream = None,
+                 SuperClass_identifier: str = None,
+                 SubClass_identifier: list = None):
         """
         :param common_token_stream:
         """
@@ -103,3 +110,56 @@ class VisitorPatternRefactoringListener(JavaParserLabeledListener):
                     from_idx=ctx.start.tokenIndex,
                     to_idx=ctx.stop.tokenIndex,
                     text="accept(new DoVisitor" + self.SuperClass_identifier + "())")
+
+
+def main(args):
+    # Step 1: Load input source into stream
+    begin_time = time()
+    stream = FileStream(args.file, encoding='utf8')
+    # input_stream = StdinStream()
+    print('Input stream:')
+    print(stream)
+
+    # Step 2: Create an instance of AssignmentStLexer
+    lexer = JavaLexer(stream)
+    # Step 3: Convert the input source into a list of tokens
+    token_stream = CommonTokenStream(lexer)
+    # Step 4: Create an instance of the AssignmentStParser
+    parser = JavaParserLabeled(token_stream)
+    parser.getTokenStream()
+    # Step 5: Create parse tree
+    parse_tree = parser.compilationUnit()
+    # Step 6: Create an instance of the refactoringListener, and send as a parameter the list of tokens to the class
+    my_listener = VisitorPatternRefactoringListener(common_token_stream=token_stream,
+                                                    SuperClass_identifier='SC',
+                                                    SubClass_identifier=['CC1', 'CC2', 'CC3'])
+    #                                                    SuperClass_identifier='ComputerPart',
+    #                                                    SubClass_identifier=['Keyboard', 'Monitor', 'Mouse', 'Computer'])
+    #                                                    SuperClass_identifier='Shape',
+    #                                                    SubClass_identifier=['Polygon', 'Rectangle','Arrow'])
+
+    walker = ParseTreeWalker()
+    walker.walk(t=parse_tree, listener=my_listener)
+
+    print('Compiler result:')
+    print(my_listener.token_stream_rewriter.getDefaultText())
+
+    with open('../tests/visitor1/VisitorExample0.refactored.java', mode='w', newline='') as f:
+        #   with open('VisitorExample1.refactored.java', mode='w', newline='') as f:
+        #    with open('VisitorExample2.refactored.java', mode='w', newline='') as f:
+        f.write(my_listener.token_stream_rewriter.getDefaultText())
+
+    end_time = time()
+    print("time execution : ", end_time - begin_time)
+
+
+# Test driver
+if __name__ == '__main__':
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument(
+        '-n', '--file',
+        help='Input source', default=r'VisitorExample0.java')
+    #        help='Input source', default=r'VisitorExample1.java')
+    #        help='Input source', default=r'VisitorExample2.java')
+    args = argparser.parse_args()
+    main(args)

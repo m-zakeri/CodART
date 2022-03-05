@@ -5,12 +5,14 @@ You should set the path of understand installation in this script
 """
 import os
 import sys
-import logging
+# import logging
 
 from dotenv import load_dotenv
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__file__)
+# logging.basicConfig(level=logging.DEBUG)
+# logger = logging.getLogger(__file__)
+from sbse.config import logger
+
 load_dotenv()
 
 # -------------------

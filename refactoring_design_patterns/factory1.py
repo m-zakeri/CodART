@@ -1,14 +1,27 @@
+"""
+This module implements automated refactoring to factory method design pattern
+
+"""
+
+__version__ = '1.0.0'
+__author__ = 'Morteza Zakeri'
+
+import os
+import time
+import argparse
+
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
-from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
+from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
+from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 
 class FactoryMethodRefactoringListener(JavaParserLabeledListener):
     def __init__(self, common_token_stream: CommonTokenStream = None,
                  creator_identifier: str = None,
-                 products_identifier: str = None):
+                 products_identifier: list = None):
         self.enter_class = False
         self.token_stream = common_token_stream
         self.creator_identifier = creator_identifier
@@ -135,3 +148,38 @@ class FactoryMethodRefactoringListener(JavaParserLabeledListener):
             self.token_stream_rewriter.insertAfter(program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
                                                    index=self.CretorStartIndex,
                                                    text=newProductMethod)
+
+
+def main(args):
+    # Step 1: Load input source into stream
+    stream = FileStream(args.file, encoding='utf8')
+    # input_stream = StdinStream()
+
+    # Step 2: Create an instance of AssignmentStLexer
+    lexer = JavaLexer(stream)
+    # Step 3: Convert the input source into a list of tokens
+    token_stream = CommonTokenStream(lexer)
+    # Step 4: Create an instance of the AssignmentStParser
+    parser = JavaParserLabeled(token_stream)
+    parser.getTokenStream()
+    # Step 5: Create parse tree
+    parse_tree = parser.compilationUnit()
+    # Step 6: Create an instance of the refactoringListener, and send as a parameter the list of tokens to the class
+    my_listener = FactoryMethodRefactoringListener(common_token_stream=token_stream,
+                                                   creator_identifier='FactoryMethod',
+                                                   products_identifier=['JpegReader', 'GifReader'])
+    walker = ParseTreeWalker()
+    walker.walk(t=parse_tree, listener=my_listener)
+
+    with open('../tests/factory1/FactoryExample.refactored.java', mode='w', newline='') as f:
+        f.write(my_listener.token_stream_rewriter.getDefaultText())
+
+
+# Test driver
+if __name__ == '__main__':
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument(
+        '-n', '--file',
+        help='Input source', default=r'FactoryExample.java')
+    args = argparser.parse_args()
+    main(args)

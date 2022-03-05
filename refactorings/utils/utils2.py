@@ -2,7 +2,7 @@ from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 
 from refactorings.utils.utils_listener_fast import *
-from utilization.directory_utils import create_project_parse_tree
+from codart.utility.directory_utils import create_project_parse_tree
 
 
 def get_program(source_files: list, print_status=False) -> Program:

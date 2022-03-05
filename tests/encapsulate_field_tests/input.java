@@ -7,6 +7,7 @@ class A_New extends A
         print(this.h);
     }
 }
+
 class A
 {
     public int f; /* printF , printF, */
