@@ -1,6 +1,8 @@
+import sys
 import os
-import logging
 import datetime as dt
+import logging
+# from logging.handlers import TimedRotatingFileHandler
 
 from dotenv import load_dotenv
 
@@ -108,7 +110,7 @@ INITIAL_METRICS = {
                     'NOP': 3.210526315789474,
                     'MODULE': 0.11403752430494184,
                     #'TEST': 0.4287  # Obtaind by testability_prediction2
-                    'TEST': 0.3565407040728677  # Obtaind by testability_prediction3
+                    'TEST': 0.3565407040728677  # Obtained by testability_prediction3
                     },
     "88_jopenchart": {
         "DSC": 46,
@@ -233,18 +235,42 @@ INITIAL_METRICS = {
 }
 
 CURRENT_METRICS = INITIAL_METRICS.get(PROJECT_NAME)
-
 date_time = dt.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-logging.basicConfig(
-    format='%(asctime)s %(levelname)-8s %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S',
-    level=logging.DEBUG,  # DEBUG
-    handlers=[
-        logging.FileHandler(f'../sbse/logs/{PROJECT_NAME}-{date_time}.log'),
-        logging.StreamHandler(),
-    ],
-)
-logger = logging.getLogger()
+LOG_FILE = f'../sbse/logs/{PROJECT_NAME}-{date_time}.log'
+FORMATTER = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
+
+# logging.basicConfig(
+#     format='%(asctime)s %(levelname)-8s %(message)s',
+#     datefmt='%Y-%m-%d %H:%M:%S',
+#     level=logging.DEBUG,  # DEBUG
+#     handlers=[logging.StreamHandler(sys.stdout), logging.FileHandler(LOG_FILE)],
+# )
+
+def get_console_handler():
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setFormatter(FORMATTER)
+    return console_handler
+
+
+def get_file_handler():
+    file_handler = logging.FileHandler(LOG_FILE)
+    file_handler.setFormatter(FORMATTER)
+    return file_handler
+
+
+def get_logger(logger_name):
+    logger = logging.getLogger(logger_name)
+    logger.setLevel(logging.DEBUG) # better to have too much log than not enough
+    logger.addHandler(get_console_handler())
+    logger.addHandler(get_file_handler())
+    # with this pattern, it's rarely necessary to propagate the error up to parent
+    logger.propagate = False
+    return logger
+
+
+logger = get_logger(__name__)
+
+# print(logger.handlers)
 
 
 def log_project_info():
@@ -259,3 +285,4 @@ def log_project_info():
     logger.info(f"Crossover probability: {CROSSOVER_PROBABILITY}")
     logger.info(f"Mutation probability: {MUTATION_PROBABILITY}")
     logger.info("============ End of Configuration ============")
+
