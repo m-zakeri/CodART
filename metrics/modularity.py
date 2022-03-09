@@ -1,16 +1,23 @@
 """
 
 This module contains modularity measurement script at package-level
-to be used in refactoring process in addition to qmood metrics
+to be used in refactoring process in addition to QMOOD metrics
+
+## Changelog
+### v0.2.1
+- Improve performance
+- Improve accuracy
+- Remove unused codes
 
 ## Reference
-[1]
-[2]
+[1] https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.community.quality.modularity.html
+[2] https://networkx.org/documentation/stable/_modules/networkx/algorithms/community/quality.html
+[3] M. E. J. Newman “Networks: An Introduction”, page 224. Oxford University Press, 2011.
 
 
 """
 
-__version__ = '0.1.1'
+__version__ = '0.2.1'
 __author__ = 'Morteza Zakeri'
 
 import os
@@ -21,7 +28,6 @@ from collections import defaultdict
 import pandas
 import networkx as nx
 import networkx.algorithms.community as nx_comm
-from matplotlib import pyplot as plt
 
 import understand
 
@@ -34,10 +40,10 @@ class Modularity:
         self.project_db_path = project_db_path
         # Delete nested classes
         # Dropping the rows of "(" or ")"
-        print('Before delete nested classes', self.mdg_df.shape)
+        # print('Before delete nested classes', self.mdg_df.shape)
         self.mdg_df = self.mdg_df[~self.mdg_df["From Class"].str.contains(r"\)")]
         self.mdg_df = self.mdg_df[~self.mdg_df["To Class"].str.contains(r"\)")]
-        print('After delete nested classes', self.mdg_df.shape)
+        # print('After delete nested classes', self.mdg_df.shape)
         self.class_package_dict = dict()
         self.create_class_package_dict()
 
@@ -48,7 +54,6 @@ class Modularity:
             create_using=nx.DiGraph()
         )
 
-
     def create_class_package_dict(self):
         classes = []
         classes.extend(self.mdg_df["From Class"].values)
@@ -56,13 +61,16 @@ class Modularity:
         classes = set(classes)
         # print(len(classes), )
         # print(classes)
+        # print(self.mdg_df.shape)
         db = understand.open(self.project_db_path)
         for class_longname in classes:
             # print('Processing ',class_longname )
-            entities = db.lookup(re.compile(class_longname + r'$'), )
+            class_longname2 = class_longname.replace('$', '.')
+            entities = db.lookup(re.compile(class_longname2 + r'$'), )
             if entities is None or len(entities) == 0:  # Nested classes
                 self.mdg_df = self.mdg_df[~self.mdg_df["From Class"].str.contains(class_longname)]
                 self.mdg_df = self.mdg_df[~self.mdg_df["To Class"].str.contains(class_longname)]
+                print('Removed rows with class', class_longname, self.mdg_df.shape)
             else:
                 class_entity = entities[0]
                 package_list = class_entity.ents('Containin', 'Java Package')
@@ -76,18 +84,8 @@ class Modularity:
                     self.class_package_dict.update({class_longname: package_list[0].longname()})
         db.close()
 
-
-    def show_mdg(self):
-        pos = nx.spring_layout(self.mdg_graph)
-        nx.draw(self.mdg_graph, pos=pos, with_labels=True, )
-        edge_labels = nx.get_edge_attributes(self.mdg_graph, 'References')
-        nx.draw_networkx_edge_labels(self.mdg_graph, pos=pos, edge_labels=edge_labels, font_color='red')
-        plt.show()
-
     def compute_modularity_newman_leicht(self, ):
         """
-        https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.community.quality.modularity.html
-
         ## Example:
             communities = [['p1.C1', 'p1.C2', 'p1.C3'], ['p2.C4', 'p2.C5']]
             G = nx.barbell_graph(3, 0)
@@ -96,8 +94,6 @@ class Modularity:
         """
         q = 0
         if self.mdg_graph is not None and self.mdg_graph.number_of_edges() > 0:
-            # communities = self.__roster_communities()
-
             # communities = {v: k for k, v in self.class_package_dict.items()}
             communities = defaultdict(list)
             for key, value in self.class_package_dict.items():
@@ -105,57 +101,6 @@ class Modularity:
             q = nx_comm.modularity(self.mdg_graph, communities=communities.values())
         # print(q)
         return q
-
-    def __roster_communities(self):
-        """
-        # Example:
-        communities = self.df_class.groupby(['Parent'])['LongName'].apply(list)
-        print(list(communities))
-        :return:
-        """
-        communities_dict = dict()
-        for node_ in self.mdg_graph:
-            # print('node_:', node_)
-            # package_name = self.__get_package_name_by_parsing(node_)
-            # package_name = self.__get_package_name_by_understand_query(node_)
-            package_name = self.class_package_dict[node_]
-            if package_name in communities_dict.keys():
-                communities_dict[package_name].append(node_)
-            else:
-                communities_dict[package_name] = [node_]
-        # print(communities_dict.values())
-        return communities_dict
-
-    def __get_package_name_by_understand_query(self, class_longname: str = None):
-        """
-        This method can be used instead of `__get_package_name_by_parsing` and it is more accurate
-
-        """
-        db = understand.open(self.project_db_path)
-        entities = db.lookup(re.compile(class_longname + r'$'), )
-        if entities is None or len(entities) == 0:  # Nested classes
-            db.close()
-            return 'default'
-        else:
-            class_entity = entities[0]
-            package_list = class_entity.ents('Containin', 'Java Package')
-            while not package_list and class_entity.parent() is not None:
-                package_list = class_entity.parent().ents('Containin', 'Java Package')
-                class_entity = class_entity.parent()
-            if len(package_list) < 1:
-                db.close()
-                return 'default'
-            else:
-                package_name = package_list[0].longname()
-                db.close()
-                return package_name
-
-    def __get_package_name_by_parsing(self, class_longname: str = None):
-        if class_longname.find('.') == -1:
-            return 'default'
-        else:
-            package_name, class_short_name = class_longname.rsplit('.', 1)
-            return package_name
 
 
 # Modularity API
@@ -181,5 +126,5 @@ def main(project_db_path=None, initial_value=1.0):
 if __name__ == '__main__':
     from sbse.config import UDB_PATH
 
-    for i in range(10):
+    for i in range(1):
         print(main(UDB_PATH))
