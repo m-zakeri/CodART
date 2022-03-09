@@ -20,12 +20,18 @@ UPPER_BAND = int(os.environ.get("UPPER_BAND"))
 MUTATION_PROBABILITY = float(os.environ.get("MUTATION_PROBABILITY"))
 CROSSOVER_PROBABILITY = float(os.environ.get("CROSSOVER_PROBABILITY"))
 
+WARM_START = bool(int(os.environ.get("WARM_START")))
+
 USE_CPP_BACKEND = bool(int(os.environ.get("USE_CPP_BACKEND")))
 
 PROJECT_ROOT_DIR = os.environ.get("PROJECT_ROOT_DIR")
 CSV_ROOT_DIR = os.environ.get("CSV_ROOT_DIR")
 UDB_ROOT_DIR = os.environ.get("UDB_ROOT_DIR")
 BENCHMARK_INDEX = int(os.environ.get("BENCHMARK_INDEX", 0))
+
+EXPERIMENTER = os.environ.get("EXPERIMENTER")
+SCRIPT = os.environ.get("SCRIPT")
+DESCRIPTION = os.environ.get("DESCRIPTION")
 
 BENCHMARKS = {
     # Project Path
@@ -368,14 +374,20 @@ logger = get_logger(__name__)
 
 
 def log_project_info():
-    logger.info("============ Configuration ============")
+    logger.info("============ Configuration/Setup ============")
     logger.info(f"Project root directory: {PROJECT_PATH}")
     logger.info(f"Understand database file path: {UDB_PATH}")
     logger.info(f"Problem: {PROBLEM}")
+    logger.info(f"Number of objectives: {NUMBER_OBJECTIVES}")
     logger.info(f"Population size: {POPULATION_SIZE}")
     logger.info(f"Individual lower band: {LOWER_BAND}")
     logger.info(f"Individual upper band: {UPPER_BAND}")
     logger.info(f"Max iterations: {MAX_ITERATIONS}")
     logger.info(f"Crossover probability: {CROSSOVER_PROBABILITY}")
     logger.info(f"Mutation probability: {MUTATION_PROBABILITY}")
-    logger.info("============ End of Configuration ============")
+    logger.info(f"Warm start mode: {WARM_START}")
+    logger.info(f"CPP back-end mode: {USE_CPP_BACKEND}")
+    logger.info(f"Experimenter: {EXPERIMENTER}")
+    logger.info(f"Main script running the experiments: {SCRIPT}")
+    logger.info(f"Experiment description: {DESCRIPTION}")
+    logger.info("============ End of Configuration/Setup ============")

@@ -420,9 +420,9 @@ class PopulationInitialization(Sampling):
     The selected refactoring operations are randomly arranged in each individual.
     Assigning randomly a sequence of refactorings to certain code fragments generates the initial population
     """
-    def __init__(self,  pure_random=False):
+    def __init__(self,  warm_start=True):
         super(PopulationInitialization, self).__init__()
-        self.pure_random_mode = pure_random
+        self.warm_start = warm_start
 
     def _do(self, problem, n_samples, **kwargs):
         """
@@ -434,7 +434,7 @@ class PopulationInitialization(Sampling):
         """
 
         X = np.full((n_samples, 1), None, dtype=Individual)
-        if self.pure_random_mode:
+        if self.warm_start is False:
             population = RandomInitialization(
                 udb_path=config.UDB_PATH,
                 population_size=n_samples,
@@ -643,7 +643,7 @@ def main():
     algorithms = list()
     # 1: GA
     algorithm = GA(pop_size=config.POPULATION_SIZE,
-                   sampling=PopulationInitialization(pure_random=False),
+                   sampling=PopulationInitialization(warm_start=config.WARM_START),
                    crossover=AdaptiveSinglePointCrossover(prob=config.CROSSOVER_PROBABILITY),
                    # crossover=get_crossover("real_k_point", n_points=2),
                    mutation=BitStringMutation(prob=config.MUTATION_PROBABILITY),
@@ -653,7 +653,7 @@ def main():
 
     # 2: NSGA II
     algorithm = NSGA2(pop_size=config.POPULATION_SIZE,
-                      sampling=PopulationInitialization(pure_random=False),
+                      sampling=PopulationInitialization(warm_start=config.WARM_START),
                       crossover=AdaptiveSinglePointCrossover(prob=config.CROSSOVER_PROBABILITY),
                       # crossover=get_crossover("real_k_point", n_points=2),
                       mutation=BitStringMutation(prob=config.MUTATION_PROBABILITY),
@@ -670,7 +670,7 @@ def main():
                                         seed=1)
     algorithm = NSGA3(ref_dirs=ref_dirs,
                       pop_size=config.POPULATION_SIZE,  # 200
-                      sampling=PopulationInitialization(pure_random=False),
+                      sampling=PopulationInitialization(warm_start=config.WARM_START),
                       selection=TournamentSelection(func_comp=binary_tournament),
                       crossover=AdaptiveSinglePointCrossover(prob=config.CROSSOVER_PROBABILITY),
                       # crossover=get_crossover("real_k_point", n_points=2),
