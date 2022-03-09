@@ -14,8 +14,6 @@ import joblib
 
 import understand as und
 
-from metrics import metrics_names
-
 scaler1 = joblib.load('../metrics/data_model/DS07710.joblib')
 model5 = joblib.load('../metrics/sklearn_models7/VR1_DS7.joblib')
 condition_kw_list = ['if', 'for', 'while', 'switch', '?', 'assert', ]
@@ -30,8 +28,10 @@ class TestabilityPredicator:
 
     def prepare_metric_dataframe(self):
         dbx = und.open(self.db_path)
-        class_entities = dbx.ents('Java Class ~Interface ~Enum ~Unknown ~Unresolved ~Jar ~Library')
+        class_entities = dbx.ents('Java Class ~TypeVariable ~Anonymous ~Abstract ~Interface ~Enum ~Unknown ~Unresolved ~Jar ~Library')
         for class_entity in class_entities:
+            # print (class_entity.kind().name())
+
             # Compute method-level metrics
             # method_list = class_entity.ents('Define', 'Java Method ~Unknown ~Unresolved ~Jar ~Library')
             number_of_local_methods_all = class_entity.metric(['CountDeclMethodAll'])['CountDeclMethodAll']
@@ -99,5 +99,5 @@ def main(db_path, initial_value=1.0):
 if __name__ == '__main__':
     from sbse.config import UDB_PATH
 
-    for i in range(0, 10):
+    for i in range(0, 2):
         print(main(UDB_PATH))
