@@ -372,6 +372,10 @@ class TestabilityModel:
         y_pred = self.model.predict(X_test)
         df_new = pd.DataFrame(df_predict_data.iloc[:, 0], columns=['Class'])
         df_new['PredictedTestability'] = list(y_pred)
+        # print('min', df_new['PredictedTestability'].min())
+        # print('max', df_new['PredictedTestability'].max())
+        # print('x',  df_new['PredictedTestability'].var())
+        # quit()
         return df_new['PredictedTestability'].mean()
 
 
