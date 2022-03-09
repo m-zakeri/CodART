@@ -1,8 +1,8 @@
 """
-QMOOD Design Metrics
+The module compute and normalize QMOOD design metrics
 """
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 __author__ = 'Seyyed Ali Ayati, Mina Tahaei'
 
 import os
@@ -14,9 +14,6 @@ try:
 except ImportError:
     print("Cannot import understand.")
 
-# Config logging
-logging.basicConfig(filename='codart_result.log', level=logging.DEBUG)
-logger = logging.getLogger(os.path.basename(__file__))
 
 from sbse.config import CURRENT_METRICS, UDB_PATH
 
@@ -25,7 +22,9 @@ def divide_by_initial_value(func):
     def wrapper(*args, **kwargs):
         value = func(*args, **kwargs)
         initial = CURRENT_METRICS.get(func.__name__)
-        value = round(value / initial, 2)
+        if initial == 0:
+            initial = 1.
+        value = round(value / initial, 9)
         return value
 
     return wrapper
@@ -43,7 +42,6 @@ class QMOOD:
         self.known_class_entities = self.db.ents(kindstring='Class ~Unknown')
 
     def __del__(self):
-        logger.debug("Database closed after calculating metrics.")
         self.db.close()
 
     @property
