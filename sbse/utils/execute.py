@@ -2,7 +2,7 @@ import json
 import re
 
 from refactorings import make_field_non_static, make_field_static, make_method_static_2, \
-    make_method_non_static_2, pullup_field, move_field, move_method, move_class, pushdown_field, \
+    make_method_non_static_2, pullup_field, move_field, move_method, move_class, pushdown_field2, \
     extract_class, pullup_method, pushdown_method, extract_method, pullup_constructor, decrease_method_visibility, \
     increase_method_visibility, decrease_field_visibility, increase_field_visibility
 
@@ -12,7 +12,7 @@ REFACTORING_MAIN_MAP = {
     'Make Method Static': make_method_static_2.main,
     'Make Method Non-Static': make_method_non_static_2.main,
     'Pull Up Field': pullup_field.main,
-    'Push Down Field': pushdown_field.main,
+    'Push Down Field': pushdown_field2.main,
     'Pull Up Method': pullup_method.main,
     'Pull Up Constructor': pullup_constructor.main,
     'Push Down Method': pushdown_method.main,
@@ -41,18 +41,12 @@ def execute_from_log(input_file_path):
             params = re.search('{(.+?)}', row).group().strip()
             params = params.replace("'", '"')
             params = params.replace("False", "false")
-            params = params.replace("True", "true")            
+            params = params.replace("True", "true")
             params = json.loads(params)
 
             main_function = REFACTORING_MAIN_MAP[refactoring_name](**params)
             print(f"Executed {refactoring_name}...")
-            
-
-        
-        
-
-        
 
 
 if __name__ == '__main__':
-    prepare_input('/home/ali/Documents/IUST/CodART/sbse/utils/input.txt')
+    execute_from_log('/home/ali/Documents/IUST/CodART/sbse/utils/input.txt')

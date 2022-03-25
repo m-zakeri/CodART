@@ -23,7 +23,7 @@ except ImportError as e:
 
 
 from refactorings import make_field_non_static, make_field_static, make_method_static_2, \
-    make_method_non_static_2, pullup_field, move_field, move_method, move_class, pushdown_field, \
+    make_method_non_static_2, pullup_field, move_field, move_method, move_class, pushdown_field2, \
     extract_class, pullup_method, pushdown_method, extract_method, pullup_constructor, decrease_method_visibility, \
     increase_method_visibility, decrease_field_visibility, increase_field_visibility
 from sbse import config
@@ -493,8 +493,8 @@ class RandomInitialization(Initialization):
         return refactoring_main, params, 'Pull Up Field'
 
     def init_push_down_field(self):
-        refactoring_main = pushdown_field.main
-        params = {"project_dir": str(Path(self.udb_path).parent)}
+        refactoring_main = pushdown_field2.main
+        params = {"udb_path": str(Path(self.udb_path))}
         candidates = self._push_down_field_candidates
         params.update(random.choice(candidates))
         return refactoring_main, params, 'Push Down Field'
