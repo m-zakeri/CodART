@@ -41,18 +41,12 @@ def execute_from_log(input_file_path):
             params = re.search('{(.+?)}', row).group().strip()
             params = params.replace("'", '"')
             params = params.replace("False", "false")
-            params = params.replace("True", "true")            
+            params = params.replace("True", "true")
             params = json.loads(params)
 
             main_function = REFACTORING_MAIN_MAP[refactoring_name](**params)
             print(f"Executed {refactoring_name}...")
-            
-
-        
-        
-
-        
 
 
 if __name__ == '__main__':
-    prepare_input('/home/ali/Documents/IUST/CodART/sbse/utils/input.txt')
+    execute_from_log('/home/ali/Documents/IUST/CodART/sbse/utils/input.txt')
