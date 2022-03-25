@@ -6,12 +6,8 @@ RandomInitialization: For initialling random candidates.
 """
 
 __author__ = 'Seyyed Ali Ayati'
-try:
-    import understand as und
-except ImportError as e:
-    print(e)
-    quit()
 
+import re
 import codecs
 import random
 from collections import Counter
@@ -19,6 +15,12 @@ from pathlib import Path
 
 import pandas
 import progressbar
+
+try:
+    import understand as und
+except ImportError as e:
+    print(e)
+
 
 from refactorings import make_field_non_static, make_field_static, make_method_static_2, \
     make_method_non_static_2, pullup_field, move_field, move_method, move_class, pushdown_field, \
@@ -725,7 +727,11 @@ class SmellInitialization(RandomInitialization):
         candidates = []
         for index, row in god_classes.iterrows():
             moved_fields, moved_methods = [], []
-            class_file = self._und.lookup(row[0].strip(), "Class")[0].parent().longname()
+            print(row[0].strip())
+            try:
+                class_file = self._und.lookup(re.compile(row[0].strip() + r'$'), "Class")[0].parent().longname()
+            except:
+                continue
             source_class = row[0].split(".")[-1]
             data = row[1][1:-1]  # skip [ and ]
             data = data.split(",")
