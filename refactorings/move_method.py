@@ -371,11 +371,13 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
 
 
 if __name__ == '__main__':
+    from codart.utility.directory_utils import update_understand_database
+    update_understand_database("C:/Users/Administrator/Downloads/udbs\\jvlt-1.3.2.udb")
     main(
-        source_class="Sample",
-        source_package="source_package",
-        target_class="Person",
-        target_package="target_package",
-        method_name="testMethod",
-        udb_path="D:\Dev\JavaSample\JavaSample\JavaSample.und"
+        source_class="XMLFormatter",
+        source_package="net.sourceforge.jvlt.io",
+        target_class="Entry",
+        target_package="net.sourceforge.jvlt.core",
+        method_name="getXMLForEntryInfo",
+        udb_path="C:/Users/Administrator/Downloads/udbs\\jvlt-1.3.2.udb"
     )
