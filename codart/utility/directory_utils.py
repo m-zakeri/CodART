@@ -96,15 +96,15 @@ def get_java_files(directory):
 def create_project_parse_tree(java_file_path):
     tree = None
     rewriter = None
-    try:
-        file_stream = FileStream(java_file_path)
-        sa_javalabeled.USE_CPP_IMPLEMENTATION = config.USE_CPP_BACKEND
-        tree = sa_javalabeled.parse(file_stream, 'compilationUnit')
-        tokens = tree.parser.getInputStream()
-        rewriter = TokenStreamRewriter(tokens)
-    except Exception as e:
-        print(f'Encounter a parsing error on file {java_file_path}')
-        print(e)
+    # try:
+    file_stream = FileStream(java_file_path, encoding='utf-8', errors='ignore')
+    sa_javalabeled.USE_CPP_IMPLEMENTATION = config.USE_CPP_BACKEND
+    tree = sa_javalabeled.parse(file_stream, 'compilationUnit')
+    tokens = tree.parser.getInputStream()
+    rewriter = TokenStreamRewriter(tokens)
+    # except Exception as e:
+    #     print(f'Encounter a parsing error on file {java_file_path}')
+    #     print(e)
     return tree, rewriter
 
 
