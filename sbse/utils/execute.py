@@ -1,5 +1,11 @@
-import json
+
+import os
 import re
+import json
+
+import sbse.config as config
+from codart.utility.directory_utils import git_restore, update_understand_database
+from sbse.config import logger
 
 from refactorings import make_field_non_static, make_field_static, make_method_static_2, \
     make_method_non_static_2, pullup_field, move_field, move_method, move_class, pushdown_field2, \
@@ -27,6 +33,9 @@ REFACTORING_MAIN_MAP = {
     'Decrease Method Visibility': decrease_method_visibility.main,
 }
 
+project_dir_old = 'C:\\Users\\Administrator\\Downloads\\udbs'
+udb_path_old = 'C:/Users/Administrator/Downloads/udbs\\10_water-simulator.udb'
+file_path_base_dir_old = 'C:\\Users\\Administrator\\Downloads\\prj_src'
 
 def execute_from_log(input_file_path):
     """
@@ -34,6 +43,12 @@ def execute_from_log(input_file_path):
 
     Example: Take a look at ./input.txt
     """
+    # Stage 0: Git restore
+    logger.debug("Executing git restore.")
+    git_restore(config.PROJECT_PATH)
+    logger.debug("Updating understand database after git restore.")
+    update_understand_database(config.UDB_PATH)
+
     with open(input_file_path, 'r') as f:
         data = f.read().split('\n')
         for row in data:
@@ -44,9 +59,20 @@ def execute_from_log(input_file_path):
             params = params.replace("True", "true")
             params = json.loads(params)
 
+            if params.get('udb_path'):
+                params['udb_path'] = config.UDB_PATH
+            if params.get('project_dir'):
+                params['project_dir'] = config.PROJECT_PATH
+            if params.get('file_path'):
+                params['file_path'] = params['file_path'].replace(file_path_base_dir_old, config.PROJECT_ROOT_DIR)
+            print(refactoring_name, params)
+
             main_function = REFACTORING_MAIN_MAP[refactoring_name](**params)
-            print(f"Executed {refactoring_name}...")
+            print(f"Executed {refactoring_name} with status {main_function}")
+            print('-' * 100)
 
 
 if __name__ == '__main__':
-    execute_from_log('/home/ali/Documents/IUST/CodART/sbse/utils/input.txt')
+    dirname = os.path.dirname(__file__)
+    refactoring_sequence_input_file = os.path.join(dirname, r'input.txt')
+    execute_from_log(input_file_path=refactoring_sequence_input_file)
