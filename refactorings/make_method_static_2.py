@@ -76,9 +76,10 @@ def main(udb_path, source_class, method_name, *args, **kwargs):
     db = und.open(udb_path)
     for cls in db.ents("class"):
         if cls.simplename() == source_class:
-            main_file = cls.parent().longname(True)
-            if not os.path.isfile(main_file):
-                continue
+            if cls.parent() is not None:
+                main_file = cls.parent().longname(True)
+                if not os.path.isfile(main_file):
+                    continue
     if main_file is None:
         db.close()
         return

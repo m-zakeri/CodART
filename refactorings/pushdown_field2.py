@@ -1,5 +1,7 @@
 import logging
 
+import sbse.config
+
 try:
     import understand as und
 except ImportError as e:
@@ -118,8 +120,11 @@ class PasteFieldListener(JavaParserLabeledListener):
             )
 
 
-def main(udb_path, source_package, source_class, field_name, target_classes: list, *args, **kwargs):
-    db = und.open(udb_path)
+def main(udb_path=None, source_package=None, source_class=None, field_name=None, target_classes: list=None, *args, **kwargs):
+    if udb_path is None:
+        db = und.open(sbse.config.UDB_PATH)
+    else:
+        db = und.open(udb_path)
     source_class_ents = db.lookup(f"{source_package}.{source_class}", "Class")
     target_class_ents = []
     source_class_ent = None

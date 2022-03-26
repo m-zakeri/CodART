@@ -72,10 +72,11 @@ def main(udb_path, source_class, field_name, *args, **kwargs):
     db = und.open(udb_path)
     for cls in db.ents("class"):
         if cls.simplename() == source_class:
-            temp_file = cls.parent().longname(True)
-            if os.path.isfile(temp_file):
-                main_file = temp_file
-                break
+            if cls.parent() is not None:
+                temp_file = cls.parent().longname(True)
+                if os.path.isfile(temp_file):
+                    main_file = temp_file
+                    break
             else:
                 continue
 

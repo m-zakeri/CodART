@@ -237,10 +237,12 @@ def get_source_class_map(db, source_class: str):
     class_ents = db.lookup(source_class, "Class")
     class_ent = None
     for ent in class_ents:
-        if Path(ent.parent().longname()).name == f"{source_class}.java":
-            class_ent = ent
-            break
-    assert class_ent is not None
+        if ent.parent() is not None:
+            if Path(ent.parent().longname()).name == f"{source_class}.java":
+                class_ent = ent
+                break
+    if class_ent is None:
+        return None, None
 
     for ref in class_ent.refs("Define", "Method"):
         method_ent = ref.ent()
@@ -258,6 +260,9 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
     instance_name = target_class.lower() + "ByCodArt"
     db = und.open(udb_path)
     method_map, class_ent = get_source_class_map(db, source_class)
+    if class_ent is None:
+        logger.error("Class entity is None")
+        return None
 
     if class_ent.refs("Extend ~Implicit, ExtendBy, Implement"):
         logger.error("Class is in inheritance or implements an interface.")
