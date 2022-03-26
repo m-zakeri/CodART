@@ -334,7 +334,8 @@ INITIAL_METRICS = {
 
 CURRENT_METRICS = INITIAL_METRICS.get(PROJECT_NAME)
 date_time = dt.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-LOG_FILE = f'../sbse/logs/{PROJECT_NAME}-{date_time}.log'
+dirname = os.path.dirname(__file__)
+LOG_FILE = os.path.join(dirname, f'./logs/{PROJECT_NAME}-{date_time}.log')
 FORMATTER = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
 
 
