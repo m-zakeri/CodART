@@ -390,7 +390,7 @@ def get_tabs(line: str):
 
 # extract method function
 def extract_method(conf):
-    stream = FileStream(conf['target_file'], encoding="utf-8")
+    stream = FileStream(conf['target_file'], encoding="utf-8", errors='ignore')
     lexer = JavaLexer(stream)
     tokens = CommonTokenStream(lexer)
     parser = JavaParserLabeled(tokens)
@@ -409,7 +409,7 @@ def extract_method(conf):
         raise Exception('New method name already exists.')
 
     output = []
-    file1 = open(conf['target_file'], 'r', encoding="utf-8")
+    file1 = open(conf['target_file'], 'r', encoding="utf-8", errors='ignore')
     lines = file1.readlines()
     line_num = 1
     # func_added = False
@@ -445,7 +445,7 @@ def extract_method(conf):
         line_num += 1
     file1.close()
 
-    file2 = open(conf['output_file'], 'w', encoding="utf-8")
+    file2 = open(conf['output_file'], 'w', encoding="utf-8", errors='ignore')
     for item in output:
         file2.write(item)
     file2.close()

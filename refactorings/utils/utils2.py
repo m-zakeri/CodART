@@ -10,7 +10,7 @@ def get_program(source_files: list, print_status=False) -> Program:
     for filename in source_files:
         if print_status:
             print("Parsing " + filename)
-        stream = FileStream(filename, encoding='utf8')
+        stream = FileStream(filename, encoding='utf8', errors='ignore')
         lexer = JavaLexer(stream)
         token_stream = CommonTokenStream(lexer)
         parser = JavaParser(token_stream)
@@ -32,7 +32,7 @@ def get_program(source_files: list, print_status=False) -> Program:
 def get_objects(source_files: str) -> FileInfo:
     objects = {}
     for filename in source_files:
-        stream = FileStream(filename, encoding='utf8')
+        stream = FileStream(filename, encoding='utf8', errors='ignore')
         lexer = JavaLexer(stream)
         token_stream = CommonTokenStream(lexer)
         parser = JavaParser(token_stream)
@@ -109,7 +109,7 @@ def get_program_with_field_usage(source_files: list, field_name: str, source_cla
     for filename in source_files:
         if print_status:
             print("Parsing " + filename)
-        stream = FileStream(filename, encoding='utf8')
+        stream = FileStream(filename, encoding='utf8', errors='ignore')
         lexer = JavaLexer(stream)
         token_stream = CommonTokenStream(lexer)
         parser = JavaParser(token_stream)

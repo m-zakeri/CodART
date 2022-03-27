@@ -114,7 +114,7 @@ if __name__ == '__main__':
             if cls.kindname() != "Unknown Class":
                 mainfile = cls.parent().longname()
 
-    stream = FileStream(mainfile, encoding='utf8')
+    stream = FileStream(mainfile, encoding='utf8', errors='ignore')
     # Step 2: Create an instance of AssignmentStLexer
     lexer = JavaLexer(stream)
     # Step 3: Convert the input source into a list of tokens

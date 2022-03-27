@@ -235,7 +235,7 @@ def main(udb_path: str, children_classes: list, method_name: str, *args, **kwarg
 
     # refactored start
     for file in fileslist_to_be_rafeactored:
-        stream = FileStream(file, encoding='utf8')
+        stream = FileStream(file, encoding='utf8', errors='ignore')
         lexer = JavaLexer(stream)
         token_stream = CommonTokenStream(lexer)
         parser = JavaParserLabeled(token_stream)
@@ -255,7 +255,7 @@ def main(udb_path: str, children_classes: list, method_name: str, *args, **kwarg
 
     # beginning of propagate
     for file in fileslist_to_be_propagate:
-        stream = FileStream(file, encoding='utf8')
+        stream = FileStream(file, encoding='utf8', errors='ignore')
         lexer = JavaLexer(stream)
         token_stream = CommonTokenStream(lexer)
         parser = JavaParserLabeled(token_stream)

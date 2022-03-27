@@ -512,7 +512,7 @@ def main():
     # path_to_refactor = "C:\\Users\\asus\\Desktop\\benchmark_projects\\Chess_master"
     # new_class_file = "C:\\Users\\asus\\Desktop\\benchmark_projects\\Chess_master\\src\\game\\Pieceextracted.java"
 
-    stream = FileStream(father_path_file, encoding='utf8')
+    stream = FileStream(father_path_file, encoding='utf8', errors='ignore')
     lexer = JavaLexer(stream)
     token_stream = CommonTokenStream(lexer)
     parser = JavaParserLabeled(token_stream)
@@ -532,7 +532,7 @@ def main():
     extractJavaFilesAndProcess(path_to_refactor, father_path_file, new_class_file)
 
     for file in files_to_refactor:
-        stream = FileStream(file, encoding='utf8')
+        stream = FileStream(file, encoding='utf8', errors='ignore')
         lexer = JavaLexer(stream)
         token_stream = CommonTokenStream(lexer)
         parser = JavaParserLabeled(token_stream)
@@ -558,7 +558,7 @@ def main():
         # after find usages
 
         try:
-            stream = FileStream(file, encoding='utf8')
+            stream = FileStream(file, encoding='utf8', errors='ignore')
             lexer = JavaLexer(stream)
             token_stream = CommonTokenStream(lexer)
             parser = JavaParserLabeled(token_stream)

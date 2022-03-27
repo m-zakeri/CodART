@@ -236,7 +236,7 @@ def main(udb_path, source_package, source_class, method_name, target_classes: li
     method_text = source_method_entity.contents()
     # Delete source method
 
-    stream = FileStream(main_file, encoding='utf8')
+    stream = FileStream(main_file, encoding='utf8', errors='ignore')
     lexer = JavaLexer(stream)
     token_stream = CommonTokenStream(lexer)
     parser = JavaParserLabeled(token_stream)
@@ -251,7 +251,7 @@ def main(udb_path, source_package, source_class, method_name, target_classes: li
 
     # Do the push down
     for child_file, child_class in zip(children_files, children_classes):
-        stream = FileStream(child_file, encoding='utf8')
+        stream = FileStream(child_file, encoding='utf8', errors='ignore')
         lexer = JavaLexer(stream)
         token_stream = CommonTokenStream(lexer)
         parser = JavaParserLabeled(token_stream)
@@ -268,7 +268,7 @@ def main(udb_path, source_package, source_class, method_name, target_classes: li
 
     # Propagation
     for file, _class, line in zip(propagation_files, propagation_classes, propagation_lines):
-        stream = FileStream(file, encoding='utf8')
+        stream = FileStream(file, encoding='utf8', errors='ignore')
         lexer = JavaLexer(stream)
         token_stream = CommonTokenStream(lexer)
         parser = JavaParserLabeled(token_stream)

@@ -38,9 +38,9 @@ def main(args):
 
             # Step 1: Load input source into stream
             if i == 0:
-                stream = FileStream(input_directory + '/' + file, encoding='utf8')
+                stream = FileStream(input_directory + '/' + file, encoding='utf8', errors='ignore')
             else:
-                stream = FileStream('benchmark_projects/refactored/' + '/' + file, encoding='utf8')
+                stream = FileStream('benchmark_projects/refactored/' + '/' + file, encoding='utf8', errors='ignore')
             # input_stream = StdinStream()
 
             # Step 2: Create an instance of AssignmentStLexer

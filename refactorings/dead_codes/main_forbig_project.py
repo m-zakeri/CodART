@@ -28,7 +28,7 @@ from gen.java9.Java9_v2Parser import Java9_v2Parser
 # from refactorings.Main_refactorings_action_module import Main_Refactors_Action
 # from refactorings.Main_refactorings_action_module import Main_Refactors_Action
 # from refactorings.Refactoring_action_module_for_big_project import Main_Refactors_Action_for_big_project
-from refactorings.dead_codes.Refactoring_action_module_for_big_project import Main_Refactors_Action_for_big_project
+from refactorings.dead_codes.refactoring_action_module_for_big_project import Main_Refactors_Action_for_big_project
 from refactorings.extract_class_migrated import myExtractClassRefactoringListener
 from refactorings.field_refactorings.MoveFieldUp_Main import main_movefiledUp
 from refactorings.method_refactorings.main_MoveMethodDown import main_MoveMethodDown
@@ -274,7 +274,7 @@ def get_information(Root_path_project, source_class, move_field):
 
 if __name__ == '__main__':
     # print(timestamp())
-    with open("../../filename_status_database.txt", mode='w', encoding="utf-8", newline='') as f:
+    with open("../../filename_status_database.txt", mode='w', encoding="utf-8", newline='', errors='ignore') as f:
         f.write(
             "This file contains the list of Java files that were refracted, and if the Java file name was in this file, you must read it from the(files_refactord) folder.\n")
     refactor_action = Main_Refactors_Action_for_big_project()

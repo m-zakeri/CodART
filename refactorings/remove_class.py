@@ -79,7 +79,7 @@ if __name__ == '__main__':
         if cls.simplename() == source_class:
             main_file = cls.parent().longname()
 
-    stream = FileStream(main_file, encoding='utf8')
+    stream = FileStream(main_file, encoding='utf8', errors='ignore')
     # Step 2: Create an instance of AssignmentStLexer
     lexer = JavaLexer(stream)
     # Step 3: Convert the input source into a list of tokens

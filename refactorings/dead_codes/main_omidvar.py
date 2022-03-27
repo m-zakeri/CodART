@@ -42,7 +42,7 @@ def main(args):
 
         print(file)
 
-        stream = FileStream(file, encoding='utf8')
+        stream = FileStream(file, encoding='utf8', errors='ignore')
         # input_stream = StdinStream()
 
         # Step 2: Create an instance of AssignmentStLexer

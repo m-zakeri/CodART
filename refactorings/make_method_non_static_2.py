@@ -65,12 +65,15 @@ class MakeMethodNonStaticRefactoringListener(JavaParserLabeledListener):
                     )
 
 
-def main(udb_path, source_class, method_name, *args, **kwargs):
+def main(udb_path=None, source_class=None, method_name=None, *args, **kwargs):
     main_file = ""
     db = und.open(udb_path)
     for cls in db.ents("class"):
-        if cls.simplename() == source_class:
-            main_file = cls.parent().longname(True)
+        if cls.parent() is not None:
+            if cls.simplename() == source_class:
+                main_file = cls.parent().longname(True)
+                break
+
     if main_file is None:
         db.close()
         return
@@ -78,7 +81,8 @@ def main(udb_path, source_class, method_name, *args, **kwargs):
     if not os.path.isfile(main_file):
         db.close()
         return
-    stream = FileStream(main_file, encoding='utf8')
+
+    stream = FileStream(main_file, encoding='utf-8', errors='ignore')
     lexer = JavaLexer(stream)
     token_stream = CommonTokenStream(lexer)
     parser = JavaParserLabeled(token_stream)
@@ -96,8 +100,8 @@ def main(udb_path, source_class, method_name, *args, **kwargs):
 
 
 if __name__ == '__main__':
-    udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
-    source_class = "App"
-    method_name = "testMethod"
+    udb_path_ = "/home/ali/Desktop/code/TestProject/TestProject.udb"
+    source_class_ = "App"
+    method_name_ = "testMethod"
     # initialize with understand
-    main(udb_path, source_class, method_name)
+    main(udb_path_, source_class_, method_name_)

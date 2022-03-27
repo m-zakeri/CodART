@@ -324,7 +324,7 @@ def main(udb, child, parent):
     file_list_to_be_propagate = list(file_list_to_be_propagate)
     propagate_classes = list(propagate_classes)
 
-    stream = FileStream(child_path_file, encoding='utf8')
+    stream = FileStream(child_path_file, encoding='utf8', errors='ignore')
     lexer = JavaLexer(stream)
     token_stream = CommonTokenStream(lexer)
     parser = JavaParserLabeled(token_stream)
@@ -350,7 +350,7 @@ def main(udb, child, parent):
     with open(child_path_file, mode='w', newline='') as f:
         f.write(my_listener_remove_child_class.token_stream_rewriter.getDefaultText())
     # Refactor
-    stream = FileStream(father_path_file, encoding='utf8')
+    stream = FileStream(father_path_file, encoding='utf8', errors='ignore')
     lexer = JavaLexer(stream)
     token_stream = CommonTokenStream(lexer)
     parser = JavaParserLabeled(token_stream)
@@ -368,7 +368,7 @@ def main(udb, child, parent):
         f.write(my_listener_refactor_action.token_stream_rewriter.getDefaultText())
     # Propagate
     for file in file_list_to_be_propagate:
-        stream = FileStream(file, encoding='utf8')
+        stream = FileStream(file, encoding='utf8', errors='ignore')
         lexer = JavaLexer(stream)
         token_stream = CommonTokenStream(lexer)
         parser = JavaParserLabeled(token_stream)

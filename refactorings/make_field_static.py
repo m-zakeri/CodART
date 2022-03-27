@@ -87,7 +87,7 @@ def main(udb_path, source_class, field_name, *args, **kwargs):
     if not os.path.isfile(main_file):
         db.close()
         return
-    stream = FileStream(main_file, encoding='utf8')
+    stream = FileStream(main_file, encoding='utf8', errors='ignore')
     lexer = JavaLexer(stream)
     token_stream = CommonTokenStream(lexer)
     parser = JavaParserLabeled(token_stream)

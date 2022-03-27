@@ -190,7 +190,7 @@ class RemoveFlagArgument:
         self.arguemnt_name = argument_name
         self.main_file = main_file
 
-        self.stream = FileStream(self.main_file, encoding='utf8')
+        self.stream = FileStream(self.main_file, encoding='utf8', errors='ignore')
         self.lexer = JavaLexer(self.stream)
         self.token_stream = CommonTokenStream(self.lexer)
         self.parser = JavaParserLabeled(self.token_stream)

@@ -391,7 +391,7 @@ class ExtractClassAPI:
         self.new_class = new_class
         self.moved_fields = moved_fields
         self.moved_methods = moved_methods
-        self.stream = FileStream(self.file_path, encoding="utf8")
+        self.stream = FileStream(self.file_path, encoding="utf-8", errors='ignore')
         self.lexer = JavaLexer(self.stream)
         self.token_stream = CommonTokenStream(self.lexer)
         self.parser = JavaParserLabeled(self.token_stream)
@@ -435,7 +435,7 @@ class ExtractClassAPI:
     def propagate_fields(self, usages):
         for usage in usages:
             file_path = usage.pop('file_path')
-            stream = FileStream(file_path, encoding='utf8')
+            stream = FileStream(file_path, encoding='utf-8', errors='ignore')
             lexer = JavaLexer(stream)
             token_stream = CommonTokenStream(lexer)
             parser = JavaParserLabeled(token_stream)

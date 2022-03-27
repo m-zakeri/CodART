@@ -974,7 +974,7 @@ if __name__ == '__main__':
     field = None
     methods_tobe_update = []
     for file in files:
-        stream = FileStream(file, encoding='utf8')
+        stream = FileStream(file, encoding='utf8', errors='ignore')
         lexer = JavaLexer(stream)
         token_stream = CommonTokenStream(lexer)
         parser = JavaParser(token_stream)
@@ -1016,7 +1016,7 @@ if __name__ == '__main__':
 
     files2 = [f'{file.split(".")[0]}.rewritten.java' for file in files]
     for i, file in enumerate(files):
-        stream = FileStream(files2[i], encoding='utf8')
+        stream = FileStream(files2[i], encoding='utf8', errors='ignore')
         lexer = JavaLexer(stream)
         token_stream = CommonTokenStream(lexer)
         parser = JavaParser(token_stream)

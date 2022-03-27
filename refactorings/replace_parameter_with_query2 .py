@@ -218,7 +218,7 @@ class ReplaceParameterWithQueryAPI:
         self.target_class = target_class
         self.target_method = target_method
         self.target_parameters = target_parameters
-        self.stream = FileStream(self.file_path, encoding="utf8")
+        self.stream = FileStream(self.file_path, encoding="utf8", errors='ignore')
         self.lexer = JavaLexer(self.stream)
         self.token_stream = CommonTokenStream(self.lexer)
         self.parser = JavaParserLabeled(self.token_stream)

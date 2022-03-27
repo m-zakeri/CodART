@@ -8,10 +8,10 @@ from gen.java.JavaParser import JavaParser
 from gen.java.JavaLexer import JavaLexer
 # from refactorings.field_refactorings.IncreaseFieldVisibility import DecreaseFieldVisibilityRefactoringListener, \
 #     IncreaseFieldVisibilityRefactoringListener
-from refactorings.class_refactorings.CollapseHierarchy import CollapsHierarchyRefactoring_GetFieldText_Listener, \
+from refactorings.collapse_hierarchy import Refactoring_GetFieldText_Listener, \
     CollapsHierarchyRefactoring_GetMethodText_Listener, CollapssHierarchyRefactoringListener, \
     PropagationCollapssHierarchyListener
-from refactorings.class_refactorings.MakeAbstractClass import MakeAbstractClassRefactoringListener
+from refactorings.make_class_abstract import MakeAbstractClassRefactoringListener
 from refactorings.class_refactorings.MakeClassFinal import MakeFinalClassRefactoringListener
 from refactorings.class_refactorings.MakeClassNonFinal import MakeNonFinalClassRefactoringListener
 from refactorings.class_refactorings.MakeConcreteClass import MakeConcreteClassRefactoringListener
@@ -20,12 +20,7 @@ from refactorings.class_refactorings.RemoveInterface import RemoveInterfaceRefac
 from refactorings.class_refactorings.extract_Subclass import myExtractSubClassRefactoringListener
 from refactorings.extract_class_migrated import myExtractClassRefactoringListener
 from refactorings.field_refactorings.DecreaseFieldVisibility import DecreaseFieldVisibilityRefactoringListener
-# from refactorings.field_refactorings.IncreaseFieldVisibility import IncreaseFieldVisibilityRefactoringListener, \
-#     PropagationIncreaseFieldVisibility, \
-#     PropagationIncreaseFieldVisibilityRefactoringListener
-from refactorings.field_refactorings.IncreaseFieldVisibility import IncreaseFieldVisibilityRefactoringListener, \
-    PropagationIncreaseFieldVisibility_GetObjects_RefactoringListener, \
-    PropagationIncreaseFieldVisibilityRefactoringListener
+from refactorings.field_refactorings.IncreaseFieldVisibility import IncreaseFieldVisibilityRefactoringListener
 from refactorings.field_refactorings.MakeFieldFinal import MakeFieldFinalRefactoringListener
 from refactorings.field_refactorings.MakeFieldNonFinal import MakeFieldNonFinalRefactoringListener
 from refactorings.field_refactorings.MakeFieldNonStatic import MakeFieldNonStaticRefactoringListener
@@ -49,176 +44,13 @@ from refactorings.method_refactorings.MoveMethodUp import PropagationMoveMethodU
 from refactorings.method_refactorings.RemoveMethod import RemoveMethodRefactoringListener
 
 
-class Main_Refactors_Action_for_big_project():
+class Main_Refactors_Action():
     def __init__(self):
         self.x = 2
 
     def convert(self, set):
         return list(set)
 
-    # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-    # &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-    def main_IncreaseFieldVisibility(self, Root_path_udb_project, source_class, field_name):
-        roorpath = ""
-        a_string = Root_path_udb_project
-        new_string = a_string.replace(".udb", "")
-
-        roorpath = new_string + "/"
-        print(roorpath)
-        file_list_include_file_name_that_edited = ""
-        # initialize with undrestand [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
-        mainfile = ""
-        file_list_to_be_propagate = set()
-        propagate_classes = set()
-        db = und.open(Root_path_udb_project)
-        for field in db.ents("public variable"):
-            if (str(field) == str(source_class + "." + field_name)):
-                print("==================================\nfield =", field.longname())
-                print(field.parent().parent().relname())
-                # get path file include this field.
-                if (field.parent().parent().relname() is not None):
-                    mainfile = field.parent().parent().relname()
-                    mainfile = '/'.join(mainfile.split('/')[2:])
-                else:
-                    for ref in field.refs("Definein"):
-                        mainfile = (ref.file().relname())
-                        mainfile = '/'.join(mainfile.split('/')[2:])
-                # get propagate class and their file
-                for ref in field.refs("Setby , Useby"):
-                    if not (str(ref.ent()) == str(field.parent())
-                            or str(ref.ent().parent()) == str(field.parent())):
-                        propagate_classes.add(str(ref.ent().parent()))
-                        file_list_to_be_propagate.add("src/" + ref.file().relname())
-
-                #     pr
-        file_list_to_be_propagate = self.convert(file_list_to_be_propagate)
-        propagate_classes = self.convert(propagate_classes)
-
-        # [[[[[[[[[
-        flag_file_is_refatored = False
-        corpus = open(
-            r"filename_status_database.txt", encoding="utf-8").read()
-        if corpus.find("name:" + mainfile) == -1:
-            with open("filename_status_database.txt", mode='w', encoding="utf-8", newline='') as f:
-                f.write(corpus + "\nname:" + mainfile)
-                f.flush()
-                os.fsync(f.fileno())
-            file_list_include_file_name_that_edited += mainfile + "\n"
-        else:
-            flag_file_is_refatored = True
-            print("file already edited")
-        # ]]]]]]]]
-        mainfile = "src/" + mainfile
-        mainfiletemp = mainfile
-        #     ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
-        print("LOG 0:", mainfile)
-        file_main = roorpath + mainfile
-        print("LOG 1:", file_main)
-        print("LOG 2:", roorpath)
-
-        argparser = argparse.ArgumentParser()
-        # [[[
-        if (flag_file_is_refatored):
-            argparser.add_argument('-n', '--file', help='Input source',
-                                   default="files_refactored/" + mainfiletemp)
-        else:
-            argparser.add_argument('-n', '--file', help='Input source',
-                                   default=file_main)
-            print("LOG 6", file_main)
-
-        # ]]]
-        args = argparser.parse_args()
-        stream = FileStream(args.file, encoding='utf8')
-        # Step 2: Create an instance of AssignmentStLexer
-        lexer = JavaLexer(stream)
-        # Step 3: Convert the input source into a list of tokens
-        token_stream = CommonTokenStream(lexer)
-        # Step 4: Create an instance of the AssignmentStParser
-        parser = JavaParser(token_stream)
-        parser.getTokenStream()
-        parse_tree = parser.compilationUnit()
-        my_listener = IncreaseFieldVisibilityRefactoringListener(common_token_stream=token_stream,
-                                                                 source_class=source_class,
-                                                                 field_name=field_name)
-        walker = ParseTreeWalker()
-        walker.walk(t=parse_tree, listener=my_listener)
-
-        filename = "files_refactored/" + mainfile
-        if not os.path.exists(os.path.dirname(filename)):
-            try:
-                os.makedirs(os.path.dirname(filename))
-            except OSError as exc:  # Guard against race condition
-                if exc.errno != errno.EEXIST:
-                    raise
-        print("file to be saved most be :", "files_refactored/" + mainfile)
-        with open("files_refactored/" + mainfile, mode='w', encoding="utf-8", newline='') as f:
-            f.write(my_listener.token_stream_rewriter.getDefaultText())
-            f.flush()
-            os.fsync(f.fileno())
-        # propagate start$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-        print("file_list_to_be_propagate:", file_list_to_be_propagate)
-        for file in file_list_to_be_propagate:
-            #
-            file = '/'.join(file.split('/')[2:])
-            print("LOG 5", file)
-            flag_file_edited = False
-            corpus = open(
-                r"filename_status_database.txt", encoding="utf-8").read()
-            if (corpus.find("name:" + file) == -1):
-
-                with open("filename_status_database.txt", mode='w', encoding="utf-8", newline='') as f:
-                    f.write(corpus + "\nname:" + file)
-                    f.flush()
-                    os.fsync(f.fileno())
-                file_list_include_file_name_that_edited += file + "\n"
-            else:
-                flag_file_edited = True
-            #
-            argparser = argparse.ArgumentParser()
-            if (flag_file_edited):
-                argparser.add_argument('-n', '--file', help='Input source', default="files_refactored/" + file)
-            else:
-                argparser.add_argument('-n', '--file', help='Input source', default=roorpath + file)
-
-            args = argparser.parse_args()
-            stream = FileStream(args.file, encoding='utf8')
-            # input_stream = StdinStream()
-            # Step 2: Create an instance of AssignmentStLexer
-            lexer = JavaLexer(stream)
-            # Step 3: Convert the input source into a list of tokens
-            token_stream = CommonTokenStream(lexer)
-            # Step 4: Create an instance of the AssignmentStParser
-            parser = JavaParser(token_stream)
-            parser.getTokenStream()
-            parse_tree = parser.compilationUnit()
-
-            # get object
-            my_listener_get_object = PropagationIncreaseFieldVisibility_GetObjects_RefactoringListener(token_stream,
-                                                                                                       source_class=source_class,
-                                                                                                       propagated_class_name=propagate_classes)
-            walker = ParseTreeWalker()
-            walker.walk(t=parse_tree, listener=my_listener_get_object)
-
-            my_listener = PropagationIncreaseFieldVisibilityRefactoringListener(common_token_stream=token_stream,
-                                                                                using_field_name=field_name,
-                                                                                object_name=my_listener_get_object.objects,
-                                                                                propagated_class_name=propagate_classes)
-            walker = ParseTreeWalker()
-            walker.walk(t=parse_tree, listener=my_listener)
-
-            filename = "files_refactored/" + file
-            if not os.path.exists(os.path.dirname(filename)):
-                try:
-                    os.makedirs(os.path.dirname(filename))
-                except OSError as exc:  # Guard against race condition
-                    if exc.errno != errno.EEXIST:
-                        raise
-            with open("files_refactored/" + file, mode='w', encoding="utf-8", newline='') as f:
-                f.write(my_listener.token_stream_rewriter.getDefaultText())
-                f.flush()
-                os.fsync(f.fileno())
-
-    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     def main_ExtractSubclasse(self, Root_path_udb_project, source_class, moved_methods, moved_fields):
         roorpath = ""
         a_string = Root_path_udb_project
@@ -226,7 +58,7 @@ class Main_Refactors_Action_for_big_project():
 
         roorpath = new_string + "//"
         print(roorpath)
-        # initialize with undrestand [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
+        # initialize with understand
         father_path_file = ""
         file_list_to_be_propagate = set()
         propagate_classes = set()
@@ -246,12 +78,10 @@ class Main_Refactors_Action_for_big_project():
             # if(cls.longname()==fatherclass):
             #     print(cls.parent().relname())
             #     father_path_file=cls.parent().relname()
-
+        db.close()
         print("propagate_classes :", propagate_classes)
         print("file_list_to_be_propagate:", file_list_to_be_propagate)
-        #     ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
         print("mainfile:", father_path_file)
-        #     ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
         file_main = roorpath + father_path_file
         argparser = argparse.ArgumentParser()
         argparser.add_argument('-n', '--file', help='Input source', default=file_main)
@@ -284,7 +114,6 @@ class Main_Refactors_Action_for_big_project():
         with open("files_refactored/" + father_path_file, mode='w', newline='') as f:
             f.write(my_listener.token_stream_rewriter.getDefaultText())
 
-    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     def main_Extractclasse(self, Root_path_udb_project, source_class, moved_methods, moved_fields):
         roorpath = ""
         a_string = Root_path_udb_project
@@ -292,7 +121,7 @@ class Main_Refactors_Action_for_big_project():
 
         roorpath = new_string + "//"
         print(roorpath)
-        # initialize with undrestand [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
+        # initialize with understand
         father_path_file = ""
         file_list_to_be_propagate = set()
         propagate_classes = set()
@@ -315,9 +144,7 @@ class Main_Refactors_Action_for_big_project():
 
         print("propagate_classes :", propagate_classes)
         print("file_list_to_be_propagate:", file_list_to_be_propagate)
-        #     ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
         print("mainfile:", father_path_file)
-        #     ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
         file_main = roorpath + father_path_file
         argparser = argparse.ArgumentParser()
         argparser.add_argument('-n', '--file', help='Input source', default=file_main)
@@ -350,7 +177,6 @@ class Main_Refactors_Action_for_big_project():
         with open("files_refactored/" + father_path_file, mode='w', newline='') as f:
             f.write(my_listener.token_stream_rewriter.getDefaultText())
 
-    # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     def main_CollapsHierarchy(self, Root_path_udb_project, childclass, fatherclass):
         roorpath = ""
         a_string = Root_path_udb_project
@@ -363,14 +189,18 @@ class Main_Refactors_Action_for_big_project():
         father_path_file = ""
         file_list_to_be_propagate = set()
         propagate_classes = set()
+
         db = und.open(Root_path_udb_project)
+
         for cls in db.ents("class"):
             if (cls.longname() == childclass):
                 print(cls.parent().relname())
                 child_path_file = cls.parent().relname()
                 print(cls.refs())
                 for ref in cls.refs("Coupleby"):
+                    # print(ref.ent().longname())
                     propagate_classes.add(ref.ent().longname())
+                    # print(ref.ent().parent().relname())
                     file_list_to_be_propagate.add(ref.ent().parent().relname())
             if (cls.longname() == fatherclass):
                 print(cls.parent().relname())
@@ -444,9 +274,11 @@ class Main_Refactors_Action_for_big_project():
         parser = JavaParser(token_stream)
         parser.getTokenStream()
         parse_tree = parser.compilationUnit()
-        my_listenerrefactor_Action = CollapssHierarchyRefactoringListener(common_token_stream=token_stream
-                                                                          , parent_class=fatherclass,
-                                                                          child_class=childclass,
+        # common_token_stream: CommonTokenStream = None, parent_class = None, child_class = None, field_text:str = None, method_text:str = None):
+
+        my_listenerrefactor_Action = CollapssHierarchyRefactoringListener(common_token_stream=token_stream,
+                                                                          parent_class=fatherclass
+                                                                          , child_class=childclass,
                                                                           field_text=fieldcode,
                                                                           method_text=methods_code)
         walker = ParseTreeWalker()
@@ -470,6 +302,7 @@ class Main_Refactors_Action_for_big_project():
             else:
                 argparser.add_argument('-n', '--file', help='Input source', default=roorpath + file)
             args = argparser.parse_args()
+            # //////////////////////////////////////////////////////////////////////////
             stream = FileStream(args.file, encoding='utf8')
             # input_stream = StdinStream()
             # Step 2: Create an instance of AssignmentStLexer
@@ -502,6 +335,7 @@ class Main_Refactors_Action_for_big_project():
         roorpath = ""
         a_string = Root_path_udb_project
         new_string = a_string.replace(".udb", "")
+
         roorpath = new_string + "//"
         print(roorpath)
         # initialize with undrestand [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
@@ -1003,7 +837,7 @@ class Main_Refactors_Action_for_big_project():
         a_string = Root_path_udb_project
         new_string = a_string.replace(".udb", "")
 
-        roorpath = new_string + "//src//"
+        roorpath = new_string + "//"
         print(roorpath)
         # initialize with undrestand [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
         mainfile = ""
@@ -1138,6 +972,51 @@ class Main_Refactors_Action_for_big_project():
             f.write(my_listener.token_stream_rewriter.getDefaultText())
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    def main_IncreaseFieldVisibility(self, Root_path_udb_project, source_class, field_name):
+        roorpath = ""
+        a_string = Root_path_udb_project
+        new_string = a_string.replace(".udb", "")
+
+        roorpath = new_string + "//"
+        print(roorpath)
+        # initialize with undrestand [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
+        mainfile = ""
+        db = und.open(Root_path_udb_project)
+        for cls in db.ents("class"):
+            if (cls.longname() == source_class):
+                print(cls.parent().relname())
+                mainfile = cls.parent().relname()
+
+        #     ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
+        file_main = roorpath + mainfile
+        argparser = argparse.ArgumentParser()
+        argparser.add_argument('-n', '--file', help='Input source', default=file_main)
+        args = argparser.parse_args()
+        stream = FileStream(args.file, encoding='utf8')
+        # Step 2: Create an instance of AssignmentStLexer
+        lexer = JavaLexer(stream)
+        # Step 3: Convert the input source into a list of tokens
+        token_stream = CommonTokenStream(lexer)
+        # Step 4: Create an instance of the AssignmentStParser
+        parser = JavaParser(token_stream)
+        parser.getTokenStream()
+        parse_tree = parser.compilationUnit()
+        my_listener = IncreaseFieldVisibilityRefactoringListener(common_token_stream=token_stream,
+                                                                 source_class=source_class,
+                                                                 field_name=field_name)
+        walker = ParseTreeWalker()
+        walker.walk(t=parse_tree, listener=my_listener)
+
+        filename = "files_refactored/" + mainfile
+        if not os.path.exists(os.path.dirname(filename)):
+            try:
+                os.makedirs(os.path.dirname(filename))
+            except OSError as exc:  # Guard against race condition
+                if exc.errno != errno.EEXIST:
+                    raise
+        with open("files_refactored/" + mainfile, mode='w', newline='') as f:
+            f.write(my_listener.token_stream_rewriter.getDefaultText())
 
     # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     def main_Remove_Field(self, Root_path_udb_project, source_class, field_name):
@@ -1396,6 +1275,7 @@ class Main_Refactors_Action_for_big_project():
                     propagation_classes.add(ref.ent().parent().longname())
         print("fileslist_to_be_propagate :", fileslist_to_be_propagate)
         print("propagation_classes : ", propagation_classes)
+
         for classname in db.ents("class"):
             if (classname.longname() == source_class):
                 for childcls in classname.refs("Extendby"):
@@ -1521,13 +1401,14 @@ class Main_Refactors_Action_for_big_project():
         roorpath = new_string + "//"
         print(roorpath)
 
-        # initialize with undrestand
+        # initialize with undrestand [[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
         mainfile = ""
         fileslist_to_be_propagate = set()
         propagation_classes = set()
         children_class = set()
         fileslist_to_be_rafeactored = set()
         db = und.open(Root_path_udb_project)
+
         for mth in db.ents("Java Method"):
             if (mth.longname() == source_class + "." + moved_methods):
                 print(mth.parent())
@@ -1546,6 +1427,7 @@ class Main_Refactors_Action_for_big_project():
         print("propagation_classes : ", propagation_classes)
         print("children_class :", children_class)
         print("fileslist_to_be_rafeactored :", fileslist_to_be_rafeactored)
+
         fileslist_to_be_propagate = self.convert(fileslist_to_be_propagate)
         propagation_classes = self.convert(propagation_classes)
         children_class = self.convert(children_class)
@@ -1566,7 +1448,6 @@ class Main_Refactors_Action_for_big_project():
         parser = JavaParser(token_stream)
         parser.getTokenStream()
         parse_tree = parser.compilationUnit()
-        # listener get text
         get_text = MoveMethodDownRefactoring_GetMethodText_Listener(common_token_stream=token_stream,
                                                                     source_class=source_class,
                                                                     moved_method=moved_methods)
@@ -1667,18 +1548,36 @@ class Main_Refactors_Action_for_big_project():
         fileslist_to_be_rafeactored = set()
         fileslist_to_be_propagate = set()
         propagation_classes = set()
+
         db = und.open(Root_path_udb_project)
         i = 0
         for mth in db.ents("Java Method"):
+            # print(mth)
+            # print(mth)
             for child in children_class:
+                # print("child::",child)
+
                 if (mth.longname() == child + "." + moved_methods):
+                    # print(child, "::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::")
+                    # print("main file:", mth.parent().parent().relname())
+                    # if (i == 0):
+                    # print("mth.parent().parent().relname():",mth.parent().parent().relname())
                     mainfile = mth.parent().parent().relname()
+                    # i += 1
                     fileslist_to_be_rafeactored.add(mth.parent().parent().relname())
+                    # print("mth.parent():", mth.parent())
+                    # print(mth.parent().refs())
                     for fth in mth.parent().refs("Extend"):
+                        # print("father_class:", fth.ent().longname())
                         destination_class = fth.ent().longname()
+                        # print(fth.ent().parent().relname())
                         fileslist_to_be_rafeactored.add(fth.ent().parent().relname())
+                    # print("============")
                     for ref in mth.refs("Java Callby"):
+                        # print("ref:",ref)
+                        # print("ref.ent().parent():", ref.ent().parent())
                         propagation_classes.add(ref.ent().parent().longname())
+                        # print("ref.ent().parent().parent().relname():", ref.ent().parent().parent().relname())
                         fileslist_to_be_propagate.add(ref.ent().parent().parent().relname())
         print("=========================================")
         print("fileslist_to_be_propagate :", fileslist_to_be_propagate)
@@ -1717,11 +1616,12 @@ class Main_Refactors_Action_for_big_project():
         # }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}end get text
 
         # ////////////////////////////////////////////////////////////////////////
-        # refactored start
+        # filelist=["javatest1.java","javatest2.java"]
         for file in fileslist_to_be_rafeactored:
             argparser = argparse.ArgumentParser()
             argparser.add_argument('-n', '--file', help='Input source', default=roorpath + file)
             args = argparser.parse_args()
+            # //////////////////////////////////////////////////////////////////////////
             stream = FileStream(args.file, encoding='utf8')
             # input_stream = StdinStream()
             # Step 2: Create an instance of AssignmentStLexer
@@ -1734,7 +1634,9 @@ class Main_Refactors_Action_for_big_project():
             # Step 5: Create parse tree
             # 1. Python backend --> Low speed
             # parse_tree = parser.compilationUnit()
+
             # 2. C++ backend --> high speed
+
             parse_tree = parser.compilationUnit()
 
             my_listener_refactor = MoveMethodUpRefactoringListener(common_token_stream=token_stream,
@@ -1756,6 +1658,7 @@ class Main_Refactors_Action_for_big_project():
                 f.write(my_listener_refactor.token_stream_rewriter.getDefaultText())
             # ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]end refactoring
         # beging of propagate
+
         for file in fileslist_to_be_propagate:
             argparser = argparse.ArgumentParser()
             if (file in fileslist_to_be_rafeactored):
@@ -1763,6 +1666,7 @@ class Main_Refactors_Action_for_big_project():
             else:
                 argparser.add_argument('-n', '--file', help='Input source', default=roorpath + file)
             args = argparser.parse_args()
+            # //////////////////////////////////////////////////////////////////////////
             stream = FileStream(args.file, encoding='utf8')
             # input_stream = StdinStream()
             # Step 2: Create an instance of AssignmentStLexer
@@ -1809,16 +1713,27 @@ class Main_Refactors_Action_for_big_project():
         for field in db.ents("Java Variable"):
             for child in children_class:
                 if (field.longname() == child + "." + moved_fields[0]):
+                    # print(field.parent().parent().relname())
                     if (i == 0):
                         mainfile = field.parent().parent().relname()
                     i += 1
+
+                    # print(field.parent().parent().relname())
                     fileslist_to_be_rafeactored.add(field.parent().parent().relname())
+                    # print(field.parent().refs())
                     for fth in field.parent().refs("Extend"):
+                        # print("father_class:", fth.ent().longname())
                         father_class = fth.ent().longname()
+                        # print(fth.ent().parent().relname())
                         fileslist_to_be_rafeactored.add(fth.ent().parent().relname())
+                    # print("==================================")
                     for ref in field.refs("Setby , Useby"):
+                        # print(ref)
+                        # print(ref.ent().parent())
                         propagation_classes.add(ref.ent().parent().longname())
+                        # print(ref.ent().parent().parent().relname())
                         fileslist_to_be_propagate.add(ref.ent().parent().parent().relname())
+        # print("=========================================")
         print("fileslist_to_be_propagate :", fileslist_to_be_propagate)
         print("propagation_classes : ", propagation_classes)
         print("fileslist_to_be_rafeactored :", fileslist_to_be_rafeactored)
@@ -1850,7 +1765,6 @@ class Main_Refactors_Action_for_big_project():
         parse_tree = parser.compilationUnit()
         print(
             "************************************************************************************************************")
-        # get text
         get_text = movefieldup_gettextfield_Listener(common_token_stream=token_stream, child=children_class,
                                                      field=moved_fields[0])
         walker = ParseTreeWalker()
@@ -1889,7 +1803,7 @@ class Main_Refactors_Action_for_big_project():
             # walker = ParseTreeWalker()
             # walker.walk(t=parse_tree, listener=gettext)
             # print("====================================",gettext.field_text)
-            # refator listener
+
             my_listener = movefieldupRefactoringListener(common_token_stream=token_stream,
                                                          destination_class=father_class,
                                                          children_class=children_class, moved_fields=moved_fields,
@@ -1929,7 +1843,6 @@ class Main_Refactors_Action_for_big_project():
             parser = JavaParser(token_stream)
             parser.getTokenStream()
             parse_tree = parser.compilationUnit()
-            # propagate listener
             my_listener = PropagationMovefieldUpRefactoringListener(token_stream_rewriter=token_stream,
                                                                     old_class_name=children_class,
                                                                     new_class_name=father_class,

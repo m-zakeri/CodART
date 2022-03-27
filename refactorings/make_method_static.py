@@ -109,7 +109,7 @@ def main(udb_path, target_class, target_methods):
         if cls.simplename() == target_class:
             main_file = cls.parent().longname()
 
-    stream = FileStream(main_file, encoding='utf8')
+    stream = FileStream(main_file, encoding='utf8', errors='ignore')
     lexer = JavaLexer(stream)
     token_stream = CommonTokenStream(lexer)
     parser = JavaParserLabeled(token_stream)
