@@ -88,7 +88,7 @@ class SingletonRefactoringListener(JavaParserLabeledListener):
 
 def main(args, i):
     # Step 1: Load input source into stream
-    stream = FileStream(args.file, encoding='utf8')
+    stream = FileStream(args.file, encoding='utf8', errors='ignore')
     # Step 2: Create an instance of AssignmentStLexer
     lexer = JavaLexer(stream)
     # Step 3: Convert the input source into a list of tokens

@@ -139,7 +139,7 @@ class StrategyPatternRefactoringListener(JavaParserLabeledListener):
 def main(args):
     # Step 1: Load input source into stream
     begin_time = time()
-    stream = FileStream(args.file, encoding='utf8')
+    stream = FileStream(args.file, encoding='utf8', errors='ignore')
     # input_stream = StdinStream()
     print('Input stream:')
     print(stream)

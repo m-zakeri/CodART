@@ -152,7 +152,7 @@ class FactoryMethodRefactoringListener(JavaParserLabeledListener):
 
 def main(args):
     # Step 1: Load input source into stream
-    stream = FileStream(args.file, encoding='utf8')
+    stream = FileStream(args.file, encoding='utf8', errors='ignore')
     # input_stream = StdinStream()
 
     # Step 2: Create an instance of AssignmentStLexer
