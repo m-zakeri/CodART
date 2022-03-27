@@ -28,7 +28,7 @@ class ProjectParseUsage:
     @staticmethod
     def generate_tree(file_path):
         # Step 1: Load input source into stream
-        stream = FileStream(file_path, encoding='utf8')
+        stream = FileStream(file_path, encoding='utf8', errors='ignore')
         # Step 2: Create an instance of AssignmentStLexer
         lexer = JavaLexer(stream)
         # Step 3: Convert the input source into a list of tokens
