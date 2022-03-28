@@ -1,15 +1,24 @@
-__version__ = '0.2.0'
-__author__ = 'Seyyed Ali Ayati'
+"""
+
+
+## Changelog
+### v0.2.1
+- Fix bugs in getting entity.parent() None
+
+"""
+
+__version__ = '0.2.1'
+__author__ = 'Morteza Zakeri'
 
 import os
 from pathlib import Path
+import networkx as nx
 
 try:
     import understand as und
 except ImportError as e:
     print(e)
 
-import networkx as nx
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
@@ -421,9 +430,10 @@ class ExtractClassAPI:
         class_ents = db.lookup(self.source_class, "Class")
         class_ent = None
         for ent in class_ents:
-            if Path(ent.parent().longname()) == Path(self.file_path):
-                class_ent = ent
-                break
+            if ent.parent() is not None:
+                if Path(ent.parent().longname()) == Path(self.file_path):
+                    class_ent = ent
+                    break
         assert class_ent is not None
 
         for ref in class_ent.refs("Define", "Method"):

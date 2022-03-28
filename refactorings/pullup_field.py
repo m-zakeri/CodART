@@ -21,6 +21,10 @@ Pull up field refactoring removes the repetitive field from subclasses and moves
 3. Check for multilevel inheritance.
 
 """
+
+__version__ = '0.2.0'
+__author__ = 'Morteza Zakeri'
+
 import logging
 import os
 from refactorings.utils import utils_listener_fast, utils2
@@ -74,6 +78,8 @@ class PullUpFieldRefactoring:
 
         superclass_name = _class.superclass_name
 
+        if not program.packages[self.package_name].classes.get(superclass_name):
+            return False
         superclass: utils_listener_fast.Class = program.packages[self.package_name].classes[superclass_name]
         superclass_body_start = utils_listener_fast.TokensInfo(superclass.parser_context.classBody())
         superclass_body_start.stop = superclass_body_start.start  # Start and stop both point to the '{'
