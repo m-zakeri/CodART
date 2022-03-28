@@ -1,3 +1,12 @@
+"""
+The script reads a refactoring sequence, x, from input.txt, and execute it on system, s
+
+
+"""
+
+__version__ = '0.2.0'
+__author__ = 'Morteza Zakeri'
+
 
 import os
 import re
@@ -33,9 +42,22 @@ REFACTORING_MAIN_MAP = {
     'Decrease Method Visibility': decrease_method_visibility.main,
 }
 
-project_dir_old = 'C:\\Users\\Administrator\\Downloads\\udbs'
-udb_path_old = 'C:/Users/Administrator/Downloads/udbs\\10_water-simulator.udb'
-file_path_base_dir_old = 'C:\\Users\\Administrator\\Downloads\\prj_src'
+# project_dir_old = 'C:\\Users\\Administrator\\Downloads\\udbs'
+# udb_path_old = 'C:/Users/Administrator/Downloads/udbs\\10_water-simulator.udb'
+file_path_base_dir_old = 'C:\\Users\\Administrator\\Downloads\\prj_src'  # System server2 path (to be replaced)
+# file_path_base_dir_old = 'C:\\Users\\Administrator\\Downloads\\IdeaProjects2_Cleaned'  # For JOpenChart project only
+
+
+def reset_project():
+    # Stage 0: Git restore
+    logger.debug("Executing git restore.")
+    # git restore .
+    # git clean -f -d
+    git_restore(config.PROJECT_PATH)
+    logger.debug("Updating understand database after git restore.")
+    update_understand_database(config.UDB_PATH)
+    # quit()
+
 
 def execute_from_log(input_file_path):
     """
@@ -43,12 +65,8 @@ def execute_from_log(input_file_path):
 
     Example: Take a look at ./input.txt
     """
-    # Stage 0: Git restore
-    logger.debug("Executing git restore.")
-    git_restore(config.PROJECT_PATH)
-    logger.debug("Updating understand database after git restore.")
-    update_understand_database(config.UDB_PATH)
 
+    reset_project()
     with open(input_file_path, 'r') as f:
         data = f.read().split('\n')
         for row in data:
@@ -69,6 +87,7 @@ def execute_from_log(input_file_path):
 
             main_function = REFACTORING_MAIN_MAP[refactoring_name](**params)
             print(f"Executed {refactoring_name} with status {main_function}")
+            update_understand_database(config.UDB_PATH)
             print('-' * 100)
 
 
