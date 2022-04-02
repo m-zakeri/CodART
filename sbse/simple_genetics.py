@@ -1,4 +1,12 @@
-from pymoo.algorithms.so_genetic_algorithm import GA
+"""
+Search-based refactoring with genetic algorithm
+
+"""
+
+__version__ = '0.1.'
+__author__ = 'Morteza Zakeri'
+
+from pymoo.algorithms.soo.nonconvex.ga import GA
 from pymoo.factory import get_problem
 from pymoo.optimize import minimize
 from initialize import make_field_non_static

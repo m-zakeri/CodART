@@ -3,7 +3,7 @@ Simple search-based refactoring with random-search algorithm
 
 """
 
-__version__ = '0.1.1'
+__version__ = '0.1.'
 __author__ = 'Morteza Zakeri'
 
 
