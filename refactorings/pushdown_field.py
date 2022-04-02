@@ -20,7 +20,8 @@ because of this, we push down the field from the superclass into its related sub
 2. There will be children and parents having their desired fields added or removed.
 """
 
-from refactorings.utils import utils_listener_fast, utils2
+from codart import symbol_table
+from sbse.config import logger
 
 
 class PushDownField:
@@ -64,9 +65,9 @@ class PushDownField:
             return False
 
         for m in superclass.methods:
-            method: utils_listener_fast.Method = superclass.methods[m]
+            method: symbol_table.Method = superclass.methods[m]
             for item in method.body_local_vars_and_expr_names:
-                if isinstance(item, utils_listener_fast.ExpressionName):
+                if isinstance(item, symbol_table.ExpressionName):
                     if ((len(item.dot_separated_identifiers) == 1
                          and item.dot_separated_identifiers[0] == self.field_name)
                             or (len(item.dot_separated_identifiers) == 2
@@ -76,8 +77,8 @@ class PushDownField:
         return True
 
     def do_refactor(self):
-        program = utils2.get_program(self.source_filenames, print_status=False)
-        superclass: utils_listener_fast.Class = program.packages[self.package_name].classes[self.superclass_name]
+        program = symbol_table.get_program(self.source_filenames, print_status=False)
+        superclass: symbol_table.Class = program.packages[self.package_name].classes[self.superclass_name]
         if not self.pre_condition_check(program, superclass):
             print(f"Cannot push-down field from {superclass.name}")
             return False
@@ -85,9 +86,9 @@ class PushDownField:
         other_derived_classes = []
         classes_to_add_to = []
         for pn in program.packages:
-            p: utils_listener_fast.Package = program.packages[pn]
+            p: symbol_table.Package = program.packages[pn]
             for cn in p.classes:
-                c: utils_listener_fast.Class = p.classes[cn]
+                c: symbol_table.Class = p.classes[cn]
                 if ((c.superclass_name == self.superclass_name and
                      c.file_info.has_imported_class(self.package_name, self.superclass_name)) or
                         (
@@ -104,13 +105,13 @@ class PushDownField:
 
         # Check if the field is used from the superclass or other derived classes
         for pn in program.packages:
-            p: utils_listener_fast.Package = program.packages[pn]
+            p: symbol_table.Package = program.packages[pn]
             for cn in p.classes:
-                c: utils_listener_fast.Class = p.classes[cn]
+                c: symbol_table.Class = p.classes[cn]
                 has_imported_superclass = c.file_info.has_imported_class(self.package_name, self.superclass_name)
                 fields_of_superclass_type_or_others = []
                 for fn in c.fields:
-                    f: utils_listener_fast.Field = c.fields[fn]
+                    f: symbol_table.Field = c.fields[fn]
                     if (f.name == self.field_name and has_imported_superclass) \
                             or (self.package_name is not None and f.name == (
                             self.package_name + '.' + self.superclass_name)):
@@ -119,17 +120,17 @@ class PushDownField:
                            or f.datatype == (o.package_name + '.' + o.name) for o in other_derived_classes):
                         fields_of_superclass_type_or_others.append(f.name)
                 for mk in c.methods:
-                    m: utils_listener_fast.Method = c.methods[mk]
+                    m: symbol_table.Method = c.methods[mk]
                     local_vars_of_superclass_type_or_others = []
                     for item in m.body_local_vars_and_expr_names:
-                        if isinstance(item, utils_listener_fast.LocalVariable):
+                        if isinstance(item, symbol_table.LocalVariable):
                             if (item.datatype == self.superclass_name and has_imported_superclass) \
                                     or item.datatype == (self.package_name + '.' + self.superclass_name):
                                 local_vars_of_superclass_type_or_others.append(item.identifier)
                             if any((c.file_info.has_imported_class(o.package_name, o.name) and item.datatype == o.name)
                                    or item.datatype == (o.package_name + '.' + o.name) for o in other_derived_classes):
                                 local_vars_of_superclass_type_or_others.append(item.identifier)
-                        elif isinstance(item, utils_listener_fast.ExpressionName):
+                        elif isinstance(item, symbol_table.ExpressionName):
                             if item.dot_separated_identifiers[-1] == self.field_name \
                                     and (
                                     (len(item.dot_separated_identifiers) == 2)
@@ -143,31 +144,31 @@ class PushDownField:
                             ):
                                 return False
 
-        rewriter = utils2.Rewriter(program, self.filename_mapping)
+        rewriter = symbol_table.Rewriter(program, self.filename_mapping)
 
         field = superclass.fields[self.field_name]
         if len(field.neighbor_names) == 0:
             rewriter.replace(field.get_tokens_info(), "")
             # Have to remove the modifiers too, because of the new grammar.
             for mod_ctx in field.modifiers_parser_contexts:
-                rewriter.replace(utils_listener_fast.TokensInfo(mod_ctx), "")
+                rewriter.replace(symbol_table.TokensInfo(mod_ctx), "")
         else:
             i = field.index_in_variable_declarators
             var_ctxs = field.all_variable_declarator_contexts
             if i == 0:
-                to_remove = utils_listener_fast.TokensInfo(var_ctxs[i])
-                to_remove.stop = utils_listener_fast.TokensInfo(var_ctxs[i + 1]).start - 1  # Include the ',' after it
+                to_remove = symbol_table.TokensInfo(var_ctxs[i])
+                to_remove.stop = symbol_table.TokensInfo(var_ctxs[i + 1]).start - 1  # Include the ',' after it
                 rewriter.replace(to_remove, "")
             else:
-                to_remove = utils_listener_fast.TokensInfo(var_ctxs[i])
-                to_remove.start = utils_listener_fast.TokensInfo(var_ctxs[i - 1]).stop + 1  # Include the ',' before it
+                to_remove = symbol_table.TokensInfo(var_ctxs[i])
+                to_remove.start = symbol_table.TokensInfo(var_ctxs[i - 1]).stop + 1  # Include the ',' before it
                 rewriter.replace(to_remove, "")
 
         is_public = "public" in field.modifiers
         is_protected = "protected" in field.modifiers
         modifier = ("public " if is_public else ("protected " if is_protected else ""))
         for c in classes_to_add_to:
-            c_body_start = utils_listener_fast.TokensInfo(c.parser_context.classBody())
+            c_body_start = symbol_table.TokensInfo(c.parser_context.classBody())
             c_body_start.stop = c_body_start.start  # Start and stop both point to the '{'
             rewriter.insert_after(c_body_start, "\n    " + modifier + field.datatype + " " + self.field_name \
                                   + ((" = " + field.initializer) if field.initializer is not None else "")
@@ -203,13 +204,17 @@ def test():
 
 
 def main(project_dir, source_package, source_class, field_name, target_classes: list, *args, **kwargs):
-    print("Success!" if PushDownField(
-        utils2.get_filenames_in_dir(project_dir),
+    res = PushDownField(
+        symbol_table.get_filenames_in_dir(project_dir),
         package_name=source_package,
         superclass_name=source_class,
         field_name=field_name,
         class_names=target_classes,
-    ).do_refactor() else "Cannot refactor.")
+    ).do_refactor()
+    if not res:
+        logger.error("Cannot push-dwon field")
+        return False
+    return True
 
 
 if __name__ == "__main__":
