@@ -1,6 +1,9 @@
-import logging
+"""
+Push-down field2
 
-import sbse.config
+"""
+
+__author__ = "Seyyed Ali Ayati"
 
 try:
     import understand as und
@@ -12,10 +15,9 @@ from antlr4.TokenStreamRewriter import TokenStreamRewriter
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
-from refactorings.utils.utils2 import parse_and_walk
-
-logger = logging.getLogger()
-__author__ = "Seyyed Ali Ayati"
+from codart.symbol_table import parse_and_walk
+import sbse.config
+from sbse.config import logger
 
 
 class CutFieldListener(JavaParserLabeledListener):
@@ -120,67 +122,82 @@ class PasteFieldListener(JavaParserLabeledListener):
             )
 
 
-def main(udb_path=None, source_package=None, source_class=None, field_name=None, target_classes: list=None, *args, **kwargs):
+def main(udb_path=None, source_package=None, source_class=None, field_name=None, target_classes: list = None, *args,
+         **kwargs):
     if udb_path is None:
         db = und.open(sbse.config.UDB_PATH)
     else:
         db = und.open(udb_path)
-    source_class_ents = db.lookup(f"{source_package}.{source_class}", "Class")
-    target_class_ents = []
-    source_class_ent = None
 
+    source_class_ent = None
+    source_class_ents = db.lookup(f"{source_package}.{source_class}", "Class")
     if len(source_class_ents) == 0:
         logger.error(f"Cannot find source class: {source_class}")
-        return
+        db.close()
+        return False
     else:
         for ent in source_class_ents:
             if ent.simplename() == source_class:
                 source_class_ent = ent
                 break
+
     if source_class_ent is None:
         logger.error(f"Cannot find source class: {source_class}")
-        return
+        db.close()
+        return False
 
-    field_ent = db.lookup(f"{source_package}.{source_class}.{field_name}", "Variable")
-    if len(field_ent) == 0:
+    fields = db.lookup(f"{source_package}.{source_class}.{field_name}", "Variable")
+    if fields is None or len(fields) == 0:
         logger.error(f"Cannot find field to pushdown: {field_name}")
-        return
+        db.close()
+        return False
     else:
-        field_ent = field_ent[0]
+        field_ent = fields[0]
 
-    for ref in source_class_ent.refs("extendBy"):
+    target_class_ents_files = []
+    target_class_ents_simplenames = []
+    for ref in source_class_ent.refs("Extendby"):
         if ref.ent().simplename() not in target_classes:
             logger.error("Target classes are not children classes")
-            return
-        target_class_ents.append(ref.ent())
+            db.close()
+            return False
+        target_class_ents_files.append(ref.ent().parent().longname())
+        target_class_ents_simplenames.append(ref.ent().simplename())
 
-    for ref in field_ent.refs("useBy, setBy"):
+    for ref in field_ent.refs("Useby,Setby"):
         if ref.file().simplename().split(".")[0] in target_classes:
             continue
         else:
             logger.error("Field has dependencies.")
-            return
-            # Remove field from source class
+            db.close()
+            return False
+
+    source_class_file = source_class_ent.parent().longname()
+    db.close()
+
+    # Remove field from source class
     listener = parse_and_walk(
-        file_path=source_class_ent.parent().longname(),
+        file_path= source_class_file,
         listener_class=CutFieldListener,
         has_write=True,
         source_class=source_class,
         field_name=field_name,
         debug=False
     )
+
     # Insert field in children classes
-    for target_class in target_class_ents:
+    for i, target_class_file in enumerate(target_class_ents_files):
         parse_and_walk(
-            file_path=target_class.parent().longname(),
+            file_path=target_class_file,
             listener_class=PasteFieldListener,
             has_write=True,
-            source_class=target_class.simplename(),
+            source_class=target_class_ents_simplenames[i],
             field_content=listener.field_content,
             import_statements=listener.import_statements,
             debug=False
         )
-    db.close()
+    # db.close()
+    return True
 
 
 if __name__ == '__main__':
