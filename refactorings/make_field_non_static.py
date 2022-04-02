@@ -1,6 +1,11 @@
-import os
+"""
+Make static field non-static refactoring operation
+"""
 
-from gen.javaLabeled.JavaLexer import JavaLexer
+__author__ = "Morteza Zakeri"
+__version__ = '0.2.0'
+
+import os
 
 try:
     import understand as und
@@ -10,14 +15,14 @@ except ImportError as e:
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
+from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 
 class MakeFieldNonStaticRefactoringListener(JavaParserLabeledListener):
     """
-    To implement extract class refactoring based on its actors.
-    Creates a new class and move fields and methods from the old class to the new one
+    To implement Make static field non-static refactoring operation based on its actors.
     """
 
     def __init__(self, common_token_stream: CommonTokenStream = None, source_class=None, field_name: str = None):
@@ -54,6 +59,7 @@ class MakeFieldNonStaticRefactoringListener(JavaParserLabeledListener):
         # field_identifier = ctx.variableDeclarators().getText().split(",")
         field_identifier = ctx.variableDeclarators().variableDeclarator(0).variableDeclaratorId().IDENTIFIER().getText()
         if self.field_name in field_identifier:
+            i = 0
             if not (grand_parent_ctx.modifier() == []):
                 for i in range(0, len(grand_parent_ctx.modifier())):
                     if grand_parent_ctx.modifier(i).getText() == "static":
@@ -70,39 +76,43 @@ class MakeFieldNonStaticRefactoringListener(JavaParserLabeledListener):
 def main(udb_path, source_class, field_name, *args, **kwargs):
     main_file = None
     db = und.open(udb_path)
-    for cls in db.ents("class"):
+    classes = db.ents("Class")
+    for cls in classes:
         if cls.simplename() == source_class:
             if cls.parent() is not None:
-                temp_file = cls.parent().longname(True)
+                temp_file = str(cls.parent().longname(True))
                 if os.path.isfile(temp_file):
                     main_file = temp_file
                     break
-            else:
-                continue
 
     if main_file is None:
         db.close()
-        return
+        return False
 
+    db.close()
     stream = FileStream(main_file, encoding='utf8', errors='ignore')
     lexer = JavaLexer(stream)
     token_stream = CommonTokenStream(lexer)
     parser = JavaParserLabeled(token_stream)
     parser.getTokenStream()
     parse_tree = parser.compilationUnit()
-    my_listener = MakeFieldNonStaticRefactoringListener(common_token_stream=token_stream, source_class=source_class,
-                                                        field_name=field_name)
+    my_listener = MakeFieldNonStaticRefactoringListener(
+        common_token_stream=token_stream,
+        source_class=source_class,
+        field_name=field_name
+    )
     walker = ParseTreeWalker()
     walker.walk(t=parse_tree, listener=my_listener)
 
     with open(main_file, mode='w', newline='') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
-    db.close()
+
+    return True
 
 
 if __name__ == '__main__':
-    udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
-    source_class = "Website"
-    field_name = "HELLO_FROM_STUDENT_WEBSITE"
+    udb_path_ = "/home/ali/Desktop/code/TestProject/TestProject.udb"
+    source_class_ = "Website"
+    field_name_ = "HELLO_FROM_STUDENT_WEBSITE"
     # initialize with understand
-    main(udb_path, source_class, field_name)
+    main(udb_path_, source_class_, field_name_)
