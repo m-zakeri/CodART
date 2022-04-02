@@ -1,6 +1,8 @@
-import os
+"""
 
-from gen.javaLabeled.JavaLexer import JavaLexer
+"""
+
+import os
 
 try:
     import understand as und
@@ -10,6 +12,7 @@ except ImportError as e:
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
+from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
@@ -74,38 +77,45 @@ class MakeFieldStaticRefactoringListener(JavaParserLabeledListener):
 
 
 def main(udb_path, source_class, field_name, *args, **kwargs):
-    main_file = ""
+    main_file = None
     db = und.open(udb_path)
-    for cls in db.ents("class"):
+    classes = db.ents("Class")
+    for cls in classes:
         if cls.simplename() == source_class:
-            main_file = cls.parent().longname(True)
-            if not os.path.isfile(main_file):
-                continue
+            if cls.parent() is not None:
+                temp_file = str(cls.parent().longname(True))
+                if os.path.isfile(temp_file):
+                    main_file = temp_file
+                    break
+
     if main_file is None:
         db.close()
-        return
-    if not os.path.isfile(main_file):
-        db.close()
-        return
-    stream = FileStream(main_file, encoding='utf8', errors='ignore')
+        return False
+
+    db.close()
+    stream = FileStream(main_file, encoding='utf-8', errors='ignore')
     lexer = JavaLexer(stream)
     token_stream = CommonTokenStream(lexer)
     parser = JavaParserLabeled(token_stream)
     parser.getTokenStream()
     parse_tree = parser.compilationUnit()
-    my_listener = MakeFieldStaticRefactoringListener(common_token_stream=token_stream, source_class=source_class,
-                                                     field_name=field_name)
+    my_listener = MakeFieldStaticRefactoringListener(
+        common_token_stream=token_stream,
+        source_class=source_class,
+        field_name=field_name
+    )
     walker = ParseTreeWalker()
     walker.walk(t=parse_tree, listener=my_listener)
 
     with open(main_file, mode='w', newline='') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
-    db.close()
+
+    return True
 
 
 if __name__ == '__main__':
-    udb_path = "/data/Dev/JavaSample/JavaSample.udb"
-    source_class = "Source"
-    field_name = "number3"
+    udb_path_ = "/data/Dev/JavaSample/JavaSample.udb"
+    source_class_ = "Source"
+    field_name_ = "number3"
     # initialize with understand
-    main(udb_path, source_class, field_name)
+    main(udb_path_, source_class_, field_name_)
