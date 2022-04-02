@@ -18,8 +18,8 @@ No specific Post Condition
 
 """
 import collections
-import logging
-import os
+# import logging
+
 
 try:
     import understand as und
@@ -31,11 +31,12 @@ from antlr4.TokenStreamRewriter import TokenStreamRewriter
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
-from refactorings.utils.utils2 import parse_and_walk
+from codart.symbol_table import parse_and_walk
 
 # Config logging
-logging.basicConfig(filename='codart_result.log', level=logging.DEBUG)
-logger = logging.getLogger(os.path.basename(__file__))
+from sbse.config import logger
+# logging.basicConfig(filename='codart_result.log', level=logging.DEBUG)
+# logger = logging.getLogger(os.path.basename(__file__))
 
 
 class PullUpConstructorListener(JavaParserLabeledListener):
@@ -103,7 +104,7 @@ class PullUpConstructorListener(JavaParserLabeledListener):
 def main(udb_path, source_package, target_class, class_names: list, *args, **kwargs):
     if len(class_names) < 2:
         logger.error("class_names is empty.")
-        return None
+        return False
     db = und.open(udb_path)
     parent_cons = []
 
@@ -112,7 +113,7 @@ def main(udb_path, source_package, target_class, class_names: list, *args, **kwa
     if len(parent) != 1:
         logger.error("Count of target class is not 1.")
         db.close()
-        return
+        return False
     parent = parent[0]
     parent_file = db.lookup(f"{target_class}.java", "File")[0].longname()
 
@@ -125,10 +126,11 @@ def main(udb_path, source_package, target_class, class_names: list, *args, **kwa
     for child in class_names:
         cons = db.lookup(f"{child}.{child}", "Constructor")
         for con in cons:
-            if source_package not in con.parent().longname():
-                logger.error("Source package does not match.")
-                db.close()
-                return
+            if con.parent() is not None:
+                if source_package not in con.parent().longname():
+                    logger.error("Source package does not match.")
+                    db.close()
+                    return False
             parameters = con.parameters()
             if parameters in constructors:
                 constructors[parameters].append(con)
@@ -144,8 +146,7 @@ def main(udb_path, source_package, target_class, class_names: list, *args, **kwa
         ents = []
 
         for ref in con.refs("Set"):
-            data = {'is_father': False, 'has_father_con': k in parent_cons,
-                    'class_name': con.parent().simplename()}
+            data = {'is_father': False, 'has_father_con': k in parent_cons, 'class_name': con.parent().simplename()}
             if ref.file().longname() not in meta_data.keys():
                 meta_data[ref.file().longname()] = data
             if target_class in ref.ent().longname():
@@ -155,7 +156,8 @@ def main(udb_path, source_package, target_class, class_names: list, *args, **kwa
             con2 = constructors[k][i]
             for ref in con2.refs("Set"):
                 data = {'is_father': False, 'has_father_con': k in parent_cons,
-                        'class_name': con2.parent().simplename()}
+                        'class_name': con2.parent().simplename()
+                        }
                 if ref.file().longname() not in meta_data.keys():
                     meta_data[ref.file().longname()] = data
                 if target_class in ref.ent().longname():
@@ -176,6 +178,7 @@ def main(udb_path, source_package, target_class, class_names: list, *args, **kwa
                     params=k
                 )
     db.close()
+    return True
 
 
 if __name__ == "__main__":
