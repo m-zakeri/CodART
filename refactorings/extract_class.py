@@ -426,21 +426,25 @@ class ExtractClassAPI:
         if len(listener.connected_components) == 0:
             self.checked = True
 
-    def get_source_class_map(self, db):
-        class_ents = db.lookup(self.source_class, "Class")
+    def get_source_class_map(self):
+        _db = und.open(self.udb_path)
+        class_ents = _db.lookup(self.source_class, "Class")
         class_ent = None
         for ent in class_ents:
             if ent.parent() is not None:
                 if Path(ent.parent().longname()) == Path(self.file_path):
                     class_ent = ent
                     break
-        assert class_ent is not None
+        if class_ent is None:
+            _db.close()
+            return
 
         for ref in class_ent.refs("Define", "Method"):
             method_ent = ref.ent()
             self.method_usage_map[method_ent.simplename()] = set()
             for use in method_ent.refs("SetBy UseBy ModifyBy, Call", "Variable ~Unknown, Method ~Unknown"):
                 self.method_usage_map[method_ent.simplename()].add(use.ent().simplename())
+        _db.close()
 
     def propagate_fields(self, usages):
         for usage in usages:
@@ -467,8 +471,6 @@ class ExtractClassAPI:
         pass
 
     def do_refactor(self):
-        db = und.open(self.udb_path)
-        self.get_source_class_map(db=db)
         listener = ExtractClassRefactoringListener(
             common_token_stream=self.token_stream,
             new_class=self.new_class,
@@ -484,12 +486,12 @@ class ExtractClassAPI:
         )
 
         # Find Field and Method Usages
+        _db = und.open(self.udb_path)
         field_usages = []
-
         for field in self.moved_fields:
-            for ent in db.lookup(f"{self.source_class}.{field}"):
+            for ent in _db.lookup(f"{self.source_class}.{field}"):
                 # print(ent.name(), "  [", ent.kindname(), "]", sep="", end="\n")
-                for ref in ent.refs("useBy, setBy, modifyBy"):
+                for ref in ent.refs("Useby, Setby, Modifyby"):
                     if Path(ref.file().longname()) == Path(self.file_path):
                         continue
                     field_usage = {
@@ -525,7 +527,8 @@ class ExtractClassAPI:
         self.propagate_fields(field_usages)
         self.reformat(self.file_path)
         self.reformat(self.new_file_path)
-        db.close()
+        _db.close()
+        return True
 
 
 def get_java_files(directory):
@@ -541,7 +544,10 @@ def main(udb_path, file_path, source_class, moved_fields, moved_methods, *args, 
     new_class = f"{source_class}Extracted"
     new_file_path = os.path.join(Path(file_path).parent, f"{new_class}.java")
 
-    ExtractClassAPI(
+    if not os.path.exists(new_file_path):
+        return False
+
+    eca = ExtractClassAPI(
         udb_path=udb_path,
         file_path=file_path,
         source_class=source_class,
@@ -549,7 +555,13 @@ def main(udb_path, file_path, source_class, moved_fields, moved_methods, *args, 
         moved_fields=moved_fields,
         moved_methods=moved_methods,
         new_file_path=new_file_path
-    ).do_refactor()
+    )
+    eca.get_source_class_map()
+    if len(eca.method_usage_map):
+        return False
+    else:
+        res = eca.do_refactor()
+        return res
 
 
 if __name__ == "__main__":
