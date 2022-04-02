@@ -5,7 +5,7 @@ A function to complete the Pull up constructor refactoring by finding all the cl
 
 """
 
-from refactorings.utils.utils_listener_fast import Program
+from codart.symbol_table import Program
 
 def Diff(li1, li2):
     return list(set(li1) - set(li2)) + list(set(li2) - set(li1))
