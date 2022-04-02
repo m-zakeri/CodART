@@ -2,7 +2,7 @@
 
 """
 
-from refactorings.utils.utils_listener_fast import Program
+from codart.symbol_table import Program
 
 
 def get_removemethods(program: Program, packagename: str, superclassname: str, methodkey: str, classname: str):
