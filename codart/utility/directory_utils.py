@@ -14,9 +14,10 @@ from antlr4 import FileStream, CommonTokenStream
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 from joblib import Parallel, delayed
 
+import understand as und
+
 from gen.java.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
-
 from java8speedy.parser import sa_javalabeled
 from java8speedy.parser import JavaLabeledLexer
 
@@ -54,17 +55,46 @@ def create_understand_database(project_dir):
     return db_path
 
 
-def update_understand_database(udb_path):
+def update_understand_database2(udb_path):
     """
     This function updates database due to file changes.
     :param udb_path: The absolute path of understand database.
     :return: None
+    Error message raised by understand 6.x:
+    Error: The Analysis cannot be performed because the database is locked or read only
     """
 
     subprocess.Popen(
         ['und', 'analyze', '-changed', udb_path],
         stdout=open(os.devnull, 'wb')
     ).wait()
+
+
+def update_understand_database(udb_path):
+    """
+    This function updates database due to file changes.
+    If any error, such as database is locked or read only, occurred it tries again and again to update db.
+    :param udb_path: The absolute path of understand database.
+    :return: None
+    """
+
+    result = subprocess.run(['und', 'analyze', '-changed', udb_path],
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
+    # info_ = result.stdout.decode('utf-8')
+    # error_ = result.stderr.decode('utf-8')
+    # print(info_[:85])
+    # print(f'return code: {result.returncode} --- error: {error_}')
+    while result.returncode != 0:
+        db: und.Db = und.open(config.UDB_PATH)
+        db.close()
+        result = subprocess.run(['und', 'analyze', '-changed', udb_path],
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE)
+        # info_ = result.stdout.decode('utf-8')
+        error_ = result.stderr.decode('utf-8')
+        # print(info_[:85])
+        config.logger.error(f'return code: {result.returncode} msg: {error_}')
 
 
 def export_understand_dependencies_csv(csv_path: str, db_path: str):
@@ -178,7 +208,8 @@ def typical_parsing(directory):
     return x
 
 
-if __name__ == '__main__':
+# Test methods
+def test_typyical_and_parallel_parsing():
     # directory = r'D:/IdeaProjects/JSON20201115/'
     # directory = r'D:/IdeaProjects/jvlt-1.3.2/'
     # directory = r'D:/IdeaProjects/ganttproject_1_11_1_original/'
@@ -194,3 +225,16 @@ if __name__ == '__main__':
 
     # trees = typical_parsing(directory)
     print(f'parse successfully {len(trees)} trees')
+
+
+def test_understand_update():
+    db: und.Db = und.open(config.UDB_PATH)
+    for i in range(0, 10):
+        lnx = db.language()
+        # print(lnx)
+        update_understand_database(config.UDB_PATH)
+
+
+if __name__ == '__main__':
+    # test_typyical_and_parallel_parsing()
+    test_understand_update()
