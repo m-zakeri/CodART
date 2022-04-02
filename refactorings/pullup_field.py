@@ -25,11 +25,9 @@ Pull up field refactoring removes the repetitive field from subclasses and moves
 __version__ = '0.2.0'
 __author__ = 'Morteza Zakeri'
 
-import logging
-import os
-from refactorings.utils import utils_listener_fast, utils2
 
-logger = logging.getLogger(os.path.basename(__file__))
+from codart import symbol_table
+from sbse.config import logger
 
 
 class PullUpFieldRefactoring:
@@ -63,7 +61,7 @@ class PullUpFieldRefactoring:
         self.filename_mapping = filename_mapping
 
     def do_refactor(self):
-        program = utils2.get_program(self.source_filenames, print_status=False)
+        program = symbol_table.get_program(self.source_filenames, print_status=False)
         # print(program.packages)
         if self.package_name not in program.packages \
                 or self.class_name not in program.packages[self.package_name].classes \
@@ -71,17 +69,17 @@ class PullUpFieldRefactoring:
             logger.error("Inputs are not valid!")
             return False
 
-        _class: utils_listener_fast.Class = program.packages[self.package_name].classes[self.class_name]
+        _class: symbol_table.Class = program.packages[self.package_name].classes[self.class_name]
         if _class.superclass_name is None:
             logger.error("Super class is none.")
             return False
 
         superclass_name = _class.superclass_name
-
         if not program.packages[self.package_name].classes.get(superclass_name):
             return False
-        superclass: utils_listener_fast.Class = program.packages[self.package_name].classes[superclass_name]
-        superclass_body_start = utils_listener_fast.TokensInfo(superclass.parser_context.classBody())
+
+        superclass: symbol_table.Class = program.packages[self.package_name].classes[superclass_name]
+        superclass_body_start = symbol_table.TokensInfo(superclass.parser_context.classBody())
         superclass_body_start.stop = superclass_body_start.start  # Start and stop both point to the '{'
 
         if self.field_name in superclass.fields:
@@ -92,15 +90,13 @@ class PullUpFieldRefactoring:
 
         fields_to_remove = []
         for pn in program.packages:
-            p: utils_listener_fast.Package = program.packages[pn]
+            p: symbol_table.Package = program.packages[pn]
             for cn in p.classes:
-                c: utils_listener_fast.Class = p.classes[cn]
+                c: symbol_table.Class = p.classes[cn]
                 if ((c.superclass_name == superclass_name and c.file_info.has_imported_class(self.package_name,
                                                                                              superclass_name))
-                    or (
-                            self.package_name is not None and c.superclass_name == superclass_name)) \
-                        and self.field_name in c.fields \
-                        and c.fields[self.field_name].datatype == datatype:
+                    or (self.package_name is not None and c.superclass_name == superclass_name)) and \
+                        self.field_name in c.fields and c.fields[self.field_name].datatype == datatype:
                     fields_to_remove.append(c.fields[self.field_name])
 
         if len(fields_to_remove) == 0:
@@ -110,11 +106,11 @@ class PullUpFieldRefactoring:
         is_public = False
         is_protected = True
         for field in fields_to_remove:
-            field: utils_listener_fast.Field = field
+            field: symbol_table.Field = field
             is_public = is_public or "public" in field.modifiers
             is_protected = is_protected and ("protected" in field.modifiers or "private" in field.modifiers)
 
-        rewriter = utils2.Rewriter(program, self.filename_mapping)
+        rewriter = symbol_table.Rewriter(program, self.filename_mapping)
 
         rewriter.insert_after(superclass_body_start, "\n    " + (
             "public " if is_public else (
@@ -125,24 +121,24 @@ class PullUpFieldRefactoring:
                 rewriter.replace(field.get_tokens_info(), "")
                 # Have to remove the modifiers too, because of the new grammar.
                 for mod_ctx in field.modifiers_parser_contexts:
-                    rewriter.replace(utils_listener_fast.TokensInfo(mod_ctx), "")
+                    rewriter.replace(symbol_table.TokensInfo(mod_ctx), "")
             else:
                 i = field.index_in_variable_declarators
                 var_ctxs = field.all_variable_declarator_contexts
                 if i == 0:
-                    to_remove = utils_listener_fast.TokensInfo(var_ctxs[i])
-                    to_remove.stop = utils_listener_fast.TokensInfo(
+                    to_remove = symbol_table.TokensInfo(var_ctxs[i])
+                    to_remove.stop = symbol_table.TokensInfo(
                         var_ctxs[i + 1]).start - 1  # Include the ',' after it
                     rewriter.replace(to_remove, "")
                 else:
-                    to_remove = utils_listener_fast.TokensInfo(var_ctxs[i])
-                    to_remove.start = utils_listener_fast.TokensInfo(
+                    to_remove = symbol_table.TokensInfo(var_ctxs[i])
+                    to_remove.start = symbol_table.TokensInfo(
                         var_ctxs[i - 1]).stop + 1  # Include the ',' before it
                     rewriter.replace(to_remove, "")
 
             # Add initializer to class constructor if initializer exists in field declaration
             if field.initializer is not None:
-                _class: utils_listener_fast.Class = program.packages[field.package_name].classes[field.class_name]
+                _class: symbol_table.Class = program.packages[field.package_name].classes[field.class_name]
                 initializer_statement = (field.name
                                          + " = "
                                          + ("new " + field.datatype + " " if field.initializer.startswith('{') else "")
@@ -157,13 +153,13 @@ class PullUpFieldRefactoring:
                         constructor = member_decl.constructorDeclaration()
                         if constructor is not None:
                             body = constructor.constructorBody  # Start token = '{'
-                            body_start = utils_listener_fast.TokensInfo(body)
+                            body_start = symbol_table.TokensInfo(body)
                             body_start.stop = body_start.start  # Start and stop both point to the '{'
                             rewriter.insert_after(body_start, "\n        " + initializer_statement)
                             has_contructor = True
                 if not has_contructor:
                     body = _class.parser_context.classBody()
-                    body_start = utils_listener_fast.TokensInfo(body)
+                    body_start = symbol_table.TokensInfo(body)
                     body_start.stop = body_start.start  # Start and stop both point to the '{'
                     rewriter.insert_after(body_start,
                                           "\n    " + _class.modifiers[
@@ -179,19 +175,17 @@ class PullUpFieldRefactoring:
         return True
 
 
-
-
-
-
 def main(project_dir: str, package_name: str, children_class: str, field_name: str, *args, **kwargs):
     # print("Pull-up field")
-    print(f"Success pull-up field {field_name}" if PullUpFieldRefactoring(
-        utils2.get_filenames_in_dir(project_dir),
+    result = PullUpFieldRefactoring(
+        symbol_table.get_filenames_in_dir(project_dir),
         package_name,
         children_class,
         field_name
         # lambda x: "tests/pullup_field_ant/" + x[len(ant_dir):]
-    ).do_refactor() else f"Cannot  pull-up field {field_name}")
+    ).do_refactor()
+    # print(f"Success pull-up field {field_name}" if result else f"Cannot  pull-up field {field_name}")
+    return result
 
 
 def test():
@@ -215,7 +209,7 @@ if __name__ == "__main__":
     target_files = ["tests/apache-ant/main/org/apache/tools/ant/types/ArchiveFileSet.java",
                     "tests/apache-ant/main/org/apache/tools/ant/types/TarFileSet.java",
                     "tests/apache-ant/main/org/apache/tools/ant/types/ZipFileSet.java"
-    ]
+                    ]
     ant_dir = "/home/ali/Desktop/code/TestProject/"
 
     main(
