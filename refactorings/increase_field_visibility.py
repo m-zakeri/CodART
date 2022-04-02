@@ -1,6 +1,9 @@
-import logging
+"""
+Increase field visibility refactoring
 
-from refactorings.utils.utils2 import parse_and_walk
+"""
+
+__author__ = "Seyyed Ali Ayati"
 
 try:
     import understand as und
@@ -11,9 +14,8 @@ from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
-
-logger = logging.getLogger()
-__author__ = "Seyyed Ali Ayati"
+from codart.symbol_table import parse_and_walk
+from sbse.config import logger
 
 
 class IncreaseFieldVisibilityListener(JavaParserLabeledListener):
@@ -54,26 +56,31 @@ class IncreaseFieldVisibilityListener(JavaParserLabeledListener):
 
 def main(udb_path, source_package, source_class, source_field, *args, **kwargs):
     db = und.open(udb_path)
-    field_ent = db.lookup(f"{source_package}.{source_class}.{source_field}", "Variable")
+    fields = db.lookup(f"{source_package}.{source_class}.{source_field}", "Variable")
 
-    if len(field_ent) == 0:
+    if len(fields) == 0:
         logger.error("Invalid inputs.")
-        return
-    field_ent = field_ent[0]
+        db.close()
+        return False
 
+    field_ent = fields[0]
     if field_ent.simplename() != source_field:
         logger.error("Invalid entity.")
-        return
+        db.close()
+        return False
 
     if not field_ent.kind().check("Private"):
         logger.error("Field is not private.")
-        return
+        db.close()
+        return False
 
     parent = field_ent.parent()
     while parent.parent() is not None:
         parent = parent.parent()
 
-    main_file = parent.longname()
+    main_file = str(parent.longname())
+    db.close()
+
     parse_and_walk(
         file_path=main_file,
         listener_class=IncreaseFieldVisibilityListener,
@@ -81,7 +88,8 @@ def main(udb_path, source_package, source_class, source_field, *args, **kwargs):
         source_class=source_class,
         source_field=source_field
     )
-    db.close()
+    # db.close()
+    return True
 
 
 if __name__ == '__main__':
