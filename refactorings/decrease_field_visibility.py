@@ -1,6 +1,8 @@
-import logging
+"""
+Decrease field visibility refactoring
+"""
 
-from refactorings.utils.utils2 import parse_and_walk
+__author__ = "Seyyed Ali Ayati"
 
 try:
     import understand as und
@@ -11,9 +13,8 @@ from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
-
-logger = logging.getLogger()
-__author__ = "Seyyed Ali Ayati"
+from codart.symbol_table import parse_and_walk
+from sbse.config import logger
 
 
 class DecreaseFieldVisibilityListener(JavaParserLabeledListener):
@@ -58,29 +59,35 @@ def main(udb_path, source_package, source_class, source_field, *args, **kwargs):
 
     if len(field_ent) == 0:
         logger.error("Invalid inputs.")
-        return
-    field_ent = field_ent[0]
+        db.close()
+        return False
 
+    field_ent = field_ent[0]
     if field_ent.simplename() != source_field:
         logger.error("Invalid entity.")
-        return
+        db.close()
+        return False
 
     if not field_ent.kind().check("Public"):
         logger.error("Field is not public.")
-        return
+        db.close()
+        return False
 
-    for ref in field_ent.refs("UseBy,SetBy"):
+    for ref in field_ent.refs("Useby,Setby"):
         ent = ref.ent()
         if f"{source_package}.{source_class}" not in ent.longname():
             logger.debug(f"{source_package}.{source_class} not in {ent.longname()}")
             logger.error("Field cannot set to private.")
-            return
+            db.close()
+            return False
 
     parent = field_ent.parent()
     while parent.parent() is not None:
         parent = parent.parent()
 
     main_file = parent.longname()
+    db.close()
+
     parse_and_walk(
         file_path=main_file,
         listener_class=DecreaseFieldVisibilityListener,
@@ -88,7 +95,8 @@ def main(udb_path, source_package, source_class, source_field, *args, **kwargs):
         source_class=source_class,
         source_field=source_field
     )
-    db.close()
+
+    return True
 
 
 if __name__ == '__main__':
