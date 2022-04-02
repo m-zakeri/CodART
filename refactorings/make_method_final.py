@@ -1,4 +1,6 @@
-from gen.javaLabeled.JavaLexer import JavaLexer
+"""
+
+"""
 
 try:
     import understand as und
@@ -7,6 +9,7 @@ except ImportError as e:
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
+from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
@@ -69,8 +72,6 @@ class MakeMethodFinalRefactoringListener(JavaParserLabeledListener):
                     )
 
 
-
-
 if __name__ == '__main__':
     udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
     source_class = "App"
@@ -88,9 +89,11 @@ if __name__ == '__main__':
     parser = JavaParserLabeled(token_stream)
     parser.getTokenStream()
     parse_tree = parser.compilationUnit()
-    my_listener = MakeMethodFinalRefactoringListener(common_token_stream=token_stream,
-                                                     source_class=source_class,
-                                                     method_name=method_name)
+    my_listener = MakeMethodFinalRefactoringListener(
+        common_token_stream=token_stream,
+        source_class=source_class,
+        method_name=method_name
+    )
     walker = ParseTreeWalker()
     walker.walk(t=parse_tree, listener=my_listener)
 
