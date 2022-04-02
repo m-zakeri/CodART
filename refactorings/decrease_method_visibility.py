@@ -1,6 +1,8 @@
-import logging
+"""
+Decrease method visibility refactoring
+"""
 
-from refactorings.utils.utils2 import parse_and_walk
+__author__ = "Seyyed Ali Ayati"
 
 try:
     import understand as und
@@ -11,9 +13,8 @@ from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
-
-logger = logging.getLogger()
-__author__ = "Seyyed Ali Ayati"
+from codart.symbol_table import parse_and_walk
+from sbse.config import logger
 
 
 class DecreaseMethodVisibilityListener(JavaParserLabeledListener):
@@ -51,27 +52,33 @@ def main(udb_path, source_package, source_class, source_method, *args, **kwargs)
 
     if len(method_ent) == 0:
         logger.error("Invalid inputs.")
-        return
-    method_ent = method_ent[0]
+        db.close()
+        return False
 
+    method_ent = method_ent[0]
     if method_ent.simplename() != source_method:
         logger.error("Invalid entity.")
-        return
+        db.close()
+        return False
 
     if not method_ent.kind().check("Public"):
         logger.error("Method is not public.")
-        return
+        db.close()
+        return False
 
     for ent in method_ent.ents("CallBy"):
         if f"{source_package}.{source_class}" not in ent.longname():
             logger.error("Method cannot set to private.")
-            return
+            db.close()
+            return False
 
     parent = method_ent.parent()
     while parent.parent() is not None:
         parent = parent.parent()
 
     main_file = parent.longname()
+    db.close()
+
     parse_and_walk(
         file_path=main_file,
         listener_class=DecreaseMethodVisibilityListener,
@@ -79,7 +86,8 @@ def main(udb_path, source_package, source_class, source_method, *args, **kwargs)
         source_class=source_class,
         source_method=source_method
     )
-    db.close()
+
+    return True
 
 
 if __name__ == '__main__':
