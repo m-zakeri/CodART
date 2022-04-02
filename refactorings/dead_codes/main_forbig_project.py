@@ -10,7 +10,7 @@ The main module of CodART
 __version__ = '0.2.0'
 __author__ = 'Morteza'
 
-from utilization.understand_install_test import *
+from codart.utility.understand_install_test import *
 
 try:
     import understand as und
@@ -91,7 +91,7 @@ def get_information(Root_path_project, source_class, move_field):
     file_list_to_be_propagate = set()
     propagate_classes = set()
     isNotnonecounter = 0
-    isnonecouner = 0;
+    isnonecouner = 0
     class_counte = 0
     isnon = 0
     isnotnon = 0
@@ -101,7 +101,7 @@ def get_information(Root_path_project, source_class, move_field):
     for field in db.ents("public variable"):
         #
         if (field.parent() is not None and str(field.parent().kind()).find(
-                'Class') != -1):  # public variabel  ممکنه شامل متغیرهای شمارشی enum  نیز باشند
+                'Class') != -1):
             print("=========================================")
             print("fieldname:", field.longname())
             print("field parent cldass:", field.parent())

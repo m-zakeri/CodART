@@ -22,7 +22,7 @@ from antlr4 import *
 from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from refactorings.make_field_non_static import MakeFieldNonStaticRefactoringListener
-from refactorings.make_field_static_1 import MakeFieldStaticRefactoringListener
+from refactorings.make_field_static import MakeFieldStaticRefactoringListener
 from refactorings.rename_class import RenameClassRefactoringListener
 
 

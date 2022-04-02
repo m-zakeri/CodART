@@ -12,8 +12,9 @@ To find and run more unit and integration tests please look at `benchmark_projec
 
 """
 
-__version__ = '0.2.1'
-__author__ = 'Morteza'
+__version__ = '0.2.2'
+__author__ = 'Morteza Zakeri'
+
 
 import argparse
 
@@ -64,7 +65,7 @@ def main(args):
     walker = ParseTreeWalker()
     walker.walk(t=parse_tree, listener=my_listener)
 
-    with open('../../tests/encapsulate_field_tests/input.refactored.java', mode='w', newline='') as f:
+    with open('../tests/encapsulate_field_tests/input.refactored.java', mode='w', newline='') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
 
 
