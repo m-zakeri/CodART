@@ -1,14 +1,14 @@
 import os
 
-from gen.javaLabeled.JavaLexer import JavaLexer
+from antlr4 import *
+from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
 try:
     import understand as und
 except ImportError as e:
     print(e)
-from antlr4 import *
-from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
+from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
@@ -48,11 +48,12 @@ class MakeMethodNonStaticRefactoringListener(JavaParserLabeledListener):
 
     def exitMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
         if not self.is_source_class:
-            return None
+            return
         grand_parent_ctx = ctx.parentCtx.parentCtx
         method_identifier = ctx.IDENTIFIER().getText()
         if self.method_name in method_identifier:
             if not (grand_parent_ctx.modifier() == []):
+                i = 0
                 for i in range(0, len(grand_parent_ctx.modifier())):
                     if grand_parent_ctx.modifier(i).getText() == "static":
                         self.is_static = True
@@ -66,22 +67,22 @@ class MakeMethodNonStaticRefactoringListener(JavaParserLabeledListener):
 
 
 def main(udb_path=None, source_class=None, method_name=None, *args, **kwargs):
-    main_file = ""
+    main_file = None
     db = und.open(udb_path)
-    for cls in db.ents("class"):
+    classes = db.ents("Class")
+    for cls in classes:
         if cls.parent() is not None:
             if cls.simplename() == source_class:
-                main_file = cls.parent().longname(True)
-                break
+                temp_file = str(cls.parent().longname(True))
+                if os.path.isfile(temp_file):
+                    main_file = temp_file
+                    break
 
     if main_file is None:
         db.close()
-        return
+        return False
 
-    if not os.path.isfile(main_file):
-        db.close()
-        return
-
+    db.close()
     stream = FileStream(main_file, encoding='utf-8', errors='ignore')
     lexer = JavaLexer(stream)
     token_stream = CommonTokenStream(lexer)
@@ -96,7 +97,8 @@ def main(udb_path=None, source_class=None, method_name=None, *args, **kwargs):
 
     with open(main_file, mode='w', newline='') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
-    db.close()
+
+    return True
 
 
 if __name__ == '__main__':
