@@ -13,7 +13,7 @@ SudoRandomInitialization: Population, list of Individual
 """
 
 __version__ = '0.1.0'
-__author__ = 'Morteza Zakeri, Seyyed Ali Ayati'
+__author__ = 'Morteza Zakeri'
 
 import random
 from typing import List
@@ -36,7 +36,7 @@ from sbse.initialize import RandomInitialization
 from sbse.objectives import Objectives
 from metrics.testability_prediction import main as testability_main
 from metrics.modularity import main as modularity_main
-from utilization.directory_utils import update_understand_database, git_restore
+from codart.utility.directory_utils import update_understand_database, git_restore
 
 
 # TODO: Parallelism, Double Check Befor Run on Server
