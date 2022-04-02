@@ -20,8 +20,6 @@ No specific Post Condition
 
 import os
 
-from refactorings.utils import utils_listener_fast, utils2
-
 
 class ExtractInterfaceRefactoring:
     def __init__(
@@ -63,16 +61,11 @@ class ExtractInterfaceRefactoring:
         self.filename_mapping = filename_mapping
 
     def do_refactor(self):
-        program = utils2.get_program(self.source_filenames, print_status=True)
-        if self.package_name not in program.packages \
-                or any(
-            class_name not in program.packages[self.package_name].classes
-            for class_name in self.class_names
-        ) \
-                or any(
-            method_key not in program.packages[self.package_name].classes[class_name].methods
-            for class_name in self.class_names for method_key in self.method_keys
-        ):
+        program = utils_listener_fast.get_program(self.source_filenames, print_status=True)
+        if self.package_name not in program.packages or any(
+            class_name not in program.packages[self.package_name].classes for class_name in self.class_names) or \
+                any(method_key not in program.packages[self.package_name].classes[class_name].methods
+                    for class_name in self.class_names for method_key in self.method_keys):
             return False
 
         method_returntypes = {}
@@ -81,7 +74,7 @@ class ExtractInterfaceRefactoring:
         for method_key in self.method_keys:
             method_names.append(method_key[:method_key.find('(')])
 
-        rewriter = utils2.Rewriter(program, self.filename_mapping)
+        rewriter = utils_listener_fast.Rewriter(program, self.filename_mapping)
 
         for class_name in self.class_names:
             c: utils_listener_fast.Class = program.packages[self.package_name].classes[class_name]
@@ -268,7 +261,7 @@ def main():
     """
     ant_dir = "/home/ali/Desktop/code/TestProject/"
     print("Success!" if ExtractInterfaceRefactoring(
-        utils2.get_filenames_in_dir(ant_dir),
+        utils_listener_fast.get_filenames_in_dir(ant_dir),
         "test_package",
         ["AppChild1", "AppChild2"],
         ["printTest()"],
