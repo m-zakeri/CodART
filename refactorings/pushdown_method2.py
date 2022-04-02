@@ -10,7 +10,7 @@ from antlr4.TokenStreamRewriter import TokenStreamRewriter
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
-from refactorings.utils.utils2 import parse_and_walk
+from codart.symbol_table import parse_and_walk
 
 logger = logging.getLogger()
 __author__ = "Seyyed Ali Ayati"
