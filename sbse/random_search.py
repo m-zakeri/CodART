@@ -1,10 +1,18 @@
+"""
+Simple search-based refactoring with random-search algorithm
+
+"""
+
+__version__ = '0.1.1'
+__author__ = 'Morteza Zakeri'
+
+
 import random
 
-from config import *
-from utilization.setup_understand import *
 from initialize import RandomInitialization
 from objectives import Objectives
-from utilization.directory_utils import update_understand_database, git_restore, create_understand_database
+from codart.utility.directory_utils import update_understand_database, git_restore
+from config import *
 
 # udb_path = "D:\Dev\ganttproject\ganttproject.udb"
 # project_dir = "D:\Dev\ganttproject"
