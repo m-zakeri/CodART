@@ -3,7 +3,7 @@ This module implements the search-based refactoring with various search strategy
 using pymoo framework.
 
 ## Changelog
-### version 2
+### version 2.0
     1. Crossover function is added.
     2. Termination criteria are added.
     3. Computation of highly trade-off points is added.
@@ -22,8 +22,8 @@ PureRandomInitialization: Population, list of Individual
 
 """
 
-__version__ = '0.2.0'
-__author__ = 'Morteza Zakeri, Seyyed Ali Ayati'
+__version__ = '0.2.1'
+__author__ = 'Morteza Zakeri'
 
 # import logging
 import random
