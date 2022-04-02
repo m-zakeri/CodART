@@ -1,4 +1,8 @@
-import logging
+"""
+Push-down method
+"""
+
+__author__ = "Morteza Zakeri"
 
 try:
     import understand as und
@@ -11,7 +15,7 @@ from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
-logger = logging.getLogger()
+from sbse.config import logger
 
 
 class PushDownMethodRefactoringListener(JavaParserLabeledListener):
@@ -172,7 +176,7 @@ def main(udb_path, source_package, source_class, method_name, target_classes: li
     target_package = source_package
     source_method = method_name
 
-    main_file = ""
+    main_file = None
     source_method_entity = None
     is_static = False
     propagation_files = []
@@ -181,9 +185,10 @@ def main(udb_path, source_package, source_class, method_name, target_classes: li
     children_classes = []
     children_files = []
 
-    # initialize with understand
+    # Initialize with understand
     db = und.open(udb_path)
-    for mth in db.ents("Java Method"):
+    methods = db.ents("Java Method")
+    for mth in methods:
         if mth.longname() == source_package + "." + source_class + "." + source_method:
             source_method_entity = mth
             for child_ref in mth.parent().refs("Extendby"):
@@ -191,7 +196,7 @@ def main(udb_path, source_package, source_class, method_name, target_classes: li
                 if child_ref.simplename() in target_classes:
                     children_classes.append(child_ref.simplename())
                     children_files.append(child_ref.parent().longname())
-            print("mainfile : ", mth.parent().parent().longname())
+            # print("mainfile : ", mth.parent().parent().longname())
             is_static = mth.kind().check("static")
             main_file = mth.parent().parent().longname()
             for ref in mth.refs("Callby"):
@@ -203,39 +208,42 @@ def main(udb_path, source_package, source_class, method_name, target_classes: li
     if not len(target_classes) == 1:
         logger.error(f"len(target_classes) is not 1.")
         db.close()
-        return None
+        return False
+
     if not len(children_classes) == 1:
         logger.error(f"len(children_classes) is not 1.")
         db.close()
-        return None
+        return False
+
     if not len(children_files) == 1:
         logger.error(f"len(children_files) is not 1.")
         db.close()
-        return None
+        return False
 
-    for mth in db.ents("Java Method"):
+    for mth in methods:
         if mth.simplename() == source_method:
             if mth.parent().simplename() in target_classes:
                 if mth.type() == source_method_entity.type():
                     if mth.kind() == source_method_entity.kind():
                         if mth.parameters() == source_method_entity.parameters():
-                            logger.error("Duplicate method")
+                            logger.error("Duplicated method")
                             db.close()
-                            return None
+                            return False
 
     for ref in source_method_entity.refs("use, call"):
         ref_ent = ref.ent()
         is_public = ref_ent.kind().check("public")
-
         if not is_public:
             logger.error("Has internal dependencies.")
             db.close()
-            return None
+            return False
 
     #  get text
     method_text = source_method_entity.contents()
-    # Delete source method
 
+    db.close()
+
+    # Delete source method
     stream = FileStream(main_file, encoding='utf8', errors='ignore')
     lexer = JavaLexer(stream)
     token_stream = CommonTokenStream(lexer)
@@ -246,7 +254,7 @@ def main(udb_path, source_package, source_class, method_name, target_classes: li
     walker = ParseTreeWalker()
     walker.walk(t=parse_tree, listener=my_listener)
     # print(my_listener.token_stream_rewriter.getDefaultText())
-    with open(main_file, mode='w', newline='') as f:
+    with open(main_file, mode='w', encoding='utf-8', newline='') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
 
     # Do the push down
@@ -263,7 +271,7 @@ def main(udb_path, source_package, source_class, method_name, target_classes: li
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener)
         # print(my_listener.token_stream_rewriter.getDefaultText())
-        with open(child_file, mode='w', newline='') as f:
+        with open(child_file, mode='w', encoding='utf8', newline='') as f:
             f.write(my_listener.token_stream_rewriter.getDefaultText())
 
     # Propagation
@@ -289,7 +297,8 @@ def main(udb_path, source_package, source_class, method_name, target_classes: li
         # print(my_listener.token_stream_rewriter.getDefaultText())
         with open(file, mode='w', newline='') as f:
             f.write(my_listener.token_stream_rewriter.getDefaultText())
-    db.close()
+
+    return True
 
 
 if __name__ == '__main__':
