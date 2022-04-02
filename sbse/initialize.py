@@ -5,8 +5,11 @@ Initialization: The abstract class and common utility functions.
 RandomInitialization: For initialling random candidates.
 """
 
-__author__ = 'Seyyed Ali Ayati'
 
+__version__ = '0.3.0'
+__author__ = 'Morteza Zakeri'
+
+import os
 import re
 import codecs
 import random
@@ -14,18 +17,17 @@ from collections import Counter
 from pathlib import Path
 
 import pandas
-import progressbar
 
-try:
-    import understand as und
-except ImportError as e:
-    print(e)
+import understand as und
 
+from codart.utility.directory_utils import git_restore, update_understand_database
 
-from refactorings import make_field_non_static, make_field_static, make_method_static_2, \
-    make_method_non_static_2, pullup_field, move_field, move_method, move_class, pushdown_field2, \
-    extract_class, pullup_method, pushdown_method, extract_method, pullup_constructor, decrease_method_visibility, \
-    increase_method_visibility, decrease_field_visibility, increase_field_visibility
+from refactorings import make_field_static, make_field_non_static, make_method_static_2, make_method_non_static_2, \
+    move_field, move_method, move_class, \
+    extract_method, extract_class, \
+    pullup_field, pushdown_field2, pullup_method, pushdown_method, pullup_constructor, \
+    increase_field_visibility, decrease_field_visibility, increase_method_visibility, decrease_method_visibility
+
 from sbse import config
 
 logger = config.logger
@@ -50,13 +52,24 @@ def handle_index_error(func):
     return wrapper
 
 
+def reset_project():
+    logger.debug("Executing git restore ... ")
+    # git restore .
+    # git clean -f -d
+    git_restore(config.PROJECT_PATH)
+    logger.debug("Executing update understand database ... ")
+    # Possible error: The Analysis cannot be performed because the database is locked or read only
+    update_understand_database(config.UDB_PATH)
+
+
 class Initialization(object):
-    def __init__(self, udb_path, population_size=50, lower_band=50, upper_band=75):
+    def __init__(self, udb_path, population_size=50, lower_band=10, upper_band=50):
         """
         The superclass of initialization contains init_refactoring modules
         :param udb_path: Path for understand database file.
         :param population_size: The length of population for GA.
-        :param individual_size: The length of individual for GA.
+        :param lower_band: The minimum length of individual for GA.
+        :param upper_band: The maximum length of individual for GA.
         """
         random.seed(None)
         self.udb_path = udb_path
@@ -64,27 +77,26 @@ class Initialization(object):
         self.lower_band = lower_band
         self.upper_band = upper_band
         self.initializers = (
-            self.init_make_field_non_static,
-            self.inti_make_field_static,
-            self.init_make_method_static,
-            self.init_make_method_non_static,
-            self.init_pullup_field,
-            self.init_move_field,
-            self.init_move_method,
-            self.init_move_class,
-            self.init_push_down_field,
-            self.init_extract_class,
-            self.init_pullup_method,
-            self.init_push_down_method,
-            # self.init_extract_method,
-            self.init_pullup_constructor,
-            self.init_decrease_field_visibility,
-            self.init_increase_field_visibility,
-            self.init_decrease_method_visibility,
-            self.init_increase_method_visibility
+            self.init_make_field_non_static,  # 0
+            self.init_make_field_static,  # 1
+            self.init_make_method_static,  # 2
+            self.init_make_method_non_static,  # 3
+            self.init_pullup_field,  # 4
+            self.init_move_field,  # 5
+            self.init_move_method,  # 6
+            self.init_move_class,  # 7
+            self.init_push_down_field,  # 8
+            self.init_extract_class,  # 9
+            self.init_pullup_method,  # 10
+            self.init_push_down_method,  # 11
+            self.init_pullup_constructor,  # 12
+            self.init_decrease_field_visibility,  # 13
+            self.init_increase_field_visibility,  # 14
+            self.init_decrease_method_visibility,  # 15
+            self.init_increase_method_visibility  # 16
+            # self.init_extract_method,  # 17
         )
 
-        self._und = und.open(self.udb_path)
         self._variables = self.get_all_variables()
         self._static_variables = self.get_all_variables(static=True)
         self._methods = self.get_all_methods()
@@ -95,17 +107,19 @@ class Initialization(object):
         self._pullup_constructor_candidates = self.find_pullup_constructor_candidates()
         self._push_down_method_candidates = self.find_push_down_method_candidates()
 
-    # def __del__(self):
-    #     logger.info("Understand database closed after initialization.")
-    #     self._und.close()
+    def __del__(self):
+        # logger.info("Understand database closed after initialization.")
+        # self._und.close()
+        pass
 
     def get_all_methods(self, static=False):
+        _db = und.open(self.udb_path)
         candidates = []
         if static:
-            query = self._und.ents("static method")
+            query = _db.ents("static method")
             blacklist = ('abstract', 'unknown', 'constructor',)
         else:
-            query = self._und.ents("method")
+            query = _db.ents("method")
             blacklist = ('constructor', 'static', 'abstract', 'unknown',)
         for ent in query:
             kind_name = ent.kindname().lower()
@@ -140,15 +154,17 @@ class Initialization(object):
                     'is_public': is_public, 'is_private': is_private, 'external_references': external_references
                 }
             )
+        _db.close()
         return candidates
 
     def get_all_variables(self, static=False):
+        _db = und.open(self.udb_path)
         candidates = []
         if static:
-            query = self._und.ents("static variable")
+            query = _db.ents("static variable")
             blacklist = ()
         else:
-            query = self._und.ents("variable")
+            query = _db.ents("variable")
             blacklist = ('static',)
         for ent in query:
             kind_name = ent.kindname().lower()
@@ -181,18 +197,21 @@ class Initialization(object):
                     'is_public': is_public, 'is_private': is_private, 'external_references': external_references
                 }
             )
+        _db.close()
         return candidates
 
-    def get_all_class_entities(self, filter="class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static"):
-        query = self._und.ents(filter)
-        class_entities = []
-        for ent in query:
-            class_entities.append(ent)
-        return class_entities
+    # def get_all_class_entities(self, filter_="class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static"):
+    #     query = self._und.ents(filter_)
+    #     class_entities = []
+    #     for ent in query:
+    #         class_entities.append(ent)
+    #     return class_entities
+    #     return query
 
     def find_pullup_field_candidates(self):
+        _db = und.open(self.udb_path)
         candidates = []
-        class_entities = self.get_all_class_entities()
+        class_entities = _db.ents("class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static")
         for ent in class_entities:
             for ref in ent.refs("define", "variable"):
                 candidate = {
@@ -201,11 +220,13 @@ class Initialization(object):
                     "field_name": ref.ent().simplename()
                 }
                 candidates.append(candidate)
+        _db.close()
         return candidates
 
     def find_push_down_field_candidates(self):
+        _db = und.open(self.udb_path)
         candidates = []
-        class_entities = self.get_all_class_entities()
+        class_entities = _db.ents("class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static")
 
         for ent in class_entities:
             params = {
@@ -235,11 +256,13 @@ class Initialization(object):
                 continue
             if params["source_class"] != "":
                 candidates.append(params)
+        _db.close()
         return candidates
 
     def find_pullup_method_candidates(self):
+        _db = und.open(self.udb_path)
         candidates = []
-        class_entities = self.get_all_class_entities()
+        class_entities = _db.ents("class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static")
         common_methods = []
 
         for ent in class_entities:
@@ -281,11 +304,13 @@ class Initialization(object):
                         "method_name": random.choice(common_methods),
                         "children_classes": children
                     })
+        _db.close()
         return candidates
 
     def find_pullup_constructor_candidates(self):
+        _db = und.open(self.udb_path)
         candidates = []
-        class_entities = self.get_all_class_entities()
+        class_entities = _db.ents("class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static")
 
         for ent in class_entities:
             children = []
@@ -304,11 +329,13 @@ class Initialization(object):
             if len(children) >= 2:
                 params["class_names"] = random.sample(children, random.randint(2, len(children)))
                 candidates.append(params)
+        _db.close()
         return candidates
 
     def find_push_down_method_candidates(self):
+        _db = und.open(self.udb_path)
         candidates = []
-        class_entities = self.get_all_class_entities()
+        class_entities = _db.ents("class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static")
 
         for ent in class_entities:
             params = {
@@ -341,12 +368,13 @@ class Initialization(object):
             if params["source_class"] != "":
                 candidates.append(params)
 
+        _db.close()
         return candidates
 
     def init_make_field_non_static(self):
         pass
 
-    def inti_make_field_static(self):
+    def init_make_field_static(self):
         pass
 
     def init_make_method_static(self):
@@ -407,29 +435,58 @@ class Initialization(object):
             name: str
         """
         initializer = random.choice(self.initializers)
+        logger.debug(f'>>> Randomly selected refactoring: {initializer.__name__}')
         main_function, params, name = handle_index_error(initializer)()
         if main_function is None:
+            print(f'Inside the select_random method {name}')
             return self.select_random()
         else:
             return main_function, params, name
 
-    def generate_population(self):
+    def generate_population2(self):
         population = []
-        for _ in progressbar.progressbar(range(self.population_size)):
+        for _ in range(self.population_size):
             individual = []
             individual_size = random.randint(self.lower_band, self.upper_band)
             for j in range(individual_size):
-                individual.append(
-                    self.select_random()
-                )
+                main, params, name = self.select_random()
+                individual.append((main, params, name))
+                # print(f'Append a refactoring "{name}" to "{j}th" gene of the individual {_}.')
+
             population.append(individual)
-        self._und.close()
-        logger.debug("Database closed after initialization.")
+            # print(f'Append individual {_} to population, s')
+
+        # self._und.close()
+        # logger.debug("Database closed after initialization.")
         return population
 
-    @property
-    def und(self):
-        return self._und
+    def generate_population(self):
+        population = []
+        for _ in range(0, self.population_size):
+            individual = []
+            individual_size = random.randint(self.lower_band, self.upper_band)
+            for j in range(individual_size):
+                main, params, name = self.select_random()
+                logger.debug(f'Refactoring name: {name}')
+                logger.debug(f'Refactoring params: {params}')
+                is_correct_refactoring = main(**params)
+                while is_correct_refactoring is False:
+                    reset_project()
+                    main, params, name = self.select_random()
+                    logger.debug(f'Refactoring name: {name}')
+                    logger.debug(f'Refactoring params: {params}')
+                    is_correct_refactoring = main(**params)
+
+                individual.append((main, params, name))
+                logger.debug(f'Append a refactoring "{name}" to "{j}th" gene of the individual {_}.')
+                reset_project()
+                logger.debug('-' * 100)
+
+            population.append(individual)
+            logger.debug(f'Append individual {_} to population, s')
+
+        logger.debug('=' * 100)
+        return population
 
 
 class RandomInitialization(Initialization):
@@ -445,7 +502,7 @@ class RandomInitialization(Initialization):
         params.pop("source_package")
         return refactoring_main, params, 'Make Field Non-Static'
 
-    def inti_make_field_static(self):
+    def init_make_field_static(self):
         """
         Finds all non-static fields and randomly chooses one of them
         :return: refactoring main method and its parameters.
@@ -487,7 +544,8 @@ class RandomInitialization(Initialization):
         :return:  refactoring main method and its parameters.
         """
         refactoring_main = pullup_field.main
-        params = {"project_dir": str(Path(self.udb_path).parent)}
+        # params = {"project_dir": str(Path(self.udb_path).parent)}
+        params = {"project_dir": config.PROJECT_PATH}
         candidates = self._pullup_field_candidates
         params.update(random.choice(candidates))
         return refactoring_main, params, 'Pull Up Field'
@@ -526,12 +584,15 @@ class RandomInitialization(Initialization):
 
         Returns: refactoring main method and its parameters.
         """
+        _db = und.open(self.udb_path)
         refactoring_main = move_field.main
         params = {"udb_path": str(Path(self.udb_path))}
         random_field = random.choice(self._variables)
         params.update(random_field)
-        random_class = random.choice(self.get_all_class_entities()).longname().split(".")
+        classes = _db.ents("Class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static")
+        random_class = (random.choice(classes)).longname().split(".")
         target_package = None
+
         """
         target_class: str, target_package: str,
         """
@@ -546,7 +607,35 @@ class RandomInitialization(Initialization):
             "target_class": target_class,
             "target_package": target_package
         })
+        _db.close()
         return refactoring_main, params, 'Move Field'
+
+    def init_move_field2(self):
+        refactoring_main = move_field.main
+        params = {"udb_path": str(Path(self.udb_path))}
+        classes_fields = []
+        random_field = random.choice(classes_fields)
+        params.update(random_field)
+
+        related_entities = random_field.ents(
+            "Set, Setby, Contain, Containin, Use, Useby, Create, Createby, DotRef, DotRefby, Define, Definein",
+            "Type ~Unknown ~Anonymous"
+            # "Package"
+        )
+        print('Parameters', params)
+        print("related_entities", related_entities)
+        for e in related_entities:
+            print(e.longname(), e.kind())
+        if related_entities is not None and len(related_entities) > 0:
+            selected_entity = random.choice(related_entities)
+            package_list = selected_entity.ents('Containin', 'Java Package')
+            while not package_list and selected_entity.parent() is not None:
+                package_list = selected_entity.parent().ents('Containin', 'Java Package')
+                selected_entity = selected_entity.parent()
+            if len(package_list) < 1:
+                params.update({"target_package": "(Unnamed_Package)"})
+            else:
+                params.update({"target_package": package_list[0].longname()})
 
     def init_move_method(self):
         """
@@ -554,11 +643,13 @@ class RandomInitialization(Initialization):
 
         Returns: refactoring main method and its parameters.
         """
+        _db = und.open(self.udb_path)
         refactoring_main = move_method.main
         params = {"udb_path": str(Path(self.udb_path))}
         random_method = random.choice(self._methods)
         params.update(random_method)
-        random_class = random.choice(self.get_all_class_entities()).longname().split(".")
+        classes = _db.ents("Class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static")
+        random_class = (random.choice(classes)).longname().split(".")
         target_package = None
         """
         target_class: str, target_package: str,
@@ -574,13 +665,18 @@ class RandomInitialization(Initialization):
             "target_class": target_class,
             "target_package": target_package
         })
+        _db.close()
         return refactoring_main, params, 'Move Method'
 
-    def init_move_class(self):
+    def init_move_class2(self):
         refactoring_main = move_class.main
-        params = {"udb_path": str(Path(self.udb_path))}
+        print('BP#1')
+        print(random.choice(self.get_all_class_entities()).longname())
         random_class = random.choice(self.get_all_class_entities()).longname().split(".")
+        print('BP#2')
         random_class_2 = random.choice(self.get_all_class_entities()).longname().split(".")
+        print('BP#3')
+        params = {"udb_path": str(Path(self.udb_path))}
         if len(random_class) == 1:
             params.update({
                 "class_name": random_class[0],
@@ -591,7 +687,7 @@ class RandomInitialization(Initialization):
                 "class_name": random_class[-1],
                 "source_package": ".".join(random_class[:-1])
             })
-
+        print('BP#4')
         if len(random_class_2) == 1:
             params.update({
                 "target_package": ""
@@ -602,10 +698,60 @@ class RandomInitialization(Initialization):
             })
         return refactoring_main, params, 'Move Class'
 
+    def init_move_class(self):
+        _db = und.open(self.udb_path)
+        refactoring_main = move_class.main
+        params = {"udb_path": str(Path(self.udb_path))}
+        # classes = self._und.ents("Class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static")
+        classes = _db.ents("Type Class ~Unknown ~Anonymous")
+        selected_class = random.choice(classes)
+        package_list = selected_class.ents('Containin', 'Java Package')
+        while not package_list and selected_class.parent() is not None:
+            package_list = selected_class.parent().ents('Containin', 'Java Package')
+            selected_class = selected_class.parent()
+        # print(package_list)
+        params.update({"class_name": selected_class.longname()})
+        if len(package_list) < 1:
+            params.update({"source_package": "(Unnamed_Package)"})
+        else:
+            params.update({"source_package": package_list[0].longname()})
+
+        related_entities = selected_class.ents(
+            "Import, Importby, Contain, Containin, Couple, Coupleby, Create, Createby, DotRef, DotRefby, Declare, Declarein, Define, Definein",
+            "Type ~Unknown ~Anonymous"
+            # "Package"
+        )
+        # print('Parameters', params)
+        # print("related_entities", related_entities)
+        # for e in related_entities:
+        #     print(e.longname(), e.kind())
+        if related_entities is not None and len(related_entities) > 0:
+            selected_entity = random.choice(related_entities)
+            package_list = selected_entity.ents('Containin', 'Java Package')
+            while not package_list and selected_entity.parent() is not None:
+                package_list = selected_entity.parent().ents('Containin', 'Java Package')
+                selected_entity = selected_entity.parent()
+            if len(package_list) < 1:
+                params.update({"target_package": "(Unnamed_Package)"})
+            else:
+                params.update({"target_package": package_list[0].longname()})
+        else:
+            packages = _db.ents("Package ~Unknown ~Unresolved ~Unnamed")
+            if packages is not None and len(packages) > 0:
+                selected_package = random.choice(packages)
+                params.update({"target_package": selected_package.longname()})
+            else:
+                params.update({"target_package": "(Unnamed_Package)"})
+
+        _db.close()
+        return refactoring_main, params, 'Move Class'
+
     def init_extract_class(self):
+        _db = und.open(self.udb_path)
         refactoring_main = extract_class.main
         params = {"udb_path": str(Path(self.udb_path))}
-        random_class = random.choice(self.get_all_class_entities())
+        classes = _db.ents("Type Class ~Unknown ~Anonymous")
+        random_class = random.choice(classes)
         params.update(
             {
                 "source_class": random_class.simplename(),
@@ -629,10 +775,11 @@ class RandomInitialization(Initialization):
                                   random.sample(class_methods, random.randint(0, len(class_methods)))],
             }
         )
+        _db.close()
         return refactoring_main, params, 'Extract Class'
 
     def init_extract_method(self):
-        raise IndexError
+        pass
 
     def init_increase_field_visibility(self):
         """
@@ -718,18 +865,20 @@ class SmellInitialization(RandomInitialization):
         # Load csv files
         self.move_method_candidates = self.load_move_method_candidates()
         self.extract_class_candidates = self.load_extract_class_candidates()
-        # self.extract_method_candidates = self.load_extract_method_candidates() # We leave extract method for now.
+        # self.extract_method_candidates = self.load_extract_method_candidates()  # We leave extract method for now.
 
     def load_extract_class_candidates(self):
+        _db = und.open(self.udb_path)
         god_classes = pandas.read_csv(
             config.GOD_CLASS_PATH, sep="\t"
         )
         candidates = []
         for index, row in god_classes.iterrows():
             moved_fields, moved_methods = [], []
-            print(row[0].strip())
+            # print(row[0].strip())
             try:
-                class_file = self._und.lookup(re.compile(row[0].strip() + r'$'), "Class")[0].parent().longname()
+                class_file = _db.lookup(re.compile(row[0].strip() + r'$'), "Class")[0].parent().longname()
+                # print(class_file)
             except:
                 continue
             source_class = row[0].split(".")[-1]
@@ -755,6 +904,9 @@ class SmellInitialization(RandomInitialization):
                     "file_path": class_file
                 }
             )
+        # print(candidates)
+        # quit()
+        _db.close()
         return candidates
 
     def load_move_method_candidates(self):
@@ -777,6 +929,7 @@ class SmellInitialization(RandomInitialization):
         return candidates
 
     def load_extract_method_candidates(self):
+        _db = und.open(self.udb_path)
         long_methods = pandas.read_csv(
             config.LONG_METHOD_PATH, sep='\t', engine='python'
         )
@@ -784,7 +937,7 @@ class SmellInitialization(RandomInitialization):
         for index, row in long_methods.iterrows():
             lines = {}
             class_info = row[0].strip().split(".")[-1]
-            class_file = self._und.lookup(class_info + ".java", "File")
+            class_file = _db.lookup(class_info + ".java", "File")
             if class_file:
                 class_file = class_file[0].longname()
             else:
@@ -810,6 +963,8 @@ class SmellInitialization(RandomInitialization):
                 "file_path": class_file,
                 "lines": lines
             })
+
+        _db.close()
         return candidates
 
     def init_move_method(self):
@@ -828,17 +983,41 @@ class SmellInitialization(RandomInitialization):
         main = extract_method.main
         params = random.choice(self.extract_method_candidates)
         params["udb_path"] = self.udb_path
-        return main, params, "Extract Class"
+        return main, params, "Extract Method"
 
 
-if __name__ == '__main__':
-    rand_pop = RandomInitialization(
+#  Module tests
+def test_generate_population():
+    reset_project()
+
+    initializer_ = SmellInitialization(
         config.UDB_PATH,
         population_size=config.POPULATION_SIZE,
         lower_band=config.LOWER_BAND,
         upper_band=config.UPPER_BAND
     )
-    main, params, name = rand_pop.init_increase_method_visibility()
+    population_ = initializer_.generate_population()
+    print(population_)
+
+
+def test_refactoring_operations_initialization():
+    initializer_ = SmellInitialization(
+        config.UDB_PATH,
+        population_size=config.POPULATION_SIZE,
+        lower_band=config.LOWER_BAND,
+        upper_band=config.UPPER_BAND
+    )
+    main, params, name = initializer_.init_increase_method_visibility()
+    main, params, name = initializer_.init_make_field_non_static()
     print(f"Running {name}")
     print(params)
     main(**params)
+    quit()
+
+    for i in range(0, 100):
+        print(initializer_.init_move_class())
+
+
+if __name__ == '__main__':
+    test_generate_population()
+    # test_refactoring_operations_initialization()
