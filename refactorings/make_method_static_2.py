@@ -72,21 +72,22 @@ class MakeMethodStaticRefactoringListener(JavaParserLabeledListener):
 
 
 def main(udb_path, source_class, method_name, *args, **kwargs):
-    main_file = ""
+    main_file = None
     db = und.open(udb_path)
-    for cls in db.ents("class"):
+    classes = db.ents("Class")
+    for cls in classes:
         if cls.simplename() == source_class:
             if cls.parent() is not None:
-                main_file = cls.parent().longname(True)
-                if not os.path.isfile(main_file):
-                    continue
+                temp_file = str(cls.parent().longname(True))
+                if os.path.isfile(temp_file):
+                    main_file = temp_file
+                    break
+
     if main_file is None:
         db.close()
-        return
-    if not os.path.isfile(main_file):
-        db.close()
-        return
+        return False
 
+    db.close()
     stream = FileStream(main_file, encoding='utf8', errors='ignore')
     lexer = JavaLexer(stream)
     token_stream = CommonTokenStream(lexer)
@@ -101,7 +102,8 @@ def main(udb_path, source_class, method_name, *args, **kwargs):
 
     with open(main_file, mode='w', newline='') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
-    db.close()
+
+    return True
 
 
 if __name__ == '__main__':
