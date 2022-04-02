@@ -2,26 +2,27 @@
 The scripts implements different refactoring operations
 
 """
-version = '0.1.0'
-author = 'Morteza'
+__version__ = '0.1.0'
+__author__ = 'Morteza'
 
-from antlr4 import *
-from antlr4.TokenStreamRewriter import TokenStreamRewriter
-
-from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
-
-from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
-from gen.javaLabeled.JavaLexer import JavaLexer
+import os
 
 try:
     import understand as understand
 except ImportError as e:
     print(e)
 
+from antlr4 import *
+from antlr4.TokenStreamRewriter import TokenStreamRewriter
+
+from gen.javaLabeled.JavaLexer import JavaLexer
+from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
+from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
+
 
 class MakeMethodStaticRefactoringListener(JavaParserLabeledListener):
     """
-    To implement extract class refactoring based on its actors.
+    To implement make method static refactoring based on its actors.
     Creates a new class and move fields and methods from the old class to the new one
     """
 
@@ -103,12 +104,22 @@ class MakeMethodStaticRefactoringListener(JavaParserLabeledListener):
 
 
 def main(udb_path, target_class, target_methods):
-    main_file = ""
+    main_file = None
     db = understand.open(udb_path)
-    for cls in db.ents("class"):
+    classes = db.ents("Class")
+    for cls in classes:
         if cls.simplename() == target_class:
-            main_file = cls.parent().longname()
+            if cls.parent() is not None:
+                temp_file = str(cls.parent().longname(True))
+                if os.path.isfile(temp_file):
+                    main_file = temp_file
+                    break
 
+    if main_file is None:
+        db.close()
+        return False
+
+    db.close()
     stream = FileStream(main_file, encoding='utf8', errors='ignore')
     lexer = JavaLexer(stream)
     token_stream = CommonTokenStream(lexer)
@@ -122,12 +133,13 @@ def main(udb_path, target_class, target_methods):
 
     with open(main_file, mode='w', newline='') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
-    db.close()
+
+    return True
 
 
 if __name__ == '__main__':
-    udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
-    target_class = "Website"
-    target_methods = "HELLO_FROM_STUDENT_WEBSITE"
+    udb_path_ = "/home/ali/Desktop/code/TestProject/TestProject.udb"
+    target_class_ = "Website"
+    target_methods_ = "HELLO_FROM_STUDENT_WEBSITE"
     # initialize with understand
-    main(udb_path, target_class, target_methods)
+    main(udb_path_, target_class_, target_methods_)
