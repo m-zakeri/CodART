@@ -1,6 +1,10 @@
-import logging
+"""
+Increase method visibility refactoring
 
-from refactorings.utils.utils2 import parse_and_walk
+"""
+
+__author__ = "Morteza Zakeri"
+__version__ = '0.2.0'
 
 try:
     import understand as und
@@ -11,9 +15,8 @@ from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
-
-logger = logging.getLogger()
-__author__ = "Seyyed Ali Ayati"
+from codart.symbol_table import parse_and_walk
+from sbse.config import logger
 
 
 class IncreaseMethodVisibilityListener(JavaParserLabeledListener):
@@ -47,26 +50,31 @@ class IncreaseMethodVisibilityListener(JavaParserLabeledListener):
 
 def main(udb_path, source_package, source_class, source_method, *args, **kwargs):
     db = und.open(udb_path)
-    method_ent = db.lookup(f"{source_package}.{source_class}.{source_method}", "Method")
+    methods = db.lookup(f"{source_package}.{source_class}.{source_method}", "Method")
 
-    if len(method_ent) == 0:
+    if methods is None or len(methods) == 0:
         logger.error("Invalid inputs.")
-        return
-    method_ent = method_ent[0]
+        db.close()
+        return False
 
-    if method_ent.simplename() != source_method:
+    method_entity = methods[0]
+    if method_entity.simplename() != source_method:
         logger.error("Invalid entity.")
-        return
+        db.close()
+        return False
 
-    if not method_ent.kind().check("Private"):
+    if not method_entity.kind().check("Private"):
         logger.error("Method is not private.")
-        return
+        db.close()
+        return False
 
-    parent = method_ent.parent()
+    parent = method_entity.parent()
     while parent.parent() is not None:
         parent = parent.parent()
 
-    main_file = parent.longname()
+    main_file = parent.longname()  # The file that contain the method
+    db.close()
+
     parse_and_walk(
         file_path=main_file,
         listener_class=IncreaseMethodVisibilityListener,
@@ -74,7 +82,8 @@ def main(udb_path, source_package, source_class, source_method, *args, **kwargs)
         source_class=source_class,
         source_method=source_method
     )
-    db.close()
+    # db.close()
+    return True
 
 
 if __name__ == '__main__':
