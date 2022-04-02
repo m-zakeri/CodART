@@ -1,8 +1,11 @@
-import logging
+"""
+Pull-up method refactoring
+"""
 
-logger = logging.getLogger()
+__version__ = '0.2.0'
+__author__ = 'Morteza Zakeri'
 
-from gen.javaLabeled.JavaLexer import JavaLexer
+import os.path
 
 try:
     import understand as und
@@ -12,8 +15,11 @@ except ImportError as e:
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
+from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
+
+from sbse.config import logger
 
 
 class CheckOverrideListener(JavaParserLabeledListener):
@@ -22,8 +28,7 @@ class CheckOverrideListener(JavaParserLabeledListener):
 
 class PullUpMethodRefactoringListener(JavaParserLabeledListener):
     """
-    To implement extract class refactoring based on its actors.
-    Creates a new class and move fields and methods from the old class to the new one
+    To implement pull-up method refactoring based on its actors.
     """
 
     def __init__(self, common_token_stream: CommonTokenStream = None, destination_class: str = None,
@@ -116,7 +121,6 @@ class PullUpMethodRefactoringListener(JavaParserLabeledListener):
 
 
 class PropagationPullUpMethodRefactoringListener(JavaParserLabeledListener):
-
     def __init__(self, token_stream_rewriter: CommonTokenStream = None, old_class_name: list = None,
                  new_class_name: str = None, propagated_class_name: list = None):
 
@@ -180,13 +184,14 @@ class PropagationPullUpMethodRefactoringListener(JavaParserLabeledListener):
 def main(udb_path: str, children_classes: list, method_name: str, *args, **kwargs):
     if len(children_classes) <= 1:
         logger.error("len(children_classes) should be gte 2")
-        return None
+        return False
 
-    # initialize with understand
+    # Initialize with understand
     destination_class = ""
     fileslist_to_be_rafeactored = set()
     fileslist_to_be_propagate = set()
     propagation_classes = set()
+
     db = und.open(udb_path)
     try:
         method_ents = [db.lookup(i + "." + method_name, "method")[0] for i in children_classes]
@@ -194,23 +199,23 @@ def main(udb_path: str, children_classes: list, method_name: str, *args, **kwarg
         # print([db.lookup(i + "." + method_name, "method") for i in children_classes])
         logger.error(f"Method {method_name} does not exists in all children_classes.")
         db.close()
-        return None
+        return False
 
     # Get method text
     method_text = method_ents[0].contents().strip()
-    # end get text
 
     for method_ent in method_ents:
         if method_ent.contents().strip() != method_text:
             logger.error("Method content is different.")
             db.close()
-            return None
+            return False
 
         for ref in method_ent.refs("Use,Call"):
-            if ref.ent().parent().simplename() in children_classes:
-                logger.error("Method has internal dependencies.")
-                db.close()
-                return None
+            if ref.ent().parent() is not None:
+                if ref.ent().parent().simplename() in children_classes:
+                    logger.error("Method has internal dependencies.")
+                    db.close()
+                    return False
 
     for mth in db.ents("Java Method"):
         for child in children_classes:
@@ -222,6 +227,8 @@ def main(udb_path: str, children_classes: list, method_name: str, *args, **kwarg
                 for ref in mth.refs("Java Callby"):
                     propagation_classes.add(ref.ent().parent().longname())
                     fileslist_to_be_propagate.add(ref.ent().parent().parent().longname())
+
+    db.close()
 
     # print("=========================================")
     # print("fileslist_to_be_propagate :", fileslist_to_be_propagate)
@@ -235,7 +242,10 @@ def main(udb_path: str, children_classes: list, method_name: str, *args, **kwarg
 
     # refactored start
     for file in fileslist_to_be_rafeactored:
-        stream = FileStream(file, encoding='utf8', errors='ignore')
+        try:
+            stream = FileStream(file, encoding='utf-8', errors='ignore')
+        except:
+            continue
         lexer = JavaLexer(stream)
         token_stream = CommonTokenStream(lexer)
         parser = JavaParserLabeled(token_stream)
@@ -249,13 +259,15 @@ def main(udb_path: str, children_classes: list, method_name: str, *args, **kwarg
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener_refactor)
 
-        with open(file, mode='w', newline='') as f:
+        with open(file, mode='w', encoding='utf-8', newline='') as f:
             f.write(my_listener_refactor.token_stream_rewriter.getDefaultText())
     # end refactoring
 
     # beginning of propagate
     for file in fileslist_to_be_propagate:
-        stream = FileStream(file, encoding='utf8', errors='ignore')
+        if not os.path.exists(file):
+            continue
+        stream = FileStream(file, encoding='utf-8', errors='ignore')
         lexer = JavaLexer(stream)
         token_stream = CommonTokenStream(lexer)
         parser = JavaParserLabeled(token_stream)
@@ -268,18 +280,19 @@ def main(udb_path: str, children_classes: list, method_name: str, *args, **kwarg
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener_propagate)
 
-        with open(file, mode='w', newline='') as f:
+        with open(file, mode='w', encoding='utf-8', newline='') as f:
             f.write(my_listener_propagate.token_stream_rewriter.getDefaultText())
     # end of propagate
-    db.close()
+
+    return True
 
 
 if __name__ == '__main__':
-    udb_path = "D:\\Final Project\\IdeaProjects\\JSON20201115\\JSON20201115.und"
-    children_class = ['XMLTokener', 'HTTPTokener']
-    moved_method = "nextToken"
+    udb_path_ = "D:\\Final Project\\IdeaProjects\\JSON20201115\\JSON20201115.und"
+    children_class_ = ['XMLTokener', 'HTTPTokener']
+    moved_method_ = "nextToken"
     main(
-        udb_path=udb_path,
-        children_classes=children_class,
-        method_name=moved_method
+        udb_path=udb_path_,
+        children_classes=children_class_,
+        method_name=moved_method_
     )
