@@ -1,19 +1,25 @@
-import logging
+"""
+ Move class refactoring
+"""
+
 import os
+# import logging
 
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
-from refactorings.utils.utils2 import parse_and_walk
+from codart.symbol_table import parse_and_walk
 
 try:
     import understand as und
 except ImportError as e:
     print(e)
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__file__)
+from sbse.config import logger
+
+# logging.basicConfig(level=logging.DEBUG)
+# logger = logging.getLogger(__file__)
 
 ROOT_PACKAGE = "(Unnamed_Package)"
 
@@ -32,7 +38,7 @@ class UpdateImportsListener(JavaParserLabeledListener):
     def enterPackageDeclaration(self, ctx: JavaParserLabeled.PackageDeclarationContext):
         self.current_package = ctx.qualifiedName().getText()
 
-    def exitPackageDeclaration(self, ctx:JavaParserLabeled.PackageDeclarationContext):
+    def exitPackageDeclaration(self, ctx: JavaParserLabeled.PackageDeclarationContext):
         self.import_loc = ctx.stop
 
     def enterImportDeclaration(self, ctx: JavaParserLabeled.ImportDeclarationContext):
@@ -58,7 +64,7 @@ class UpdateImportsListener(JavaParserLabeledListener):
                 to_idx=ctx.stop.tokenIndex
             )
 
-    def exitCompilationUnit(self, ctx:JavaParserLabeled.CompilationUnitContext):
+    def exitCompilationUnit(self, ctx: JavaParserLabeled.CompilationUnitContext):
         if not self.imported and self.current_package != self.target_package:
             self.rewriter.insertAfterToken(
                 token=self.import_loc,
