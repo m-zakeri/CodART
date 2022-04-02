@@ -1,18 +1,24 @@
-import logging
+"""
+Move field refactoring
+"""
+
+# import logging
 
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
-from refactorings.utils.utils2 import parse_and_walk
+from codart.symbol_table import parse_and_walk
 
 try:
     import understand as und
 except ImportError as e:
     print(e)
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__file__)
+from sbse.config import logger
+
+# logging.basicConfig(level=logging.DEBUG)
+# logger = logging.getLogger(__file__)
 STATIC = "Public Static Variable"
 
 
@@ -141,12 +147,13 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
     if len(field_ent) == 0:
         logger.error(f"Entity not found with query: {source_package}.{source_class}.{field_name}.")
         db.close()
-        return None
+        return False
 
     if source_package == target_package and source_class == target_class:
         logger.error("Can not move to self.")
         db.close()
-        return None
+        return False
+
     field_ent = field_ent[0]
     is_static = field_ent.kindname() == STATIC
 
@@ -161,7 +168,7 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
         if file in usages:
             usages[file].append(ref.line())
         else:
-            usages[file] = [ref.line(), ]
+            usages[file] = [ref.line(),]
     try:
         src_class_file = db.lookup(f"{source_package}.{source_class}.java")[0].longname()
         target_class_file = db.lookup(f"{target_package}.{target_class}.java")[0].longname()
@@ -170,7 +177,7 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
         logger.info(f"{source_package}.{source_class}.java")
         logger.info(f"{target_package}.{target_class}.java")
         db.close()
-        return None
+        return False
 
     # Check if there is an cycle
     listener = parse_and_walk(
@@ -182,7 +189,7 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
     if not listener.is_valid:
         logger.error(f"Can not move field because there is a cycle between {source_class}, {target_class}")
         db.close()
-        return
+        return False
 
     # Propagate Changes
     for file in usages.keys():
@@ -220,6 +227,7 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
     )
 
     db.close()
+    return True
 
 
 if __name__ == '__main__':
