@@ -1,5 +1,9 @@
+"""
+
+"""
+from typing import Dict, Any
+
 from gen.javaLabeled.JavaLexer import JavaLexer
-from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 
 from refactorings.utils.utils_listener_fast import *
 from codart.utility.directory_utils import create_project_parse_tree
@@ -10,51 +14,51 @@ def get_program(source_files: list, print_status=False) -> Program:
     for filename in source_files:
         if print_status:
             print("Parsing " + filename)
-        stream = FileStream(filename, encoding='utf8', errors='ignore')
-        lexer = JavaLexer(stream)
-        token_stream = CommonTokenStream(lexer)
-        parser = JavaParser(token_stream)
-        tree = parser.compilationUnit()
-        listener = UtilsListener(filename)
-        walker = ParseTreeWalker()
-        walker.walk(listener, tree)
+        stream_ = FileStream(filename, encoding='utf8', errors='ignore')
+        lexer_ = JavaLexer(stream_)
+        token_stream_ = CommonTokenStream(lexer_)
+        parser_ = JavaParser(token_stream_)
+        tree_ = parser_.compilationUnit()
+        listener_ = UtilsListener(filename)
+        walker_ = ParseTreeWalker()
+        walker_.walk(listener_, tree_)
 
-        listener_package_name = listener.package.name or ""
+        listener_package_name = listener_.package.name or ""
 
-        if not listener_package_name in program.packages:
-            program.packages[listener_package_name] = listener.package
+        if not (listener_package_name in program.packages):
+            program.packages[listener_package_name] = listener_.package
         else:
-            for classes_name in listener.package.classes:
-                program.packages[listener_package_name].classes[classes_name] = listener.package.classes[classes_name]
+            for classes_name in listener_.package.classes:
+                program.packages[listener_package_name].classes[classes_name] = listener_.package.classes[classes_name]
     return program
 
 
-def get_objects(source_files: str) -> FileInfo:
+def get_objects(source_files: str) -> Dict[Any, Any]:
     objects = {}
     for filename in source_files:
-        stream = FileStream(filename, encoding='utf8', errors='ignore')
-        lexer = JavaLexer(stream)
-        token_stream = CommonTokenStream(lexer)
-        parser = JavaParser(token_stream)
-        tree = parser.compilationUnit()
-        listener = UtilsListener(filename)
-        walker = ParseTreeWalker()
-        walker.walk(listener, tree)
+        stream_ = FileStream(filename, encoding='utf8', errors='ignore')
+        lexer_ = JavaLexer(stream_)
+        token_stream_ = CommonTokenStream(lexer_)
+        parser_ = JavaParser(token_stream_)
+        tree_ = parser_.compilationUnit()
+        listener_ = UtilsListener(filename)
+        walker_ = ParseTreeWalker()
+        walker_.walk(listener_, tree_)
 
-        if not listener.package.name in objects:
-            objects[listener.package.name] = listener.objects_declaration
+        if not (listener_.package.name in objects):
+            objects[listener_.package.name] = listener_.objects_declaration
         else:
-            for class_name in listener.objects_declaration:
-                objects[listener.package.name][class_name] = listener.objects_declaration[class_name]
+            for class_name in listener_.objects_declaration:
+                objects[listener_.package.name][class_name] = listener_.objects_declaration[class_name]
 
     return objects
 
 
-def get_filenames_in_dir(directory_name: str, filter=lambda x: x.endswith(".java")) -> list:
-    result = []
+def get_filenames_in_dir(directory_name: str, filter_=lambda x: x.endswith(".java")) -> list:
+    result_ = []
     for (dirname, dirnames, filenames) in os.walk(directory_name):
-        result.extend([dirname + '/' + name for name in filenames if filter(name)])
-    return result
+        result_.extend([dirname + '/' + name for name in filenames if filter_(name)])
+    return result_
 
 
 class Rewriter:
@@ -67,11 +71,11 @@ class Rewriter:
             package = program.packages[package_name]
             for class_name in package.classes:
                 _class: Class = package.classes[class_name]
-                token_stream = _class.get_token_stream()
-                if token_stream not in self.token_streams:
-                    self.token_streams[token_stream] = (
+                token_stream_ = _class.get_token_stream()
+                if token_stream_ not in self.token_streams:
+                    self.token_streams[token_stream_] = (
                         _class.filename,
-                        TokenStreamRewriter(token_stream),
+                        TokenStreamRewriter(token_stream_),
                         filename_mapping(_class.filename)
                     )
 
@@ -100,7 +104,7 @@ class Rewriter:
             path = new_filename[:new_filename.rfind('/')]
             if not os.path.exists(path):
                 os.makedirs(path)
-            with open(new_filename, mode='w', newline='') as file:
+            with open(new_filename, mode='w', encoding='utf-8', newline='') as file:
                 file.write(token_stream_rewriter.getDefaultText())
 
 
@@ -109,40 +113,40 @@ def get_program_with_field_usage(source_files: list, field_name: str, source_cla
     for filename in source_files:
         if print_status:
             print("Parsing " + filename)
-        stream = FileStream(filename, encoding='utf8', errors='ignore')
-        lexer = JavaLexer(stream)
-        token_stream = CommonTokenStream(lexer)
-        parser = JavaParser(token_stream)
-        tree = parser.compilationUnit()
-        listener = StaticFieldUsageListener(filename, field_name, source_class)
-        walker = ParseTreeWalker()
-        walker.walk(listener, tree)
+        stream_ = FileStream(filename, encoding='utf8', errors='ignore')
+        lexer_ = JavaLexer(stream_)
+        token_stream_ = CommonTokenStream(lexer_)
+        parser_ = JavaParser(token_stream_)
+        tree_ = parser_.compilationUnit()
+        listener_ = StaticFieldUsageListener(filename, field_name, source_class)
+        walker_ = ParseTreeWalker()
+        walker_.walk(listener_, tree_)
 
-        if not listener.package.name in program.packages:
-            program.packages[listener.package.name] = listener.package
+        if not (listener_.package.name in program.packages):
+            program.packages[listener_.package.name] = listener_.package
         else:
-            for classes_name in listener.package.classes:
-                program.packages[listener.package.name].classes[classes_name] = listener.package.classes[classes_name]
+            for classes_name in listener_.package.classes:
+                program.packages[listener_.package.name].classes[classes_name] = listener_.package.classes[classes_name]
     return program
 
 
 def parse_and_walk(file_path: str, listener_class, has_write=False, debug=False, **kwargs):
-    tree, rewriter = create_project_parse_tree(file_path)
+    tree_, rewriter = create_project_parse_tree(file_path)
     if has_write:
         if rewriter is None:
             raise Exception("Failed to create rewriter.")
         kwargs.update({'rewriter': rewriter})
-    listener = listener_class(**kwargs)
+    listener_ = listener_class(**kwargs)
     ParseTreeWalker().walk(
-        listener,
-        tree
+        listener_,
+        tree_
     )
 
     if has_write:
         if not debug:
-            with open(file_path, 'w') as f:
-                f.write(listener.rewriter.getDefaultText())
+            with open(file_path, mode='w', encoding='utf-8') as f_:
+                f_.write(listener_.rewriter.getDefaultText())
         else:
-            print(listener.rewriter.getDefaultText())
+            print(listener_.rewriter.getDefaultText())
 
-    return listener
+    return listener_
