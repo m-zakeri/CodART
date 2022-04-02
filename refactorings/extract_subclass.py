@@ -1,6 +1,12 @@
+"""
+Extract subclass refactoring
+"""
+
+
 import os
 from gen.javaLabeled.JavaLexer import JavaLexer
 from antlr4 import *
+from antlr4.tree import Tree
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
@@ -312,7 +318,7 @@ class FindUsagesListener(JavaParserLabeledListener):
         right_hand_side = ctx.children[-1]
         left_hand_side = ctx.children[0]
         if type(left_hand_side) == JavaParserLabeled.Expression0Context:
-            if type(right_hand_side) == tree.Tree.TerminalNodeImpl:
+            if type(right_hand_side) == Tree.TerminalNodeImpl:
                 if left_hand_side.getText() != 'this':
                     self.aul.add_field_to_identifier(identifier=(left_hand_side.getText(), self.scope),
                                                      field_name=right_hand_side.getText())
@@ -322,7 +328,7 @@ class FindUsagesListener(JavaParserLabeledListener):
                                                       method_name=right_hand_side.children[0].getText())
 
         elif type(left_hand_side) == JavaParserLabeled.Expression1Context:
-            if type(right_hand_side) == tree.Tree.TerminalNodeImpl:
+            if type(right_hand_side) == Tree.TerminalNodeImpl:
                 self.aul.add_field_to_identifier(identifier=(left_hand_side.children[-1].getText(), self.scope),
                                                  field_name=right_hand_side.getText())
             elif type(right_hand_side) == JavaParserLabeled.MethodCall0Context:
