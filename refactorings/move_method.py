@@ -1,21 +1,26 @@
-import logging
+"""
+
+"""
+import os
 import os.path
 from pathlib import Path
+# import logging
 
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 from refactorings.move_field import CheckCycleListener
-from refactorings.utils.utils2 import parse_and_walk
+from codart.symbol_table import parse_and_walk
 
 try:
     import understand as und
 except ImportError as e:
     print(e)
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__file__)
+from sbse.config import logger
+# logging.basicConfig(level=logging.DEBUG)
+# logger = logging.getLogger(__file__)
 STATIC = "Static Method"
 
 
@@ -262,12 +267,12 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
     method_map, class_ent = get_source_class_map(db, source_class)
     if class_ent is None:
         logger.error("Class entity is None")
-        return None
+        return False
 
     if class_ent.refs("Extend ~Implicit, ExtendBy, Implement"):
         logger.error("Class is in inheritance or implements an interface.")
         db.close()
-        return None
+        return False
 
     # Check if method is static
     method_ent = db.lookup(f"{source_package}.{source_class}.{method_name}", "Method")
@@ -276,18 +281,19 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
     else:
         logger.error("Entity not found.")
         db.close()
-        return None
+        return False
 
     if method_ent.simplename() != method_name:
         logger.error("Can not move method duo to duplicated entities.")
         logger.info(f"{method_ent}, {method_ent.kindname()}")
         db.close()
-        return None
+        return False
 
     if source_package == target_package and source_class == target_class:
         logger.error("Can not move to self.")
         db.close()
-        return None
+        return False
+
     is_static = STATIC in method_ent.kindname()
     # Find usages
     usages = {}
@@ -307,7 +313,7 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
         logger.info(f"{source_package}.{source_class}.java")
         logger.info(f"{target_package}.{target_class}.java")
         db.close()
-        return None
+        return False
 
     # Check if there is an cycle
     listener = parse_and_walk(
@@ -319,7 +325,8 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
     if not listener.is_valid:
         logger.error(f"Can not move method because there is a cycle between {source_class}, {target_class}")
         db.close()
-        return None
+        return False
+
     # Propagate Changes
     for file in usages.keys():
         public_class_name = os.path.basename(file).split(".")[0]
@@ -373,6 +380,7 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
         has_empty_cons=listener.has_empty_cons,
     )
     db.close()
+    return True
 
 
 if __name__ == '__main__':
