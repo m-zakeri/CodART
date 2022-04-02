@@ -1,6 +1,10 @@
 """
 Utilities related to project directory.
 """
+
+__author__ = 'Morteza Zakeri'
+__version__ = '0.5.0'
+
 import datetime
 import os
 import subprocess
@@ -12,9 +16,11 @@ from joblib import Parallel, delayed
 
 from gen.java.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
-from sbse import config
+
 from java8speedy.parser import sa_javalabeled
 from java8speedy.parser import JavaLabeledLexer
+
+from sbse import config
 
 
 def git_restore(project_dir):
@@ -96,15 +102,15 @@ def get_java_files(directory):
 def create_project_parse_tree(java_file_path):
     tree = None
     rewriter = None
-    # try:
-    file_stream = FileStream(java_file_path, encoding='utf-8', errors='ignore')
-    sa_javalabeled.USE_CPP_IMPLEMENTATION = config.USE_CPP_BACKEND
-    tree = sa_javalabeled.parse(file_stream, 'compilationUnit')
-    tokens = tree.parser.getInputStream()
-    rewriter = TokenStreamRewriter(tokens)
-    # except Exception as e:
-    #     print(f'Encounter a parsing error on file {java_file_path}')
-    #     print(e)
+    try:
+        file_stream = FileStream(java_file_path, encoding='utf-8', errors='ignore')
+        sa_javalabeled.USE_CPP_IMPLEMENTATION = config.USE_CPP_BACKEND
+        tree = sa_javalabeled.parse(file_stream, 'compilationUnit')
+        tokens = tree.parser.getInputStream()
+        rewriter = TokenStreamRewriter(tokens)
+    except Exception as e:
+        print(f'Encounter a parsing error on file {java_file_path}')
+        print(e)
     return tree, rewriter
 
 
