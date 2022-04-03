@@ -1,12 +1,17 @@
 """
-The module compute and normalize QMOOD design metrics
+The module compute and normalize QMOOD design metrics and QMOOD quality attributes
+to be used as six objectives in search-based refactoring
+
+## Reference
+[1] J. Bansiya and C. G. Davis, “A hierarchical model for object-oriented design quality assessment,”
+IEEE Trans. Softw. Eng., vol. 28, no. 1, pp. 4–17, 2002.
+
 """
 
-__version__ = '0.1.2'
-__author__ = 'Seyyed Ali Ayati, Mina Tahaei'
+__version__ = '0.2.0'
+__author__ = 'Morteza Zakeri'
 
 import os
-import logging
 from pprint import pprint
 
 try:
@@ -14,8 +19,7 @@ try:
 except ImportError:
     print("Cannot import understand.")
 
-
-from sbse.config import CURRENT_METRICS, UDB_PATH
+from sbse.config import CURRENT_METRICS, UDB_PATH, logger
 
 
 def divide_by_initial_value(func):
@@ -24,34 +28,44 @@ def divide_by_initial_value(func):
         initial = CURRENT_METRICS.get(func.__name__)
         if initial == 0:
             initial = 1.
-        value = round(value / initial, 9)
+        value = round(value / initial, 5)
         return value
 
     return wrapper
 
 
-class QMOOD:
+class DesignMetrics:
+    """
+    Class to compute 11 design metrics listed by J. Bansiya et G. Davis, 2002
+
+    """
+
     def __init__(self, udb_path):
         # To be used with Sci-tools Understand 6.x the following two line should be commented.
         # if not os.path.isfile(udb_path):
         #     raise ValueError("Project directory is not valid.")
         self.db = und.open(udb_path)
         self.metrics = self.db.metric(self.db.metrics())
-        self.user_defined_classes = self.get_classes()
-        self.all_classes = self.get_classes(filter_string="Class")
-        self.known_class_entities = self.db.ents(kindstring='Class ~Unknown')
+
+        filter1 = "Java Class ~TypeVariable ~Anonymous ~Enum ~Interface ~Abstract ~Jar ~Library ~Standard"
+        filter2 = "Java Class ~Unresolved ~Unknown ~TypeVariable ~Anonymous ~Annotation ~Enum ~Interface ~Abstract ~Jar ~Library ~Standard"
+        filter3 = "Java Class ~Unresolved ~Unknown ~TypeVariable ~Anonymous ~Annotation ~Enum ~Interface ~Abstract ~Jar ~Library ~Standard"
+        self.all_classes = self.get_classes(filter1)
+        self.known_class_entities = self.db.ents(filter2)
+        self.user_defined_classes = self.get_classes(filter3)
 
     def __del__(self):
-        self.db.close()
+        # self.db.close()
+        pass
 
     @property
     @divide_by_initial_value
     def DSC(self):
         """
-        DSC - Design Size in Classes
+        DSC - Design size in classes
         :return: Total number of classes in the design.
         """
-        return self.metrics.get('CountDeclClass', 0)
+        return len(self.user_defined_classes)
 
     @property
     @divide_by_initial_value
@@ -189,16 +203,17 @@ class QMOOD:
         for ref in class_entity.refs("Define", "Variable"):
             define = ref.ent()
             kind_name = define.kindname()
-            if "Public" in kind_name:
+            if "Public" in kind_name or "public" in kind_name:
                 public_variables += 1
-            elif "Private" in kind_name:
+            elif "Private" in kind_name or "private" in kind_name:
                 private_variables += 1
-            elif "Protected" in kind_name:
+            elif "Protected" in kind_name or "protected" in kind_name:
                 protected_variables += 1
 
         try:
-            ratio = (private_variables + protected_variables) / (
-                    private_variables + protected_variables + public_variables)
+            enum_ = private_variables + protected_variables
+            denum_ = private_variables + protected_variables + public_variables
+            ratio = enum_ / denum_
         except ZeroDivisionError:
             ratio = 0.0
         return ratio
@@ -312,32 +327,157 @@ class QMOOD:
         for k, v in sorted(self.metrics.items()):
             print(k, "=", v)
 
-    def get_classes(self, filter_string="Class ~Unknown ~TypeVariable ~Anonymous"):
+    def get_classes(self, filter_string=None):
         """
         :return: a set of all class names
         """
         classes = set()
-        for ent in self.db.ents(kindstring=filter_string):
+        for ent in self.db.ents(filter_string):
             classes.add(ent.simplename())
         return classes
 
 
+class DesignQualityAttributes:
+    """
+    Class to compute six quality attribute proposed by J. J. Bansiya et G. Davis, 2002
+    The QMOOD quality attribute are:
+        1. Reusability
+        2. Flexibility
+        3. Understandability
+        4. Functionality
+        5. Extendability
+        6. Effectiveness
+    """
+
+    def __init__(self, udb_path):
+        """
+        Implements Project Objectives due to QMOOD design metrics
+        :param udb_path: The understand database path
+        """
+        self.udb_path = udb_path
+        self.qmood = DesignMetrics(udb_path=udb_path)
+        # Calculating once and using multiple times
+        self.DSC = self.qmood.DSC
+        self.NOH = self.qmood.NOH
+        self.ANA = self.qmood.ANA
+        self.MOA = self.qmood.MOA
+        self.DAM = self.qmood.DAM
+        self.CAMC = self.qmood.CAMC
+        self.CIS = self.qmood.CIS
+        self.NOM = self.qmood.NOM
+        self.DCC = self.qmood.DCC
+        self.MFA = self.qmood.MFA
+        self.NOP = self.qmood.NOP
+
+        # For caching results
+        self._reusability = None
+        self._flexibility = None
+        self._understandability = None
+        self._functionality = None
+        self._extendability = None
+        self._effectiveness = None
+
+    @property
+    def reusability(self):
+        """
+        A design with low coupling and high cohesion is easily reused by other designs.
+        :return: reusability score
+        """
+        self._reusability = -0.25 * self.DCC + 0.25 * self.CAMC + 0.5 * self.CIS + 0.5 * self.DSC
+        return self._reusability
+
+    @property
+    def flexibility(self):
+        """
+        The degree of allowance of changes in the design.
+        :return: flexibility score
+        """
+        self._flexibility = 0.25 * self.DAM - 0.25 * self.DCC + 0.5 * self.MOA + 0.5 * self.NOP
+        return self._flexibility
+
+    @property
+    def understandability(self):
+        """
+        The degree of understanding and the easiness of learning the design implementation details.
+        :return: understandability score
+        """
+        self._understandability = -0.33 * self.ANA + 0.33 * self.DAM - 0.33 * self.DCC + \
+                                  0.33 * self.CAMC - 0.33 * self.NOP - 0.33 * self.NOM - \
+                                  0.33 * self.DSC
+        return self._understandability
+
+    @property
+    def functionality(self):
+        """
+        Classes with given functions that are publicly stated in interfaces to be used by others.
+        :return: functionality score
+        """
+        self._functionality = 0.12 * self.CAMC + 0.22 * self.NOP + 0.22 * self.CIS + \
+                              0.22 * self.DSC + 0.22 * self.NOH
+        return self._functionality
+
+    @property
+    def extendability(self):
+        """
+        Measurement of design's allowance to incorporate new functional requirements.
+        :return: extendability
+        """
+        self._extendability = 0.5 * self.ANA - 0.5 * self.DCC + 0.5 * self.MFA + 0.5 * self.NOP
+        return self._extendability
+
+    @property
+    def effectiveness(self):
+        """
+        Design efficiency in fulfilling the required functionality.
+        :return: effectiveness score
+        """
+        self._effectiveness = 0.2 * self.ANA + 0.2 * self.DAM + 0.2 * self.MOA + 0.2 * \
+                              self.MFA + 0.2 * self.NOP
+        return self._effectiveness
+
+    @property
+    def average(self):
+        metrics = ['reusability', 'flexibility', 'understandability',
+                   'functionality', 'extendability', 'effectiveness',
+                   ]
+        all_metrics = []
+        for metric in metrics:
+            cache = getattr(self, f'_{metric}')
+            if cache is None:
+                all_metrics.append(getattr(self, metric))
+            else:
+                all_metrics.append(cache)
+        return sum(all_metrics) / len(all_metrics)
+
+
 if __name__ == '__main__':
-    print(f"Path: {UDB_PATH}")
-    metric = QMOOD(UDB_PATH)
-    print("Object created.")
-    obj = {
-        "DSC": metric.DSC,
-        "NOH": metric.NOH,
-        "ANA": metric.ANA,
-        "MOA": metric.MOA,
-        "DAM": metric.DAM,
-        "CAMC": metric.CAMC,
-        "CIS": metric.CIS,
-        "NOM": metric.NOM,
-        "DCC": metric.DCC,
-        "MFA": metric.MFA,
-        "NOP": metric.NOP
+    print(f"UDB path: {UDB_PATH}")
+    design_metric = DesignMetrics(UDB_PATH)
+    design_quality_attribute = DesignQualityAttributes(UDB_PATH)
+    metrics_dict = {
+        "DSC": design_metric.DSC,
+        "NOH": design_metric.NOH,
+        "ANA": design_metric.ANA,
+        "MOA": design_metric.MOA,
+        "DAM": design_metric.DAM,
+        "CAMC": design_metric.CAMC,
+        "CIS": design_metric.CIS,
+        "NOM": design_metric.NOM,
+        "DCC": design_metric.DCC,
+        "MFA": design_metric.MFA,
+        "NOP": design_metric.NOP
     }
-    pprint(obj)
-    del metric
+    quality_attributes_dict = {
+        "reusability": design_quality_attribute.reusability,
+        "flexibility": design_quality_attribute.flexibility,
+        "understandability": design_quality_attribute.understandability,
+        "functionality": design_quality_attribute.functionality,
+        "extendability": design_quality_attribute.extendability,
+        "effectiveness": design_quality_attribute.effectiveness,
+        #
+        "average": design_quality_attribute.average
+    }
+    print('QMOOD design metrics (normalized):')
+    pprint(metrics_dict)
+    print('QMOOD quality attributes:')
+    pprint(quality_attributes_dict)
