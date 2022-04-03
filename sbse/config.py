@@ -27,6 +27,7 @@ USE_CPP_BACKEND = bool(int(os.environ.get("USE_CPP_BACKEND")))
 PROJECT_ROOT_DIR = os.environ.get("PROJECT_ROOT_DIR")
 CSV_ROOT_DIR = os.environ.get("CSV_ROOT_DIR")
 UDB_ROOT_DIR = os.environ.get("UDB_ROOT_DIR")
+INIT_POP_FILE = os.environ.get("INIT_POP_FILE")
 BENCHMARK_INDEX = int(os.environ.get("BENCHMARK_INDEX", 0))
 
 EXPERIMENTER = os.environ.get("EXPERIMENTER")
@@ -315,20 +316,20 @@ INITIAL_METRICS = {
         "TEST": 0.4787325664033668,  # Obtained by testability_prediction3
     },
     "tabula-java": {  # 11
-        'ANA': 0.623376623,
-        'CAMC': 0.763636364,
-        'CIS': 4.064935065,
-        'DAM': 0.374758575,
-        'DCC': 1.727272727,
-        'DSC': 68.0,
-        'MFA': 0.086567354,
-        'MOA': 2.051948052,
+        'ANA': 0.60465,
+        'CAMC': 0.60977,
+        'CIS': 6.60465,
+        'DAM': 0.67287,
+        'DCC': 2.55814,
+        'DSC': 43.0,
+        'MFA': 0.15502,
+        'MOA': 3.48837,
         'NOH': 1.0,
-        'NOM': 5.142857143,
-        'NOP': 3.194805195,
-        'MODULE': 0.08199833867331198,
-        'TEST2': 0,  # Obtained by testability_prediction2
-        'TEST': 0.39981560024235097  # Obtained by testability_prediction3
+        'NOM': 8.51163,
+        'NOP': 5.04651,
+        'MODULE': 0.08172,
+        'TEST': 0.44405,  # Obtained by testability_prediction2
+        'TEST3': 0.3976  # Obtained by testability_prediction3
     },
 }
 
@@ -359,13 +360,13 @@ def get_file_handler():
 
 
 def get_logger(logger_name):
-    logger = logging.getLogger(logger_name)
-    logger.setLevel(logging.DEBUG)  # better to have too much log than not enough
-    logger.addHandler(get_console_handler())
-    logger.addHandler(get_file_handler())
+    logger_ = logging.getLogger(logger_name)
+    logger_.setLevel(logging.DEBUG)  # better to have too much log than not enough
+    logger_.addHandler(get_console_handler())
+    logger_.addHandler(get_file_handler())
     # with this pattern, it's rarely necessary to propagate the error up to parent
-    logger.propagate = False
-    return logger
+    logger_.propagate = False
+    return logger_
 
 
 logger = get_logger(__name__)
