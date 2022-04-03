@@ -10,7 +10,7 @@ __author__ = 'Morteza Zakeri'
 import random
 
 from initialize import RandomInitialization
-from objectives import Objectives
+from metrics.qmood import DesignQualityAttributes
 from codart.utility.directory_utils import update_understand_database, git_restore
 from config import *
 
@@ -26,7 +26,7 @@ rand_init = RandomInitialization(
         upper_band=UPPER_BAND
     )
 rand_pop = rand_init.generate_population()
-score = Objectives(udb_path=udb_path).reusability
+score = DesignQualityAttributes(udb_path=udb_path).reusability
 k = 0
 limit = len(rand_pop)
 best_answer = None
@@ -51,7 +51,7 @@ while k < MAX_ITERATIONS and limit > 0:
         # update understand database
         update_understand_database(udb_path)
     # calculate objective
-    obj_score = Objectives(udb_path=udb_path).reusability
+    obj_score = DesignQualityAttributes(udb_path=udb_path).reusability
     print("Objective Score", obj_score)
     if obj_score < score:
         score = obj_score
