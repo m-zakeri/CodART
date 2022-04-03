@@ -52,6 +52,8 @@ class MakeMethodNonStaticRefactoringListener(JavaParserLabeledListener):
         grand_parent_ctx = ctx.parentCtx.parentCtx
         method_identifier = ctx.IDENTIFIER().getText()
         if self.method_name in method_identifier:
+            if not hasattr(grand_parent_ctx, "modifier"):
+                return
             if not (grand_parent_ctx.modifier() == []):
                 i = 0
                 for i in range(0, len(grand_parent_ctx.modifier())):
