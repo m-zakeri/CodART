@@ -19,7 +19,6 @@ import antlr4
 from antlr4.Token import CommonToken
 import antlr4.tree
 from antlr4.tree import Tree
-from antlr4.CommonTokenStream import CommonTokenStream
 from antlr4 import FileStream, ParseTreeWalker, CommonTokenStream
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
