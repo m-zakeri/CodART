@@ -9,10 +9,12 @@ RandomInitialization: For initialling random candidates.
 __version__ = '0.3.0'
 __author__ = 'Morteza Zakeri'
 
+
 import os
 import re
 import codecs
 import random
+import json
 from collections import Counter
 from pathlib import Path
 
@@ -31,6 +33,27 @@ from refactorings import make_field_static, make_field_non_static, make_method_s
 from sbse import config
 
 logger = config.logger
+
+REFACTORING_MAIN_MAP = {
+    'Make Field Non-Static': make_field_non_static.main,
+    'Make Field Static': make_field_static.main,
+    'Make Method Static': make_method_static_2.main,
+    'Make Method Non-Static': make_method_non_static_2.main,
+    'Pull Up Field': pullup_field.main,
+    'Push Down Field': pushdown_field2.main,
+    'Pull Up Method': pullup_method.main,
+    'Pull Up Constructor': pullup_constructor.main,
+    'Push Down Method': pushdown_method.main,
+    'Move Field': move_field.main,
+    'Move Method': move_method.main,
+    'Move Class': move_class.main,
+    'Extract Class': extract_class.main,
+    'Extract Method': extract_method.main,
+    'Increase Field Visibility': increase_field_visibility.main,
+    'Increase Method Visibility': increase_method_visibility.main,
+    'Decrease Field Visibility': decrease_field_visibility.main,
+    'Decrease Method Visibility': decrease_method_visibility.main,
+}
 
 
 def get_package_from_class(class_longname: str):
@@ -76,6 +99,8 @@ class Initialization(object):
         self.population_size = population_size
         self.lower_band = lower_band
         self.upper_band = upper_band
+        self.population = []
+
         self.initializers = (
             self.init_make_field_non_static,  # 0
             self.init_make_field_static,  # 1
@@ -461,7 +486,6 @@ class Initialization(object):
         return population
 
     def generate_population(self):
-        population = []
         for _ in range(0, self.population_size):
             individual = []
             individual_size = random.randint(self.lower_band, self.upper_band)
@@ -482,11 +506,40 @@ class Initialization(object):
                 reset_project()
                 logger.debug('-' * 100)
 
-            population.append(individual)
+            self.population.append(individual)
             logger.debug(f'Append individual {_} to population, s')
 
         logger.debug('=' * 100)
-        return population
+        self.dump_population()
+        return self.population
+
+    def dump_population(self, path=f'{config.PROJECT_PATH}_population_{config.date_time}.json'):
+        if self.population is None or len(self.population) == 0:
+            return
+        population_trimmed = []
+        for chromosome in self.population:
+            chromosome_new = []
+            for gene_ in chromosome:
+                chromosome_new.append((gene_[2], gene_[1]))
+            population_trimmed.append(chromosome_new)
+        print(population_trimmed)
+
+        with open(path, 'w', encoding='utf-8') as fp:
+            json.dump(population_trimmed, fp, indent=4)
+
+    def load_population(self, path=None):
+        if len(self.population) > 0:
+            return
+
+        with open(path, 'r', encoding='utf-8') as fp:
+            population_trimmed = json.load(fp)
+
+        for chromosome in population_trimmed:
+            chromosome_new = []
+            for gene_ in chromosome:
+                chromosome_new.append((REFACTORING_MAIN_MAP[gene_[0]], gene_[1], gene_[0]))
+            self.population.append(chromosome_new)
+        # print(self.population)
 
 
 class RandomInitialization(Initialization):
@@ -998,6 +1051,19 @@ def test_generate_population():
     )
     population_ = initializer_.generate_population()
     print(population_)
+    initializer_.dump_population(config.PROJECT_PATH + '_population.json')
+
+def test_load_population():
+    reset_project()
+
+    initializer_ = SmellInitialization(
+        config.UDB_PATH,
+        population_size=config.POPULATION_SIZE,
+        lower_band=config.LOWER_BAND,
+        upper_band=config.UPPER_BAND
+    )
+
+    initializer_.load_population(config.PROJECT_PATH + '_population.json')
 
 
 def test_refactoring_operations_initialization():
@@ -1019,5 +1085,6 @@ def test_refactoring_operations_initialization():
 
 
 if __name__ == '__main__':
-    test_generate_population()
+    # test_generate_population()
     # test_refactoring_operations_initialization()
+    test_load_population()
