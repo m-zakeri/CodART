@@ -31,7 +31,7 @@ import networkx.algorithms.community as nx_comm
 
 import understand
 
-from codart.utility.directory_utils import export_understand_dependencies_csv
+from codart.utility.directory_utils import export_understand_dependencies_csv, update_understand_database
 
 
 class Modularity:
@@ -70,7 +70,7 @@ class Modularity:
             if entities is None or len(entities) == 0:  # Nested classes
                 self.mdg_df = self.mdg_df[~self.mdg_df["From Class"].str.contains(class_longname)]
                 self.mdg_df = self.mdg_df[~self.mdg_df["To Class"].str.contains(class_longname)]
-                print('Removed rows with class', class_longname, self.mdg_df.shape)
+                # print('Removed rows with class', class_longname, self.mdg_df.shape)
             else:
                 class_entity = entities[0]
                 package_list = class_entity.ents('Containin', 'Java Package')
@@ -119,12 +119,13 @@ def main(project_db_path=None, initial_value=1.0):
     modulo = Modularity(graph_path=csv_path, project_db_path=project_db_path)
     q = modulo.compute_modularity_newman_leicht()
     os.remove(csv_path)
-    return q / initial_value
+    return round(q / initial_value, 5)
 
 
 # Test module
 if __name__ == '__main__':
     from sbse.config import UDB_PATH
-
+    print(f"UDB path: {UDB_PATH}")
+    # update_understand_database(UDB_PATH)
     for i in range(1):
         print(main(UDB_PATH))
