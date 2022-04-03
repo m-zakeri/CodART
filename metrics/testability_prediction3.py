@@ -99,5 +99,5 @@ def main(db_path, initial_value=1.0):
 if __name__ == '__main__':
     from sbse.config import UDB_PATH
 
-    for i in range(0, 2):
+    for i in range(0, 1):
         print(main(UDB_PATH))

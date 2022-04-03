@@ -26,6 +26,8 @@ from joblib import Parallel, delayed
 
 import understand as und
 
+import sbse.config
+from codart.utility.directory_utils import update_understand_database
 from metrics import metrics_names
 from metrics.metrics_coverability import UnderstandUtility
 
@@ -365,29 +367,34 @@ class TestabilityModel:
         self.scaler = scaler1
         self.model = model5
 
-    def inference(self, df_predict_data=None):
+    def inference(self, df_predict_data=None, verbose=False):
         df_predict_data = df_predict_data.fillna(0)
         X_test1 = df_predict_data.iloc[:, 1:]
         X_test = self.scaler.transform(X_test1)
         y_pred = self.model.predict(X_test)
         df_new = pd.DataFrame(df_predict_data.iloc[:, 0], columns=['Class'])
         df_new['PredictedTestability'] = list(y_pred)
-        # print('min', df_new['PredictedTestability'].min())
-        # print('max', df_new['PredictedTestability'].max())
-        # print('x',  df_new['PredictedTestability'].var())
-        # quit()
+
+        if verbose:
+            print('count classes testability2\t\t', df_new['PredictedTestability'].count())
+            print('min testability2\t\t', df_new['PredictedTestability'].min())
+            print('max testability2\t\t', df_new['PredictedTestability'].max())
+            print('variance testability2\t',  df_new['PredictedTestability'].var())
+            print('sum testability2\t\t', df_new['PredictedTestability'].sum())
+            df_new.to_csv(sbse.config.PROJECT_PATH + '_testability2_after_ga.csv', index=False)
+
         return df_new['PredictedTestability'].mean()
 
 
 # API
-def main(project_db_path, initial_value=1.0):
+def main(project_db_path, initial_value=1.0, verbose=False):
     """
     testability_prediction module API
     """
     df = PreProcess().compute_metrics_by_class_list(project_db_path, n_jobs=0)  # n_job must be set to number of CPU cores
-    testability_ = TestabilityModel().inference(df_predict_data=df)
+    testability_ = TestabilityModel().inference(df_predict_data=df, verbose=verbose)
     # print('testability=', testability_)
-    return testability_ / initial_value
+    return round(testability_ / initial_value, 5)
 
 
 # Test module
@@ -395,7 +402,8 @@ if __name__ == '__main__':
     # project_path_ = r'../benchmark_projects/ganttproject/biz.ganttproject.core/biz.ganttproject.core.und'  # T=0.5253
     # project_path_ = r'../benchmark_projects/JSON/JSON.und'  # T=0.4531
     # project_path_ = r'D:/IdeaProjects/JSON20201115/JSON20201115.und'  # T=0.4749
-    project_path_ = r'D:/IdeaProjects/jvlt-1.3.2/src.und'  # T=0.3997
+    # project_path_ = r'D:/IdeaProjects/jvlt-1.3.2/src.und'  # T=0.3997
     from sbse.config import UDB_PATH
-    for i in range(0, 10):
-        print(main(UDB_PATH))
+    print(f"UDB path: {UDB_PATH}")
+    for i in range(0, 1):
+        print('mean testability2 normalize by 1\t', main(UDB_PATH))
