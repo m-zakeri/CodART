@@ -3,7 +3,12 @@ This module implements the search-based refactoring with various search strategy
 using pymoo framework.
 
 ## Changelog
-### version 2.0
+### version 0.2.1
+    minor updates
+    fix bugs
+    rename variables names
+
+### version 0.2.0
     1. Crossover function is added.
     2. Termination criteria are added.
     3. Computation of highly trade-off points is added.
@@ -26,15 +31,16 @@ __version__ = '0.2.1'
 __author__ = 'Morteza Zakeri'
 
 # import logging
+import os
 import random
 from copy import deepcopy
 from multiprocessing import Process, Array
 from typing import List
 
 import numpy as np
+from pymoo.algorithms.soo.nonconvex.ga import GA
 from pymoo.algorithms.moo.nsga2 import NSGA2
 from pymoo.algorithms.moo.nsga3 import NSGA3
-from pymoo.algorithms.soo.nonconvex.ga import GA
 from pymoo.core.crossover import Crossover
 from pymoo.core.duplicate import ElementwiseDuplicateElimination
 from pymoo.core.mutation import Mutation
@@ -45,14 +51,16 @@ from pymoo.operators.selection.tournament import TournamentSelection
 from pymoo.optimize import minimize
 from pymoo.util.termination.default import MultiObjectiveDefaultTermination
 
+from metrics.qmood import DesignQualityAttributes
 from metrics.modularity import main as modularity_main
-from metrics.testability_prediction3 import main as testability_main
-from sbse.initialize import RandomInitialization, SmellInitialization
-from sbse.objectives import Objectives
-from codart.utility.directory_utils import update_understand_database, git_restore
+from metrics.testability_prediction2 import main as testability_main
 
+from codart.utility.directory_utils import update_understand_database, git_restore
+from sbse.initialize import RandomInitialization, SmellInitialization, Initialization
 from sbse import config
 from sbse.config import logger
+
+POPULATION = []
 
 
 class Gene:
@@ -104,23 +112,11 @@ class RefactoringOperation(Gene):
         logger.info(f"Running {self.name}")
         logger.info(f"Parameters {self.params}")
         try:
-            self.main(**self.params)
-            return True
+            res = self.main(**self.params)
+            return res
         except Exception as e:
-            logger.error(f"Error in executing refactoring:\n {e}")
+            logger.error(f"Unexpected error in executing refactoring:\n {e}")
             return False
-
-
-    @classmethod
-    def generate_randomly(cls):
-        initializer = SmellInitialization(udb_path=config.UDB_PATH)
-        item = initializer.select_random()
-        initializer._und.close()
-        return cls(
-            name=item[2],
-            params=item[1],
-            main=item[0]
-        )
 
 
 class Individual(List):
@@ -163,13 +159,13 @@ class Individual(List):
 
 # ---------------------- Defines objectives calculation functions -----------------------
 def calc_qmood_objectives(arr_):
-    qmood = Objectives(udb_path=config.UDB_PATH)
-    arr_[0] = qmood.reusability
-    arr_[1] = qmood.understandability
-    arr_[2] = qmood.flexibility
-    arr_[3] = qmood.functionality
-    arr_[4] = qmood.effectiveness
-    arr_[5] = qmood.extendability
+    qmood_quality_attributes = DesignQualityAttributes(udb_path=config.UDB_PATH)
+    arr_[0] = qmood_quality_attributes.reusability
+    arr_[1] = qmood_quality_attributes.understandability
+    arr_[2] = qmood_quality_attributes.flexibility
+    arr_[3] = qmood_quality_attributes.functionality
+    arr_[4] = qmood_quality_attributes.effectiveness
+    arr_[5] = qmood_quality_attributes.extendability
 
 
 def calc_testability_objective(path_, arr_):
@@ -251,11 +247,11 @@ class ProblemSingleObjective(Problem):
                     score = sum([i for i in arr]) / 8.
                 else:
                     # Stage 2 (Multi-objective mode, sequential): Computing quality attributes
-                    qmoods = Objectives(udb_path=config.UDB_PATH)
-                    o1 = qmoods.average
+                    qmood_quality_attributes = DesignQualityAttributes(udb_path=config.UDB_PATH)
+                    o1 = qmood_quality_attributes.average
                     o2 = testability_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("TEST", 1.0))
                     o3 = modularity_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("MODULE", 1.0))
-                    del qmoods
+                    del qmood_quality_attributes
                     score = (o1 * 6. + o2 + o3) / 8.
 
             # Stage 3: Marshal objectives into vector
@@ -326,11 +322,11 @@ class ProblemMultiObjective(Problem):
                 o3 = arr[8]
             else:
                 # Stage 2 (sequential mood): Computing quality attributes
-                qmoods = Objectives(udb_path=config.UDB_PATH)
-                o1 = qmoods.average
+                qmood_quality_attributes = DesignQualityAttributes(udb_path=config.UDB_PATH)
+                o1 = qmood_quality_attributes.average
                 o2 = testability_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("TEST", 1.0))
                 o3 = modularity_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("MODULE", 1.0))
-                del qmoods
+                del qmood_quality_attributes
 
             # Stage 3: Marshal objectives into vector
             objective_values.append([-1 * o1, -1 * o2, -1 * o3])
@@ -378,8 +374,7 @@ class ProblemManyObjective(Problem):
                 res = refactoring_operation.do_refactoring()
                 # Update Understand DB
                 logger.debug(f"Updating understand database after {refactoring_operation.name}.")
-                if res:
-                    update_understand_database(config.UDB_PATH)
+                update_understand_database(config.UDB_PATH)
 
             # Stage 2:
             arr = Array('d', range(8))
@@ -392,16 +387,16 @@ class ProblemManyObjective(Problem):
                 p1.join(), p2.join(), p3.join()
             else:
                 # Stage 2 (sequential mood): Computing quality attributes
-                qmood = Objectives(udb_path=config.UDB_PATH)
-                arr[0] = qmood.reusability
-                arr[1] = qmood.understandability
-                arr[2] = qmood.flexibility
-                arr[3] = qmood.functionality
-                arr[4] = qmood.effectiveness
-                arr[5] = qmood.extendability
+                qmood_quality_attributes = DesignQualityAttributes(udb_path=config.UDB_PATH)
+                arr[0] = qmood_quality_attributes.reusability
+                arr[1] = qmood_quality_attributes.understandability
+                arr[2] = qmood_quality_attributes.flexibility
+                arr[3] = qmood_quality_attributes.functionality
+                arr[4] = qmood_quality_attributes.effectiveness
+                arr[5] = qmood_quality_attributes.extendability
                 arr[6] = testability_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("TEST", 1.0))
                 arr[7] = modularity_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("MODULE", 1.0))
-                del qmood
+                del qmood_quality_attributes
 
             # Stage 3: Marshal objectives into vector
             objective_values.append([-1 * i for i in arr])
@@ -420,9 +415,9 @@ class PopulationInitialization(Sampling):
     The selected refactoring operations are randomly arranged in each individual.
     Assigning randomly a sequence of refactorings to certain code fragments generates the initial population
     """
-    def __init__(self,  warm_start=True):
+    def __init__(self,  initializer: Initialization = None):
         super(PopulationInitialization, self).__init__()
-        self.warm_start = warm_start
+        self._initializer = initializer
 
     def _do(self, problem, n_samples, **kwargs):
         """
@@ -432,35 +427,20 @@ class PopulationInitialization(Sampling):
             n_samples (int): the same population size, pop_size
 
         """
-
-        X = np.full((n_samples, 1), None, dtype=Individual)
-        if self.warm_start is False:
-            population = RandomInitialization(
-                udb_path=config.UDB_PATH,
-                population_size=n_samples,
-                lower_band=problem.n_refactorings_lowerbound,
-                upper_band=problem.n_refactorings_upperbound
-            ).generate_population()
+        if os.path.exists(config.INIT_POP_FILE):
+            self._initializer.load_population(path=config.INIT_POP_FILE)
+            population = self._initializer.population
+            config.logger.debug(f'The initial population was loaded from disk')
         else:
-            population = SmellInitialization(
-                udb_path=config.UDB_PATH,
-                population_size=n_samples,
-                lower_band=problem.n_refactorings_lowerbound,
-                upper_band=problem.n_refactorings_upperbound
-            ).generate_population()
+            population = self._initializer.generate_population()
 
+        x = np.full((n_samples, 1), None, dtype=Individual)
         for i in range(n_samples):
             individual_object = []  # list of refactoring operations (Temporarily used instead of Individual class)
             for ref in population[i]:
-                individual_object.append(
-                    RefactoringOperation(
-                        name=ref[2],
-                        params=ref[1],
-                        main=ref[0]
-                    )
-                )
-            X[i, 0] = individual_object
-        return X
+                individual_object.append(RefactoringOperation(name=ref[2], params=ref[1], main=ref[0]))
+            x[i, 0] = deepcopy(individual_object)
+        return x
 
 
 class AdaptiveSinglePointCrossover(Crossover):
@@ -557,13 +537,14 @@ class BitStringMutation(Mutation):
 
     Each chromosome dimension would be changed according to the mutation probability.
     For example, for a mutation probability of 0.2, for each dimension, we generate randomly a number x between 0 and 1,
-    if x<0.2 we change the refactoring operation in that dimension, otherwise no change is took into account.
+    if x<0.2 we change the refactoring operation in that dimension, otherwise no changes are taken into account.
 
     """
 
-    def __init__(self, prob=0.2):
+    def __init__(self, prob=0.2, initializer: Initialization = None):
         super().__init__()
         self.mutation_probability = prob
+        self._initializer = initializer
 
     def _do(self, problem, X, **kwargs):
         for i, individual in enumerate(X):
@@ -571,8 +552,9 @@ class BitStringMutation(Mutation):
                 r = np.random.random()
                 # with a probability of `mutation_probability` replace the refactoring operation with new one
                 if r < self.mutation_probability:
-                    random_refactoring_operation = RefactoringOperation.generate_randomly()
-                    X[i][0][j] = deepcopy(random_refactoring_operation)
+                    random_chromosome = random.choice(self._initializer.population)
+                    item = random.choice(random_chromosome)
+                    X[i][0][j] = deepcopy(RefactoringOperation(name=item[2], params=item[1], main=item[0]))
         return X
 
 
@@ -582,9 +564,11 @@ class BitStringMutation2(Mutation):
         Only flip one refactoring operation in the selected individual.
     """
 
-    def __init__(self, prob=0.2):
+    def __init__(self, prob=0.2, initializer: Initialization = None):
         super().__init__()
         self.mutation_probability = prob
+        self._initializer = initializer
+        self._initializer.load_population()
 
     def _do(self, problem, X, **kwargs):
         for i, individual in enumerate(X):
@@ -593,8 +577,9 @@ class BitStringMutation2(Mutation):
             if r < self.mutation_probability:
                 # j is a random index in individual
                 j = random.randint(0, len(individual[0]) - 1)
-                random_refactoring_operation = RefactoringOperation.generate_randomly()
-                X[i][0][j] = random_refactoring_operation
+                random_chromosome = random.choice(self._initializer.population)
+                item = random.choice(random_chromosome)
+                X[i][0][j] = deepcopy(RefactoringOperation(name=item[2], params=item[1], main=item[0]))
 
         return X
 
@@ -603,7 +588,7 @@ class BitStringMutation2(Mutation):
 def is_equal_2_refactorings_list(a, b):
     """
     This method implement is_equal method which should return True if two instances of Individual class are equal.
-    Otherwise it return False.
+    Otherwise, it returns False.
     The duplicate instances are removed from population at each generation.
     Only one instance is held to speed up the search algorithm
     """
@@ -639,24 +624,33 @@ def binary_tournament(pop, P, **kwargs):
 
 
 def main():
+    # Define initialization objects
+    initializer_class = SmellInitialization if config.WARM_START else RandomInitialization
+    initializer_object = initializer_class(
+        udb_path=config.UDB_PATH,
+        population_size=config.POPULATION_SIZE,
+        lower_band=config.LOWER_BAND,
+        upper_band=config.UPPER_BAND
+    )
+
     # Define search algorithms
     algorithms = list()
     # 1: GA
     algorithm = GA(pop_size=config.POPULATION_SIZE,
-                   sampling=PopulationInitialization(warm_start=config.WARM_START),
+                   sampling=PopulationInitialization(initializer_object),
                    crossover=AdaptiveSinglePointCrossover(prob=config.CROSSOVER_PROBABILITY),
                    # crossover=get_crossover("real_k_point", n_points=2),
-                   mutation=BitStringMutation(prob=config.MUTATION_PROBABILITY),
+                   mutation=BitStringMutation(prob=config.MUTATION_PROBABILITY, initializer=initializer_object),
                    eliminate_duplicates=ElementwiseDuplicateElimination(cmp_func=is_equal_2_refactorings_list)
                    )
     algorithms.append(algorithm)
 
     # 2: NSGA II
     algorithm = NSGA2(pop_size=config.POPULATION_SIZE,
-                      sampling=PopulationInitialization(warm_start=config.WARM_START),
+                      sampling=PopulationInitialization(initializer_object),
                       crossover=AdaptiveSinglePointCrossover(prob=config.CROSSOVER_PROBABILITY),
                       # crossover=get_crossover("real_k_point", n_points=2),
-                      mutation=BitStringMutation(prob=config.MUTATION_PROBABILITY),
+                      mutation=BitStringMutation(prob=config.MUTATION_PROBABILITY, initializer=initializer_object),
                       eliminate_duplicates=ElementwiseDuplicateElimination(cmp_func=is_equal_2_refactorings_list)
                       )
     algorithms.append(algorithm)
@@ -670,11 +664,11 @@ def main():
                                         seed=1)
     algorithm = NSGA3(ref_dirs=ref_dirs,
                       pop_size=config.POPULATION_SIZE,  # 200
-                      sampling=PopulationInitialization(warm_start=config.WARM_START),
+                      sampling=PopulationInitialization(initializer_object),
                       selection=TournamentSelection(func_comp=binary_tournament),
-                      crossover=AdaptiveSinglePointCrossover(prob=config.CROSSOVER_PROBABILITY),
+                      crossover=AdaptiveSinglePointCrossover(prob=config.CROSSOVER_PROBABILITY, ),
                       # crossover=get_crossover("real_k_point", n_points=2),
-                      mutation=BitStringMutation(prob=config.MUTATION_PROBABILITY),
+                      mutation=BitStringMutation(prob=config.MUTATION_PROBABILITY, initializer=initializer_object),
                       eliminate_duplicates=ElementwiseDuplicateElimination(cmp_func=is_equal_2_refactorings_list)
                       )
     algorithms.append(algorithm)
