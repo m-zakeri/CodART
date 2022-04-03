@@ -133,7 +133,9 @@ class UnderstandUtility:
     @classmethod
     def get_project_classes_longnames_java(cls, db):
         class_name_list = list()
-        entities = db.ents('Java Class ~Interface ~Enum ~Unknown ~Unresolved ~Jar ~Library')
+        filter1 = "Java Class ~Unresolved ~Unknown ~TypeVariable ~Anonymous ~Annotation ~Enum ~Interface ~Abstract ~Jar ~Library"
+        entities = db.ents(filter1)
+
         # entities = db.ents('Type')
         for class_ in sorted(entities, key=UnderstandUtility.sort_key):
             # print(class_.name())
