@@ -33,7 +33,7 @@ from pymoo.optimize import minimize
 from sbse import config
 from sbse.config import logger
 from sbse.initialize import RandomInitialization
-from sbse.objectives import Objectives
+from metrics.qmood import DesignQualityAttributes
 from metrics.testability_prediction import main as testability_main
 from metrics.modularity import main as modularity_main
 from codart.utility.directory_utils import update_understand_database, git_restore
@@ -221,7 +221,7 @@ class ProblemMultiObjective(ElementwiseProblem):
             update_understand_database(config.UDB_PATH)
 
         # Stage 2: Computing quality attributes
-        obj = Objectives(udb_path=config.UDB_PATH)
+        obj = DesignQualityAttributes(udb_path=config.UDB_PATH)
         o1 = obj.average
         del obj
         o2 = testability_main(config.UDB_PATH)
@@ -273,7 +273,7 @@ class ProblemManyObjective(ElementwiseProblem):
             update_understand_database(config.UDB_PATH)
 
         # Stage 2: Computing quality attributes
-        qmood = Objectives(udb_path=config.UDB_PATH)
+        qmood = DesignQualityAttributes(udb_path=config.UDB_PATH)
         o1 = qmood.reusability
         o2 = qmood.understandability
         o3 = qmood.flexibility
