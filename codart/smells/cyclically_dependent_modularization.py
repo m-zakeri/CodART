@@ -1,6 +1,8 @@
-from antlr4.TokenStreamRewriter import TokenStreamRewriter
-from refactorings.utils.utils2 import get_program, Rewriter, get_filenames_in_dir
-from refactorings.utils.utils_listener_fast import TokensInfo, SingleFileElement, Class
+"""
+
+
+"""
+from codart.symbol_table import get_program, get_filenames_in_dir
 
 
 class CyclicDependentModularization(object):
