@@ -11,6 +11,7 @@ __version__ = '0.2.1'
 __author__ = 'Morteza Zakeri'
 
 import os
+import random
 from pathlib import Path
 import networkx as nx
 
@@ -26,6 +27,7 @@ from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
+from sbse.config import logger
 
 class DependencyPreConditionListener(JavaParserLabeledListener):
 
@@ -442,7 +444,7 @@ class ExtractClassAPI:
         for ref in class_ent.refs("Define", "Method"):
             method_ent = ref.ent()
             self.method_usage_map[method_ent.simplename()] = set()
-            for use in method_ent.refs("SetBy UseBy ModifyBy, Call", "Variable ~Unknown, Method ~Unknown"):
+            for use in method_ent.refs("Setby Useby Modifyby, Call", "Variable ~Unknown, Method ~Unknown"):
                 self.method_usage_map[method_ent.simplename()].add(use.ent().simplename())
         _db.close()
 
@@ -500,7 +502,7 @@ class ExtractClassAPI:
                     }
                     if field_usage not in field_usages:
                         field_usages.append(field_usage)
-
+        _db.close()
         # print(listener.token_stream_rewriter.getDefaultText())
         # print("=" * 25)
         # print(listener.code)
@@ -527,7 +529,7 @@ class ExtractClassAPI:
         self.propagate_fields(field_usages)
         self.reformat(self.file_path)
         self.reformat(self.new_file_path)
-        _db.close()
+
         return True
 
 
@@ -541,10 +543,15 @@ def get_java_files(directory):
 
 
 def main(udb_path, file_path, source_class, moved_fields, moved_methods, *args, **kwargs):
-    new_class = f"{source_class}Extracted"
+    new_class = f"{source_class}Extracted{random.randint(1, 1000)}"
     new_file_path = os.path.join(Path(file_path).parent, f"{new_class}.java")
 
-    if not os.path.exists(new_file_path):
+    if not os.path.exists(file_path):
+        logger.error(f'The source class "{source_class}" is nested in {file_path}')
+        return False
+
+    if os.path.exists(new_file_path):
+        logger.error(f'The new class "{new_file_path}" already exist.')
         return False
 
     eca = ExtractClassAPI(
@@ -557,7 +564,8 @@ def main(udb_path, file_path, source_class, moved_fields, moved_methods, *args, 
         new_file_path=new_file_path
     )
     eca.get_source_class_map()
-    if len(eca.method_usage_map):
+    if len(eca.method_usage_map) == 0:
+        logger.error(f'The method_usage_map is empty: {len(eca.method_usage_map)}')
         return False
     else:
         res = eca.do_refactor()
