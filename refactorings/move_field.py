@@ -163,7 +163,7 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
     # Find usages
     usages = {}
 
-    for ref in field_ent.refs("setby,useby"):
+    for ref in field_ent.refs("Setby,Useby"):
         file = ref.file().longname()
         if file in usages:
             usages[file].append(ref.line())
@@ -179,6 +179,8 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
         db.close()
         return False
 
+    db.close()
+
     # Check if there is an cycle
     listener = parse_and_walk(
         file_path=target_class_file,
@@ -188,7 +190,7 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
 
     if not listener.is_valid:
         logger.error(f"Can not move field because there is a cycle between {source_class}, {target_class}")
-        db.close()
+        # db.close()
         return False
 
     # Propagate Changes
@@ -204,7 +206,6 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
 
     # Do the cut and paste!
     # Cut
-
     listener = parse_and_walk(
         file_path=src_class_file,
         listener_class=CutFieldListener,
@@ -226,7 +227,7 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
         field_text=field_text,
     )
 
-    db.close()
+    # db.close()
     return True
 
 
