@@ -383,7 +383,7 @@ class TestabilityModel:
             print('sum testability2\t\t', df_new['PredictedTestability'].sum())
             df_new.to_csv(sbse.config.PROJECT_PATH + '_testability2_after_ga.csv', index=False)
 
-        return df_new['PredictedTestability'].mean()
+        return df_new['PredictedTestability'].sum()  # Return sum instead mean
 
 
 # API
@@ -406,4 +406,4 @@ if __name__ == '__main__':
     from sbse.config import UDB_PATH
     print(f"UDB path: {UDB_PATH}")
     for i in range(0, 1):
-        print('mean testability2 normalize by 1\t', main(UDB_PATH))
+        print('mean testability2 normalize by 1\t', main(UDB_PATH, initial_value=1.0, verbose=False))
