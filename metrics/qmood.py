@@ -78,7 +78,7 @@ class DesignMetrics:
         count = 0
         for ent in self.known_class_entities:
             is_tree = False
-            for ref in ent.refs("ExtendBy"):
+            for ref in ent.refs("Extendby"):
                 if ref:
                     is_tree = True
                     break
@@ -203,23 +203,23 @@ class DesignMetrics:
         class_entity = self.get_class_entity(class_longname)
         for ref in class_entity.refs("Define", "Variable ~Local ~Unknown"):
             defined_entity = ref.ent()
-            kind_name = defined_entity.kindname()
-            if "Public" in kind_name or "public" in kind_name:
-                public_variables += 1
-            elif "Private" in kind_name or "private" in kind_name:
-                private_variables += 1
-            elif "Protected" in kind_name or "protected" in kind_name:
-                protected_variables += 1
-            elif "Default" in kind_name or "default" in kind_name:
-                default_variables += 1
+            kind_name = str(defined_entity.kindname())
 
+            if kind_name.find('Public') != -1:
+                public_variables += 1
+            elif kind_name.find('Private') != -1:
+                private_variables += 1
+            elif kind_name.find('Protected') != -1:
+                protected_variables += 1
+            elif kind_name.find('Default') != -1:
+                default_variables += 1
         try:
             enum_ = private_variables + protected_variables
             denum_ = private_variables + protected_variables + default_variables + public_variables
             ratio = enum_ / denum_
         except ZeroDivisionError:
-            logger.error('ZeroDivisionError in computing QMOOD DAM metric.')
-            ratio = 0.0
+            # logger.error('ZeroDivisionError in computing QMOOD DAM metric.')
+            ratio = 1.0
         return ratio
 
     def ClassLevelCAMC(self, class_longname):
@@ -257,7 +257,7 @@ class DesignMetrics:
         class_entity = self.get_class_entity(class_longname)
         if class_entity:
             # print(class_entity.metric(['CountDeclMethod']).get('CountDeclMethod', 0))
-            method_list = class_entity.ents('Define', 'Java Method ~Unknown ~Unresolved ~Jar ~Library')
+            method_list = class_entity.ents('Define', 'Java Method ~Unknown ~Unresolved ~Jar ~Library ~Constructor ~Implicit ~Lambda ~External')
             counter = 0
             for method_ in method_list:
                 if method_.metric(['Cyclomatic']).get('Cyclomatic', 0) > 1:
@@ -278,7 +278,7 @@ class DesignMetrics:
             if ref.ent().type() in self.all_classes:
                 others.add(ref.ent().type())
 
-        for ref in class_entity.refs("Define", "Method"):
+        for ref in class_entity.refs("Define", "Method ~Unknown ~Unresolved ~Jar ~Library ~Constructor ~Implicit ~Lambda ~External"):
             for ref2 in ref.ent().refs("Define", "Parameter"):
                 if ref2.ent().type() in self.all_classes:
                     others.add(ref2.ent().type())
@@ -313,7 +313,7 @@ class DesignMetrics:
         private_methods = class_entity.metric(['CountDeclMethodPrivate']).get('CountDeclMethodPrivate', 0)
         static_methods = class_entity.metric(['CountDeclClassMethod']).get('CountDeclClassMethod', 0)
         final_methods = 0
-        for ref in class_entity.refs('Define', 'Java Method ~Unknown ~Unresolved ~Jar ~Library'):
+        for ref in class_entity.refs('Define', 'Java Method ~Unknown ~Unresolved ~Jar ~Library ~Constructor ~Implicit ~Lambda ~External'):
             if "Final" in ref.ent().kindname():
                 final_methods += 1
         return instance_methods - (private_methods + final_methods + static_methods)
@@ -363,19 +363,19 @@ class DesignQualityAttributes:
         :param udb_path: The understand database path
         """
         self.udb_path = udb_path
-        self.qmood = DesignMetrics(udb_path=udb_path)
+        self.__qmood = DesignMetrics(udb_path=udb_path)
         # Calculating once and using multiple times
-        self.DSC = self.qmood.DSC
-        self.NOH = self.qmood.NOH
-        self.ANA = self.qmood.ANA
-        self.MOA = self.qmood.MOA
-        self.DAM = self.qmood.DAM
-        self.CAMC = self.qmood.CAMC
-        self.CIS = self.qmood.CIS
-        self.NOM = self.qmood.NOM
-        self.DCC = self.qmood.DCC
-        self.MFA = self.qmood.MFA
-        self.NOP = self.qmood.NOP
+        self.DSC = self.__qmood.DSC
+        self.NOH = self.__qmood.NOH
+        self.ANA = self.__qmood.ANA
+        self.MOA = self.__qmood.MOA
+        self.DAM = self.__qmood.DAM
+        self.CAMC = self.__qmood.CAMC
+        self.CIS = self.__qmood.CIS
+        self.NOM = self.__qmood.NOM
+        self.DCC = self.__qmood.DCC
+        self.MFA = self.__qmood.MFA
+        self.NOP = self.__qmood.NOP
 
         # For caching results
         self._reusability = None
@@ -420,8 +420,7 @@ class DesignQualityAttributes:
         Classes with given functions that are publicly stated in interfaces to be used by others.
         :return: functionality score
         """
-        self._functionality = 0.12 * self.CAMC + 0.22 * self.NOP + 0.22 * self.CIS + \
-                              0.22 * self.DSC + 0.22 * self.NOH
+        self._functionality = 0.12 * self.CAMC + 0.22 * self.NOP + 0.22 * self.CIS + 0.22 * self.DSC + 0.22 * self.NOH
         return self._functionality
 
     @property
@@ -439,15 +438,12 @@ class DesignQualityAttributes:
         Design efficiency in fulfilling the required functionality.
         :return: effectiveness score
         """
-        self._effectiveness = 0.2 * self.ANA + 0.2 * self.DAM + 0.2 * self.MOA + 0.2 * \
-                              self.MFA + 0.2 * self.NOP
+        self._effectiveness = 0.2 * self.ANA + 0.2 * self.DAM + 0.2 * self.MOA + 0.2 *  self.MFA + 0.2 * self.NOP
         return self._effectiveness
 
     @property
     def average(self):
-        metrics = ['reusability', 'flexibility', 'understandability',
-                   'functionality', 'extendability', 'effectiveness',
-                   ]
+        metrics = ['reusability', 'flexibility', 'understandability', 'functionality', 'extendability', 'effectiveness',]
         all_metrics = []
         for metric in metrics:
             cache = getattr(self, f'_{metric}')
