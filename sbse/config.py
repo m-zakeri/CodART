@@ -138,20 +138,20 @@ PROJECT_NAME = os.path.basename(PROJECT_PATH)
 # Initial value of QMOOD design metrics, testability and modularity used in objective-normalization process
 INITIAL_METRICS = {
     "10_water-simulator": {  # 0
-        'ANA': 0.705357143,
-        'CAMC': 0.711339286,
-        'CIS': 2.571428571,
-        'DAM': 0.6224462,
-        'DCC': 3.625,
-        'DSC': 113.0,
-        'MFA': 0.033040629,
-        'MOA': 1.223214286,
-        'NOH': 1.0,
-        'NOM': 3.616071429,
-        'NOP': 3.026785714,
-        'MODULE': 0.22967147316783118,
-        'TEST2': 0.4878024731806904,  # Obtained by testability_prediction2
-        'TEST': 0.3702604117198275  # Obtained by testability_prediction3
+        'ANA': 0.56757,
+        'CAMC': 0.5877,
+        'CIS': 3.09459,
+        'DAM': 0.87451,
+        'DCC': 4.82432,
+        'DSC': 71.0,
+        'MFA': 0.05001,
+        'MOA': 1.68919,
+        'NOH': 0.0,
+        'NOM': 4.66216,
+        'NOP': 3.77027,
+        'MODULE': 0.22967,
+        'TEST': 0.48329,  # Obtained by testability_prediction2
+        'TEST3': 0.3702604117198275  # Obtained by testability_prediction3
     },
     "61_noen": {  # 1
         'ANA': 0.498777506,
@@ -346,6 +346,7 @@ FORMATTER = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
 #     level=logging.DEBUG,  # DEBUG
 #     handlers=[logging.StreamHandler(sys.stdout), logging.FileHandler(LOG_FILE)],
 # )
+
 
 def get_console_handler():
     console_handler = logging.StreamHandler(sys.stdout)
