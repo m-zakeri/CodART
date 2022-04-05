@@ -47,9 +47,9 @@ class DesignMetrics:
         self.db = und.open(udb_path)
         self.metrics = self.db.metric(self.db.metrics())
 
-        filter1 = "Java Class ~TypeVariable ~Anonymous ~Enum ~Interface ~Abstract ~Jar ~Library ~Standard"
-        filter2 = "Java Class ~Unresolved ~Unknown ~TypeVariable ~Anonymous ~Annotation ~Enum ~Interface ~Abstract ~Jar ~Library ~Standard"
-        filter3 = "Java Class ~Unresolved ~Unknown ~TypeVariable ~Anonymous ~Annotation ~Enum ~Interface ~Abstract ~Jar ~Library ~Standard"
+        filter1 = "Java Class ~TypeVariable ~Anonymous ~Enum ~Interface ~Jar ~Library ~Standard"
+        filter2 = "Java Class ~Unresolved ~Unknown ~TypeVariable ~Anonymous ~Annotation ~Enum ~Interface ~Jar ~Library ~Standard"
+        filter3 = "Java Class ~Unresolved ~Unknown ~TypeVariable ~Anonymous ~Enum ~Interface ~Jar ~Library ~Standard"
         self.all_classes = self.get_classes(filter1)
         self.known_class_entities = self.db.ents(filter2)
         self.user_defined_classes = self.get_classes(filter3)
@@ -122,7 +122,7 @@ class DesignMetrics:
     @divide_by_initial_value
     def CAMC(self):
         """
-        CAMC - Cohesion Among Methods of class
+        CAMC or CAM - Cohesion Among Methods of class
         :return: AVG(All Class's CAMC)
         """
         return self.get_class_average(self.ClassLevelCAMC)
@@ -198,23 +198,27 @@ class DesignMetrics:
         public_variables = 0
         protected_variables = 0
         private_variables = 0
+        default_variables = 0
 
         class_entity = self.get_class_entity(class_longname)
-        for ref in class_entity.refs("Define", "Variable"):
-            define = ref.ent()
-            kind_name = define.kindname()
+        for ref in class_entity.refs("Define", "Variable ~Local ~Unknown"):
+            defined_entity = ref.ent()
+            kind_name = defined_entity.kindname()
             if "Public" in kind_name or "public" in kind_name:
                 public_variables += 1
             elif "Private" in kind_name or "private" in kind_name:
                 private_variables += 1
             elif "Protected" in kind_name or "protected" in kind_name:
                 protected_variables += 1
+            elif "Default" in kind_name or "default" in kind_name:
+                default_variables += 1
 
         try:
             enum_ = private_variables + protected_variables
-            denum_ = private_variables + protected_variables + public_variables
+            denum_ = private_variables + protected_variables + default_variables + public_variables
             ratio = enum_ / denum_
         except ZeroDivisionError:
+            logger.error('ZeroDivisionError in computing QMOOD DAM metric.')
             ratio = 0.0
         return ratio
 
@@ -252,7 +256,14 @@ class DesignMetrics:
         """
         class_entity = self.get_class_entity(class_longname)
         if class_entity:
-            return class_entity.metric(['CountDeclMethod']).get('CountDeclMethod', 0)
+            # print(class_entity.metric(['CountDeclMethod']).get('CountDeclMethod', 0))
+            method_list = class_entity.ents('Define', 'Java Method ~Unknown ~Unresolved ~Jar ~Library')
+            counter = 0
+            for method_ in method_list:
+                if method_.metric(['Cyclomatic']).get('Cyclomatic', 0) > 1:
+                    counter += 1
+            return counter
+
         return 0
 
     def ClassLevelDCC(self, class_longname):
@@ -300,15 +311,12 @@ class DesignMetrics:
             return 0
         instance_methods = class_entity.metric(['CountDeclInstanceMethod']).get('CountDeclInstanceMethod', 0)
         private_methods = class_entity.metric(['CountDeclMethodPrivate']).get('CountDeclMethodPrivate', 0)
+        static_methods = class_entity.metric(['CountDeclClassMethod']).get('CountDeclClassMethod', 0)
         final_methods = 0
-        for ref in class_entity.refs("Define", "Method"):
+        for ref in class_entity.refs('Define', 'Java Method ~Unknown ~Unresolved ~Jar ~Library'):
             if "Final" in ref.ent().kindname():
                 final_methods += 1
-        return instance_methods - (private_methods + final_methods)
-
-    def test(self):
-        print("Entity:", "Project")
-        print(self.NOP)
+        return instance_methods - (private_methods + final_methods + static_methods)
 
     def get_class_entity(self, class_longname):
         for ent in self.known_class_entities:
