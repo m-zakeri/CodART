@@ -40,10 +40,10 @@ REFACTORING_MAIN_MAP = {
     'Make Method Static': make_method_static_2.main,
     'Make Method Non-Static': make_method_non_static_2.main,
     'Pull Up Field': pullup_field.main,
-    'Push Down Field': pushdown_field2.main,
-    'Pull Up Method': pullup_method.main,
-    'Pull Up Constructor': pullup_constructor.main,
-    'Push Down Method': pushdown_method.main,
+    'Push Down Field': pushdown_field2.main,  # 0
+    'Pull Up Method': pullup_method.main,  # 0
+    'Pull Up Constructor': pullup_constructor.main,  # 0
+    'Push Down Method': pushdown_method.main,  # 0
     'Move Field': move_field.main,
     'Move Method': move_method.main,
     'Move Class': move_class.main,
@@ -51,7 +51,7 @@ REFACTORING_MAIN_MAP = {
     'Extract Method': extract_method.main,
     'Increase Field Visibility': increase_field_visibility.main,
     'Increase Method Visibility': increase_method_visibility.main,
-    'Decrease Field Visibility': decrease_field_visibility.main,
+    'Decrease Field Visibility': decrease_field_visibility.main,  # 0
     'Decrease Method Visibility': decrease_method_visibility.main,
 }
 
@@ -102,23 +102,23 @@ class Initialization(object):
         self.population = []
 
         self.initializers = (
-            self.init_make_field_non_static,  # 0
-            self.init_make_field_static,  # 1
-            self.init_make_method_static,  # 2
-            self.init_make_method_non_static,  # 3
-            self.init_pullup_field,  # 4
-            self.init_move_field,  # 5
-            self.init_move_method,  # 6
+            # self.init_make_field_non_static,  # 0
+            # self.init_make_field_static,  # 1
+            # self.init_make_method_static,  # 2
+            # self.init_make_method_non_static,  # 3
+            # self.init_pullup_field,  # 4
+            # self.init_move_field,  # 5
+            # self.init_move_method,  # 6
             self.init_move_class,  # 7
-            self.init_push_down_field,  # 8
-            self.init_extract_class,  # 9
-            self.init_pullup_method,  # 10
-            self.init_push_down_method,  # 11
-            self.init_pullup_constructor,  # 12
-            self.init_decrease_field_visibility,  # 13
-            self.init_increase_field_visibility,  # 14
-            self.init_decrease_method_visibility,  # 15
-            self.init_increase_method_visibility  # 16
+            # self.init_push_down_field,  # 8
+            # self.init_extract_class,  # 9
+            # self.init_pullup_method,  # 10
+            # self.init_push_down_method,  # 11
+            # self.init_pullup_constructor,  # 12
+            # self.init_decrease_field_visibility,  # 13
+            # self.init_increase_field_visibility,  # 14
+            # self.init_decrease_method_visibility,  # 15
+            # self.init_increase_method_visibility  # 16
             # self.init_extract_method,  # 17
         )
 
@@ -755,15 +755,14 @@ class RandomInitialization(Initialization):
         _db = und.open(self.udb_path)
         refactoring_main = move_class.main
         params = {"udb_path": str(Path(self.udb_path))}
-        # classes = self._und.ents("Class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static")
-        classes = _db.ents("Type Class ~Unknown ~Anonymous")
+        classes = _db.ents("Java Class Public ~TypeVariable ~Anonymous ~Unknown ~Unresolved ~Private ~Static")
         selected_class = random.choice(classes)
         package_list = selected_class.ents('Containin', 'Java Package')
         while not package_list and selected_class.parent() is not None:
             package_list = selected_class.parent().ents('Containin', 'Java Package')
             selected_class = selected_class.parent()
         # print(package_list)
-        params.update({"class_name": selected_class.longname()})
+        params.update({"class_name": selected_class.simplename()})
         if len(package_list) < 1:
             params.update({"source_package": "(Unnamed_Package)"})
         else:
@@ -778,23 +777,26 @@ class RandomInitialization(Initialization):
         # print("related_entities", related_entities)
         # for e in related_entities:
         #     print(e.longname(), e.kind())
-        if related_entities is not None and len(related_entities) > 0:
-            selected_entity = random.choice(related_entities)
-            package_list = selected_entity.ents('Containin', 'Java Package')
-            while not package_list and selected_entity.parent() is not None:
-                package_list = selected_entity.parent().ents('Containin', 'Java Package')
-                selected_entity = selected_entity.parent()
-            if len(package_list) < 1:
-                params.update({"target_package": "(Unnamed_Package)"})
+        while True:
+            if related_entities is not None and len(related_entities) > 0:
+                selected_entity = random.choice(related_entities)
+                package_list = selected_entity.ents('Containin', 'Java Package')
+                while not package_list and selected_entity.parent() is not None:
+                    package_list = selected_entity.parent().ents('Containin', 'Java Package')
+                    selected_entity = selected_entity.parent()
+                if len(package_list) < 1:
+                    params.update({"target_package": "(Unnamed_Package)"})
+                else:
+                    params.update({"target_package": package_list[0].longname()})
             else:
-                params.update({"target_package": package_list[0].longname()})
-        else:
-            packages = _db.ents("Package ~Unknown ~Unresolved ~Unnamed")
-            if packages is not None and len(packages) > 0:
-                selected_package = random.choice(packages)
-                params.update({"target_package": selected_package.longname()})
-            else:
-                params.update({"target_package": "(Unnamed_Package)"})
+                packages = _db.ents("Package ~Unknown ~Unresolved ~Unnamed")
+                if packages is not None and len(packages) > 0:
+                    selected_package = random.choice(packages)
+                    params.update({"target_package": selected_package.longname()})
+                else:
+                    params.update({"target_package": "(Unnamed_Package)"})
+            if params['source_package'] != params['target_package'] != '(Unnamed_Package)':
+                break
 
         _db.close()
         return refactoring_main, params, 'Move Class'
@@ -922,9 +924,7 @@ class SmellInitialization(RandomInitialization):
 
     def load_extract_class_candidates(self):
         _db = und.open(self.udb_path)
-        god_classes = pandas.read_csv(
-            config.GOD_CLASS_PATH, sep="\t"
-        )
+        god_classes = pandas.read_csv(config.GOD_CLASS_PATH, sep="\t")
         candidates = []
         for index, row in god_classes.iterrows():
             moved_fields, moved_methods = [], []
@@ -933,6 +933,7 @@ class SmellInitialization(RandomInitialization):
                 class_file = _db.lookup(re.compile(row[0].strip() + r'$'), "Class")[0].parent().longname()
                 # print(class_file)
             except:
+                # print('Class file not found')
                 continue
             source_class = row[0].split(".")[-1]
             data = row[1][1:-1]  # skip [ and ]
@@ -1051,7 +1052,8 @@ def test_generate_population():
     )
     population_ = initializer_.generate_population()
     print(population_)
-    initializer_.dump_population(config.PROJECT_PATH + '_population.json')
+    # initializer_.dump_population(config.PROJECT_PATH + '_population.json')
+
 
 def test_load_population():
     reset_project()
@@ -1085,6 +1087,6 @@ def test_refactoring_operations_initialization():
 
 
 if __name__ == '__main__':
-    # test_generate_population()
+    test_generate_population()
     # test_refactoring_operations_initialization()
-    test_load_population()
+    # test_load_population()

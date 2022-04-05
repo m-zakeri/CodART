@@ -3,7 +3,6 @@
 """
 
 import os
-# import logging
 
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
@@ -17,9 +16,6 @@ except ImportError as e:
     print(e)
 
 from sbse.config import logger
-
-# logging.basicConfig(level=logging.DEBUG)
-# logger = logging.getLogger(__file__)
 
 ROOT_PACKAGE = "(Unnamed_Package)"
 
@@ -102,8 +98,10 @@ class MoveClassAPI:
             logger.error("Package entity does not exists.")
             return False
 
-        if not os.path.exists(os.path.join(source_package_dir, f"{self.class_name}.java")):
-            logger.error("Class does not exists in source package.")
+        src_package_dir = os.path.join(source_package_dir, f"{self.class_name}.java")
+        if not os.path.exists(src_package_dir):
+            logger.error(
+                f'Class "{self.class_name}" does not exists in source package "{src_package_dir}" with the same file name.')
             return False
 
         # Get class directory
@@ -134,8 +132,10 @@ class MoveClassAPI:
             long_name = ent.longname()
             if long_name == self.source_package and sp is None:
                 sp = os.path.dirname(ent.parent().longname())
+                print(sp)
             if long_name == self.target_package and tp is None:
                 tp = os.path.dirname(ent.parent().longname())
+                print(tp)
         db.close()
         return sp, tp
 
@@ -160,8 +160,9 @@ class MoveClassAPI:
 
     def do_refactor(self):
         if not self.check_preconditions():
-            logger.error("Pre conditions failed.")
+            logger.error("@@@@@@@@@@@@@@@@@@@@@@@@@ Pre conditions failed.")
             return False
+
         # Update usages
         for file_path in self.usages:
             parse_and_walk(
@@ -177,14 +178,14 @@ class MoveClassAPI:
         os.remove(self.class_dir)
 
         # Write the new class
-        with open(self.new_class_path, 'w') as f:
-            package = ""
-            if self.target_package != ROOT_PACKAGE:
-                package = f"package {self.target_package};\n\n"
-            imports = ""
-            if self.source_package != ROOT_PACKAGE:
-                imports = f"import {self.source_package}.*;\n\n"
+        package = ""
+        if self.target_package != ROOT_PACKAGE:
+            package = f"package {self.target_package};\n\n"
+        imports = ""
+        if self.source_package != ROOT_PACKAGE:
+            imports = f"import {self.source_package}.*;\n\n"
 
+        with open(self.new_class_path, 'w') as f:
             f.write(package + imports + self.class_content)
 
         return True
