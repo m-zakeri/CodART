@@ -610,13 +610,13 @@ def binary_tournament(pop, P, **kwargs):
         raise Exception("Only pressure=2 allowed for binary tournament!")
     S = np.full(n_tournaments, -1, dtype=np.int64)
 
-    # now do all the tournaments
+    # Now do all the tournaments
     for i in range(n_tournaments):
         a, b = P[i]
-        # if the first individual is better, choose it
+        # If the first individual is better, choose it
         if pop[a].F.all() <= pop[a].F.all():
             S[i] = a
-        # otherwise take the other individual
+        # Otherwise, take the other individual
         else:
             S[i] = b
 
