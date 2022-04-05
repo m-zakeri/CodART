@@ -138,19 +138,19 @@ PROJECT_NAME = os.path.basename(PROJECT_PATH)
 # Initial value of QMOOD design metrics, testability and modularity used in objective-normalization process
 INITIAL_METRICS = {
     "10_water-simulator": {  # 0
-        'ANA': 0.56757,
-        'CAMC': 0.5877,
-        'CIS': 3.09459,
-        'DAM': 0.87451,
-        'DCC': 4.82432,
-        'DSC': 71.0,
-        'MFA': 0.05001,
-        'MOA': 1.68919,
-        'NOH': 0.0,
-        'NOM': 4.66216,
-        'NOP': 3.77027,
+        'ANA': 0.56,
+        'CAMC': 0.5844,
+        'CIS': 3.21333,
+        'DAM': 0.96952,
+        'DCC': 4.61333,
+        'DSC': 72.0,
+        'MFA': 0.04934,
+        'MOA': 1.69333,
+        'NOH': 1.0,
+        'NOM': 1.25333,
+        'NOP': 3.86667,
         'MODULE': 0.22967,
-        'TEST': 0.48329,  # Obtained by testability_prediction2
+        'TEST': 22.71451,  # Obtained by testability_prediction2
         'TEST3': 0.3702604117198275  # Obtained by testability_prediction3
     },
     "61_noen": {  # 1
