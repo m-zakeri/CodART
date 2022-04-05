@@ -1,6 +1,7 @@
 """
 
 """
+
 import os
 import os.path
 from pathlib import Path
@@ -243,6 +244,7 @@ def get_source_class_map(db, source_class: str):
     class_ent = None
     for ent in class_ents:
         if ent.parent() is not None:
+            # print(source_class)
             if Path(ent.parent().longname()).name == f"{source_class}.java":
                 class_ent = ent
                 break
@@ -269,10 +271,11 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
         logger.error("Class entity is None")
         return False
 
-    if class_ent.refs("Extend ~Implicit, ExtendBy, Implement"):
-        logger.error("Class is in inheritance or implements an interface.")
-        db.close()
-        return False
+    # Strong overlay precondition
+    # if class_ent.refs("Extend ~Implicit, ExtendBy, Implement"):
+    #     logger.error("Class is in inheritance or implements an interface.")
+    #     db.close()
+    #     return False
 
     # Check if method is static
     method_ent = db.lookup(f"{source_package}.{source_class}.{method_name}", "Method")
@@ -298,7 +301,7 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
     # Find usages
     usages = {}
 
-    for ref in method_ent.refs("callby"):
+    for ref in method_ent.refs("Callby"):
         file = ref.file().longname()
         if file in usages:
             usages[file].append(ref.line())
@@ -315,6 +318,8 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
         db.close()
         return False
 
+    db.close()
+
     # Check if there is an cycle
     listener = parse_and_walk(
         file_path=target_class_file,
@@ -324,7 +329,7 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
 
     if not listener.is_valid:
         logger.error(f"Can not move method because there is a cycle between {source_class}, {target_class}")
-        db.close()
+        # db.close()
         return False
 
     # Propagate Changes
@@ -379,7 +384,7 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
         imports=None,
         has_empty_cons=listener.has_empty_cons,
     )
-    db.close()
+    # db.close()
     return True
 
 
