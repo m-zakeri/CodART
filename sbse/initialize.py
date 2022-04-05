@@ -5,10 +5,8 @@ Initialization: The abstract class and common utility functions.
 RandomInitialization: For initialling random candidates.
 """
 
-
 __version__ = '0.3.0'
 __author__ = 'Morteza Zakeri'
-
 
 import os
 import re
@@ -51,7 +49,7 @@ REFACTORING_MAIN_MAP = {
     'Extract Method': extract_method.main,
     'Increase Field Visibility': increase_field_visibility.main,
     'Increase Method Visibility': increase_method_visibility.main,
-    'Decrease Field Visibility': decrease_field_visibility.main,  # 0
+    'Decrease Field Visibility': decrease_field_visibility.main,
     'Decrease Method Visibility': decrease_method_visibility.main,
 }
 
@@ -109,7 +107,7 @@ class Initialization(object):
             # self.init_pullup_field,  # 4
             # self.init_move_field,  # 5
             # self.init_move_method,  # 6
-            self.init_move_class,  # 7
+            # self.init_move_class,  # 7
             # self.init_push_down_field,  # 8
             # self.init_extract_class,  # 9
             # self.init_pullup_method,  # 10
@@ -117,8 +115,8 @@ class Initialization(object):
             # self.init_pullup_constructor,  # 12
             # self.init_decrease_field_visibility,  # 13
             # self.init_increase_field_visibility,  # 14
-            # self.init_decrease_method_visibility,  # 15
-            # self.init_increase_method_visibility  # 16
+            self.init_decrease_method_visibility,  # 15
+            # self.init_increase_method_visibility,  # 16
             # self.init_extract_method,  # 17
         )
 
@@ -141,10 +139,10 @@ class Initialization(object):
         _db = und.open(self.udb_path)
         candidates = []
         if static:
-            query = _db.ents("static method")
+            query = _db.ents("Static Method")
             blacklist = ('abstract', 'unknown', 'constructor',)
         else:
-            query = _db.ents("method")
+            query = _db.ents("Method")
             blacklist = ('constructor', 'static', 'abstract', 'unknown',)
         for ent in query:
             kind_name = ent.kindname().lower()
@@ -169,7 +167,7 @@ class Initialization(object):
             is_public = ent.kind().check('public')
             is_private = ent.kind().check('private')
             external_references = 0
-            for ref in ent.refs('CallBy, OverrideBy'):
+            for ref in ent.refs('Callby, Overrideby'):
                 if '.'.join(long_name[:-1]) not in ref.ent().longname():
                     external_references += 1
 
@@ -186,10 +184,10 @@ class Initialization(object):
         _db = und.open(self.udb_path)
         candidates = []
         if static:
-            query = _db.ents("static variable")
+            query = _db.ents("Static Variable")
             blacklist = ()
         else:
-            query = _db.ents("variable")
+            query = _db.ents("Variable")
             blacklist = ('static',)
         for ent in query:
             kind_name = ent.kindname().lower()
@@ -213,7 +211,7 @@ class Initialization(object):
             is_public = ent.kind().check('public')
             is_private = ent.kind().check('private')
             external_references = 0
-            for ref in ent.refs('SetBy, UseBy'):
+            for ref in ent.refs('Setby, Useby'):
                 if '.'.join(long_name[:-1]) not in ref.ent().longname():
                     external_references += 1
             candidates.append(
@@ -238,7 +236,7 @@ class Initialization(object):
         candidates = []
         class_entities = _db.ents("class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static")
         for ent in class_entities:
-            for ref in ent.refs("define", "variable"):
+            for ref in ent.refs("Define", "Variable"):
                 candidate = {
                     "package_name": get_package_from_class(ent.longname()),
                     "children_class": ent.simplename(),
@@ -251,7 +249,7 @@ class Initialization(object):
     def find_push_down_field_candidates(self):
         _db = und.open(self.udb_path)
         candidates = []
-        class_entities = _db.ents("class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static")
+        class_entities = _db.ents("Class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static")
 
         for ent in class_entities:
             params = {
@@ -287,7 +285,7 @@ class Initialization(object):
     def find_pullup_method_candidates(self):
         _db = und.open(self.udb_path)
         candidates = []
-        class_entities = _db.ents("class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static")
+        class_entities = _db.ents("Class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static")
         common_methods = []
 
         for ent in class_entities:
@@ -335,13 +333,13 @@ class Initialization(object):
     def find_pullup_constructor_candidates(self):
         _db = und.open(self.udb_path)
         candidates = []
-        class_entities = _db.ents("class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static")
+        class_entities = _db.ents("Class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static")
 
         for ent in class_entities:
             children = []
             params = {}
 
-            for ref in ent.refs("extendby"):
+            for ref in ent.refs("Extendby"):
                 child = ref.ent()
                 if not child.kind().check("public class"):
                     continue
@@ -371,13 +369,13 @@ class Initialization(object):
             }
             method_names = []
 
-            for ref in ent.refs("ExtendBy ~Implicit", "public class"):
+            for ref in ent.refs("Extendby ~Implicit", "public class"):
                 params["source_class"] = ent.simplename()
                 ln = ent.longname().split(".")
                 params["source_package"] = ln[0] if len(ln) > 1 else ""
                 params["target_classes"].append(ref.ent().simplename())
 
-            for ref in ent.refs("define", "method"):
+            for ref in ent.refs("Define", "Method"):
                 method_names.append(ref.ent().simplename())
 
             if method_names:
@@ -844,7 +842,7 @@ class RandomInitialization(Initialization):
         """
         refactoring_main = increase_field_visibility.main
         params = {"udb_path": str(Path(self.udb_path))}
-        candidates = list(filter(lambda d: d['is_private'] is True, self._variables))
+        candidates = list(filter(lambda d: d['is_public'] is False, self._variables))
         field = random.choice(candidates)
         params.update({
             "source_package": field["source_package"],
@@ -852,23 +850,6 @@ class RandomInitialization(Initialization):
             "source_field": field["field_name"],
         })
         return refactoring_main, params, 'Increase Field Visibility'
-
-    def init_increase_method_visibility(self):
-        """
-        Finds a private method to increase its visibility to public.
-        Returns:
-            the refactoring main func, its parameters and its name
-        """
-        refactoring_main = increase_method_visibility.main
-        params = {"udb_path": str(Path(self.udb_path))}
-        candidates = list(filter(lambda d: d['is_private'] is True, self._methods))
-        method = random.choice(candidates)
-        params.update({
-            "source_package": method["source_package"],
-            "source_class": method["source_class"],
-            "source_method": method["method_name"],
-        })
-        return refactoring_main, params, 'Increase Method Visibility'
 
     def init_decrease_field_visibility(self):
         """
@@ -878,7 +859,8 @@ class RandomInitialization(Initialization):
         """
         refactoring_main = decrease_field_visibility.main
         params = {"udb_path": str(Path(self.udb_path))}
-        candidates = list(filter(lambda d: d['is_public'] is True and d['external_references'] == 0, self._variables))
+        candidates = list(filter(lambda d: d['is_private'] is False and d['external_references'] == 0, self._variables))
+        # print(candidates)
         field = random.choice(candidates)
         params.update({
             "source_package": field["source_package"],
@@ -886,6 +868,23 @@ class RandomInitialization(Initialization):
             "source_field": field["field_name"],
         })
         return refactoring_main, params, 'Decrease Field Visibility'
+
+    def init_increase_method_visibility(self):
+        """
+        Finds a private method to increase its visibility to public.
+        Returns:
+            the refactoring main func, its parameters and its name
+        """
+        refactoring_main = increase_method_visibility.main
+        params = {"udb_path": str(Path(self.udb_path))}
+        candidates = list(filter(lambda d: d['is_public'] is False, self._methods))
+        method = random.choice(candidates)
+        params.update({
+            "source_package": method["source_package"],
+            "source_class": method["source_class"],
+            "source_method": method["method_name"],
+        })
+        return refactoring_main, params, 'Increase Method Visibility'
 
     def init_decrease_method_visibility(self):
         """
@@ -895,7 +894,7 @@ class RandomInitialization(Initialization):
         """
         refactoring_main = decrease_method_visibility.main
         params = {"udb_path": str(Path(self.udb_path))}
-        candidates = list(filter(lambda d: d['is_public'] is True and d['external_references'] == 0, self._methods))
+        candidates = list(filter(lambda d: d['is_private'] is False and d['external_references'] == 0, self._methods))
         method = random.choice(candidates)
         params.update({
             "source_package": method["source_package"],
@@ -1025,6 +1024,7 @@ class SmellInitialization(RandomInitialization):
         params = random.choice(self.move_method_candidates)
         params["udb_path"] = self.udb_path
         main = move_method.main
+        # print(params)
         return main, params, "Move Method"
 
     def init_extract_class(self):

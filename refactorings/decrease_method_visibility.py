@@ -2,7 +2,8 @@
 Decrease method visibility refactoring
 """
 
-__author__ = "Seyyed Ali Ayati"
+__author__ = "Morteza Zakeri"
+__version__ = '0.2.0'
 
 try:
     import understand as und
@@ -39,10 +40,16 @@ class DecreaseMethodVisibilityListener(JavaParserLabeledListener):
 
     def exitClassBodyDeclaration2(self, ctx: JavaParserLabeled.ClassBodyDeclaration2Context):
         if self.detected_method:
-            self.rewriter.replaceSingleToken(
-                token=ctx.modifier(0).start,
-                text="private"
-            )
+            if ctx.modifier(0) is not None:
+                self.rewriter.replaceSingleToken(
+                    token=ctx.modifier(0).start,
+                    text="private"
+                )
+            else:
+                self.rewriter.replaceSingleToken(
+                    ctx.memberDeclaration().start,
+                    text="private" + ctx.memberDeclaration().getText()
+                )
             self.detected_method = False
 
 
@@ -61,10 +68,11 @@ def main(udb_path, source_package, source_class, source_method, *args, **kwargs)
         db.close()
         return False
 
-    if not method_ent.kind().check("Public"):
-        logger.error("Method is not public.")
-        db.close()
-        return False
+    # Strong overlay precondition
+    # if not method_ent.kind().check("Public"):
+    #     logger.error("Method is not public.")
+    #     db.close()
+    #     return False
 
     for ent in method_ent.ents("CallBy"):
         if f"{source_package}.{source_class}" not in ent.longname():

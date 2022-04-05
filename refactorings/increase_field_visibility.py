@@ -3,7 +3,8 @@ Increase field visibility refactoring
 
 """
 
-__author__ = "Seyyed Ali Ayati"
+__version__ = "0.2.0"
+__author__ = "Morteza Zakeri"
 
 try:
     import understand as und
@@ -47,10 +48,16 @@ class IncreaseFieldVisibilityListener(JavaParserLabeledListener):
 
     def exitClassBodyDeclaration2(self, ctx: JavaParserLabeled.ClassBodyDeclaration2Context):
         if self.detected_field:
-            self.rewriter.replaceSingleToken(
-                token=ctx.modifier(0).start,
-                text="public"
-            )
+            if ctx.modifier(0) is not None:
+                self.rewriter.replaceSingleToken(
+                    token=ctx.modifier(0).start,
+                    text="public"
+                )
+            else:
+                self.rewriter.replaceSingleToken(
+                    ctx.memberDeclaration().start,
+                    text="public" + ctx.memberDeclaration().getText()
+                )
             self.detected_field = False
 
 
@@ -69,10 +76,11 @@ def main(udb_path, source_package, source_class, source_field, *args, **kwargs):
         db.close()
         return False
 
-    if not field_ent.kind().check("Private"):
-        logger.error("Field is not private.")
-        db.close()
-        return False
+    # Strong overlay precondition
+    # if not field_ent.kind().check("private"):
+    #     logger.error("Field is not private.")
+    #     db.close()
+    #     return False
 
     parent = field_ent.parent()
     while parent.parent() is not None:
