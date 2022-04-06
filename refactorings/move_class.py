@@ -193,7 +193,7 @@ class MoveClassAPI:
             )
 
         # Delete source class
-        print('Current class path to be removed: ', self._class_current_path)
+        # logger.debug(f'Current class path to be removed: {self._class_current_path}')
         os.remove(self._class_current_path)
 
         # Write the new class
@@ -204,7 +204,7 @@ class MoveClassAPI:
         if self.source_package != ROOT_PACKAGE:
             imports = f"import {self.source_package}.*;\n"
 
-        print('New class path to be added: ', self._class_new_path)
+        # logger.debug(f'New class path to be added: {self._class_new_path}')
         with open(self._class_new_path, mode='w', encoding='utf-8') as f:
             f.write(package + imports + self.class_content)
 
