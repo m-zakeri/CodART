@@ -126,8 +126,8 @@ BENCHMARKS = {
     ],
 }
 
-PROJECT_PATH = os.path.join(PROJECT_ROOT_DIR, BENCHMARKS['PROJ'][BENCHMARK_INDEX])
-UDB_PATH = os.path.join(UDB_ROOT_DIR, BENCHMARKS['UDB'][BENCHMARK_INDEX])
+PROJECT_PATH = os.path.join(PROJECT_ROOT_DIR, BENCHMARKS['PROJ'][BENCHMARK_INDEX]).replace('/', '\\')
+UDB_PATH = os.path.join(UDB_ROOT_DIR, BENCHMARKS['UDB'][BENCHMARK_INDEX]).replace('/', '\\')
 
 FEATURE_ENVY_PATH = os.path.join(CSV_ROOT_DIR, BENCHMARKS['FEATURE_ENVY'][BENCHMARK_INDEX])
 GOD_CLASS_PATH = os.path.join(CSV_ROOT_DIR, BENCHMARKS['GOD_CLASS'][BENCHMARK_INDEX])
@@ -319,16 +319,16 @@ INITIAL_METRICS = {
         'ANA': 0.60465,
         'CAMC': 0.60977,
         'CIS': 6.60465,
-        'DAM': 0.67287,
-        'DCC': 2.55814,
+        'DAM': 0.85891,
+        'DCC': 2.4186,
         'DSC': 43.0,
         'MFA': 0.15502,
         'MOA': 3.48837,
         'NOH': 1.0,
-        'NOM': 8.51163,
-        'NOP': 5.04651,
+        'NOM': 3.2093,
+        'NOP': 3.23256,
         'MODULE': 0.08172,
-        'TEST': 0.44405,  # Obtained by testability_prediction2
+        'TEST': 14.65374,  # Obtained by testability_prediction2
         'TEST3': 0.3976  # Obtained by testability_prediction3
     },
 }

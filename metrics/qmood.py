@@ -297,7 +297,7 @@ class DesignMetrics:
         all_methods = metrics.get('CountDeclMethodAll')
         if all_methods == 0:
             return 0
-        return (all_methods - local_methods) / all_methods
+        return round((all_methods - local_methods) / all_methods, 5)
 
     def ClassLevelNOP(self, class_longname):
         """
@@ -365,17 +365,17 @@ class DesignQualityAttributes:
         self.udb_path = udb_path
         self.__qmood = DesignMetrics(udb_path=udb_path)
         # Calculating once and using multiple times
-        self.DSC = self.__qmood.DSC
-        self.NOH = self.__qmood.NOH
-        self.ANA = self.__qmood.ANA
-        self.MOA = self.__qmood.MOA
-        self.DAM = self.__qmood.DAM
-        self.CAMC = self.__qmood.CAMC
-        self.CIS = self.__qmood.CIS
-        self.NOM = self.__qmood.NOM
-        self.DCC = self.__qmood.DCC
-        self.MFA = self.__qmood.MFA
-        self.NOP = self.__qmood.NOP
+        self.DSC = self.__qmood.DSC  # Design Size
+        self.NOH = self.__qmood.NOH  # Hierarchies
+        self.ANA = self.__qmood.ANA  # Abstraction
+        self.MOA = self.__qmood.MOA  # Composition, Aggregation
+        self.DAM = self.__qmood.DAM  # Encapsulation
+        self.CAMC = self.__qmood.CAMC  # Cohesion, CAM
+        self.CIS = self.__qmood.CIS  # Messaging
+        self.NOM = self.__qmood.NOM  # Complexity
+        self.DCC = self.__qmood.DCC  # Coupling
+        self.MFA = self.__qmood.MFA  # Inheritance
+        self.NOP = self.__qmood.NOP  # Polymorphism
 
         # For caching results
         self._reusability = None
@@ -392,7 +392,7 @@ class DesignQualityAttributes:
         :return: reusability score
         """
         self._reusability = -0.25 * self.DCC + 0.25 * self.CAMC + 0.5 * self.CIS + 0.5 * self.DSC
-        return self._reusability
+        return round(self._reusability, 5)
 
     @property
     def flexibility(self):
@@ -401,7 +401,7 @@ class DesignQualityAttributes:
         :return: flexibility score
         """
         self._flexibility = 0.25 * self.DAM - 0.25 * self.DCC + 0.5 * self.MOA + 0.5 * self.NOP
-        return self._flexibility
+        return round(self._flexibility, 5)
 
     @property
     def understandability(self):
@@ -409,10 +409,9 @@ class DesignQualityAttributes:
         The degree of understanding and the easiness of learning the design implementation details.
         :return: understandability score
         """
-        self._understandability = -0.33 * self.ANA + 0.33 * self.DAM - 0.33 * self.DCC + \
-                                  0.33 * self.CAMC - 0.33 * self.NOP - 0.33 * self.NOM - \
-                                  0.33 * self.DSC
-        return self._understandability
+        self._understandability = - 0.33 * self.ANA + 0.33 * self.DAM - 0.33 * self.DCC + 0.33 * self.CAMC \
+                                  - 0.33 * self.NOP - 0.34 * self.NOM - 0.33 * self.DSC
+        return round(self._understandability, 5)
 
     @property
     def functionality(self):
@@ -421,7 +420,7 @@ class DesignQualityAttributes:
         :return: functionality score
         """
         self._functionality = 0.12 * self.CAMC + 0.22 * self.NOP + 0.22 * self.CIS + 0.22 * self.DSC + 0.22 * self.NOH
-        return self._functionality
+        return round(self._functionality, 5)
 
     @property
     def extendability(self):
@@ -429,8 +428,8 @@ class DesignQualityAttributes:
         Measurement of design's allowance to incorporate new functional requirements.
         :return: extendability
         """
-        self._extendability = 0.5 * self.ANA - 0.5 * self.DCC + 0.5 * self.MFA + 0.5 * self.NOP
-        return self._extendability
+        self._extendability = 0.50 * self.ANA - 0.50 * self.DCC + 0.50 * self.MFA + 0.50 * self.NOP
+        return round(self._extendability, 5)
 
     @property
     def effectiveness(self):
@@ -438,8 +437,8 @@ class DesignQualityAttributes:
         Design efficiency in fulfilling the required functionality.
         :return: effectiveness score
         """
-        self._effectiveness = 0.2 * self.ANA + 0.2 * self.DAM + 0.2 * self.MOA + 0.2 *  self.MFA + 0.2 * self.NOP
-        return self._effectiveness
+        self._effectiveness = 0.20 * self.ANA + 0.20 * self.DAM + 0.20 * self.MOA + 0.20 * self.MFA + 0.20 * self.NOP
+        return round(self._effectiveness, 5)
 
     @property
     def average(self):
@@ -451,7 +450,7 @@ class DesignQualityAttributes:
                 all_metrics.append(getattr(self, metric))
             else:
                 all_metrics.append(cache)
-        return sum(all_metrics) / len(all_metrics)
+        return round(sum(all_metrics) / len(all_metrics), 5)
 
 
 if __name__ == '__main__':
