@@ -86,8 +86,8 @@ class TestabilityPredicator:
         X_test1 = self.df_all.iloc[:, 1:]
         X_test = self.scaler.transform(X_test1)
         y_pred = self.model.predict(X_test)
-        return sum(list(y_pred)) / len(list(y_pred))
-
+        # return sum(list(y_pred)) / len(list(y_pred))
+        return sum(list(y_pred))
 
 def main(db_path, initial_value=1.0):
     testability_ = TestabilityPredicator(db_path=db_path)
