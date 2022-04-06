@@ -55,9 +55,9 @@ class DecreaseFieldVisibilityListener(JavaParserLabeledListener):
             else:
                 self.rewriter.replaceSingleToken(
                     ctx.memberDeclaration().start,
-                    text="private" + ctx.memberDeclaration().getText()
+                    text="private " + ctx.memberDeclaration().getText()
                 )
-            # print("public" + ctx.memberDeclaration().getText())
+            # print("public " + ctx.memberDeclaration().getText())
             self.detected_field = False
 
 

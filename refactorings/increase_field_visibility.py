@@ -56,7 +56,7 @@ class IncreaseFieldVisibilityListener(JavaParserLabeledListener):
             else:
                 self.rewriter.replaceSingleToken(
                     ctx.memberDeclaration().start,
-                    text="public" + ctx.memberDeclaration().getText()
+                    text="public " + ctx.memberDeclaration().getText()
                 )
             self.detected_field = False
 

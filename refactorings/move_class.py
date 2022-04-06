@@ -6,6 +6,7 @@ import os
 
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
+import sbse.config
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 from codart.symbol_table import parse_and_walk
@@ -78,10 +79,10 @@ class MoveClassAPI:
 
         self.source_package_dir = None
         self.target_package_dir = None
-        self.class_dir = None
+        self._class_current_path = None
         self.class_content = None
         self.usages = None
-        self.new_class_path = None
+        self._class_new_path = None
 
     def check_preconditions(self) -> bool:
         if self.source_package == self.target_package:
@@ -98,46 +99,62 @@ class MoveClassAPI:
             logger.error("Package entity does not exists.")
             return False
 
-        src_package_dir = os.path.join(source_package_dir, f"{self.class_name}.java")
-        if not os.path.exists(src_package_dir):
-            logger.error(
-                f'Class "{self.class_name}" does not exists in source package "{src_package_dir}" with the same file name.')
+        if sbse.config.PROJECT_PATH not in target_package_dir:
+            logger.error(f"Target package address {target_package_dir} cannot be resolved.")
+            return False
+
+        if sbse.config.PROJECT_PATH not in source_package_dir:
+            logger.error(f"Source package address {source_package_dir} cannot be resolved.")
+            return False
+
+        class_full_path = os.path.join(source_package_dir, f"{self.class_name}.java")
+        if not os.path.exists(class_full_path):
+            logger.error(f'Class "{self.class_name}" does not exists in source package "{source_package_dir}" ')
             return False
 
         # Get class directory
-        class_dir, class_content, usages = self.get_class_info()
-        if class_dir is None or class_content is None:
+        class_path, class_content, usages = self.get_class_info()
+        if class_path is None or class_content is None:
             logger.error("Class entity does not exists.")
             return False
 
-        new_class_path = os.path.join(target_package_dir, f"{self.class_name}.java")
-        if os.path.exists(new_class_path):
+        class_new_path = os.path.join(target_package_dir, f"{self.class_name}.java")
+        if os.path.exists(class_new_path):
             logger.error("Class already exists in target package.")
             return False
 
         self.source_package_dir = source_package_dir
         self.target_package_dir = target_package_dir
-        self.class_dir = class_dir
+        self._class_current_path = class_path
         self.class_content = class_content
         self.usages = usages
-        self.new_class_path = new_class_path
+        self._class_new_path = class_new_path
 
         return True
 
     def get_package_directories(self):
         db = und.open(self.udb_path)
-        sp = None
-        tp = None
-        for ent in db.ents("Package"):
-            long_name = ent.longname()
-            if long_name == self.source_package and sp is None:
-                sp = os.path.dirname(ent.parent().longname())
-                print(sp)
-            if long_name == self.target_package and tp is None:
-                tp = os.path.dirname(ent.parent().longname())
-                print(tp)
+        source_package_path = None
+        target_package_path = None
+        packages = db.ents("Java Package")
+        for ent_ in packages:
+            if ent_.longname() == self.source_package:
+                if ent_.parent() is not None:
+                    name_ = ent_.parent().longname()
+                    if os.path.exists(name_):
+                        source_package_path = os.path.dirname(name_)
+                        break
+
+        for ent_ in packages:
+            if ent_.longname() == self.target_package:
+                if ent_.parent() is not None:
+                    name_ = ent_.parent().longname()
+                    if os.path.exists(name_):
+                        target_package_path = os.path.dirname(name_)
+                        break
+
         db.close()
-        return sp, tp
+        return source_package_path, target_package_path
 
     def get_class_info(self):
         db = und.open(self.udb_path)
@@ -145,22 +162,23 @@ class MoveClassAPI:
         class_contents = None
         usages = set()
 
-        for ent in db.ents("Class"):
-            simple_name = ent.simplename()
-            if simple_name == self.class_name and class_path is None:
-                class_contents = ent.contents()
-                class_path = ent.parent().longname()
+        classes = db.ents("Class ~Unresolved ~Unknown ~Anonymous")
+        for ent_ in classes:
+            simple_name = ent_.simplename()
+            if simple_name == self.class_name and class_path is None and ent_.parent() is not None:
+                class_contents = ent_.contents()
+                class_path = ent_.parent().longname()
 
-                for ref in ent.refs():
-                    if ref.file().simplename() != f"{simple_name}.java":
-                        usages.add(ref.file().longname())
+                for ref_ in ent_.refs():
+                    if ref_.file().simplename() != f"{simple_name}.java":
+                        usages.add(ref_.file().longname())
                 break
         db.close()
         return class_path, class_contents, usages
 
     def do_refactor(self):
         if not self.check_preconditions():
-            logger.error("@@@@@@@@@@@@@@@@@@@@@@@@@ Pre conditions failed.")
+            logger.error("Pre conditions failed.")
             return False
 
         # Update usages
@@ -175,26 +193,28 @@ class MoveClassAPI:
             )
 
         # Delete source class
-        os.remove(self.class_dir)
+        print('Current class path to be removed: ', self._class_current_path)
+        os.remove(self._class_current_path)
 
         # Write the new class
         package = ""
         if self.target_package != ROOT_PACKAGE:
-            package = f"package {self.target_package};\n\n"
+            package = f"package {self.target_package};\n"
         imports = ""
         if self.source_package != ROOT_PACKAGE:
-            imports = f"import {self.source_package}.*;\n\n"
+            imports = f"import {self.source_package}.*;\n"
 
-        with open(self.new_class_path, 'w') as f:
+        print('New class path to be added: ', self._class_new_path)
+        with open(self._class_new_path, mode='w', encoding='utf-8') as f:
             f.write(package + imports + self.class_content)
 
         return True
 
 
 def main(udb_path: str, source_package: str, target_package: str, class_name: str, *args, **kwargs):
-    return MoveClassAPI(
-        udb_path, source_package, target_package, class_name
-    ).do_refactor()
+    move_class = MoveClassAPI(udb_path, source_package, target_package, class_name)
+    res = move_class.do_refactor()
+    return res
 
 
 if __name__ == '__main__':
