@@ -218,20 +218,20 @@ INITIAL_METRICS = {
         'TEST': 0.3605321041480411,  # Obtained by testability_prediction3
     },
     "107_weka": {  # 5
-        'ANA': 0.894190871,
-        'CAMC': 0.561151452,
-        'CIS': 10.743775934,
-        'DAM': 0.636623387,
-        'DCC': 2.358921162,
-        'DSC': 1037.0,
-        'MFA': 0.346718339,
-        'MOA': 3.442946058,
-        'NOH': 75.0,
-        'NOM': 12.752074689,
-        'NOP': 11.32780083,
-        'MODULE': 0.20492201195677706,
-        'TEST2': 0,  # Obtained by testability_prediction2
-        'TEST': 0.37257823716205646,  # Obtained by testability_prediction3
+        'ANA': 0.94025,
+        'CAMC': 0.4844,
+        'CIS': 11.48631,
+        'DAM': 0.92378,
+        'DCC': 3.35519,
+        'DSC': 1145.0,
+        'MFA': 0.25965,
+        'MOA': 3.92033,
+        'NOH': 70.0,
+        'NOM': 5.34357,
+        'NOP': 10.98091,
+        'MODULE': 0.26754,
+        'TEST2': 1,  # Obtained by testability_prediction2
+        'TEST': 412.9319579700542,  # Obtained by testability_prediction3
     },
     "commons-codec": {  # 6
         'ANA': 0.32,
