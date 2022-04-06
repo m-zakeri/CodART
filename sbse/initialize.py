@@ -775,7 +775,8 @@ class RandomInitialization(Initialization):
         # print("related_entities", related_entities)
         # for e in related_entities:
         #     print(e.longname(), e.kind())
-        while True:
+        trials = 0
+        while trials < 50:
             if related_entities is not None and len(related_entities) > 0:
                 selected_entity = random.choice(related_entities)
                 package_list = selected_entity.ents('Containin', 'Java Package')
@@ -793,8 +794,10 @@ class RandomInitialization(Initialization):
                     params.update({"target_package": selected_package.longname()})
                 else:
                     params.update({"target_package": "(Unnamed_Package)"})
-            if params['source_package'] != params['target_package'] != '(Unnamed_Package)':
+            # print(params['source_package'], params['target_package'])
+            if params['source_package'] != params['target_package'] and params['target_package'] != '(Unnamed_Package)':
                 break
+            trials += 1
 
         _db.close()
         return refactoring_main, params, 'Move Class'
