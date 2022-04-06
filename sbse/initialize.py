@@ -5,7 +5,7 @@ Initialization: The abstract class and common utility functions.
 RandomInitialization: For initialling random candidates.
 """
 
-__version__ = '0.3.0'
+__version__ = '0.3.1'
 __author__ = 'Morteza Zakeri'
 
 import os
@@ -100,23 +100,23 @@ class Initialization(object):
         self.population = []
 
         self.initializers = (
-            # self.init_make_field_non_static,  # 0
-            # self.init_make_field_static,  # 1
-            # self.init_make_method_static,  # 2
-            # self.init_make_method_non_static,  # 3
-            # self.init_pullup_field,  # 4
-            # self.init_move_field,  # 5
-            # self.init_move_method,  # 6
-            # self.init_move_class,  # 7
-            # self.init_push_down_field,  # 8
-            # self.init_extract_class,  # 9
-            # self.init_pullup_method,  # 10
-            # self.init_push_down_method,  # 11
-            # self.init_pullup_constructor,  # 12
-            # self.init_decrease_field_visibility,  # 13
-            # self.init_increase_field_visibility,  # 14
+            self.init_make_field_non_static,  # 0
+            self.init_make_field_static,  # 1
+            self.init_make_method_static,  # 2
+            self.init_make_method_non_static,  # 3
+            self.init_pullup_field,  # 4
+            self.init_move_field,  # 5
+            self.init_move_method,  # 6
+            self.init_move_class,  # 7
+            self.init_push_down_field,  # 8
+            self.init_extract_class,  # 9
+            self.init_pullup_method,  # 10
+            self.init_push_down_method,  # 11
+            self.init_pullup_constructor,  # 12
+            self.init_decrease_field_visibility,  # 13
+            self.init_increase_field_visibility,  # 14
             self.init_decrease_method_visibility,  # 15
-            # self.init_increase_method_visibility,  # 16
+            self.init_increase_method_visibility,  # 16
             # self.init_extract_method,  # 17
         )
 
