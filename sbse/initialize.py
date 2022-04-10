@@ -22,7 +22,7 @@ import understand as und
 
 from codart.utility.directory_utils import git_restore, update_understand_database
 
-from refactorings import make_field_static, make_field_non_static, make_method_static_2, make_method_non_static_2, \
+from refactorings import make_field_static, make_field_non_static, make_method_static2, make_method_non_static2, \
     move_field, move_method, move_class, \
     extract_method, extract_class, \
     pullup_field, pushdown_field2, pullup_method, pushdown_method, pullup_constructor, \
