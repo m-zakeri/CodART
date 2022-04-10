@@ -35,8 +35,8 @@ logger = config.logger
 REFACTORING_MAIN_MAP = {
     'Make Field Non-Static': make_field_non_static.main,
     'Make Field Static': make_field_static.main,
-    'Make Method Static': make_method_static_2.main,
-    'Make Method Non-Static': make_method_non_static_2.main,
+    'Make Method Static': make_method_static2.main,
+    'Make Method Non-Static': make_method_non_static2.main,
     'Pull Up Field': pullup_field.main,
     'Push Down Field': pushdown_field2.main,  # 0
     'Pull Up Method': pullup_method.main,  # 0
@@ -570,7 +570,7 @@ class RandomInitialization(Initialization):
         Finds all non-static methods and randomly chooses one of them
         :return: refactoring main method and its parameters.
         """
-        refactoring_main = make_method_static_2.main
+        refactoring_main = make_method_static2.main
         params = {"udb_path": self.udb_path}
         candidates = self._methods
         params.update(random.choice(candidates))
@@ -582,7 +582,7 @@ class RandomInitialization(Initialization):
         Finds all static methods and randomly chooses one of them
         :return: refactoring main method and its parameters.
         """
-        refactoring_main = make_method_non_static_2.main
+        refactoring_main = make_method_non_static2.main
         params = {"udb_path": self.udb_path}
         candidates = self._static_methods
         params.update(random.choice(candidates))
