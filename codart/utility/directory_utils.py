@@ -85,6 +85,7 @@ def update_understand_database(udb_path):
     # error_ = result.stderr.decode('utf-8')
     # print(info_[:85])
     # print(f'return code: {result.returncode} --- error: {error_}')
+    trials = 0
     while result.returncode != 0:
         db: und.Db = und.open(config.UDB_PATH)
         db.close()
@@ -95,6 +96,9 @@ def update_understand_database(udb_path):
         error_ = result.stderr.decode('utf-8')
         # print(info_[:85])
         config.logger.error(f'return code: {result.returncode} msg: {error_}')
+        trials += 1
+        if trials > 10:
+            break
 
 
 def export_understand_dependencies_csv(csv_path: str, db_path: str):
