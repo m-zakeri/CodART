@@ -201,22 +201,22 @@ INITIAL_METRICS = {
         "TEST2": 0,  # Obtained by testability_prediction2
         'TEST': 0  # Obtained by testability_prediction3
     },
-    "105_freemind": {  # 4
-        'ANA': 0.927272727,
-        'CAMC': 0.738527273,
-        'CIS': 5.163636364,
-        'DAM': 0.46497322,
-        'DCC': 3.154545455,
-        'DSC': 626.0,
-        'MFA': 0.162760581,
-        'MOA': 1.590909091,
+      "105_freemind": {  # 4
+        'ANA': 0.94783,
+        'CAMC': 0.69098,
+        'CIS': 5.91957,
+        'DAM': 0.94725,
+        'DCC': 3.36957,
+        'DSC': 455.0,
+        'MFA': 0.19461,
+        'MOA': 1.8913,
         'NOH': 17.0,
-        'NOM': 6.474545455,
-        'NOP': 5.416363636,
-        'MODULE': 0.25275845632370597,
-        'TEST2': 0.4237480455902344,  # Obtained by testability_prediction2
-        'TEST': 0.3605321041480411,  # Obtained by testability_prediction3
-    },
+        'NOM': 2.59565,
+        'NOP': 5.63478,
+        'MODULE': 0.25276,
+        'TEST2': 107.59553,  # Obtained by testability_prediction2
+        'TEST': 156.83146530439788,  # Obtained by testability_prediction3
+      },
     "107_weka": {  # 5
         'ANA': 0.94025,
         'CAMC': 0.4844,
