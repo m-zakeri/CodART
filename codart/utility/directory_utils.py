@@ -3,7 +3,7 @@ Utilities related to project directory.
 """
 
 __author__ = 'Morteza Zakeri'
-__version__ = '0.5.0'
+__version__ = '0.5.1'
 
 import datetime
 import os
@@ -97,8 +97,15 @@ def update_understand_database(udb_path):
         # print(info_[:85])
         config.logger.error(f'return code: {result.returncode} msg: {error_}')
         trials += 1
-        if trials > 10:
+        if trials > 5:
             break
+
+    # Try to close und.exe process if it has not been killed automatically
+    result = subprocess.run(['taskkill', '/f', '/im', 'und.exe'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if result.returncode != 0:
+        config.logger.debug('The und.exe process is not running')
+    else:
+        config.logger.debug('The und.exe process killed manually')
 
 
 def export_understand_dependencies_csv(csv_path: str, db_path: str):
