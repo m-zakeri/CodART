@@ -31,7 +31,8 @@ import networkx.algorithms.community as nx_comm
 
 import understand
 
-from codart.utility.directory_utils import export_understand_dependencies_csv, update_understand_database
+from sbse import config
+from codart.utility.directory_utils import export_understand_dependencies_csv
 
 
 class Modularity:
@@ -108,14 +109,18 @@ def main(project_db_path=None, initial_value=1.0):
     """
     A demo of using modularity module to measure modularity quality attribute based on graph-analysis
     """
-    csv_path = os.path.abspath('../metrics/mdg/MDG.csv')
+
+    # csv_path = os.path.abspath('../metrics/mdg/MDG.csv')
+    csv_path = os.path.join(os.path.dirname(__file__), 'mdg/MDG.csv')
     export_understand_dependencies_csv(
         csv_path=csv_path,
         db_path=project_db_path
     )
-    while not os.path.exists(csv_path):
-        time.sleep(0.05)
+    # while not os.path.exists(csv_path):
+    #     time.sleep(0.05)
 
+    if not os.path.exists(csv_path):
+        return initial_value
     modulo = Modularity(graph_path=csv_path, project_db_path=project_db_path)
     q = modulo.compute_modularity_newman_leicht()
     os.remove(csv_path)
@@ -124,8 +129,6 @@ def main(project_db_path=None, initial_value=1.0):
 
 # Test module
 if __name__ == '__main__':
-    from sbse.config import UDB_PATH
-    print(f"UDB path: {UDB_PATH}")
-    # update_understand_database(UDB_PATH)
+    print(f"UDB path: {config.UDB_PATH}")
     for i in range(1):
-        print(main(UDB_PATH))
+        print(main(config.UDB_PATH))
