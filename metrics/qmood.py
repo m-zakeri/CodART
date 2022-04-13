@@ -8,24 +8,19 @@ IEEE Trans. Softw. Eng., vol. 28, no. 1, pp. 4–17, 2002.
 
 """
 
-__version__ = '0.2.0'
+__version__ = '0.3.0'
 __author__ = 'Morteza Zakeri'
 
-import os
-from pprint import pprint
 
-try:
-    import understand as und
-except ImportError:
-    print("Cannot import understand.")
+import understand as und
 
-from sbse.config import CURRENT_METRICS, UDB_PATH, logger
+from sbse import config
 
 
 def divide_by_initial_value(func):
     def wrapper(*args, **kwargs):
         value = func(*args, **kwargs)
-        initial = CURRENT_METRICS.get(func.__name__)
+        initial = config.CURRENT_METRICS.get(func.__name__)
         if initial == 0:
             initial = 1.
         value = round(value / initial, 5)
@@ -41,18 +36,12 @@ class DesignMetrics:
     """
 
     def __init__(self, udb_path):
-        # To be used with Sci-tools Understand 6.x the following two line should be commented.
-        # if not os.path.isfile(udb_path):
-        #     raise ValueError("Project directory is not valid.")
-        self.db = und.open(udb_path)
-        self.metrics = self.db.metric(self.db.metrics())
+        self.udb_path = udb_path
 
-        filter1 = "Java Class ~TypeVariable ~Anonymous ~Enum ~Interface ~Jar ~Library ~Standard"
-        filter2 = "Java Class ~Unresolved ~Unknown ~TypeVariable ~Anonymous ~Annotation ~Enum ~Interface ~Jar ~Library ~Standard"
+        filter1 = "Java Class ~TypeVariable ~Anonymous ~Enum ~Interface"
         filter3 = "Java Class ~Unresolved ~Unknown ~TypeVariable ~Anonymous ~Enum ~Interface ~Jar ~Library ~Standard"
-        self.all_classes = self.get_classes(filter1)
-        self.known_class_entities = self.db.ents(filter2)
-        self.user_defined_classes = self.get_classes(filter3)
+        self.all_classes = self.get_classes_simple_names(filter1)
+        self.user_defined_classes = self.get_classes_simple_names(filter3)
 
     def __del__(self):
         # self.db.close()
@@ -62,7 +51,7 @@ class DesignMetrics:
     @divide_by_initial_value
     def DSC(self):
         """
-        DSC - Design size in classes
+        DSC - Design size in classes, project-level design metric
         :return: Total number of classes in the design.
         """
         return len(self.user_defined_classes)
@@ -71,12 +60,15 @@ class DesignMetrics:
     @divide_by_initial_value
     def NOH(self):
         """
-        NOH - Number Of Hierarchies
+        NOH - Number Of Hierarchies, project-level design metric
         count(MaxInheritanceTree(class)) = 0
         :return: Total number of 'root' classes in the design.
         """
         count = 0
-        for ent in self.known_class_entities:
+        dbx: und.Db = und.open(self.udb_path)
+        filter2 = "Java Class ~Unresolved ~Unknown ~TypeVariable ~Anonymous ~Enum ~Interface"
+        known_class_entities = dbx.ents(filter2)
+        for ent in known_class_entities:
             is_tree = False
             for ref in ent.refs("Extendby"):
                 if ref:
@@ -85,100 +77,107 @@ class DesignMetrics:
             mit = ent.metric(['MaxInheritanceTree'])['MaxInheritanceTree']
             if mit == 1 and is_tree:
                 count += 1
+
+        dbx.close()
         return count
 
     @property
     @divide_by_initial_value
     def ANA(self):
         """
-        ANA - Average Number of Ancestors
+        ANA - Average Number of Ancestors, project-level design metric
         :return: Average number of classes in the inheritance tree for each class
         """
         MITs = []
-        for ent in self.known_class_entities:
+        dbx: und.Db = und.open(self.udb_path)
+        filter2 = "Java Class ~Unresolved ~Unknown ~TypeVariable ~Anonymous ~Enum ~Interface"
+        known_class_entities = dbx.ents(filter2)
+
+        for ent in known_class_entities:
             mit = ent.metric(['MaxInheritanceTree'])['MaxInheritanceTree']
             MITs.append(mit - 1)
+
+        dbx.close()
         return sum(MITs) / len(MITs)
 
     @property
     @divide_by_initial_value
     def MOA(self):
         """
-        MOA - Measure of Aggregation
+        MOA - Measure of Aggregation, to be a project-level design metric
         :return: AVG(All Class's MOA).
         """
-        return self.get_class_average(self.ClassLevelMOA)
+        return self.get_class_average(self.MOA_class_level)
 
     @property
     @divide_by_initial_value
     def DAM(self):
         """
-        DAM - The Average of Direct Access Metric for all classes
+        DAM - The Average of Direct Access Metric of class, to be a project-level design metric
         :return: AVG(All Class's DAM).
         """
-        return self.get_class_average(self.ClassLevelDAM)
+        return self.get_class_average(self.DAM_class_level)
 
     @property
     @divide_by_initial_value
     def CAMC(self):
         """
-        CAMC or CAM - Cohesion Among Methods of class
+        CAMC or CAM - Cohesion Among Methods of class, to be a project-level design metric
         :return: AVG(All Class's CAMC)
         """
-        return self.get_class_average(self.ClassLevelCAMC)
+        return self.get_class_average(self.CAMC_class_level)
 
     @property
     @divide_by_initial_value
     def CIS(self):
         """
-        CIS - Class Interface Size
+        CIS - Class Interface Size, to be a project-level design metric
         :return: AVG(All class's CIS)
         """
-        return self.get_class_average(self.ClassLevelCIS)
+        return self.get_class_average(self.CIS_class_level)
 
     @property
     @divide_by_initial_value
     def NOM(self):
         """
-        NOM - Number of Methods
+        NOM - Number of Methods, to be a project-level design metric
         :return: AVG(All class's NOM)
         """
-        return self.get_class_average(self.ClassLevelNOM)
+        return self.get_class_average(self.NOM_class_level)
 
     @property
     @divide_by_initial_value
     def DCC(self):
         """
-        DCC - Direct Class Coupling
+        DCC - Direct Class Coupling, to be a project-level design metric
         :return: AVG(All class's DCC)
         """
-        return self.get_class_average(self.ClassLevelDCC)
+        return self.get_class_average(self.DCC_class_level)
 
     @property
     @divide_by_initial_value
     def MFA(self):
         """
-        MFA - Measure of Functional Abstraction
+        MFA - Measure of Functional Abstraction, to be a project-level design metric
         :return: AVG(All class's MFA)
         """
-        return self.get_class_average(self.ClassLevelMFA)
+        return self.get_class_average(self.MFA_class_level)
 
     @property
     @divide_by_initial_value
     def NOP(self):
         """
-        NOP - Number of Polymorphic Methods
+        NOP - Number of Polymorphic Methods, to be a project-level design metric
         :return: AVG(All class's NOP)
         """
-        return self.get_class_average(self.ClassLevelNOP)
+        return self.get_class_average(self.NOP_class_level)
 
-    def ClassLevelMOA(self, class_longname):
+    def MOA_class_level(self, class_entity: und.Ent):
         """
         MOA - Class Level Measure of Aggregation
-        :param class_longname: The longname of a class. For examole: package_name.ClassName
+        :param class_entity: The class entity.
         :return: Count of number of attributes whose type is user defined class(es).
         """
-        class_entity = self.get_class_entity(class_longname)
         counter = 0
         for ref in class_entity.refs("Define", "Variable"):
             if ref.ent().type() in self.user_defined_classes:
@@ -189,10 +188,10 @@ class DesignMetrics:
                     counter += 1
         return counter
 
-    def ClassLevelDAM(self, class_longname):
+    def DAM_class_level(self, class_entity: und.Ent):
         """
         DAM - Class Level Direct Access Metric
-        :param class_longname: The longname of a class. For examole: package_name.ClassName
+        :param class_entity: The class entity.
         :return: Ratio of the number of private and protected attributes to the total number of attributes in a class.
         """
         public_variables = 0
@@ -200,7 +199,6 @@ class DesignMetrics:
         private_variables = 0
         default_variables = 0
 
-        class_entity = self.get_class_entity(class_longname)
         for ref in class_entity.refs("Define", "Variable ~Local ~Unknown"):
             defined_entity = ref.ent()
             kind_name = str(defined_entity.kindname())
@@ -222,42 +220,40 @@ class DesignMetrics:
             ratio = 1.0
         return ratio
 
-    def ClassLevelCAMC(self, class_longname):
+    def CAMC_class_level(self, class_entity: und.Ent):
         """
         CAMC - Class Level Cohesion Among Methods of class
         Measures of how related methods are in a class in terms of used parameters.
         It can also be computed by: 1 - LackOfCohesionOfMethods()
-        :param class_longname: The longname of a class. For examole: package_name.ClassName
+        :param class_entity: The class entity.
         :return:  A float number between 0 and 1.
         """
-        class_entity = self.get_class_entity(class_longname)
         percentage = class_entity.metric(['PercentLackOfCohesion']).get('PercentLackOfCohesion', 0)
         if percentage is None:
             percentage = 0
         return 1.0 - percentage / 100
 
-    def ClassLevelCIS(self, class_longname):
+    def CIS_class_level(self, class_entity: und.Ent):
         """
         CIS - Class Level Class Interface Size
-        :param class_longname: The longname of a class. For examole: package_name.ClassName
+        :param class_entity: The class entity
         :return: Number of public methods in class
         """
-        class_entity = self.get_class_entity(class_longname)
         value = class_entity.metric(['CountDeclMethodPublic']).get('CountDeclMethodPublic', 0)
         if value is None:
             value = 0
         return value
 
-    def ClassLevelNOM(self, class_longname):
+    def NOM_class_level(self, class_entity: und.Ent):
         """
         NOM - Class Level Number of Methods
-        :param class_longname: The longname of a class. For examole: package_name.ClassName
+        :param class_entity: The class entity
         :return: Number of methods declared in a class.
         """
-        class_entity = self.get_class_entity(class_longname)
-        if class_entity:
+        if class_entity is not None:
             # print(class_entity.metric(['CountDeclMethod']).get('CountDeclMethod', 0))
-            method_list = class_entity.ents('Define', 'Java Method ~Unknown ~Unresolved ~Jar ~Library ~Constructor ~Implicit ~Lambda ~External')
+            kind_filter = 'Java Method ~Unknown ~Unresolved ~Jar ~Library ~Constructor ~Implicit ~Lambda ~External'
+            method_list = class_entity.ents('Define', kind_filter)
             counter = 0
             for method_ in method_list:
                 if method_.metric(['Cyclomatic']).get('Cyclomatic', 0) > 1:
@@ -266,32 +262,32 @@ class DesignMetrics:
 
         return 0
 
-    def ClassLevelDCC(self, class_longname):
+    def DCC_class_level(self, class_entity: und.Ent):
         """
         DCC - Class Level Direct Class Coupling
-        :param class_longname: The longname of a class. For examole: package_name.ClassName
-        :return: Number of other classes a class relates to, either through a shared attribute or a parameter in a method.
+        :param class_entity: The class entity
+        :return: Number of other classes a class relates to, either through a shared attribute or
+        a parameter in a method.
         """
-        class_entity = self.get_class_entity(class_longname)
         others = set()
         for ref in class_entity.refs("Define", "Variable"):
             if ref.ent().type() in self.all_classes:
                 others.add(ref.ent().type())
 
-        for ref in class_entity.refs("Define", "Method ~Unknown ~Unresolved ~Jar ~Library ~Constructor ~Implicit ~Lambda ~External"):
+        kind_filter = "Method ~Unknown ~Unresolved ~Jar ~Library ~Constructor ~Implicit ~Lambda ~External"
+        for ref in class_entity.refs("Define", kind_filter):
             for ref2 in ref.ent().refs("Define", "Parameter"):
                 if ref2.ent().type() in self.all_classes:
                     others.add(ref2.ent().type())
 
         return len(others)
 
-    def ClassLevelMFA(self, class_longname):
+    def MFA_class_level(self, class_entity: und.Ent):
         """
         MFA - Class Level Measure of Functional Abstraction
-        :param class_longname: The longname of a class. For examole: package_name.ClassName
+        :param class_entity: The class entity
         :return: Ratio of the number of inherited methods per the total number of methods within a class.
         """
-        class_entity = self.get_class_entity(class_longname)
         metrics = class_entity.metric(['CountDeclMethod', 'CountDeclMethodAll'])
         local_methods = metrics.get('CountDeclMethod')
         all_methods = metrics.get('CountDeclMethodAll')
@@ -299,50 +295,54 @@ class DesignMetrics:
             return 0
         return round((all_methods - local_methods) / all_methods, 5)
 
-    def ClassLevelNOP(self, class_longname):
+    def NOP_class_level(self, class_entity: und.Ent):
         """
         NOP - Class Level Number of Polymorphic Methods
         Any method that can be used by a class and its descendants.
-        :param class_longname: The longname of a class. For examole: package_name.ClassName
+       :param class_entity: The class entity
         :return: Counts of the number of methods in a class excluding private, static and final ones.
         """
-        class_entity = self.get_class_entity(class_longname)
         if "Final" in class_entity.kindname():
             return 0
         instance_methods = class_entity.metric(['CountDeclInstanceMethod']).get('CountDeclInstanceMethod', 0)
         private_methods = class_entity.metric(['CountDeclMethodPrivate']).get('CountDeclMethodPrivate', 0)
         static_methods = class_entity.metric(['CountDeclClassMethod']).get('CountDeclClassMethod', 0)
         final_methods = 0
-        for ref in class_entity.refs('Define', 'Java Method ~Unknown ~Unresolved ~Jar ~Library ~Constructor ~Implicit ~Lambda ~External'):
+        kind_filter = 'Java Method ~Unknown ~Unresolved ~Jar ~Library ~Constructor ~Implicit ~Lambda ~External'
+        for ref in class_entity.refs('Define', kind_filter):
             if "Final" in ref.ent().kindname():
                 final_methods += 1
         return instance_methods - (private_methods + final_methods + static_methods)
 
-    def get_class_entity(self, class_longname):
-        for ent in self.known_class_entities:
-            if ent.longname() == class_longname:
-                return ent
-        return None
-
-    def get_class_average(self, class_level_metric):
-        scores = []
-        for ent in self.known_class_entities:
-            class_metric = class_level_metric(ent.longname())
-            scores.append(class_metric)
-        return sum(scores) / len(scores)
-
-    def print_all(self):
-        for k, v in sorted(self.metrics.items()):
-            print(k, "=", v)
-
-    def get_classes(self, filter_string=None):
+    def get_classes_simple_names(self, filter_string: str = None) -> set:
         """
-        :return: a set of all class names
+        :return: a set of all classes (short name) names matched with a given filter on db entities
         """
         classes = set()
-        for ent in self.db.ents(filter_string):
+        dbx: und.Db = und.open(self.udb_path)
+        for ent in dbx.ents(filter_string):
             classes.add(ent.simplename())
+        dbx.close()
         return classes
+
+    def get_class_average(self, class_level_design_metric):
+        scores = []
+        dbx: und.Db = und.open(self.udb_path)
+        filter2 = "Java Class ~Unresolved ~Unknown ~TypeVariable ~Anonymous ~Enum ~Interface"
+        known_class_entities = dbx.ents(filter2)
+        for class_entity in known_class_entities:
+            class_metric = class_level_design_metric(class_entity)
+            scores.append(class_metric)
+
+        dbx.close()
+        return sum(scores) / len(scores)
+
+    def print_project_metrics(self):
+        dbx = und.open(self.udb_path)
+        db_level_metrics = dbx.metric(dbx.metrics())
+        for k, v in sorted(db_level_metrics.items()):
+            print(k, "=", v)
+        dbx.close()
 
 
 class DesignQualityAttributes:
@@ -441,46 +441,47 @@ class DesignQualityAttributes:
         return round(self._effectiveness, 5)
 
     @property
-    def average(self):
-        metrics = ['reusability', 'flexibility', 'understandability', 'functionality', 'extendability', 'effectiveness',]
+    def average_sum(self):
+        attrs = ['reusability', 'flexibility', 'understandability', 'functionality', 'extendability', 'effectiveness', ]
         all_metrics = []
-        for metric in metrics:
+        for metric in attrs:
             cache = getattr(self, f'_{metric}')
             if cache is None:
                 all_metrics.append(getattr(self, metric))
             else:
                 all_metrics.append(cache)
-        return round(sum(all_metrics) / len(all_metrics), 5)
+        return round(sum(all_metrics) / len(all_metrics), 5), sum(all_metrics)
 
 
 if __name__ == '__main__':
-    print(f"UDB path: {UDB_PATH}")
-    design_metric = DesignMetrics(UDB_PATH)
-    design_quality_attribute = DesignQualityAttributes(UDB_PATH)
+    print(f"UDB path: {config.UDB_PATH}")
+    design_quality_attribute = DesignQualityAttributes(config.UDB_PATH)
     metrics_dict = {
-        "DSC": design_metric.DSC,
-        "NOH": design_metric.NOH,
-        "ANA": design_metric.ANA,
-        "MOA": design_metric.MOA,
-        "DAM": design_metric.DAM,
-        "CAMC": design_metric.CAMC,
-        "CIS": design_metric.CIS,
-        "NOM": design_metric.NOM,
-        "DCC": design_metric.DCC,
-        "MFA": design_metric.MFA,
-        "NOP": design_metric.NOP
+        "DSC": design_quality_attribute.DSC,
+        "NOH": design_quality_attribute.NOH,
+        "ANA": design_quality_attribute.ANA,
+        "MOA": design_quality_attribute.MOA,
+        "DAM": design_quality_attribute.DAM,
+        "CAMC": design_quality_attribute.CAMC,
+        "CIS": design_quality_attribute.CIS,
+        "NOM": design_quality_attribute.NOM,
+        "DCC": design_quality_attribute.DCC,
+        "MFA": design_quality_attribute.MFA,
+        "NOP": design_quality_attribute.NOP
     }
+    avg_, sum_ = design_quality_attribute.average_sum
     quality_attributes_dict = {
         "reusability": design_quality_attribute.reusability,
-        "flexibility": design_quality_attribute.flexibility,
         "understandability": design_quality_attribute.understandability,
+        "flexibility": design_quality_attribute.flexibility,
         "functionality": design_quality_attribute.functionality,
-        "extendability": design_quality_attribute.extendability,
         "effectiveness": design_quality_attribute.effectiveness,
+        "extendability": design_quality_attribute.extendability,
         #
-        "average": design_quality_attribute.average
+        "average": avg_,
+        "sum": sum_
     }
     print('QMOOD design metrics (normalized):')
-    pprint(metrics_dict)
+    print(metrics_dict)
     print('QMOOD quality attributes:')
-    pprint(quality_attributes_dict)
+    print(quality_attributes_dict)
