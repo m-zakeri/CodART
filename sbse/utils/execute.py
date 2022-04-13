@@ -16,6 +16,10 @@ import sbse.config as config
 from codart.utility.directory_utils import git_restore, update_understand_database
 from sbse.initialize import REFACTORING_MAIN_MAP
 
+from metrics import qmood
+from metrics.modularity import main as modularity_main
+from metrics.testability_prediction2 import main as testability_main
+
 
 # project_dir_old = 'C:\\Users\\Administrator\\Downloads\\udbs'
 # udb_path_old = 'C:/Users/Administrator/Downloads/udbs\\10_water-simulator.udb'
@@ -31,7 +35,7 @@ def reset_project():
     git_restore(config.PROJECT_PATH)
     config.logger.debug("Updating understand database after git restore.")
     update_understand_database(config.UDB_PATH)
-    quit()
+    # quit()
 
 
 def execute_from_log(input_file_path):
@@ -67,7 +71,52 @@ def execute_from_log(input_file_path):
         print('-' * 100)
 
 
+def print_objective_initial_values():
+    reset_project()
+    design_metric = qmood.DesignMetrics(config.UDB_PATH)
+    design_quality_attribute = qmood.DesignQualityAttributes(config.UDB_PATH)
+    metrics_dict = {
+        "DSC": design_metric.DSC,
+        "NOH": design_metric.NOH,
+        "ANA": design_metric.ANA,
+        "MOA": design_metric.MOA,
+        "DAM": design_metric.DAM,
+        "CAMC": design_metric.CAMC,
+        "CIS": design_metric.CIS,
+        "NOM": design_metric.NOM,
+        "DCC": design_metric.DCC,
+        "MFA": design_metric.MFA,
+        "NOP": design_metric.NOP
+    }
+
+    avg_, sum_ = design_quality_attribute.average_sum
+    t_ = testability_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("TEST", 1.0))
+    m_ = modularity_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("MODULE", 1.0))
+
+    objectives = {
+        "reusability": design_quality_attribute.reusability,
+        "understandability": design_quality_attribute.understandability,
+        "flexibility": design_quality_attribute.flexibility,
+        "functionality": design_quality_attribute.functionality,
+        "effectiveness": design_quality_attribute.effectiveness,
+        "extendability": design_quality_attribute.extendability,
+        "testability": t_,
+        "modularity": m_,
+        #
+        "average qmood": avg_,
+        "sum qmood ": sum_
+    }
+
+    print('QMOOD design metrics (N):')
+    print(metrics_dict)
+
+    print('Objectives:')
+    print(objectives)
+
+
 if __name__ == '__main__':
     directory_name_ = os.path.dirname(__file__)
     refactoring_sequence_input_file = os.path.join(directory_name_, r'input.txt')
-    execute_from_log(input_file_path=refactoring_sequence_input_file)
+    # execute_from_log(input_file_path=refactoring_sequence_input_file)
+    print_objective_initial_values()
+
