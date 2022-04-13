@@ -776,7 +776,7 @@ class RandomInitialization(Initialization):
         # for e in related_entities:
         #     print(e.longname(), e.kind())
         trials = 0
-        while trials < 50:
+        while trials < 25:
             if related_entities is not None and len(related_entities) > 0:
                 selected_entity = random.choice(related_entities)
                 package_list = selected_entity.ents('Containin', 'Java Package')

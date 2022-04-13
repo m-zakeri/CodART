@@ -316,20 +316,20 @@ INITIAL_METRICS = {
         "TEST": 0.4787325664033668,  # Obtained by testability_prediction3
     },
     "tabula-java": {  # 11
-        'ANA': 0.60465,
-        'CAMC': 0.60977,
-        'CIS': 6.60465,
-        'DAM': 0.85891,
-        'DCC': 2.4186,
-        'DSC': 43.0,
-        'MFA': 0.15502,
-        'MOA': 3.48837,
-        'NOH': 1.0,
-        'NOM': 3.2093,
-        'NOP': 3.23256,
-        'MODULE': 0.08172,
-        'TEST': 14.65374,  # Obtained by testability_prediction2
-        'TEST3': 0.3976  # Obtained by testability_prediction3
+        'ANA': 1.,
+        'CAMC': 1.,
+        'CIS': 1.,
+        'DAM': 1.,
+        'DCC': 1.,
+        'DSC': 1.,
+        'MFA': 1.,
+        'MOA': 1.,
+        'NOH': 1.,
+        'NOM': 1.,
+        'NOP': 1.,
+        'MODULE': 1.,
+        'TEST': 1.,  # Obtained by testability_prediction2
+        'TEST3': 1.  # Obtained by testability_prediction3
     },
 }
 

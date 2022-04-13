@@ -34,6 +34,7 @@ __author__ = 'Morteza Zakeri'
 import os
 import random
 from copy import deepcopy
+from datetime import datetime
 from multiprocessing import Process, Array
 from typing import List
 
@@ -41,6 +42,7 @@ import numpy as np
 from pymoo.algorithms.soo.nonconvex.ga import GA
 from pymoo.algorithms.moo.nsga2 import NSGA2
 from pymoo.algorithms.moo.nsga3 import NSGA3
+from pymoo.core.callback import Callback
 from pymoo.core.crossover import Crossover
 from pymoo.core.duplicate import ElementwiseDuplicateElimination
 from pymoo.core.mutation import Mutation
@@ -123,8 +125,8 @@ class Individual(List):
     """
     The class define a data structure (list) to hold an individual during the search process.
     Each individual (also called, chromosome or solution in the context of genetic programming)
-    is an array of refactoring operations
-    where the order of their execution is accorded by their positions in the array.
+    is an array of refactoring operations where the order of their execution is accorded by
+    their positions in the array.
     """
 
     def __init__(self):
@@ -206,7 +208,7 @@ class ProblemSingleObjective(Problem):
                   *args,
                   **kwargs):
         """
-        This method iterate over an Individual, execute the refactoring operation sequentially,
+        This method iterate over a population, execute the refactoring operations in each individual sequentially,
         and compute quality attributes for the refactored version of the program, as objectives of the search
 
         params:
@@ -248,7 +250,7 @@ class ProblemSingleObjective(Problem):
                 else:
                     # Stage 2 (Multi-objective mode, sequential): Computing quality attributes
                     qmood_quality_attributes = DesignQualityAttributes(udb_path=config.UDB_PATH)
-                    o1 = qmood_quality_attributes.average
+                    o1 = qmood_quality_attributes.average_sum
                     o2 = testability_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("TEST", 1.0))
                     o3 = modularity_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("MODULE", 1.0))
                     del qmood_quality_attributes
@@ -284,7 +286,7 @@ class ProblemMultiObjective(Problem):
                   *args,
                   **kwargs):
         """
-        This method iterate over an Individual, execute the refactoring operation sequentially,
+        This method iterate over a population, execute the refactoring operations in each individual sequentially,
         and compute quality attributes for the refactored version of the program, as objectives of the search
 
         params:
@@ -323,7 +325,7 @@ class ProblemMultiObjective(Problem):
             else:
                 # Stage 2 (sequential mood): Computing quality attributes
                 qmood_quality_attributes = DesignQualityAttributes(udb_path=config.UDB_PATH)
-                o1 = qmood_quality_attributes.average
+                o1 = qmood_quality_attributes.average_sum
                 o2 = testability_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("TEST", 1.0))
                 o3 = modularity_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("MODULE", 1.0))
                 del qmood_quality_attributes
@@ -352,6 +354,8 @@ class ProblemManyObjective(Problem):
 
     def _evaluate(self, x, out, *args, **kwargs):
         """
+        This method iterate over a population, execute the refactoring operations in each individual sequentially,
+        and compute quality attributes for the refactored version of the program, as objectives of the search.
         By default, elementwise_evaluation is set to False, which implies the _evaluate retrieves a set of solutions.
 
         params:
@@ -584,6 +588,29 @@ class BitStringMutation2(Mutation):
         return X
 
 
+class LogCallback(Callback):
+    def __init__(self) -> None:
+        super().__init__()
+        # self.data["best"] = []
+
+    def notify(self, algorithm, **kwargs):
+        # self.data["best"].append(algorithm.pop.get("F").min())
+        logger.info(f'Generation #{algorithm.n_gen} was finished:')
+
+        # logger.info(f'Best solution:')
+        # logger.info(f'{algorithm.pop.get("F")}')
+        # logger.info(f'Pareto-front solutions:')
+        # logger.info(f'{algorithm.pf}')
+
+        X, F, CV, G = algorithm.opt.get("X", "F", "CV", "G")
+        logger.info(f'Optimum solutions:')
+        logger.info(f'{F}')
+
+        logger.info('-'*100)
+        logger.info(' ')
+
+
+
 # Calling the equal method of individual class
 def is_equal_2_refactorings_list(a, b):
     """
@@ -712,15 +739,17 @@ def main():
                    copy_algorithm=True,
                    copy_termination=True,
                    save_history=False,
+                   callback=LogCallback(),
                    )
     # np.save('checkpoint', res.algorithm)
 
     # Log results
-    logger.info("\n** FINISHED **\n")
-    logger.info("Best refactoring sequences (a set of non-dominated solutions):")
-    logger.info(res.X)
+    logger.info(f"***** Algorithm was finished in {res.algorithm.n_gen} generations *****")
+    logger.info(" ")
     logger.info("Best objective values (a set of non-dominated solutions):")
     logger.info(res.F)
+    logger.info("Best refactoring sequences (a set of non-dominated solutions):")
+    logger.info(res.X)
 
     logger.info("=" * 75)
     logger.info("Other solutions:")
@@ -730,25 +759,26 @@ def main():
         logger.info("-" * 50)
     logger.info("=" * 75)
 
-    logger.info(f"Start time: {res.start_time}")
-    logger.info(f"End time: {res.end_time}")
+    logger.info("**** time information *****")
+    logger.info(f"Start time: {datetime.fromtimestamp(res.start_time).strftime('%Y-%m-%d %H:%M:%S')}")
+    logger.info(f"End time: {datetime.fromtimestamp(res.end_time).strftime('%Y-%m-%d %H:%M:%S')}")
     logger.info(f"Execution time in seconds: {res.exec_time}")
     logger.info(f"Execution time in minutes: {res.exec_time / 60}")
     logger.info(f"Execution time in hours: {res.exec_time / (60 * 60)}")
-    logger.info(f"Number of generations: {res.algorithm.n_gen}")
+    # logger.info(f"Number of generations: {res.algorithm.n_gen}")
     # logger.info(f"Number of generations", res.algorithm.termination)
 
     pf = res.F
-    # dm = HighTradeoffPoints()
-    dm = get_decision_making("high-tradeoff")
     try:
+        # dm = HighTradeoffPoints()
+        dm = get_decision_making("high-tradeoff")
         I = dm.do(pf)
         logger.info(f"High tradeoff points: {pf[I]}")
         logger.info(f"High tradeoff points corresponding refactorings: {res.X[I]}")
         logger.info(f"The mean improvement of quality attributes: {np.mean(pf[I], axis=0)}")
         logger.info(f"The median improvement of quality attributes: {np.median(pf[I], axis=0)}")
     except:
-        logger.info("No multi optimal solutions (error in computing high tradeoff points)!")
+        logger.error("No multi optimal solutions (error in computing high tradeoff points)!")
 
 
 # CodART search-based refactoring module main driver

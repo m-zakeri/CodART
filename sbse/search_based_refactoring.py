@@ -222,7 +222,7 @@ class ProblemMultiObjective(ElementwiseProblem):
 
         # Stage 2: Computing quality attributes
         obj = DesignQualityAttributes(udb_path=config.UDB_PATH)
-        o1 = obj.average
+        o1 = obj.average_sum
         del obj
         o2 = testability_main(config.UDB_PATH)
         o3 = modularity_main(config.UDB_PATH)
