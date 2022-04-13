@@ -6,16 +6,20 @@ to be used in refactoring process in addition to QMOOD metrics.
 
 """
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 __author__ = 'Morteza Zakeri'
 
+import os
 import pandas as pd
 import joblib
 
 import understand as und
 
-scaler1 = joblib.load('../metrics/data_model/DS07710.joblib')
-model5 = joblib.load('../metrics/sklearn_models7/VR1_DS7.joblib')
+from sbse import config
+
+scaler1 = joblib.load(os.path.join(os.path.dirname(__file__), 'data_model/DS07710.joblib'))
+model5 = joblib.load(os.path.join(os.path.dirname(__file__), 'sklearn_models7/VR1_DS7.joblib'))
+
 condition_kw_list = ['if', 'for', 'while', 'switch', '?', 'assert', ]
 
 
@@ -81,23 +85,37 @@ class TestabilityPredicator:
 
         dbx.close()
 
-    def inference(self, ):
+    def inference(self, verbose=False):
         self.df_all = self.df_all.fillna(0)
         X_test1 = self.df_all.iloc[:, 1:]
         X_test = self.scaler.transform(X_test1)
         y_pred = self.model.predict(X_test)
-        # return sum(list(y_pred)) / len(list(y_pred))
-        return sum(list(y_pred))
+        df_new = pd.DataFrame(self.df_all.iloc[:, 0], columns=['Class'])
+        df_new['PredictedTestability'] = list(y_pred)
 
-def main(db_path, initial_value=1.0):
+        if verbose:
+            self.export_class_testability_values(df_new)
+        return df_new['PredictedTestability'].sum()  # Return sum instead mean
+
+    @classmethod
+    def export_class_testability_values(cls, df):
+        print('count classes testability3 ->', df['PredictedTestability'].count())
+        print('minimum testability3 ------->', df['PredictedTestability'].min())
+        print('maximum testability3 ------->', df['PredictedTestability'].max())
+        print('variance testability3 ------>', df['PredictedTestability'].var())
+        print('sum classes testability3 --->', df['PredictedTestability'].sum())
+        # print(df)
+        df.to_csv(config.PROJECT_PATH + '_testability3_after_ga.csv', index=False)
+
+
+def main(db_path, initial_value=1.0, verbose=False):
     testability_ = TestabilityPredicator(db_path=db_path)
     testability_.prepare_metric_dataframe()
-    return testability_.inference() / initial_value
+    return testability_.inference(verbose=verbose) / initial_value
 
 
 # Test module
 if __name__ == '__main__':
-    from sbse.config import UDB_PATH
-
+    print(f"UDB path: {config.UDB_PATH}")
     for i in range(0, 1):
-        print(main(UDB_PATH))
+        print(main(config.UDB_PATH, initial_value=1.0, verbose=False))
