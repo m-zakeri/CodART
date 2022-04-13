@@ -87,18 +87,22 @@ def update_understand_database(udb_path):
     # print(f'return code: {result.returncode} --- error: {error_}')
     trials = 0
     while result.returncode != 0:
-        db: und.Db = und.open(config.UDB_PATH)
-        db.close()
-        result = subprocess.run(['und', 'analyze', '-changed', udb_path],
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE)
-        # info_ = result.stdout.decode('utf-8')
-        error_ = result.stderr.decode('utf-8')
-        # print(info_[:85])
-        config.logger.error(f'return code: {result.returncode} msg: {error_}')
-        trials += 1
-        if trials > 5:
-            break
+        try:
+            db: und.Db = und.open(config.UDB_PATH)
+            db.close()
+        except:
+            pass
+        finally:
+            result = subprocess.run(['und', 'analyze', '-changed', udb_path],
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE)
+            # info_ = result.stdout.decode('utf-8')
+            error_ = result.stderr.decode('utf-8')
+            # print(info_[:85])
+            config.logger.debug(f'return code: {result.returncode} msg: {error_}')
+            trials += 1
+            if trials > 5:
+                break
 
     # Try to close und.exe process if it has not been killed automatically
     result = subprocess.run(['taskkill', '/f', '/im', 'und.exe'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -108,7 +112,7 @@ def update_understand_database(udb_path):
         config.logger.debug('The und.exe process killed manually')
 
 
-def export_understand_dependencies_csv(csv_path: str, db_path: str):
+def export_understand_dependencies_csv2(csv_path: str, db_path: str):
     """
     Exports understand dependencies into a csv file.
 
@@ -121,7 +125,34 @@ def export_understand_dependencies_csv(csv_path: str, db_path: str):
         command,
         stdout=open(os.devnull, 'wb')
     ).wait()
-    print("CSV Exported...")
+    config.logger.debug("Modular dependency graph (MDG.csv) was exported.")
+
+
+def export_understand_dependencies_csv(csv_path: str, db_path: str):
+    """
+    Exports understand dependencies into a csv file.
+
+    :param csv_path: The absolute address of csv file to generate.
+    :param db_path: The absolute address of project path.
+    :return: None
+    """
+    command = ['und', 'export', '-format', 'long', '-dependencies', 'class', 'csv', csv_path, db_path]
+    result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    trials = 0
+    while result.returncode != 0:
+        result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        error_ = result.stderr.decode('utf-8')
+        config.logger.debug(f'return code: {result.returncode} msg: {error_}')
+        trials += 1
+        if trials > 5:
+            break
+    config.logger.debug("Modular dependency graph (MDG.csv) was exported.")
+    # Try to close und.exe process if it has not been killed automatically
+    result = subprocess.run(['taskkill', '/f', '/im', 'und.exe'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if result.returncode != 0:
+        config.logger.debug('The und.exe process is not running')
+    else:
+        config.logger.debug('The und.exe process killed manually')
 
 
 # -----------------------------------------------
