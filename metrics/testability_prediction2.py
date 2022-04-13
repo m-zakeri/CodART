@@ -17,22 +17,23 @@ to be used in refactoring process in addition to QMOOD metrics.
 
 """
 
-__version__ = '0.2.2'
+__version__ = '0.2.3'
 __author__ = 'Morteza Zakeri'
 
+import os
 import pandas as pd
 import joblib
 from joblib import Parallel, delayed
 
 import understand as und
 
-import sbse.config
-from codart.utility.directory_utils import update_understand_database
+from sbse import config
 from metrics import metrics_names
 from metrics.metrics_coverability import UnderstandUtility
 
-scaler1 = joblib.load('../metrics/data_model/DS07510.joblib')
-model5 = joblib.load('../metrics/sklearn_models7/VR1_DS5.joblib')
+
+scaler1 = joblib.load(os.path.join(os.path.dirname(__file__), 'data_model/DS07510.joblib'))
+model5 = joblib.load(os.path.join(os.path.dirname(__file__), 'sklearn_models7/VR1_DS5.joblib'))
 
 
 class TestabilityMetrics:
@@ -376,14 +377,18 @@ class TestabilityModel:
         df_new['PredictedTestability'] = list(y_pred)
 
         if verbose:
-            print('count classes testability2\t\t', df_new['PredictedTestability'].count())
-            print('min testability2\t\t', df_new['PredictedTestability'].min())
-            print('max testability2\t\t', df_new['PredictedTestability'].max())
-            print('variance testability2\t',  df_new['PredictedTestability'].var())
-            print('sum testability2\t\t', df_new['PredictedTestability'].sum())
-            df_new.to_csv(sbse.config.PROJECT_PATH + '_testability2_after_ga.csv', index=False)
+            self.export_class_testability_values(df_new)
 
         return df_new['PredictedTestability'].sum()  # Return sum instead mean
+
+    @classmethod
+    def export_class_testability_values(cls, df):
+        print('count classes testability2 ->', df['PredictedTestability'].count())
+        print('minimum testability2 ------->', df['PredictedTestability'].min())
+        print('maximum testability2 ------->', df['PredictedTestability'].max())
+        print('variance testability2 ------>', df['PredictedTestability'].var())
+        print('sum classes testability2 --->', df['PredictedTestability'].sum())
+        df.to_csv(config.PROJECT_PATH + '_testability2_after_ga.csv', index=False)
 
 
 # API
@@ -403,7 +408,6 @@ if __name__ == '__main__':
     # project_path_ = r'../benchmark_projects/JSON/JSON.und'  # T=0.4531
     # project_path_ = r'D:/IdeaProjects/JSON20201115/JSON20201115.und'  # T=0.4749
     # project_path_ = r'D:/IdeaProjects/jvlt-1.3.2/src.und'  # T=0.3997
-    from sbse.config import UDB_PATH
-    print(f"UDB path: {UDB_PATH}")
+    print(f"UDB path: {config.UDB_PATH}")
     for i in range(0, 1):
-        print('mean testability2 normalize by 1\t', main(UDB_PATH, initial_value=1.0, verbose=False))
+        print('mean testability2 normalize by 1\t', main(config.UDB_PATH, initial_value=1.0, verbose=False))
