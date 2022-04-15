@@ -18,7 +18,12 @@ classes.
 No specific Post Condition
 """
 
+__version__ = '0.1.1'
+__author__ = 'Morteza Zakeri'
+
 import os
+from codart import symbol_table
+from sbse import config
 
 
 class ExtractInterfaceRefactoring:
@@ -30,14 +35,16 @@ class ExtractInterfaceRefactoring:
             interface_name: str,
             interface_filename: str,
             filename_mapping=lambda x: (x[:-5] if x.endswith(".java") else x) + ".java"):
-        """The main function that does the process of extract interface refactoring.
-                      Splits the identical,reused portion of the interface, creates a new interface,
-                      and moves the split portion to the new interface.
+        """
+        The main function that does the process of extract interface refactoring.
+        Splits the identical,reused portion of the interface, creates a new interface,
+        and moves the split portion to the new interface.
 
                 Args:
                       source_filenames (list): A list of file names to be processed
 
-                      package_name (str): The name of the package in which the refactoring has to be done (contains the classes)
+                      package_name (str): The name of the package in which the refactoring has
+                      to be done (contains the classes)
 
                       class_names (str): The classes which are going to implement the new interface
 
@@ -61,7 +68,7 @@ class ExtractInterfaceRefactoring:
         self.filename_mapping = filename_mapping
 
     def do_refactor(self):
-        program = utils_listener_fast.get_program(self.source_filenames, print_status=True)
+        program = symbol_table.get_program(self.source_filenames, print_status=True)
         if self.package_name not in program.packages or any(
             class_name not in program.packages[self.package_name].classes for class_name in self.class_names) or \
                 any(method_key not in program.packages[self.package_name].classes[class_name].methods
@@ -74,27 +81,27 @@ class ExtractInterfaceRefactoring:
         for method_key in self.method_keys:
             method_names.append(method_key[:method_key.find('(')])
 
-        rewriter = utils_listener_fast.Rewriter(program, self.filename_mapping)
+        rewriter = symbol_table.Rewriter(program, self.filename_mapping)
 
         for class_name in self.class_names:
-            c: utils_listener_fast.Class = program.packages[self.package_name].classes[class_name]
+            c: symbol_table.Class = program.packages[self.package_name].classes[class_name]
             # Add implements to the class
             has_superinterface = False
             if c.parser_context.IMPLEMENTS() is not None:  # old: c.parser_context.superinterfaces()
-                t = utils_listener_fast.TokensInfo(
+                t = symbol_table.TokensInfo(
                     c.parser_context.typeList())  # old: c.parser_context.superinterfaces()
                 has_superinterface = True
             elif c.parser_context.EXTENDS() is not None:  # old: c.parser_context.superclass()
-                t = utils_listener_fast.TokensInfo(c.parser_context.typeType())  # old: c.parser_context.superclass()
+                t = symbol_table.TokensInfo(c.parser_context.typeType())  # old: c.parser_context.superclass()
             elif c.parser_context.typeParameters() is not None:
-                t = utils_listener_fast.TokensInfo(c.parser_context.typeParameters())
+                t = symbol_table.TokensInfo(c.parser_context.typeParameters())
             else:
                 # old: TokensInfo(c.parser_context.identifier())
-                t = utils_listener_fast.TokensInfo(c.parser_context)
+                t = symbol_table.TokensInfo(c.parser_context)
                 t.stop = c.parser_context.IDENTIFIER().getSymbol().tokenIndex
             rewriter.insert_after(t, (", " if has_superinterface else " implements ") + self.interface_name)
             for method_key in self.method_keys:
-                m: utils_listener_fast.Method = c.methods[method_key]
+                m: symbol_table.Method = c.methods[method_key]
                 # Check if the return types / parameter types are the same
                 # Or add to dictionary
                 if method_key in method_returntypes:
@@ -110,7 +117,7 @@ class ExtractInterfaceRefactoring:
                     method_parameters[method_key] = m.parameters
                 # Manage method modifiers
                 if len(m.modifiers_parser_contexts) > 0:
-                    t = utils_listener_fast.TokensInfo(m.modifiers_parser_contexts[0])
+                    t = symbol_table.TokensInfo(m.modifiers_parser_contexts[0])
                 else:
                     t = m.get_tokens_info()
                 rewriter.insert_before_start(
@@ -121,18 +128,18 @@ class ExtractInterfaceRefactoring:
                 for i in range(len(m.modifiers)):
                     mm = m.modifiers[i]
                     if mm == "private" or mm == "protected":
-                        t = utils_listener_fast.TokensInfo(
+                        t = symbol_table.TokensInfo(
                             m.modifiers_parser_contexts[i])  # old: m.parser_context.methodModifier(i)
                         rewriter.replace(t, "")
 
         # Change variable types to the interface if only interface methods are used.
         for package_name in program.packages:
-            p: utils_listener_fast.Package = program.packages[package_name]
+            p: symbol_table.Package = program.packages[package_name]
             for class_name in p.classes:
-                c: utils_listener_fast.Class = p.classes[class_name]
+                c: symbol_table.Class = p.classes[class_name]
                 fields_of_interest = {}
                 for fn in c.fields:
-                    f: utils_listener_fast.Field = c.fields[fn]
+                    f: symbol_table.Field = c.fields[fn]
                     d = False
                     for cn in self.class_names:
                         if (f.datatype == cn and f.file_info.has_imported_class(package_name, cn)) \
@@ -142,16 +149,16 @@ class ExtractInterfaceRefactoring:
                     if d and "private" in f.modifiers:
                         fields_of_interest[f.name] = f
                 for method_key in c.methods:
-                    m: utils_listener_fast.Method = c.methods[method_key]
+                    m: symbol_table.Method = c.methods[method_key]
                     vars_of_interest = {}
                     for item in m.body_local_vars_and_expr_names:
-                        if isinstance(item, utils_listener_fast.LocalVariable):
+                        if isinstance(item, symbol_table.LocalVariable):
                             for cn in self.class_names:
                                 if (item.datatype == cn and c.file_info.has_imported_class(package_name, cn)) \
                                         or (package_name is not None and item.datatype == package_name + '.' + cn):
                                     vars_of_interest[item.identifier] = item
                                     break
-                        if isinstance(item, utils_listener_fast.MethodInvocation):
+                        if isinstance(item, symbol_table.MethodInvocation):
                             if len(item.dot_separated_identifiers) == 2 or \
                                     (len(item.dot_separated_identifiers) == 3 and item.dot_separated_identifiers[
                                         0] == "this"):
@@ -165,13 +172,13 @@ class ExtractInterfaceRefactoring:
                         var = vars_of_interest[var_name]
                         if m.file_info.has_imported_package(package_name):
                             # old: var.parser_context.unannType()
-                            rewriter.replace(utils_listener_fast.TokensInfo(var.parser_context.typeType()),
+                            rewriter.replace(symbol_table.TokensInfo(var.parser_context.typeType()),
                                              self.interface_name)
                         else:
                             if package_name is None:
                                 break
                             # old: var.parser_context.unannType()
-                            rewriter.replace(utils_listener_fast.TokensInfo(var.parser_context.typeType()),
+                            rewriter.replace(symbol_table.TokensInfo(var.parser_context.typeType()),
                                              package_name + '.' + self.interface_name)
                 for field_name in fields_of_interest:
                     f = fields_of_interest[field_name]
@@ -182,17 +189,17 @@ class ExtractInterfaceRefactoring:
                             break
                         typename = package_name + '.' + self.interface_name
                     if len(f.neighbor_names) == 0:
-                        rewriter.replace(utils_listener_fast.TokensInfo(f.parser_context.typeType()),
+                        rewriter.replace(symbol_table.TokensInfo(f.parser_context.typeType()),
                                          typename)  # old: f.parser_context.unannType()
                     else:
                         if not any(nn in fields_of_interest for nn in f.neighbor_names):
-                            t = utils_listener_fast.TokensInfo(
+                            t = symbol_table.TokensInfo(
                                 f.all_variable_declarator_contexts[f.index_in_variable_declarators])
                             if f.index_in_variable_declarators == 0:
-                                t.stop = utils_listener_fast.TokensInfo(
+                                t.stop = symbol_table.TokensInfo(
                                     f.all_variable_declarator_contexts[f.index_in_variable_declarators + 1]).start - 1
                             else:
-                                t.start = utils_listener_fast.TokensInfo(
+                                t.start = symbol_table.TokensInfo(
                                     f.all_variable_declarator_contexts[f.index_in_variable_declarators - 1]).start + 1
                             rewriter.replace(t, "")
                             rewriter.insert_after(
@@ -260,14 +267,20 @@ def main():
     ]
     """
     ant_dir = "/home/ali/Desktop/code/TestProject/"
-    print("Success!" if ExtractInterfaceRefactoring(
-        utils_listener_fast.get_filenames_in_dir(ant_dir),
-        "test_package",
-        ["AppChild1", "AppChild2"],
-        ["printTest()"],
-        "ExtractedInterface",
-        "/home/ali/Desktop/code/TestProject/src/test_package/ExtractedInterface.java",
+
+    extract_interface_object = ExtractInterfaceRefactoring(
+        source_filenames=symbol_table.get_filenames_in_dir(ant_dir),
+        package_name="test_package",
+        class_names=["AppChild1", "AppChild2"],
+        method_keys=["printTest()"],
+        interface_name="ExtractedInterface",
+        interface_filename="/home/ali/Desktop/code/TestProject/src/test_package/ExtractedInterface.java",
         # lambda x: "tests/extract_interface_ant/" + x[len(ant_dir):]
-    ).do_refactor() else "Cannot refactor.")
+    )
+
+    res = extract_interface_object.do_refactor()
+    if not res:
+        config.logger.error("Cannot perform extract interface refactoring.")
+    return res
 
 
