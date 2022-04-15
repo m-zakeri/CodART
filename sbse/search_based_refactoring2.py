@@ -27,7 +27,7 @@ PureRandomInitialization: Population, list of Individual
 
 """
 
-__version__ = '0.2.1'
+__version__ = '0.2.2'
 __author__ = 'Morteza Zakeri'
 
 # import logging
@@ -53,11 +53,11 @@ from pymoo.operators.selection.tournament import TournamentSelection
 from pymoo.optimize import minimize
 from pymoo.util.termination.default import MultiObjectiveDefaultTermination
 
-from metrics.qmood import DesignQualityAttributes
+from metrics.qmood import DesignMetrics, DesignQualityAttributes
 from metrics.modularity import main as modularity_main
 from metrics.testability_prediction2 import main as testability_main
 
-from codart.utility.directory_utils import update_understand_database, git_restore
+from codart.utility.directory_utils import update_understand_database, git_restore, reset_project
 from sbse.initialize import RandomInitialization, SmellInitialization, Initialization
 from sbse import config
 from sbse.config import logger
@@ -650,6 +650,50 @@ def binary_tournament(pop, P, **kwargs):
     return S
 
 
+def log_project_info(reset_=True, ):
+    if reset_:
+        reset_project()
+    design_metric = DesignMetrics(config.UDB_PATH)
+    design_quality_attribute = DesignQualityAttributes(config.UDB_PATH)
+    metrics_dict = {
+        "DSC": design_metric.DSC,
+        "NOH": design_metric.NOH,
+        "ANA": design_metric.ANA,
+        "MOA": design_metric.MOA,
+        "DAM": design_metric.DAM,
+        "CAMC": design_metric.CAMC,
+        "CIS": design_metric.CIS,
+        "NOM": design_metric.NOM,
+        "DCC": design_metric.DCC,
+        "MFA": design_metric.MFA,
+        "NOP": design_metric.NOP
+    }
+
+    avg_, sum_ = design_quality_attribute.average_sum
+    t_ = testability_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("TEST", 1.0))
+    m_ = modularity_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("MODULE", 1.0))
+
+    objectives = {
+        "reusability": design_quality_attribute.reusability,
+        "understandability": design_quality_attribute.understandability,
+        "flexibility": design_quality_attribute.flexibility,
+        "functionality": design_quality_attribute.functionality,
+        "effectiveness": design_quality_attribute.effectiveness,
+        "extendability": design_quality_attribute.extendability,
+        "testability": t_,
+        "modularity": m_,
+        #
+        "average qmood": avg_,
+        "sum qmood ": sum_
+    }
+
+    logger.info('QMOOD design metrics (N):')
+    logger.info(metrics_dict)
+
+    logger.info('Objectives:')
+    logger.info(objectives)
+
+
 def main():
     # Define initialization objects
     initializer_class = SmellInitialization if config.WARM_START else RandomInitialization
@@ -784,5 +828,9 @@ def main():
 # CodART search-based refactoring module main driver
 if __name__ == '__main__':
     # print(logger.handlers)
-    config.log_project_info()
+    config.log_experiment_info()
+    logger.info('============ Objectives values before Refactoring ============')
+    log_project_info(reset_=True)
+    # quit()
     main()
+

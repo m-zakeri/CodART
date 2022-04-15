@@ -523,5 +523,5 @@ def main():
 
 
 if __name__ == '__main__':
-    config.log_project_info()
+    config.log_experiment_info()
     main()
