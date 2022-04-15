@@ -155,6 +155,17 @@ def export_understand_dependencies_csv(csv_path: str, db_path: str):
         config.logger.debug('The und.exe process killed manually')
 
 
+def reset_project(quit_=False):
+    # Stage 0: Git restore
+    config.logger.debug("Executing git restore.")
+    # git restore .
+    # git clean -f -d
+    git_restore(config.PROJECT_PATH)
+    config.logger.debug("Updating understand database after git restore.")
+    update_understand_database(config.UDB_PATH)
+    if quit_:
+        quit()
+
 # -----------------------------------------------
 # trees = []
 shared_set = set()
