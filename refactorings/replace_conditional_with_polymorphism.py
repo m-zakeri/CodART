@@ -1,3 +1,8 @@
+"""
+
+
+"""
+
 from antlr4 import *
 from gen.javaLabeled.JavaLexer import JavaLexer
 
@@ -6,6 +11,7 @@ from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 import ntpath
+
 switches = []
 switch_type = ""
 variables = []
@@ -15,6 +21,7 @@ returntype = []
 clas = []
 found_class = []
 found_func = []
+
 
 class ReplaceConditionalWithPolymorphism(JavaParserLabeledListener):
 
@@ -39,20 +46,19 @@ class ReplaceConditionalWithPolymorphism(JavaParserLabeledListener):
         switches.append(ctx.getText())
         notfound.append("doo")
 
-    def enterVariableDeclarators(self, ctx:JavaParserLabeled.VariableDeclaratorsContext):
+    def enterVariableDeclarators(self, ctx: JavaParserLabeled.VariableDeclaratorsContext):
         if len(notfound) == 0:
             variables.append(ctx.getText().split('=')[0])
 
-    def enterMethodDeclaration(self, ctx:JavaParserLabeled.MethodDeclarationContext):
+    def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
         methods.append(f"{ctx.IDENTIFIER()} ")
         returntype.append(ctx.typeTypeOrVoid().getText())
         if ctx.IDENTIFIER().getText() == self.method_name:
             found_func.append(ctx.IDENTIFIER())
 
-    def exitClassDeclaration(self, ctx:JavaParserLabeled.ClassDeclarationContext):
+    def exitClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
         clas.append(ctx.getText())
         if ctx.IDENTIFIER().getText() == self.class_name:
-
             found_class.append(ctx.IDENTIFIER().getText())
 
 
@@ -76,7 +82,7 @@ if __name__ == '__main__':
         t=tree
     )
     token = lexer.reset()
-    if len(found_class)>0 and len(found_func) > 0:
+    if len(found_class) > 0 and len(found_func) > 0:
         token = lexer.nextToken()
         not_switch = True
         opening = ""

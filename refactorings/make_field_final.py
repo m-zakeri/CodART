@@ -1,3 +1,10 @@
+"""
+
+"""
+
+__version__ = '0.1.0'
+__author__ = 'Morteza'
+
 try:
     import understand as und
 except ModuleNotFoundError:
@@ -97,8 +104,6 @@ class MakeFieldFinalRefactoringListener(JavaParserLabeledListener):
                         to_idx=grand_parent_ctx.modifier(0).stop.tokenIndex,
                         text=grand_parent_ctx.modifier(0).getText() + ' final'
                     )
-
-
 
 
 if __name__ == '__main__':

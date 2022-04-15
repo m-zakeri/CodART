@@ -1,7 +1,8 @@
+"""
+"""
+
 import os
 import sys
-
-sys.path.append('../')
 
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
@@ -9,6 +10,8 @@ from antlr4.TokenStreamRewriter import TokenStreamRewriter
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 from gen.javaLabeled.JavaLexer import JavaLexer
+
+sys.path.append('../')
 
 
 class RenameFieldRefactoringListener(JavaParserLabeledListener):

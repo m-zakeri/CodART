@@ -1,3 +1,13 @@
+"""
+## Introduction
+
+To implement replace parameter with query refactoring:
+with consider of removable parameters, find new object in method declaration
+Delete target parameters in both method call and declaration
+Insert removed parameters in method body.
+
+"""
+
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
@@ -108,7 +118,7 @@ class ReplaceParameterWithQueryRefactoringListener(JavaParserLabeledListener):
 
     def exit_method_or_constructor(self):
         for expression in self.removed_expressions:
-            if type(expression) is JavaParserLabeled.Expression0Context and\
+            if type(expression) is JavaParserLabeled.Expression0Context and \
                     type(expression.primary()) is JavaParserLabeled.Primary4Context:
                 self.remove_expression_declaration(expression)
 
@@ -156,7 +166,7 @@ class ReplaceParameterWithQueryRefactoringListener(JavaParserLabeledListener):
                         parameter_vdi = parameter.variableDeclaratorId().getText()
                         parameter_initializer = self.add_to_top_of_target_method[0]
                         text += \
-                            parameter_type + ' ' + parameter_vdi + ' = ' + parameter_initializer +\
+                            parameter_type + ' ' + parameter_vdi + ' = ' + parameter_initializer + \
                             ';' + self.NEW_LINE + self.TAB + self.TAB
                         self.add_to_top_of_target_method.remove(parameter_initializer)
 

@@ -1,6 +1,7 @@
 """
-The scripts implements different refactoring operations
+The script implements different refactoring operations
 """
+
 __version__ = '0.1.0'
 __author__ = 'Morteza'
 
@@ -8,7 +9,6 @@ from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
-
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 
@@ -96,7 +96,7 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
             else:
                 self.is_target_class = False
         elif self.is_source_class:
-            if ctx.parentCtx.classOrInterfaceModifier(0) == None:
+            if ctx.parentCtx.classOrInterfaceModifier(0) is None:
                 return
             self.is_source_class = False
             self.token_stream_rewriter.delete(
@@ -131,7 +131,8 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
 
             name = ctx.variableDeclarators().variableDeclarator(0).variableDeclaratorId().IDENTIFIER().getText()
 
-            if ctx.typeType().classOrInterfaceType() != None and ctx.typeType().classOrInterfaceType().getText() == self.source_class:
+            if ctx.typeType().classOrInterfaceType() is not None and \
+                    ctx.typeType().classOrInterfaceType().getText() == self.source_class:
                 self.field_that_has_source.append(name)
                 return
 
@@ -184,20 +185,20 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
             constructor_text += '}\n'
             if self.is_source_class:
                 self.source_class_data['constructors'].append(ConstructorOrMethod(
-                    name=self.target_class, parameters=[Parameter(parameterType=p.typeType().getText(),
+                    name=self.target_class, parameters=[Parameter(parameter_type=p.typeType().getText(),
                                                                   name=p.variableDeclaratorId().IDENTIFIER().getText())
                                                         for p in constructor_parameters],
-                    text=constructor_text, constructorBody=self.token_stream_rewriter.getText(
+                    text=constructor_text, constructor_body=self.token_stream_rewriter.getText(
                         program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
                         start=ctx.block().start.tokenIndex + 1,
                         stop=ctx.block().stop.tokenIndex - 1
                     )))
             else:
                 self.target_class_data['constructors'].append(ConstructorOrMethod(
-                    name=self.target_class, parameters=[Parameter(parameterType=p.typeType().getText(),
+                    name=self.target_class, parameters=[Parameter(parameter_type=p.typeType().getText(),
                                                                   name=p.variableDeclaratorId().IDENTIFIER().getText())
                                                         for p in constructor_parameters],
-                    text=constructor_text, constructorBody=self.token_stream_rewriter.getText(
+                    text=constructor_text, constructor_body=self.token_stream_rewriter.getText(
                         program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
                         start=ctx.block().start.tokenIndex + 1,
                         stop=ctx.block().stop.tokenIndex - 1
@@ -205,7 +206,7 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
                 proper_constructor = get_proper_constructor(self.target_class_data['constructors'][-1],
                                                             self.source_class_data['constructors'])
 
-                if proper_constructor == None:
+                if proper_constructor is None:
                     return
 
                 self.token_stream_rewriter.insertBeforeIndex(
@@ -226,7 +227,7 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
 
             type_text = ctx.typeTypeOrVoid().getText()
 
-            if (type_text == self.source_class):
+            if type_text == self.source_class:
                 type_text = self.target_class
 
                 if self.is_target_class:
@@ -254,7 +255,7 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
                 self.source_class_data['methods'].append(ConstructorOrMethod(
                     name=ctx.IDENTIFIER().getText(),
                     parameters=[Parameter(
-                        parameterType=p.typeType().getText(),
+                        parameter_type=p.typeType().getText(),
                         name=p.variableDeclaratorId().IDENTIFIER().getText())
                         for p in
                         method_parameters],
@@ -263,14 +264,14 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
                 self.target_class_data['methods'].append(ConstructorOrMethod(
                     name=ctx.IDENTIFIER().getText(),
                     parameters=[Parameter(
-                        parameterType=p.typeType().getText(),
+                        parameter_type=p.typeType().getText(),
                         name=p.variableDeclaratorId().IDENTIFIER().getText())
                         for p in
                         method_parameters],
                     text=method_text))
 
     def enterExpression1(self, ctx: JavaParserLabeled.Expression1Context):
-        if ctx.IDENTIFIER() != None and ctx.IDENTIFIER().getText() in self.field_that_has_source:
+        if ctx.IDENTIFIER() is None and ctx.IDENTIFIER().getText() in self.field_that_has_source:
             field_text = ctx.expression().getText()
             self.token_stream_rewriter.replace(
                 program_name=self.token_stream_rewriter.DEFAULT_PROGRAM_NAME,
@@ -341,24 +342,24 @@ class InlineClassRefactoringListener(JavaParserLabeledListener):
 
 
 class Field:
-    def __init__(self, text: str = None, name: str = None, fieldType: str = None):
+    def __init__(self, text: str = None, name: str = None, field_type: str = None):
         self.text = text
         self.name = name
-        self.fieldType = fieldType
+        self.fieldType = field_type
 
 
 class Parameter:
-    def __init__(self, parameterType, name):
-        self.parameterType = parameterType
+    def __init__(self, parameter_type, name):
+        self.parameterType = parameter_type
         self.name = name
 
 
 class ConstructorOrMethod:
-    def __init__(self, text: str = None, name: str = None, parameters: Parameter = None, constructorBody: str = None):
+    def __init__(self, text: str = None, name: str = None, parameters: Parameter = None, constructor_body: str = None):
         self.text = text
         self.name = name
         self.parameters = parameters
-        self.constructorBody = constructorBody
+        self.constructorBody = constructor_body
 
 
 def merge_fields(source_fields: Field, target_fields, target_class_type):

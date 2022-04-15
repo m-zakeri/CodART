@@ -1,3 +1,9 @@
+"""
+
+"""
+__version__ = '0.1.1'
+__author__ = 'Morteza Zakeri'
+
 import os
 
 from antlr4 import *

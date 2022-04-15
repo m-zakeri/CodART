@@ -1,4 +1,10 @@
-import logging
+"""
+
+"""
+__version__ = '0.1.0'
+__author__ = 'Seyyed Ali Ayati'
+
+
 
 try:
     import understand as und
@@ -11,9 +17,7 @@ from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 from codart.symbol_table import parse_and_walk
-
-logger = logging.getLogger()
-__author__ = "Seyyed Ali Ayati"
+from sbse import config
 
 
 class CutMethodListener(JavaParserLabeledListener):
@@ -124,36 +128,41 @@ def main(udb_path, source_package, source_class, method_name, target_classes: li
     source_class_ent = None
 
     if len(source_class_ents) == 0:
-        logger.error(f"Cannot find source class: {source_class}")
-        return
+        config.logger.error(f"Cannot find source class: {source_class}")
+        db.close()
+        return False
     else:
         for ent in source_class_ents:
             if ent.simplename() == source_class:
                 source_class_ent = ent
                 break
     if source_class_ent is None:
-        logger.error(f"Cannot find source class: {source_class}")
-        return
+        config.logger.error(f"Cannot find source class: {source_class}")
+        db.close()
+        return False
 
     method_ent = db.lookup(f"{source_package}.{source_class}.{method_name}", "Method")
     if len(method_ent) == 0:
-        logger.error(f"Cannot find method to pushdown: {method_name}")
-        return
+        config.logger.error(f"Cannot find method to pushdown: {method_name}")
+        db.close()
+        return False
     else:
         method_ent = method_ent[0]
 
     for ref in source_class_ent.refs("extendBy"):
         if ref.ent().simplename() not in target_classes:
-            logger.error("Target classes are not children classes")
-            return
+            config.logger.error("Target classes are not children classes")
+            db.close()
+            return False
         target_class_ents.append(ref.ent())
 
     for ref in method_ent.refs("callBy"):
         if ref.file().simplename().split(".")[0] in target_classes:
             continue
         else:
-            logger.error("Method has dependencies.")
-            return
+            config.logger.error("Method has dependencies.")
+            db.close()
+            return False
 
     # Remove field from source class
     listener = parse_and_walk(
@@ -164,6 +173,7 @@ def main(udb_path, source_package, source_class, method_name, target_classes: li
         method_name=method_name,
         debug=False
     )
+
     # Insert field in children classes
     for target_class in target_class_ents:
         parse_and_walk(

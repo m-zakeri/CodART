@@ -1,4 +1,9 @@
-from gen.javaLabeled.JavaLexer import JavaLexer
+"""
+
+"""
+
+__version__ = '0.1.1'
+__author__ = 'Morteza'
 
 try:
     import understand as und
@@ -8,6 +13,7 @@ except ImportError as e:
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
+from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 

@@ -1,5 +1,6 @@
-from gen.javaLabeled.JavaLexer import JavaLexer
-import os
+"""
+
+"""
 
 try:
     import understand as und
@@ -9,6 +10,7 @@ except ImportError as e:
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
+from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
@@ -101,7 +103,6 @@ class RemoveFlagArgumentListener(JavaParserLabeledListener):
                 self.token_stream_rewriter = TokenStreamRewriter(self.common_token_stream)
                 self.token_stream_rewriter_changed = True
 
-
     def exitMethodBody(self, ctx: JavaParserLabeled.MethodBodyContext):
         """after exiting the soure method create two new method for new method logics and call these in if and
         else block in the source method
@@ -144,7 +145,7 @@ class RemoveFlagArgumentListener(JavaParserLabeledListener):
         """
         if self.is_source_method:
 
-            try :
+            try:
                 primary = ctx.parExpression().expression().primary()
                 if hasattr(primary, "IDENTIFIER"):
                     if ctx.parExpression().expression().primary().IDENTIFIER().getText() == self.argument_name:
@@ -152,9 +153,10 @@ class RemoveFlagArgumentListener(JavaParserLabeledListener):
 
                         # TODO : handle on statements blocks .e.g. {}
 
-                        self.body_1, self.body_2 = [self.common_token_stream.getText(s.block().start, s.block().stop)[1:]
-                                                    for s
-                                                    in ctx.statement()]
+                        self.body_1, self.body_2 = [
+                            self.common_token_stream.getText(s.block().start, s.block().stop)[1:]
+                            for s
+                            in ctx.statement()]
 
                         self.body_1_token, self.body_2_token = [s.block() for s in ctx.statement()]
 
@@ -165,7 +167,7 @@ class RemoveFlagArgumentListener(JavaParserLabeledListener):
                         # for s in ctx.statement():
                         #     print(s.block().getText())
 
-            except :
+            except:
                 pass
 
 
@@ -217,5 +219,5 @@ class RemoveFlagArgument:
 if __name__ == '__main__':
     RemoveFlagArgument().do_refactor()
 
-    RemoveFlagArgument("JSONArray", "addAll", "wrap",r"D:\Uni\Compiler\project\CodART\benchmark_projects\JSON\src\main\java\org\json\JSONArray.java" ).do_refactor()
-
+    RemoveFlagArgument("JSONArray", "addAll", "wrap",
+                       r"D:\Uni\Compiler\project\CodART\benchmark_projects\JSON\src\main\java\org\json\JSONArray.java").do_refactor()

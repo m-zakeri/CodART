@@ -1,4 +1,9 @@
-from gen.javaLabeled.JavaLexer import JavaLexer
+"""
+
+"""
+
+__version__ = '0.1.1'
+__author__ = 'Morteza Zakeri'
 
 try:
     import understand as und
@@ -8,6 +13,7 @@ except ImportError as e:
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
+from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
@@ -37,6 +43,7 @@ class RemoveFieldRefactoringListener(JavaParserLabeledListener):
         self.is_source_class = False
         self.inner_class_count = 0
         self.is_static = False
+        self.detected_field = None
 
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
 
@@ -54,11 +61,9 @@ class RemoveFieldRefactoringListener(JavaParserLabeledListener):
             self.inner_class_count -= 1
 
     def exitFieldDeclaration(self, ctx: JavaParserLabeled.FieldDeclarationContext):
-        # print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
         if not self.is_source_class or self.inner_class_count != 0:
             return None
         field_identifier = ctx.variableDeclarators().variableDeclarator(0).variableDeclaratorId().IDENTIFIER().getText()
-        # print("field_identifier:::::::::",field_identifier)
         if self.field_name == field_identifier:
             grand_parent_ctx = ctx.parentCtx.parentCtx
             self.token_stream_rewriter.delete(
@@ -71,13 +76,13 @@ class RemoveFieldRefactoringListener(JavaParserLabeledListener):
 
 if __name__ == '__main__':
     udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
-    source_class = "App"
-    field_name = "push_down_field"
+    source_class_ = "App"
+    field_name_ = "push_down_field"
     # initialize with understand
     main_file = ""
     db = und.open(udb_path)
     for cls in db.ents("class"):
-        if cls.simplename() == source_class:
+        if cls.simplename() == source_class_:
             main_file = cls.parent().longname()
 
     stream = FileStream(main_file, encoding='utf8', errors='ignore')
@@ -86,8 +91,9 @@ if __name__ == '__main__':
     parser = JavaParserLabeled(token_stream)
     parser.getTokenStream()
     parse_tree = parser.compilationUnit()
-    my_listener = RemoveFieldRefactoringListener(common_token_stream=token_stream, source_class=source_class,
-                                                 field_name=field_name)
+    my_listener = RemoveFieldRefactoringListener(common_token_stream=token_stream,
+                                                 source_class=source_class_,
+                                                 field_name=field_name_)
     walker = ParseTreeWalker()
     walker.walk(t=parse_tree, listener=my_listener)
 

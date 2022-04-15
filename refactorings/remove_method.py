@@ -1,4 +1,6 @@
-from gen.javaLabeled.JavaLexer import JavaLexer
+"""
+
+"""
 
 try:
     import understand as und
@@ -7,6 +9,7 @@ except ImportError as e:
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
+from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
@@ -17,7 +20,7 @@ class RemoveMethodRefactoringListener(JavaParserLabeledListener):
     Creates a new class and move fields and methods from the old class to the new one
     """
 
-    def __init__(self, common_token_stream: CommonTokenStream = None, source_class=None, method_name:str = None):
+    def __init__(self, common_token_stream: CommonTokenStream = None, source_class=None, method_name: str = None):
 
         if method_name is None:
             self.method_name = ""

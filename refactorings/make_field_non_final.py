@@ -1,3 +1,10 @@
+"""
+
+"""
+
+__version__ = '0.1.0'
+__author__ = 'Morteza'
+
 try:
     import understand as und
 except ImportError as e:
@@ -93,8 +100,6 @@ class MakeFieldNonFinalRefactoringListener(JavaParserLabeledListener):
                         to_idx=grand_parent_ctx.modifier(i).stop.tokenIndex,
                         text=''
                     )
-
-
 
 
 if __name__ == '__main__':

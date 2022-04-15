@@ -1,4 +1,9 @@
-from gen.javaLabeled.JavaLexer import JavaLexer
+"""
+
+"""
+
+__version__ = '0.1.0'
+__author__ = 'Morteza'
 
 try:
     import understand as und
@@ -8,6 +13,7 @@ except ImportError as e:
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
+from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
@@ -19,7 +25,6 @@ class MakeNonFinalClassRefactoringListener(JavaParserLabeledListener):
     """
 
     def __init__(self, common_token_stream: CommonTokenStream = None, class_name: str = None):
-
 
         if common_token_stream is None:
             raise ValueError('common_token_stream is None')
@@ -38,21 +43,19 @@ class MakeNonFinalClassRefactoringListener(JavaParserLabeledListener):
         self.TAB = "\t"
         self.NEW_LINE = "\n"
         self.code = ""
-    def enterTypeDeclaration(self, ctx:JavaParserLabeled.TypeDeclarationContext):
 
+    def enterTypeDeclaration(self, ctx: JavaParserLabeled.TypeDeclarationContext):
 
-        if  self.objective_class == ctx.classDeclaration().IDENTIFIER().getText():
-            #modifier=ctx.getText().split(",")
-            is_fanal=False
-            for i in range (0, len(ctx.classOrInterfaceModifier())):
-             if ctx.classOrInterfaceModifier(i).getText()=="final":
-               self.token_stream_rewriter.replaceRange(
-               from_idx=ctx.classOrInterfaceModifier(i).start.tokenIndex,
-               to_idx=ctx.classOrInterfaceModifier(i).stop.tokenIndex,
-               text=""
-                )
-
-
+        if self.objective_class == ctx.classDeclaration().IDENTIFIER().getText():
+            # modifier=ctx.getText().split(",")
+            is_fanal = False
+            for i in range(0, len(ctx.classOrInterfaceModifier())):
+                if ctx.classOrInterfaceModifier(i).getText() == "final":
+                    self.token_stream_rewriter.replaceRange(
+                        from_idx=ctx.classOrInterfaceModifier(i).start.tokenIndex,
+                        to_idx=ctx.classOrInterfaceModifier(i).stop.tokenIndex,
+                        text=""
+                    )
 
     # def enterFieldDeclaration(self, ctx:JavaParserLabeled.FieldDeclarationContext):
     #     if self.is_source_class:

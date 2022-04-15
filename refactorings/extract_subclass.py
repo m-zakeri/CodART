@@ -2,12 +2,16 @@
 Extract subclass refactoring
 """
 
+__version__ = '0.1.0'
+__author__ = 'IUST students'
 
 import os
-from gen.javaLabeled.JavaLexer import JavaLexer
+
 from antlr4 import *
 from antlr4.tree import Tree
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
+
+from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 

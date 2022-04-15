@@ -1,4 +1,9 @@
-from gen.javaLabeled.JavaLexer import JavaLexer
+"""
+
+"""
+
+__version__ = '0.1.0'
+__author__ = 'Morteza'
 
 try:
     import understand as und
@@ -8,6 +13,7 @@ except ImportError as e:
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
+from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
@@ -19,7 +25,6 @@ class MakeFinalClassRefactoringListener(JavaParserLabeledListener):
     """
 
     def __init__(self, common_token_stream: CommonTokenStream = None, class_name: str = None):
-
 
         if common_token_stream is None:
             raise ValueError('common_token_stream is None')
@@ -39,13 +44,13 @@ class MakeFinalClassRefactoringListener(JavaParserLabeledListener):
         self.NEW_LINE = "\n"
         self.code = ""
 
-    def enterClassDeclaration(self, ctx:JavaParserLabeled.ClassDeclarationContext):
+    def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
 
         if self.objective_class == ctx.IDENTIFIER().getText():
             self.token_stream_rewriter.replaceRange(
                 from_idx=0,
                 to_idx=0,
-                text= "final "+ctx.CLASS().getText()
+                text="final " + ctx.CLASS().getText()
             )
     # def enterTypeDeclaration(self, ctx:JavaParserLabeled.TypeDeclarationContext):
     #
