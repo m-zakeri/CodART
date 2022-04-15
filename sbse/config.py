@@ -138,182 +138,180 @@ PROJECT_NAME = os.path.basename(PROJECT_PATH)
 # Initial value of QMOOD design metrics, testability and modularity used in objective-normalization process
 INITIAL_METRICS = {
     "10_water-simulator": {  # 0
-        'ANA': 0.56,
-        'CAMC': 0.5844,
-        'CIS': 3.21333,
-        'DAM': 0.96952,
-        'DCC': 4.61333,
-        'DSC': 72.0,
-        'MFA': 0.04934,
-        'MOA': 1.69333,
-        'NOH': 1.0,
-        'NOM': 1.25333,
-        'NOP': 3.86667,
-        'MODULE': 0.22967,
-        'TEST': 22.71451,  # Obtained by testability_prediction2
-        'TEST3': 0.3702604117198275  # Obtained by testability_prediction3
+        'ANA': 1.,
+        'CAMC': 1.,
+        'CIS': 1.,
+        'DAM': 1.,
+        'DCC': 1.,
+        'DSC': 1.,
+        'MFA': 1.,
+        'MOA': 1.,
+        'NOH': 1.,
+        'NOM': 1.,
+        'NOP': 1.,
+        'MODULE': 1.,
+        'TEST': 1.,  # Obtained by testability_prediction2
+        'TEST3': 1.  # Obtained by testability_prediction3
     },
     "61_noen": {  # 1
-        'ANA': 0.498777506,
-        'CAMC': 0.688801956,
-        'CIS': 4.471882641,
-        'DAM': 0.757864181,
-        'DCC': 1.696821516,
-        'DSC': 428.0,
-        'MFA': 0.12371425,
-        'MOA': 1.701711491,
-        'NOH': 15.0,
-        'NOM': 4.951100244,
-        'NOP': 4.523227384,
-        'MODULE': 0.3743241335376458,
-        'TEST2': 0.5581233625170191,  # Obtained by testability_prediction2
-        'TEST': 0.5295360105264939  # Obtained by testability_prediction3
+        'ANA': 1.,
+        'CAMC': 1.,
+        'CIS': 1.,
+        'DAM': 1.,
+        'DCC': 1.,
+        'DSC': 1.,
+        'MFA': 1.,
+        'MOA': 1.,
+        'NOH': 1.,
+        'NOM': 1.,
+        'NOP': 1.,
+        'MODULE': 1.,
+        'TEST': 1.,  # Obtained by testability_prediction2
+        'TEST3': 1.  # Obtained by testability_prediction3
     },
     "88_jopenchart": {  # 2
-        'ANA': 0.692307692,
-        'CAMC': 0.577692308,
-        'CIS': 8.025641026,
-        'DAM': 0.529107312,
-        'DCC': 2.358974359,
-        'DSC': 46.0,
-        'MFA': 0.270584931,
-        'MOA': 0.923076923,
-        'NOH': 4.0,
-        'NOM': 8.615384615,
-        'NOP': 8.076923077,
-        'MODULE': 0.20512820512820512,
-        'TEST2': 0.5516735761315649,  # Obtained by testability_prediction2
-        'TEST': 0.4817706859946628  # Obtained by testability_prediction3
+        'ANA': 1.,
+        'CAMC': 1.,
+        'CIS': 1.,
+        'DAM': 1.,
+        'DCC': 1.,
+        'DSC': 1.,
+        'MFA': 1.,
+        'MOA': 1.,
+        'NOH': 1.,
+        'NOM': 1.,
+        'NOP': 1.,
+        'MODULE': 1.,
+        'TEST': 1.,  # Obtained by testability_prediction2
+        'TEST3': 1.  # Obtained by testability_prediction3
     },
     "104_vuze": {  # 3 Not ready
-        'ANA': 0.647412982,
-        'CAMC': 0.803941675,
-        'CIS': 4.467732832,
-        'DAM': 0.305707086,
-        'DCC': 1.729444967,
-        'DSC': 6221.0,
-        'MFA': 0.206624442,
-        'MOA': 1.029162747,
-        'NOH': 130.0,
-        'NOM': 5.634995296,
-        'NOP': 4.751834431,
-        "MODULE": 0,
-        "TEST2": 0,  # Obtained by testability_prediction2
-        'TEST': 0  # Obtained by testability_prediction3
+        'ANA': 1.,
+        'CAMC': 1.,
+        'CIS': 1.,
+        'DAM': 1.,
+        'DCC': 1.,
+        'DSC': 1.,
+        'MFA': 1.,
+        'MOA': 1.,
+        'NOH': 1.,
+        'NOM': 1.,
+        'NOP': 1.,
+        'MODULE': 1.,
+        'TEST': 1.,  # Obtained by testability_prediction2
+        'TEST3': 1.  # Obtained by testability_prediction3
     },
       "105_freemind": {  # 4
-        'ANA': 0.94783,
-        'CAMC': 0.69098,
-        'CIS': 5.91957,
-        'DAM': 0.94725,
-        'DCC': 3.36957,
-        'DSC': 455.0,
-        'MFA': 0.19461,
-        'MOA': 1.8913,
-        'NOH': 17.0,
-        'NOM': 2.59565,
-        'NOP': 5.63478,
-        'MODULE': 0.25276,
-        'TEST2': 107.59553,  # Obtained by testability_prediction2
-        'TEST': 156.83146530439788,  # Obtained by testability_prediction3
+        'ANA': 1.,
+        'CAMC': 1.,
+        'CIS': 1.,
+        'DAM': 1.,
+        'DCC': 1.,
+        'DSC': 1.,
+        'MFA': 1.,
+        'MOA': 1.,
+        'NOH': 1.,
+        'NOM': 1.,
+        'NOP': 1.,
+        'MODULE': 1.,
+        'TEST': 1.,  # Obtained by testability_prediction2
+        'TEST3': 1.  # Obtained by testability_prediction3
       },
     "107_weka": {  # 5
-        'ANA': 0.94025,
-        'CAMC': 0.4844,
-        'CIS': 11.48631,
-        'DAM': 0.92378,
-        'DCC': 3.35519,
-        'DSC': 1145.0,
-        'MFA': 0.25965,
-        'MOA': 3.92033,
-        'NOH': 70.0,
-        'NOM': 5.34357,
-        'NOP': 10.98091,
-        'MODULE': 0.26754,
-        'TEST2': 1,  # Obtained by testability_prediction2
-        'TEST': 412.9319579700542,  # Obtained by testability_prediction3
+        'ANA': 1.,
+        'CAMC': 1.,
+        'CIS': 1.,
+        'DAM': 1.,
+        'DCC': 1.,
+        'DSC': 1.,
+        'MFA': 1.,
+        'MOA': 1.,
+        'NOH': 1.,
+        'NOM': 1.,
+        'NOP': 1.,
+        'MODULE': 1.,
+        'TEST': 1.,  # Obtained by testability_prediction2
+        'TEST3': 1.  # Obtained by testability_prediction3
     },
     "commons-codec": {  # 6
-        'ANA': 0.32,
-        'CAMC': 0.7213,
-        'CIS': 6.92,
-        'DAM': 0.597956349,
-        'DCC': 1.85,
-        'DSC': 108.0,
-        'MFA': 0.125396441,
-        'MOA': 0.54,
-        'NOH': 7.0,
-        'NOM': 9.15,
-        'NOP': 4.18,
-        'MODULE': 0.4198853053622194,
-        'TEST2': 0,  # Obtained by testability_prediction2
-        'TEST': 0.4653682475404442  # Obtained by testability_prediction3
+        'ANA': 1.,
+        'CAMC': 1.,
+        'CIS': 1.,
+        'DAM': 1.,
+        'DCC': 1.,
+        'DSC': 1.,
+        'MFA': 1.,
+        'MOA': 1.,
+        'NOH': 1.,
+        'NOM': 1.,
+        'NOP': 1.,
+        'MODULE': 1.,
+        'TEST': 1.,  # Obtained by testability_prediction2
+        'TEST3': 1.  # Obtained by testability_prediction3
     },
     "ganttproject_1_11_1_original": {  # 7
-        'ANA': 0.574285714,
-        'CAMC': 0.730228571,
-        'CIS': 4.157142857,
-        'DAM': 0.5197205,
-        'DCC': 2.74,
-        'DSC': 407.0,
-        'MFA': 0.156224894,
-        'MOA': 1.577142857,
-        'NOH': 28.0,
-        'NOM': 5.491428571,
-        'NOP': 4.645714286,
-        "MODULE": 0.33473127930074126,
-        "TEST2": 0,  # Obtained by testability_prediction2
-        "TEST": 0.4426126215132276,  # Obtained by testability_prediction3
-
+        'ANA': 1.,
+        'CAMC': 1.,
+        'CIS': 1.,
+        'DAM': 1.,
+        'DCC': 1.,
+        'DSC': 1.,
+        'MFA': 1.,
+        'MOA': 1.,
+        'NOH': 1.,
+        'NOM': 1.,
+        'NOP': 1.,
+        'MODULE': 1.,
+        'TEST': 1.,  # Obtained by testability_prediction2
+        'TEST3': 1.  # Obtained by testability_prediction3
     },
     "jfreechart-master": {  # 8
-        'ANA': 1.036723164,
-        'CAMC': 0.709943503,
-        'CIS': 9.950564972,
-        'DAM': 0.544492767,
-        'DCC': 3.433615819,
-        'DSC': 633.0,
-        'MFA': 0.270958496,
-        'MOA': 2.892655367,
-        'NOH': 27.0,
-        'NOM': 11.211864407,
-        'NOP': 9.991525424,
-        "MODULE": 0.2544013611666677,
-        "TEST2": 0,  # Obtained by testability_prediction2
-        "TEST": 0.470488065430968,  # Obtained by testability_prediction3
-
+        'ANA': 1.,
+        'CAMC': 1.,
+        'CIS': 1.,
+        'DAM': 1.,
+        'DCC': 1.,
+        'DSC': 1.,
+        'MFA': 1.,
+        'MOA': 1.,
+        'NOH': 1.,
+        'NOM': 1.,
+        'NOP': 1.,
+        'MODULE': 1.,
+        'TEST': 1.,  # Obtained by testability_prediction2
+        'TEST3': 1.  # Obtained by testability_prediction3
     },
     "JSON20201115": {  # 9
-        'ANA': 0.5,
-        'CAMC': 0.848666667,
-        'CIS': 9.5,
-        'DAM': 0.305555556,
-        'DCC': 2.866666667,
-        'DSC': 26.0,
-        'MFA': 0.099846547,
-        'MOA': 1.2,
-        'NOH': 2.0,
-        'NOM': 10.9,
-        'NOP': 7.266666667,
-        "MODULE": 0.0,  # JASON project have no packages
-        "TEST2": 0,  # Obtained by testability_prediction2
-        "TEST": 0.4713493233566381,  # Obtained by testability_prediction3
+        'ANA': 1.,
+        'CAMC': 1.,
+        'CIS': 1.,
+        'DAM': 1.,
+        'DCC': 1.,
+        'DSC': 1.,
+        'MFA': 1.,
+        'MOA': 1.,
+        'NOH': 1.,
+        'NOM': 1.,
+        'NOP': 1.,
+        'MODULE': 1.,
+        'TEST': 1.,  # Obtained by testability_prediction2
+        'TEST3': 1.  # Obtained by testability_prediction3
     },
     "jvlt-1.3.2": {  # 10
-        'ANA': 0.763513514,
-        'CAMC': 0.710135135,
-        'CIS': 4.966216216,
-        'DAM': 0.659427284,
-        'DCC': 2.148648649,
-        'DSC': 160.0,
-        'MFA': 0.297960026,
-        'MOA': 1.75,
-        'NOH': 11.0,
-        'NOM': 5.418918919,
-        'NOP': 4.797297297,
-        "MODULE": 0.3051931655584547,
-        "TEST2": 0,  # Obtained by testability_prediction2
-        "TEST": 0.4787325664033668,  # Obtained by testability_prediction3
+        'ANA': 1.,
+        'CAMC': 1.,
+        'CIS': 1.,
+        'DAM': 1.,
+        'DCC': 1.,
+        'DSC': 1.,
+        'MFA': 1.,
+        'MOA': 1.,
+        'NOH': 1.,
+        'NOM': 1.,
+        'NOP': 1.,
+        'MODULE': 1.,
+        'TEST': 1.,  # Obtained by testability_prediction2
+        'TEST3': 1.  # Obtained by testability_prediction3
     },
     "tabula-java": {  # 11
         'ANA': 1.,
@@ -376,7 +374,7 @@ logger = get_logger(__name__)
 # print(logger.handlers)
 
 
-def log_project_info():
+def log_experiment_info():
     logger.info("============ Configuration/Setup ============")
     logger.info(f"Project root directory: {PROJECT_PATH}")
     logger.info(f"Understand database file path: {UDB_PATH}")
@@ -394,3 +392,4 @@ def log_project_info():
     logger.info(f"Main script running the experiments: {SCRIPT}")
     logger.info(f"Experiment description: {DESCRIPTION}")
     logger.info("============ End of Configuration/Setup ============")
+
