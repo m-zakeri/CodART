@@ -20,11 +20,11 @@ import pandas
 
 import understand as und
 
-from codart.utility.directory_utils import git_restore, update_understand_database
+from codart.utility.directory_utils import reset_project
 
 from refactorings import make_field_static, make_field_non_static, make_method_static2, make_method_non_static2, \
     move_field, move_method, move_class, \
-    extract_method, extract_class, \
+    extract_method, extract_class, extract_interface2, \
     pullup_field, pushdown_field2, pullup_method, pushdown_method, pullup_constructor, \
     increase_field_visibility, decrease_field_visibility, increase_method_visibility, decrease_method_visibility
 
@@ -33,24 +33,29 @@ from sbse import config
 logger = config.logger
 
 REFACTORING_MAIN_MAP = {
-    'Make Field Non-Static': make_field_non_static.main,
-    'Make Field Static': make_field_static.main,
-    'Make Method Static': make_method_static2.main,
-    'Make Method Non-Static': make_method_non_static2.main,
-    'Pull Up Field': pullup_field.main,
-    'Push Down Field': pushdown_field2.main,  # 0
-    'Pull Up Method': pullup_method.main,  # 0
-    'Pull Up Constructor': pullup_constructor.main,  # 0
-    'Push Down Method': pushdown_method.main,  # 0
-    'Move Field': move_field.main,
-    'Move Method': move_method.main,
-    'Move Class': move_class.main,
-    'Extract Class': extract_class.main,
-    'Extract Method': extract_method.main,
-    'Increase Field Visibility': increase_field_visibility.main,
-    'Increase Method Visibility': increase_method_visibility.main,
-    'Decrease Field Visibility': decrease_field_visibility.main,
-    'Decrease Method Visibility': decrease_method_visibility.main,
+    'Make Field Non-Static': make_field_non_static.main,  # RO1
+    'Make Field Static': make_field_static.main,  # RO2
+    'Make Method Static': make_method_static2.main,  # RO3
+    'Make Method Non-Static': make_method_non_static2.main,  # RO4
+
+    'Pull Up Field': pullup_field.main,  # RO5
+    'Push Down Field': pushdown_field2.main,  # # RO6, 0
+    'Pull Up Method': pullup_method.main,  # # RO7, 0
+    'Pull Up Constructor': pullup_constructor.main,  # RO8, 0
+    'Push Down Method': pushdown_method.main,  # # RO9, 0
+
+    'Move Field': move_field.main,  # RO10
+    'Move Method': move_method.main,  # RO11
+    'Move Class': move_class.main,  # RO12
+
+    'Extract Class': extract_class.main,  # RO13
+    'Extract Method': extract_method.main,  # RO14
+    'Extract Interface': extract_interface2.main,  # RO15
+
+    'Increase Field Visibility': increase_field_visibility.main,  # RO16
+    'Increase Method Visibility': increase_method_visibility.main,  # RO17
+    'Decrease Field Visibility': decrease_field_visibility.main,  # RO18
+    'Decrease Method Visibility': decrease_method_visibility.main,  # RO19
 }
 
 
@@ -71,16 +76,6 @@ def handle_index_error(func):
             return None, None, None
 
     return wrapper
-
-
-def reset_project():
-    logger.debug("Executing git restore ... ")
-    # git restore .
-    # git clean -f -d
-    git_restore(config.PROJECT_PATH)
-    logger.debug("Executing update understand database ... ")
-    # Possible error: The Analysis cannot be performed because the database is locked or read only
-    update_understand_database(config.UDB_PATH)
 
 
 class Initialization(object):
@@ -117,7 +112,8 @@ class Initialization(object):
             self.init_increase_field_visibility,  # 14
             self.init_decrease_method_visibility,  # 15
             self.init_increase_method_visibility,  # 16
-            # self.init_extract_method,  # 17
+            self.init_extract_interface,  # 17
+            # self.init_extract_method,  # 18
         )
 
         self._variables = self.get_all_variables()
@@ -129,6 +125,7 @@ class Initialization(object):
         self._pullup_method_candidates = self.find_pullup_method_candidates()
         self._pullup_constructor_candidates = self.find_pullup_constructor_candidates()
         self._push_down_method_candidates = self.find_push_down_method_candidates()
+        self._extract_interface_candidates = self.find_extract_interface_candidate()
 
     def __del__(self):
         # logger.info("Understand database closed after initialization.")
@@ -394,6 +391,20 @@ class Initialization(object):
         _db.close()
         return candidates
 
+    def find_extract_interface_candidate(self):
+        _db = und.open(config.UDB_PATH)
+        extract_interface_refactoring_candidates = []
+        classes = _db.ents("Type Class Public  ~Generic ~Interface ~Abstract ~Enum ~Unknown ~Anonymous ~TypeVariable")
+        for class_entity in classes:
+            class_path = class_entity.parent().longname()
+            if os.path.exists(class_path):
+                inherited_entities = class_entity.ents(
+                    'Java Extend Couple ~Implicit, Java Implement Couple ~Implicit', )
+                if len(inherited_entities) == 0:
+                    extract_interface_refactoring_candidates.append(class_path)
+        _db.close()
+        return extract_interface_refactoring_candidates
+
     def init_make_field_non_static(self):
         pass
 
@@ -446,6 +457,9 @@ class Initialization(object):
         pass
 
     def init_increase_method_visibility(self):
+        pass
+
+    def init_extract_interface(self):
         pass
 
     def select_random(self):
@@ -836,6 +850,15 @@ class RandomInitialization(Initialization):
 
     def init_extract_method(self):
         pass
+
+    def init_extract_interface(self):
+        _db = und.open(self.udb_path)
+        refactoring_main = extract_interface2.main
+        # params = {"udb_path": str(Path(self.udb_path))}
+        random_class = random.choice(self._extract_interface_candidates)
+        params = {'class_path': random_class}
+
+        return refactoring_main, params, 'Extract Interface'
 
     def init_increase_field_visibility(self):
         """
