@@ -38,8 +38,8 @@ class DesignMetrics:
     def __init__(self, udb_path):
         self.udb_path = udb_path
 
-        filter1 = "Java Class ~TypeVariable ~Anonymous ~Enum "
-        filter3 = "Java Class ~Unresolved ~Unknown ~TypeVariable ~Anonymous ~Enum  ~Jar ~Library ~Standard"
+        filter1 = "Java Class ~TypeVariable ~Anonymous ~Enum, Java Interface"
+        filter3 = "Java Class ~Unresolved ~Unknown ~TypeVariable ~Anonymous ~Enum  ~Jar ~Library ~Standard, Java Interface"
         self.all_classes = self.get_classes_simple_names(filter1)
         self.user_defined_classes = self.get_classes_simple_names(filter3)
 
@@ -66,7 +66,7 @@ class DesignMetrics:
         """
         count = 0
         dbx: und.Db = und.open(self.udb_path)
-        filter2 = "Java Class ~Unresolved ~Unknown ~TypeVariable ~Anonymous ~Enum "
+        filter2 = "Java Class ~Unresolved ~Unknown ~TypeVariable ~Anonymous ~Enum, Java Interface"
         known_class_entities = dbx.ents(filter2)
         for ent in known_class_entities:
             is_tree = False
@@ -90,7 +90,7 @@ class DesignMetrics:
         """
         MITs = []
         dbx: und.Db = und.open(self.udb_path)
-        filter2 = "Java Class ~Unresolved ~Unknown ~TypeVariable ~Anonymous ~Enum "
+        filter2 = "Java Class ~Unresolved ~Unknown ~TypeVariable ~Anonymous ~Enum, Java Interface"
         known_class_entities = dbx.ents(filter2)
 
         for ent in known_class_entities:
@@ -328,7 +328,7 @@ class DesignMetrics:
     def get_class_average(self, class_level_design_metric):
         scores = []
         dbx: und.Db = und.open(self.udb_path)
-        filter2 = "Java Class ~Unresolved ~Unknown ~TypeVariable ~Anonymous ~Enum"
+        filter2 = "Java Class ~Unresolved ~Unknown ~TypeVariable ~Anonymous ~Enum, Java Interface"
         known_class_entities = dbx.ents(filter2)
         for class_entity in known_class_entities:
             class_metric = class_level_design_metric(class_entity)

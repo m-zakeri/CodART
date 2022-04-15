@@ -32,7 +32,8 @@ class TestabilityPredicator:
 
     def prepare_metric_dataframe(self):
         dbx = und.open(self.db_path)
-        class_entities = dbx.ents('Java Class ~TypeVariable ~Anonymous ~Abstract ~Interface ~Enum ~Unknown ~Unresolved ~Jar ~Library')
+        kind_filter = 'Java Class ~TypeVariable ~Anonymous ~Enum ~Unknown ~Unresolved ~Jar ~Library, Java Interface'
+        class_entities = dbx.ents(kind_filter)
         for class_entity in class_entities:
             # print (class_entity.kind().name())
 
