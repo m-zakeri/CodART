@@ -228,10 +228,16 @@ class DesignMetrics:
         :param class_entity: The class entity.
         :return:  A float number between 0 and 1.
         """
+        if "Interface" in class_entity.kindname():
+            return 1
+
         percentage = class_entity.metric(['PercentLackOfCohesion']).get('PercentLackOfCohesion', 0)
+
         if percentage is None:
             percentage = 0
-        return 1.0 - percentage / 100
+        cohesion_ = 1. - (percentage / 100.)
+        # print(class_entity.longname(), cohesion_)
+        return round(cohesion_, 5)
 
     def CIS_class_level(self, class_entity: und.Ent):
         """
@@ -242,24 +248,27 @@ class DesignMetrics:
         value = class_entity.metric(['CountDeclMethodPublic']).get('CountDeclMethodPublic', 0)
         if value is None:
             value = 0
+        # print(class_entity.longname(), value)
         return value
 
     def NOM_class_level(self, class_entity: und.Ent):
         """
-        NOM - Class Level Number of Methods
+        NOM - Class Level Number of Methods (WMC)
         :param class_entity: The class entity
         :return: Number of methods declared in a class.
         """
         if class_entity is not None:
             # print(class_entity.metric(['CountDeclMethod']).get('CountDeclMethod', 0))
-            kind_filter = 'Java Method ~Unknown ~Unresolved ~Jar ~Library ~Constructor ~Implicit ~Lambda ~External'
-            method_list = class_entity.ents('Define', kind_filter)
-            counter = 0
-            for method_ in method_list:
-                if method_.metric(['Cyclomatic']).get('Cyclomatic', 0) > 1:
-                    counter += 1
-            return counter
-
+            # kind_filter = 'Java Method ~Unknown ~Unresolved ~Jar ~Library ~Constructor ~Implicit ~Lambda ~External'
+            # method_list = class_entity.ents('Define', kind_filter)
+            # counter = 0
+            # for method_ in method_list:
+            #     if method_.metric(['Cyclomatic']).get('Cyclomatic', 0) > 1:
+            #         counter += 1
+            # return counter
+            if "Interface" in class_entity.kindname():
+                return 0
+            return class_entity.metric(['SumCyclomatic']).get('SumCyclomatic', 0)
         return 0
 
     def DCC_class_level(self, class_entity: und.Ent):
@@ -270,6 +279,8 @@ class DesignMetrics:
         a parameter in a method.
         """
         others = set()
+        if "Interface" in class_entity.kindname():
+            return 0
         for ref in class_entity.refs("Define", "Variable"):
             if ref.ent().type() in self.all_classes:
                 others.add(ref.ent().type())
@@ -291,9 +302,25 @@ class DesignMetrics:
         metrics = class_entity.metric(['CountDeclMethod', 'CountDeclMethodAll'])
         local_methods = metrics.get('CountDeclMethod')
         all_methods = metrics.get('CountDeclMethodAll')
-        if all_methods == 0:
-            return 0
-        return round((all_methods - local_methods) / all_methods, 5)
+        # print(class_entity.longname(), metrics)
+
+        mfa = 0
+        if "Interface" in class_entity.kindname():
+            mfa = 1
+        else:
+            implemented_interfaces = class_entity.ents('Java Implement Couple', '~Unknown')
+            if len(implemented_interfaces) == 0:
+                if all_methods == 0:
+                    mfa = 0
+                else:
+                     mfa = round((all_methods - local_methods) / all_methods, 5)
+            else:
+                implemented_methods = 0
+                for interface_entity in implemented_interfaces:
+                    implemented_methods += interface_entity.metric(['CountDeclMethodAll']).get('CountDeclMethodAll', 0)
+                mfa = round((all_methods - implemented_methods) / all_methods, 5)
+        # print(class_entity.longname(), mfa)
+        return mfa if mfa >= 0 else 1
 
     def NOP_class_level(self, class_entity: und.Ent):
         """
@@ -304,15 +331,18 @@ class DesignMetrics:
         """
         if "Final" in class_entity.kindname():
             return 0
-        instance_methods = class_entity.metric(['CountDeclInstanceMethod']).get('CountDeclInstanceMethod', 0)
-        private_methods = class_entity.metric(['CountDeclMethodPrivate']).get('CountDeclMethodPrivate', 0)
-        static_methods = class_entity.metric(['CountDeclClassMethod']).get('CountDeclClassMethod', 0)
-        final_methods = 0
+        all_methods = class_entity.metric(['CountDeclMethodAll']).get('CountDeclMethodAll', 0)
+        # private_methods = class_entity.metric(['CountDeclMethodPrivate']).get('CountDeclMethodPrivate', 0)
+        # static_methods = class_entity.metric(['CountDeclClassMethod']).get('CountDeclClassMethod', 0)
+        # final_methods = 0
+        private_or_static_or_final = 0
         kind_filter = 'Java Method ~Unknown ~Unresolved ~Jar ~Library ~Constructor ~Implicit ~Lambda ~External'
         for ref in class_entity.refs('Define', kind_filter):
-            if "Final" in ref.ent().kindname():
-                final_methods += 1
-        return instance_methods - (private_methods + final_methods + static_methods)
+            if "Final" in ref.ent().kindname() or "Private" in ref.ent().kindname() or "Static" in ref.ent().kindname():
+                private_or_static_or_final += 1
+        poly_ = all_methods - private_or_static_or_final
+        # print(class_entity.longname(), poly_)
+        return poly_ if poly_ >= 0 else 0
 
     def get_classes_simple_names(self, filter_string: str = None) -> set:
         """
@@ -335,7 +365,7 @@ class DesignMetrics:
             scores.append(class_metric)
 
         dbx.close()
-        return sum(scores) / len(scores)
+        return round(sum(scores) / len(scores), 5)
 
     def print_project_metrics(self):
         dbx = und.open(self.udb_path)
@@ -409,8 +439,8 @@ class DesignQualityAttributes:
         The degree of understanding and the easiness of learning the design implementation details.
         :return: understandability score
         """
-        self._understandability = - 0.33 * self.ANA + 0.33 * self.DAM - 0.33 * self.DCC + 0.33 * self.CAMC \
-                                  - 0.33 * self.NOP - 0.34 * self.NOM - 0.33 * self.DSC
+        self._understandability = - 0.33 * self.ANA + 0.33 * self.DAM - 0.33 * self.DCC + 0.34 * self.CAMC \
+                                  - 0.33 * self.NOP - 0.33 * self.NOM - 0.33 * self.DSC
         return round(self._understandability, 5)
 
     @property
@@ -450,11 +480,14 @@ class DesignQualityAttributes:
                 all_metrics.append(getattr(self, metric))
             else:
                 all_metrics.append(cache)
-        return round(sum(all_metrics) / len(all_metrics), 5), sum(all_metrics)
+        return round(sum(all_metrics) / len(all_metrics), 5), round(sum(all_metrics), 5)
 
 
 if __name__ == '__main__':
+    from codart.utility.directory_utils import update_understand_database
+    update_understand_database(config.UDB_PATH)
     print(f"UDB path: {config.UDB_PATH}")
+
     design_quality_attribute = DesignQualityAttributes(config.UDB_PATH)
     metrics_dict = {
         "DSC": design_quality_attribute.DSC,

@@ -20,7 +20,7 @@ import pandas
 
 import understand as und
 
-from codart.utility.directory_utils import reset_project
+from codart.utility.directory_utils import reset_project, update_understand_database
 
 from refactorings import make_field_static, make_field_non_static, make_method_static2, make_method_non_static2, \
     move_field, move_method, move_class, \
@@ -512,7 +512,8 @@ class Initialization(object):
                     logger.debug(f'Refactoring name: {name}')
                     logger.debug(f'Refactoring params: {params}')
                     is_correct_refactoring = main(**params)
-
+                update_understand_database(self.udb_path)
+                quit()
                 individual.append((main, params, name))
                 logger.debug(f'Append a refactoring "{name}" to "{j}th" gene of the individual {_}.')
                 reset_project()
