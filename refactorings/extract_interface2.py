@@ -165,8 +165,9 @@ class AddingImplementStatementToClass(JavaParserLabeledListener):
 
 
 class InterfaceCreator:
-    def __init__(self, interface_info):
+    def __init__(self, interface_info, class_path):
         self.interface_info = interface_info
+        self.class_path = class_path
 
     def make_interface_body(self):
         interface_text = 'package ' + self.interface_info['package'] + ';\n'
@@ -184,8 +185,8 @@ class InterfaceCreator:
     def get_import_text(self):
         return self.interface_info['package'] + '.' + self.interface_info['name']
 
-    def add_implement_statement_to_class(self, class_path):
-        stream = FileStream(class_path, encoding='utf-8', errors='ignore')
+    def add_implement_statement_to_class(self,):
+        stream = FileStream(self.class_path, encoding='utf-8', errors='ignore')
         lexer = JavaLexer(stream)
         token_stream = CommonTokenStream(lexer)
         parser = JavaParserLabeled(token_stream)
@@ -193,18 +194,20 @@ class InterfaceCreator:
         parse_tree = parser.compilationUnit()
         listener = AddingImplementStatementToClass(
             common_token_stream=token_stream,
-            class_name=os.path.splitext(os.path.basename(class_path))[0],
+            class_name=os.path.splitext(os.path.basename(self.class_path))[0],
             interface_package=self.interface_info['package'],
             interface_name=self.interface_info['name']
         )
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=listener)
 
-        with open(class_path, mode='w', newline='') as f:
+        with open(self.class_path, mode='w', newline='') as f:
             f.write(listener.token_stream_rewriter.getDefaultText())
 
     def save(self):
         interface_text = self.make_interface_body()
+        if self.interface_info['path'] == '':
+            self.interface_info['path'] = os.path.dirname(self.class_path)
         with open(self.interface_info['path'] + '/' + self.interface_info['name'] + '.java', mode='w') as f:
             f.write(interface_text)
 
@@ -229,9 +232,10 @@ def main(class_path):
     path_list = Path.convert_str_paths_to_list_paths([class_path])
     interface_info_['path'] = '/'.join(path_list[0][:-1])
 
-    ic = InterfaceCreator(interface_info_)
+    ic = InterfaceCreator(interface_info_, class_path)
+    ic.add_implement_statement_to_class()
     ic.save()
-    ic.add_implement_statement_to_class(class_path)
+
     return True
 
 
