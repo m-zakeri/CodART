@@ -29,8 +29,11 @@ from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 from sbse.config import logger
 
-class DependencyPreConditionListener(JavaParserLabeledListener):
 
+class DependencyPreConditionListener(JavaParserLabeledListener):
+    """
+
+    """
     def __init__(self, common_token_stream: CommonTokenStream = None,
                  class_identifier: str = None):
         self.enter_class = False
@@ -48,7 +51,7 @@ class DependencyPreConditionListener(JavaParserLabeledListener):
 
     # Groups methods in terms of their dependncies on the class attributes and one another
     def split_class(self):
-        # 1- move the dictionay of fields into a new dictionary of methods operating on fields
+        # 1- move the dictionary of fields into a new dictionary of methods operating on fields
         method_dict = {}
         for key, value in self.field_dict.items():
             for method in value:
@@ -240,7 +243,7 @@ class ExtractClassRefactoringListener(JavaParserLabeledListener):
                     if modifier.getText() == "private":
                         self.token_stream_rewriter.replaceSingleToken(
                             token=modifier.start,
-                            text="public"
+                            text="public "
                         )
 
     def exitFieldDeclaration(self, ctx: JavaParserLabeled.FieldDeclarationContext):
@@ -256,9 +259,15 @@ class ExtractClassRefactoringListener(JavaParserLabeledListener):
             field_type = ctx.typeType().getText()
 
             if len(field_names) == 1:
-                self.code += f"public {field_type} {field_names[0]};{self.NEW_LINE}"
+                st = f"public {field_type} {field_names[0]};{self.NEW_LINE}"
+                if '=new' in st and '<>' in st:
+                    st = st.replace('new', 'new ')
+                self.code += st
             else:
-                self.code += f"public {field_type} {self.detected_field};{self.NEW_LINE}"
+                st = f"public {field_type} {self.detected_field};{self.NEW_LINE}"
+                if '=new' in st and '<>' in st:
+                    st = st.replace('new', 'new ')
+                self.code += st
             # delete field from source class
             for i in field_names:
                 if self.detected_field in i:
@@ -462,7 +471,7 @@ class ExtractClassAPI:
             walker.walk(t=parse_tree, listener=my_listener)
 
             # print(my_listener.token_stream_rewriter.getDefaultText())
-            with open(file_path, 'w') as f:
+            with open(file_path, mode='w', encoding='utf-8', errors='ignore') as f:
                 f.write(my_listener.token_stream_rewriter.getDefaultText())
             self.reformat(file_path)
 
@@ -519,10 +528,10 @@ class ExtractClassAPI:
         # print(my_listener.token_stream_rewriter.getDefaultText())
 
         # Write Changes
-        with open(self.file_path, 'w') as f:
+        with open(self.file_path, mode='w', encoding='utf-8', errors='ignore', newline='') as f:
             f.write(listener.token_stream_rewriter.getDefaultText())
 
-        with open(self.new_file_path, 'w') as f:
+        with open(self.new_file_path, mode='w', encoding='utf-8', errors='ignore') as f:
             f.write(my_listener.token_stream_rewriter.getDefaultText())
 
         # Propagate and reformat

@@ -74,6 +74,13 @@ class InterfaceInfoListener(JavaParserLabeledListener):
     def __init__(self):
         self.current_class = None
         self.interface_info = {'package': str(), 'name': str(), 'path': str(), 'methods': []}
+        self.enter_method_body_stack = list()
+
+    def enterMethodBody(self, ctx:JavaParserLabeled.MethodBodyContext):
+        self.enter_method_body_stack.append(True)
+
+    def exitMethodBody(self, ctx:JavaParserLabeled.MethodBodyContext):
+        self.enter_method_body_stack.pop()
 
     def enterPackageDeclaration(self, ctx: JavaParserLabeled.PackageDeclarationContext):
         self.interface_info['package'] = ctx.qualifiedName().getText()
@@ -94,22 +101,29 @@ class InterfaceInfoListener(JavaParserLabeledListener):
         self.current_class = None
 
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
+        if len(self.enter_method_body_stack) > 0:
+            return
         if hasattr(ctx.parentCtx.parentCtx, 'modifier'):
             modifiers = ctx.parentCtx.parentCtx.modifier()
         else:
             modifiers = ctx.parentCtx.parentCtx.parentCtx.modifier()
+
+        do_extract = True
         for modifier in modifiers:
             if modifier.classOrInterfaceModifier() is not None:
                 # print('modifier.classOrInterfaceModifier().getText()', modifier.classOrInterfaceModifier().getText())
-                if modifier.classOrInterfaceModifier().getText() not in ['private']:
-                    method = {'name': ctx.IDENTIFIER().getText(), 'return_type': ctx.typeTypeOrVoid().getText(),
-                              'formal_parameters': []}
-                    if ctx.formalParameters().formalParameterList() is not None:
-                        for f in ctx.formalParameters().formalParameterList().formalParameter():
-                            _type = f.typeType().getText()
-                            identifier = f.variableDeclaratorId().getText()
-                            method['formal_parameters'].append([_type, identifier])
-                    self.interface_info['methods'].append(method)
+                if "private" in modifier.classOrInterfaceModifier().getText() or \
+                        "static" in modifier.classOrInterfaceModifier().getText():
+                    do_extract = False
+        if do_extract:
+            method = {'name': ctx.IDENTIFIER().getText(), 'return_type': ctx.typeTypeOrVoid().getText(),
+                      'formal_parameters': []}
+            if ctx.formalParameters().formalParameterList() is not None:
+                for f in ctx.formalParameters().formalParameterList().formalParameter():
+                    _type = f.typeType().getText()
+                    identifier = f.variableDeclaratorId().getText()
+                    method['formal_parameters'].append([_type, identifier])
+            self.interface_info['methods'].append(method)
 
     def get_interface_info(self):
         return self.interface_info

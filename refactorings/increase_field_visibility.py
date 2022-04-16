@@ -49,10 +49,16 @@ class IncreaseFieldVisibilityListener(JavaParserLabeledListener):
     def exitClassBodyDeclaration2(self, ctx: JavaParserLabeled.ClassBodyDeclaration2Context):
         if self.detected_field:
             if ctx.modifier(0) is not None:
-                self.rewriter.replaceSingleToken(
-                    token=ctx.modifier(0).start,
-                    text="public"
-                )
+                if "@" in ctx.modifier(0).getText():
+                    self.rewriter.replaceSingleToken(
+                        token=ctx.modifier(1).start,
+                        text="public "
+                    )
+                else:
+                    self.rewriter.replaceSingleToken(
+                        token=ctx.modifier(0).start,
+                        text="public "
+                    )
             else:
                 self.rewriter.replaceSingleToken(
                     ctx.memberDeclaration().start,

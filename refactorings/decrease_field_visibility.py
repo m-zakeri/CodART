@@ -48,10 +48,16 @@ class DecreaseFieldVisibilityListener(JavaParserLabeledListener):
         if self.detected_field:
             # print(ctx.getText())
             if ctx.modifier(0) is not None:
-                self.rewriter.replaceSingleToken(
-                    token=ctx.modifier(0).start,
-                    text="private"
-                )
+                if "@" in ctx.modifier(0).getText():
+                    self.rewriter.replaceSingleToken(
+                        token=ctx.modifier(1).start,
+                        text="private "
+                    )
+                else:
+                    self.rewriter.replaceSingleToken(
+                        token=ctx.modifier(0).start,
+                        text="private "
+                    )
             else:
                 self.rewriter.replaceSingleToken(
                     ctx.memberDeclaration().start,
