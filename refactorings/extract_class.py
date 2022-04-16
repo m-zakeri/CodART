@@ -530,8 +530,8 @@ class ExtractClassAPI:
         # Write Changes
         with open(self.file_path, mode='w', encoding='utf-8', errors='ignore', newline='') as f:
             f.write(listener.token_stream_rewriter.getDefaultText())
-
-        with open(self.new_file_path, mode='w', encoding='utf-8', errors='ignore') as f:
+        import codecs
+        with open(self.new_file_path, mode='w', encoding='utf-8', errors='ignore', newline='') as f:
             f.write(my_listener.token_stream_rewriter.getDefaultText())
 
         # Propagate and reformat
