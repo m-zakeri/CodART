@@ -1099,7 +1099,7 @@ def parse_and_walk(file_path: str, listener_class, has_write=False, debug=False,
 
     if has_write:
         if not debug:
-            with open(file_path, mode='w', encoding='utf-8') as f_:
+            with open(file_path, mode='w', encoding='utf-8', errors='ignore', newline='') as f_:
                 f_.write(listener_.rewriter.getDefaultText())
         else:
             print(listener_.rewriter.getDefaultText())
