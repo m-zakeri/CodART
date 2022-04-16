@@ -512,8 +512,12 @@ class Initialization(object):
                     logger.debug(f'Refactoring name: {name}')
                     logger.debug(f'Refactoring params: {params}')
                     is_correct_refactoring = main(**params)
-                update_understand_database(self.udb_path)
-                quit()
+
+                ####
+                # update_understand_database(self.udb_path)
+                # quit()
+                ####
+
                 individual.append((main, params, name))
                 logger.debug(f'Append a refactoring "{name}" to "{j}th" gene of the individual {_}.')
                 reset_project()
