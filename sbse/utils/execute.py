@@ -34,7 +34,7 @@ def execute_from_log(input_file_path):
     Example: Take a look at ./input.txt
     """
 
-    reset_project()
+
     with open(input_file_path, 'r') as f:
         data = f.read().split('\n')
 
@@ -63,5 +63,6 @@ def execute_from_log(input_file_path):
 if __name__ == '__main__':
     directory_name_ = os.path.dirname(__file__)
     refactoring_sequence_input_file = os.path.join(directory_name_, r'input.txt')
+    reset_project()
     # execute_from_log(input_file_path=refactoring_sequence_input_file)
 
