@@ -53,10 +53,11 @@ class IncreaseMethodVisibilityListener(JavaParserLabeledListener):
                         text="public "
                     )
             else:
-                self.rewriter.replaceSingleToken(
-                    ctx.memberDeclaration().start,
-                    text="public " + ctx.memberDeclaration().getText()
-                )
+                if ctx.memberDeclaration().getChild(0).getChild(0) is not None:
+                    self.rewriter.replaceSingleToken(
+                        ctx.memberDeclaration().getChild(0).getChild(0).start,
+                        text="public " + ctx.memberDeclaration().getChild(0).getChild(0).getText()
+                    )
             self.detected_method = False
 
 

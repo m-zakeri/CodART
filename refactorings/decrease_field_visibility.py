@@ -59,10 +59,11 @@ class DecreaseFieldVisibilityListener(JavaParserLabeledListener):
                         text="private "
                     )
             else:
-                self.rewriter.replaceSingleToken(
-                    ctx.memberDeclaration().start,
-                    text="private " + ctx.memberDeclaration().getText()
-                )
+                if ctx.memberDeclaration().getChild(0).getChild(0) is not None:
+                    self.rewriter.replaceSingleToken(
+                        ctx.memberDeclaration().getChild(0).getChild(0).start,
+                        text="private " + ctx.memberDeclaration().getChild(0).getChild(0).getText()
+                    )
             # print("public " + ctx.memberDeclaration().getText())
             self.detected_field = False
 
