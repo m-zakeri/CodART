@@ -7,7 +7,6 @@ The script reads a refactoring sequence, x, from input.txt, and execute it on sy
 __version__ = '0.2.0'
 __author__ = 'Morteza Zakeri'
 
-
 import os
 import re
 import json
@@ -20,10 +19,11 @@ from metrics import qmood
 from metrics.modularity import main as modularity_main
 from metrics.testability_prediction2 import main as testability_main
 
-
 # project_dir_old = 'C:\\Users\\Administrator\\Downloads\\udbs'
 # udb_path_old = 'C:/Users/Administrator/Downloads/udbs\\10_water-simulator.udb'
 file_path_base_dir_old = 'C:\\Users\\Administrator\\Downloads\\prj_src'  # System server2 path (to be replaced)
+
+
 # file_path_base_dir_old = 'C:\\Users\\Administrator\\Downloads\\IdeaProjects2_Cleaned'  # For JOpenChart project only
 
 
@@ -33,7 +33,6 @@ def execute_from_log(input_file_path):
 
     Example: Take a look at ./input.txt
     """
-
 
     with open(input_file_path, 'r') as f:
         data = f.read().split('\n')
@@ -65,4 +64,3 @@ if __name__ == '__main__':
     refactoring_sequence_input_file = os.path.join(directory_name_, r'input.txt')
     reset_project()
     # execute_from_log(input_file_path=refactoring_sequence_input_file)
-
