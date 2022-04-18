@@ -5,7 +5,7 @@ Initialization: The abstract class and common utility functions.
 RandomInitialization: For initialling random candidates.
 """
 
-__version__ = '0.3.1'
+__version__ = '0.3.2'
 __author__ = 'Morteza Zakeri'
 
 import os
@@ -244,7 +244,7 @@ class Initialization(object):
     def find_pullup_field_candidates(self):
         _db = und.open(self.udb_path)
         candidates = []
-        class_entities = _db.ents("class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static")
+        class_entities = _db.ents("Class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static")
         for ent in class_entities:
             for ref in ent.refs("Define", "Variable"):
                 candidate = {
@@ -303,11 +303,11 @@ class Initialization(object):
             class_method_dict = {}
             father_methods = []
 
-            for met_ref in ent.refs("define", "method ~override"):
+            for met_ref in ent.refs("Define", "Method ~Override"):
                 method = met_ref.ent()
                 father_methods.append(method.simplename())
 
-            for ref in ent.refs("extendby"):
+            for ref in ent.refs("Extendby"):
                 child = ref.ent()
                 if not child.kind().check("public class"):
                     continue
@@ -316,11 +316,11 @@ class Initialization(object):
                 if child_name not in class_method_dict:
                     class_method_dict[child_name] = []
 
-                for met_ref in child.refs("define", "method"):
+                for met_ref in child.refs("Define", "Method"):
                     method = met_ref.ent()
                     method_name = method.simplename()
 
-                    if method.ents("override"):
+                    if method.ents("Override"):
                         continue
 
                     if method_name not in father_methods:
@@ -368,7 +368,7 @@ class Initialization(object):
     def find_push_down_method_candidates(self):
         _db = und.open(self.udb_path)
         candidates = []
-        class_entities = _db.ents("class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static")
+        class_entities = _db.ents("Class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static")
 
         for ent in class_entities:
             params = {
@@ -379,7 +379,7 @@ class Initialization(object):
             }
             method_names = []
 
-            for ref in ent.refs("Extendby ~Implicit", "public class"):
+            for ref in ent.refs("Extendby ~Implicit", "Public Class"):
                 params["source_class"] = ent.simplename()
                 ln = ent.longname().split(".")
                 params["source_package"] = ln[0] if len(ln) > 1 else ""
