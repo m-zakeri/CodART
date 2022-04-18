@@ -42,20 +42,32 @@ class DecreaseMethodVisibilityListener(JavaParserLabeledListener):
         if self.detected_method:
             if ctx.modifier(0) is not None:
                 if "@" in ctx.modifier(0).getText():
-                    self.rewriter.replaceSingleToken(
-                        token=ctx.modifier(1).start,
-                        text="private "
-                    )
+                    if ctx.modifier(1) is not None:
+                        self.rewriter.replaceSingleToken(
+                            token=ctx.modifier(1).start,
+                            text="private "
+                        )
+                    else:
+                        self.rewriter.replaceSingleToken(
+                            ctx.memberDeclaration().getChild(0).getChild(0).start,
+                            text="private " + ctx.memberDeclaration().getChild(0).getChild(0).getText()
+                        )
                 else:
-                    self.rewriter.replaceSingleToken(
-                        token=ctx.modifier(0).start,
-                        text="private "
-                    )
+                    if ctx.modifier(0).getText() == 'public' or ctx.modifier(0).getText() == 'protected':
+                        self.rewriter.replaceSingleToken(
+                            token=ctx.modifier(0).start,
+                            text="private "
+                        )
+                    else:
+                        self.rewriter.insertBeforeToken(
+                            token=ctx.modifier(0).start,
+                            text="private "
+                        )
             else:
                 if ctx.memberDeclaration().getChild(0).getChild(0) is not None:
-                    self.rewriter.replaceSingleToken(
+                    self.rewriter.insertBeforeToken(
                         ctx.memberDeclaration().getChild(0).getChild(0).start,
-                        text="private " + ctx.memberDeclaration().getChild(0).getChild(0).getText()
+                        text="private "
                     )
             self.detected_method = False
 

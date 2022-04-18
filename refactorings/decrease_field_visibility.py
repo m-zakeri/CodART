@@ -14,7 +14,7 @@ from antlr4.TokenStreamRewriter import TokenStreamRewriter
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 from codart.symbol_table import parse_and_walk
-from sbse.config import logger
+from sbse.config import logger, UDB_PATH
 
 
 class DecreaseFieldVisibilityListener(JavaParserLabeledListener):
@@ -49,22 +49,35 @@ class DecreaseFieldVisibilityListener(JavaParserLabeledListener):
             # print(ctx.getText())
             if ctx.modifier(0) is not None:
                 if "@" in ctx.modifier(0).getText():
-                    self.rewriter.replaceSingleToken(
-                        token=ctx.modifier(1).start,
-                        text="private "
-                    )
+                    if ctx.modifier(1) is not None:
+                        self.rewriter.replaceSingleToken(
+                            token=ctx.modifier(1).start,
+                            text="private "
+                        )
+                    else:
+                        self.rewriter.replaceSingleToken(
+                            ctx.memberDeclaration().getChild(0).getChild(0).start,
+                            text="private " + ctx.memberDeclaration().getChild(0).getChild(0).getText()
+                        )
                 else:
-                    self.rewriter.replaceSingleToken(
-                        token=ctx.modifier(0).start,
-                        text="private "
-                    )
+                    if ctx.modifier(0).getText() == 'public' or ctx.modifier(0).getText() == 'protected':
+                        self.rewriter.replaceSingleToken(
+                            token=ctx.modifier(0).start,
+                            text="private "
+                        )
+                    else:
+                        self.rewriter.insertBeforeToken(
+                            token=ctx.modifier(0).start,
+                            text="private "
+                        )
             else:
                 if ctx.memberDeclaration().getChild(0).getChild(0) is not None:
-                    self.rewriter.replaceSingleToken(
+                    self.rewriter.insertBeforeToken(
                         ctx.memberDeclaration().getChild(0).getChild(0).start,
-                        text="private " + ctx.memberDeclaration().getChild(0).getChild(0).getText()
+                        text="private "
                     )
-            # print("public " + ctx.memberDeclaration().getText())
+
+            # print("private " + ctx.memberDeclaration().getText())
             self.detected_field = False
 
 
@@ -115,10 +128,25 @@ def main(udb_path, source_package, source_class, source_field, *args, **kwargs):
     return True
 
 
-if __name__ == '__main__':
+# Tests
+def test1():
     main(
         udb_path="D:/IdeaProjects/JSON20201115/JSON20201115.und",
         source_package="org.json",
         source_class="JSONObject",
         source_field="Object"
     )
+
+
+def test2():
+    main(
+        udb_path=UDB_PATH,
+        source_package='technology.tabula',
+        source_class='TableWithRulingLines',
+        source_field='si'
+    )
+
+
+if __name__ == '__main__':
+    # test1()
+    test2()
