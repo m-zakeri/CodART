@@ -259,13 +259,13 @@ class ExtractClassRefactoringListener(JavaParserLabeledListener):
             field_type = ctx.typeType().getText()
 
             if len(field_names) == 1:
-                # Todo: Required better handling
+                # Todo: Requires better handling
                 st = f"public {field_type} {field_names[0]};{self.NEW_LINE}"
                 if '=new' in st and '()' in st:
                     st = st.replace('new', 'new ')
                 self.code += st
             else:
-                # Todo: Required better handling
+                # Todo: Requires better handling
                 st = f"public {field_type} {self.detected_field};{self.NEW_LINE}"
                 if '=new' in st and '()' in st:
                     st = st.replace('new', 'new ')
