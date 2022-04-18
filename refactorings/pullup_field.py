@@ -25,9 +25,8 @@ Pull up field refactoring removes the repetitive field from subclasses and moves
 __version__ = '0.2.0'
 __author__ = 'Morteza Zakeri'
 
-
 from codart import symbol_table
-from sbse.config import logger
+from sbse.config import logger, PROJECT_PATH
 
 
 class PullUpFieldRefactoring:
@@ -145,6 +144,11 @@ class PullUpFieldRefactoring:
                                          + ("new " + field.datatype + " " if field.initializer.startswith('{') else "")
                                          + field.initializer
                                          + ";")
+
+                # Todo: Requires better handling
+                if 'new' in initializer_statement and '()' in initializer_statement:
+                    initializer_statement = initializer_statement.replace('new', 'new ')
+
                 has_contructor = False
                 for class_body_decl in _class.parser_context.classBody().getChildren():
                     if class_body_decl.getText() in ['{', '}']:
@@ -163,7 +167,8 @@ class PullUpFieldRefactoring:
                     body_start = symbol_table.TokensInfo(body)
                     body_start.stop = body_start.start  # Start and stop both point to the '{'
                     rewriter.insert_after(body_start,
-                                          "\n\t" + _class.modifiers[0] + " " + _class.name + "() { " + initializer_statement + " }"
+                                          "\n\t" + _class.modifiers[
+                                              0] + " " + _class.name + "() { " + initializer_statement + " }"
                                           )
 
         rewriter.apply()
@@ -187,7 +192,8 @@ def main(project_dir: str, package_name: str, children_class: str, field_name: s
     return result
 
 
-def test():
+# Tests
+def test1():
     print("Testing pullup_field...")
     filenames = [
         "D:/archive/uni/CD/project/CodART/tests/pullup_field/test5.java",
@@ -204,7 +210,7 @@ def test():
         print("Cannot refactor.")
 
 
-if __name__ == "__main__":
+def test2():
     target_files = ["tests/apache-ant/main/org/apache/tools/ant/types/ArchiveFileSet.java",
                     "tests/apache-ant/main/org/apache/tools/ant/types/TarFileSet.java",
                     "tests/apache-ant/main/org/apache/tools/ant/types/ZipFileSet.java"
@@ -217,3 +223,18 @@ if __name__ == "__main__":
         children_class="Soldier",
         field_name="has_baby"
     )
+
+
+def test3():
+    main(
+        project_dir=PROJECT_PATH,
+        package_name="technology.tabula",
+        children_class="Table",
+        field_name="cells"
+    )
+
+
+if __name__ == "__main__":
+    # test1()
+    # test2()
+    test3()
