@@ -112,9 +112,18 @@ class InterfaceInfoListener(JavaParserLabeledListener):
         for modifier in modifiers:
             if modifier.classOrInterfaceModifier() is not None:
                 # print('modifier.classOrInterfaceModifier().getText()', modifier.classOrInterfaceModifier().getText())
+
+                # Todo: Required better handling
                 if "private" in modifier.classOrInterfaceModifier().getText() or \
-                        "static" in modifier.classOrInterfaceModifier().getText():
+                        "static" in modifier.classOrInterfaceModifier().getText() or \
+                        '?' in modifier.classOrInterfaceModifier().getText():
                     do_extract = False
+                    break
+
+        # Todo: Required better handling
+        if '?' in ctx.getChild(0).getTex():
+            do_extract = False
+
         if do_extract:
             method = {'name': ctx.IDENTIFIER().getText(), 'return_type': ctx.typeTypeOrVoid().getText(),
                       'formal_parameters': []}

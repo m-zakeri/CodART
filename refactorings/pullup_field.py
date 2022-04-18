@@ -66,7 +66,7 @@ class PullUpFieldRefactoring:
         if self.package_name not in program.packages \
                 or self.class_name not in program.packages[self.package_name].classes \
                 or self.field_name not in program.packages[self.package_name].classes[self.class_name].fields:
-            logger.error("Inputs are not valid!")
+            logger.error("One or more inputs are not valid.")
             return False
 
         _class: symbol_table.Class = program.packages[self.package_name].classes[self.class_name]
@@ -76,6 +76,7 @@ class PullUpFieldRefactoring:
 
         superclass_name = _class.superclass_name
         if not program.packages[self.package_name].classes.get(superclass_name):
+            logger.error("Super class package is none!")
             return False
 
         superclass: symbol_table.Class = program.packages[self.package_name].classes[superclass_name]
@@ -112,7 +113,7 @@ class PullUpFieldRefactoring:
 
         rewriter = symbol_table.Rewriter(program, self.filename_mapping)
 
-        rewriter.insert_after(superclass_body_start, "\n    " + (
+        rewriter.insert_after(superclass_body_start, "\n\t" + (
             "public " if is_public else (
                 "protected " if is_protected else "")) + datatype + " " + self.field_name + ";")
 
@@ -155,23 +156,21 @@ class PullUpFieldRefactoring:
                             body = constructor.constructorBody  # Start token = '{'
                             body_start = symbol_table.TokensInfo(body)
                             body_start.stop = body_start.start  # Start and stop both point to the '{'
-                            rewriter.insert_after(body_start, "\n        " + initializer_statement)
+                            rewriter.insert_after(body_start, "\n\t" + initializer_statement)
                             has_contructor = True
                 if not has_contructor:
                     body = _class.parser_context.classBody()
                     body_start = symbol_table.TokensInfo(body)
                     body_start.stop = body_start.start  # Start and stop both point to the '{'
                     rewriter.insert_after(body_start,
-                                          "\n    " + _class.modifiers[
-                                              0] + " " + _class.name + "() { " + initializer_statement + " }"
+                                          "\n\t" + _class.modifiers[0] + " " + _class.name + "() { " + initializer_statement + " }"
                                           )
 
         rewriter.apply()
 
-        # check for multilevel inheritance recursively.
-
-        if _class.superclass_name is not None:
-            PullUpFieldRefactoring(self.source_filenames, self.package_name, _class.superclass_name, "id").do_refactor()
+        # Todo: check for multilevel inheritance recursively.
+        # if _class.superclass_name is not None:
+        #     PullUpFieldRefactoring(self.source_filenames, self.package_name, _class.superclass_name, "id").do_refactor()
         return True
 
 
