@@ -99,20 +99,33 @@ class Initialization(object):
             self.init_make_field_static,  # 1
             self.init_make_method_static,  # 2
             self.init_make_method_non_static,  # 3
+
             self.init_pullup_field,  # 4
             self.init_move_field,  # 5
+
             self.init_move_method,  # 6
+            self.init_move_method,  # 6.2
+
             self.init_move_class,  # 7
+            self.init_move_class,  # 7.2
+
             self.init_push_down_field,  # 8
+
             self.init_extract_class,  # 9
+            self.init_extract_class,  # 9.2
+
             self.init_pullup_method,  # 10
             self.init_push_down_method,  # 11
             self.init_pullup_constructor,  # 12
+
             self.init_decrease_field_visibility,  # 13
             self.init_increase_field_visibility,  # 14
             self.init_decrease_method_visibility,  # 15
             self.init_increase_method_visibility,  # 16
+
             self.init_extract_interface,  # 17
+            self.init_extract_interface,  # 17.2
+
             # self.init_extract_method,  # 18
         )
 
@@ -498,6 +511,7 @@ class Initialization(object):
         return population
 
     def generate_population(self):
+        config.logger.debug(f'Generating initial population ...')
         for _ in range(0, self.population_size):
             individual = []
             individual_size = random.randint(self.lower_band, self.upper_band)
@@ -527,10 +541,12 @@ class Initialization(object):
             logger.debug(f'Append individual {_} to population, s')
 
         logger.debug('=' * 100)
-        self.dump_population()
+        initial_pop_path = f'{config.PROJECT_LOG_DIR}initial_population_{config.global_execution_start_time}.json'
+        self.dump_population(path=initial_pop_path)
+        config.logger.debug(f'Generating initial population finished.')
         return self.population
 
-    def dump_population(self, path=f'{config.PROJECT_PATH}_population_{config.date_time}.json'):
+    def dump_population(self, path=None):
         if self.population is None or len(self.population) == 0:
             return
         population_trimmed = []
@@ -539,10 +555,12 @@ class Initialization(object):
             for gene_ in chromosome:
                 chromosome_new.append((gene_[2], gene_[1]))
             population_trimmed.append(chromosome_new)
-        print(population_trimmed)
+        # config.logger.debug(population_trimmed)
 
-        with open(path, 'w', encoding='utf-8') as fp:
+        with open(path, mode='w', encoding='utf-8') as fp:
             json.dump(population_trimmed, fp, indent=4)
+
+        config.logger.debug(f'The initial population was saved into {path}')
 
     def load_population(self, path=None):
         if len(self.population) > 0:
@@ -556,7 +574,8 @@ class Initialization(object):
             for gene_ in chromosome:
                 chromosome_new.append((REFACTORING_MAIN_MAP[gene_[0]], gene_[1], gene_[0]))
             self.population.append(chromosome_new)
-        # print(self.population)
+        # config.logger.debug(self.population)
+        config.logger.debug(f'The initial population was loaded into "population field" from {path}')
 
 
 class RandomInitialization(Initialization):

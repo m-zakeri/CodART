@@ -28,6 +28,8 @@ PROJECT_ROOT_DIR = os.environ.get("PROJECT_ROOT_DIR")
 CSV_ROOT_DIR = os.environ.get("CSV_ROOT_DIR")
 UDB_ROOT_DIR = os.environ.get("UDB_ROOT_DIR")
 INIT_POP_FILE = os.environ.get("INIT_POP_FILE")
+NGEN = int(os.environ.get("NGEN"))
+RESUME_EXECUTION = os.environ.get("RESUME_EXECUTION")
 BENCHMARK_INDEX = int(os.environ.get("BENCHMARK_INDEX", 0))
 
 EXPERIMENTER = os.environ.get("EXPERIMENTER")
@@ -332,11 +334,22 @@ INITIAL_METRICS = {
 }
 
 CURRENT_METRICS = INITIAL_METRICS.get(PROJECT_NAME)
-date_time = dt.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-dirname = os.path.dirname(__file__)
-LOG_FILE = os.path.join(dirname, f'./logs/{PROJECT_NAME}-{date_time}.log')
+if NGEN == 0:
+    global_execution_start_time = dt.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+elif NGEN > MAX_ITERATIONS:
+    quit()
+else:
+    global_execution_start_time = RESUME_EXECUTION
+    MAX_ITERATIONS = MAX_ITERATIONS - NGEN
+
+# dirname = os.path.dirname(__file__)
+# LOG_FILE = os.path.join(dirname, f'./logs/{PROJECT_NAME}__{global_execution_start_time}.log')
+PROJECT_LOG_DIR = f'{PROJECT_PATH}_CodART_Log/execution__{global_execution_start_time}/'
+comprehensive_log_file = f'{PROJECT_LOG_DIR}{PROJECT_NAME}_full_log_{global_execution_start_time}_NGEN{NGEN}.log'
 FORMATTER = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
 
+if not os.path.exists(PROJECT_LOG_DIR):
+    os.makedirs(PROJECT_LOG_DIR)
 
 # logging.basicConfig(
 #     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -352,24 +365,23 @@ def get_console_handler():
     return console_handler
 
 
-def get_file_handler():
-    file_handler = logging.FileHandler(LOG_FILE)
+def get_file_handler(log_file):
+    file_handler = logging.FileHandler(log_file)
     file_handler.setFormatter(FORMATTER)
     return file_handler
 
 
-def get_logger(logger_name):
+def get_logger(logger_name, logger_file_name):
     logger_ = logging.getLogger(logger_name)
     logger_.setLevel(logging.DEBUG)  # better to have too much log than not enough
     logger_.addHandler(get_console_handler())
-    logger_.addHandler(get_file_handler())
+    logger_.addHandler(get_file_handler(log_file=logger_file_name))
     # with this pattern, it's rarely necessary to propagate the error up to parent
     logger_.propagate = False
     return logger_
 
 
-logger = get_logger(__name__)
-
+logger = get_logger(__name__, logger_file_name=comprehensive_log_file)
 
 # print(logger.handlers)
 
@@ -384,6 +396,8 @@ def log_experiment_info():
     logger.info(f"Individual lower band: {LOWER_BAND}")
     logger.info(f"Individual upper band: {UPPER_BAND}")
     logger.info(f"Max iterations: {MAX_ITERATIONS}")
+    logger.info(f"NGEN: {NGEN}")
+    logger.info(f"RESUME_EXECUTION: {RESUME_EXECUTION}")
     logger.info(f"Crossover probability: {CROSSOVER_PROBABILITY}")
     logger.info(f"Mutation probability: {MUTATION_PROBABILITY}")
     logger.info(f"Warm start mode: {WARM_START}")

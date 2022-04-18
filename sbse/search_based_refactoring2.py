@@ -3,6 +3,9 @@ This module implements the search-based refactoring with various search strategy
 using pymoo framework.
 
 ## Changelog
+### version 0.2.2
+    1. Add a separate log directory for each execution
+    2. Add possibility to resume algorithm
 ### version 0.2.1
     minor updates
     fix bugs
@@ -33,21 +36,27 @@ __author__ = 'Morteza Zakeri'
 # import logging
 import os
 import random
+import json
 from copy import deepcopy
 from datetime import datetime
 from multiprocessing import Process, Array
 from typing import List
 
 import numpy as np
-from pymoo.algorithms.soo.nonconvex.ga import GA
-from pymoo.algorithms.moo.nsga2 import NSGA2
-from pymoo.algorithms.moo.nsga3 import NSGA3
+import pymoo.core.individual
+
+from pymoo.core import algorithm
 from pymoo.core.callback import Callback
 from pymoo.core.crossover import Crossover
 from pymoo.core.duplicate import ElementwiseDuplicateElimination
 from pymoo.core.mutation import Mutation
 from pymoo.core.problem import Problem
 from pymoo.core.sampling import Sampling
+
+from pymoo.algorithms.soo.nonconvex.ga import GA
+from pymoo.algorithms.moo.nsga2 import NSGA2
+from pymoo.algorithms.moo.nsga3 import NSGA3
+
 from pymoo.factory import get_reference_directions, get_decision_making
 from pymoo.operators.selection.tournament import TournamentSelection
 from pymoo.optimize import minimize
@@ -413,13 +422,14 @@ class ProblemManyObjective(Problem):
 
 class PopulationInitialization(Sampling):
     """
-    This class create the initial population, X, consists of n_samples, pop_size.
+    This class create the initial population, x, consists of n_samples, pop_size.
     For each refactoring operation, a set of controlling parameters (e.g., actors and roles) is picked based on
     existing code smells in the program to be refactored.
     The selected refactoring operations are randomly arranged in each individual.
     Assigning randomly a sequence of refactorings to certain code fragments generates the initial population
     """
-    def __init__(self,  initializer: Initialization = None):
+
+    def __init__(self, initializer: Initialization = None):
         super(PopulationInitialization, self).__init__()
         self._initializer = initializer
 
@@ -434,7 +444,9 @@ class PopulationInitialization(Sampling):
         if os.path.exists(config.INIT_POP_FILE):
             self._initializer.load_population(path=config.INIT_POP_FILE)
             population = self._initializer.population
-            config.logger.debug(f'The initial population was loaded from disk')
+            initial_pop_path = f'{config.PROJECT_LOG_DIR}initial_population_{config.global_execution_start_time}.json'
+            if config.NGEN == 0:
+                self._initializer.dump_population(path=initial_pop_path)
         else:
             population = self._initializer.generate_population()
 
@@ -593,9 +605,9 @@ class LogCallback(Callback):
         super().__init__()
         # self.data["best"] = []
 
-    def notify(self, algorithm, **kwargs):
+    def notify(self, algorithm: algorithm.Algorithm, **kwargs):
         # self.data["best"].append(algorithm.pop.get("F").min())
-        logger.info(f'Generation #{algorithm.n_gen} was finished:')
+        logger.info(f'Generation #{algorithm.n_gen+config.NGEN} was finished:')
 
         # logger.info(f'Best solution:')
         # logger.info(f'{algorithm.pop.get("F")}')
@@ -606,9 +618,51 @@ class LogCallback(Callback):
         logger.info(f'Optimum solutions:')
         logger.info(f'{F}')
 
-        logger.info('-'*100)
-        logger.info(' ')
+        # Log evolved population at end of each generation
+        generation_log_path = config.PROJECT_LOG_DIR + '/generations_logs/'
+        generation_endof_date_time = config.dt.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        population_log_file_path = f'{generation_log_path}/pop_gen{algorithm.n_gen+config.NGEN}_{generation_endof_date_time}.json'
+        pop_opt_log_file_path = f'{generation_log_path}/pop_opt_gen{algorithm.n_gen+config.NGEN}_{generation_endof_date_time}.json'
+        pop_opt_objective_value_log = f'{config.PROJECT_LOG_DIR}{config.PROJECT_NAME}_objectives_log_{config.global_execution_start_time}.csv'
+        if not os.path.exists(generation_log_path):
+            os.makedirs(generation_log_path)
 
+        population_trimmed = []
+        for chromosome in algorithm.pop:
+            chromosome_new = []
+            for gene_ in chromosome.X[0]:
+                chromosome_new.append((gene_.name, gene_.params))
+            population_trimmed.append(chromosome_new)
+
+        with open(population_log_file_path, 'w', encoding='utf-8') as fp:
+            json.dump(population_trimmed, fp, indent=4)
+
+        population_trimmed = []
+        objective_values_content = ''
+        for chromosome in algorithm.opt:
+            chromosome_new = []
+            for gene_ in chromosome.X[0]:
+                chromosome_new.append((gene_.name, gene_.params))
+            population_trimmed.append(chromosome_new)
+
+            objective_values_content += f'{algorithm.n_gen+config.NGEN},'
+            for gene_objective_ in chromosome.F:
+                objective_values_content += f'{gene_objective_},'
+            objective_values_content += '\n'
+
+        with open(pop_opt_log_file_path, mode='w', encoding='utf-8') as fp:
+            json.dump(population_trimmed, fp, indent=4)
+
+        if not os.path.exists(pop_opt_objective_value_log):
+            writing_mode = 'w'
+        else:
+            writing_mode = 'a'
+        with open(pop_opt_objective_value_log, mode=writing_mode, encoding='utf-8') as fp:
+            fp.write(objective_values_content)
+
+        logger.info('-' * 100)
+        logger.info(' ')
+        # quit()
 
 
 # Calling the equal method of individual class
@@ -712,7 +766,8 @@ def main():
                    crossover=AdaptiveSinglePointCrossover(prob=config.CROSSOVER_PROBABILITY),
                    # crossover=get_crossover("real_k_point", n_points=2),
                    mutation=BitStringMutation(prob=config.MUTATION_PROBABILITY, initializer=initializer_object),
-                   eliminate_duplicates=ElementwiseDuplicateElimination(cmp_func=is_equal_2_refactorings_list)
+                   eliminate_duplicates=ElementwiseDuplicateElimination(cmp_func=is_equal_2_refactorings_list),
+                   n_gen=config.NGEN,
                    )
     algorithms.append(algorithm)
 
@@ -722,7 +777,8 @@ def main():
                       crossover=AdaptiveSinglePointCrossover(prob=config.CROSSOVER_PROBABILITY),
                       # crossover=get_crossover("real_k_point", n_points=2),
                       mutation=BitStringMutation(prob=config.MUTATION_PROBABILITY, initializer=initializer_object),
-                      eliminate_duplicates=ElementwiseDuplicateElimination(cmp_func=is_equal_2_refactorings_list)
+                      eliminate_duplicates=ElementwiseDuplicateElimination(cmp_func=is_equal_2_refactorings_list),
+                      n_gen=config.NGEN,
                       )
     algorithms.append(algorithm)
 
@@ -740,7 +796,8 @@ def main():
                       crossover=AdaptiveSinglePointCrossover(prob=config.CROSSOVER_PROBABILITY, ),
                       # crossover=get_crossover("real_k_point", n_points=2),
                       mutation=BitStringMutation(prob=config.MUTATION_PROBABILITY, initializer=initializer_object),
-                      eliminate_duplicates=ElementwiseDuplicateElimination(cmp_func=is_equal_2_refactorings_list)
+                      eliminate_duplicates=ElementwiseDuplicateElimination(cmp_func=is_equal_2_refactorings_list),
+                      n_gen=config.NGEN,
                       )
     algorithms.append(algorithm)
 
@@ -768,8 +825,8 @@ def main():
         x_tol=None,
         cv_tol=None,
         f_tol=0.0015,
-        nth_gen=10,
-        n_last=20,
+        nth_gen=5,
+        n_last=5,
         n_max_gen=config.MAX_ITERATIONS,  # about 1000 - 1400
         n_max_evals=1e6
     )
@@ -833,4 +890,3 @@ if __name__ == '__main__':
     log_project_info(reset_=True)
     # quit()
     main()
-
