@@ -121,7 +121,7 @@ class InterfaceInfoListener(JavaParserLabeledListener):
                     break
 
         # Todo: Requires better handling
-        if '?' in ctx.getChild(0).getTex():
+        if '?' in ctx.getChild(0).getText():
             do_extract = False
 
         if do_extract:
