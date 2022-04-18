@@ -70,12 +70,12 @@ class DesignMetrics:
         known_class_entities = dbx.ents(filter2)
         for ent in known_class_entities:
             is_tree = False
-            for ref in ent.refs("Extendby"):
+            for ref in ent.refs("Coupleby Extendby, Coupleby Implementby"):
                 if ref:
                     is_tree = True
                     break
             mit = ent.metric(['MaxInheritanceTree'])['MaxInheritanceTree']
-            if mit == 1 and is_tree:
+            if ("Interface" in ent.kindname() or mit == 1) and is_tree:
                 count += 1
 
         dbx.close()
@@ -95,7 +95,7 @@ class DesignMetrics:
 
         for ent in known_class_entities:
             mit = ent.metric(['MaxInheritanceTree'])['MaxInheritanceTree']
-            MITs.append(mit - 1)
+            MITs.append(mit)
 
         dbx.close()
         return sum(MITs) / len(MITs)
@@ -179,11 +179,12 @@ class DesignMetrics:
         :return: Count of number of attributes whose type is user defined class(es).
         """
         counter = 0
-        for ref in class_entity.refs("Define", "Variable"):
+        for ref in class_entity.refs("Define, Typed, Set, Create", "Variable"):
             if ref.ent().type() in self.user_defined_classes:
                 counter += 1
-        for ref in class_entity.refs("Define", "Method"):
-            for ref2 in ref.ent().refs("Define", "Variable"):
+        filter_ = "Method ~Unknown ~Jar ~Library ~Constructor ~Implicit ~Lambda ~External"
+        for ref in class_entity.refs("Define, Typed, Set, Create", filter_):
+            for ref2 in ref.ent().refs("Define, Typed, Set, Create", "Variable ~Unknown"):
                 if ref2.ent().type() in self.user_defined_classes:
                     counter += 1
         return counter
@@ -218,7 +219,7 @@ class DesignMetrics:
         except ZeroDivisionError:
             # logger.error('ZeroDivisionError in computing QMOOD DAM metric.')
             ratio = 1.0
-        return ratio
+        return 1. + ratio
 
     def CAMC_class_level(self, class_entity: und.Ent):
         """
@@ -237,7 +238,7 @@ class DesignMetrics:
             percentage = 0
         cohesion_ = 1. - (percentage / 100.)
         # print(class_entity.longname(), cohesion_)
-        return round(cohesion_, 5)
+        return 1. + round(cohesion_, 5)
 
     def CIS_class_level(self, class_entity: und.Ent):
         """
@@ -285,7 +286,7 @@ class DesignMetrics:
             if ref.ent().type() in self.all_classes:
                 others.add(ref.ent().type())
 
-        kind_filter = "Method ~Unknown ~Unresolved ~Jar ~Library ~Constructor ~Implicit ~Lambda ~External"
+        kind_filter = "Method ~Unknown ~Jar ~Library ~Constructor ~Implicit ~Lambda ~External"
         for ref in class_entity.refs("Define", kind_filter):
             for ref2 in ref.ent().refs("Define", "Parameter"):
                 if ref2.ent().type() in self.all_classes:
@@ -320,7 +321,7 @@ class DesignMetrics:
                     implemented_methods += interface_entity.metric(['CountDeclMethodAll']).get('CountDeclMethodAll', 0)
                 mfa = round((all_methods - implemented_methods) / all_methods, 5)
         # print(class_entity.longname(), mfa)
-        return mfa if mfa >= 0 else 1
+        return 1. + mfa if mfa >= 0 else 1
 
     def NOP_class_level(self, class_entity: und.Ent):
         """
@@ -439,8 +440,10 @@ class DesignQualityAttributes:
         The degree of understanding and the easiness of learning the design implementation details.
         :return: understandability score
         """
-        self._understandability = - 0.33 * self.ANA + 0.33 * self.DAM - 0.33 * self.DCC + 0.34 * self.CAMC \
-                                  - 0.33 * self.NOP - 0.33 * self.NOM - 0.33 * self.DSC
+        # self._understandability = - 0.33 * self.ANA + 0.33 * self.DAM - 0.33 * self.DCC + 0.34 * self.CAMC \
+        #                           - 0.33 * self.NOP - 0.33 * self.NOM - 0.33 * self.DSC
+        self._understandability = - 0.33 * self.ANA + 0.66 * self.DAM - 0.33 * self.DCC + 0.66 * self.CAMC \
+                                  - 0.33 * self.NOP - 0.33 * self.NOM
         return round(self._understandability, 5)
 
     @property
