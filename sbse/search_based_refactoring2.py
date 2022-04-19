@@ -761,7 +761,7 @@ def main():
     # Define search algorithms
     algorithms = list()
     # 1: GA
-    algorithm = GA(pop_size=config.POPULATION_SIZE,
+    alg1 = GA(pop_size=config.POPULATION_SIZE,
                    sampling=PopulationInitialization(initializer_object),
                    crossover=AdaptiveSinglePointCrossover(prob=config.CROSSOVER_PROBABILITY),
                    # crossover=get_crossover("real_k_point", n_points=2),
@@ -769,10 +769,10 @@ def main():
                    eliminate_duplicates=ElementwiseDuplicateElimination(cmp_func=is_equal_2_refactorings_list),
                    n_gen=config.NGEN,
                    )
-    algorithms.append(algorithm)
+    algorithms.append(alg1)
 
     # 2: NSGA II
-    algorithm = NSGA2(pop_size=config.POPULATION_SIZE,
+    alg2 = NSGA2(pop_size=config.POPULATION_SIZE,
                       sampling=PopulationInitialization(initializer_object),
                       crossover=AdaptiveSinglePointCrossover(prob=config.CROSSOVER_PROBABILITY),
                       # crossover=get_crossover("real_k_point", n_points=2),
@@ -780,7 +780,7 @@ def main():
                       eliminate_duplicates=ElementwiseDuplicateElimination(cmp_func=is_equal_2_refactorings_list),
                       n_gen=config.NGEN,
                       )
-    algorithms.append(algorithm)
+    algorithms.append(alg2)
 
     # 3: NSGA III
     # pop_size must be equal or larger than the number of reference directions
@@ -789,7 +789,7 @@ def main():
                                         config.NUMBER_OBJECTIVES,  # number of objectives
                                         number_of_references_points,  # number of reference directions
                                         seed=1)
-    algorithm = NSGA3(ref_dirs=ref_dirs,
+    alg3 = NSGA3(ref_dirs=ref_dirs,
                       pop_size=config.POPULATION_SIZE,  # 200
                       sampling=PopulationInitialization(initializer_object),
                       selection=TournamentSelection(func_comp=binary_tournament),
@@ -799,7 +799,7 @@ def main():
                       eliminate_duplicates=ElementwiseDuplicateElimination(cmp_func=is_equal_2_refactorings_list),
                       n_gen=config.NGEN,
                       )
-    algorithms.append(algorithm)
+    algorithms.append(alg3)
 
     # -------------------------------------------
     # Define problems
@@ -845,22 +845,9 @@ def main():
     # np.save('checkpoint', res.algorithm)
 
     # Log results
-    logger.info(f"***** Algorithm was finished in {res.algorithm.n_gen} generations *****")
+    logger.info(f"***** Algorithm was finished in {res.algorithm.n_gen+config.NGEN} generations *****")
     logger.info(" ")
-    logger.info("Best objective values (a set of non-dominated solutions):")
-    logger.info(res.F)
-    logger.info("Best refactoring sequences (a set of non-dominated solutions):")
-    logger.info(res.X)
-
-    logger.info("=" * 75)
-    logger.info("Other solutions:")
-    for ind in res.opt:
-        logger.info(ind.X)
-        logger.info(ind.F)
-        logger.info("-" * 50)
-    logger.info("=" * 75)
-
-    logger.info("**** time information *****")
+    logger.info("============ time information ============")
     logger.info(f"Start time: {datetime.fromtimestamp(res.start_time).strftime('%Y-%m-%d %H:%M:%S')}")
     logger.info(f"End time: {datetime.fromtimestamp(res.end_time).strftime('%Y-%m-%d %H:%M:%S')}")
     logger.info(f"Execution time in seconds: {res.exec_time}")
@@ -869,17 +856,97 @@ def main():
     # logger.info(f"Number of generations: {res.algorithm.n_gen}")
     # logger.info(f"Number of generations", res.algorithm.termination)
 
-    pf = res.F
+    # Log optimum solutions
+    logger.info("============ All opt solutions ============")
+    for i, ind in enumerate(res.opt):
+        logger.info(f'Opt refactoring sequence {i}:')
+        logger.info(ind.X)
+        logger.info(f'Opt refactoring sequence corresponding objectives vector {i}:')
+        logger.info(ind.F)
+        logger.info("-" * 75)
+
+    # Log best refactorings
+    logger.info("============ Best refactoring sequences (a set of non-dominated solutions) ============")
+    for i, ind in enumerate(res.X):
+        logger.info(f'Best refactoring sequence {i}:')
+        logger.info(ind)
+        logger.info("-" * 75)
+    logger.info("============ Best objective values (a set of non-dominated solutions) ============")
+    for i, ind_objective in enumerate(res.F):
+        logger.info(f'Best refactoring sequence corresponding objectives vector {i}:')
+        logger.info(ind_objective)
+        logger.info("-" * 75)
+
+    # Save best refactorings
+    population_trimmed = []
+    objective_values_content = ''
+    for chromosome in res.X:
+        chromosome_new = []
+        for gene_ in chromosome[0]:
+            chromosome_new.append((gene_.name, gene_.params))
+        population_trimmed.append(chromosome_new)
+
+    for objective_vector in res.F:
+        objective_values_content += f'{res.algorithm.n_gen + config.NGEN},'
+        for objective_ in objective_vector:
+            objective_values_content += f'{objective_},'
+        objective_values_content += '\n'
+
+    best_refactoring_sequences_path = f'{config.PROJECT_LOG_DIR}best_refactoring_sequences_after_{res.algorithm.n_gen + config.NGEN}gnes.json'
+    with open(best_refactoring_sequences_path, mode='w', encoding='utf-8') as fp:
+        json.dump(population_trimmed, fp, indent=4)
+
+    best_refactoring_sequences_objectives_path = f'{config.PROJECT_LOG_DIR}best_refactoring_sequences_objectives_after_{res.algorithm.n_gen + config.NGEN}gnes.csv'
+    with open(best_refactoring_sequences_objectives_path, mode='w', encoding='utf-8') as fp:
+        fp.write(objective_values_content)
+
     try:
+        pf = res.F
         # dm = HighTradeoffPoints()
         dm = get_decision_making("high-tradeoff")
         I = dm.do(pf)
-        logger.info(f"High tradeoff points: {pf[I]}")
-        logger.info(f"High tradeoff points corresponding refactorings: {res.X[I]}")
-        logger.info(f"The mean improvement of quality attributes: {np.mean(pf[I], axis=0)}")
-        logger.info(f"The median improvement of quality attributes: {np.median(pf[I], axis=0)}")
+
+        logger.info("============ High-tradeoff points refactoring sequences ============")
+        for i, ind in enumerate(res.X[I]):
+            logger.info(f'High tradeoff points refactoring sequence {i}:')
+            logger.info(ind)
+            logger.info("-" * 75)
+        logger.info("============ High-tradeoff points objective values  ============")
+        for i, ind_objective in enumerate(pf[I]):
+            logger.info(f'High-tradeoff points refactoring sequence corresponding objectives vector {i}:')
+            logger.info(ind_objective)
+            logger.info("-" * 75)
+
+        logger.info("High-tradeoff points mean:")
+        logger.info(np.mean(pf[I], axis=0))
+        logger.info("High-tradeoff points median:")
+        logger.info(np.median(pf[I], axis=0))
+
+        # Save high-tradeoff refactorings
+        population_trimmed = []
+        objective_values_content = ''
+        for chromosome in res.X[I]:
+            chromosome_new = []
+            for gene_ in chromosome[0]:
+                chromosome_new.append((gene_.name, gene_.params))
+            population_trimmed.append(chromosome_new)
+
+        for objective_vector in pf[I]:
+            objective_values_content += f'{res.algorithm.n_gen + config.NGEN},'
+            for objective_ in objective_vector:
+                objective_values_content += f'{objective_},'
+            objective_values_content += '\n'
+
+        high_tradeoff_path = f'{config.PROJECT_LOG_DIR}high_tradeoff_point_refactoring_after_{res.algorithm.n_gen + config.NGEN}gnes.json'
+        with open(high_tradeoff_path, mode='w', encoding='utf-8') as fp:
+            json.dump(population_trimmed, fp, indent=4)
+
+        high_tradeoff_path_objectives_path = f'{config.PROJECT_LOG_DIR}high_tradeoff_points_after_{res.algorithm.n_gen + config.NGEN}gnes.csv'
+        with open(high_tradeoff_path_objectives_path, mode='w', encoding='utf-8') as fp:
+            fp.write(objective_values_content)
+
     except:
-        logger.error("No multi optimal solutions (error in computing high tradeoff points)!")
+        logger.error("No multi-optimal solutions (error in computing high tradeoff points)!")
 
 
 # CodART search-based refactoring module main driver
