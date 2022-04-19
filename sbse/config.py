@@ -39,18 +39,19 @@ DESCRIPTION = os.environ.get("DESCRIPTION")
 BENCHMARKS = {
     # Project Path
     'PROJ': [
-        '10_water-simulator',
-        '61_noen',
-        '88_jopenchart',
-        '104_vuze',  # Not ready
-        '105_freemind',
-        '107_weka',
-        'commons-codec',
-        'ganttproject_1_11_1_original',
-        'jfreechart-master',
-        'JSON20201115',
-        'jvlt-1.3.2',
-        'tabula-java',
+        '10_water-simulator',  # 0
+        '61_noen',  # 1
+        '88_jopenchart',  # 2
+        '104_vuze',  # 3, Not ready
+        '105_freemind',  # 4
+        '107_weka',  # 5
+        'commons-codec',  # 6
+        'ganttproject_1_11_1_original',  # 7
+        'jfreechart-master',  # 8
+        'JSON20201115',  # 9
+        'jvlt-1.3.2',  # 10
+        'tabula-java',  # 11
+        'JHotDraw-7.0.6',  # 12
     ],
 
     # Understand DB Path
@@ -79,6 +80,8 @@ BENCHMARKS = {
         'jvlt-1.3.2.und',
         # 'tabula-java.udb',
         'tabula-java.und',
+        # 'JHotDraw-7.0.6.udb',  # 12
+        'JHotDraw-7.0.6.und',  # 12
     ],
 
     # CSV files path containing code smells identified by JDeodorant
@@ -95,6 +98,7 @@ BENCHMARKS = {
         'JSON20201115/Long-Method2_JASON-20201115.csv',
         'jVLT-1.3.2/Long-Method2_jvlt-1.3.2.csv',
         'tabula-java/fake.csv',
+        'JHotDraw-7.0.6/Long-Method2_JHotDraw-7.0.6.csv',
     ],
 
     'FEATURE_ENVY': [
@@ -110,6 +114,7 @@ BENCHMARKS = {
         'JSON20201115/Feature-Envy2_JASON-20201115.csv',
         'jVLT-1.3.2/Feature-Envy_jvlt-1.3.2.csv',
         'tabula-java/Feature-Envy-Tabula-v1.0.6.csv',
+        'JHotDraw-7.0.6/Featuer-Envy2_JHotDraw-7.0.6.csv',
     ],
 
     'GOD_CLASS': [
@@ -125,6 +130,7 @@ BENCHMARKS = {
         'JSON20201115/God-Class_JASON-20201115.csv',
         'jVLT-1.3.2/God-Class_jvlt-1.3.2.csv',
         'tabula-java/God-Class-Tabula-v1.0.6.csv',
+        'JHotDraw-7.0.6/God-Class_JHotDraw-7.0.6.csv'
     ],
 }
 
@@ -316,6 +322,22 @@ INITIAL_METRICS = {
         'TEST3': 1.  # Obtained by testability_prediction3
     },
     "tabula-java": {  # 11
+        'ANA': 1.,
+        'CAMC': 1.,
+        'CIS': 1.,
+        'DAM': 1.,
+        'DCC': 1.,
+        'DSC': 1.,
+        'MFA': 1.,
+        'MOA': 1.,
+        'NOH': 1.,
+        'NOM': 1.,
+        'NOP': 1.,
+        'MODULE': 1.,
+        'TEST': 1.,  # Obtained by testability_prediction2
+        'TEST3': 1.  # Obtained by testability_prediction3
+    },
+     "JHotDraw-7.0.6": {  # 12
         'ANA': 1.,
         'CAMC': 1.,
         'CIS': 1.,
