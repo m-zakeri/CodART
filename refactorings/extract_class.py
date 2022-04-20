@@ -34,6 +34,7 @@ class DependencyPreConditionListener(JavaParserLabeledListener):
     """
 
     """
+
     def __init__(self, common_token_stream: CommonTokenStream = None,
                  class_identifier: str = None):
         self.enter_class = False
@@ -270,10 +271,14 @@ class ExtractClassRefactoringListener(JavaParserLabeledListener):
                 if '=new' in st and '()' in st:
                     st = st.replace('new', 'new ')
                 self.code += st
+
             # delete field from source class
-            for i in field_names:
-                if self.detected_field in i:
-                    field_names.remove(i)
+            for fi in field_names:
+                if self.detected_field in fi:
+                    field_names.remove(fi)
+                # Todo: Requires better handling
+                if fi == '1))' or fi == ' 1))':
+                    field_names.remove(fi)
 
             if field_names:
                 self.token_stream_rewriter.replaceRange(
