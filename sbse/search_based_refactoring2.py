@@ -43,6 +43,7 @@ from multiprocessing import Process, Array
 from typing import List
 
 import numpy as np
+import pandas as pd
 import pymoo.core.individual
 
 from pymoo.core import algorithm
@@ -707,45 +708,51 @@ def binary_tournament(pop, P, **kwargs):
 def log_project_info(reset_=True, ):
     if reset_:
         reset_project()
-    design_metric = DesignMetrics(config.UDB_PATH)
     design_quality_attribute = DesignQualityAttributes(config.UDB_PATH)
-    metrics_dict = {
-        "DSC": design_metric.DSC,
-        "NOH": design_metric.NOH,
-        "ANA": design_metric.ANA,
-        "MOA": design_metric.MOA,
-        "DAM": design_metric.DAM,
-        "CAMC": design_metric.CAMC,
-        "CIS": design_metric.CIS,
-        "NOM": design_metric.NOM,
-        "DCC": design_metric.DCC,
-        "MFA": design_metric.MFA,
-        "NOP": design_metric.NOP
+    avg_, sum_ = design_quality_attribute.average_sum
+    predicted_testability = testability_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("TEST", 1.0))
+    mdg_modularity = modularity_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("MODULE", 1.0))
+
+    design_metrics = {
+        "DSC": design_quality_attribute.DSC,
+        "NOH": design_quality_attribute.NOH,
+        "ANA": design_quality_attribute.ANA,
+        "MOA": design_quality_attribute.MOA,
+        "DAM": design_quality_attribute.DAM,
+        "CAMC": design_quality_attribute.CAMC,
+        "CIS": design_quality_attribute.CIS,
+        "NOM": design_quality_attribute.NOM,
+        "DCC": design_quality_attribute.DCC,
+        "MFA": design_quality_attribute.MFA,
+        "NOP": design_quality_attribute.NOP
     }
 
-    avg_, sum_ = design_quality_attribute.average_sum
-    t_ = testability_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("TEST", 1.0))
-    m_ = modularity_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("MODULE", 1.0))
-
-    objectives = {
-        "reusability": design_quality_attribute.reusability,
-        "understandability": design_quality_attribute.understandability,
-        "flexibility": design_quality_attribute.flexibility,
-        "functionality": design_quality_attribute.functionality,
-        "effectiveness": design_quality_attribute.effectiveness,
-        "extendability": design_quality_attribute.extendability,
-        "testability": t_,
-        "modularity": m_,
-        #
-        "average qmood": avg_,
-        "sum qmood ": sum_
+    quality_objectives = {
+        "generation": [0],
+        "reusability": [design_quality_attribute.reusability],
+        "understandability": [design_quality_attribute.understandability],
+        "flexibility": [design_quality_attribute.flexibility],
+        "functionality": [design_quality_attribute.functionality],
+        "effectiveness": [design_quality_attribute.effectiveness],
+        "extendability": [design_quality_attribute.extendability],
+        "testability": [predicted_testability],
+        "modularity": [mdg_modularity],
     }
 
     logger.info('QMOOD design metrics (N):')
-    logger.info(metrics_dict)
+    logger.info(design_metrics)
 
     logger.info('Objectives:')
-    logger.info(objectives)
+    logger.info(quality_objectives)
+
+    logger.info('QMOOD quality attributes sum:')
+    logger.info(sum_)
+    logger.info('QMOOD quality attributes mean:')
+    logger.info(avg_)
+
+    initial_metrics_path = f'{config.PROJECT_LOG_DIR}quality_attrs_initial_values.csv'
+    df = pd.DataFrame(data=quality_objectives)
+    df.to_csv(initial_metrics_path, index=False)
 
 
 def main():
@@ -882,21 +889,28 @@ def main():
     objective_values_content = ''
     for chromosome in res.X:
         chromosome_new = []
-        for gene_ in chromosome[0]:
-            chromosome_new.append((gene_.name, gene_.params))
+        if config.PROBLEM == 0:  # i.e., single objective problem
+            for gene_ in chromosome:
+                chromosome_new.append((gene_.name, gene_.params))
+        else:
+            for gene_ in chromosome[0]:
+                chromosome_new.append((gene_.name, gene_.params))
         population_trimmed.append(chromosome_new)
 
     for objective_vector in res.F:
         objective_values_content += f'{res.algorithm.n_gen + config.NGEN},'
-        for objective_ in objective_vector:
-            objective_values_content += f'{objective_},'
+        if config.PROBLEM == 0:
+            objective_values_content += f'{objective_vector},'
+        else:
+            for objective_ in objective_vector:
+                objective_values_content += f'{objective_},'
         objective_values_content += '\n'
 
-    best_refactoring_sequences_path = f'{config.PROJECT_LOG_DIR}best_refactoring_sequences_after_{res.algorithm.n_gen + config.NGEN}gnes.json'
+    best_refactoring_sequences_path = f'{config.PROJECT_LOG_DIR}best_refactoring_sequences_after_{res.algorithm.n_gen + config.NGEN}gens.json'
     with open(best_refactoring_sequences_path, mode='w', encoding='utf-8') as fp:
         json.dump(population_trimmed, fp, indent=4)
 
-    best_refactoring_sequences_objectives_path = f'{config.PROJECT_LOG_DIR}best_refactoring_sequences_objectives_after_{res.algorithm.n_gen + config.NGEN}gnes.csv'
+    best_refactoring_sequences_objectives_path = f'{config.PROJECT_LOG_DIR}best_refactoring_sequences_objectives_after_{res.algorithm.n_gen + config.NGEN}gens.csv'
     with open(best_refactoring_sequences_objectives_path, mode='w', encoding='utf-8') as fp:
         fp.write(objective_values_content)
 
@@ -927,21 +941,28 @@ def main():
         objective_values_content = ''
         for chromosome in res.X[I]:
             chromosome_new = []
-            for gene_ in chromosome[0]:
-                chromosome_new.append((gene_.name, gene_.params))
+            if config.PROBLEM == 0:  # i.e., single objective problem
+                for gene_ in chromosome:
+                    chromosome_new.append((gene_.name, gene_.params))
+            else:
+                for gene_ in chromosome[0]:
+                    chromosome_new.append((gene_.name, gene_.params))
             population_trimmed.append(chromosome_new)
 
         for objective_vector in pf[I]:
             objective_values_content += f'{res.algorithm.n_gen + config.NGEN},'
-            for objective_ in objective_vector:
-                objective_values_content += f'{objective_},'
+            if config.PROBLEM == 0:
+                objective_values_content += f'{objective_vector},'
+            else:
+                for objective_ in objective_vector:
+                    objective_values_content += f'{objective_},'
             objective_values_content += '\n'
 
-        high_tradeoff_path = f'{config.PROJECT_LOG_DIR}high_tradeoff_point_refactoring_after_{res.algorithm.n_gen + config.NGEN}gnes.json'
+        high_tradeoff_path = f'{config.PROJECT_LOG_DIR}high_tradeoff_points_refactoring_after_{res.algorithm.n_gen + config.NGEN}gens.json'
         with open(high_tradeoff_path, mode='w', encoding='utf-8') as fp:
             json.dump(population_trimmed, fp, indent=4)
 
-        high_tradeoff_path_objectives_path = f'{config.PROJECT_LOG_DIR}high_tradeoff_points_after_{res.algorithm.n_gen + config.NGEN}gnes.csv'
+        high_tradeoff_path_objectives_path = f'{config.PROJECT_LOG_DIR}high_tradeoff_points_after_{res.algorithm.n_gen + config.NGEN}gens.csv'
         with open(high_tradeoff_path_objectives_path, mode='w', encoding='utf-8') as fp:
             fp.write(objective_values_content)
 
