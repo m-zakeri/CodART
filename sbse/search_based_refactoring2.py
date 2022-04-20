@@ -705,9 +705,12 @@ def binary_tournament(pop, P, **kwargs):
     return S
 
 
-def log_project_info(reset_=True, ):
+def log_project_info(reset_=True, quality_attributes_path=None, generation=0):
     if reset_:
         reset_project()
+    if quality_attributes_path is None:
+        quality_attributes_path = f'{config.PROJECT_LOG_DIR}quality_attrs_initial_values.csv'
+
     design_quality_attribute = DesignQualityAttributes(config.UDB_PATH)
     avg_, sum_ = design_quality_attribute.average_sum
     predicted_testability = testability_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("TEST", 1.0))
@@ -728,7 +731,7 @@ def log_project_info(reset_=True, ):
     }
 
     quality_objectives = {
-        "generation": [0],
+        "generation": [generation],
         "reusability": [design_quality_attribute.reusability],
         "understandability": [design_quality_attribute.understandability],
         "flexibility": [design_quality_attribute.flexibility],
@@ -750,9 +753,13 @@ def log_project_info(reset_=True, ):
     logger.info('QMOOD quality attributes mean:')
     logger.info(avg_)
 
-    initial_metrics_path = f'{config.PROJECT_LOG_DIR}quality_attrs_initial_values.csv'
-    df = pd.DataFrame(data=quality_objectives)
-    df.to_csv(initial_metrics_path, index=False)
+    df_quality_attributes = pd.DataFrame(data=quality_objectives)
+    if os.path.exists(quality_attributes_path):
+        df = pd.read_csv(quality_attributes_path, index_col=False)
+        df = df.append(df_quality_attributes, ignore_index=True)
+        df.to_csv(quality_attributes_path, index=False)
+    else:
+        df_quality_attributes.to_csv(quality_attributes_path, index=False)
 
 
 def main():
