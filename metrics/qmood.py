@@ -39,7 +39,7 @@ class DesignMetrics:
         self.udb_path = udb_path
 
         filter1 = "Java Class ~TypeVariable ~Anonymous ~Enum, Java Interface"
-        filter3 = "Java Class ~Unresolved ~Unknown ~TypeVariable ~Anonymous ~Enum  ~Jar ~Library ~Standard, Java Interface"
+        filter3 = "Java Class ~Unresolved ~Unknown ~TypeVariable ~Anonymous ~Enum ~Jar ~Library ~Standard, Java Interface"
         self.all_classes = self.get_classes_simple_names(filter1)
         self.user_defined_classes = self.get_classes_simple_names(filter3)
 
@@ -93,8 +93,10 @@ class DesignMetrics:
         filter2 = "Java Class ~Unresolved ~Unknown ~TypeVariable ~Anonymous ~Enum, Java Interface"
         known_class_entities = dbx.ents(filter2)
 
-        for ent in known_class_entities:
-            mit = ent.metric(['MaxInheritanceTree'])['MaxInheritanceTree']
+        for class_entity in known_class_entities:
+            if "Interface" in class_entity.kindname():
+                continue
+            mit = class_entity.metric(['MaxInheritanceTree'])['MaxInheritanceTree']
             MITs.append(mit)
 
         dbx.close()
@@ -179,12 +181,12 @@ class DesignMetrics:
         :return: Count of number of attributes whose type is user defined class(es).
         """
         counter = 0
-        for ref in class_entity.refs("Define, Typed, Set, Create", "Variable"):
+        for ref in class_entity.refs("Define, Typed, Set, Create", "Java Variable, Parameter"):
             if ref.ent().type() in self.user_defined_classes:
                 counter += 1
         filter_ = "Method ~Unknown ~Jar ~Library ~Constructor ~Implicit ~Lambda ~External"
         for ref in class_entity.refs("Define, Typed, Set, Create", filter_):
-            for ref2 in ref.ent().refs("Define, Typed, Set, Create", "Variable ~Unknown"):
+            for ref2 in ref.ent().refs("Define, Typed, Set, Create", "Java Variable ~Unknown, Java Parameter"):
                 if ref2.ent().type() in self.user_defined_classes:
                     counter += 1
         return counter
@@ -195,30 +197,21 @@ class DesignMetrics:
         :param class_entity: The class entity.
         :return: Ratio of the number of private and protected attributes to the total number of attributes in a class.
         """
-        public_variables = 0
-        protected_variables = 0
-        private_variables = 0
-        default_variables = 0
+        if "Interface" in class_entity.kindname():
+            return 2.0
 
-        for ref in class_entity.refs("Define", "Variable ~Local ~Unknown"):
-            defined_entity = ref.ent()
-            kind_name = str(defined_entity.kindname())
+        public_variables = len(class_entity.ents("Define", "Java Variable Public Member"))
+        private_variables = len(class_entity.ents("Define", "Java Variable Private Member"))
+        protected_variables = len(class_entity.ents("Define", "Java Variable Protected Member"))
+        default_variables = len(class_entity.ents("Define", "Java Variable Default Member"))
 
-            if kind_name.find('Public') != -1:
-                public_variables += 1
-            elif kind_name.find('Private') != -1:
-                private_variables += 1
-            elif kind_name.find('Protected') != -1:
-                protected_variables += 1
-            elif kind_name.find('Default') != -1:
-                default_variables += 1
         try:
             enum_ = private_variables + protected_variables
             denum_ = private_variables + protected_variables + default_variables + public_variables
             ratio = enum_ / denum_
         except ZeroDivisionError:
             # logger.error('ZeroDivisionError in computing QMOOD DAM metric.')
-            ratio = 1.0
+            ratio = 2.0
         return 1. + ratio
 
     def CAMC_class_level(self, class_entity: und.Ent):
@@ -227,10 +220,10 @@ class DesignMetrics:
         Measures of how related methods are in a class in terms of used parameters.
         It can also be computed by: 1 - LackOfCohesionOfMethods()
         :param class_entity: The class entity.
-        :return:  A float number between 0 and 1.
+        :return:  A float number between 0 (1) and 1 (2).
         """
         if "Interface" in class_entity.kindname():
-            return 1
+            return 2.
 
         percentage = class_entity.metric(['PercentLackOfCohesion']).get('PercentLackOfCohesion', 0)
 
@@ -246,9 +239,14 @@ class DesignMetrics:
         :param class_entity: The class entity
         :return: Number of public methods in class
         """
-        value = class_entity.metric(['CountDeclMethodPublic']).get('CountDeclMethodPublic', 0)
+        if "Interface" in class_entity.kindname():
+            value = class_entity.metric(['CountDeclMethodAll']).get('CountDeclMethodAll', 0)
+        else:
+            value = class_entity.metric(['CountDeclMethodPublic']).get('CountDeclMethodPublic', 0)
+            # public_methods = len(class_entity.ents("Define", "Java Method Public Member"))
+
         if value is None:
-            value = 0
+            value = 0.
         # print(class_entity.longname(), value)
         return value
 
@@ -268,9 +266,9 @@ class DesignMetrics:
             #         counter += 1
             # return counter
             if "Interface" in class_entity.kindname():
-                return 0
+                return 0.
             return class_entity.metric(['SumCyclomatic']).get('SumCyclomatic', 0)
-        return 0
+        return 0.
 
     def DCC_class_level(self, class_entity: und.Ent):
         """
@@ -279,20 +277,26 @@ class DesignMetrics:
         :return: Number of other classes a class relates to, either through a shared attribute or
         a parameter in a method.
         """
-        others = set()
+        others = list()
         if "Interface" in class_entity.kindname():
             return 0
+
         for ref in class_entity.refs("Define", "Variable"):
             if ref.ent().type() in self.all_classes:
-                others.add(ref.ent().type())
+                others.append(ref.ent().type())
 
         kind_filter = "Method ~Unknown ~Jar ~Library ~Constructor ~Implicit ~Lambda ~External"
         for ref in class_entity.refs("Define", kind_filter):
-            for ref2 in ref.ent().refs("Define", "Parameter"):
+            for ref2 in ref.ent().refs("Java Define", "Java Parameter"):
                 if ref2.ent().type() in self.all_classes:
-                    others.add(ref2.ent().type())
+                    others.append(ref2.ent().type())
 
-        return len(others)
+        for ref in class_entity.refs("Define", kind_filter):
+            for ref2 in ref.ent().refs("Java Use Return"):
+                if ref2.ent().type() in self.all_classes:
+                    others.append(ref2.ent().type())
+
+        return len(set(others))
 
     def MFA_class_level(self, class_entity: und.Ent):
         """
@@ -305,9 +309,8 @@ class DesignMetrics:
         all_methods = metrics.get('CountDeclMethodAll')
         # print(class_entity.longname(), metrics)
 
-        mfa = 0
         if "Interface" in class_entity.kindname():
-            mfa = 1
+            return 2.
         else:
             implemented_interfaces = class_entity.ents('Java Implement Couple', '~Unknown')
             if len(implemented_interfaces) == 0:
@@ -332,6 +335,7 @@ class DesignMetrics:
         """
         if "Final" in class_entity.kindname():
             return 0
+
         all_methods = class_entity.metric(['CountDeclMethodAll']).get('CountDeclMethodAll', 0)
         # private_methods = class_entity.metric(['CountDeclMethodPrivate']).get('CountDeclMethodPrivate', 0)
         # static_methods = class_entity.metric(['CountDeclClassMethod']).get('CountDeclClassMethod', 0)
