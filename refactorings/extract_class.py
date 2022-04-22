@@ -528,8 +528,12 @@ class ExtractClassAPI:
         parser = JavaParserLabeled(token_stream)
         parser.getTokenStream()
         parse_tree = parser.compilationUnit()
-        my_listener = NewClassPropagation(common_token_stream=token_stream, method_map=self.method_usage_map,
-                                          source_class=self.source_class, moved_fields=self.moved_fields)
+        my_listener = NewClassPropagation(
+            common_token_stream=token_stream,
+            method_map=self.method_usage_map,
+            source_class=self.source_class,
+            moved_fields=self.moved_fields
+        )
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener)
         # print(my_listener.token_stream_rewriter.getDefaultText())
@@ -537,7 +541,8 @@ class ExtractClassAPI:
         # Write Changes
         with open(self.file_path, mode='w', encoding='utf-8', errors='ignore', newline='') as f:
             f.write(listener.token_stream_rewriter.getDefaultText())
-        import codecs
+
+        # Write new class
         with open(self.new_file_path, mode='w', encoding='utf-8', errors='ignore', newline='') as f:
             f.write(my_listener.token_stream_rewriter.getDefaultText())
 
@@ -559,7 +564,7 @@ def get_java_files(directory):
 
 
 def main(udb_path, file_path, source_class, moved_fields, moved_methods, *args, **kwargs):
-    new_class = f"{source_class}Extracted{random.randint(1, 1000)}"
+    new_class = f"{source_class}Extracted"
     new_file_path = os.path.join(Path(file_path).parent, f"{new_class}.java")
 
     if not os.path.exists(file_path):
