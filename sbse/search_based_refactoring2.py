@@ -356,11 +356,14 @@ class ProblemManyObjective(Problem):
         Objective 8: Modularity
     """
 
-    def __init__(self, n_refactorings_lowerbound=10, n_refactorings_upperbound=50, evaluate_in_parallel=False):
+    def __init__(self, n_refactorings_lowerbound=10, n_refactorings_upperbound=50,
+                 evaluate_in_parallel=False, verbose_design_metrics=False,
+                 ):
         super(ProblemManyObjective, self).__init__(n_var=1, n_obj=8, n_constr=0, )
         self.n_refactorings_lowerbound = n_refactorings_lowerbound
         self.n_refactorings_upperbound = n_refactorings_upperbound
         self.evaluate_in_parallel = evaluate_in_parallel
+        self.verbose_design_metrics = verbose_design_metrics
 
     def _evaluate(self, x, out, *args, **kwargs):
         """
@@ -410,6 +413,22 @@ class ProblemManyObjective(Problem):
                 arr[5] = qmood_quality_attributes.extendability
                 arr[6] = testability_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("TEST", 1.0))
                 arr[7] = modularity_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("MODULE", 1.0))
+                if self.verbose_design_metrics:
+                    design_metrics = {
+                        "DSC": [qmood_quality_attributes.DSC],
+                        "NOH": [qmood_quality_attributes.NOH],
+                        "ANA": [qmood_quality_attributes.ANA],
+                        "MOA": [qmood_quality_attributes.MOA],
+                        "DAM": [qmood_quality_attributes.DAM],
+                        "CAMC": [qmood_quality_attributes.CAMC],
+                        "CIS": [qmood_quality_attributes.CIS],
+                        "NOM": [qmood_quality_attributes.NOM],
+                        "DCC": [qmood_quality_attributes.DCC],
+                        "MFA": [qmood_quality_attributes.MFA],
+                        "NOP": [qmood_quality_attributes.NOP]
+                    }
+                    self.log_design_metrics(design_metrics)
+
                 del qmood_quality_attributes
 
             # Stage 3: Marshal objectives into vector
@@ -419,6 +438,16 @@ class ProblemManyObjective(Problem):
         # Stage 4: Marshal all objectives into out dictionary
         out['F'] = np.array(objective_values, dtype=float)
         # print('OUT', out['F'])
+
+    def log_design_metrics(self, design_metrics):
+        design_metrics_path = f'{config.PROJECT_LOG_DIR}{config.PROJECT_NAME}_design_metrics_log_{config.global_execution_start_time}.csv'
+        df_design_metrics = pd.DataFrame(data=design_metrics)
+        if os.path.exists(design_metrics_path):
+            df = pd.read_csv(design_metrics_path, index_col=False)
+            df = df.append(df_design_metrics, ignore_index=True)
+            df.to_csv(design_metrics_path, index=False)
+        else:
+            df_design_metrics.to_csv(design_metrics_path, index=False)
 
 
 class PopulationInitialization(Sampling):
@@ -705,11 +734,13 @@ def binary_tournament(pop, P, **kwargs):
     return S
 
 
-def log_project_info(reset_=True, quality_attributes_path=None, generation=0):
+def log_project_info(reset_=True, design_metrics_path=None, quality_attributes_path=None, generation=0):
     if reset_:
         reset_project()
     if quality_attributes_path is None:
         quality_attributes_path = f'{config.PROJECT_LOG_DIR}quality_attrs_initial_values.csv'
+    if design_metrics_path is None:
+        design_metrics_path = f'{config.PROJECT_LOG_DIR}design_metrics.csv'
 
     design_quality_attribute = DesignQualityAttributes(config.UDB_PATH)
     avg_, sum_ = design_quality_attribute.average_sum
@@ -717,17 +748,17 @@ def log_project_info(reset_=True, quality_attributes_path=None, generation=0):
     mdg_modularity = modularity_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("MODULE", 1.0))
 
     design_metrics = {
-        "DSC": design_quality_attribute.DSC,
-        "NOH": design_quality_attribute.NOH,
-        "ANA": design_quality_attribute.ANA,
-        "MOA": design_quality_attribute.MOA,
-        "DAM": design_quality_attribute.DAM,
-        "CAMC": design_quality_attribute.CAMC,
-        "CIS": design_quality_attribute.CIS,
-        "NOM": design_quality_attribute.NOM,
-        "DCC": design_quality_attribute.DCC,
-        "MFA": design_quality_attribute.MFA,
-        "NOP": design_quality_attribute.NOP
+        "DSC": [design_quality_attribute.DSC],
+        "NOH": [design_quality_attribute.NOH],
+        "ANA": [design_quality_attribute.ANA],
+        "MOA": [design_quality_attribute.MOA],
+        "DAM": [design_quality_attribute.DAM],
+        "CAMC": [design_quality_attribute.CAMC],
+        "CIS": [design_quality_attribute.CIS],
+        "NOM": [design_quality_attribute.NOM],
+        "DCC": [design_quality_attribute.DCC],
+        "MFA": [design_quality_attribute.MFA],
+        "NOP": [design_quality_attribute.NOP]
     }
 
     quality_objectives = {
@@ -760,6 +791,14 @@ def log_project_info(reset_=True, quality_attributes_path=None, generation=0):
         df.to_csv(quality_attributes_path, index=False)
     else:
         df_quality_attributes.to_csv(quality_attributes_path, index=False)
+
+    df_design_metrics = pd.DataFrame(data=design_metrics)
+    if os.path.exists(design_metrics_path):
+        df = pd.read_csv(design_metrics_path, index_col=False)
+        df = df.append(df_design_metrics, ignore_index=True)
+        df.to_csv(design_metrics_path, index=False)
+    else:
+        df_design_metrics.to_csv(design_metrics_path, index=False)
 
 
 def main():
