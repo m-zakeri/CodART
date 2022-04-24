@@ -189,6 +189,7 @@ class DesignMetrics:
             for ref2 in ref.ent().refs("Define, Typed, Set, Create", "Java Variable ~Unknown, Java Parameter"):
                 if ref2.ent().type() in self.user_defined_classes:
                     counter += 1
+
         return counter
 
     def DAM_class_level(self, class_entity: und.Ent):
@@ -340,14 +341,17 @@ class DesignMetrics:
         # private_methods = class_entity.metric(['CountDeclMethodPrivate']).get('CountDeclMethodPrivate', 0)
         # static_methods = class_entity.metric(['CountDeclClassMethod']).get('CountDeclClassMethod', 0)
         # final_methods = 0
+        if "Interface" in class_entity.kindname():
+            return all_methods
+
         private_or_static_or_final = 0
-        kind_filter = 'Java Method ~Unknown ~Unresolved ~Jar ~Library ~Constructor ~Implicit ~Lambda ~External'
+        kind_filter = 'Java Method ~Jar ~Library ~Constructor ~Implicit ~Lambda ~External'
         for ref in class_entity.refs('Define', kind_filter):
             if "Final" in ref.ent().kindname() or "Private" in ref.ent().kindname() or "Static" in ref.ent().kindname():
                 private_or_static_or_final += 1
-        poly_ = all_methods - private_or_static_or_final
+        number_of_polymorphic_methods = all_methods - private_or_static_or_final
         # print(class_entity.longname(), poly_)
-        return poly_ if poly_ >= 0 else 0
+        return number_of_polymorphic_methods if number_of_polymorphic_methods >= 0 else 0
 
     def get_classes_simple_names(self, filter_string: str = None) -> set:
         """
@@ -363,14 +367,15 @@ class DesignMetrics:
     def get_class_average(self, class_level_design_metric):
         scores = []
         dbx: und.Db = und.open(self.udb_path)
-        filter2 = "Java Class ~Unresolved ~Unknown ~TypeVariable ~Anonymous ~Enum, Java Interface"
+        filter2 = "Java Class ~Unknown ~TypeVariable ~Anonymous ~Enum, Java Interface"
         known_class_entities = dbx.ents(filter2)
         for class_entity in known_class_entities:
             class_metric = class_level_design_metric(class_entity)
             scores.append(class_metric)
 
         dbx.close()
-        return round(sum(scores) / len(scores), 5)
+        # return round(sum(scores) / len(scores), 5)
+        return sum(scores)
 
     def print_project_metrics(self):
         dbx = und.open(self.udb_path)
