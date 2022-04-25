@@ -1,39 +1,52 @@
 """
+## Module description
+
 This module implements the search-based refactoring with various search strategy
 using pymoo framework.
 
+### Classes
+
+    Gene, RefactoringOperation: One refactoring with params
+    Individual: A list of RefactoringOperation
+    PureRandomInitialization: Population, list of Individual
+
+
+## References
+[1] https://pymoo.org/customization/custom.html
+[2] https://pymoo.org/misc/reference_directions.html
+
+
 ## Changelog
+
+### version 0.2.3
+    1. Fix PEP 8 warnings
+
 ### version 0.2.2
     1. Add a separate log directory for each execution
     2. Add possibility to resume algorithm
+
 ### version 0.2.1
-    minor updates
-    fix bugs
-    rename variables names
+    1. minor updates
+    2. fix bugs
+    3. rename variables names
 
 ### version 0.2.0
     1. Crossover function is added.
     2. Termination criteria are added.
     3. Computation of highly trade-off points is added.
     4. Tournament-selection is added.
-    5. _evaluate function in NSGA-III is now works on population instead of an individual (population-based versus element-wise).
+    5. _evaluate function in NSGA-III is now works on population instead of an individual
+        (population-based versus element-wise).
     6. Other setting for NSGA-III including adding energy-references point instead of Das and Dennis approach.
-    ===
+===
 
-Gene, RefactoringOperation: One refactoring with params
-Individual: A list of RefactoringOperation
-PureRandomInitialization: Population, list of Individual
-
-## References
-[1] https://pymoo.org/customization/custom.html
-[2] https://pymoo.org/misc/reference_directions.html
 
 """
 
-__version__ = '0.2.2'
+__version__ = '0.2.3'
 __author__ = 'Morteza Zakeri'
 
-# import logging
+
 import os
 import random
 import json
@@ -44,9 +57,7 @@ from typing import List
 
 import numpy as np
 import pandas as pd
-import pymoo.core.individual
 
-from pymoo.core import algorithm
 from pymoo.core.callback import Callback
 from pymoo.core.crossover import Crossover
 from pymoo.core.duplicate import ElementwiseDuplicateElimination
@@ -63,7 +74,7 @@ from pymoo.operators.selection.tournament import TournamentSelection
 from pymoo.optimize import minimize
 from pymoo.util.termination.default import MultiObjectiveDefaultTermination
 
-from metrics.qmood import DesignMetrics, DesignQualityAttributes
+from metrics.qmood import DesignQualityAttributes
 from metrics.modularity import main as modularity_main
 from metrics.testability_prediction2 import main as testability_main
 
@@ -440,7 +451,11 @@ class ProblemManyObjective(Problem):
         # print('OUT', out['F'])
 
     def log_design_metrics(self, design_metrics):
-        design_metrics_path = f'{config.PROJECT_LOG_DIR}{config.PROJECT_NAME}_design_metrics_log_{config.global_execution_start_time}.csv'
+        design_metrics_path = os.path.join(
+            config.PROJECT_LOG_DIR,
+            f'{config.PROJECT_NAME}_design_metrics_log_{config.global_execution_start_time}.csv'
+        )
+
         df_design_metrics = pd.DataFrame(data=design_metrics)
         if os.path.exists(design_metrics_path):
             df = pd.read_csv(design_metrics_path, index_col=False)
@@ -635,10 +650,9 @@ class LogCallback(Callback):
         super().__init__()
         # self.data["best"] = []
 
-    def notify(self, algorithm: algorithm.Algorithm, **kwargs):
+    def notify(self, algorithm, **kwargs):
         # self.data["best"].append(algorithm.pop.get("F").min())
-        logger.info(f'Generation #{algorithm.n_gen+config.NGEN} was finished:')
-
+        logger.info(f'Generation #{algorithm.n_gen + config.NGEN} was finished:')
         # logger.info(f'Best solution:')
         # logger.info(f'{algorithm.pop.get("F")}')
         # logger.info(f'Pareto-front solutions:')
@@ -649,13 +663,24 @@ class LogCallback(Callback):
         logger.info(f'{F}')
 
         # Log evolved population at end of each generation
-        generation_log_path = config.PROJECT_LOG_DIR + '/generations_logs/'
-        generation_endof_date_time = config.dt.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        population_log_file_path = f'{generation_log_path}/pop_gen{algorithm.n_gen+config.NGEN}_{generation_endof_date_time}.json'
-        pop_opt_log_file_path = f'{generation_log_path}/pop_opt_gen{algorithm.n_gen+config.NGEN}_{generation_endof_date_time}.json'
-        pop_opt_objective_value_log = f'{config.PROJECT_LOG_DIR}{config.PROJECT_NAME}_objectives_log_{config.global_execution_start_time}.csv'
+        generation_log_path = f'{config.PROJECT_LOG_DIR}generations_logs/'
         if not os.path.exists(generation_log_path):
             os.makedirs(generation_log_path)
+
+        generation_endof_date_time = config.dt.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        population_log_file_path = os.path.join(
+            generation_log_path,
+            f'pop_gen{algorithm.n_gen + config.NGEN}_{generation_endof_date_time}.json'
+        )
+        pop_opt_log_file_path = os.path.join(
+            generation_log_path,
+            f'pop_opt_gen{algorithm.n_gen + config.NGEN}_{generation_endof_date_time}.json'
+        )
+
+        pop_opt_objective_value_log = os.path.join(
+            config.PROJECT_LOG_DIR,
+            f'{config.PROJECT_NAME}_objectives_log_{config.global_execution_start_time}.csv'
+        )
 
         population_trimmed = []
         for chromosome in algorithm.pop:
@@ -675,7 +700,7 @@ class LogCallback(Callback):
                 chromosome_new.append((gene_.name, gene_.params))
             population_trimmed.append(chromosome_new)
 
-            objective_values_content += f'{algorithm.n_gen+config.NGEN},'
+            objective_values_content += f'{algorithm.n_gen + config.NGEN},'
             for gene_objective_ in chromosome.F:
                 objective_values_content += f'{gene_objective_},'
             objective_values_content += '\n'
@@ -739,10 +764,9 @@ def log_project_info(reset_=True, design_metrics_path=None, quality_attributes_p
     if reset_:
         reset_project()
     if quality_attributes_path is None:
-
         quality_attributes_path = os.path.join(config.PROJECT_LOG_DIR, 'quality_attrs_initial_values.csv')
     if design_metrics_path is None:
-        design_metrics_path = os.path.join(config.PROJECT_LOG_DIR,'design_metrics.csv')
+        design_metrics_path = os.path.join(config.PROJECT_LOG_DIR, 'design_metrics.csv')
 
     design_quality_attribute = DesignQualityAttributes(config.UDB_PATH)
     avg_, sum_ = design_quality_attribute.average_sum
@@ -826,24 +850,24 @@ def main():
     algorithms = list()
     # 1: GA
     alg1 = GA(pop_size=config.POPULATION_SIZE,
-                   sampling=PopulationInitialization(initializer_object),
-                   crossover=AdaptiveSinglePointCrossover(prob=config.CROSSOVER_PROBABILITY),
-                   # crossover=get_crossover("real_k_point", n_points=2),
-                   mutation=BitStringMutation(prob=config.MUTATION_PROBABILITY, initializer=initializer_object),
-                   eliminate_duplicates=ElementwiseDuplicateElimination(cmp_func=is_equal_2_refactorings_list),
-                   n_gen=config.NGEN,
-                   )
+              sampling=PopulationInitialization(initializer_object),
+              crossover=AdaptiveSinglePointCrossover(prob=config.CROSSOVER_PROBABILITY),
+              # crossover=get_crossover("real_k_point", n_points=2),
+              mutation=BitStringMutation(prob=config.MUTATION_PROBABILITY, initializer=initializer_object),
+              eliminate_duplicates=ElementwiseDuplicateElimination(cmp_func=is_equal_2_refactorings_list),
+              n_gen=config.NGEN,
+              )
     algorithms.append(alg1)
 
     # 2: NSGA II
     alg2 = NSGA2(pop_size=config.POPULATION_SIZE,
-                      sampling=PopulationInitialization(initializer_object),
-                      crossover=AdaptiveSinglePointCrossover(prob=config.CROSSOVER_PROBABILITY),
-                      # crossover=get_crossover("real_k_point", n_points=2),
-                      mutation=BitStringMutation(prob=config.MUTATION_PROBABILITY, initializer=initializer_object),
-                      eliminate_duplicates=ElementwiseDuplicateElimination(cmp_func=is_equal_2_refactorings_list),
-                      n_gen=config.NGEN,
-                      )
+                 sampling=PopulationInitialization(initializer_object),
+                 crossover=AdaptiveSinglePointCrossover(prob=config.CROSSOVER_PROBABILITY),
+                 # crossover=get_crossover("real_k_point", n_points=2),
+                 mutation=BitStringMutation(prob=config.MUTATION_PROBABILITY, initializer=initializer_object),
+                 eliminate_duplicates=ElementwiseDuplicateElimination(cmp_func=is_equal_2_refactorings_list),
+                 n_gen=config.NGEN,
+                 )
     algorithms.append(alg2)
 
     # 3: NSGA III
@@ -854,15 +878,15 @@ def main():
                                         number_of_references_points,  # number of reference directions
                                         seed=1)
     alg3 = NSGA3(ref_dirs=ref_dirs,
-                      pop_size=config.POPULATION_SIZE,  # 200
-                      sampling=PopulationInitialization(initializer_object),
-                      selection=TournamentSelection(func_comp=binary_tournament),
-                      crossover=AdaptiveSinglePointCrossover(prob=config.CROSSOVER_PROBABILITY, ),
-                      # crossover=get_crossover("real_k_point", n_points=2),
-                      mutation=BitStringMutation(prob=config.MUTATION_PROBABILITY, initializer=initializer_object),
-                      eliminate_duplicates=ElementwiseDuplicateElimination(cmp_func=is_equal_2_refactorings_list),
-                      n_gen=config.NGEN,
-                      )
+                 pop_size=config.POPULATION_SIZE,  # 200
+                 sampling=PopulationInitialization(initializer_object),
+                 selection=TournamentSelection(func_comp=binary_tournament),
+                 crossover=AdaptiveSinglePointCrossover(prob=config.CROSSOVER_PROBABILITY, ),
+                 # crossover=get_crossover("real_k_point", n_points=2),
+                 mutation=BitStringMutation(prob=config.MUTATION_PROBABILITY, initializer=initializer_object),
+                 eliminate_duplicates=ElementwiseDuplicateElimination(cmp_func=is_equal_2_refactorings_list),
+                 n_gen=config.NGEN,
+                 )
     algorithms.append(alg3)
 
     # -------------------------------------------
@@ -916,7 +940,7 @@ def main():
     # np.save('checkpoint', res.algorithm)
 
     # Log results
-    logger.info(f"***** Algorithm was finished in {res.algorithm.n_gen+config.NGEN} generations *****")
+    logger.info(f"***** Algorithm was finished in {res.algorithm.n_gen + config.NGEN} generations *****")
     logger.info(" ")
     logger.info("============ time information ============")
     logger.info(f"Start time: {datetime.fromtimestamp(res.start_time).strftime('%Y-%m-%d %H:%M:%S')}")
@@ -970,11 +994,17 @@ def main():
                 objective_values_content += f'{objective_},'
         objective_values_content += '\n'
 
-    best_refactoring_sequences_path = f'{config.PROJECT_LOG_DIR}best_refactoring_sequences_after_{res.algorithm.n_gen + config.NGEN}gens.json'
+    best_refactoring_sequences_path = os.path.join(
+        config.PROJECT_LOG_DIR,
+        f'best_refactoring_sequences_after_{res.algorithm.n_gen + config.NGEN}gens.json'
+    )
     with open(best_refactoring_sequences_path, mode='w', encoding='utf-8') as fp:
         json.dump(population_trimmed, fp, indent=4)
 
-    best_refactoring_sequences_objectives_path = f'{config.PROJECT_LOG_DIR}best_refactoring_sequences_objectives_after_{res.algorithm.n_gen + config.NGEN}gens.csv'
+    best_refactoring_sequences_objectives_path = os.path.join(
+        config.PROJECT_LOG_DIR,
+        f'best_refactoring_sequences_objectives_after_{res.algorithm.n_gen + config.NGEN}gens.csv'
+    )
     with open(best_refactoring_sequences_objectives_path, mode='w', encoding='utf-8') as fp:
         fp.write(objective_values_content)
 
@@ -1022,11 +1052,17 @@ def main():
                     objective_values_content += f'{objective_},'
             objective_values_content += '\n'
 
-        high_tradeoff_path = f'{config.PROJECT_LOG_DIR}high_tradeoff_points_refactoring_after_{res.algorithm.n_gen + config.NGEN}gens.json'
+        high_tradeoff_path = os.path.join(
+            config.PROJECT_LOG_DIR,
+            f'high_tradeoff_points_refactoring_after_{res.algorithm.n_gen + config.NGEN}gens.json'
+        )
         with open(high_tradeoff_path, mode='w', encoding='utf-8') as fp:
             json.dump(population_trimmed, fp, indent=4)
 
-        high_tradeoff_path_objectives_path = f'{config.PROJECT_LOG_DIR}high_tradeoff_points_after_{res.algorithm.n_gen + config.NGEN}gens.csv'
+        high_tradeoff_path_objectives_path = os.path.join(
+            config.PROJECT_LOG_DIR,
+            f'high_tradeoff_points_after_{res.algorithm.n_gen + config.NGEN}gens.csv'
+        )
         with open(high_tradeoff_path_objectives_path, mode='w', encoding='utf-8') as fp:
             fp.write(objective_values_content)
 
