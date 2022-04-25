@@ -201,10 +201,10 @@ class DesignMetrics:
         if "Interface" in class_entity.kindname():
             return 2.0
 
-        public_variables = len(class_entity.ents("Define", "Java Variable Public Member"))
         private_variables = len(class_entity.ents("Define", "Java Variable Private Member"))
         protected_variables = len(class_entity.ents("Define", "Java Variable Protected Member"))
         default_variables = len(class_entity.ents("Define", "Java Variable Default Member"))
+        public_variables = len(class_entity.ents("Define", "Java Variable Public Member"))
 
         try:
             enum_ = private_variables + protected_variables
@@ -267,9 +267,12 @@ class DesignMetrics:
             #         counter += 1
             # return counter
             if "Interface" in class_entity.kindname():
-                return 0.
-            return class_entity.metric(['SumCyclomatic']).get('SumCyclomatic', 0)
-        return 0.
+                return 0
+            # wmc = class_entity.metric(['SumCyclomatic']).get('SumCyclomatic', 0)
+            wmc2 = class_entity.metric(['SumCyclomaticModified']).get('SumCyclomaticModified', 0)
+            # print(class_entity.longname(), wmc, wmc2)
+            return wmc2
+        return 0
 
     def DCC_class_level(self, class_entity: und.Ent):
         """
@@ -350,7 +353,7 @@ class DesignMetrics:
             if "Final" in ref.ent().kindname() or "Private" in ref.ent().kindname() or "Static" in ref.ent().kindname():
                 private_or_static_or_final += 1
         number_of_polymorphic_methods = all_methods - private_or_static_or_final
-        # print(class_entity.longname(), poly_)
+        # print(class_entity.longname(), number_of_polymorphic_methods)
         return number_of_polymorphic_methods if number_of_polymorphic_methods >= 0 else 0
 
     def get_classes_simple_names(self, filter_string: str = None) -> set:
@@ -374,8 +377,8 @@ class DesignMetrics:
             scores.append(class_metric)
 
         dbx.close()
-        # return round(sum(scores) / len(scores), 5)
-        return sum(scores)
+        return round(sum(scores) / len(scores), 5)
+        # return sum(scores)
 
     def print_project_metrics(self):
         dbx = und.open(self.udb_path)
