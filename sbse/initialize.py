@@ -407,14 +407,17 @@ class Initialization(object):
     def find_extract_interface_candidate(self):
         _db = und.open(config.UDB_PATH)
         extract_interface_refactoring_candidates = []
-        classes = _db.ents("Type Class Public  ~Generic ~Interface ~Abstract ~Enum ~Unknown ~Anonymous ~TypeVariable")
+        classes = _db.ents("Type Class Public ~Generic ~Interface ~Enum ~Unknown ~Anonymous ~TypeVariable")
         for class_entity in classes:
             class_path = class_entity.parent().longname()
             if os.path.exists(class_path):
-                inherited_entities = class_entity.ents(
-                    'Java Extend Couple ~Implicit, Java Implement Couple ~Implicit', )
+                filter_inherited_attrs = 'Java Extend Couple ~Implicit, Java Implement Couple ~Implicit'
+                filter_inherited_attrs = 'Java Implement Couple ~Implicit'
+                inherited_entities = class_entity.ents(filter_inherited_attrs)
                 if len(inherited_entities) == 0:
-                    extract_interface_refactoring_candidates.append(class_path)
+                    public_methods = len(class_entity.ents("Define", "Java Method Member ~Private ~Static"))
+                    if public_methods > 0:
+                        extract_interface_refactoring_candidates.append(class_path)
         _db.close()
         return extract_interface_refactoring_candidates
 
