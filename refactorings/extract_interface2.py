@@ -88,6 +88,9 @@ class InterfaceInfoListener(JavaParserLabeledListener):
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
         if len(self.interface_info['name']) > 0:
             return
+        # Todo: requires better handling
+        if not hasattr(ctx.parentCtx, 'classOrInterfaceModifier'):
+            return
         if ctx.parentCtx.classOrInterfaceModifier() is not None:
             if len(ctx.parentCtx.classOrInterfaceModifier()) > 0:
                 if ctx.parentCtx.classOrInterfaceModifier()[0].getText() == "public":
