@@ -86,7 +86,7 @@ class TestabilityPredicator:
 
         dbx.close()
 
-    def inference(self, verbose=False):
+    def inference(self, verbose=False, log_path=None):
         self.df_all = self.df_all.fillna(0)
         X_test1 = self.df_all.iloc[:, 1:]
         X_test = self.scaler.transform(X_test1)
@@ -95,24 +95,30 @@ class TestabilityPredicator:
         df_new['PredictedTestability'] = list(y_pred)
 
         if verbose:
-            self.export_class_testability_values(df_new)
+            self.export_class_testability_values(df=df_new,log_path=log_path)
         return df_new['PredictedTestability'].sum()  # Return sum instead mean
 
     @classmethod
-    def export_class_testability_values(cls, df):
-        print('count classes testability3 ->', df['PredictedTestability'].count())
-        print('minimum testability3 ------->', df['PredictedTestability'].min())
-        print('maximum testability3 ------->', df['PredictedTestability'].max())
-        print('variance testability3 ------>', df['PredictedTestability'].var())
-        print('sum classes testability3 --->', df['PredictedTestability'].sum())
-        # print(df)
-        df.to_csv(config.PROJECT_PATH + '_testability3_after_ga.csv', index=False)
+    def export_class_testability_values(cls, df=None, log_path=None):
+        if log_path is None:
+            log_path = os.path.join(
+                config.PROJECT_LOG_DIR,
+                f'classes_testability2_for_problem_{config.PROBLEM}.csv')
+        config.logger.info(log_path)
+        config.logger.info(f'count classes testability2\t {df["PredictedTestability"].count()}')
+        config.logger.info(f'minimum testability2\t {df["PredictedTestability"].min()}')
+        config.logger.info(f'maximum testability2\t {df["PredictedTestability"].max()}')
+        config.logger.info(f'variance testability2\t {df["PredictedTestability"].var()}')
+        config.logger.info(f'sum classes testability2\t, {df["PredictedTestability"].sum()}')
+        config.logger.info('-' * 50)
+
+        df.to_csv(log_path, index=False)
 
 
-def main(db_path, initial_value=1.0, verbose=False):
+def main(db_path, initial_value=1.0, verbose=False, log_path=None):
     testability_ = TestabilityPredicator(db_path=db_path)
     testability_.prepare_metric_dataframe()
-    return testability_.inference(verbose=verbose) / initial_value
+    return testability_.inference(verbose=verbose, log_path=log_path) / initial_value
 
 
 # Test module

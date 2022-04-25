@@ -33,14 +33,14 @@ class RefactoringSequenceEvaluation:
         self.file_path_base_dir_old = 'C:\\Users\\Administrator\\Downloads\\prj_src'  # Server2 path (to be replaced)
 
     def evaluate_sequences(self):
-        initial_values_path = glob.glob(f'{self.log_directory}quality_attrs_initial_values.csv')[0]
+        initial_values_path = glob.glob(os.path.join(self.log_directory, 'quality_attrs_initial_values.csv'))[0]
         df_initial = pd.read_csv(
             initial_values_path,
             sep=',',
             index_col=False
         )
 
-        res_path = glob.glob(f'{self.log_directory}best_refactoring_sequences_objectives*.csv')[0]
+        res_path = glob.glob(os.path.join(self.log_directory, 'best_refactoring_sequences_objectives*.csv'))[0]
         if config.PROBLEM == 2:
             col_names = ['generation',
                          'reusability', 'understandability', 'flexibility', 'functionality', 'effectiveness',
@@ -81,9 +81,9 @@ class RefactoringSequenceEvaluation:
         print(df_final_result)
         df_final_result.to_csv(f'{config.PROJECT_LOG_DIR}evaluation_results.csv', index=False)
 
-    def execute_from_json_log(self, input_file_path=None):
+    def execute_from_json_log(self, input_file_path=None, reset=True):
         if input_file_path is None:
-            input_file_path = glob.glob(f'{self.log_directory}best_refactoring_sequences*.json')[0]
+            input_file_path = glob.glob(os.path.join(self.log_directory, 'best_refactoring_sequences*.json'))[0]
 
         population = []
         with open(input_file_path, 'r', encoding='utf-8') as fp:
@@ -107,7 +107,7 @@ class RefactoringSequenceEvaluation:
 
         print(population)
         # quit()
-        for refactoring_sequence in population:
+        for k, refactoring_sequence in enumerate(population):
             reset_project()
             # Apply sequence X to system S
             for refactoring_operation in refactoring_sequence:
@@ -118,11 +118,19 @@ class RefactoringSequenceEvaluation:
             # Compute quality metrics
             log_project_info(
                 reset_=False,
-                quality_attributes_path=f'{config.PROJECT_LOG_DIR}best_refactoring_sequences_objectives_extended.csv',
-                generation=config.MAX_ITERATIONS
+                quality_attributes_path=os.path.join(
+                    config.PROJECT_LOG_DIR,
+                    'best_refactoring_sequences_objectives_extended.csv'
+                ),
+                generation=config.MAX_ITERATIONS,
+                testability_verbose=True,
+                testability_log_path=os.path.join(
+                    config.PROJECT_LOG_DIR,
+                    f'classes_testability2_for_problem_{config.PROBLEM}_sequence_{k}.csv'
+                )
             )
-
-        reset_project()
+        if reset:
+            reset_project()
 
     def execute_from_txt_log(self, input_file_path):
         """
@@ -164,7 +172,9 @@ def execute_refactoring_sequence():
 
 
 if __name__ == '__main__':
+    # reset_project()
+    # quit()
     # execute_refactoring_sequence()
     eval_ = RefactoringSequenceEvaluation(log_directory=config.PROJECT_LOG_DIR)
     eval_.evaluate_sequences()
-    eval_.execute_from_json_log()
+    # eval_.execute_from_json_log(reset=False)

@@ -368,7 +368,7 @@ class TestabilityModel:
         self.scaler = scaler1
         self.model = model5
 
-    def inference(self, df_predict_data=None, verbose=False):
+    def inference(self, df_predict_data=None, verbose=False, log_path=None):
         df_predict_data = df_predict_data.fillna(0)
         X_test1 = df_predict_data.iloc[:, 1:]
         X_test = self.scaler.transform(X_test1)
@@ -377,27 +377,34 @@ class TestabilityModel:
         df_new['PredictedTestability'] = list(y_pred)
 
         if verbose:
-            self.export_class_testability_values(df_new)
+            self.export_class_testability_values(df=df_new, log_path=log_path)
 
         return df_new['PredictedTestability'].sum()  # Return sum instead mean
 
     @classmethod
-    def export_class_testability_values(cls, df):
-        print('count classes testability2 ->', df['PredictedTestability'].count())
-        print('minimum testability2 ------->', df['PredictedTestability'].min())
-        print('maximum testability2 ------->', df['PredictedTestability'].max())
-        print('variance testability2 ------>', df['PredictedTestability'].var())
-        print('sum classes testability2 --->', df['PredictedTestability'].sum())
-        df.to_csv(config.PROJECT_PATH + '_testability2_after_ga.csv', index=False)
+    def export_class_testability_values(cls, df=None, log_path=None):
+        if log_path is None:
+            log_path = os.path.join(
+                config.PROJECT_LOG_DIR,
+                f'classes_testability2_for_problem_{config.PROBLEM}.csv')
+        config.logger.info(log_path)
+        config.logger.info(f'count classes testability2\t {df["PredictedTestability"].count()}')
+        config.logger.info(f'minimum testability2\t {df["PredictedTestability"].min()}')
+        config.logger.info(f'maximum testability2\t {df["PredictedTestability"].max()}')
+        config.logger.info(f'variance testability2\t {df["PredictedTestability"].var()}')
+        config.logger.info(f'sum classes testability2\t, {df["PredictedTestability"].sum()}')
+        config.logger.info('-'*50)
+
+        df.to_csv(log_path, index=False)
 
 
 # API
-def main(project_db_path, initial_value=1.0, verbose=False):
+def main(project_db_path, initial_value=1.0, verbose=False, log_path=None):
     """
     testability_prediction module API
     """
     df = PreProcess().compute_metrics_by_class_list(project_db_path, n_jobs=0)  # n_job must be set to number of CPU cores
-    testability_ = TestabilityModel().inference(df_predict_data=df, verbose=verbose)
+    testability_ = TestabilityModel().inference(df_predict_data=df, verbose=verbose, log_path=log_path)
     # print('testability=', testability_)
     return round(testability_ / initial_value, 5)
 

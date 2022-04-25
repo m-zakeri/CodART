@@ -734,18 +734,28 @@ def binary_tournament(pop, P, **kwargs):
     return S
 
 
-def log_project_info(reset_=True, design_metrics_path=None, quality_attributes_path=None, generation=0):
+def log_project_info(reset_=True, design_metrics_path=None, quality_attributes_path=None,
+                     generation=0, testability_verbose=True, testability_log_path=None):
     if reset_:
         reset_project()
     if quality_attributes_path is None:
-        quality_attributes_path = f'{config.PROJECT_LOG_DIR}quality_attrs_initial_values.csv'
+
+        quality_attributes_path = os.path.join(config.PROJECT_LOG_DIR, 'quality_attrs_initial_values.csv')
     if design_metrics_path is None:
-        design_metrics_path = f'{config.PROJECT_LOG_DIR}design_metrics.csv'
+        design_metrics_path = os.path.join(config.PROJECT_LOG_DIR,'design_metrics.csv')
 
     design_quality_attribute = DesignQualityAttributes(config.UDB_PATH)
     avg_, sum_ = design_quality_attribute.average_sum
-    predicted_testability = testability_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("TEST", 1.0))
-    mdg_modularity = modularity_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("MODULE", 1.0))
+    predicted_testability = testability_main(
+        config.UDB_PATH,
+        initial_value=config.CURRENT_METRICS.get("TEST", 1.0),
+        verbose=testability_verbose,
+        log_path=testability_log_path
+    )
+    mdg_modularity = modularity_main(
+        config.UDB_PATH,
+        initial_value=config.CURRENT_METRICS.get("MODULE", 1.0)
+    )
 
     design_metrics = {
         "DSC": [design_quality_attribute.DSC],
