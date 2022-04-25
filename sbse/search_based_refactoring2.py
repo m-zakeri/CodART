@@ -444,8 +444,8 @@ class ProblemManyObjective(Problem):
         df_design_metrics = pd.DataFrame(data=design_metrics)
         if os.path.exists(design_metrics_path):
             df = pd.read_csv(design_metrics_path, index_col=False)
-            df = df.append(df_design_metrics, ignore_index=True)
-            df.to_csv(design_metrics_path, index=False)
+            df_result = pd.concat([df, df_design_metrics], ignore_index=True)
+            df_result.to_csv(design_metrics_path, index=False)
         else:
             df_design_metrics.to_csv(design_metrics_path, index=False)
 
@@ -787,16 +787,17 @@ def log_project_info(reset_=True, design_metrics_path=None, quality_attributes_p
     df_quality_attributes = pd.DataFrame(data=quality_objectives)
     if os.path.exists(quality_attributes_path):
         df = pd.read_csv(quality_attributes_path, index_col=False)
-        df = df.append(df_quality_attributes, ignore_index=True)
-        df.to_csv(quality_attributes_path, index=False)
+        df_result = pd.concat([df, df_quality_attributes], ignore_index=True)
+        df_result.to_csv(quality_attributes_path, index=False)
     else:
         df_quality_attributes.to_csv(quality_attributes_path, index=False)
 
     df_design_metrics = pd.DataFrame(data=design_metrics)
     if os.path.exists(design_metrics_path):
         df = pd.read_csv(design_metrics_path, index_col=False)
-        df = df.append(df_design_metrics, ignore_index=True)
-        df.to_csv(design_metrics_path, index=False)
+        df_results = pd.concat([df, df_design_metrics], ignore_index=True)
+        # df = df.append(df_design_metrics, ignore_index=True)
+        df_results.to_csv(design_metrics_path, index=False)
     else:
         df_design_metrics.to_csv(design_metrics_path, index=False)
 
@@ -858,19 +859,26 @@ def main():
     # Define problems
     problems = list()  # 0: Genetic (Single), 1: NSGA-II (Multi), 2: NSGA-III (Many) objectives problems
     problems.append(
-        ProblemSingleObjective(n_refactorings_lowerbound=config.LOWER_BAND,
-                               n_refactorings_upperbound=config.UPPER_BAND,
-                               evaluate_in_parallel=False)
+        ProblemSingleObjective(
+            n_refactorings_lowerbound=config.LOWER_BAND,
+            n_refactorings_upperbound=config.UPPER_BAND,
+            evaluate_in_parallel=False,
+        )
     )
     problems.append(
-        ProblemMultiObjective(n_refactorings_lowerbound=config.LOWER_BAND,
-                              n_refactorings_upperbound=config.UPPER_BAND,
-                              evaluate_in_parallel=False)
+        ProblemMultiObjective(
+            n_refactorings_lowerbound=config.LOWER_BAND,
+            n_refactorings_upperbound=config.UPPER_BAND,
+            evaluate_in_parallel=False,
+        )
     )
     problems.append(
-        ProblemManyObjective(n_refactorings_lowerbound=config.LOWER_BAND,
-                             n_refactorings_upperbound=config.UPPER_BAND,
-                             evaluate_in_parallel=False)
+        ProblemManyObjective(
+            n_refactorings_lowerbound=config.LOWER_BAND,
+            n_refactorings_upperbound=config.UPPER_BAND,
+            evaluate_in_parallel=False,
+            verbose_design_metrics=True,
+        )
     )
 
     # Termination of algorithms
