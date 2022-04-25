@@ -239,6 +239,14 @@ def main(class_path):
     """
     :param: class_path(str): The java file path containing the public class
     """
+    # Precondition 1: The interface should not be already exist.
+    interface_path = os.path.join(
+        os.path.dirname(class_path),
+        f'I{os.path.splitext(os.path.basename(class_path))[0]}.java'
+    )
+    if os.path.exists(interface_path):
+        return False
+
     stream = FileStream(class_path, encoding='utf-8', errors='ignore')
     lexer = JavaLexer(stream)
     tokens = CommonTokenStream(lexer)
