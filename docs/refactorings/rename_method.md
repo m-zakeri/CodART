@@ -1,3 +1,3 @@
 # Rename method
 
-::: refactorings.rename_method.RenameMethodListener
+::: refactorings.rename_method
