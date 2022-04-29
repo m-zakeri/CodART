@@ -10,12 +10,14 @@
 
 ## Project Contributors
 
-Who are behind CodART?
 The CodART Project is part of Morteza Zakeri’s Ph.D. thesis to refactor Java source codes automatically and improve their testability. 
-We have also defined several sub-projects relevant to CodART to improve software quality. 
+
+We have defined several sub-projects relevant to CodART to improve software quality. 
+
 
 ### Project Owner
 [Morteza ZAKERI](https://m-zakeri.github.io), Ph.D. student at Iran University of Science and Technology 
+
 
 ### Project Supervisors
 
@@ -23,17 +25,19 @@ We have also defined several sub-projects relevant to CodART to improve software
 
 [Dr. Mehrdad Ashtiani Assistant](http://webpages.iust.ac.ir/m_ashtiani/) professor at Iran University of Science and Technology
 
+
 ### Current Contributors
 
-* Seyyed Ali Ayati, B.Sc. Student at Iran University of Science and Technology 
-* Mina Tahaei, B.Sc. Student at Iran University of Science and Technology 
+* Morteza Zakeri
+* 
 
 
 ### Former contributors
-
-* IUST B.Sc. Students in Compiler course (Fall 2020)
-* IUST M.Sc. students in Advanced Compiler course (Fall 2020)
-
+* Seyyed Ali Ayati, B.Sc. student at Iran University of Science and Technology 
+* Mina Tahaei, B.Sc. student at Iran University of Science and Technology
+* IUST B.Sc. Students in compiler course (Spring 2021)
+* IUST B.Sc. Students in compiler course (Fall 2020)
+* IUST M.Sc. students in advanced Compiler course (Fall 2020)
 
 
 
