@@ -1,5 +1,25 @@
 """
-The module implements a light version of extract interface refactoring
+## Introduction
+
+The module implements a light version of extract interface refactoring described in `extract_interface.py`
+
+
+## Pre and post-conditions
+
+### Pre-conditions:
+
+1. The interface should not be already exist.
+
+2. precondition is whether the package name, all the class names and method names in
+those classes exist.
+
+3. The parameter types and return types of each method should be the same across the
+classes.
+
+### Post-conditions:
+
+No specific post-condition
+
 """
 
 __version__ = '0.1.2'
@@ -240,8 +260,13 @@ class InterfaceCreator:
 
 def main(class_path):
     """
-    :param: class_path(str): The java file path containing the public class
+
+    Args:
+
+        class_path (str): The java file path containing the public class
+
     """
+
     # Precondition 1: The interface should not be already exist.
     interface_path = os.path.join(
         os.path.dirname(class_path),
@@ -273,6 +298,7 @@ def main(class_path):
     return True
 
 
+# Tests
 if __name__ == "__main__":
     class_path1 = "benchmarks/simple_injection/src/calculator/Calculator.java"
     class_path2 = "benchmarks/10_water-simulator/src/main/java/simulator/SA/GridGenerator.java"

@@ -1,6 +1,26 @@
 """
+
+## Introduction
+
 Decrease field visibility refactoring
+
+Decrease the visibility of a field from public to protected, protected to package or package to private.
+
+
+## Pre and post-conditions
+
+### Pre-conditions:
+
+User must enter the field's name, and the source class's name for the refactoring in order to decrease
+the target field's visibility.
+
+### Post-conditions:
+
+No specific post-condition
+
+
 """
+
 __version__ = "0.2.0"
 __author__ = "Morteza Zakeri"
 
@@ -18,7 +38,31 @@ from sbse.config import logger, UDB_PATH
 
 
 class DecreaseFieldVisibilityListener(JavaParserLabeledListener):
+    """
+
+    To implement ِDecrease Field Visibility refactoring based on its actors.
+
+    Detects the required field and decreases/changes its visibility status.
+
+    """
     def __init__(self, source_class, source_field, rewriter: TokenStreamRewriter):
+        """
+
+        Args:
+
+            source_class (str): Name of the class in which the refactoring has to be done
+
+            source_field (str): Name of the field whose visibility status has to be changed
+
+            rewriter (CommonTokenStream): An instance of TokenStreamRewriter
+
+
+        Returns:
+
+            object (DecreaseFieldVisibilityListener): An instance of DecreaseFieldVisibilityListener
+
+        """
+
         self.source_class = source_class
         self.source_field = source_field
         self.in_class = False
@@ -82,6 +126,11 @@ class DecreaseFieldVisibilityListener(JavaParserLabeledListener):
 
 
 def main(udb_path, source_package, source_class, source_field, *args, **kwargs):
+    """
+
+
+    """
+
     db = und.open(udb_path)
     field_ent = db.lookup(f"{source_package}.{source_class}.{source_field}", "Variable")
 

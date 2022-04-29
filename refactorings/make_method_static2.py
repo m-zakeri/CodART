@@ -1,13 +1,33 @@
+"""
+## Introduction
+
+The module implements a light-weight version of make method static refactoring operation
+described in `make_method_static`.
+
+## Pre and post-conditions
+
+### Pre-conditions:
+
+Todo: Add pre-conditions
+
+### Post-conditions:
+
+Todo: Add post-conditions
+
+"""
+
+__version__ = "0.2.0"
+__author__ = "Morteza Zakeri"
+
 import os
-
-
-from antlr4 import *
-from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
 try:
     import understand as und
 except ImportError as e:
     print(e)
+
+from antlr4 import *
+from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
 from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
@@ -17,10 +37,16 @@ from sbse import config
 
 class MakeMethodStaticRefactoringListener(JavaParserLabeledListener):
     """
-    To implement make method static.
+
+    To implement make method static (version 2).
+
     """
 
     def __init__(self, common_token_stream: CommonTokenStream = None, source_class=None, method_name: str = None):
+        """
+
+
+        """
 
         if method_name is None:
             self.method_name = ""
@@ -72,6 +98,11 @@ class MakeMethodStaticRefactoringListener(JavaParserLabeledListener):
 
 
 def main(udb_path, source_class, method_name, *args, **kwargs):
+    """
+
+
+    """
+
     main_file = None
     db = und.open(udb_path)
     classes = db.ents("Class")

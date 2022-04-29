@@ -1,6 +1,22 @@
 """
-Move field refactoring
+## Introduction
+
+The module implements Move Field refactoring operation
+
+## Pre and post-conditions
+
+### Pre-conditions:
+
+Todo: Add pre-conditions
+
+### Post-conditions:
+
+Todo: Add post-conditions
+
 """
+
+__version__ = '0.1.0'
+__author__ = 'Morteza Zakeri'
 
 # import logging
 
@@ -23,8 +39,18 @@ STATIC = "Public Static Variable"
 
 
 class CutFieldListener(JavaParserLabeledListener):
+    """
+
+
+    """
+
     def __init__(self, class_name: str, instance_name: str, field_name: str, is_static: bool, import_statement: str,
                  rewriter: TokenStreamRewriter):
+        """
+
+
+        """
+
         self.class_name = class_name
         self.field_name = field_name
         self.is_static = is_static
@@ -136,6 +162,11 @@ class CheckCycleListener(JavaParserLabeledListener):
 
 def main(source_class: str, source_package: str, target_class: str, target_package: str, field_name: str,
          udb_path: str, *args, **kwargs):
+    """
+
+
+    """
+
     import_statement = None
     if source_package != target_package:
         import_statement = f"\nimport {target_package}.{target_class};"
@@ -168,7 +199,7 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
         if file in usages:
             usages[file].append(ref.line())
         else:
-            usages[file] = [ref.line(),]
+            usages[file] = [ref.line(), ]
     try:
         src_class_file = db.lookup(f"{source_package}.{source_class}.java")[0].longname()
         target_class_file = db.lookup(f"{target_package}.{target_class}.java")[0].longname()
@@ -231,6 +262,7 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
     return True
 
 
+# Tests
 if __name__ == '__main__':
     main(
         source_class="Source",

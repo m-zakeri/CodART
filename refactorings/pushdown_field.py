@@ -20,11 +20,22 @@ because of this, we push down the field from the superclass into its related sub
 2. There will be children and parents having their desired fields added or removed.
 """
 
+__version__ = '0.1.1'
+__author__ = 'Morteza Zakeri'
+
 from codart import symbol_table
 from sbse.config import logger
 
 
 class PushDownField:
+    """
+
+    The main function that does the process of pull up field refactoring.
+
+    Adds the necessary fields to the subclasses and removes them from the superclass.
+
+    """
+
     def __init__(self, source_filenames: list,
                  package_name: str,
                  superclass_name: str,
@@ -32,24 +43,27 @@ class PushDownField:
                  class_names: list = [],
                  filename_mapping=lambda x: (x[:-5] if x.endswith(".java") else x) + ".java"):
         """
-        The main function that does the process of pull up field refactoring.
-                Adds the necessary fields to the subclasses and removes them from the superclass.
 
-                Args:
-                      source_filenames (list): A list of file names to be processed
+        Args:
 
-                      package_name (str): The name of the package in which the refactoring has to be done (contains the superclass)
+            source_filenames (list): A list of file names to be processed
 
-                      superclass_name (str): The name of the needed superclass
+            package_name (str): The name of the package in which the refactoring has to be done \
+            (contains the superclass)
 
-                      class_names (str): Name of the classes in which the refactoring has to be done (the classes to push down field from)
+            superclass_name (str): The name of the needed superclass
 
-                      field_name (str): Name of the field that has to be refactored
+            class_names (list): Name of the classes in which the refactoring has to be done \
+            (the classes to push down field from)
 
-                      filename_mapping (str): Mapping the file's name to the correct format so that it can be processed
+            field_name (str): Name of the field that has to be refactored
 
-                Returns:
-                    No returns
+            filename_mapping (str): Mapping the file's name to the correct format so that it can be processed
+
+        Returns:
+
+            object (PushDownField): An instance of PushDownField class
+
         """
         self.source_filenames = source_filenames
         self.package_name = package_name
@@ -178,6 +192,25 @@ class PushDownField:
         return True
 
 
+def main(project_dir, source_package, source_class, field_name, target_classes: list, *args, **kwargs):
+    """
+
+
+    """
+    res = PushDownField(
+        symbol_table.get_filenames_in_dir(project_dir),
+        package_name=source_package,
+        superclass_name=source_class,
+        field_name=field_name,
+        class_names=target_classes,
+    ).do_refactor()
+    if not res:
+        logger.error("Cannot push-down field")
+        return False
+    return True
+
+
+# Tests
 def test():
     print("Testing pushdown_field...")
     filenames = [
@@ -201,20 +234,6 @@ def test():
             print("1, 2, " + str(i + 1) + ": Success!")
         else:
             print("1, 2, " + str(i + 1) + ": Cannot refactor.")
-
-
-def main(project_dir, source_package, source_class, field_name, target_classes: list, *args, **kwargs):
-    res = PushDownField(
-        symbol_table.get_filenames_in_dir(project_dir),
-        package_name=source_package,
-        superclass_name=source_class,
-        field_name=field_name,
-        class_names=target_classes,
-    ).do_refactor()
-    if not res:
-        logger.error("Cannot push-dwon field")
-        return False
-    return True
 
 
 if __name__ == "__main__":

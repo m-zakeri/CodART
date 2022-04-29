@@ -1,8 +1,21 @@
 """
-Push-down field2
+
+## Introduction
+
+The module implements a light-weight version of push-down field refactoring described in `pushdown_field.py`.
+
+
+### Pre-conditions:
+
+Todo: Add pre-conditions
+
+### Post-conditions:
+
+Todo: Add post-conditions
 
 """
 
+__version__ = '0.1.1'
 __author__ = "Seyyed Ali Ayati"
 
 try:
@@ -21,16 +34,27 @@ from sbse.config import logger
 
 
 class CutFieldListener(JavaParserLabeledListener):
-    def __init__(self, source_class, field_name, rewriter: TokenStreamRewriter):
+    """
+
+    Removes the field declaration from the parent class.
+
+    """
+
+    def __init__(self, source_class:str, field_name:str, rewriter: TokenStreamRewriter):
         """
-        Removes the field declaration from the parent class.
 
         Args:
+
             source_class: (str) Parent's class name.
+
             field_name: (str) Field's name.
-            rewriter: Antlr's token stream rewriter.
+
+            rewriter (TokenStreamRewriter): ANTLR's token stream rewriter.
+
         Returns:
-            field_content: The full string of field declaration
+
+            field_content (CutFieldListener): The full string of field declaration
+
         """
         self.source_class = source_class
         self.field_name = field_name
@@ -81,15 +105,27 @@ class CutFieldListener(JavaParserLabeledListener):
 
 
 class PasteFieldListener(JavaParserLabeledListener):
+    """
+
+    Inserts field declaration to children classes.
+
+    """
+
     def __init__(self, source_class, field_content, import_statements, rewriter: TokenStreamRewriter):
         """
-        Inserts field declaration to children classes.
+
         Args:
+
             source_class: Child class name.
+
             field_content: Full string of the field declaration.
+
             rewriter: Antlr's token stream rewriter.
+
         Returns:
-            None
+
+            object (PasteFieldListener): An instance of PasteFieldListener class
+
         """
         self.source_class = source_class
         self.rewriter = rewriter
@@ -124,6 +160,12 @@ class PasteFieldListener(JavaParserLabeledListener):
 
 def main(udb_path=None, source_package=None, source_class=None, field_name=None, target_classes: list = None, *args,
          **kwargs):
+    """
+
+    The main API for push-down field refactoring
+
+    """
+
     if udb_path is None:
         db = und.open(sbse.config.UDB_PATH)
     else:
@@ -177,7 +219,7 @@ def main(udb_path=None, source_package=None, source_class=None, field_name=None,
 
     # Remove field from source class
     listener = parse_and_walk(
-        file_path= source_class_file,
+        file_path=source_class_file,
         listener_class=CutFieldListener,
         has_write=True,
         source_class=source_class,
@@ -200,6 +242,7 @@ def main(udb_path=None, source_package=None, source_class=None, field_name=None,
     return True
 
 
+# Tests
 if __name__ == '__main__':
     main(
         udb_path="D:\Dev\JavaSample\JavaSample\JavaSample.und",

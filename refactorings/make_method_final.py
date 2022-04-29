@@ -1,6 +1,24 @@
 """
 
+## Introduction
+
+Make method final refactoring operation
+
+
+## Pre and post-conditions
+
+### Pre-conditions:
+
+Todo: Add pre-conditions
+
+### Post-conditions:
+
+Todo: Add post-conditions
 """
+
+__version__ = '0.1.0'
+__author__ = "Morteza Zakeri"
+
 
 try:
     import understand as und
@@ -16,11 +34,16 @@ from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 class MakeMethodFinalRefactoringListener(JavaParserLabeledListener):
     """
-    To implement extract class refactoring based on its actors.
-    Creates a new class and move fields and methods from the old class to the new one
+
+    To implement Make method final refactoring based on its actors.
+
     """
 
     def __init__(self, common_token_stream: CommonTokenStream = None, source_class=None, method_name: str = None):
+        """
+
+
+        """
 
         if method_name is None:
             self.method_name = ""

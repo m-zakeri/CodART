@@ -1,9 +1,14 @@
 """
-The script implements different refactoring operations
+## Introduction
+
+The script implements inline class refactoring
+
+Merge to class into one class
+
 """
 
 __version__ = '0.1.0'
-__author__ = 'Morteza'
+__author__ = 'Morteza Zakeri'
 
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
@@ -14,14 +19,21 @@ from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 class InlineClassRefactoringListener(JavaParserLabeledListener):
     """
-    To implement extract class refactoring based on its actors.
-    Creates a new class and move fields and methods from the old class to the new one
+
+    To implement inline class refactoring based on its actors.
+
+    Creates a new class and move fields and methods from two old class to the new one, then delete the two class
+
     """
 
     def __init__(
             self, common_token_stream: CommonTokenStream = None,
             source_class: str = None, source_class_data: dict = None,
             target_class: str = None, target_class_data: dict = None, is_complete: bool = False):
+        """
+
+
+        """
 
         if common_token_stream is None:
             raise ValueError('common_token_stream is None')

@@ -1,4 +1,5 @@
 """
+
 ## Introduction
 
 When subclasses grow and get developed separately, identical (or nearly identical) fields and methods appear.
@@ -30,29 +31,40 @@ from sbse.config import logger, PROJECT_PATH
 
 
 class PullUpFieldRefactoring:
+    """
+
+    The  class that does the process of pull up field refactoring.
+
+    Removes the repetitive fields from the subclasses, creates the superclass,
+    and moves the fields to the superclass.
+
+    """
+
     def __init__(self, source_filenames: list,
                  package_name: str,
                  class_name: str,
                  field_name: str,
                  filename_mapping=lambda x: (x[:-5] if x.endswith(".java") else x) + ".java"):
-        """The main function that does the process of pull up field refactoring.
-               Removes the repetitive fields from the subclasses, creates the superclass,
-               and moves the fields to the superclass.
+        """
 
-               Args:
-                   source_filenames (list): A list of file names to be processed
+        Args:
 
-                   package_name (str): The name of the package in which the refactoring has to be done (contains the classes/superclasses)
+            source_filenames (list): A list of file names to be processed
 
-                   class_name (str): Name of the class that the field is pulled up from
+            package_name (str): The name of the package in which the refactoring has to be done \
+            (contains the classes/superclasses)
 
-                   field_name (str): Name of the field that has to be refactored
+            class_name (str): Name of the class that the field is pulled up from
 
-                   filename_mapping (str): Mapping the file's name to the correct format so that it can be processed
+            field_name (str): Name of the field that has to be refactored
 
-               Returns:
-                   No returns
-            """
+            filename_mapping (str): Mapping the file's name to the correct format so that it can be processed
+
+        Returns:
+
+            object (PullUpFieldRefactoring): An instance of PullUpFieldRefactoring class
+
+        """
         self.source_filenames = source_filenames
         self.package_name = package_name
         self.class_name = class_name
@@ -180,6 +192,11 @@ class PullUpFieldRefactoring:
 
 
 def main(project_dir: str, package_name: str, children_class: str, field_name: str, *args, **kwargs):
+    """
+
+
+    """
+
     # print("Pull-up field")
     result = PullUpFieldRefactoring(
         symbol_table.get_filenames_in_dir(project_dir),

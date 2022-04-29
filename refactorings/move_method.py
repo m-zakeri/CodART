@@ -1,6 +1,22 @@
 """
+## Introduction
+
+The module implements Move Method refactoring operation
+
+## Pre and post-conditions
+
+### Pre-conditions:
+
+Todo: Add pre-conditions
+
+### Post-conditions:
+
+Todo: Add post-conditions
 
 """
+
+__version__ = '0.1.0'
+__author__ = 'Morteza Zakeri'
 
 import os
 import os.path
@@ -9,25 +25,36 @@ from pathlib import Path
 
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
-from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
-from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
-from refactorings.move_field import CheckCycleListener
-from codart.symbol_table import parse_and_walk
-
 try:
     import understand as und
 except ImportError as e:
     print(e)
 
+from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
+from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
+from refactorings.move_field import CheckCycleListener
+from codart.symbol_table import parse_and_walk
 from sbse.config import logger
+
 # logging.basicConfig(level=logging.DEBUG)
 # logger = logging.getLogger(__file__)
+
 STATIC = "Static Method"
 
 
 class CutMethodListener(JavaParserLabeledListener):
+    """
+
+
+    """
+
     def __init__(self, class_name: str, instance_name: str, method_name: str, is_static: bool, import_statement: str,
                  rewriter: TokenStreamRewriter):
+        """
+
+
+        """
+
         self.class_name = class_name
         self.method_name = method_name
         self.is_static = is_static
@@ -261,6 +288,11 @@ def get_source_class_map(db, source_class: str):
 
 def main(source_class: str, source_package: str, target_class: str, target_package: str, method_name: str,
          udb_path: str, *args, **kwargs):
+    """
+
+
+    """
+
     import_statement = None
     if source_package != target_package:
         import_statement = f"\nimport {target_package}.{target_class};"
@@ -388,14 +420,16 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
     return True
 
 
+# Tests
 if __name__ == '__main__':
     from codart.utility.directory_utils import update_understand_database
-    update_understand_database("C:/Users/Administrator/Downloads/udbs\\jvlt-1.3.2.udb")
+
+    update_understand_database("C:/Users/Administrator/Downloads/udbs/jvlt-1.3.2.udb")
     main(
         source_class="XMLFormatter",
         source_package="net.sourceforge.jvlt.io",
         target_class="Entry",
         target_package="net.sourceforge.jvlt.core",
         method_name="getXMLForEntryInfo",
-        udb_path="C:/Users/Administrator/Downloads/udbs\\jvlt-1.3.2.udb"
+        udb_path="C:/Users/Administrator/Downloads/udbs/jvlt-1.3.2.udb"
     )

@@ -1,10 +1,22 @@
 """
 
+## Introduction
+
+The module implements a light-weight version of the push-down method refactoring described in `pushdown_method.py`
+
+
+### Pre-conditions:
+
+Todo: Add pre-conditions
+
+### Post-conditions:
+
+Todo: Add post-conditions
+
 """
-__version__ = '0.1.0'
+
+__version__ = '0.1.1'
 __author__ = 'Seyyed Ali Ayati'
-
-
 
 try:
     import understand as und
@@ -21,17 +33,28 @@ from sbse import config
 
 
 class CutMethodListener(JavaParserLabeledListener):
+    """
+
+    Removes the method declaration from the parent class.
+
+    """
     def __init__(self, source_class, method_name, rewriter: TokenStreamRewriter):
         """
-        Removes the method declaration from the parent class.
 
         Args:
+
             source_class: (str) Parent's class name.
+
             method_name: (str) Method's name.
-            rewriter: Antlr's token stream rewriter.
+
+            rewriter (TokenStreamRewriter): ANTLR's token stream rewriter.
+
         Returns:
-            field_content: The full string of method declaration
+
+            field_content (CutMethodListener): The full string of method declaration
+
         """
+
         self.source_class = source_class
         self.method_name = method_name
         self.rewriter = rewriter
@@ -79,16 +102,28 @@ class CutMethodListener(JavaParserLabeledListener):
 
 
 class PasteMethodListener(JavaParserLabeledListener):
+    """
+
+    Inserts method declaration to children classes.
+
+    """
     def __init__(self, source_class, method_content, import_statements, rewriter: TokenStreamRewriter):
         """
-        Inserts method declaration to children classes.
+
         Args:
-            source_class: Child class name.
-            method_content: Full string of the method declaration.
-            rewriter: Antlr's token stream rewriter.
+
+            source_class (str): Child class name.
+
+            method_content (str): Full string of the method declaration.
+
+            rewriter (TokenStreamRewriter): ANTLR's token stream rewriter.
+
         Returns:
-            None
+
+            object (PasteMethodListener): An instance of PasteMethodListener class.
+
         """
+
         self.source_class = source_class
         self.rewriter = rewriter
         self.method_content = method_content
@@ -122,6 +157,12 @@ class PasteMethodListener(JavaParserLabeledListener):
 
 
 def main(udb_path, source_package, source_class, method_name, target_classes: list, *args, **kwargs):
+    """
+
+    The main API for the push-down method refactoring (version 2)
+
+    """
+
     db = und.open(udb_path)
     source_class_ents = db.lookup(f"{source_package}.{source_class}", "Class")
     target_class_ents = []
@@ -188,6 +229,7 @@ def main(udb_path, source_package, source_class, method_name, target_classes: li
     db.close()
 
 
+# Tests
 if __name__ == '__main__':
     main(
         udb_path="D:\Dev\JavaSample\JavaSample\JavaSample.und",

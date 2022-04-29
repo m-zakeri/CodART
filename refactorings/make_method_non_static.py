@@ -1,24 +1,36 @@
 """
-The scripts implements different refactoring operations
 
+## Introduction
+
+The module implements make method non-static refactoring operation
+
+## Pre and post-conditions
+
+### Pre-conditions:
+
+Todo: Add pre-conditions
+
+### Post-conditions:
+
+Todo: Add post-conditions
 
 """
+
 __version__ = '0.1.0'
-__author__ = 'Morteza'
+__author__ = 'Morteza Zakeri'
 
 import os
-
-from antlr4 import *
-from antlr4.TokenStreamRewriter import TokenStreamRewriter
-from gen.javaLabeled.JavaLexer import JavaLexer
-from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
-
-from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 try:
     import understand as understand
 except ImportError as e:
     print(e)
+
+from antlr4 import *
+from antlr4.TokenStreamRewriter import TokenStreamRewriter
+from gen.javaLabeled.JavaLexer import JavaLexer
+from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
+from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 
 class Parameter:
@@ -36,13 +48,18 @@ class ConstructorOrMethod:
 
 class MakeMethodNonStaticRefactoringListener(JavaParserLabeledListener):
     """
-    To implement extract class refactoring based on its actors.
-    Creates a new class and move fields and methods from the old class to the new one
+
+    To implement Make Method None-Static refactoring based on its actors.
+
     """
 
     def __init__(
             self, common_token_stream: CommonTokenStream = None,
             target_class: str = None, target_methods: list = None):
+        """
+
+
+        """
 
         if common_token_stream is None:
             raise ValueError('common_token_stream is None')
@@ -144,6 +161,11 @@ class MakeMethodNonStaticRefactoringListener(JavaParserLabeledListener):
 
 
 def main(udb_path, target_class, target_methods):
+    """
+
+
+    """
+
     main_file = None
     db = understand.open(udb_path)
     classes = db.ents("Class")
@@ -177,6 +199,7 @@ def main(udb_path, target_class, target_methods):
     return True
 
 
+# Tests
 if __name__ == '__main__':
     udb_path_ = "/home/ali/Desktop/code/TestProject/TestProject.udb"
     target_class_ = "Website"

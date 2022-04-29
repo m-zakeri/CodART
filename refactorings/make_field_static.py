@@ -1,6 +1,24 @@
 """
 
+## Introduction
+
+Make static field static refactoring operation
+
+
+## Pre and post-conditions
+
+### Pre-conditions:
+
+Todo: Add pre-conditions
+
+### Post-conditions:
+
+Todo: Add post-conditions
+
 """
+
+__version__ = '0.2.0'
+__author__ = "Morteza Zakeri"
 
 import os
 
@@ -19,11 +37,17 @@ from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 class MakeFieldStaticRefactoringListener(JavaParserLabeledListener):
     """
-    To implement extract class refactoring based on its actors.
-    Creates a new class and move fields and methods from the old class to the new one
+
+    To implement make field static refactoring based on its actors.
+
+
     """
 
     def __init__(self, common_token_stream: CommonTokenStream = None, source_class=None, field_name: str = None):
+        """
+
+
+        """
 
         if field_name is None:
             self.field_name = ""
@@ -77,6 +101,11 @@ class MakeFieldStaticRefactoringListener(JavaParserLabeledListener):
 
 
 def main(udb_path, source_class, field_name, *args, **kwargs):
+    """
+
+     The main API for make field static
+
+    """
     main_file = None
     db = und.open(udb_path)
     classes = db.ents("Class")

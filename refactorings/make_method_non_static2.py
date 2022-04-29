@@ -1,3 +1,24 @@
+"""
+## Introduction
+
+The module implements a light-weight version of make method non-static refactoring operation
+described in `make_method_non_static`.
+
+## Pre and post-conditions
+
+### Pre-conditions:
+
+Todo: Add pre-conditions
+
+### Post-conditions:
+
+Todo: Add post-conditions
+
+"""
+
+__version__ = "0.2.0"
+__author__ = "Morteza Zakeri"
+
 import os
 
 from antlr4 import *
@@ -15,11 +36,16 @@ from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 class MakeMethodNonStaticRefactoringListener(JavaParserLabeledListener):
     """
-    To implement extract class refactoring based on its actors.
-    Creates a new class and move fields and methods from the old class to the new one
+
+    To implement Make Method Non-Static refactoring based on its actors (version 2).
+
     """
 
     def __init__(self, common_token_stream: CommonTokenStream = None, source_class=None, method_name: str = None):
+        """
+
+
+        """
 
         if method_name is None:
             self.method_name = ""
@@ -69,6 +95,10 @@ class MakeMethodNonStaticRefactoringListener(JavaParserLabeledListener):
 
 
 def main(udb_path=None, source_class=None, method_name=None, *args, **kwargs):
+    """
+
+    """
+
     main_file = None
     db = und.open(udb_path)
     classes = db.ents("Class")
@@ -104,6 +134,7 @@ def main(udb_path=None, source_class=None, method_name=None, *args, **kwargs):
     return True
 
 
+# Tests
 if __name__ == '__main__':
     udb_path_ = "/TestProject/TestProject.udb"
     source_class_ = "App"

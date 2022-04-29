@@ -1,5 +1,20 @@
 """
 
+## Introduction
+
+The module implements the extract class refactoring to fix `God/Large/Blob class` code smell.
+
+Extract a set of filed and methods from the class to a new class.
+
+## Pre and Post Conditions
+
+### Pre Conditions:
+
+
+
+### Post Conditions:
+
+
 
 ## Changelog
 ### v0.2.1
@@ -35,8 +50,7 @@ class DependencyPreConditionListener(JavaParserLabeledListener):
 
     """
 
-    def __init__(self, common_token_stream: CommonTokenStream = None,
-                 class_identifier: str = None):
+    def __init__(self, common_token_stream: CommonTokenStream = None, class_identifier: str = None):
         self.enter_class = False
         self.token_stream = common_token_stream
         self.class_identifier = class_identifier
@@ -62,14 +76,16 @@ class DependencyPreConditionListener(JavaParserLabeledListener):
                     method_dict[str(method)].append(key)
         # 2- Group methods in terms of their dependencies on one another
         method_group = dict()
-        # _____________________To be modified ________________________
+
         # 3- Group methods in terms of their dependencies on the class attributes
+        # Todo: To be modified
         for key, value in method_dict.items():
             if not str(value) in method_group:
                 method_group[str(value)] = [key]
             else:
                 method_group[str(value)].append(key)
         # --------------------------------------
+
         # 4- Create graph
         G = nx.DiGraph()
         for field, methods in self.field_dict.items():
@@ -133,8 +149,11 @@ class DependencyPreConditionListener(JavaParserLabeledListener):
 
 class ExtractClassRefactoringListener(JavaParserLabeledListener):
     """
+
     To implement extract class refactoring based on its actors.
+
     Creates a new class and move fields and methods from the old class to the new one
+
     """
 
     def __init__(
@@ -593,10 +612,11 @@ def main(udb_path, file_path, source_class, moved_fields, moved_methods, *args, 
         return res
 
 
+# Tests
 if __name__ == "__main__":
     main(
-        udb_path="D:\Dev\JavaSample\JavaSample\JavaSample.und",
-        file_path="D:\Dev\JavaSample\JavaSample\src\extract_class\Person.java",
+        udb_path="D:/Dev/JavaSample/JavaSample/JavaSample.und",
+        file_path="D:/Dev/JavaSample/JavaSample/src/extract_class/Person.java",
         source_class="Person",
         moved_fields=['officeAreaCode', 'officeNumber', ],
         moved_methods=['getTelephoneNumber', ],

@@ -5,21 +5,29 @@ When subclasses grow and get developed separately, your code may have constructo
 Pull up constructor refactoring removes the repetitive method from subclasses and moves it to a superclass.
 
 
-## Pre and Post Conditions
+## Pre and post-conditions
 
-### Pre Conditions:
+### Pre-conditions:
+
 1. The source package, class and constructor should exist.
+
 2. The order of the params in the constructor should be equal in the child classes.
+
 3. empty package name is addressable using "".
+
 
 ### Post Conditions:
 
-No specific Post Condition
+No specific post-condition
 
 """
-import collections
-# import logging
 
+__version__ = '0.1.1'
+__author__ = 'Morteza Zakeri'
+
+import collections
+
+# import logging
 
 try:
     import understand as und
@@ -31,17 +39,29 @@ from antlr4.TokenStreamRewriter import TokenStreamRewriter
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
-from codart.symbol_table import parse_and_walk
+from codart.symbol_table import parse_and_walk, Program
 
 # Config logging
 from sbse.config import logger
+
+
 # logging.basicConfig(filename='codart_result.log', level=logging.DEBUG)
 # logger = logging.getLogger(os.path.basename(__file__))
 
 
 class PullUpConstructorListener(JavaParserLabeledListener):
+    """
+
+
+    """
+
     def __init__(self, rewriter: TokenStreamRewriter, is_father: bool, class_name: str, has_father_con: bool,
                  common_sets: [], params: str):
+        """
+
+
+        """
+
         self.rewriter = rewriter
         self.is_father = is_father
         self.has_father_con = has_father_con
@@ -101,7 +121,89 @@ class PullUpConstructorListener(JavaParserLabeledListener):
         self.delete = False
 
 
+def get_cons(program: Program, packagename: str, superclassname: str, class_name: str):
+    """
+
+    A function to complete the Pull-up constructor refactoring by finding all the classes with similar constructors.
+
+    """
+    extendedclass = []
+    removemethods = {}
+    removemethods1 = []
+    removemethods3 = {}
+    mets = program.packages[packagename].classes[class_name].methods
+    met = []
+    methodkey = ""
+    for methodName, method in mets.items():
+        if method.is_constructor:
+            met = method
+            methodkey = methodName
+            break
+    body_text_method = met.body_text
+    parammethod = met.parameters
+
+    for package_name in program.packages:
+        package = program.packages[package_name]
+        for class_ in package.classes:
+            _class = package.classes[class_]
+
+            if _class.superclass_name == superclassname:
+                extendedclass.append(_class)
+
+    i = 0
+    for d in extendedclass:
+        class_ = extendedclass[i]
+        i = i + 1
+        for mk in class_.methods:
+            m_ = class_.methods[mk]
+            m = mk[:mk.find('(')]
+            if m_.body_text == body_text_method and m_.parameters == parammethod and m_.is_constructor == True:
+                if class_.name not in removemethods:
+                    removemethods[class_.name] = [methodkey]
+                else:
+                    removemethods[class_.name].append(methodkey)
+            elif m_.is_constructor == True:
+                listBody_text = body_text_method.replace("{", "").replace("}", "").split(";")
+                listm_body = m_.body_text.replace("{", "").replace("}", "").split(";")
+                s1 = set(listBody_text)
+                s2 = set(listm_body)
+                if s2.issubset(s1):
+                    removemethods1.append(diff_lists(listBody_text, listm_body))
+                    if class_.name not in removemethods:
+                        removemethods[class_.name] = [mk]
+                    else:
+                        removemethods[class_.name].append(mk)
+                elif s1.issubset(s2):
+                    removemethods1.append(diff_lists(listm_body, listBody_text))
+                    if class_.name not in removemethods:
+                        removemethods[class_.name] = [mk]
+                    else:
+                        removemethods[class_.name].append(mk)
+                else:
+                    a = diff_lists(listBody_text, listm_body)
+                    if class_.name not in removemethods3:
+                        removemethods3[class_.name] = [a]
+                    else:
+                        removemethods3[class_.name].append(a)
+
+                    if class_.name not in removemethods:
+                        removemethods[class_.name] = [mk]
+                    else:
+                        removemethods[class_.name].append(mk)
+
+    removemethods[class_name] = [methodkey]
+    return removemethods, removemethods1
+
+
+def diff_lists(li1, li2):
+    return list(set(li1) - set(li2)) + list(set(li2) - set(li1))
+
+
 def main(udb_path, source_package, target_class, class_names: list, *args, **kwargs):
+    """
+
+    """
+
     if len(class_names) < 2:
         logger.error("class_names is empty.")
         return False
@@ -183,7 +285,7 @@ def main(udb_path, source_package, target_class, class_names: list, *args, **kwa
 
 if __name__ == "__main__":
     main(
-        "D:\Dev\JavaSample\JavaSample1.udb",
+        "D:/Dev/JavaSample/JavaSample1.udb",
         "",
         "Employee",
         class_names=["Admin", "Manager", ]

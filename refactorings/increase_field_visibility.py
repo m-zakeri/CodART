@@ -1,5 +1,22 @@
 """
+
+## Introduction
+
 Increase field visibility refactoring
+
+Increase the visibility of a field from private to package, package to protected or protected to public.
+
+## Pre and post-conditions
+
+### Pre-conditions:
+
+User must enter the field's name, and the source class's name for the refactoring in order to increase
+the target field's visibility.
+
+### Post-conditions:
+
+No specific post-condition
+
 
 """
 
@@ -20,7 +37,30 @@ from sbse.config import logger
 
 
 class IncreaseFieldVisibilityListener(JavaParserLabeledListener):
+    """
+
+    To implement ِIncrease Field Visibility refactoring based on its actors.
+
+    Detects the required field and increases/changes its visibility status.
+
+    """
     def __init__(self, source_class, source_field, rewriter: TokenStreamRewriter):
+        """
+        Args:
+
+            source_class (str): Name of the class in which the refactoring has to be done
+
+            source_field (str): Name of the field whose visibility status has to be changed
+
+            rewriter (CommonTokenStream): An instance of TokenStreamRewriter
+
+
+        Returns:
+
+            object (IncreaseFieldVisibilityListener): An instance of IncreaseFieldVisibilityListener
+
+        """
+
         self.source_class = source_class
         self.source_field = source_field
         self.in_class = False
@@ -81,6 +121,11 @@ class IncreaseFieldVisibilityListener(JavaParserLabeledListener):
 
 
 def main(udb_path, source_package, source_class, source_field, *args, **kwargs):
+    """
+
+
+    """
+
     db = und.open(udb_path)
     fields = db.lookup(f"{source_package}.{source_class}.{source_field}", "Variable")
 
@@ -119,9 +164,10 @@ def main(udb_path, source_package, source_class, source_field, *args, **kwargs):
     return True
 
 
+# Tests
 if __name__ == '__main__':
     main(
-        udb_path="D:\Dev\JavaSample\JavaSample\JavaSample.und",
+        udb_path="D:/Dev/JavaSample/JavaSample/JavaSample.und",
         source_package="source_package",
         source_class="Sample",
         source_field="privateField"

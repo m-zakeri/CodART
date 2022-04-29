@@ -1,24 +1,50 @@
-from gen.javaLabeled.JavaLexer import JavaLexer
+"""
+
+## Introduction
+
+Make method non-final refactoring operation
+
+
+## Pre and post-conditions
+
+### Pre-conditions:
+
+Todo: Add pre-conditions
+
+### Post-conditions:
+
+Todo: Add post-conditions
+
+"""
+
+__version__ = '0.1.0'
+__author__ = "Morteza Zakeri"
 
 try:
     import understand as und
 except ImportError as e:
     print(e)
+
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
+from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 
 class MakeMethodNonFinalRefactoringListener(JavaParserLabeledListener):
     """
-    To implement extract class refactoring based on its actors.
-    Creates a new class and move fields and methods from the old class to the new one
+
+    To implement Make Method Non-Final refactoring based on its actors.
+
     """
 
     def __init__(self, common_token_stream: CommonTokenStream = None, source_class=None, method_name: str = None):
+        """
 
+
+        """
         if method_name is None:
             self.method_name = ""
         else:
@@ -61,8 +87,6 @@ class MakeMethodNonFinalRefactoringListener(JavaParserLabeledListener):
                         to_idx=grand_parent_ctx.modifier(i).stop.tokenIndex,
                         text=''
                     )
-
-
 
 
 if __name__ == '__main__':

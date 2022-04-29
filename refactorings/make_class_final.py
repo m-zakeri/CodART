@@ -1,9 +1,13 @@
 """
 
+## Introduction
+
+Make Class Final refactoring operation
+
 """
 
-__version__ = '0.1.0'
-__author__ = 'Morteza'
+__version__ = '0.1.1'
+__author__ = 'Morteza Zakeri'
 
 try:
     import understand as und
@@ -20,11 +24,17 @@ from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 class MakeFinalClassRefactoringListener(JavaParserLabeledListener):
     """
-    To implement extract class refactoring based on its actors.
-    Creates a new class and move fields and methods from the old class to the new one
+
+    To implement Make Class Final refactoring based on its actors.
+
+
     """
 
     def __init__(self, common_token_stream: CommonTokenStream = None, class_name: str = None):
+        """
+
+
+        """
 
         if common_token_stream is None:
             raise ValueError('common_token_stream is None')

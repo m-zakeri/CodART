@@ -1,9 +1,25 @@
 """
+
+## Introduction
+
 Make static field non-static refactoring operation
+
+
+## Pre and post-conditions
+
+### Pre-conditions:
+
+Todo: Add pre-conditions
+
+### Post-conditions:
+
+Todo: Add post-conditions
+
+
 """
 
-__author__ = "Morteza Zakeri"
 __version__ = '0.2.0'
+__author__ = "Morteza Zakeri"
 
 import os
 
@@ -22,10 +38,16 @@ from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 class MakeFieldNonStaticRefactoringListener(JavaParserLabeledListener):
     """
+
     To implement Make static field non-static refactoring operation based on its actors.
+
     """
 
     def __init__(self, common_token_stream: CommonTokenStream = None, source_class=None, field_name: str = None):
+        """
+
+
+        """
 
         if field_name is None:
             self.field_name = ""
@@ -74,6 +96,12 @@ class MakeFieldNonStaticRefactoringListener(JavaParserLabeledListener):
 
 
 def main(udb_path, source_class, field_name, *args, **kwargs):
+    """
+
+    Main API for make field non-static
+
+    """
+
     main_file = None
     db = und.open(udb_path)
     classes = db.ents("Class")

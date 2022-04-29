@@ -1,14 +1,28 @@
 """
-The scripts implements different refactoring operations
+## Introduction
+
+The module implements make method static refactoring operation
+
+## Pre and post-conditions
+
+### Pre-conditions:
+
+Todo: Add pre-conditions
+
+### Post-conditions:
+
+Todo: Add post-conditions
+
 
 """
+
 __version__ = '0.1.0'
-__author__ = 'Morteza'
+__author__ = 'Morteza Zakeri'
 
 import os
 
 try:
-    import understand as understand
+    import understand as und
 except ImportError as e:
     print(e)
 
@@ -22,13 +36,18 @@ from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 class MakeMethodStaticRefactoringListener(JavaParserLabeledListener):
     """
+
     To implement make method static refactoring based on its actors.
-    Creates a new class and move fields and methods from the old class to the new one
+
     """
 
     def __init__(
             self, common_token_stream: CommonTokenStream = None,
             target_class: str = None, target_methods: list = None):
+        """
+
+
+        """
 
         if common_token_stream is None:
             raise ValueError('common_token_stream is None')
@@ -104,8 +123,13 @@ class MakeMethodStaticRefactoringListener(JavaParserLabeledListener):
 
 
 def main(udb_path, target_class, target_methods):
+    """
+
+
+    """
+
     main_file = None
-    db = understand.open(udb_path)
+    db = und.open(udb_path)
     classes = db.ents("Class")
     for cls in classes:
         if cls.simplename() == target_class:
@@ -137,6 +161,7 @@ def main(udb_path, target_class, target_methods):
     return True
 
 
+# Tests
 if __name__ == '__main__':
     udb_path_ = "/home/ali/Desktop/code/TestProject/TestProject.udb"
     target_class_ = "Website"

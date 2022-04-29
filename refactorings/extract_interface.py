@@ -1,21 +1,24 @@
 """
+
 ## Introduction
 
 When multiple clients are using the same part of a class interface, or part of the interface in two classes is the same;
 Extract Interface Refactoring moves this identical portion to its own interface.
 
-## Pre and Post Conditions
+## Pre and post-conditions
 
-### Pre Conditions:
+### Pre-conditions:
+
 1. precondition is whether the package name, all the class names and method names in
 those classes exist.
 
 2. The parameter types and return types of each method should be the same across the
 classes.
 
-### Post Conditions:
+### Post-conditions:
 
 No specific Post Condition
+
 """
 
 __version__ = '0.1.1'
@@ -27,6 +30,14 @@ from sbse import config
 
 
 class ExtractInterfaceRefactoring:
+    """
+    The class that does the process of extract interface refactoring.
+
+    Splits the identical,reused portion of the interface, creates a new interface,
+    and moves the split portion to the new interface.
+
+    """
+
     def __init__(
             self, source_filenames: list,
             package_name: str,
@@ -36,29 +47,29 @@ class ExtractInterfaceRefactoring:
             interface_filename: str,
             filename_mapping=lambda x: (x[:-5] if x.endswith(".java") else x) + ".java"):
         """
-        The main function that does the process of extract interface refactoring.
-        Splits the identical,reused portion of the interface, creates a new interface,
-        and moves the split portion to the new interface.
 
-                Args:
-                      source_filenames (list): A list of file names to be processed
+        Args:
 
-                      package_name (str): The name of the package in which the refactoring has
-                      to be done (contains the classes)
+            source_filenames (list): A list of file names to be processed
 
-                      class_names (str): The classes which are going to implement the new interface
+            package_name (str): The name of the package in which the refactoring has to be done (contains the classes)
 
-                      method_keys (str): The methods which are going to be included in the interface
+            class_names (str): The classes which are going to implement the new interface
 
-                      filename_mapping (str): Mapping the file's name to the correct format so that it can be processed
+            method_keys (str): The methods which are going to be included in the interface
 
-                      interface_name (str): The new interface name
+            filename_mapping (str): Mapping the file's name to the correct format so that it can be processed
 
-                      interface_filename (str): The new interface file name
+            interface_name (str): The new interface name
 
-                Returns:
-                    No returns
-            """
+            interface_filename (str): The new interface file name
+
+        Returns:
+
+            object (ExtractInterfaceRefactoring): An instance of ExtractInterfaceRefactoring class
+
+        """
+
         self.source_filenames = source_filenames
         self.package_name = package_name
         self.class_names = class_names
@@ -70,7 +81,7 @@ class ExtractInterfaceRefactoring:
     def do_refactor(self):
         program = symbol_table.get_program(self.source_filenames, print_status=True)
         if self.package_name not in program.packages or any(
-            class_name not in program.packages[self.package_name].classes for class_name in self.class_names) or \
+                class_name not in program.packages[self.package_name].classes for class_name in self.class_names) or \
                 any(method_key not in program.packages[self.package_name].classes[class_name].methods
                     for class_name in self.class_names for method_key in self.method_keys):
             return False
@@ -236,7 +247,30 @@ class ExtractInterfaceRefactoring:
         return True
 
 
-def test():
+def main(source_filenames, package_name, class_names, method_keys, interface_name, interface_filename, **kwargs):
+    """
+
+    The main API for extract interface refactoring
+
+    """
+
+    extract_interface_object = ExtractInterfaceRefactoring(
+        source_filenames=source_filenames,
+        package_name=package_name,
+        class_names=class_names,
+        method_keys=method_keys,
+        interface_name=interface_name,
+        interface_filename=interface_filename,
+    )
+
+    res = extract_interface_object.do_refactor()
+    if not res:
+        config.logger.error("Cannot perform extract interface refactoring.")
+    return res
+
+
+# Tests
+def test1():
     print("Testing extract_interface...")
     filenames = [
         "../benchmark_projects/tests/extract_interface/A.java",
@@ -259,16 +293,9 @@ def test():
             print("A, B, " + third_class + ": Cannot refactor.")
 
 
-def main():
-    """
-    target_files = [
-        "tests/apache-ant/main/org/apache/tools/ant/input/InputRequest.java",
-        "tests/apache-ant/main/org/apache/tools/ant/input/MultipleChoiceInputRequest.java"
-    ]
-    """
+def test2():
     ant_dir = "/home/ali/Desktop/code/TestProject/"
-
-    extract_interface_object = ExtractInterfaceRefactoring(
+    res = main(
         source_filenames=symbol_table.get_filenames_in_dir(ant_dir),
         package_name="test_package",
         class_names=["AppChild1", "AppChild2"],
@@ -277,10 +304,9 @@ def main():
         interface_filename="/home/ali/Desktop/code/TestProject/src/test_package/ExtractedInterface.java",
         # lambda x: "tests/extract_interface_ant/" + x[len(ant_dir):]
     )
-
-    res = extract_interface_object.do_refactor()
-    if not res:
-        config.logger.error("Cannot perform extract interface refactoring.")
-    return res
+    print(res)
 
 
+if __name__ == '__main__':
+    test1()
+    # test2()

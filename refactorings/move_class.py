@@ -1,28 +1,53 @@
 """
- Move class refactoring
+## Introduction
+
+The module implements Move Class refactoring operation
+
+## Pre and post-conditions
+
+### Pre-conditions:
+
+Todo: Add pre-conditions
+
+### Post-conditions:
+
+Todo: Add post-conditions
+
 """
 
+__version__ = '0.1.0'
+__author__ = 'Morteza Zakeri'
+
 import os
-
-from antlr4.TokenStreamRewriter import TokenStreamRewriter
-
-import sbse.config
-from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
-from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
-from codart.symbol_table import parse_and_walk
 
 try:
     import understand as und
 except ImportError as e:
     print(e)
 
+from antlr4.TokenStreamRewriter import TokenStreamRewriter
+
+from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
+from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
+from codart.symbol_table import parse_and_walk
+import sbse.config
 from sbse.config import logger
 
 ROOT_PACKAGE = "(Unnamed_Package)"
 
 
 class UpdateImportsListener(JavaParserLabeledListener):
+    """
+
+
+    """
+
     def __init__(self, rewriter: TokenStreamRewriter, source_package: str, target_package: str, class_name: str):
+        """
+
+
+        """
+
         self.rewriter = rewriter
         self.source_package = source_package
         self.target_package = target_package
@@ -71,7 +96,17 @@ class UpdateImportsListener(JavaParserLabeledListener):
 
 
 class MoveClassAPI:
+    """
+
+
+    """
+
     def __init__(self, udb_path: str, source_package: str, target_package: str, class_name: str):
+        """
+
+
+        """
+
         self.udb_path = udb_path
         self.source_package = source_package
         self.target_package = target_package
@@ -212,14 +247,20 @@ class MoveClassAPI:
 
 
 def main(udb_path: str, source_package: str, target_package: str, class_name: str, *args, **kwargs):
+    """
+
+    The main API for Move Class refactoring
+
+    """
     move_class = MoveClassAPI(udb_path, source_package, target_package, class_name)
     res = move_class.do_refactor()
     return res
 
 
+# Tests
 if __name__ == '__main__':
     main(
-        udb_path="D:\\Dev\\JavaSample\\JavaSample\\JavaSample.und",
+        udb_path="D:/Dev/JavaSample/JavaSample/JavaSample.und",
         class_name="Sample",
         source_package="source_package",
         target_package="target_package",  # "(Unnamed_Package)"

@@ -1,3 +1,43 @@
+"""
+
+## Introduction
+
+    An Extraction method refactoring class for using compiler listeners
+
+    Description about the code:
+    - statements are each line of code showing an act for example a = 5; is a statement.
+
+    - exact each method of each class.
+
+
+## Pre and post-conditions
+
+### Pre-conditions:
+
+No specific pre-condition
+
+### Post-conditions:
+
+No specific Post-condition
+
+
+## Conf object help
+
+   - Lines are calculated from beginning the beginning of file starting from 1 .
+
+
+## limitations
+
+ - Extracted lines must be a part of a method or a class constructor any other format simply would not work.
+ (though we don't know java even supports any other format)
+
+
+"""
+
+__version__ = "0.1.0"
+__author__ = "Morteza Zakeri"
+
+
 import json
 import logging
 
@@ -11,24 +51,7 @@ from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 # Config logging
 logger = logging.getLogger()
 
-"""
-    An Extraction method refactoring class for using compiler listeners 
-    Authors: Mohammad Sajad Naghizadeh, Sadegh Jafari, Sina Ziaee, Mohammad reza babaee
 
-    Description about the code:
-    - statements are each line of code showing an act for example a = 5; is an statement.
-    - exact each method of each class.
-"""
-
-"""
-    Conf object help:
-        -- lines are calculated from beginning the beginning of file starting from 1 .
-"""
-
-"""
-    limitations : 
-        -- extracted lines must be a part of a method or a class constructor any other format simply would not work.(though we don't know java even supports any other format)
-"""
 
 
 def is_equivalent(a, b):
@@ -37,14 +60,24 @@ def is_equivalent(a, b):
     return False
 
 
-"""
-    Extract method factoring class extending javaParserLabeledListener
-"""
-
-
 class ExtractMethodRefactoring(JavaParserLabeledListener):
+    """
+
+    Extract method factoring class extending javaParserLabeledListener
+
+    """
 
     def __init__(self, lines: list):
+        """
+        Arges:
+
+            Lines (list<int>): A list of statements line numbers to be extracted form the method body.
+
+        Returns:
+
+              object (ExtractMethodRefactoring): An instance of ExtractMethodRefactoring
+
+        """
 
         # checks Target method and lines to be valid
         if lines is None or len(lines) == 0:
@@ -451,12 +484,13 @@ def extract_method(conf):
     file2.close()
 
 
-"""
-    driver method
-"""
-
-
 def main(file_path, lines: dict):
+    """
+
+       The main API for Extract Method refactoring operation
+
+    """
+
     print("Started Extract Method")
     _conf = {
         'target_file': file_path,
@@ -469,12 +503,13 @@ def main(file_path, lines: dict):
     print("Finished Extract Method")
 
 
+# Tests
 if __name__ == "__main__":
     index = 0
-    print(len("D:\\Final Project\\IdeaProjects\\"))
-    json_file = json.load(open('json-extract-method.json', 'r'))
-    file_path = json_file[index]["file_path"][30:]
-    lines = json_file[index]["lines"]
-    print(file_path)
-    print(lines)
-    main(file_path, lines)
+    print(len("D:/Final Project/IdeaProjects/"))
+    json_file_ = json.load(open('json-extract-method.json', 'r'))
+    file_path_ = json_file_[index]["file_path"][30:]
+    lines_ = json_file_[index]["lines"]
+    print(file_path_)
+    print(lines_)
+    main(file_path_, lines_)

@@ -1,7 +1,21 @@
 """
-Push-down method
+
+## Introduction
+
+The module implements push-down method refactoring
+
+
+### Pre-conditions:
+
+Todo: Add pre-conditions
+
+### Post-conditions:
+
+Todo: Add post-conditions
+
 """
 
+__version__ = '0.1.1'
 __author__ = "Morteza Zakeri"
 
 try:
@@ -19,7 +33,16 @@ from sbse.config import logger
 
 
 class PushDownMethodRefactoringListener(JavaParserLabeledListener):
+    """
+
+
+    """
+
     def __init__(self, common_token_stream: CommonTokenStream, source_class: str, source_method_text: str):
+        """
+
+        """
+
         self.source_method_text = source_method_text
         self.source_class = source_class
         self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
@@ -41,7 +64,16 @@ class PushDownMethodRefactoringListener(JavaParserLabeledListener):
 
 
 class DeleteSourceListener(JavaParserLabeledListener):
+    """
+
+
+    """
+
     def __init__(self, common_token_stream: CommonTokenStream, source_method: str):
+        """
+
+        """
+
         self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
         self.source_method = source_method
 
@@ -55,8 +87,17 @@ class DeleteSourceListener(JavaParserLabeledListener):
 
 
 class PropagationListener(JavaParserLabeledListener):
+    """
+
+    """
+
     def __init__(self, common_token_stream: CommonTokenStream, source_class: str, child_class: str, class_name: str,
                  method_name: str, ref_line: int, target_package: str):
+        """
+
+
+        """
+
         self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
         self.source_class = source_class
         self.child_class = child_class
@@ -100,6 +141,11 @@ class PropagationListener(JavaParserLabeledListener):
 
 
 class PropagationNonStaticListener(PropagationListener):
+    """
+
+
+    """
+
     def exitCreatedName0(self, ctx: JavaParserLabeled.CreatedName0Context):
         if ctx.IDENTIFIER(0).getText() == self.source_class and self.is_safe:
             self.detected_class = True
@@ -146,7 +192,17 @@ class PropagationNonStaticListener(PropagationListener):
 
 
 class PropagationStaticListener(PropagationListener):
+    """
+
+
+    """
+
     def __init__(self, *args, **kwargs):
+        """
+
+
+        """
+
         super(PropagationStaticListener, self).__init__(*args, **kwargs)
         self.detected_method = False
 
@@ -173,6 +229,11 @@ class PropagationStaticListener(PropagationListener):
 
 
 def main(udb_path, source_package, source_class, method_name, target_classes: list, *args, **kwargs):
+    """
+
+    The main API for the push-down method refactoring operation
+
+    """
     target_package = source_package
     source_method = method_name
 
@@ -301,5 +362,6 @@ def main(udb_path, source_package, source_class, method_name, target_classes: li
     return True
 
 
+# Tests
 if __name__ == '__main__':
-    main("D:\Dev\JavaSample\JavaSample1.udb", "your_package", "Unit", "getFuel", ["Tank", ])
+    main("D:/Dev/JavaSample/JavaSample1.udb", "your_package", "Unit", "getFuel", ["Tank", ])

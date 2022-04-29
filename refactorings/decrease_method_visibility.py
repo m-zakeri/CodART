@@ -1,5 +1,11 @@
 """
+
+## Introduction
+
 Decrease method visibility refactoring
+
+Decrease the visibility of a method from public to protected, protected to package or package to private.
+
 """
 
 __author__ = "Morteza Zakeri"
@@ -19,7 +25,30 @@ from sbse.config import logger
 
 
 class DecreaseMethodVisibilityListener(JavaParserLabeledListener):
+    """
+
+     To implement ِDecrease Method Visibility refactoring based on its actors.
+
+     Detects the required method and decreases/changes its visibility status.
+
+    """
     def __init__(self, source_class, source_method, rewriter: TokenStreamRewriter):
+        """
+
+        Args:
+
+            source_class (str): Name of the class in which the refactoring has to be done
+
+            source_method (str): Name of the field whose visibility status has to be changed
+
+            rewriter (CommonTokenStream): An instance of TokenStreamRewriter
+
+
+        Returns:
+
+            object (DecreaseMethodVisibilityListener): An instance of DecreaseMethodVisibilityListener
+
+        """
         self.source_class = source_class
         self.source_method = source_method
         self.in_class = False
@@ -73,6 +102,11 @@ class DecreaseMethodVisibilityListener(JavaParserLabeledListener):
 
 
 def main(udb_path, source_package, source_class, source_method, *args, **kwargs):
+    """
+
+
+    """
+
     db = und.open(udb_path)
     method_ent = db.lookup(f"{source_package}.{source_class}.{source_method}", "Method")
 
@@ -117,6 +151,7 @@ def main(udb_path, source_package, source_class, source_method, *args, **kwargs)
     return True
 
 
+# Tests
 if __name__ == '__main__':
     main(
         udb_path="D:\Dev\JavaSample\JavaSample\JavaSample.und",

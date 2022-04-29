@@ -1,11 +1,26 @@
 """
-Pull-up method refactoring
+
+## Introduction
+
+The module implements pull-up method refactoring operation.
+
+
+### Pre-conditions:
+
+Todo: Add pre-conditions
+
+### Post-conditions:
+
+Todo: Add post-conditions
+
 """
 
 __version__ = '0.2.0'
 __author__ = 'Morteza Zakeri'
 
 import os.path
+
+from codart.symbol_table import Program
 
 try:
     import understand as und
@@ -18,7 +33,6 @@ from antlr4.TokenStreamRewriter import TokenStreamRewriter
 from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
-
 from sbse.config import logger
 
 
@@ -28,11 +42,17 @@ class CheckOverrideListener(JavaParserLabeledListener):
 
 class PullUpMethodRefactoringListener(JavaParserLabeledListener):
     """
+
     To implement pull-up method refactoring based on its actors.
+
     """
 
     def __init__(self, common_token_stream: CommonTokenStream = None, destination_class: str = None,
                  children_class: list = None, moved_methods=None, method_text: str = None):
+        """
+
+
+        """
 
         if method_text is None:
             self.mothod_text = []
@@ -181,7 +201,50 @@ class PropagationPullUpMethodRefactoringListener(JavaParserLabeledListener):
             self.is_class = False
 
 
+def get_removed_methods(program: Program, packagename: str, superclassname: str, methodkey: str, classname: str):
+    extendedclass = []
+    removemethods = {}
+
+    met = program.packages[packagename].classes[classname].methods[methodkey]
+    body_text_method = met.body_text
+    parammethod = met.parameters
+    returntypeofmethod = met.returntype
+    nameofmethod = met.name
+    # print(program)
+    for package_name in program.packages:
+        package = program.packages[package_name]
+        # print(package)
+        for class_name in package.classes:
+            _class = package.classes[class_name]
+
+            if _class.superclass_name == superclassname:
+                extendedclass.append(_class)
+
+    i = 0
+    for d in extendedclass:
+        class_ = extendedclass[i]
+        i = i + 1
+        for mk in class_.methods:
+            m_ = class_.methods[mk]
+            m = mk[:mk.find('(')]
+            if (
+                    m_.body_text == body_text_method and m_.returntype == returntypeofmethod and m_.parameters == parammethod and m_.name == nameofmethod and m_.is_constructor == False):
+                if class_.name not in removemethods:
+                    removemethods[class_.name] = [methodkey]
+                else:
+
+                    removemethods[class_.name].append(methodkey)
+    # removemethods[classname]=[nameofmethod]
+    removemethods[classname] = [methodkey]
+    return removemethods
+
+
 def main(udb_path: str, children_classes: list, method_name: str, *args, **kwargs):
+    """
+
+
+    """
+
     if len(children_classes) <= 1:
         logger.error("len(children_classes) should be gte 2")
         return False
@@ -287,8 +350,9 @@ def main(udb_path: str, children_classes: list, method_name: str, *args, **kwarg
     return True
 
 
+# Tests
 if __name__ == '__main__':
-    udb_path_ = "D:\\Final Project\\IdeaProjects\\JSON20201115\\JSON20201115.und"
+    udb_path_ = "D:/IdeaProjects/JSON20201115/JSON20201115.und"
     children_class_ = ['XMLTokener', 'HTTPTokener']
     moved_method_ = "nextToken"
     main(
@@ -296,3 +360,5 @@ if __name__ == '__main__':
         children_classes=children_class_,
         method_name=moved_method_
     )
+
+
