@@ -36,18 +36,36 @@ nav:
     - Proposals:
         - Core refactoring development: proposals/core_refactorings_development.md
         - Core code smell development: proposals/core_code_smell_development.md
-        - Core serach-based development: proposals/core_search_based_development.md
+        - Core search-based development: proposals/core_search_based_development.md
         - Core refactoring to patterns development: proposals/core_refactoring_to_design_patterns_development.md
     - Refactorings details:
         - Decrease field visibility: refactorings/decrease_field_visibility.md
-        - Increase field visibility: refactorings/increase_field_visibility.md
+        - Decrease method visibility: refactorings/decrease_method_visibility.md
+        - Encapsulate field: refactorings/encapsulate_field.md
+        - Extract class: refactorings/extract_class.md
         - Extract interface: refactorings/extract_interface.md
+        - Extract interface 2: refactorings/extract_interface2.md
+        - Extract method: refactorings/extract_method.md
+        - Extract subclass: refactorings/extract_subclass.md
+        - Increase field visibility: refactorings/increase_field_visibility.md
+        - Increase method visibility: refactorings/increase_method_visibility.md
+        - Inline class: refactorings/inline_class.md
         - Make field final: refactorings/make_field_final.md
         - Make field non-final: refactorings/make_field_non_final.md
+        - Make field non-static: refactorings/make_field_non_static.md
+        - Make field static: refactorings/make_field_static.md
+        - Make method final: refactorings/make_method_final.md
+        - Make method non-final: refactorings/make_method_non_final.md
+        - Make method non-static: refactorings/make_method_non_static.md
+        - Make method static: refactorings/make_method_static.md
+        - Move class: refactorings/move_class.md
+        - Mode field: refactorings/move_field.md
+        - Move method: refactorings/move_method.md
+        - Pull-up constructor: refactorings/pull_up_constructor.md
         - Pull-up field: refactorings/pull_up_field.md
-        - Push-down field: refactorings/push_down_field.md
         - Pull-up method: refactorings/pull_up_method.md
-        - Rename method: refactorings/rename_method.md
+        - Push-down field: refactorings/push_down_field.md
+        - Push-down method: refactorings/push_down_method.md
     - Code smells details:
         - Large class: code_smells/large_class.md
         - Long method: code_smells/long_method.md
