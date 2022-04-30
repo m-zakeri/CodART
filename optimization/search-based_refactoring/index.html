@@ -20,7 +20,7 @@
     
     
       
-        <title>Search-based refactoring module - CodART Docs (v0.1.2dev)</title>
+        <title>Search-based refactoring - CodART Docs (v0.1.2dev)</title>
       
     
     
@@ -103,7 +103,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Search-based refactoring module
+              Search-based refactoring
             
           </span>
         </div>
@@ -791,12 +791,14 @@
 
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8" type="checkbox" id="__nav_8" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8" type="checkbox" id="__nav_8" checked>
       
       <label class="md-nav__link" for="__nav_8">
         Optimization
@@ -812,11 +814,361 @@
             
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../search_based_refactoring.md" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Search-based refactoring
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         Search-based refactoring
       </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2" class="md-nav__link">
+    sbse.search_based_refactoring2
+  </a>
+  
+    <nav class="md-nav" aria-label="sbse.search_based_refactoring2">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2--module-description" class="md-nav__link">
+    Module description
+  </a>
+  
+    <nav class="md-nav" aria-label="Module description">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2--classes" class="md-nav__link">
+    Classes
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2--references" class="md-nav__link">
+    References
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2--changelog" class="md-nav__link">
+    Changelog
+  </a>
+  
+    <nav class="md-nav" aria-label="Changelog">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2--version-023" class="md-nav__link">
+    version 0.2.3
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2--version-022" class="md-nav__link">
+    version 0.2.2
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2--version-021" class="md-nav__link">
+    version 0.2.1
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2--version-020" class="md-nav__link">
+    version 0.2.0
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2.AdaptiveSinglePointCrossover" class="md-nav__link">
+    AdaptiveSinglePointCrossover
+  </a>
+  
+    <nav class="md-nav" aria-label="AdaptiveSinglePointCrossover">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2.AdaptiveSinglePointCrossover.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2.BitStringMutation" class="md-nav__link">
+    BitStringMutation
+  </a>
+  
+    <nav class="md-nav" aria-label="BitStringMutation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2.BitStringMutation.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2.BitStringMutation2" class="md-nav__link">
+    BitStringMutation2
+  </a>
+  
+    <nav class="md-nav" aria-label="BitStringMutation2">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2.BitStringMutation2.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2.Gene" class="md-nav__link">
+    Gene
+  </a>
+  
+    <nav class="md-nav" aria-label="Gene">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2.Gene.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2.Individual" class="md-nav__link">
+    Individual
+  </a>
+  
+    <nav class="md-nav" aria-label="Individual">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2.Individual.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2.Individual.append" class="md-nav__link">
+    append()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2.Individual.insert" class="md-nav__link">
+    insert()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2.LogCallback" class="md-nav__link">
+    LogCallback
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2.PopulationInitialization" class="md-nav__link">
+    PopulationInitialization
+  </a>
+  
+    <nav class="md-nav" aria-label="PopulationInitialization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2.PopulationInitialization.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2.ProblemManyObjective" class="md-nav__link">
+    ProblemManyObjective
+  </a>
+  
+    <nav class="md-nav" aria-label="ProblemManyObjective">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2.ProblemManyObjective.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2.ProblemMultiObjective" class="md-nav__link">
+    ProblemMultiObjective
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2.ProblemSingleObjective" class="md-nav__link">
+    ProblemSingleObjective
+  </a>
+  
+    <nav class="md-nav" aria-label="ProblemSingleObjective">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2.ProblemSingleObjective.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2.RefactoringOperation" class="md-nav__link">
+    RefactoringOperation
+  </a>
+  
+    <nav class="md-nav" aria-label="RefactoringOperation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2.RefactoringOperation.do_refactoring" class="md-nav__link">
+    do_refactoring()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2.binary_tournament" class="md-nav__link">
+    binary_tournament()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2.is_equal_2_refactorings_list" class="md-nav__link">
+    is_equal_2_refactorings_list()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2.log_project_info" class="md-nav__link">
+    log_project_info()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sbse.search_based_refactoring2.main" class="md-nav__link">
+    main()
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -2953,6 +3305,41 @@ Only one instance is held to speed up the search algorithm</p>
       
         
 <footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        
+        <a href="../../code_smells/feature_envy/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Feature envy" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Feature envy
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../../tutorials/antlr_basics/" class="md-footer__link md-footer__link--next" aria-label="Next: ANTLR basics" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              ANTLR basics
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
