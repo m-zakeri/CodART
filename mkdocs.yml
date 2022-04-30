@@ -71,7 +71,7 @@ nav:
         - Long method: code_smells/long_method.md
         - Feature envy: code_smells/feature_envy.md
     - Optimization:
-        - Search-based refactoring: optimization/search_based_refactoring.md
+        - Search-based refactoring: optimization/search-based_refactoring.md
     - Tutorials:
         - ANTLR basics: tutorials/antlr_basics.md
         - ANTLR advanced: tutorials/antlr_advanced.md
