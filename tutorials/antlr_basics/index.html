@@ -799,11 +799,53 @@
         <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8" type="checkbox" id="__nav_8" >
       
       <label class="md-nav__link" for="__nav_8">
+        Metrics
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Metrics" data-md-level="1">
+        <label class="md-nav__title" for="__nav_8">
+          <span class="md-nav__icon md-icon"></span>
+          Metrics
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../metrics/testability/" class="md-nav__link">
+        Testability prediction
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_9" type="checkbox" id="__nav_9" >
+      
+      <label class="md-nav__link" for="__nav_9">
         Optimization
         <span class="md-nav__icon md-icon"></span>
       </label>
       <nav class="md-nav" aria-label="Optimization" data-md-level="1">
-        <label class="md-nav__title" for="__nav_8">
+        <label class="md-nav__title" for="__nav_9">
           <span class="md-nav__icon md-icon"></span>
           Optimization
         </label>
@@ -840,14 +882,14 @@
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_9" type="checkbox" id="__nav_9" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_10" type="checkbox" id="__nav_10" checked>
       
-      <label class="md-nav__link" for="__nav_9">
+      <label class="md-nav__link" for="__nav_10">
         Tutorials
         <span class="md-nav__icon md-icon"></span>
       </label>
       <nav class="md-nav" aria-label="Tutorials" data-md-level="1">
-        <label class="md-nav__title" for="__nav_9">
+        <label class="md-nav__title" for="__nav_10">
           <span class="md-nav__icon md-icon"></span>
           Tutorials
         </label>
@@ -934,6 +976,13 @@
         <li class="md-nav__item">
   <a href="#conclusion-and-remarks" class="md-nav__link">
     Conclusion and remarks
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    References
   </a>
   
 </li>
@@ -1121,6 +1170,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    References
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1142,7 +1198,7 @@
 <p>By: Morteza Zakeri</p>
 <p>Last update: April 30, 2022</p>
 <h2 id="introduction">Introduction</h2>
-<p>The ANTLR tool generates a top-down parser from the grammar rules defined with the ANTLR meta-grammar (Parr and Fisher 2011). The initial version of ANTLR generated the target parser source code in Java. In the current version (version 4), the parser source code can be generated in a wide range of programming languages listed on the <a href="https://www.antlr.org">ANTLR official website</a> (Parr). 
+<p>The ANTLR tool generates a top-down parser from the grammar rules defined with the ANTLR meta-grammar (Parr and Fisher 2011). The initial version of ANTLR generated the target parser source code in Java. In the current version (version 4), the parser source code can be generated in a wide range of programming languages listed on the <a href="https://www.antlr.org">ANTLR official website</a> (Parr 2022a). 
 For simplicity, we generate the parser in Python 3, which provides us to run the tool on every platform having Python 3 installed on it. 
 Another reason to use Python is that we can integrate the developed program easily with other libraries available in Python, such as machine learning and optimization libraries. 
 Finally, I found that there is no comprehensive tutorial on using ANTLR with the Python backend. </p>
@@ -1179,7 +1235,7 @@ The parse tree structure in and listener mechanism are discussed in the next sec
 <p><img alt="Test the grammar rule in the ANTLR PyCharm plugin" src="../../figs/antlr_basics/example_of_antlr-parse-tree-in-antlr-preview.png" /></p>
 <p><em>Figure 4. Test the grammar rule in the ANTLR PyCharm plugin.</em></p>
 <p>It should be mentioned that the ANTLR Preview window is based on a grammar interpreter, not on the actual generated parser described in the previous section. It means that grammar attributes such as actions and predicates will not be evaluated during live preview because the interpreter is language agnostic. For the same reasons, if the generated parser and/or lexer classes extend a custom implementation of the base parser/lexer classes, the custom code will not be run during the live preview. </p>
-<p>In addition to the parse tree visualization, the ANTLR plugin provides facilities such as profiling, code generation, etc., described in <a href="https://github.com/antlr/intellij-plugin-v4">here</a>. For example, the profile tab shows the execution time of each rule in the parser for a given input string.</p>
+<p>In addition to the parse tree visualization, the ANTLR plugin provides facilities such as profiling, code generation, etc., described in <a href="https://github.com/antlr/intellij-plugin-v4">here</a> (Parr 2022b). For example, the profile tab shows the execution time of each rule in the parser for a given input string.</p>
 <p>I want to emphasize that visualizing the parse tree with the ANTLR plugin is really helpful when developing code and fixing bugs described in the next section of this tutorial.</p>
 <h2 id="traversing-the-parse-tree-programmatically">Traversing the parse tree programmatically</h2>
 <p>ANTLR is not a simple parser generator. It provides a depth-first parse tree visiting and a callback mechanism called listener to implement the required program analysis or transformation passes. The depth-first search is performed by instantiating an object from the ANTLR <code>ParseTreeWalker</code> class and calling the walk method, which takes an instance of <code>ParseTree</code> as an input argument and traverses it.</p>
@@ -1263,6 +1319,10 @@ def main(args):
 <h2 id="conclusion-and-remarks">Conclusion and remarks</h2>
 <p>In this tutorial, we described the basic concepts regarding using the ANTLR tool to generate and walk phase three and implement custom program analysis applications with the help of the ANTLR listener mechanism. The most important point is that we used the real-world programming languages grammars to show the parsing and analyzing process. The discussed topics form the underlying concepts of our approach for automated refactoring used in CodART.
 Check out the <a href="../antlr_advanced/">ANTLR advanced tutorial</a> to find out how we can use ANTLR for reliable and efficient program transformation.</p>
+<h2 id="references">References</h2>
+<p>Parr T ANTLR (ANother Tool for Language Recognition). https://www.antlr.org. Accessed 10 Jan 2022a</p>
+<p>Parr T IntelliJ Idea Plugin for ANTLR v4. https://github.com/antlr/intellij-plugin-v4. Accessed 10 Jan 2022b</p>
+<p>Parr T, Fisher K (2011) LL(*): the foundation of the ANTLR parser generator. Proc 32nd ACM SIGPLAN Conf Program Lang Des Implement 425–436. https://doi.org/http://doi.acm.org/10.1145/1993498.1993548</p>
                 
               
               
