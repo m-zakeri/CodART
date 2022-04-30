@@ -1,5 +1,7 @@
 """
 
+## Introduction
+
 This module contains light-weight version of testability prediction script (with 68 metrics)
 to be used in refactoring process in addition to QMOOD metrics.
 
@@ -11,7 +13,7 @@ to be used in refactoring process in addition to QMOOD metrics.
 
 
 ## Reference
-[1] ADAFEST2 paper
+[1] ADAFEST paper
 [2] TsDD paper
 
 
@@ -38,7 +40,9 @@ model5 = joblib.load(os.path.join(os.path.dirname(__file__), 'sklearn_models7/VR
 
 class TestabilityMetrics:
     """
+
     Compute all required metrics for computing Coverageability and testability.
+
     """
 
     @classmethod
@@ -91,7 +95,11 @@ class TestabilityMetrics:
 
     @classmethod
     def compute_java_package_metrics(cls, db=None, entity=None):
-        # Find package: strategy 2: Dominated strategy
+        """
+        Find package: strategy 2: Dominated strategy
+
+        """
+        #
         class_name = entity.longname()
         class_name_list = class_name.split('.')[:-1]
         package_name = '.'.join(class_name_list)
@@ -111,6 +119,7 @@ class TestabilityMetrics:
                        'CountDeclMethodProtected', 'CountDeclMethodPublic', ]
         package_metrics = package.metric(metric_list)
         classes_and_interfaces_list = package.ents('Contain', 'Java Type ~Unknown ~Unresolved ~Jar ~Library')
+
         # PKNOMNAMM: Package number of not accessor or mutator methods
         pk_accessor_and_mutator_methods_list = list()
         for type_entity in classes_and_interfaces_list:
@@ -129,9 +138,15 @@ class TestabilityMetrics:
     @classmethod
     def compute_java_class_metrics_lexicon(cls, entity=None):
         """
-        :param entity:
-        :return:
+        Args:
+
+            entity (understand.Ent):
+
+        Returns:
+             dict: class-level metrics
+
         """
+
         class_lexicon_metrics_dict = dict()
         tokens_list = list()
         identifiers_list = list()
@@ -220,9 +235,15 @@ class TestabilityMetrics:
         Strategy #2: Take a list of all classes and search for target class
         Which strategy is used for our final setting? I do not know!
 
-        :param db:
-        :param entity:
-        :return:
+        Args:
+            db (understand.Db):
+
+            entity (understand.Ent):
+
+        Returns:
+
+            dict: Class-level metrics
+
         """
 
         method_list = UnderstandUtility.get_method_of_class_java2(db=db, class_name=entity.longname())
@@ -331,14 +352,18 @@ def do(class_entity_long_name, project_db_path):
 # ------------------------------------------------------------------------
 class PreProcess:
     """
+
     Writes all metrics in a csv file and performs preprocessing
+
     """
 
     @classmethod
     def compute_metrics_by_class_list(cls, project_db_path, n_jobs):
         """
 
+
         """
+
         # class_entities = cls.read_project_classes(db=db, classes_names_list=class_list, )
         # print(project_db_path)
         db = und.open(project_db_path)
@@ -364,6 +389,11 @@ class PreProcess:
 
 
 class TestabilityModel:
+    """
+
+    Testability prediction model
+
+    """
     def __init__(self, ):
         self.scaler = scaler1
         self.model = model5
@@ -401,8 +431,11 @@ class TestabilityModel:
 # API
 def main(project_db_path, initial_value=1.0, verbose=False, log_path=None):
     """
+
     testability_prediction module API
+
     """
+
     df = PreProcess().compute_metrics_by_class_list(project_db_path, n_jobs=0)  # n_job must be set to number of CPU cores
     testability_ = TestabilityModel().inference(df_predict_data=df, verbose=verbose, log_path=log_path)
     # print('testability=', testability_)
