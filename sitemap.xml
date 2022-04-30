@@ -51,6 +51,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://m-zakeri.github.io/optimization/search-based_refactoring/</loc>
+         <lastmod>2022-04-30</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://m-zakeri.github.io/proposals/core_code_smell_development/</loc>
          <lastmod>2022-04-30</lastmod>
          <changefreq>daily</changefreq>
