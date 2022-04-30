@@ -1,4 +1,5 @@
 """
+
 ## Module description
 
 This module implements the search-based refactoring with various search strategy
@@ -6,13 +7,17 @@ using pymoo framework.
 
 ### Classes
 
-    Gene, RefactoringOperation: One refactoring with params
-    Individual: A list of RefactoringOperation
-    PureRandomInitialization: Population, list of Individual
+Gene, RefactoringOperation: One refactoring with params
+
+Individual: A list of RefactoringOperation
+
+PureRandomInitialization: Population, list of Individual
 
 
 ## References
+
 [1] https://pymoo.org/customization/custom.html
+
 [2] https://pymoo.org/misc/reference_directions.html
 
 
@@ -38,14 +43,13 @@ using pymoo framework.
     5. _evaluate function in NSGA-III is now works on population instead of an individual
         (population-based versus element-wise).
     6. Other setting for NSGA-III including adding energy-references point instead of Das and Dennis approach.
-===
 
+===
 
 """
 
 __version__ = '0.2.3'
 __author__ = 'Morteza Zakeri'
-
 
 import os
 import random
@@ -88,10 +92,24 @@ POPULATION = []
 
 class Gene:
     """
-    The base class for the Gene in genetic algorithms
+
+    The base class for the Gene in genetic algorithms.
+
     """
 
     def __init__(self, **kwargs):
+        """
+
+        Args:
+
+            name (str): Refactoring operation name
+
+            params (dict): Refactoring operation parameters
+
+            main (function): Refactoring operation main function (API)
+
+        """
+
         self.name = kwargs.get('name')
         self.params = kwargs.get('params')
         self.main = kwargs.get('main')
@@ -105,14 +123,14 @@ class Gene:
 
 class RefactoringOperation(Gene):
     """
-    The class define a data structure (dictionary) to hold a refactoring operation
-    """
 
-    def __init__(self, **kwargs):
-        """
-        Each refactoring operation hold as a dictionary contains the required parameters.
+    The class define a data structure (dictionary) to hold a refactoring operation
+
+    Each refactoring operation hold as a dictionary contains the required parameters.
 
         Example:
+
+            ```
             make_field_static refactoring is marshaled as the following dict:
             params = {
                 'refactoring_name': 'make_field_static'
@@ -120,6 +138,20 @@ class RefactoringOperation(Gene):
                 'source_class': 'name_of_source_class'
                 'field_name': 'name_of_the_field_to_be_static'
             }
+            ```
+
+    """
+
+    def __init__(self, **kwargs):
+        """
+
+        Args:
+
+            name (str): Refactoring operation name
+
+            params (dict): Refactoring operation parameters
+
+            main (function): Refactoring operation main function (API)
 
         """
         super(RefactoringOperation, self).__init__(**kwargs)
@@ -131,7 +163,16 @@ class RefactoringOperation(Gene):
         return self.__str__()
 
     def do_refactoring(self):
-        """ Check preconditions and apply refactoring operation to source code"""
+        """
+
+        Check preconditions and apply refactoring operation to source code
+
+        Returns:
+
+            result (boolean): The result statues of the applied refactoring
+
+        """
+
         logger.info(f"Running {self.name}")
         logger.info(f"Parameters {self.params}")
         try:
@@ -144,13 +185,21 @@ class RefactoringOperation(Gene):
 
 class Individual(List):
     """
+
     The class define a data structure (list) to hold an individual during the search process.
     Each individual (also called, chromosome or solution in the context of genetic programming)
     is an array of refactoring operations where the order of their execution is accorded by
     their positions in the array.
+
     """
 
     def __init__(self):
+        """
+
+        Args:
+
+
+        """
         super(Individual, self).__init__()
         self.refactoring_operations = []
 
@@ -208,13 +257,28 @@ def calc_modularity_objective(path_, arr_):
 # ---------------------- Defines problems ----------------------------
 class ProblemSingleObjective(Problem):
     """
+
         The CodART single-objective optimization work with only one objective, testability:
+
     """
 
-    def __init__(self, n_refactorings_lowerbound=10, n_refactorings_upperbound=50,
+    def __init__(self, n_refactorings_lowerbound=10,
+                 n_refactorings_upperbound=50,
                  evaluate_in_parallel=False,
                  mode='single'  # 'multi'
                  ):
+        """
+
+        Args:
+
+            n_refactorings_lowerbound (int): The lower bound of the refactoring sequences
+
+            n_refactorings_upperbound (int): The upper bound of the refactoring sequences
+
+            mode (str): 'single' or 'multi'
+
+        """
+
         super(ProblemSingleObjective, self).__init__(n_var=1,
                                                      n_obj=1,
                                                      n_constr=0)
@@ -232,11 +296,13 @@ class ProblemSingleObjective(Problem):
         This method iterate over a population, execute the refactoring operations in each individual sequentially,
         and compute quality attributes for the refactored version of the program, as objectives of the search
 
-        params:
-        x (Population): x is a matrix where each row is an individual, and each column a variable.
-            We have one variable of type list (Individual) ==> x.shape = (len(Population), 1)
+        Args:
+
+            x (Population): x is a matrix where each row is an individual, and each column a variable.\
+                We have one variable of type list (Individual) ==> x.shape = (len(Population), 1)
 
         """
+
         objective_values = []
         for k, individual_ in enumerate(x):
             # Stage 0: Git restore
@@ -287,10 +353,15 @@ class ProblemSingleObjective(Problem):
 
 class ProblemMultiObjective(Problem):
     """
+
     The CodART multi-objective optimization work with three objective:
-        Objective 1: Mean value of QMOOD metrics
-        Objective 2: Testability
-        Objective 3: Modularity
+
+    * Objective 1: Mean value of QMOOD metrics
+
+    * Objective 2: Testability
+
+    * Objective 3: Modularity
+
     """
 
     def __init__(self, n_refactorings_lowerbound=10, n_refactorings_upperbound=50, evaluate_in_parallel=False):
@@ -307,12 +378,15 @@ class ProblemMultiObjective(Problem):
                   *args,
                   **kwargs):
         """
+
         This method iterate over a population, execute the refactoring operations in each individual sequentially,
         and compute quality attributes for the refactored version of the program, as objectives of the search
 
-        params:
-        x (Population): x is a matrix where each row is an individual, and each column a variable.
+        Args:
+
+            x (Population): x is a matrix where each row is an individual, and each column a variable. \
             We have one variable of type list (Individual) ==> x.shape = (len(Population), 1)
+
 
         """
         objective_values = []
@@ -361,15 +435,33 @@ class ProblemMultiObjective(Problem):
 
 class ProblemManyObjective(Problem):
     """
+
     The CodART many-objective optimization work with eight objective:
-        Objective 1 to 6: QMOOD metrics
-        Objective 7: Testability
-        Objective 8: Modularity
+
+    * Objective 1 to 6: QMOOD metrics
+
+    * Objective 7: Testability
+
+    * Objective 8: Modularity
+
     """
 
     def __init__(self, n_refactorings_lowerbound=10, n_refactorings_upperbound=50,
                  evaluate_in_parallel=False, verbose_design_metrics=False,
                  ):
+        """
+
+        Args:
+
+            n_refactorings_lowerbound (int): The lower bound of the refactoring sequences
+
+            n_refactorings_upperbound (int): The upper bound of the refactoring sequences
+
+            evaluate_in_parallel (bool): Whether the objectives computed in parallel or not
+
+            verbose_design_metrics (bool): Whether log the design metrics for each refactoring sequences or not
+
+        """
         super(ProblemManyObjective, self).__init__(n_var=1, n_obj=8, n_constr=0, )
         self.n_refactorings_lowerbound = n_refactorings_lowerbound
         self.n_refactorings_upperbound = n_refactorings_upperbound
@@ -378,13 +470,16 @@ class ProblemManyObjective(Problem):
 
     def _evaluate(self, x, out, *args, **kwargs):
         """
+
         This method iterate over a population, execute the refactoring operations in each individual sequentially,
         and compute quality attributes for the refactored version of the program, as objectives of the search.
         By default, elementwise_evaluation is set to False, which implies the _evaluate retrieves a set of solutions.
 
-        params:
-            x (Population): x is a matrix where each row is an individual, and each column a variable.
+        Args:
+
+            x (Population): x is a matrix where each row is an individual, and each column a variable.\
             We have one variable of type list (Individual) ==> x.shape = (len(Population), 1)
+
 
         """
 
@@ -472,18 +567,28 @@ class PopulationInitialization(Sampling):
     existing code smells in the program to be refactored.
     The selected refactoring operations are randomly arranged in each individual.
     Assigning randomly a sequence of refactorings to certain code fragments generates the initial population
+
     """
 
     def __init__(self, initializer: Initialization = None):
+        """
+        Args:
+
+            initializer (Initialization): An  initializer object to be used for generating initial population
+
+        """
         super(PopulationInitialization, self).__init__()
         self._initializer = initializer
 
     def _do(self, problem, n_samples, **kwargs):
         """
         Since the problem having only one variable, we return a matrix with the shape (n,1)
-        Params:
 
-            n_samples (int): the same population size, pop_size
+        Args:
+
+            problem (Problem): An instance of pymoo Problem class to be optimized.
+
+            n_samples (int): The same population size, pop_size.
 
         """
         if os.path.exists(config.INIT_POP_FILE):
@@ -506,6 +611,7 @@ class PopulationInitialization(Sampling):
 
 class AdaptiveSinglePointCrossover(Crossover):
     """
+
     This class implements solution variation, the adaptive one-point or single-point crossover operator.
     The crossover operator combines parents to create offsprings.
     It starts by selecting and splitting at random two parent solutions or individuals.
@@ -513,27 +619,41 @@ class AdaptiveSinglePointCrossover(Crossover):
     the first part of the first parent with the second part of the second parent,
     and vice versa for the second child.
 
-    Note 1: In the pymoo framework, the crossover operator retrieves the input already with predefined matings.
+    * Note 1: In the pymoo framework, the crossover operator retrieves the input already with predefined matings.
     The default parent selection algorithm is TournamentSelection.
 
-    Note 2: It is better to create children that are close to their parents to have a more efficient search process,
+    * Note 2: It is better to create children that are close to their parents to have a more efficient search process,
     a so-called __adaptive crossover__, specifically in many-objective optimization.
     Therefore, the cutting point of the one-point crossover operator are controlled by restricting its position
     to be either belonging to the first tier of the refactoring sequence or belonging to the last tier.
 
-    Params:
-        prob (float): crossover probability
     """
 
     def __init__(self, prob=0.9):
+        """
+
+        Args:
+
+        prob (float): crossover probability
+
+        """
 
         # Define the crossover: number of parents, number of offsprings, and cross-over probability
         super().__init__(n_parents=2, n_offsprings=2, prob=prob)
 
     def _do(self, problem, X, **kwargs):
         """
+
         For population X
+
+        Args:
+
+            problem (Problem): An instance of pymoo Problem class to be optimized.
+
+            X (np.array): Population
+
         """
+
         # The input of has the following shape (n_parents, n_matings, n_var)
         _, n_matings, n_var = X.shape
 
@@ -592,17 +712,27 @@ class AdaptiveSinglePointCrossover(Crossover):
 
 class BitStringMutation(Mutation):
     """
+
     This class implements solution variation, a bit-string mutation operator.
     The bit-string mutation operator that picks probabilistically one or more refactoring operations from its
     or their associated sequence and replaces them by other ones from the initial list of possible refactorings.
 
     Each chromosome dimension would be changed according to the mutation probability.
     For example, for a mutation probability of 0.2, for each dimension, we generate randomly a number x between 0 and 1,
-    if x<0.2 we change the refactoring operation in that dimension, otherwise no changes are taken into account.
+    if `x < mutation_probability` (e.g., 0.2) we change the refactoring operation in that dimension,
+    otherwise no changes are taken into account.
 
     """
 
     def __init__(self, prob=0.2, initializer: Initialization = None):
+        """
+
+        Args:
+
+             prob (float): mutation probability
+
+        """
+
         super().__init__()
         self.mutation_probability = prob
         self._initializer = initializer
@@ -621,11 +751,21 @@ class BitStringMutation(Mutation):
 
 class BitStringMutation2(Mutation):
     """
+
         Select an individual to mutate with mutation probability.
         Only flip one refactoring operation in the selected individual.
+
     """
 
     def __init__(self, prob=0.2, initializer: Initialization = None):
+        """
+
+        Args:
+
+            prob (float): mutation probability
+
+        """
+
         super().__init__()
         self.mutation_probability = prob
         self._initializer = initializer
@@ -646,6 +786,12 @@ class BitStringMutation2(Mutation):
 
 
 class LogCallback(Callback):
+    """
+
+    Logging useful information after each iteration of the search algorithms
+
+    """
+
     def __init__(self) -> None:
         super().__init__()
         # self.data["best"] = []
@@ -723,10 +869,12 @@ class LogCallback(Callback):
 # Calling the equal method of individual class
 def is_equal_2_refactorings_list(a, b):
     """
+
     This method implement is_equal method which should return True if two instances of Individual class are equal.
     Otherwise, it returns False.
     The duplicate instances are removed from population at each generation.
     Only one instance is held to speed up the search algorithm
+
     """
 
     if len(a.X[0]) != len(b.X[0]):
@@ -740,6 +888,12 @@ def is_equal_2_refactorings_list(a, b):
 
 
 def binary_tournament(pop, P, **kwargs):
+    """
+
+    Implements the binary tournament selection algorithm
+
+    """
+
     # The P input defines the tournaments and competitors
     n_tournaments, n_competitors = P.shape
     if n_competitors != 2:
@@ -761,6 +915,12 @@ def binary_tournament(pop, P, **kwargs):
 
 def log_project_info(reset_=True, design_metrics_path=None, quality_attributes_path=None,
                      generation=0, testability_verbose=True, testability_log_path=None):
+    """
+
+    Logging project metrics and information
+
+    """
+
     if reset_:
         reset_project()
     if quality_attributes_path is None:
@@ -837,6 +997,12 @@ def log_project_info(reset_=True, design_metrics_path=None, quality_attributes_p
 
 
 def main():
+    """
+
+    Optimization module main driver
+
+    """
+
     # Define initialization objects
     initializer_class = SmellInitialization if config.WARM_START else RandomInitialization
     initializer_object = initializer_class(
