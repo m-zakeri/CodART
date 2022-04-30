@@ -1,8 +1,8 @@
-site_name: CodART Docs (v0.1.0dev)
+site_name: CodART Docs (v0.1.2dev)
 site_url: https://m-zakeri.github.io
 repo_url: https://github.com/m-zakeri/CodART
 site_description: Automated Source Code Refactoring Toolkit
-site_author: Morteza Zakeri, Ali Ayati, Saeed Parsa
+site_author: Morteza Zakeri
 copyright: © 2020-2021 CodART project - Reverse engineering laboratory
 
 theme:
@@ -74,6 +74,7 @@ nav:
         - ANTLR basics: tutorials/antlr_basics.md
         - ANTLR advanced: tutorials/antlr_advanced.md
         - Refactoring basics: tutorials/refactorings_basics.md
+        - ANTLR slides: tutorials/antlr_slides.md
     - Publications: publications.md
     - About us: about.md
     - FAQ : faq.md
