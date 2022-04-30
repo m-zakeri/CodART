@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Zakeri-Nasrabadi"
+  given-names: "Morteza"
+  orcid: "https://orcid.org/0000-0003-4289-0606"
+title: "CodART"
+version: 0.1.0
+doi: https://doi.org/10.5281/zenodo.6508415
+date-released: 2022-04-30
+url: "https://m-zakeri.github.io/CodART"
