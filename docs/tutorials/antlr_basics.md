@@ -5,7 +5,7 @@ By: Morteza Zakeri
 Last update: April 30, 2022
 
 ## Introduction
-The ANTLR tool generates a top-down parser from the grammar rules defined with the ANTLR meta-grammar (Parr and Fisher 2011). The initial version of ANTLR generated the target parser source code in Java. In the current version (version 4), the parser source code can be generated in a wide range of programming languages listed on the [ANTLR official website](https://www.antlr.org) (Parr). 
+The ANTLR tool generates a top-down parser from the grammar rules defined with the ANTLR meta-grammar (Parr and Fisher 2011). The initial version of ANTLR generated the target parser source code in Java. In the current version (version 4), the parser source code can be generated in a wide range of programming languages listed on the [ANTLR official website](https://www.antlr.org) (Parr 2022a). 
 For simplicity, we generate the parser in Python 3, which provides us to run the tool on every platform having Python 3 installed on it. 
 Another reason to use Python is that we can integrate the developed program easily with other libraries available in Python, such as machine learning and optimization libraries. 
 Finally, I found that there is no comprehensive tutorial on using ANTLR with the Python backend. 
@@ -71,7 +71,7 @@ _Figure 4. Test the grammar rule in the ANTLR PyCharm plugin._
 
 It should be mentioned that the ANTLR Preview window is based on a grammar interpreter, not on the actual generated parser described in the previous section. It means that grammar attributes such as actions and predicates will not be evaluated during live preview because the interpreter is language agnostic. For the same reasons, if the generated parser and/or lexer classes extend a custom implementation of the base parser/lexer classes, the custom code will not be run during the live preview. 
 
-In addition to the parse tree visualization, the ANTLR plugin provides facilities such as profiling, code generation, etc., described in [here](https://github.com/antlr/intellij-plugin-v4). For example, the profile tab shows the execution time of each rule in the parser for a given input string.
+In addition to the parse tree visualization, the ANTLR plugin provides facilities such as profiling, code generation, etc., described in [here](https://github.com/antlr/intellij-plugin-v4) (Parr 2022b). For example, the profile tab shows the execution time of each rule in the parser for a given input string.
 
 I want to emphasize that visualizing the parse tree with the ANTLR plugin is really helpful when developing code and fixing bugs described in the next section of this tutorial.
 
@@ -176,3 +176,11 @@ _Listing 2: Main driver module for the program in Listing 1_
 In this tutorial, we described the basic concepts regarding using the ANTLR tool to generate and walk phase three and implement custom program analysis applications with the help of the ANTLR listener mechanism. The most important point is that we used the real-world programming languages grammars to show the parsing and analyzing process. The discussed topics form the underlying concepts of our approach for automated refactoring used in CodART.
 Check out the [ANTLR advanced tutorial](antlr_advanced.md) to find out how we can use ANTLR for reliable and efficient program transformation.
 
+
+## References
+
+Parr T ANTLR (ANother Tool for Language Recognition). https://www.antlr.org. Accessed 10 Jan 2022a
+
+Parr T IntelliJ Idea Plugin for ANTLR v4. https://github.com/antlr/intellij-plugin-v4. Accessed 10 Jan 2022b
+
+Parr T, Fisher K (2011) LL(*): the foundation of the ANTLR parser generator. Proc 32nd ACM SIGPLAN Conf Program Lang Des Implement 425–436. https://doi.org/http://doi.acm.org/10.1145/1993498.1993548
