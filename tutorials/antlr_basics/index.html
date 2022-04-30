@@ -10,7 +10,7 @@
       
       
       
-        <meta name="author" content="Morteza Zakeri, Ali Ayati, Saeed Parsa">
+        <meta name="author" content="Morteza Zakeri">
       
       
         <link rel="canonical" href="https://m-zakeri.github.io/tutorials/antlr_basics/">
@@ -20,7 +20,7 @@
     
     
       
-        <title>ANTLR basics - CodART Docs (v0.1.0dev)</title>
+        <title>ANTLR basics - CodART Docs (v0.1.2dev)</title>
       
     
     
@@ -84,7 +84,7 @@
     
       <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="CodART Docs (v0.1.0dev)" class="md-header__button md-logo" aria-label="CodART Docs (v0.1.0dev)" data-md-component="logo">
+    <a href="../.." title="CodART Docs (v0.1.2dev)" class="md-header__button md-logo" aria-label="CodART Docs (v0.1.2dev)" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
@@ -97,7 +97,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            CodART Docs (v0.1.0dev)
+            CodART Docs (v0.1.2dev)
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -203,13 +203,13 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="CodART Docs (v0.1.0dev)" class="md-nav__button md-logo" aria-label="CodART Docs (v0.1.0dev)" data-md-component="logo">
+    <a href="../.." title="CodART Docs (v0.1.2dev)" class="md-nav__button md-logo" aria-label="CodART Docs (v0.1.2dev)" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
 
     </a>
-    CodART Docs (v0.1.0dev)
+    CodART Docs (v0.1.2dev)
   </label>
   
     <div class="md-nav__source">
@@ -849,22 +849,49 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#introduction-to-antlr-part-i" class="md-nav__link">
-    Introduction to ANTLR: Part I
+  <a href="#introduction" class="md-nav__link">
+    Introduction
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#introduction-to-antlr-part-ii" class="md-nav__link">
-    Introduction to ANTLR: Part II
+  <a href="#generating-parser" class="md-nav__link">
+    Generating parser
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#introduction-to-antlr-part-iii" class="md-nav__link">
-    Introduction to ANTLR: Part III
+  <a href="#antlr-parse-tree" class="md-nav__link">
+    ANTLR parse tree
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#traversing-the-parse-tree-programmatically" class="md-nav__link">
+    Traversing the parse tree programmatically
+  </a>
+  
+    <nav class="md-nav" aria-label="Traversing the parse tree programmatically">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#wiring-the-modules" class="md-nav__link">
+    Wiring the modules
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conclusion-and-remarks" class="md-nav__link">
+    Conclusion and remarks
   </a>
   
 </li>
@@ -896,6 +923,18 @@
     <li class="md-nav__item">
       <a href="../refactorings_basics/" class="md-nav__link">
         Refactoring basics
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../antlr_slides/" class="md-nav__link">
+        ANTLR slides
       </a>
     </li>
   
@@ -993,22 +1032,49 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#introduction-to-antlr-part-i" class="md-nav__link">
-    Introduction to ANTLR: Part I
+  <a href="#introduction" class="md-nav__link">
+    Introduction
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#introduction-to-antlr-part-ii" class="md-nav__link">
-    Introduction to ANTLR: Part II
+  <a href="#generating-parser" class="md-nav__link">
+    Generating parser
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#introduction-to-antlr-part-iii" class="md-nav__link">
-    Introduction to ANTLR: Part III
+  <a href="#antlr-parse-tree" class="md-nav__link">
+    ANTLR parse tree
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#traversing-the-parse-tree-programmatically" class="md-nav__link">
+    Traversing the parse tree programmatically
+  </a>
+  
+    <nav class="md-nav" aria-label="Traversing the parse tree programmatically">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#wiring-the-modules" class="md-nav__link">
+    Wiring the modules
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conclusion-and-remarks" class="md-nav__link">
+    Conclusion and remarks
   </a>
   
 </li>
@@ -1031,17 +1097,130 @@
                 
                 
                 <h1 id="antlr-basic-tutorials">ANTLR basic tutorials</h1>
-<h2 id="introduction-to-antlr-part-i">Introduction to ANTLR: Part I</h2>
-<iframe src="https://www.slideshare.net/slideshow/embed_code/key/5YesznKckOJKs4" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe>
-<div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/MortezaZakeri/antlr-part1-introduction" title="Antlr part1 introduction" target="_blank">Antlr part1 introduction</a> </strong> from <strong><a href="//www.slideshare.net/MortezaZakeri" target="_blank">Morteza Zakeri</a></strong> </div>
+<p>By: Morteza Zakeri</p>
+<p>Last update: April 30, 2022</p>
+<h2 id="introduction">Introduction</h2>
+<p>The ANTLR tool generates a top-down parser from the grammar rules defined with the ANTLR meta-grammar (Parr and Fisher 2011). The initial version of ANTLR generated the target parser source code in Java. In the current version (version 4), the parser source code can be generated in a wide range of programming languages listed on the <a href="https://www.antlr.org">ANTLR official website</a> (Parr). 
+For simplicity, we generate the parser in Python 3, which provides us to run the tool on every platform having Python 3 installed on it. 
+Another reason to use Python is that we can integrate the developed program easily with other libraries available in Python, such as machine learning and optimization libraries. 
+Finally, I found that there is no comprehensive tutorial on using ANTLR with the Python backend. </p>
+<p>To use ANTLR in other programming languages, specifically Java and C#, refer to the ANTLR slides I created before this tutorial. </p>
+<p>The ANTLR tool is a small “.jar” file that must be run from the command line to generate the parser codes. The ANTLR tool jar file can be downloaded from <a href="https://www.antlr.org/download/antlr-4.10.1-complete.jar">here</a>. </p>
+<h2 id="generating-parser">Generating parser</h2>
+<p>As mentioned, to generate a parser for a programming language, the grammar specification described with ANTLR meta-grammar is required. ANTLR grammar files are named with the “.g4” suffix. </p>
+<p>We obtain the grammar of Java 8 to build our parser for the Java programming language. The grammar can be downloaded from ANTLR 4 grammar repository on GitHub: <a href="[https://github.com/antlr/grammars-v4">https://github.com/antlr/grammars-v4</a>. 
+Once the ANTLR tool and required grammar files are prepared, we can generate the parser for that with the following command:</p>
+<pre><code class="language-commandline">
+&gt; java -Xmx500M -cp antlr-4.9.3-complete.jar org.antlr.v4.Tool -Dlanguage=Python3 -o . JavaLexer.g4
 
-<h2 id="introduction-to-antlr-part-ii">Introduction to ANTLR: Part II</h2>
-<iframe src="https://www.slideshare.net/slideshow/embed_code/key/1Ne5AaXLZ2Q5qE" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe>
-<div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/MortezaZakeri/antlr-part2-gettingstartedinjava" title="Antlr part2 getting_started_in_java" target="_blank">Antlr part2 getting_started_in_java</a> </strong> from <strong><a href="https://www.slideshare.net/MortezaZakeri" target="_blank">Morteza Zakeri</a></strong> </div>
+&gt; java -Xmx500M -cp antlr-4.9.3-complete.jar org.antlr.v4.Tool -Dlanguage=Python3 -visitor -listener -o . JavaLabeledParser.g4
 
-<h2 id="introduction-to-antlr-part-iii">Introduction to ANTLR: Part III</h2>
-<iframe src="https://www.slideshare.net/slideshow/embed_code/key/kG1VeeZBQKXgED" width="595" height="485" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe>
-<div style="margin-bottom:5px"> <strong> <a href="//www.slideshare.net/MortezaZakeri/antlr-part3-gettingstartedincsharp" title="Antlr part3 getting_started_in_c_sharp" target="_blank">Antlr part3 getting_started_in_c_sharp</a> </strong> from <strong><a href="https://www.slideshare.net/MortezaZakeri" target="_blank">Morteza Zakeri</a></strong> </div>
+</code></pre>
+<p>The first command generates the lexer from the <code>JavaLexer.g4</code> description file and the second command generates the parser from the <code>JavaLabeledParser.g4</code> description file. It is worth noting that the lexer and parser can be written in one file. In such a case, a <em>single command</em> generates all required codes in one step.</p>
+<p>The grammar files used in the above command are also available in <a href="../../grammars">grammars directory</a> of the CodART repository.
+You may see that I have made some modifications to the Parser rules. </p>
+<p>In the above commands, the <code>antlr-4.9.3-complete.jar</code> is the ANTLR tool that requires Java to be executed. <code>-Dlanguage</code> denotes the destination language that the ANTLR parser (and lexer) source code is generated in which. In our case, we set it to Python3. </p>
+<p>After executing the ANTLR parser generation commands, eight files, including parser source code and other required information, are generated. Figure 1 shows the generated files. The “.py” contains lexer and parser source code that can parse any Java input file. The <code>-visitor -listener</code> switches in the second command result in generating two separate source files, <code>JavaLabledParserListener.py</code> and <code>JavaLabledParserVistor.py</code>, which provide interfaces to implement the required codes for a specific language application. Our application is source code refactoring which uses the listener mechanism to implement necessary actions transforming the program to the refactored version. 
+The parse tree structure in and listener mechanism are discussed in the next sections.</p>
+<p><img alt="ANTLR generated files " src="../../figs/antlr_basics/antlr-generated-files.png" /></p>
+<p><em>Figure 1. Generated files by ANTLR.</em></p>
+<p>It should be noted that to use the generated classes in Figure 1, for developing a specific program, we need to install the appropriate ANTLR runtime library. For creating ANTLR-based programs in Python, the command <code>pip install antlr-python3-runtime</code> can be used. It installed all runtime dependencies required to program using the ANTLR library.</p>
+<h2 id="antlr-parse-tree">ANTLR parse tree</h2>
+<p>The generated parser by ANTLR is responsible for parsing every Java source code file and generating the parse tree or designating the syntax errors in the input file. The parse tree for real-world programs with thousands of lines of code has a non-trivial structure. ANTLR developers have provided some IDE plugins that can visualize the parse tree to better understand the structure of the parse tree generated by ANTLR. We use Pycharm IDE developed by Jetbrains  to work with Python code. </p>
+<p>Figure 2 shows how we can install the ANTLR plugin in PyCharm. The plugin source code is available on the <a href="https://github.com/antlr/intellij-plugin-v4">GitHub repo</a>. When the plugin is installed, the ANTLR preview widow is applied at the bottom of the PyCharm IDE. In addition, the IDE can be recognized as “.g4” files and some other options added to the IDE. The main option is the ability to test a grammar rule and visualize the corresponding parse tree to that rule.</p>
+<p><img alt="Installing ANTLR plugin in PyCharm IDE " src="../../figs/antlr_basics/installing-antlr4-plugin-in-pycharm.png" /></p>
+<p><em>Figure 2. Installing the ANTLR plugin in the PyCharm IDE.</em></p>
+<p>In order to use the ANTLR preview tab, the ANTLR grammar should be opened in the PyCharm IDE. We then select a rule (typically the start rule) of our grammar, right-click on the rule, and select the “Test Rule <code>rule_name</code>” option from the opened menu, shown in Figure 3. We now write our sample input program in the left panel of the ANTLR preview, and the parse tree is shown in the right panel. </p>
+<p><img alt="Test the grammar rule in the ANTLR PyCharm plugin " src="../../figs/antlr_basics/selecting-rule-for-test-in-antlr-preview-window.png" /></p>
+<p><em>Figure 3. Test the grammar rule in the ANTLR PyCharm plugin.</em></p>
+<p>Figure 4 shows a simple Java class and the corresponding parse tree generated by the ANTLR. The leaves of the parse tree are program tokens, while the intermediate nodes are grammar rules that the evaluating program is derived from them. Also, the root of the tree is the grammar rule, which we selected to start parsing. It means that we can select and test every rule independently. However, a complete Java program can only parse from the start rule of the given grammar, i.e., the <code>compilaionUnit</code> rule.</p>
+<p><img alt="Test the grammar rule in the ANTLR PyCharm plugin" src="../../figs/antlr_basics/example_of_antlr-parse-tree-in-antlr-preview.png" /></p>
+<p><em>Figure 4. Test the grammar rule in the ANTLR PyCharm plugin.</em></p>
+<p>It should be mentioned that the ANTLR Preview window is based on a grammar interpreter, not on the actual generated parser described in the previous section. It means that grammar attributes such as actions and predicates will not be evaluated during live preview because the interpreter is language agnostic. For the same reasons, if the generated parser and/or lexer classes extend a custom implementation of the base parser/lexer classes, the custom code will not be run during the live preview. </p>
+<p>In addition to the parse tree visualization, the ANTLR plugin provides facilities such as profiling, code generation, etc., described in <a href="https://github.com/antlr/intellij-plugin-v4">here</a>. For example, the profile tab shows the execution time of each rule in the parser for a given input string.</p>
+<p>I want to emphasize that visualizing the parse tree with the ANTLR plugin is really helpful when developing code and fixing bugs described in the next section of this tutorial.</p>
+<h2 id="traversing-the-parse-tree-programmatically">Traversing the parse tree programmatically</h2>
+<p>ANTLR is not a simple parser generator. It provides a depth-first parse tree visiting and a callback mechanism called listener to implement the required program analysis or transformation passes. The depth-first search is performed by instantiating an object from the ANTLR <code>ParseTreeWalker</code> class and calling the walk method, which takes an instance of <code>ParseTree</code> as an input argument and traverses it.</p>
+<p>Obviously, if we visit the parse tree with the depth-first search algorithm, all program tokens are visited in the same order that they appeared in the source code file. However, the depth-first search contains additional information about when a node in the tree is visited and when the visiting all nodes in its subtree is finished. Therefore, we can add the required actions when visiting a node to perform a special task. For example, according to Figure 4, for counting the number of classes in a code snippet, we can define a counter variable, initialize it to zero, and increase it whenever the walker visits the “classDeclartion” node. </p>
+<p>ANTLR provides two callback functions for each node in the parse tree. One is called by the walker when it is entered into a node, i.e., visit the node, but the children are not visited yet. Another is called when all nodes in the subtree of the visited node have been visited, and the walker is exiting the node. These callback functions are available in the listener class generated by the ANTLR for every rule in a given grammar. In our example for counting the number of classes, we implement all required logic in the body of <code>enterClassDeclartion</code> method of the <code>JavaLabledParserListener</code> class. We called these logic codes <em>grammar’s actions</em> since, indeed, they are bunded to a grammar rule. </p>
+<p>It is worth noting that we can add these actions codes in the grammar file (<code>.g4</code> file) to form an attributed grammar. Embedding actions in grammar increase the efficiency of the analyzing process. However, when we need many complex actions, the listener mechanism provides a better way to implement them. Indeed, ANTLR 4 emphasizes separating the language applications from the language grammar by using the listener mechanism.</p>
+<p>Listing 1 shows the implementation program for counting the number of classes using the ANTLR listener mechanism. The <code>DesignMetrics</code> class inherits from <code>JavaLabeledParserListener</code> class which is the default listener class generated by ANTLR. We only implement the <code>enterClassDeclartion</code> method, which increases the value of the <code>__dsc</code> counter each time the walker visits a Java class.</p>
+<pre><code class="language-Python"># module: JavaLabledParserListener.py
+
+__version__ = &quot;0.1.0&quot;
+__author__ = &quot;Morteza&quot;
+
+from antlr4 import *
+if __name__ is not None and &quot;.&quot; in __name__:
+    from .JavaLabeledParser import JavaLabeledParser
+else:
+    from JavaLabeledParser import JavaLabeledParser
+
+class JavaLabeledParserListener(ParseTreeListener):
+    # …
+    def enterClassDeclaration(self,
+                              ctx:JavaLabeledParser.ClassDeclarationContext):
+        pass
+    # …
+
+class DesignMetrics(JavaLabeledParserListener):
+    def __init__(self):
+        self.__dsc:int = 0  # Keep design size in classes
+
+    @property
+    def get_design_size(self):
+        return self.__dsc
+
+    def enterClassDeclaration(self,
+                              ctx:JavaLabeledParser.ClassDeclarationContext):
+        self.__dsc += 1
+
+</code></pre>
+<p><em>Listing 1: Programs that count the number of classes in a Java source code.</em></p>
+<h3 id="wiring-the-modules">Wiring the modules</h3>
+<p>To complete our simple analysis task, first, the parse tree for a given input should be constructed. Then, the DesignMetrics class should be instantiated and passed to an object of ParseTreeWalker class. We created a driver module in Python beside the generated code by ANTLR to connect different parts of our program and complete our task. Listing 2 shows the implementation of the main driver for a program that counts the number of classes in Java source codes.</p>
+<pre><code class="language-Python"># Module: main_driver.py
+
+__version__ = &quot;0.1.0&quot;
+__author__ = &quot;Morteza&quot;
+from antlr4 import *
+from JavaLabledLexer import JavaLabledLexer
+from JavaLeabledParser import JavaLabledParser
+from JavaLabledParserListener import DesignMetrics
+
+def main(args):
+
+    # Step 1: Load input source into the stream object
+    stream = FileStream(args.file, encoding='utf8')
+
+    # Step 2: Create an instance of AssignmentStLexer
+    lexer = JavaLabledLexer(stream)
+
+    # Step 3: Convert the input source into a list of tokens
+    token_stream = CommonTokenStream(lexer)
+
+    # Step 4: Create an instance of the AssignmentStParser
+    parser = JavaLabledParser(token_stream)
+
+    # Step 5: Create parse tree
+    parse_tree = parser.compilationUnit()
+
+    # Step 6: Create an instance of DesignMetrics listener class
+    my_listener = DesignMetrics()
+
+    # Step 7: Create a walker to traverse the parse tree and callback our listener
+    walker = ParseTreeWalker()
+    walker.walk(t=parse_tree, listener=my_listener)
+
+    # Step 8: Getting the results
+    print(f'DSC={my_listener.get_design_size}')
+
+
+</code></pre>
+<p><em>Listing 2: Main driver module for the program in Listing 1</em></p>
+<h2 id="conclusion-and-remarks">Conclusion and remarks</h2>
+<p>In this tutorial, we described the basic concepts regarding using the ANTLR tool to generate and walk phase three and implement custom program analysis applications with the help of the ANTLR listener mechanism. The most important point is that we used the real-world programming languages grammars to show the parsing and analyzing process. The discussed topics form the underlying concepts of our approach for automated refactoring used in CodART.
+Check out the <a href="../antlr_advanced/">ANTLR advanced tutorial</a> to find out how we can use ANTLR for reliable and efficient program transformation.</p>
                 
               
               

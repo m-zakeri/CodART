@@ -10,7 +10,7 @@
       
       
       
-        <meta name="author" content="Morteza Zakeri, Ali Ayati, Saeed Parsa">
+        <meta name="author" content="Morteza Zakeri">
       
       
         <link rel="canonical" href="https://m-zakeri.github.io/tutorials/antlr_advanced/">
@@ -20,7 +20,7 @@
     
     
       
-        <title>ANTLR advanced - CodART Docs (v0.1.0dev)</title>
+        <title>ANTLR advanced - CodART Docs (v0.1.2dev)</title>
       
     
     
@@ -84,7 +84,7 @@
     
       <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="CodART Docs (v0.1.0dev)" class="md-header__button md-logo" aria-label="CodART Docs (v0.1.0dev)" data-md-component="logo">
+    <a href="../.." title="CodART Docs (v0.1.2dev)" class="md-header__button md-logo" aria-label="CodART Docs (v0.1.2dev)" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
@@ -97,7 +97,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            CodART Docs (v0.1.0dev)
+            CodART Docs (v0.1.2dev)
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -203,13 +203,13 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="CodART Docs (v0.1.0dev)" class="md-nav__button md-logo" aria-label="CodART Docs (v0.1.0dev)" data-md-component="logo">
+    <a href="../.." title="CodART Docs (v0.1.2dev)" class="md-nav__button md-logo" aria-label="CodART Docs (v0.1.2dev)" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
 
     </a>
-    CodART Docs (v0.1.0dev)
+    CodART Docs (v0.1.2dev)
   </label>
   
     <div class="md-nav__source">
@@ -837,9 +837,39 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          ANTLR advanced
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         ANTLR advanced
       </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#compiler-background" class="md-nav__link">
+    Compiler background
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -852,6 +882,18 @@
     <li class="md-nav__item">
       <a href="../refactorings_basics/" class="md-nav__link">
         Refactoring basics
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../antlr_slides/" class="md-nav__link">
+        ANTLR slides
       </a>
     </li>
   
@@ -942,6 +984,21 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#compiler-background" class="md-nav__link">
+    Compiler background
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -958,7 +1015,20 @@
                 
                 
                 <h1 id="antlr-advanced-tutorials">ANTLR advanced tutorials</h1>
-<p>To be announced.</p>
+<p>By: Morteza Zakeri</p>
+<p>Last update: April 30, 2022</p>
+<h2 id="compiler-background">Compiler background</h2>
+<p>We first define some terms used in compiler literature when analyzing the program based on the ANTLR vocabulary.</p>
+<ul>
+<li>
+<p><strong>Compiler pass.</strong>
+Each time that the <code>walk</code> method of <code>ParseTreeWalker</code> class is called, it visits all nodes of the parse tree. In compiler literature, we called this process a pass. The ANTLR pass can be annotated with listener classes to perform specific analysis or transformation. An analysis pass refers to the pass in which some information is obtained from the source code, but the source code is not changed, or no new code is generated. A transformation pass refers to the pass in which the program source code is modified or new codes are generated. As we discussed in the next sections, refactoring automation consists of both the analysis and transformation passes.</p>
+</li>
+<li>
+<p><strong>Single v.s. multiple pass.</strong> 
+Often to perform specific analyses or transformations, the program should be visited multiple times. Indeed, such tasks required multiple passes. For instance, if a class attribute is defined after it is used in a method, which is possible in Java programming language, to find the definition of the field and then modify its usage, we should visit the program twice. The reason is that the program tokens are read from left to right, and then when traversing the parse tree, the node only is visited once in the order they appear in the program text. For a given task, if we visit a node and require the information obtained from the next nodes, we cannot complete the task in one pass. In such a case, a pass is required to obtain the necessary information from the next nodes, and another pass is required to use this information for the current node. Most refactoring operations we described in this chapter require multiple passes to complete the refactoring process. For each pass, we develop a separate listener class and pass it to <code>ParseTreeWalker</code> class.</p>
+</li>
+</ul>
                 
               
               

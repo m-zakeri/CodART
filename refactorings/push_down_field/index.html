@@ -10,7 +10,7 @@
       
       
       
-        <meta name="author" content="Morteza Zakeri, Ali Ayati, Saeed Parsa">
+        <meta name="author" content="Morteza Zakeri">
       
       
         <link rel="canonical" href="https://m-zakeri.github.io/refactorings/push_down_field/">
@@ -20,7 +20,7 @@
     
     
       
-        <title>Push-down field - CodART Docs (v0.1.0dev)</title>
+        <title>Push-down field - CodART Docs (v0.1.2dev)</title>
       
     
     
@@ -84,7 +84,7 @@
     
       <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="CodART Docs (v0.1.0dev)" class="md-header__button md-logo" aria-label="CodART Docs (v0.1.0dev)" data-md-component="logo">
+    <a href="../.." title="CodART Docs (v0.1.2dev)" class="md-header__button md-logo" aria-label="CodART Docs (v0.1.2dev)" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
@@ -97,7 +97,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            CodART Docs (v0.1.0dev)
+            CodART Docs (v0.1.2dev)
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -203,13 +203,13 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="CodART Docs (v0.1.0dev)" class="md-nav__button md-logo" aria-label="CodART Docs (v0.1.0dev)" data-md-component="logo">
+    <a href="../.." title="CodART Docs (v0.1.2dev)" class="md-nav__button md-logo" aria-label="CodART Docs (v0.1.2dev)" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
 
     </a>
-    CodART Docs (v0.1.0dev)
+    CodART Docs (v0.1.2dev)
   </label>
   
     <div class="md-nav__source">
@@ -954,6 +954,18 @@
   
 
           
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/antlr_slides/" class="md-nav__link">
+        ANTLR slides
+      </a>
+    </li>
+  
+
+          
         </ul>
       </nav>
     </li>
@@ -1217,7 +1229,7 @@ because of this, we push down the field from the superclass into its related sub
 
 
 <h3 id="refactorings.pushdown_field.PushDownField.__init__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_filenames</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">superclass_name</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">class_names</span><span class="o">=</span><span class="p">[],</span> <span class="n">filename_mapping</span><span class="o">=&lt;</span><span class="n">function</span> <span class="n">PushDownField</span><span class="o">.&lt;</span><span class="k">lambda</span><span class="o">&gt;</span> <span class="n">at</span> <span class="mh">0x00000199BEA9EC10</span><span class="o">&gt;</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_filenames</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">superclass_name</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">class_names</span><span class="o">=</span><span class="p">[],</span> <span class="n">filename_mapping</span><span class="o">=&lt;</span><span class="n">function</span> <span class="n">PushDownField</span><span class="o">.&lt;</span><span class="k">lambda</span><span class="o">&gt;</span> <span class="n">at</span> <span class="mh">0x000001EE7F91EC10</span><span class="o">&gt;</span><span class="p">)</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-special"><code>special</code></small>
@@ -1273,7 +1285,7 @@ because of this, we push down the field from the superclass into its related sub
         <td><code>filename_mapping</code></td>
         <td><code>str</code></td>
         <td><p>Mapping the file's name to the correct format so that it can be processed</p></td>
-        <td><code>&lt;function PushDownField.&lt;lambda&gt; at 0x00000199BEA9EC10&gt;</code></td>
+        <td><code>&lt;function PushDownField.&lt;lambda&gt; at 0x000001EE7F91EC10&gt;</code></td>
       </tr>
   </tbody>
 </table>
