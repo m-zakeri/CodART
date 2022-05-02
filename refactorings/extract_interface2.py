@@ -247,14 +247,18 @@ class InterfaceCreator:
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=listener)
 
-        with open(self.class_path, mode='w', newline='') as f:
+        with open(self.class_path, encoding='utf-8', mode='w', newline='') as f:
             f.write(listener.token_stream_rewriter.getDefaultText())
 
     def save(self):
         interface_text = self.make_interface_body()
         if self.interface_info['path'] == '':
             self.interface_info['path'] = os.path.dirname(self.class_path)
-        with open(self.interface_info['path'] + '/' + self.interface_info['name'] + '.java', mode='w') as f:
+        with open(
+                self.interface_info['path'] + '/' + self.interface_info['name'] + '.java',
+                encoding='utf-8',
+                mode='w'
+        ) as f:
             f.write(interface_text)
 
 
