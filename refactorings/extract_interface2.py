@@ -96,10 +96,10 @@ class InterfaceInfoListener(JavaParserLabeledListener):
         self.interface_info = {'package': str(), 'name': str(), 'path': str(), 'methods': []}
         self.enter_method_body_stack = list()
 
-    def enterMethodBody(self, ctx:JavaParserLabeled.MethodBodyContext):
+    def enterMethodBody(self, ctx: JavaParserLabeled.MethodBodyContext):
         self.enter_method_body_stack.append(True)
 
-    def exitMethodBody(self, ctx:JavaParserLabeled.MethodBodyContext):
+    def exitMethodBody(self, ctx: JavaParserLabeled.MethodBodyContext):
         self.enter_method_body_stack.pop()
 
     def enterPackageDeclaration(self, ctx: JavaParserLabeled.PackageDeclarationContext):
@@ -151,10 +151,11 @@ class InterfaceInfoListener(JavaParserLabeledListener):
             method = {'name': ctx.IDENTIFIER().getText(), 'return_type': ctx.typeTypeOrVoid().getText(),
                       'formal_parameters': []}
             if ctx.formalParameters().formalParameterList() is not None:
-                for f in ctx.formalParameters().formalParameterList().formalParameter():
-                    _type = f.typeType().getText()
-                    identifier = f.variableDeclaratorId().getText()
-                    method['formal_parameters'].append([_type, identifier])
+                if hasattr(ctx.formalParameters().formalParameterList(), 'formalParameter'):
+                    for f in ctx.formalParameters().formalParameterList().formalParameter():
+                        _type = f.typeType().getText()
+                        identifier = f.variableDeclaratorId().getText()
+                        method['formal_parameters'].append([_type, identifier])
             self.interface_info['methods'].append(method)
 
     def get_interface_info(self):
@@ -231,7 +232,7 @@ class InterfaceCreator:
     def get_import_text(self):
         return self.interface_info['package'] + '.' + self.interface_info['name']
 
-    def add_implement_statement_to_class(self,):
+    def add_implement_statement_to_class(self, ):
         stream = FileStream(self.class_path, encoding='utf-8', errors='ignore')
         lexer = JavaLexer(stream)
         token_stream = CommonTokenStream(lexer)
