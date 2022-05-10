@@ -33,6 +33,7 @@ from antlr4.TokenStreamRewriter import TokenStreamRewriter
 from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
+from sbse import config
 
 
 class Path:
@@ -77,6 +78,7 @@ class Path:
         list_paths = []
         for str_path in str_paths:
             list_paths.append(str_path.split('/'))
+        print(list_paths)
         return list_paths
 
     @staticmethod
@@ -256,7 +258,7 @@ class InterfaceCreator:
         if self.interface_info['path'] == '':
             self.interface_info['path'] = os.path.dirname(self.class_path)
         with open(
-                self.interface_info['path'] + '/' + self.interface_info['name'] + '.java',
+                os.path.join(self.interface_info['path'], f"{self.interface_info['name']}.java"),
                 encoding='utf-8',
                 mode='w'
         ) as f:
@@ -293,8 +295,7 @@ def main(class_path):
 
     interface_info_ = listener.get_interface_info()
     interface_info_['name'] = 'I' + interface_info_['name']
-    path_list = Path.convert_str_paths_to_list_paths([class_path])
-    interface_info_['path'] = '/'.join(path_list[0][:-1])
+    interface_info_['path'] = os.path.dirname(class_path)
 
     ic = InterfaceCreator(interface_info_, class_path)
     ic.add_implement_statement_to_class()
@@ -307,5 +308,8 @@ def main(class_path):
 if __name__ == "__main__":
     class_path1 = "benchmarks/simple_injection/src/calculator/Calculator.java"
     class_path2 = "benchmarks/10_water-simulator/src/main/java/simulator/SA/GridGenerator.java"
-
-    main(class_path=class_path2)
+    class_path3 = os.path.join(
+        config.PROJECT_PATH,
+        "src\\net\\sourceforge\\ganttproject\\gui\\server\\ConnectionPanel.java")
+    print(class_path3)
+    main(class_path=class_path3)
