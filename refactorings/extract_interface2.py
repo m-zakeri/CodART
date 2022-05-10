@@ -36,62 +36,6 @@ from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from sbse import config
 
 
-class Path:
-    @staticmethod
-    def find_package_of_dependee(dependee, imports, imports_star, index_dic):
-        splitted_dependee = dependee.split('.')
-        # for normal import
-        for i in imports:
-            splitted_import = i.split('.')
-            if splitted_dependee[0] == splitted_import[-1]:
-                return '.'.join(i.split('.')[:-1])
-
-        # for import star
-        class_name = splitted_dependee[-1]
-        for i in imports_star:
-            index_dic_dependee = i + '.'.join(splitted_dependee[:-1]) + '-' + class_name + '-' + class_name
-            if index_dic_dependee in index_dic.keys():
-                return i
-
-    @staticmethod
-    def get_default_package(base_dirs, file_path):
-        for base_dir in base_dirs:
-            if base_dir == file_path[:len(base_dir)]:
-                target_dir = file_path[len(base_dir):]
-                splitted_targer_dir = target_dir.split("/")
-                package = '.'.join(splitted_targer_dir[:-1])
-                return package
-
-    @staticmethod
-    def get_file_name_from_path(path):
-        """
-        Use Python built-in functions instead of this
-        """
-        path = path.split('/')
-        class_name = path[-1]
-        class_name = class_name.split('.')
-        class_name = class_name[0]
-        return class_name
-
-    @staticmethod
-    def convert_str_paths_to_list_paths(str_paths):
-        list_paths = []
-        for str_path in str_paths:
-            list_paths.append(str_path.split('/'))
-        print(list_paths)
-        return list_paths
-
-    @staticmethod
-    def detect_path(paths):
-        if len(paths) == 1:
-            return '/'.join(paths[0][-2])
-        max_path_length = max([len(list_path) for list_path in paths])
-        for i in range(max_path_length):
-            x = set([j[i] for j in paths])
-            if len(x) > 1:
-                return '/'.join(paths[0][:i])
-
-
 class InterfaceInfoListener(JavaParserLabeledListener):
     def __init__(self):
         self.current_class = None
@@ -300,7 +244,6 @@ def main(class_path):
     ic = InterfaceCreator(interface_info_, class_path)
     ic.add_implement_statement_to_class()
     ic.save()
-
     return True
 
 
