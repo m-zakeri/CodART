@@ -584,22 +584,25 @@ class RandomInitialization(Initialization):
             list: List of refactoring sequences (list of refactoring operations)
 
         """
-
-        population = []
+        config.logger.debug(f'Generating a random initial population ...')
+        # population = []
         for _ in range(self.population_size):
             individual = []
             individual_size = random.randint(self.lower_band, self.upper_band)
             for j in range(individual_size):
                 main, params, name = self.select_random()
                 individual.append((main, params, name))
-                # print(f'Append a refactoring "{name}" to "{j}th" gene of the individual {_}.')
+                logger.debug(f'Append a refactoring "{name}" to "{j}th" gene of the individual {_}.')
+                logger.debug('-' * 100)
 
-            population.append(individual)
-            # print(f'Append individual {_} to population, s')
+            self.population.append(individual)
+            logger.debug(f'Append individual {_} to population, s')
 
-        # self._und.close()
-        # logger.debug("Database closed after initialization.")
-        return population
+        logger.debug('=' * 100)
+        initial_pop_path = f'{config.PROJECT_LOG_DIR}initial_population_{config.global_execution_start_time}.json'
+        self.dump_population(path=initial_pop_path)
+        config.logger.debug(f'Generating a random initial population was finished.')
+        return self.population
 
     def init_make_field_non_static(self):
         """
@@ -1119,7 +1122,7 @@ class SmellInitialization(RandomInitialization):
 
         """
 
-        config.logger.debug(f'Generating initial population ...')
+        config.logger.debug(f'Generating a biased initial population ...')
         for _ in range(0, self.population_size):
             individual = []
             individual_size = random.randint(self.lower_band, self.upper_band)
@@ -1151,7 +1154,7 @@ class SmellInitialization(RandomInitialization):
         logger.debug('=' * 100)
         initial_pop_path = f'{config.PROJECT_LOG_DIR}initial_population_{config.global_execution_start_time}.json'
         self.dump_population(path=initial_pop_path)
-        config.logger.debug(f'Generating initial population finished.')
+        config.logger.debug(f'Generating a biased initial population was finished.')
         return self.population
 
     def load_extract_class_candidates(self):
