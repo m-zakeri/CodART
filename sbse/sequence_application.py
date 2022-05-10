@@ -85,6 +85,8 @@ class RefactoringSequenceEvaluation:
         if input_file_path is None:
             input_file_path = glob.glob(os.path.join(self.log_directory, 'best_refactoring_sequences*.json'))[0]
 
+        log_project_info(reset_=True,)
+
         population = []
         with open(input_file_path, 'r', encoding='utf-8') as fp:
             population_trimmed = json.load(fp)
@@ -102,10 +104,15 @@ class RefactoringSequenceEvaluation:
                         self.file_path_base_dir_old,
                         config.PROJECT_ROOT_DIR
                     )
+                if refactoring_params.get('class_path'):
+                    refactoring_params['class_path'] = refactoring_params['class_path'].replace(
+                        self.file_path_base_dir_old,
+                        config.PROJECT_ROOT_DIR
+                    )
                 chromosome_new.append((REFACTORING_MAIN_MAP[gene_[0]], refactoring_params, gene_[0]))
             population.append(chromosome_new)
 
-        print(population)
+        # print(population)
         # quit()
         for k, refactoring_sequence in enumerate(population):
             reset_project()
@@ -113,7 +120,7 @@ class RefactoringSequenceEvaluation:
             for refactoring_operation in refactoring_sequence:
                 res = refactoring_operation[0](**refactoring_operation[1])
                 update_understand_database(config.UDB_PATH)
-                print(f"Executed {refactoring_operation[2]} with status {res}")
+                config.logger.info(f"Executed {refactoring_operation[2]} with status {res}")
 
             # Compute quality metrics
             log_project_info(
@@ -172,9 +179,9 @@ def execute_refactoring_sequence():
 
 
 if __name__ == '__main__':
-    # reset_project()
-    # quit()
+    reset_project()
+    quit()
     # execute_refactoring_sequence()
     eval_ = RefactoringSequenceEvaluation(log_directory=config.PROJECT_LOG_DIR)
-    eval_.evaluate_sequences()
-    # eval_.execute_from_json_log(reset=False)
+    # eval_.evaluate_sequences()
+    eval_.execute_from_json_log(reset=False)
