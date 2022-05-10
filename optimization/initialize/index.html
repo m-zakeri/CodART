@@ -1,0 +1,3654 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Automated Source Code Refactoring Toolkit">
+      
+      
+      
+        <meta name="author" content="Morteza Zakeri">
+      
+      
+        <link rel="canonical" href="https://m-zakeri.github.io/optimization/initialize/">
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.2.2, mkdocs-material-7.2.5">
+    
+    
+      
+        <title>Population initialization - CodART Docs (v0.1.2dev)</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.be71726b.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.3f5d1f46.min.css">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font-family:"Roboto";--md-code-font-family:"Roboto Mono"}</style>
+      
+    
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    
+      
+
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent="">
+  
+    
+    <script>function __prefix(e){return new URL("../..",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    
+      <script>var palette=__get("__palette");if(null!==palette&&"object"==typeof palette.color)for(var key in palette.color)document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#search-based-refactoring-initialization" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="CodART Docs (v0.1.2dev)" class="md-header__button md-logo" aria-label="CodART Docs (v0.1.2dev)" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            CodART Docs (v0.1.2dev)
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Population initialization
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent=""  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Dark mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7 10a2 2 0 0 1 2 2 2 2 0 0 1-2 2 2 2 0 0 1-2-2 2 2 0 0 1 2-2m10-3a5 5 0 0 1 5 5 5 5 0 0 1-5 5H7a5 5 0 0 1-5-5 5 5 0 0 1 5-5h10M7 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3h10a3 3 0 0 0 3-3 3 3 0 0 0-3-3H7z"/></svg>
+            </label>
+          
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="" data-md-color-accent=""  aria-label="Light mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Light mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        
+<a href="https://github.com/m-zakeri/CodART/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="CodART Docs (v0.1.2dev)" class="md-nav__button md-logo" aria-label="CodART Docs (v0.1.2dev)" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    CodART Docs (v0.1.2dev)
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/m-zakeri/CodART/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings_list/" class="md-nav__link">
+        Refactoring list
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code_smells_list/" class="md-nav__link">
+        Code smell list
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../benchmarks/" class="md-nav__link">
+        Benchmarks
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+      
+      <label class="md-nav__link" for="__nav_5">
+        Proposals
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Proposals" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Proposals
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proposals/core_refactorings_development/" class="md-nav__link">
+        Core refactoring development
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proposals/core_code_smell_development/" class="md-nav__link">
+        Core code smell development
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proposals/core_search_based_development/" class="md-nav__link">
+        Core search-based development
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proposals/core_refactoring_to_design_patterns_development/" class="md-nav__link">
+        Core refactoring to patterns development
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" type="checkbox" id="__nav_6" >
+      
+      <label class="md-nav__link" for="__nav_6">
+        Refactorings details
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Refactorings details" data-md-level="1">
+        <label class="md-nav__title" for="__nav_6">
+          <span class="md-nav__icon md-icon"></span>
+          Refactorings details
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings/decrease_field_visibility/" class="md-nav__link">
+        Decrease field visibility
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings/decrease_method_visibility/" class="md-nav__link">
+        Decrease method visibility
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings/encapsulate_field/" class="md-nav__link">
+        Encapsulate field
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings/extract_class/" class="md-nav__link">
+        Extract class
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings/extract_interface/" class="md-nav__link">
+        Extract interface
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings/extract_interface2/" class="md-nav__link">
+        Extract interface 2
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings/extract_method/" class="md-nav__link">
+        Extract method
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings/extract_subclass/" class="md-nav__link">
+        Extract subclass
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings/increase_field_visibility/" class="md-nav__link">
+        Increase field visibility
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings/increase_method_visibility/" class="md-nav__link">
+        Increase method visibility
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings/inline_class/" class="md-nav__link">
+        Inline class
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings/make_field_final/" class="md-nav__link">
+        Make field final
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings/make_field_non_final/" class="md-nav__link">
+        Make field non-final
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings/make_field_non_static/" class="md-nav__link">
+        Make field non-static
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings/make_field_static/" class="md-nav__link">
+        Make field static
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings/make_method_final/" class="md-nav__link">
+        Make method final
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings/make_method_non_final/" class="md-nav__link">
+        Make method non-final
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings/make_method_non_static/" class="md-nav__link">
+        Make method non-static
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings/make_method_static/" class="md-nav__link">
+        Make method static
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings/move_class/" class="md-nav__link">
+        Move class
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings/move_field/" class="md-nav__link">
+        Mode field
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings/move_method/" class="md-nav__link">
+        Move method
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings/pull_up_constructor/" class="md-nav__link">
+        Pull-up constructor
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings/pull_up_field/" class="md-nav__link">
+        Pull-up field
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings/pull_up_method/" class="md-nav__link">
+        Pull-up method
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings/push_down_field/" class="md-nav__link">
+        Push-down field
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings/push_down_method/" class="md-nav__link">
+        Push-down method
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7" type="checkbox" id="__nav_7" >
+      
+      <label class="md-nav__link" for="__nav_7">
+        Code smells details
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Code smells details" data-md-level="1">
+        <label class="md-nav__title" for="__nav_7">
+          <span class="md-nav__icon md-icon"></span>
+          Code smells details
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code_smells/large_class/" class="md-nav__link">
+        Large class
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code_smells/long_method/" class="md-nav__link">
+        Long method
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code_smells/feature_envy/" class="md-nav__link">
+        Feature envy
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8" type="checkbox" id="__nav_8" >
+      
+      <label class="md-nav__link" for="__nav_8">
+        Metrics
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Metrics" data-md-level="1">
+        <label class="md-nav__title" for="__nav_8">
+          <span class="md-nav__icon md-icon"></span>
+          Metrics
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../metrics/testability/" class="md-nav__link">
+        Testability prediction
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_9" type="checkbox" id="__nav_9" checked>
+      
+      <label class="md-nav__link" for="__nav_9">
+        Optimization
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Optimization" data-md-level="1">
+        <label class="md-nav__title" for="__nav_9">
+          <span class="md-nav__icon md-icon"></span>
+          Optimization
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Population initialization
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Population initialization
+      </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#sbse.initialize" class="md-nav__link">
+    sbse.initialize
+  </a>
+  
+    <nav class="md-nav" aria-label="sbse.initialize">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize--introduction" class="md-nav__link">
+    Introduction
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize--changelog" class="md-nav__link">
+    Changelog
+  </a>
+  
+    <nav class="md-nav" aria-label="Changelog">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize--version-040" class="md-nav__link">
+    Version 0.4.0
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize--version-032" class="md-nav__link">
+    Version 0.3.2
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sbse.initialize.Initialization" class="md-nav__link">
+    Initialization
+  </a>
+  
+    <nav class="md-nav" aria-label="Initialization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.Initialization.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.Initialization.generate_population" class="md-nav__link">
+    generate_population()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.Initialization.select_random" class="md-nav__link">
+    select_random()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization" class="md-nav__link">
+    RandomInitialization
+  </a>
+  
+    <nav class="md-nav" aria-label="RandomInitialization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.generate_population" class="md-nav__link">
+    generate_population()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_decrease_field_visibility" class="md-nav__link">
+    init_decrease_field_visibility()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_decrease_method_visibility" class="md-nav__link">
+    init_decrease_method_visibility()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_extract_class" class="md-nav__link">
+    init_extract_class()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_extract_interface" class="md-nav__link">
+    init_extract_interface()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_increase_field_visibility" class="md-nav__link">
+    init_increase_field_visibility()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_increase_method_visibility" class="md-nav__link">
+    init_increase_method_visibility()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_make_field_non_static" class="md-nav__link">
+    init_make_field_non_static()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_make_field_static" class="md-nav__link">
+    init_make_field_static()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_make_method_non_static" class="md-nav__link">
+    init_make_method_non_static()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_make_method_static" class="md-nav__link">
+    init_make_method_static()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_move_class" class="md-nav__link">
+    init_move_class()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_move_field" class="md-nav__link">
+    init_move_field()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_move_field2" class="md-nav__link">
+    init_move_field2()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_move_method" class="md-nav__link">
+    init_move_method()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_pullup_constructor" class="md-nav__link">
+    init_pullup_constructor()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_pullup_field" class="md-nav__link">
+    init_pullup_field()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_pullup_method" class="md-nav__link">
+    init_pullup_method()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_push_down_field" class="md-nav__link">
+    init_push_down_field()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_push_down_method" class="md-nav__link">
+    init_push_down_method()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sbse.initialize.SmellInitialization" class="md-nav__link">
+    SmellInitialization
+  </a>
+  
+    <nav class="md-nav" aria-label="SmellInitialization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.SmellInitialization.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.SmellInitialization.generate_population" class="md-nav__link">
+    generate_population()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.SmellInitialization.init_extract_class" class="md-nav__link">
+    init_extract_class()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.SmellInitialization.init_move_method" class="md-nav__link">
+    init_move_method()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../search-based_refactoring/" class="md-nav__link">
+        Search-based refactoring
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_10" type="checkbox" id="__nav_10" >
+      
+      <label class="md-nav__link" for="__nav_10">
+        Tutorials
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Tutorials" data-md-level="1">
+        <label class="md-nav__title" for="__nav_10">
+          <span class="md-nav__icon md-icon"></span>
+          Tutorials
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/antlr_basics/" class="md-nav__link">
+        ANTLR basics
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/antlr_advanced/" class="md-nav__link">
+        ANTLR advanced
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/refactorings_basics/" class="md-nav__link">
+        Refactoring basics
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/antlr_slides/" class="md-nav__link">
+        ANTLR slides
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../publications/" class="md-nav__link">
+        Publications
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../about/" class="md-nav__link">
+        About us
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/" class="md-nav__link">
+        FAQ
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/m-zakeri/CodART/issues" class="md-nav__link">
+        Issue tracker
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#sbse.initialize" class="md-nav__link">
+    sbse.initialize
+  </a>
+  
+    <nav class="md-nav" aria-label="sbse.initialize">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize--introduction" class="md-nav__link">
+    Introduction
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize--changelog" class="md-nav__link">
+    Changelog
+  </a>
+  
+    <nav class="md-nav" aria-label="Changelog">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize--version-040" class="md-nav__link">
+    Version 0.4.0
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize--version-032" class="md-nav__link">
+    Version 0.3.2
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sbse.initialize.Initialization" class="md-nav__link">
+    Initialization
+  </a>
+  
+    <nav class="md-nav" aria-label="Initialization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.Initialization.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.Initialization.generate_population" class="md-nav__link">
+    generate_population()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.Initialization.select_random" class="md-nav__link">
+    select_random()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization" class="md-nav__link">
+    RandomInitialization
+  </a>
+  
+    <nav class="md-nav" aria-label="RandomInitialization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.generate_population" class="md-nav__link">
+    generate_population()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_decrease_field_visibility" class="md-nav__link">
+    init_decrease_field_visibility()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_decrease_method_visibility" class="md-nav__link">
+    init_decrease_method_visibility()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_extract_class" class="md-nav__link">
+    init_extract_class()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_extract_interface" class="md-nav__link">
+    init_extract_interface()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_increase_field_visibility" class="md-nav__link">
+    init_increase_field_visibility()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_increase_method_visibility" class="md-nav__link">
+    init_increase_method_visibility()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_make_field_non_static" class="md-nav__link">
+    init_make_field_non_static()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_make_field_static" class="md-nav__link">
+    init_make_field_static()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_make_method_non_static" class="md-nav__link">
+    init_make_method_non_static()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_make_method_static" class="md-nav__link">
+    init_make_method_static()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_move_class" class="md-nav__link">
+    init_move_class()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_move_field" class="md-nav__link">
+    init_move_field()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_move_field2" class="md-nav__link">
+    init_move_field2()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_move_method" class="md-nav__link">
+    init_move_method()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_pullup_constructor" class="md-nav__link">
+    init_pullup_constructor()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_pullup_field" class="md-nav__link">
+    init_pullup_field()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_pullup_method" class="md-nav__link">
+    init_pullup_method()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_push_down_field" class="md-nav__link">
+    init_push_down_field()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.RandomInitialization.init_push_down_method" class="md-nav__link">
+    init_push_down_method()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sbse.initialize.SmellInitialization" class="md-nav__link">
+    SmellInitialization
+  </a>
+  
+    <nav class="md-nav" aria-label="SmellInitialization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.SmellInitialization.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.SmellInitialization.generate_population" class="md-nav__link">
+    generate_population()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.SmellInitialization.init_extract_class" class="md-nav__link">
+    init_extract_class()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sbse.initialize.SmellInitialization.init_move_method" class="md-nav__link">
+    init_move_method()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/m-zakeri/CodART/edit/master/docs/optimization/initialize.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                <h1 id="search-based-refactoring-initialization">Search-based refactoring initialization</h1>
+
+
+  <div class="doc doc-object doc-module">
+
+<a id="sbse.initialize"></a>
+    <div class="doc doc-contents first">
+
+      <h3 id="sbse.initialize--introduction">Introduction</h3>
+<p>This module implements finding refactoring candidates for the search-based algorithms</p>
+<p>Initialization: The abstract class and common utility functions.
+RandomInitialization: For initialling random candidates.</p>
+<h3 id="sbse.initialize--changelog">Changelog</h3>
+<h4 id="sbse.initialize--version-040">Version 0.4.0</h4>
+<ul>
+<li>Enhances module's design.</li>
+</ul>
+<h4 id="sbse.initialize--version-032">Version 0.3.2</h4>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-class">
+
+
+
+<h2 id="sbse.initialize.Initialization" class="doc doc-heading">
+        <code>Initialization</code>
+
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>The superclass of initialization contains init_refactoring methods</p>
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="sbse.initialize.Initialization.__init__" class="doc doc-heading">
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">udb_path</span><span class="p">,</span> <span class="n">population_size</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">lower_band</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">upper_band</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-special"><code>special</code></small>
+  </span>
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>udb_path</code></td>
+        <td><code>str</code></td>
+        <td><p>Path for understand database file.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>population_size</code></td>
+        <td><code>int</code></td>
+        <td><p>The length of population for GA.</p></td>
+        <td><code>50</code></td>
+      </tr>
+      <tr>
+        <td><code>lower_band</code></td>
+        <td><code>int</code></td>
+        <td><p>The minimum length of individual for GA.</p></td>
+        <td><code>10</code></td>
+      </tr>
+      <tr>
+        <td><code>upper_band</code></td>
+        <td><code>int</code></td>
+        <td><p>The maximum length of individual for GA.</p></td>
+        <td><code>50</code></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code></code></td>
+      <td><p>None</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>sbse\initialize.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">udb_path</span><span class="p">,</span> <span class="n">population_size</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">lower_band</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">upper_band</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Args:</span>
+
+<span class="sd">        udb_path (str): Path for understand database file.</span>
+
+<span class="sd">        population_size (int): The length of population for GA.</span>
+
+<span class="sd">        lower_band (int): The minimum length of individual for GA.</span>
+
+<span class="sd">        upper_band (int): The maximum length of individual for GA.</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">        None</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">udb_path</span> <span class="o">=</span> <span class="n">udb_path</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">population_size</span> <span class="o">=</span> <span class="n">population_size</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">lower_band</span> <span class="o">=</span> <span class="n">lower_band</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">upper_band</span> <span class="o">=</span> <span class="n">upper_band</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">population</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">initializers</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_make_field_non_static</span><span class="p">,</span>  <span class="c1"># 0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_make_field_static</span><span class="p">,</span>  <span class="c1"># 1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_make_method_static</span><span class="p">,</span>  <span class="c1"># 2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_make_method_non_static</span><span class="p">,</span>  <span class="c1"># 3</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_pullup_field</span><span class="p">,</span>  <span class="c1"># 4</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_move_field</span><span class="p">,</span>  <span class="c1"># 5</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_move_method</span><span class="p">,</span>  <span class="c1"># 6</span>
+        <span class="c1"># self.init_move_method,  # 6.2</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_move_class</span><span class="p">,</span>  <span class="c1"># 7</span>
+        <span class="c1"># self.init_move_class,  # 7.2</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_push_down_field</span><span class="p">,</span>  <span class="c1"># 8</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_extract_class</span><span class="p">,</span>  <span class="c1"># 9</span>
+        <span class="c1"># self.init_extract_class,  # 9.2</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_pullup_method</span><span class="p">,</span>  <span class="c1"># 10</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_push_down_method</span><span class="p">,</span>  <span class="c1"># 11</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_pullup_constructor</span><span class="p">,</span>  <span class="c1"># 12</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_decrease_field_visibility</span><span class="p">,</span>  <span class="c1"># 13</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_increase_field_visibility</span><span class="p">,</span>  <span class="c1"># 14</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_decrease_method_visibility</span><span class="p">,</span>  <span class="c1"># 15</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_increase_method_visibility</span><span class="p">,</span>  <span class="c1"># 16</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_extract_interface</span><span class="p">,</span>  <span class="c1"># 17</span>
+        <span class="c1"># self.init_extract_interface,  # 17.2</span>
+
+        <span class="c1"># self.init_extract_method,  # 18</span>
+    <span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_all_variables</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_static_variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_all_variables</span><span class="p">(</span><span class="n">static</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_methods</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_all_methods</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_static_methods</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_all_methods</span><span class="p">(</span><span class="n">static</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_pullup_field_candidates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_pullup_field_candidates</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_push_down_field_candidates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_push_down_field_candidates</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_pullup_method_candidates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_pullup_method_candidates</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_pullup_constructor_candidates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_pullup_constructor_candidates</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_push_down_method_candidates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_push_down_method_candidates</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_extract_interface_candidates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_extract_interface_candidate</span><span class="p">()</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="sbse.initialize.Initialization.generate_population" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">generate_population</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Generate population abstract method</p>
+
+        <details class="quote">
+          <summary>Source code in <code>sbse\initialize.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">generate_population</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Generate population abstract method</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">pass</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="sbse.initialize.Initialization.select_random" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">select_random</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Randomly selects a refactoring. If there are no candidates it tries again!</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>tuple</code></td>
+      <td><p>Refactoring main method, its parameters, and its human-readable name.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>sbse\initialize.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">select_random</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Randomly selects a refactoring. If there are no candidates it tries again!</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">        tuple: Refactoring main method, its parameters, and its human-readable name.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">initializer</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initializers</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&gt;&gt;&gt; Randomly selected refactoring: </span><span class="si">{</span><span class="n">initializer</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">main_function</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">handle_index_error</span><span class="p">(</span><span class="n">initializer</span><span class="p">)()</span>
+    <span class="k">if</span> <span class="n">main_function</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Inside the select_random method </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">select_random</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">main_function</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">name</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-class">
+
+
+
+<h2 id="sbse.initialize.RandomInitialization" class="doc doc-heading">
+        <code>RandomInitialization</code>
+
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Use to randomly initialize the refactoring population in search-based algorithms</p>
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="sbse.initialize.RandomInitialization.generate_population" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">generate_population</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Generate randomly (unbiased) initialized refactoring population</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>list</code></td>
+      <td><p>List of refactoring sequences (list of refactoring operations)</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>sbse\initialize.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">generate_population</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate randomly (unbiased) initialized refactoring population</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">        list: List of refactoring sequences (list of refactoring operations)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Generating a random initial population ...&#39;</span><span class="p">)</span>
+    <span class="c1"># population = []</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">population_size</span><span class="p">):</span>
+        <span class="n">individual</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">individual_size</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lower_band</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper_band</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">individual_size</span><span class="p">):</span>
+            <span class="n">main</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">select_random</span><span class="p">()</span>
+            <span class="n">individual</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">main</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Append a refactoring &quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot; to &quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s1">th&quot; gene of the individual </span><span class="si">{</span><span class="n">_</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;-&#39;</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">population</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">individual</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Append individual </span><span class="si">{</span><span class="n">_</span><span class="si">}</span><span class="s1"> to population, s&#39;</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="n">initial_pop_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">PROJECT_LOG_DIR</span><span class="si">}</span><span class="s1">initial_population_</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">global_execution_start_time</span><span class="si">}</span><span class="s1">.json&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">dump_population</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">initial_pop_path</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Generating a random initial population was finished.&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">population</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="sbse.initialize.RandomInitialization.init_decrease_field_visibility" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">init_decrease_field_visibility</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Finds a none-external-reference-public field to decrease its visibility to private.</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>tuple</code></td>
+      <td><p>Refactoring main func, its parameters, and its human-readable name.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>sbse\initialize.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">init_decrease_field_visibility</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Finds a none-external-reference-public field to decrease its visibility to private.</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">        tuple: Refactoring main func, its parameters, and its human-readable name.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">refactoring_main</span> <span class="o">=</span> <span class="n">decrease_field_visibility</span><span class="o">.</span><span class="n">main</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;udb_path&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">udb_path</span><span class="p">))}</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;is_private&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;external_references&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variables</span><span class="p">))</span>
+    <span class="c1"># print(candidates)</span>
+    <span class="n">field</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">candidates</span><span class="p">)</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+        <span class="s2">&quot;source_package&quot;</span><span class="p">:</span> <span class="n">field</span><span class="p">[</span><span class="s2">&quot;source_package&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;source_class&quot;</span><span class="p">:</span> <span class="n">field</span><span class="p">[</span><span class="s2">&quot;source_class&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;source_field&quot;</span><span class="p">:</span> <span class="n">field</span><span class="p">[</span><span class="s2">&quot;field_name&quot;</span><span class="p">],</span>
+    <span class="p">})</span>
+    <span class="k">return</span> <span class="n">refactoring_main</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="s1">&#39;Decrease Field Visibility&#39;</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="sbse.initialize.RandomInitialization.init_decrease_method_visibility" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">init_decrease_method_visibility</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Finds a none-external-reference-public method to decrease its visibility to private.</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>tuple</code></td>
+      <td><p>Refactoring main func, its parameters, and its human-readable name.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>sbse\initialize.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">init_decrease_method_visibility</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Finds a none-external-reference-public method to decrease its visibility to private.</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">        tuple: Refactoring main func, its parameters, and its human-readable name.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">refactoring_main</span> <span class="o">=</span> <span class="n">decrease_method_visibility</span><span class="o">.</span><span class="n">main</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;udb_path&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">udb_path</span><span class="p">))}</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;is_private&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;external_references&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_methods</span><span class="p">))</span>
+    <span class="n">method</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">candidates</span><span class="p">)</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+        <span class="s2">&quot;source_package&quot;</span><span class="p">:</span> <span class="n">method</span><span class="p">[</span><span class="s2">&quot;source_package&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;source_class&quot;</span><span class="p">:</span> <span class="n">method</span><span class="p">[</span><span class="s2">&quot;source_class&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;source_method&quot;</span><span class="p">:</span> <span class="n">method</span><span class="p">[</span><span class="s2">&quot;method_name&quot;</span><span class="p">],</span>
+    <span class="p">})</span>
+    <span class="k">return</span> <span class="n">refactoring_main</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="s1">&#39;Decrease Method Visibility&#39;</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="sbse.initialize.RandomInitialization.init_extract_class" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">init_extract_class</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Finds a set of methods and fields which should be extracted as a new class</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>tuple</code></td>
+      <td><p>Refactoring main method, its parameters, and its human-readable name.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>sbse\initialize.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">init_extract_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds a set of methods and fields which should be extracted as a new class</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">        tuple: Refactoring main method, its parameters, and its human-readable name.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_db</span> <span class="o">=</span> <span class="n">und</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">udb_path</span><span class="p">)</span>
+    <span class="n">refactoring_main</span> <span class="o">=</span> <span class="n">extract_class</span><span class="o">.</span><span class="n">main</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;udb_path&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">udb_path</span><span class="p">))}</span>
+    <span class="n">classes</span> <span class="o">=</span> <span class="n">_db</span><span class="o">.</span><span class="n">ents</span><span class="p">(</span><span class="s2">&quot;Type Class ~Unknown ~Anonymous&quot;</span><span class="p">)</span>
+    <span class="n">random_class</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">classes</span><span class="p">)</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;source_class&quot;</span><span class="p">:</span> <span class="n">random_class</span><span class="o">.</span><span class="n">simplename</span><span class="p">(),</span>
+            <span class="s2">&quot;file_path&quot;</span><span class="p">:</span> <span class="n">random_class</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">longname</span><span class="p">()</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+    <span class="n">class_fields</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">class_methods</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">random_class</span><span class="o">.</span><span class="n">refs</span><span class="p">(</span><span class="s2">&quot;define&quot;</span><span class="p">,</span> <span class="s2">&quot;variable&quot;</span><span class="p">):</span>
+        <span class="n">class_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ref</span><span class="o">.</span><span class="n">ent</span><span class="p">())</span>
+
+    <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">random_class</span><span class="o">.</span><span class="n">refs</span><span class="p">(</span><span class="s2">&quot;define&quot;</span><span class="p">,</span> <span class="s2">&quot;method&quot;</span><span class="p">):</span>
+        <span class="n">class_methods</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ref</span><span class="o">.</span><span class="n">ent</span><span class="p">())</span>
+
+    <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;moved_fields&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">ent</span><span class="o">.</span><span class="n">simplename</span><span class="p">()</span> <span class="k">for</span> <span class="n">ent</span> <span class="ow">in</span>
+                             <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">class_fields</span><span class="p">,</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">class_fields</span><span class="p">)))],</span>
+            <span class="s2">&quot;moved_methods&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">ent</span><span class="o">.</span><span class="n">simplename</span><span class="p">()</span> <span class="k">for</span> <span class="n">ent</span> <span class="ow">in</span>
+                              <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">class_methods</span><span class="p">,</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">class_methods</span><span class="p">)))],</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+    <span class="n">_db</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">refactoring_main</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="s1">&#39;Extract Class&#39;</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="sbse.initialize.RandomInitialization.init_extract_interface" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">init_extract_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Finds a class which should have an interface</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>tuple</code></td>
+      <td><p>Refactoring main method, its parameters, and its human-readable name.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>sbse\initialize.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">init_extract_interface</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds a class which should have an interface</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">        tuple: Refactoring main method, its parameters, and its human-readable name.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_db</span> <span class="o">=</span> <span class="n">und</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">udb_path</span><span class="p">)</span>
+    <span class="n">refactoring_main</span> <span class="o">=</span> <span class="n">extract_interface2</span><span class="o">.</span><span class="n">main</span>
+    <span class="c1"># params = {&quot;udb_path&quot;: str(Path(self.udb_path))}</span>
+    <span class="n">random_class</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_extract_interface_candidates</span><span class="p">)</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;class_path&#39;</span><span class="p">:</span> <span class="n">random_class</span><span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">refactoring_main</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="s1">&#39;Extract Interface&#39;</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="sbse.initialize.RandomInitialization.init_increase_field_visibility" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">init_increase_field_visibility</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Finds a private field to increase its visibility to public.</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>tuple</code></td>
+      <td><p>Refactoring main func, its parameters, and its human-readable name.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>sbse\initialize.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">init_increase_field_visibility</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds a private field to increase its visibility to public.</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">        tuple: Refactoring main func, its parameters, and its human-readable name.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">refactoring_main</span> <span class="o">=</span> <span class="n">increase_field_visibility</span><span class="o">.</span><span class="n">main</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;udb_path&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">udb_path</span><span class="p">))}</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;is_public&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variables</span><span class="p">))</span>
+    <span class="n">field</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">candidates</span><span class="p">)</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+        <span class="s2">&quot;source_package&quot;</span><span class="p">:</span> <span class="n">field</span><span class="p">[</span><span class="s2">&quot;source_package&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;source_class&quot;</span><span class="p">:</span> <span class="n">field</span><span class="p">[</span><span class="s2">&quot;source_class&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;source_field&quot;</span><span class="p">:</span> <span class="n">field</span><span class="p">[</span><span class="s2">&quot;field_name&quot;</span><span class="p">],</span>
+    <span class="p">})</span>
+    <span class="k">return</span> <span class="n">refactoring_main</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="s1">&#39;Increase Field Visibility&#39;</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="sbse.initialize.RandomInitialization.init_increase_method_visibility" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">init_increase_method_visibility</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Finds a private method to increase its visibility to public.</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>tuple</code></td>
+      <td><p>Refactoring main func, its parameters, and its human-readable name.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>sbse\initialize.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">init_increase_method_visibility</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Finds a private method to increase its visibility to public.</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">        tuple: Refactoring main func, its parameters, and its human-readable name.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">refactoring_main</span> <span class="o">=</span> <span class="n">increase_method_visibility</span><span class="o">.</span><span class="n">main</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;udb_path&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">udb_path</span><span class="p">))}</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;is_public&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_methods</span><span class="p">))</span>
+    <span class="n">method</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">candidates</span><span class="p">)</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+        <span class="s2">&quot;source_package&quot;</span><span class="p">:</span> <span class="n">method</span><span class="p">[</span><span class="s2">&quot;source_package&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;source_class&quot;</span><span class="p">:</span> <span class="n">method</span><span class="p">[</span><span class="s2">&quot;source_class&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;source_method&quot;</span><span class="p">:</span> <span class="n">method</span><span class="p">[</span><span class="s2">&quot;method_name&quot;</span><span class="p">],</span>
+    <span class="p">})</span>
+    <span class="k">return</span> <span class="n">refactoring_main</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="s1">&#39;Increase Method Visibility&#39;</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="sbse.initialize.RandomInitialization.init_make_field_non_static" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">init_make_field_non_static</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Finds all static fields and randomly chooses one of them</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>tuple</code></td>
+      <td><p>Refactoring main method, its parameters, and its human-readable name.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>sbse\initialize.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">init_make_field_non_static</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Finds all static fields and randomly chooses one of them</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">        tuple: Refactoring main method, its parameters, and its human-readable name.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">refactoring_main</span> <span class="o">=</span> <span class="n">make_field_non_static</span><span class="o">.</span><span class="n">main</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;udb_path&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">udb_path</span><span class="p">}</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_static_variables</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">candidates</span><span class="p">))</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;source_package&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">refactoring_main</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="s1">&#39;Make Field Non-Static&#39;</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="sbse.initialize.RandomInitialization.init_make_field_static" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">init_make_field_static</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Finds all non-static fields and randomly chooses one of them</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>tuple</code></td>
+      <td><p>Refactoring main method, its parameters, and its human-readable name.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>sbse\initialize.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">init_make_field_static</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Finds all non-static fields and randomly chooses one of them</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">        tuple: Refactoring main method, its parameters, and its human-readable name.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">refactoring_main</span> <span class="o">=</span> <span class="n">make_field_static</span><span class="o">.</span><span class="n">main</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;udb_path&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">udb_path</span><span class="p">}</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variables</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">candidates</span><span class="p">))</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;source_package&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">refactoring_main</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="s1">&#39;Make Field Static&#39;</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="sbse.initialize.RandomInitialization.init_make_method_non_static" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">init_make_method_non_static</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Finds all static methods and randomly chooses one of them</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>tuple</code></td>
+      <td><p>refactoring main method, its parameters, and its human-readable name.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>sbse\initialize.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">init_make_method_non_static</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds all static methods and randomly chooses one of them</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">        tuple: refactoring main method, its parameters, and its human-readable name.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">refactoring_main</span> <span class="o">=</span> <span class="n">make_method_non_static2</span><span class="o">.</span><span class="n">main</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;udb_path&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">udb_path</span><span class="p">}</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_static_methods</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">candidates</span><span class="p">))</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;source_package&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">refactoring_main</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="s1">&#39;Make Method Non-Static&#39;</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="sbse.initialize.RandomInitialization.init_make_method_static" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">init_make_method_static</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Finds all non-static methods and randomly chooses one of them</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>tuple</code></td>
+      <td><p>Refactoring main method, its parameters, and its human-readable name.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>sbse\initialize.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">init_make_method_static</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Finds all non-static methods and randomly chooses one of them</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">        tuple: Refactoring main method, its parameters, and its human-readable name.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">refactoring_main</span> <span class="o">=</span> <span class="n">make_method_static2</span><span class="o">.</span><span class="n">main</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;udb_path&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">udb_path</span><span class="p">}</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_methods</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">candidates</span><span class="p">))</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;source_package&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">refactoring_main</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="s1">&#39;Make Method Static&#39;</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="sbse.initialize.RandomInitialization.init_move_class" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">init_move_class</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Finds a class which should be moved to another existing package</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>tuple</code></td>
+      <td><p>Refactoring main method, its parameters, and its human-readable name.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>sbse\initialize.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">init_move_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds a class which should be moved to another existing package</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">        tuple: Refactoring main method, its parameters, and its human-readable name.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_db</span> <span class="o">=</span> <span class="n">und</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">udb_path</span><span class="p">)</span>
+    <span class="n">refactoring_main</span> <span class="o">=</span> <span class="n">move_class</span><span class="o">.</span><span class="n">main</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;udb_path&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">udb_path</span><span class="p">))}</span>
+    <span class="n">classes</span> <span class="o">=</span> <span class="n">_db</span><span class="o">.</span><span class="n">ents</span><span class="p">(</span><span class="s2">&quot;Java Class Public ~TypeVariable ~Anonymous ~Unknown ~Unresolved ~Private ~Static&quot;</span><span class="p">)</span>
+    <span class="n">selected_class</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">classes</span><span class="p">)</span>
+    <span class="n">package_list</span> <span class="o">=</span> <span class="n">selected_class</span><span class="o">.</span><span class="n">ents</span><span class="p">(</span><span class="s1">&#39;Containin&#39;</span><span class="p">,</span> <span class="s1">&#39;Java Package&#39;</span><span class="p">)</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">package_list</span> <span class="ow">and</span> <span class="n">selected_class</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">package_list</span> <span class="o">=</span> <span class="n">selected_class</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">ents</span><span class="p">(</span><span class="s1">&#39;Containin&#39;</span><span class="p">,</span> <span class="s1">&#39;Java Package&#39;</span><span class="p">)</span>
+        <span class="n">selected_class</span> <span class="o">=</span> <span class="n">selected_class</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span>
+    <span class="c1"># print(package_list)</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;class_name&quot;</span><span class="p">:</span> <span class="n">selected_class</span><span class="o">.</span><span class="n">simplename</span><span class="p">()})</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">package_list</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;source_package&quot;</span><span class="p">:</span> <span class="s2">&quot;(Unnamed_Package)&quot;</span><span class="p">})</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;source_package&quot;</span><span class="p">:</span> <span class="n">package_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">longname</span><span class="p">()})</span>
+
+    <span class="n">entity_filter</span> <span class="o">=</span> <span class="s2">&quot;Import, Importby, Contain, Containin, Couple, Coupleby, &quot;</span>
+    <span class="n">entity_filter</span> <span class="o">+=</span> <span class="s2">&quot;Create, Createby, DotRef, DotRefby, Declare, Declarein, Define, Definein&quot;</span>
+    <span class="n">related_entities</span> <span class="o">=</span> <span class="n">selected_class</span><span class="o">.</span><span class="n">ents</span><span class="p">(</span>
+        <span class="n">entity_filter</span><span class="p">,</span>
+        <span class="s2">&quot;Type ~Unknown ~Anonymous&quot;</span>
+        <span class="c1"># &quot;Package&quot;</span>
+    <span class="p">)</span>
+
+    <span class="c1"># print(&#39;Parameters&#39;, params)</span>
+    <span class="c1"># print(&quot;related_entities&quot;, related_entities)</span>
+    <span class="c1"># for e in related_entities:</span>
+    <span class="c1">#     print(e.longname(), e.kind())</span>
+
+    <span class="n">trials</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">trials</span> <span class="o">&lt;</span> <span class="mi">25</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">related_entities</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">related_entities</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">selected_entity</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">related_entities</span><span class="p">)</span>
+            <span class="n">package_list</span> <span class="o">=</span> <span class="n">selected_entity</span><span class="o">.</span><span class="n">ents</span><span class="p">(</span><span class="s1">&#39;Containin&#39;</span><span class="p">,</span> <span class="s1">&#39;Java Package&#39;</span><span class="p">)</span>
+            <span class="k">while</span> <span class="ow">not</span> <span class="n">package_list</span> <span class="ow">and</span> <span class="n">selected_entity</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">package_list</span> <span class="o">=</span> <span class="n">selected_entity</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">ents</span><span class="p">(</span><span class="s1">&#39;Containin&#39;</span><span class="p">,</span> <span class="s1">&#39;Java Package&#39;</span><span class="p">)</span>
+                <span class="n">selected_entity</span> <span class="o">=</span> <span class="n">selected_entity</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">package_list</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;target_package&quot;</span><span class="p">:</span> <span class="s2">&quot;(Unnamed_Package)&quot;</span><span class="p">})</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;target_package&quot;</span><span class="p">:</span> <span class="n">package_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">longname</span><span class="p">()})</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">packages</span> <span class="o">=</span> <span class="n">_db</span><span class="o">.</span><span class="n">ents</span><span class="p">(</span><span class="s2">&quot;Package ~Unknown ~Unresolved ~Unnamed&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">packages</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">packages</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">selected_package</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">packages</span><span class="p">)</span>
+                <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;target_package&quot;</span><span class="p">:</span> <span class="n">selected_package</span><span class="o">.</span><span class="n">longname</span><span class="p">()})</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;target_package&quot;</span><span class="p">:</span> <span class="s2">&quot;(Unnamed_Package)&quot;</span><span class="p">})</span>
+        <span class="c1"># print(params[&#39;source_package&#39;], params[&#39;target_package&#39;])</span>
+        <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;source_package&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;target_package&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;target_package&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;(Unnamed_Package)&#39;</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">trials</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">_db</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">refactoring_main</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="s1">&#39;Move Class&#39;</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="sbse.initialize.RandomInitialization.init_move_field" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">init_move_field</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Finds fields with a class to move</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>tuple</code></td>
+      <td><p>Refactoring main method, its parameters, and its human-readable name.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>sbse\initialize.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">init_move_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds fields with a class to move</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">        tuple: Refactoring main method, its parameters, and its human-readable name.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_db</span> <span class="o">=</span> <span class="n">und</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">udb_path</span><span class="p">)</span>
+    <span class="n">refactoring_main</span> <span class="o">=</span> <span class="n">move_field</span><span class="o">.</span><span class="n">main</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;udb_path&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">udb_path</span><span class="p">))}</span>
+    <span class="n">random_field</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_variables</span><span class="p">)</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">random_field</span><span class="p">)</span>
+    <span class="n">classes</span> <span class="o">=</span> <span class="n">_db</span><span class="o">.</span><span class="n">ents</span><span class="p">(</span><span class="s2">&quot;Class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static&quot;</span><span class="p">)</span>
+    <span class="n">random_class</span> <span class="o">=</span> <span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">classes</span><span class="p">))</span><span class="o">.</span><span class="n">longname</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+    <span class="n">target_package</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    target_class: str, target_package: str,</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">random_class</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">target_class</span> <span class="o">=</span> <span class="n">random_class</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">random_class</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">target_package</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">random_class</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">target_class</span> <span class="o">=</span> <span class="n">random_class</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_move_field</span><span class="p">()</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+        <span class="s2">&quot;target_class&quot;</span><span class="p">:</span> <span class="n">target_class</span><span class="p">,</span>
+        <span class="s2">&quot;target_package&quot;</span><span class="p">:</span> <span class="n">target_package</span>
+    <span class="p">})</span>
+    <span class="n">_db</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">refactoring_main</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="s1">&#39;Move Field&#39;</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="sbse.initialize.RandomInitialization.init_move_field2" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">init_move_field2</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Finds fields with a class to move (version 2)</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>tuple</code></td>
+      <td><p>Refactoring main method, its parameters, and its human-readable name.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>sbse\initialize.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">init_move_field2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds fields with a class to move (version 2)</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">        tuple: Refactoring main method, its parameters, and its human-readable name.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">refactoring_main</span> <span class="o">=</span> <span class="n">move_field</span><span class="o">.</span><span class="n">main</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;udb_path&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">udb_path</span><span class="p">))}</span>
+    <span class="n">classes_fields</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">random_field</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">classes_fields</span><span class="p">)</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">random_field</span><span class="p">)</span>
+
+    <span class="n">related_entities</span> <span class="o">=</span> <span class="n">random_field</span><span class="o">.</span><span class="n">ents</span><span class="p">(</span>
+        <span class="s2">&quot;Set, Setby, Contain, Containin, Use, Useby, Create, Createby, DotRef, DotRefby, Define, Definein&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Type ~Unknown ~Anonymous&quot;</span>
+        <span class="c1"># &quot;Package&quot;</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Parameters&#39;</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;related_entities&quot;</span><span class="p">,</span> <span class="n">related_entities</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">related_entities</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">longname</span><span class="p">(),</span> <span class="n">e</span><span class="o">.</span><span class="n">kind</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">related_entities</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">related_entities</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">selected_entity</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">related_entities</span><span class="p">)</span>
+        <span class="n">package_list</span> <span class="o">=</span> <span class="n">selected_entity</span><span class="o">.</span><span class="n">ents</span><span class="p">(</span><span class="s1">&#39;Containin&#39;</span><span class="p">,</span> <span class="s1">&#39;Java Package&#39;</span><span class="p">)</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">package_list</span> <span class="ow">and</span> <span class="n">selected_entity</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">package_list</span> <span class="o">=</span> <span class="n">selected_entity</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">ents</span><span class="p">(</span><span class="s1">&#39;Containin&#39;</span><span class="p">,</span> <span class="s1">&#39;Java Package&#39;</span><span class="p">)</span>
+            <span class="n">selected_entity</span> <span class="o">=</span> <span class="n">selected_entity</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">package_list</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;target_package&quot;</span><span class="p">:</span> <span class="s2">&quot;(Unnamed_Package)&quot;</span><span class="p">})</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;target_package&quot;</span><span class="p">:</span> <span class="n">package_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">longname</span><span class="p">()})</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="sbse.initialize.RandomInitialization.init_move_method" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">init_move_method</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Finds methods with a class to move</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>tuple</code></td>
+      <td><p>Refactoring main method, its parameters, and its human-readable name.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>sbse\initialize.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">init_move_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds methods with a class to move</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">        tuple: Refactoring main method, its parameters, and its human-readable name.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_db</span> <span class="o">=</span> <span class="n">und</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">udb_path</span><span class="p">)</span>
+    <span class="n">refactoring_main</span> <span class="o">=</span> <span class="n">move_method</span><span class="o">.</span><span class="n">main</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;udb_path&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">udb_path</span><span class="p">))}</span>
+    <span class="n">random_method</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_methods</span><span class="p">)</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">random_method</span><span class="p">)</span>
+    <span class="n">classes</span> <span class="o">=</span> <span class="n">_db</span><span class="o">.</span><span class="n">ents</span><span class="p">(</span><span class="s2">&quot;Class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static&quot;</span><span class="p">)</span>
+    <span class="n">random_class</span> <span class="o">=</span> <span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">classes</span><span class="p">))</span><span class="o">.</span><span class="n">longname</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+    <span class="n">target_package</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    target_class: str, target_package: str,</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">random_class</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">target_class</span> <span class="o">=</span> <span class="n">random_class</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">random_class</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">target_package</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">random_class</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">target_class</span> <span class="o">=</span> <span class="n">random_class</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_move_field</span><span class="p">()</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+        <span class="s2">&quot;target_class&quot;</span><span class="p">:</span> <span class="n">target_class</span><span class="p">,</span>
+        <span class="s2">&quot;target_package&quot;</span><span class="p">:</span> <span class="n">target_package</span>
+    <span class="p">})</span>
+    <span class="n">_db</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">refactoring_main</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="s1">&#39;Move Method&#39;</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="sbse.initialize.RandomInitialization.init_pullup_constructor" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">init_pullup_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Finds statements in class constructors to be pulled-up</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>tuple</code></td>
+      <td><p>Refactoring main method, its parameters, and its human-readable name.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>sbse\initialize.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">init_pullup_constructor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds statements in class constructors to be pulled-up</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">        tuple: Refactoring main method, its parameters, and its human-readable name.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">refactoring_main</span> <span class="o">=</span> <span class="n">pullup_constructor</span><span class="o">.</span><span class="n">main</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;udb_path&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">udb_path</span><span class="p">))}</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pullup_constructor_candidates</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">candidates</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">refactoring_main</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="s1">&#39;Pull Up Constructor&#39;</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="sbse.initialize.RandomInitialization.init_pullup_field" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">init_pullup_field</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Find all classes with their attributes and package names, then chooses randomly one of them!</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code></code></td>
+      <td><p>Refactoring main method, its parameters, and its human-readable name.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>sbse\initialize.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">init_pullup_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find all classes with their attributes and package names, then chooses randomly one of them!</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">        Refactoring main method, its parameters, and its human-readable name.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">refactoring_main</span> <span class="o">=</span> <span class="n">pullup_field</span><span class="o">.</span><span class="n">main</span>
+    <span class="c1"># params = {&quot;project_dir&quot;: str(Path(self.udb_path).parent)}</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;project_dir&quot;</span><span class="p">:</span> <span class="n">config</span><span class="o">.</span><span class="n">PROJECT_PATH</span><span class="p">}</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pullup_field_candidates</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">candidates</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">refactoring_main</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="s1">&#39;Pull Up Field&#39;</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="sbse.initialize.RandomInitialization.init_pullup_method" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">init_pullup_method</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Finds methods to be pulled-up</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>tuple</code></td>
+      <td><p>Refactoring main method, its parameters, and its human-readable name.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>sbse\initialize.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">init_pullup_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds methods to be pulled-up</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">        tuple: Refactoring main method, its parameters, and its human-readable name.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">refactoring_main</span> <span class="o">=</span> <span class="n">pullup_method</span><span class="o">.</span><span class="n">main</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;udb_path&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">udb_path</span><span class="p">))}</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pullup_method_candidates</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">candidates</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">refactoring_main</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="s1">&#39;Pull Up Method&#39;</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="sbse.initialize.RandomInitialization.init_push_down_field" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">init_push_down_field</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Finds fields to be push-down</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>tuple</code></td>
+      <td><p>Refactoring main method, its parameters, and its human-readable name.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>sbse\initialize.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">init_push_down_field</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds fields to be push-down</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">        tuple: Refactoring main method, its parameters, and its human-readable name.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">refactoring_main</span> <span class="o">=</span> <span class="n">pushdown_field2</span><span class="o">.</span><span class="n">main</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;udb_path&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">udb_path</span><span class="p">))}</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_push_down_field_candidates</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">candidates</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">refactoring_main</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="s1">&#39;Push Down Field&#39;</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="sbse.initialize.RandomInitialization.init_push_down_method" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">init_push_down_method</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Finds methods to be pushed-downs</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>tuple</code></td>
+      <td><p>Refactoring main method, its parameters, and its human-readable name.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>sbse\initialize.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">init_push_down_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finds methods to be pushed-downs</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">        tuple: Refactoring main method, its parameters, and its human-readable name.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">refactoring_main</span> <span class="o">=</span> <span class="n">pushdown_method</span><span class="o">.</span><span class="n">main</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;udb_path&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">udb_path</span><span class="p">))}</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_push_down_method_candidates</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">candidates</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">refactoring_main</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="s1">&#39;Push Down Method&#39;</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-class">
+
+
+
+<h2 id="sbse.initialize.SmellInitialization" class="doc doc-heading">
+        <code>SmellInitialization</code>
+
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Use to initialize refactoring population based on refactoring opportunities</p>
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="sbse.initialize.SmellInitialization.__init__" class="doc doc-heading">
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-special"><code>special</code></small>
+  </span>
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>SmellInitialization</code></td>
+      <td><p>An instance of SmellInitialization class</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>sbse\initialize.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">        SmellInitialization: An instance of SmellInitialization class</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">super</span><span class="p">(</span><span class="n">SmellInitialization</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="c1"># Load csv files</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">move_method_candidates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_move_method_candidates</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">extract_class_candidates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_extract_class_candidates</span><span class="p">()</span>
+    <span class="c1"># self.extract_method_candidates = self.load_extract_method_candidates()  # We leave extract method for now.</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="sbse.initialize.SmellInitialization.generate_population" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">generate_population</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Generate a biased initial population consists of first-time validated refactorings</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>list</code></td>
+      <td><p>list of refactoring sequences (list of refactoring operations)</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>sbse\initialize.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">generate_population</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Generate a biased initial population consists of first-time validated refactorings</span>
+
+<span class="sd">    Return:</span>
+
+<span class="sd">        list: list of refactoring sequences (list of refactoring operations)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">config</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Generating a biased initial population ...&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">population_size</span><span class="p">):</span>
+        <span class="n">individual</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">individual_size</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lower_band</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper_band</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">individual_size</span><span class="p">):</span>
+            <span class="n">main</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">select_random</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Refactoring name: </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Refactoring params: </span><span class="si">{</span><span class="n">params</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">is_correct_refactoring</span> <span class="o">=</span> <span class="n">main</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+            <span class="k">while</span> <span class="n">is_correct_refactoring</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="n">reset_project</span><span class="p">()</span>
+                <span class="n">main</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">select_random</span><span class="p">()</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Refactoring name: </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Refactoring params: </span><span class="si">{</span><span class="n">params</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">is_correct_refactoring</span> <span class="o">=</span> <span class="n">main</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+
+            <span class="c1">####</span>
+            <span class="c1"># update_understand_database(self.udb_path)</span>
+            <span class="c1"># quit()</span>
+            <span class="c1">####</span>
+
+            <span class="n">individual</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">main</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Append a refactoring &quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot; to &quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s1">th&quot; gene of the individual </span><span class="si">{</span><span class="n">_</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+            <span class="n">reset_project</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;-&#39;</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">population</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">individual</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Append individual </span><span class="si">{</span><span class="n">_</span><span class="si">}</span><span class="s1"> to population, s&#39;</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="n">initial_pop_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">PROJECT_LOG_DIR</span><span class="si">}</span><span class="s1">initial_population_</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">global_execution_start_time</span><span class="si">}</span><span class="s1">.json&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">dump_population</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">initial_pop_path</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Generating a biased initial population was finished.&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">population</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="sbse.initialize.SmellInitialization.init_extract_class" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">init_extract_class</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Finds a set of methods and fields which should be extracted as a new class</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>tuple</code></td>
+      <td><p>Refactoring main method, its parameters, and its human-readable name.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>sbse\initialize.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">init_extract_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">main</span> <span class="o">=</span> <span class="n">extract_class</span><span class="o">.</span><span class="n">main</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extract_class_candidates</span><span class="p">)</span>
+    <span class="n">params</span><span class="p">[</span><span class="s2">&quot;udb_path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">udb_path</span>
+    <span class="k">return</span> <span class="n">main</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="s2">&quot;Extract Class&quot;</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="sbse.initialize.SmellInitialization.init_move_method" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">init_move_method</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Finds methods with a class to move</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>tuple</code></td>
+      <td><p>Refactoring main method, its parameters, and its human-readable name.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>sbse\initialize.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">init_move_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">move_method_candidates</span><span class="p">)</span>
+    <span class="n">params</span><span class="p">[</span><span class="s2">&quot;udb_path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">udb_path</span>
+    <span class="n">main</span> <span class="o">=</span> <span class="n">move_method</span><span class="o">.</span><span class="n">main</span>
+    <span class="c1"># print(params)</span>
+    <span class="k">return</span> <span class="n">main</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="s2">&quot;Move Method&quot;</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        
+        <a href="../../metrics/testability/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Testability prediction" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Testability prediction
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../search-based_refactoring/" class="md-footer__link md-footer__link--next" aria-label="Next: Search-based refactoring" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Search-based refactoring
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+          <div class="md-footer-copyright__highlight">
+            © 2020-2021 CodART project - Reverse engineering laboratory
+          </div>
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+        
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../../assets/javascripts/workers/search.409db549.min.js", "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.56a63758.min.js"></script>
+      
+    
+  </body>
+</html>

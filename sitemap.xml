@@ -2,242 +2,247 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://m-zakeri.github.io/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/about/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/benchmarks/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/code_smells_list/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/faq/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/publications/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/refactorings_list/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/code_smells/feature_envy/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/code_smells/large_class/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/code_smells/long_method/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/metrics/testability/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://m-zakeri.github.io/optimization/initialize/</loc>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/optimization/search-based_refactoring/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/proposals/core_code_smell_development/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/proposals/core_refactoring_to_design_patterns_development/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/proposals/core_refactorings_development/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/proposals/core_search_based_development/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/refactorings/decrease_field_visibility/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/refactorings/decrease_method_visibility/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/refactorings/encapsulate_field/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/refactorings/extract_class/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/refactorings/extract_interface/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/refactorings/extract_interface2/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/refactorings/extract_method/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/refactorings/extract_subclass/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/refactorings/increase_field_visibility/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/refactorings/increase_method_visibility/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/refactorings/inline_class/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/refactorings/make_field_final/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/refactorings/make_field_non_final/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/refactorings/make_field_non_static/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/refactorings/make_field_static/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/refactorings/make_method_final/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/refactorings/make_method_non_final/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/refactorings/make_method_non_static/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/refactorings/make_method_static/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/refactorings/move_class/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/refactorings/move_field/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/refactorings/move_method/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/refactorings/pull_up_constructor/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/refactorings/pull_up_field/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/refactorings/pull_up_method/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/refactorings/push_down_field/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/refactorings/push_down_method/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/refactorings/rename_method/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/tutorials/antlr_advanced/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/tutorials/antlr_basics/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/tutorials/antlr_slides/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://m-zakeri.github.io/tutorials/refactorings_basics/</loc>
-         <lastmod>2022-04-30</lastmod>
+         <lastmod>2022-05-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>

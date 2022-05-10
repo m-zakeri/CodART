@@ -536,26 +536,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#refactorings.extract_interface2.Path" class="md-nav__link">
-    Path
-  </a>
-  
-    <nav class="md-nav" aria-label="Path">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#refactorings.extract_interface2.Path.get_file_name_from_path" class="md-nav__link">
-    get_file_name_from_path()
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#refactorings.extract_interface2.main" class="md-nav__link">
     main()
   </a>
@@ -965,6 +945,18 @@
   
   
     <li class="md-nav__item">
+      <a href="../../optimization/initialize/" class="md-nav__link">
+        Population initialization
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../optimization/search-based_refactoring/" class="md-nav__link">
         Search-based refactoring
       </a>
@@ -1189,26 +1181,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#refactorings.extract_interface2.Path" class="md-nav__link">
-    Path
-  </a>
-  
-    <nav class="md-nav" aria-label="Path">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#refactorings.extract_interface2.Path.get_file_name_from_path" class="md-nav__link">
-    get_file_name_from_path()
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#refactorings.extract_interface2.main" class="md-nav__link">
     main()
   </a>
@@ -1272,84 +1244,6 @@ classes.</p>
 
 
 
-
-
-
-  <div class="doc doc-object doc-class">
-
-
-
-<h2 id="refactorings.extract_interface2.Path" class="doc doc-heading">
-        <code>Path</code>
-
-
-
-</h2>
-
-    <div class="doc doc-contents ">
-
-
-
-
-
-  <div class="doc doc-children">
-
-
-
-
-
-
-
-
-
-
-
-
-
-  <div class="doc doc-object doc-method">
-
-
-
-<h3 id="refactorings.extract_interface2.Path.get_file_name_from_path" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">get_file_name_from_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></code>
-
-  <span class="doc doc-properties">
-      <small class="doc doc-property doc-property-staticmethod"><code>staticmethod</code></small>
-  </span>
-
-</h3>
-
-    <div class="doc doc-contents ">
-
-      <p>Use Python built-in functions instead of this</p>
-
-        <details class="quote">
-          <summary>Source code in <code>refactorings\extract_interface2.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="nd">@staticmethod</span>
-<span class="k">def</span> <span class="nf">get_file_name_from_path</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Use Python built-in functions instead of this</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
-    <span class="n">class_name</span> <span class="o">=</span> <span class="n">path</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">class_name</span> <span class="o">=</span> <span class="n">class_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
-    <span class="n">class_name</span> <span class="o">=</span> <span class="n">class_name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">class_name</span>
-</code></pre></div>
-        </details>
-    </div>
-
-  </div>
-
-
-
-
-
-  </div>
-
-    </div>
-
-  </div>
 
 
 
@@ -1418,13 +1312,11 @@ classes.</p>
 
     <span class="n">interface_info_</span> <span class="o">=</span> <span class="n">listener</span><span class="o">.</span><span class="n">get_interface_info</span><span class="p">()</span>
     <span class="n">interface_info_</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;I&#39;</span> <span class="o">+</span> <span class="n">interface_info_</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
-    <span class="n">path_list</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">convert_str_paths_to_list_paths</span><span class="p">([</span><span class="n">class_path</span><span class="p">])</span>
-    <span class="n">interface_info_</span><span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_list</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">interface_info_</span><span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">class_path</span><span class="p">)</span>
 
     <span class="n">ic</span> <span class="o">=</span> <span class="n">InterfaceCreator</span><span class="p">(</span><span class="n">interface_info_</span><span class="p">,</span> <span class="n">class_path</span><span class="p">)</span>
     <span class="n">ic</span><span class="o">.</span><span class="n">add_implement_statement_to_class</span><span class="p">()</span>
     <span class="n">ic</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-
     <span class="k">return</span> <span class="kc">True</span>
 </code></pre></div>
         </details>
