@@ -40,7 +40,7 @@ class RefactoringSequenceEvaluation:
             index_col=False
         )
 
-        res_path = glob.glob(os.path.join(self.log_directory, 'best_refactoring_sequences_objectives*.csv'))[0]
+        res_path = glob.glob(os.path.join(self.log_directory, 'best_refactoring_sequences_objectives_extended.csv'))[0]
         if config.PROBLEM == 2:
             col_names = ['generation',
                          'reusability', 'understandability', 'flexibility', 'functionality', 'effectiveness',
@@ -55,23 +55,29 @@ class RefactoringSequenceEvaluation:
         df_res = pd.read_csv(
             res_path,
             sep=',',
-            header=None,
-            names=col_names,
+            # header=None,
+            # names=col_names,
             index_col=False
         )
-        # print(df)
+        print('df initial')
+        print(df_initial)
+        print('df_res')
+        print(df_res)
 
         evaluation_results = []
         for index, row in df_res.iterrows():
-            raw_improvements = [(-item)-df_initial[col_names[i+1]][0] for i, item in enumerate(row[1:])]
-            relative_improvements = [((-item)-df_initial[col_names[i+1]][0])/abs(df_initial[col_names[i+1]][0])
+            # We should use positive quality attributes
+            raw_improvements = [item - df_initial[col_names[i+1]][0] for i, item in enumerate(row[1:])]
+            relative_improvements = [(item - df_initial[col_names[i+1]][0]) / abs(df_initial[col_names[i+1]][0])
                                      for i, item in enumerate(row[1:])]
 
             quality_gain_raw = [sum(raw_improvements)]
-            quality_gain_relative = [(sum(-row[1:])/sum([df_initial[col][0] for col in col_names[1:]])) - 1]  # single
+            quality_gain_relative = [(sum(row[1:]) / sum([df_initial[col][0] for col in col_names[1:]])) - 1]  # single
 
-            evaluation_results.append([*raw_improvements, *relative_improvements,
-                                       *quality_gain_raw, *quality_gain_relative])
+            evaluation_results.append(
+                [*raw_improvements, *relative_improvements,
+                 *quality_gain_raw, *quality_gain_relative]
+            )
 
         evaluation_results_cols = [*[f'{name}_raw_improvement' for name in col_names[1:]],
                                    *[f'{name}_relative_improvement' for name in col_names[1:]],
@@ -129,7 +135,7 @@ class RefactoringSequenceEvaluation:
                     config.PROJECT_LOG_DIR,
                     'best_refactoring_sequences_objectives_extended.csv'
                 ),
-                generation=config.MAX_ITERATIONS,
+                generation='-1',  # config.MAX_ITERATIONS,
                 testability_verbose=True,
                 testability_log_path=os.path.join(
                     config.PROJECT_LOG_DIR,
@@ -180,8 +186,8 @@ def execute_refactoring_sequence():
 
 if __name__ == '__main__':
     reset_project()
-    quit()
+    # quit()
     # execute_refactoring_sequence()
     eval_ = RefactoringSequenceEvaluation(log_directory=config.PROJECT_LOG_DIR)
-    # eval_.evaluate_sequences()
-    eval_.execute_from_json_log(reset=False)
+    eval_.evaluate_sequences()
+    # eval_.execute_from_json_log(reset=False)
