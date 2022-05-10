@@ -1,11 +1,22 @@
 """
-This module implements finding candidates for the genetic algorithms!
+## Introduction
+
+This module implements finding refactoring candidates for the search-based algorithms
 
 Initialization: The abstract class and common utility functions.
 RandomInitialization: For initialling random candidates.
+
+## Changelog
+### Version 0.4.0
+* Enhances module's design.
+
+### Version 0.3.2
+
+
+
 """
 
-__version__ = '0.3.2'
+__version__ = '0.4.0'
 __author__ = 'Morteza Zakeri'
 
 import os
@@ -22,11 +33,13 @@ import understand as und
 
 from codart.utility.directory_utils import reset_project, update_understand_database
 
-from refactorings import make_field_static, make_field_non_static, make_method_static2, make_method_non_static2, \
-    move_field, move_method, move_class, \
-    extract_method, extract_class, extract_interface2, \
-    pullup_field, pushdown_field2, pullup_method, pushdown_method, pullup_constructor, \
+from refactorings import (
+    make_field_static, make_field_non_static, make_method_static2, make_method_non_static2,
+    move_field, move_method, move_class,
+    extract_method, extract_class, extract_interface2,
+    pullup_field, pushdown_field2, pullup_method, pushdown_method, pullup_constructor,
     increase_field_visibility, decrease_field_visibility, increase_method_visibility, decrease_method_visibility
+)
 
 from sbse import config
 
@@ -79,14 +92,30 @@ def handle_index_error(func):
 
 
 class Initialization(object):
+    """
+    The superclass of initialization contains init_refactoring methods
+
+    """
+
     def __init__(self, udb_path, population_size=50, lower_band=10, upper_band=50):
         """
-        The superclass of initialization contains init_refactoring modules
-        :param udb_path: Path for understand database file.
-        :param population_size: The length of population for GA.
-        :param lower_band: The minimum length of individual for GA.
-        :param upper_band: The maximum length of individual for GA.
+
+        Args:
+
+            udb_path (str): Path for understand database file.
+
+            population_size (int): The length of population for GA.
+
+            lower_band (int): The minimum length of individual for GA.
+
+            upper_band (int): The maximum length of individual for GA.
+
+        Returns:
+
+            None
+
         """
+
         random.seed(None)
         self.udb_path = udb_path
         self.population_size = population_size
@@ -104,15 +133,15 @@ class Initialization(object):
             self.init_move_field,  # 5
 
             self.init_move_method,  # 6
-            self.init_move_method,  # 6.2
+            # self.init_move_method,  # 6.2
 
             self.init_move_class,  # 7
-            self.init_move_class,  # 7.2
+            # self.init_move_class,  # 7.2
 
             self.init_push_down_field,  # 8
 
             self.init_extract_class,  # 9
-            self.init_extract_class,  # 9.2
+            # self.init_extract_class,  # 9.2
 
             self.init_pullup_method,  # 10
             self.init_push_down_method,  # 11
@@ -124,7 +153,7 @@ class Initialization(object):
             self.init_increase_method_visibility,  # 16
 
             self.init_extract_interface,  # 17
-            self.init_extract_interface,  # 17.2
+            # self.init_extract_interface,  # 17.2
 
             # self.init_extract_method,  # 18
         )
@@ -478,14 +507,23 @@ class Initialization(object):
     def init_extract_interface(self):
         pass
 
+    def generate_population(self):
+        """
+
+        Generate population abstract method
+
+        """
+
+        pass
+
     def select_random(self):
         """
         Randomly selects a refactoring. If there are no candidates it tries again!
 
         Returns:
-            main_function: function
-            params: dict
-            name: str
+
+            tuple: Refactoring main method, its parameters, and its human-readable name.
+
         """
         initializer = random.choice(self.initializers)
         logger.debug(f'>>> Randomly selected refactoring: {initializer.__name__}')
@@ -495,59 +533,6 @@ class Initialization(object):
             return self.select_random()
         else:
             return main_function, params, name
-
-    def generate_population2(self):
-        population = []
-        for _ in range(self.population_size):
-            individual = []
-            individual_size = random.randint(self.lower_band, self.upper_band)
-            for j in range(individual_size):
-                main, params, name = self.select_random()
-                individual.append((main, params, name))
-                # print(f'Append a refactoring "{name}" to "{j}th" gene of the individual {_}.')
-
-            population.append(individual)
-            # print(f'Append individual {_} to population, s')
-
-        # self._und.close()
-        # logger.debug("Database closed after initialization.")
-        return population
-
-    def generate_population(self):
-        config.logger.debug(f'Generating initial population ...')
-        for _ in range(0, self.population_size):
-            individual = []
-            individual_size = random.randint(self.lower_band, self.upper_band)
-            for j in range(individual_size):
-                main, params, name = self.select_random()
-                logger.debug(f'Refactoring name: {name}')
-                logger.debug(f'Refactoring params: {params}')
-                is_correct_refactoring = main(**params)
-                while is_correct_refactoring is False:
-                    reset_project()
-                    main, params, name = self.select_random()
-                    logger.debug(f'Refactoring name: {name}')
-                    logger.debug(f'Refactoring params: {params}')
-                    is_correct_refactoring = main(**params)
-
-                ####
-                # update_understand_database(self.udb_path)
-                # quit()
-                ####
-
-                individual.append((main, params, name))
-                logger.debug(f'Append a refactoring "{name}" to "{j}th" gene of the individual {_}.')
-                reset_project()
-                logger.debug('-' * 100)
-
-            self.population.append(individual)
-            logger.debug(f'Append individual {_} to population, s')
-
-        logger.debug('=' * 100)
-        initial_pop_path = f'{config.PROJECT_LOG_DIR}initial_population_{config.global_execution_start_time}.json'
-        self.dump_population(path=initial_pop_path)
-        config.logger.debug(f'Generating initial population finished.')
-        return self.population
 
     def dump_population(self, path=None):
         if self.population is None or len(self.population) == 0:
@@ -582,11 +567,51 @@ class Initialization(object):
 
 
 class RandomInitialization(Initialization):
+    """
+    Use to randomly initialize the refactoring population in search-based algorithms
+
+    """
+
+    def __init__(self, *args, **kwargs):
+        super(RandomInitialization, self).__init__(*args, **kwargs)
+
+    def generate_population(self):
+        """
+        Generate randomly (unbiased) initialized refactoring population
+
+        Returns:
+
+            list: List of refactoring sequences (list of refactoring operations)
+
+        """
+
+        population = []
+        for _ in range(self.population_size):
+            individual = []
+            individual_size = random.randint(self.lower_band, self.upper_band)
+            for j in range(individual_size):
+                main, params, name = self.select_random()
+                individual.append((main, params, name))
+                # print(f'Append a refactoring "{name}" to "{j}th" gene of the individual {_}.')
+
+            population.append(individual)
+            # print(f'Append individual {_} to population, s')
+
+        # self._und.close()
+        # logger.debug("Database closed after initialization.")
+        return population
+
     def init_make_field_non_static(self):
         """
+
         Finds all static fields and randomly chooses one of them
-        :return: refactoring main method and its parameters.
+
+        Returns:
+
+            tuple: Refactoring main method, its parameters, and its human-readable name.
+
         """
+
         refactoring_main = make_field_non_static.main
         params = {"udb_path": self.udb_path}
         candidates = self._static_variables
@@ -596,9 +621,15 @@ class RandomInitialization(Initialization):
 
     def init_make_field_static(self):
         """
+
         Finds all non-static fields and randomly chooses one of them
-        :return: refactoring main method and its parameters.
+
+        Returns:
+
+            tuple: Refactoring main method, its parameters, and its human-readable name.
+
         """
+
         refactoring_main = make_field_static.main
         params = {"udb_path": self.udb_path}
         candidates = self._variables
@@ -608,9 +639,15 @@ class RandomInitialization(Initialization):
 
     def init_make_method_static(self):
         """
+
         Finds all non-static methods and randomly chooses one of them
-        :return: refactoring main method and its parameters.
+
+        Returns:
+
+            tuple: Refactoring main method, its parameters, and its human-readable name.
+
         """
+
         refactoring_main = make_method_static2.main
         params = {"udb_path": self.udb_path}
         candidates = self._methods
@@ -621,8 +658,13 @@ class RandomInitialization(Initialization):
     def init_make_method_non_static(self):
         """
         Finds all static methods and randomly chooses one of them
-        :return: refactoring main method and its parameters.
+
+        Returns:
+
+            tuple: refactoring main method, its parameters, and its human-readable name.
+
         """
+
         refactoring_main = make_method_non_static2.main
         params = {"udb_path": self.udb_path}
         candidates = self._static_methods
@@ -633,8 +675,13 @@ class RandomInitialization(Initialization):
     def init_pullup_field(self):
         """
         Find all classes with their attributes and package names, then chooses randomly one of them!
-        :return:  refactoring main method and its parameters.
+
+        Returns:
+
+            Refactoring main method, its parameters, and its human-readable name.
+
         """
+
         refactoring_main = pullup_field.main
         # params = {"project_dir": str(Path(self.udb_path).parent)}
         params = {"project_dir": config.PROJECT_PATH}
@@ -643,6 +690,15 @@ class RandomInitialization(Initialization):
         return refactoring_main, params, 'Pull Up Field'
 
     def init_push_down_field(self):
+        """
+        Finds fields to be push-down
+
+        Returns:
+
+            tuple: Refactoring main method, its parameters, and its human-readable name.
+
+        """
+
         refactoring_main = pushdown_field2.main
         params = {"udb_path": str(Path(self.udb_path))}
         candidates = self._push_down_field_candidates
@@ -650,6 +706,15 @@ class RandomInitialization(Initialization):
         return refactoring_main, params, 'Push Down Field'
 
     def init_pullup_method(self):
+        """
+        Finds methods to be pulled-up
+
+        Returns:
+
+            tuple: Refactoring main method, its parameters, and its human-readable name.
+
+        """
+
         refactoring_main = pullup_method.main
         params = {"udb_path": str(Path(self.udb_path))}
         candidates = self._pullup_method_candidates
@@ -657,6 +722,15 @@ class RandomInitialization(Initialization):
         return refactoring_main, params, 'Pull Up Method'
 
     def init_pullup_constructor(self):
+        """
+        Finds statements in class constructors to be pulled-up
+
+        Returns:
+
+            tuple: Refactoring main method, its parameters, and its human-readable name.
+
+        """
+
         refactoring_main = pullup_constructor.main
         params = {"udb_path": str(Path(self.udb_path))}
         candidates = self._pullup_constructor_candidates
@@ -664,6 +738,15 @@ class RandomInitialization(Initialization):
         return refactoring_main, params, 'Pull Up Constructor'
 
     def init_push_down_method(self):
+        """
+        Finds methods to be pushed-downs
+
+        Returns:
+
+            tuple: Refactoring main method, its parameters, and its human-readable name.
+
+        """
+
         refactoring_main = pushdown_method.main
         params = {"udb_path": str(Path(self.udb_path))}
         candidates = self._push_down_method_candidates
@@ -674,8 +757,12 @@ class RandomInitialization(Initialization):
         """
         Finds fields with a class to move
 
-        Returns: refactoring main method and its parameters.
+        Returns:
+
+            tuple: Refactoring main method, its parameters, and its human-readable name.
+
         """
+
         _db = und.open(self.udb_path)
         refactoring_main = move_field.main
         params = {"udb_path": str(Path(self.udb_path))}
@@ -703,6 +790,15 @@ class RandomInitialization(Initialization):
         return refactoring_main, params, 'Move Field'
 
     def init_move_field2(self):
+        """
+        Finds fields with a class to move (version 2)
+
+        Returns:
+
+            tuple: Refactoring main method, its parameters, and its human-readable name.
+
+        """
+
         refactoring_main = move_field.main
         params = {"udb_path": str(Path(self.udb_path))}
         classes_fields = []
@@ -733,8 +829,12 @@ class RandomInitialization(Initialization):
         """
         Finds methods with a class to move
 
-        Returns: refactoring main method and its parameters.
+        Returns:
+
+            tuple: Refactoring main method, its parameters, and its human-readable name.
+
         """
+
         _db = und.open(self.udb_path)
         refactoring_main = move_method.main
         params = {"udb_path": str(Path(self.udb_path))}
@@ -743,9 +843,11 @@ class RandomInitialization(Initialization):
         classes = _db.ents("Class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static")
         random_class = (random.choice(classes)).longname().split(".")
         target_package = None
+
         """
         target_class: str, target_package: str,
         """
+
         if len(random_class) == 1:
             target_class = random_class[0]
         elif len(random_class) > 1:
@@ -760,37 +862,16 @@ class RandomInitialization(Initialization):
         _db.close()
         return refactoring_main, params, 'Move Method'
 
-    def init_move_class2(self):
-        refactoring_main = move_class.main
-        print('BP#1')
-        print(random.choice(self.get_all_class_entities()).longname())
-        random_class = random.choice(self.get_all_class_entities()).longname().split(".")
-        print('BP#2')
-        random_class_2 = random.choice(self.get_all_class_entities()).longname().split(".")
-        print('BP#3')
-        params = {"udb_path": str(Path(self.udb_path))}
-        if len(random_class) == 1:
-            params.update({
-                "class_name": random_class[0],
-                "source_package": ""
-            })
-        else:
-            params.update({
-                "class_name": random_class[-1],
-                "source_package": ".".join(random_class[:-1])
-            })
-        print('BP#4')
-        if len(random_class_2) == 1:
-            params.update({
-                "target_package": ""
-            })
-        else:
-            params.update({
-                "target_package": ".".join(random_class[:-1])
-            })
-        return refactoring_main, params, 'Move Class'
-
     def init_move_class(self):
+        """
+        Finds a class which should be moved to another existing package
+
+        Returns:
+
+            tuple: Refactoring main method, its parameters, and its human-readable name.
+
+        """
+
         _db = und.open(self.udb_path)
         refactoring_main = move_class.main
         params = {"udb_path": str(Path(self.udb_path))}
@@ -807,15 +888,19 @@ class RandomInitialization(Initialization):
         else:
             params.update({"source_package": package_list[0].longname()})
 
+        entity_filter = "Import, Importby, Contain, Containin, Couple, Coupleby, "
+        entity_filter += "Create, Createby, DotRef, DotRefby, Declare, Declarein, Define, Definein"
         related_entities = selected_class.ents(
-            "Import, Importby, Contain, Containin, Couple, Coupleby, Create, Createby, DotRef, DotRefby, Declare, Declarein, Define, Definein",
+            entity_filter,
             "Type ~Unknown ~Anonymous"
             # "Package"
         )
+
         # print('Parameters', params)
         # print("related_entities", related_entities)
         # for e in related_entities:
         #     print(e.longname(), e.kind())
+
         trials = 0
         while trials < 25:
             if related_entities is not None and len(related_entities) > 0:
@@ -844,6 +929,15 @@ class RandomInitialization(Initialization):
         return refactoring_main, params, 'Move Class'
 
     def init_extract_class(self):
+        """
+        Finds a set of methods and fields which should be extracted as a new class
+
+        Returns:
+
+            tuple: Refactoring main method, its parameters, and its human-readable name.
+
+        """
+
         _db = und.open(self.udb_path)
         refactoring_main = extract_class.main
         params = {"udb_path": str(Path(self.udb_path))}
@@ -879,6 +973,15 @@ class RandomInitialization(Initialization):
         pass
 
     def init_extract_interface(self):
+        """
+        Finds a class which should have an interface
+
+        Returns:
+
+            tuple: Refactoring main method, its parameters, and its human-readable name.
+
+        """
+
         _db = und.open(self.udb_path)
         refactoring_main = extract_interface2.main
         # params = {"udb_path": str(Path(self.udb_path))}
@@ -890,9 +993,13 @@ class RandomInitialization(Initialization):
     def init_increase_field_visibility(self):
         """
         Finds a private field to increase its visibility to public.
+
         Returns:
-            the refactoring main func, its parameters and its name
+
+            tuple: Refactoring main func, its parameters, and its human-readable name.
+
         """
+
         refactoring_main = increase_field_visibility.main
         params = {"udb_path": str(Path(self.udb_path))}
         candidates = list(filter(lambda d: d['is_public'] is False, self._variables))
@@ -906,9 +1013,13 @@ class RandomInitialization(Initialization):
 
     def init_decrease_field_visibility(self):
         """
+
         Finds a none-external-reference-public field to decrease its visibility to private.
+
         Returns:
-            the refactoring main func, its parameters and its name
+
+            tuple: Refactoring main func, its parameters, and its human-readable name.
+
         """
         refactoring_main = decrease_field_visibility.main
         params = {"udb_path": str(Path(self.udb_path))}
@@ -924,10 +1035,15 @@ class RandomInitialization(Initialization):
 
     def init_increase_method_visibility(self):
         """
+
         Finds a private method to increase its visibility to public.
+
         Returns:
-            the refactoring main func, its parameters and its name
+
+            tuple: Refactoring main func, its parameters, and its human-readable name.
+
         """
+
         refactoring_main = increase_method_visibility.main
         params = {"udb_path": str(Path(self.udb_path))}
         candidates = list(filter(lambda d: d['is_public'] is False, self._methods))
@@ -941,9 +1057,13 @@ class RandomInitialization(Initialization):
 
     def init_decrease_method_visibility(self):
         """
+
         Finds a none-external-reference-public method to decrease its visibility to private.
+
         Returns:
-            the refactoring main func, its parameters and its name
+
+            tuple: Refactoring main func, its parameters, and its human-readable name.
+
         """
         refactoring_main = decrease_method_visibility.main
         params = {"udb_path": str(Path(self.udb_path))}
@@ -967,12 +1087,72 @@ def get_move_method_location(row):
 
 
 class SmellInitialization(RandomInitialization):
+    """
+
+    Use to initialize refactoring population based on refactoring opportunities
+
+    """
+
     def __init__(self, *args, **kwargs):
+        """
+
+        Returns:
+
+            SmellInitialization: An instance of SmellInitialization class
+
+        """
+
         super(SmellInitialization, self).__init__(*args, **kwargs)
         # Load csv files
         self.move_method_candidates = self.load_move_method_candidates()
         self.extract_class_candidates = self.load_extract_class_candidates()
         # self.extract_method_candidates = self.load_extract_method_candidates()  # We leave extract method for now.
+
+    def generate_population(self):
+        """
+
+        Generate a biased initial population consists of first-time validated refactorings
+
+        Return:
+
+            list: list of refactoring sequences (list of refactoring operations)
+
+        """
+
+        config.logger.debug(f'Generating initial population ...')
+        for _ in range(0, self.population_size):
+            individual = []
+            individual_size = random.randint(self.lower_band, self.upper_band)
+            for j in range(individual_size):
+                main, params, name = self.select_random()
+                logger.debug(f'Refactoring name: {name}')
+                logger.debug(f'Refactoring params: {params}')
+                is_correct_refactoring = main(**params)
+                while is_correct_refactoring is False:
+                    reset_project()
+                    main, params, name = self.select_random()
+                    logger.debug(f'Refactoring name: {name}')
+                    logger.debug(f'Refactoring params: {params}')
+                    is_correct_refactoring = main(**params)
+
+                ####
+                # update_understand_database(self.udb_path)
+                # quit()
+                ####
+
+                individual.append((main, params, name))
+                logger.debug(f'Append a refactoring "{name}" to "{j}th" gene of the individual {_}.')
+                reset_project()
+                logger.debug('-' * 100)
+
+            self.population.append(individual)
+            logger.debug(f'Append individual {_} to population, s')
+
+        logger.debug('=' * 100)
+        initial_pop_path = f'{config.PROJECT_LOG_DIR}initial_population_{config.global_execution_start_time}.json'
+        self.dump_population(path=initial_pop_path)
+        config.logger.debug(f'Generating initial population finished.')
+        return self.population
 
     def load_extract_class_candidates(self):
         _db = und.open(self.udb_path)
