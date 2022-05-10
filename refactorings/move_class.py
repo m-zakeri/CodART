@@ -30,8 +30,7 @@ from antlr4.TokenStreamRewriter import TokenStreamRewriter
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 from codart.symbol_table import parse_and_walk
-import sbse.config
-from sbse.config import logger
+from sbse import config
 
 ROOT_PACKAGE = "(Unnamed_Package)"
 
@@ -71,7 +70,7 @@ class UpdateImportsListener(JavaParserLabeledListener):
                 if self.target_package == self.current_package:
                     replace_text = ""
                 else:
-                    replace_text = f"import {self.target_package}.{self.class_name};\n"
+                    replace_text = f"\nimport {self.target_package}.{self.class_name};\n"
 
                 self.rewriter.replaceRangeTokens(
                     from_token=ctx.start,
@@ -121,41 +120,41 @@ class MoveClassAPI:
 
     def check_preconditions(self) -> bool:
         if self.source_package == self.target_package:
-            logger.error("Source and target packages are same.")
+            config.logger.error("Source and target packages are same.")
             return False
 
         if self.source_package == ROOT_PACKAGE or self.target_package == ROOT_PACKAGE:
-            logger.error("Can not move package to/from root package.")
+            config.logger.error("Can not move package to/from root package.")
             return False
 
         # Get package directories
         source_package_dir, target_package_dir = self.get_package_directories()
         if source_package_dir is None or target_package_dir is None:
-            logger.error("Package entity does not exists.")
+            config.logger.error("Package entity does not exists.")
             return False
 
-        if sbse.config.PROJECT_PATH not in target_package_dir:
-            logger.error(f"Target package address {target_package_dir} cannot be resolved.")
+        if config.PROJECT_PATH not in target_package_dir:
+            config.logger.error(f"Target package address {target_package_dir} cannot be resolved.")
             return False
 
-        if sbse.config.PROJECT_PATH not in source_package_dir:
-            logger.error(f"Source package address {source_package_dir} cannot be resolved.")
+        if config.PROJECT_PATH not in source_package_dir:
+            config.logger.error(f"Source package address {source_package_dir} cannot be resolved.")
             return False
 
         class_full_path = os.path.join(source_package_dir, f"{self.class_name}.java")
         if not os.path.exists(class_full_path):
-            logger.error(f'Class "{self.class_name}" does not exists in source package "{source_package_dir}" ')
+            config.logger.error(f'Class "{self.class_name}" does not exists in source package "{source_package_dir}" ')
             return False
 
         # Get class directory
         class_path, class_content, usages = self.get_class_info()
         if class_path is None or class_content is None:
-            logger.error("Class entity does not exists.")
+            config.logger.error("Class entity does not exists.")
             return False
 
         class_new_path = os.path.join(target_package_dir, f"{self.class_name}.java")
         if os.path.exists(class_new_path):
-            logger.error("Class already exists in target package.")
+            config.logger.error("Class already exists in target package.")
             return False
 
         self.source_package_dir = source_package_dir
@@ -213,7 +212,7 @@ class MoveClassAPI:
 
     def do_refactor(self):
         if not self.check_preconditions():
-            logger.error("Pre conditions failed.")
+            config.logger.error("Pre conditions failed.")
             return False
 
         # Update usages
@@ -228,7 +227,7 @@ class MoveClassAPI:
             )
 
         # Delete source class
-        # logger.debug(f'Current class path to be removed: {self._class_current_path}')
+        # config.logger.debug(f'Current class path to be removed: {self._class_current_path}')
         os.remove(self._class_current_path)
 
         # Write the new class
@@ -258,10 +257,27 @@ def main(udb_path: str, source_package: str, target_package: str, class_name: st
 
 
 # Tests
-if __name__ == '__main__':
-    main(
-        udb_path="D:/Dev/JavaSample/JavaSample/JavaSample.und",
-        class_name="Sample",
-        source_package="source_package",
-        target_package="target_package",  # "(Unnamed_Package)"
+def test1():
+    res = main(
+        udb_path=config.UDB_PATH,
+        class_name="GanttLanguage",
+        source_package="net.sourceforge.ganttproject.language",
+        target_package="net.sourceforge.ganttproject.gui.about",  # "(Unnamed_Package)"
     )
+    print(res)
+    assert res
+
+
+def test2():
+    res = main(
+        udb_path=config.UDB_PATH,
+        class_name="ColorConvertion",
+        source_package="net.sourceforge.ganttproject.util",
+        target_package="net.sourceforge.ganttproject.io",  # "(Unnamed_Package)"
+    )
+    print(res)
+    assert res
+
+
+if __name__ == '__main__':
+    test2()
