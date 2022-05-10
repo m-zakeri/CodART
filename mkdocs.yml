@@ -73,6 +73,7 @@ nav:
     - Metrics:
         - Testability prediction: metrics/testability.md
     - Optimization:
+        - Population initialization: optimization/initialize.md
         - Search-based refactoring: optimization/search-based_refactoring.md
     - Tutorials:
         - ANTLR basics: tutorials/antlr_basics.md
