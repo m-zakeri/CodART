@@ -156,10 +156,15 @@ class ExtractClassRefactoringListener(JavaParserLabeledListener):
 
     """
 
-    def __init__(
-            self, common_token_stream: CommonTokenStream = None,
-            source_class: str = None, new_class: str = None,
-            moved_fields=None, moved_methods=None, method_map: dict = None):
+    def __init__(self, common_token_stream: CommonTokenStream = None,
+                 source_class: str = None, new_class: str = None,
+                 moved_fields=None, moved_methods=None, method_map: dict = None
+                 ):
+        """
+
+
+        """
+
         if method_map is None:
             self.method_map = {}
         else:
@@ -203,7 +208,8 @@ class ExtractClassRefactoringListener(JavaParserLabeledListener):
 
         temp = []
         for method in moved_methods:
-            temp.append(self.method_map.get(method))
+            if self.method_map.get(method) is not None and len(self.method_map.get(method)) > 0:
+                temp.append(self.method_map.get(method))
         self.fields_to_increase_visibility = set().union(*temp)
 
     def enterPackageDeclaration(self, ctx: JavaParserLabeled.PackageDeclarationContext):
