@@ -206,7 +206,7 @@ def main(udb_path=None, source_package=None, source_class=None, field_name=None,
         target_class_ents_files.append(ref.ent().parent().longname())
         target_class_ents_simplenames.append(ref.ent().simplename())
 
-    for ref in field_ent.refs("Useby,Setby"):
+    for ref in field_ent.refs("Useby, Setby"):
         if ref.file().simplename().split(".")[0] in target_classes:
             continue
         else:

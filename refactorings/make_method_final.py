@@ -106,7 +106,7 @@ if __name__ == '__main__':
         if cls.simplename() == source_class:
             main_file = cls.parent().longname()
 
-    stream = FileStream(main_file, encoding='utf8', errors='ignore')
+    stream = FileStream(main_file, encoding='utf8', errors='ignore', )
     lexer = JavaLexer(stream)
     token_stream = CommonTokenStream(lexer)
     parser = JavaParserLabeled(token_stream)
@@ -120,6 +120,6 @@ if __name__ == '__main__':
     walker = ParseTreeWalker()
     walker.walk(t=parse_tree, listener=my_listener)
 
-    with open(main_file, mode='w', newline='') as f:
+    with open(main_file, mode='w', encoding='utf8', errors='ignore', newline='') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
     db.close()

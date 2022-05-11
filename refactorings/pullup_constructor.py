@@ -157,12 +157,12 @@ def get_cons(program: Program, packagename: str, superclassname: str, class_name
         for mk in class_.methods:
             m_ = class_.methods[mk]
             m = mk[:mk.find('(')]
-            if m_.body_text == body_text_method and m_.parameters == parammethod and m_.is_constructor == True:
+            if m_.body_text == body_text_method and m_.parameters == parammethod and m_.is_constructor:
                 if class_.name not in removemethods:
                     removemethods[class_.name] = [methodkey]
                 else:
                     removemethods[class_.name].append(methodkey)
-            elif m_.is_constructor == True:
+            elif m_.is_constructor:
                 listBody_text = body_text_method.replace("{", "").replace("}", "").split(";")
                 listm_body = m_.body_text.replace("{", "").replace("}", "").split(";")
                 s1 = set(listBody_text)
@@ -283,6 +283,7 @@ def main(udb_path, source_package, target_class, class_names: list, *args, **kwa
     return True
 
 
+# Tests
 if __name__ == "__main__":
     main(
         "D:/Dev/JavaSample/JavaSample1.udb",

@@ -239,7 +239,7 @@ class ExtractInterfaceRefactoring:
 
         if not os.path.exists(self.interface_filename[:self.interface_filename.rfind('/')]):
             os.makedirs(self.interface_filename[:self.interface_filename.rfind('/')])
-        file = open(self.interface_filename, "w+")
+        file = open(self.interface_filename, "w+", encoding='utf8', errors='ignore')
         file.write(interface_file_content)
         file.close()
 

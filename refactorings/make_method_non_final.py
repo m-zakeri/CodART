@@ -106,12 +106,14 @@ if __name__ == '__main__':
     parser = JavaParserLabeled(token_stream)
     parser.getTokenStream()
     parse_tree = parser.compilationUnit()
-    my_listener = MakeMethodNonFinalRefactoringListener(common_token_stream=token_stream,
-                                                        source_class=source_class,
-                                                        method_name=method_name)
+    my_listener = MakeMethodNonFinalRefactoringListener(
+        common_token_stream=token_stream,
+        source_class=source_class,
+        method_name=method_name
+    )
     walker = ParseTreeWalker()
     walker.walk(t=parse_tree, listener=my_listener)
 
-    with open(main_file, mode='w', newline='') as f:
+    with open(main_file, mode='w', encoding='utf8', errors='ignore', newline='') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
     db.close()

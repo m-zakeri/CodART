@@ -164,6 +164,7 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
          udb_path: str, *args, **kwargs):
     """
 
+    Move filed main API
 
     """
 
@@ -194,7 +195,7 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
     # Find usages
     usages = {}
 
-    for ref in field_ent.refs("Setby,Useby"):
+    for ref in field_ent.refs("Setby, Useby"):
         file = ref.file().longname()
         if file in usages:
             usages[file].append(ref.line())

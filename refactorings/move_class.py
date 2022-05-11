@@ -239,7 +239,7 @@ class MoveClassAPI:
             imports = f"import {self.source_package}.*;\n"
 
         # logger.debug(f'New class path to be added: {self._class_new_path}')
-        with open(self._class_new_path, mode='w', encoding='utf-8') as f:
+        with open(self._class_new_path, mode='w', encoding='utf8', errors='ignore') as f:
             f.write(package + imports + self.class_content)
 
         return True

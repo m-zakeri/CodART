@@ -184,9 +184,14 @@ class PushDownField:
         for c in classes_to_add_to:
             c_body_start = symbol_table.TokensInfo(c.parser_context.classBody())
             c_body_start.stop = c_body_start.start  # Start and stop both point to the '{'
-            rewriter.insert_after(c_body_start, "\n    " + modifier + field.datatype + " " + self.field_name \
-                                  + ((" = " + field.initializer) if field.initializer is not None else "")
-                                  + ";")
+            rewriter.insert_after(c_body_start,
+                                  (
+                                          "\n    " + modifier + field.datatype + " "
+                                          + self.field_name
+                                          + ((" = " + field.initializer) if field.initializer is not None else "")
+                                          + ";"
+                                  )
+                                  )
 
         rewriter.apply()
         return True

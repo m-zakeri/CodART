@@ -179,7 +179,7 @@ class InterfaceCreator:
         return self.interface_info['package'] + '.' + self.interface_info['name']
 
     def add_implement_statement_to_class(self, ):
-        stream = FileStream(self.class_path, encoding='utf-8', errors='ignore')
+        stream = FileStream(self.class_path, encoding='utf8', errors='ignore')
         lexer = JavaLexer(stream)
         token_stream = CommonTokenStream(lexer)
         parser = JavaParserLabeled(token_stream)
@@ -194,7 +194,7 @@ class InterfaceCreator:
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=listener)
 
-        with open(self.class_path, encoding='utf-8', mode='w', newline='') as f:
+        with open(self.class_path, encoding='utf8', errors='ignore', mode='w', newline='') as f:
             f.write(listener.token_stream_rewriter.getDefaultText())
 
     def save(self):
@@ -203,7 +203,8 @@ class InterfaceCreator:
             self.interface_info['path'] = os.path.dirname(self.class_path)
         with open(
                 os.path.join(self.interface_info['path'], f"{self.interface_info['name']}.java"),
-                encoding='utf-8',
+                encoding='utf8',
+                errors='ignore',
                 mode='w'
         ) as f:
             f.write(interface_text)

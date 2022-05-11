@@ -74,9 +74,11 @@ class PullUpFieldRefactoring:
     def do_refactor(self):
         program = symbol_table.get_program(self.source_filenames, print_status=False)
         # print(program.packages)
-        if self.package_name not in program.packages \
-                or self.class_name not in program.packages[self.package_name].classes \
-                or self.field_name not in program.packages[self.package_name].classes[self.class_name].fields:
+        if (
+                self.package_name not in program.packages
+                or self.class_name not in program.packages[self.package_name].classes
+                or self.field_name not in program.packages[self.package_name].classes[self.class_name].fields
+        ):
             logger.error("One or more inputs are not valid.")
             return False
 
@@ -105,10 +107,17 @@ class PullUpFieldRefactoring:
             p: symbol_table.Package = program.packages[pn]
             for cn in p.classes:
                 c: symbol_table.Class = p.classes[cn]
-                if ((c.superclass_name == superclass_name and c.file_info.has_imported_class(self.package_name,
-                                                                                             superclass_name))
-                    or (self.package_name is not None and c.superclass_name == superclass_name)) and \
-                        self.field_name in c.fields and c.fields[self.field_name].datatype == datatype:
+                if (
+                        (
+                        (
+                                c.superclass_name == superclass_name
+                                and c.file_info.has_imported_class(self.package_name, superclass_name)
+                        )
+                        or (self.package_name is not None and c.superclass_name == superclass_name)
+                        )
+                        and
+                        self.field_name in c.fields and c.fields[self.field_name].datatype == datatype
+                ):
                     fields_to_remove.append(c.fields[self.field_name])
 
         if len(fields_to_remove) == 0:

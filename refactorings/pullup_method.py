@@ -343,7 +343,7 @@ def main(udb_path: str, children_classes: list, method_name: str, *args, **kwarg
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener_propagate)
 
-        with open(file, mode='w', encoding='utf-8', newline='') as f:
+        with open(file, mode='w', encoding='utf8', errors='ignore', newline='') as f:
             f.write(my_listener_propagate.token_stream_rewriter.getDefaultText())
     # end of propagate
 

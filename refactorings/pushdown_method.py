@@ -356,7 +356,7 @@ def main(udb_path, source_package, source_class, method_name, target_classes: li
         walker = ParseTreeWalker()
         walker.walk(t=parse_tree, listener=my_listener)
         # print(my_listener.token_stream_rewriter.getDefaultText())
-        with open(file, mode='w', newline='') as f:
+        with open(file, mode='w', encoding='utf8', errors='ignore', newline='') as f:
             f.write(my_listener.token_stream_rewriter.getDefaultText())
 
     return True

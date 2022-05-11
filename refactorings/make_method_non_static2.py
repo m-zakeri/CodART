@@ -116,19 +116,21 @@ def main(udb_path=None, source_class=None, method_name=None, *args, **kwargs):
 
     db.close()
 
-    stream = FileStream(main_file, encoding='utf-8', errors='ignore')
+    stream = FileStream(main_file, encoding='utf8', errors='ignore')
     lexer = JavaLexer(stream)
     token_stream = CommonTokenStream(lexer)
     parser = JavaParserLabeled(token_stream)
     parser.getTokenStream()
     parse_tree = parser.compilationUnit()
-    my_listener = MakeMethodNonStaticRefactoringListener(common_token_stream=token_stream,
-                                                         source_class=source_class,
-                                                         method_name=method_name)
+    my_listener = MakeMethodNonStaticRefactoringListener(
+        common_token_stream=token_stream,
+        source_class=source_class,
+        method_name=method_name
+    )
     walker = ParseTreeWalker()
     walker.walk(t=parse_tree, listener=my_listener)
 
-    with open(main_file, mode='w', encoding='utf-8', newline='') as f:
+    with open(main_file, mode='w', encoding='utf8', errors='ignore', newline='') as f:
         f.write(my_listener.token_stream_rewriter.getDefaultText())
 
     return True
