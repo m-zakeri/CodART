@@ -1,9 +1,6 @@
-"""
-
-"""
-
 import os
 import sys
+sys.path.append('../')
 
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
@@ -11,8 +8,6 @@ from antlr4.TokenStreamRewriter import TokenStreamRewriter
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 from gen.javaLabeled.JavaLexer import JavaLexer
-
-sys.path.append('../')
 
 
 class RenameClassRefactoringListener(JavaParserLabeledListener):
@@ -81,7 +76,7 @@ class RenameClassRefactoringListener(JavaParserLabeledListener):
                     text=self.class_new_name)
                 print("class name in creator changed")
 
-    def enterClassOrInterfaceType(self, ctx: JavaParserLabeled.ClassOrInterfaceTypeContext):
+    def enterClassOrInterfaceType(self, ctx:JavaParserLabeled.ClassOrInterfaceTypeContext):
         if self.is_package_imported or self.in_selected_package:
             if ctx.IDENTIFIER(0).getText() == self.class_identifier:
                 self.token_stream_rewriter.replaceIndex(
@@ -137,7 +132,7 @@ def main():
 
             Tree = Parser.compilationUnit()
 
-            ListenerForReRenameClass = \
+            ListenerForReRenameClass =\
                 RenameClassRefactoringListener(TokenStream, Package_name, class_identifier, new_class_name)
 
             Walker = ParseTreeWalker()
@@ -150,6 +145,8 @@ def main():
     for i in range(len(old_names)):
         os.rename(Path + "/refactoredFiles/" + old_names[i] + "_Refactored.java",
                   Path + "/refactoredFiles/" + new_names[i] + "_Refactored.java")
+
+    print(" %%%%%%%%%%%%%" + " all files finished " + "****************")
 
 
 if __name__ == "__main__":
