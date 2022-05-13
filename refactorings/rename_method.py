@@ -1,7 +1,3 @@
-"""
-
-"""
-
 import os
 
 try:
@@ -13,9 +9,9 @@ except ModuleNotFoundError:
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
-from gen.javaLabeled.JavaLexer import JavaLexer
-from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
-from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
+from Refactoring.gen.javaLabeled.JavaLexer import JavaLexer
+from Refactoring.gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
+from Refactoring.gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 
 class RenameMethodListener(JavaParserLabeledListener):
@@ -191,7 +187,7 @@ def rename_method(java_file_path, scope_class_name, target_method_name, new_name
     walker = ParseTreeWalker()
     walker.walk(listener, tree)
     if listener.changed:
-        print(java_file_path)
+        #print(java_file_path)
         new_file = open(file=java_file_path, mode='w')
         new_file.write(listener.token_stream_rewriter.getDefaultText().replace('\r', ''))
 
@@ -199,10 +195,10 @@ def rename_method(java_file_path, scope_class_name, target_method_name, new_name
 def main():
     # TODO: Create UDB File automatically
     # db_path = "/home/ali/Documents/compiler/Research/xerces2-j/xerces2-j.udb"
-    file_path = "D:/archive/uni/CD/project/CodART/tests/simpleCode.java"
+    file_path = "C:/Users/Mohamad/Desktop/New folder/CodART-main/CodART-main/tests/simpleCode.java"
     class_name = "C"
-    method_name = "printG"
-    new_method_name = "printFUCK"
+    method_name = "printC"
+    new_method_name = "printCC"
     # references = get_method_calls(db_path, class_name, method_name)
     rename_method(file_path, class_name, method_name, new_method_name)
 

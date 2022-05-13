@@ -1,9 +1,6 @@
-"""
-
-"""
-
 import os
 import sys
+sys.path.append('../')
 
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
@@ -11,8 +8,6 @@ from antlr4.TokenStreamRewriter import TokenStreamRewriter
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 from gen.javaLabeled.JavaLexer import JavaLexer
-
-sys.path.append('../')
 
 
 class RenameMethodRefactoringListener(JavaParserLabeledListener):
@@ -41,6 +36,7 @@ class RenameMethodRefactoringListener(JavaParserLabeledListener):
         else:
             raise TypeError('common_token_stream is None')
 
+
     def enterPackageDeclaration(self, ctx: JavaParserLabeled.PackageDeclarationContext):
         if self.package_identifier == ctx.qualifiedName().getText():
             self.in_selected_package = True
@@ -68,7 +64,7 @@ class RenameMethodRefactoringListener(JavaParserLabeledListener):
             if self.in_class:
                 if ctx.IDENTIFIER().getText() == self.method_identifier:
                     self.token_stream_rewriter.replaceIndex(
-                        index=ctx.start.tokenIndex + 2,
+                        index=ctx.start.tokenIndex+ 2,
                         text=self.method_new_name)
                     print("method name changed !")
 
@@ -114,8 +110,7 @@ def main():
             Tree = Parser.compilationUnit()
 
             ListenerForReRenameClass = \
-                RenameMethodRefactoringListener(TokenStream, Package_name, class_identifier, method_identifier,
-                                                method_new_name)
+                RenameMethodRefactoringListener(TokenStream, Package_name, class_identifier, method_identifier, method_new_name)
 
             Walker = ParseTreeWalker()
 
