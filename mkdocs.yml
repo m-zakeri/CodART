@@ -69,7 +69,7 @@ nav:
         - Rename class: refactorings/rename_class.md
         - Rename field: refactorings/rename_field.md
         - Rename method: refactorings/rename_method.md
-        - Rename package: refactorings/rename_method.md
+        - Rename package: refactorings/rename_package.md
     - Code smells details:
         - Large class: code_smells/large_class.md
         - Long method: code_smells/long_method.md
