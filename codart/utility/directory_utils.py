@@ -3,7 +3,7 @@ Utilities related to project directory.
 """
 
 __author__ = 'Morteza Zakeri'
-__version__ = '0.5.1'
+__version__ = '0.5.2'
 
 import datetime
 import os
@@ -26,46 +26,82 @@ from sbse import config
 
 def git_restore(project_dir):
     """
-    This function executes "git restore ." on the given project directory.
-    :param project_dir: A string and Absolute path of the project's directory.
-    :return: None
+    This function returns a git supported project back to the initial commit
+
+    Args:
+
+        project_dir (str): The absolute path of project's directory.
+
+    Returns:
+
+        None
+
     """
     assert os.path.isdir(project_dir)
+    assert os.path.isdir(os.path.join(project_dir, '.git'))
     subprocess.Popen(["git", "restore", "."], cwd=project_dir, stdout=open(os.devnull, 'wb')).wait()
     subprocess.Popen(["git", "clean", "-f", "-d"], cwd=project_dir, stdout=open(os.devnull, 'wb')).wait()
 
 
-def create_understand_database(project_dir):
+def create_understand_database(project_dir: str = None, db_dir: str = None):
     """
     This function creates understand database for the given project directory.
-    :param und_path: The path of und binary file for executing understand command-line
-    :param project_dir: The absolute path of project's directory.
-    :return: String path of created database.
+
+    Args:
+
+        project_dir (str): The absolute path of project's directory.
+
+        db_dir (str): The absolute directory path to save Understand database (.udb or .und binary file)
+
+    Returns:
+
+        str: Understand database path
+
     """
     assert os.path.isdir(project_dir)
     db_name = os.path.basename(os.path.normpath(project_dir)) + ".und"
-    db_path = os.path.join(project_dir, db_name)
-    assert os.path.exists(db_path) is False
+    db_path = os.path.join(db_dir, db_name)
+    # print(project_dir, db_name, db_path)
+    # quit()
+    if os.path.exists(db_path):
+        return db_path
     # An example of command-line is:
     # und create -languages c++ add @myFiles.txt analyze -all myDb.udb
-    subprocess.Popen(
-        ['und', 'create', '-languages', 'Java', 'add', project_dir, 'analyze', '-all', db_path],
-        stdout=open(os.devnull, 'wb')
-    ).wait()
+
+    understand_5_cmd = ['und', 'create', '-languages', 'Java', 'add', project_dir, 'analyze', '-all', db_path]
+    understand_6_cmd = ['und', 'create', '-db', db_path, '-languages', 'java']
+    result = subprocess.run(understand_6_cmd,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
+
+    if result.returncode != 0:
+        error_ = result.stderr.decode('utf-8')
+        config.logger.debug(f'return code: {result.returncode} msg: {error_}')
+    else:
+        config.logger.debug(f'Understand project was created successfully!')
     return db_path
 
 
 def update_understand_database2(udb_path):
     """
     This function updates database due to file changes.
-    :param udb_path: The absolute path of understand database.
-    :return: None
     Error message raised by understand 6.x:
     Error: The Analysis cannot be performed because the database is locked or read only
+
+    Arges:
+
+        udb_path (str): The absolute path of understand database.
+
+    Return:
+
+        None
+
     """
+    understand_5_cmd = ['und', 'analyze', '-rescan', '-changed', udb_path]
+    understand_6_cmd = ['und', 'analyze', '-changed', udb_path]  # -rescan option is not required for understand >= 6.0
 
     subprocess.Popen(
-        ['und', 'analyze', '-changed', udb_path],
+        understand_6_cmd,
         stdout=open(os.devnull, 'wb')
     ).wait()
 
@@ -74,13 +110,23 @@ def update_understand_database(udb_path):
     """
     This function updates database due to file changes.
     If any error, such as database is locked or read only, occurred it tries again and again to update db.
-    :param udb_path: The absolute path of understand database.
-    :return: None
-    """
 
-    result = subprocess.run(['und', 'analyze', '-changed', udb_path],
+    Arges:
+
+        udb_path (str): The absolute path of understand database.
+
+    Return:
+
+        None
+
+    """
+    understand_5_cmd = ['und', 'analyze', '-rescan', '-changed', udb_path]
+    understand_6_cmd = ['und', 'analyze', '-changed', udb_path]  # -rescan option is not required for understand >= 6.0
+
+    result = subprocess.run(understand_6_cmd,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE)
+
     # info_ = result.stdout.decode('utf-8')
     # error_ = result.stderr.decode('utf-8')
     # print(info_[:85])
@@ -93,7 +139,8 @@ def update_understand_database(udb_path):
         except:
             pass
         finally:
-            result = subprocess.run(['und', 'analyze', '-changed', udb_path],
+
+            result = subprocess.run(understand_6_cmd,  #
                                     stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE)
             # info_ = result.stdout.decode('utf-8')
@@ -165,6 +212,7 @@ def reset_project(quit_=False):
     update_understand_database(config.UDB_PATH)
     if quit_:
         quit()
+
 
 # -----------------------------------------------
 # trees = []
