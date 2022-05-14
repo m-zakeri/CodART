@@ -1,5 +1,21 @@
 """
+
+When the name of a class field does not explain what the field hold, it needs to be changed.
+
+
+### Pre-conditions:
+
+Todo: Add pre-conditions
+
+### Post-conditions:
+
+Todo: Add post-conditions
+
+
 """
+
+__author__ = 'Morteza Zakeri'
+__version__ = '0.1.1'
 
 import os
 import sys
@@ -15,6 +31,10 @@ sys.path.append('../')
 
 
 class RenameFieldRefactoringListener(JavaParserLabeledListener):
+    """
+    The class performs Rename Field Refactoring
+
+    """
 
     def __init__(self,
                  common_token_stream: CommonTokenStream = None,
@@ -22,6 +42,25 @@ class RenameFieldRefactoringListener(JavaParserLabeledListener):
                  scope_class_name: str = None,
                  field_identifier: str = None,
                  field_new_name: str = None):
+
+        """
+        Args:
+
+            common_token_stream (CommonTokenStream): An instance of ANTLR4 CommonTokenStream class
+
+            package_name(str): Name of the packages in which the refactoring has to be done
+
+            scope_class_name(str): Name of the class in which the refactoring has to be done
+
+            field_identifier(str): Name of the package in which the refactoring has to be done
+
+            field_new_name(str): The new name of the refactored method
+
+        Returns:
+
+            RenameFieldListener: An instance of RenameFieldListener class
+
+        """
 
         self.token_stream = common_token_stream
         self.class_identifier = scope_class_name
@@ -127,45 +166,42 @@ class RenameFieldRefactoringListener(JavaParserLabeledListener):
 
 
 def main():
-    Path = "../tests/rename_tests/benchmark"
-    Package_name = "org.json"
-    class_identifier = "HTTP"
-    field_identifier = "CRLF"
-    field_new_name = "test"
+    path_ = "../tests/rename_tests/benchmark"
+    package_name_ = "org.json"
+    class_identifier_ = "HTTP"
+    field_identifier_ = "CRLF"
+    field_new_name_ = "test"
 
-    FolderPath = os.listdir(Path)
-    testsPath = os.listdir(Path + "/refactoredFiles/")
+    folder_path = os.listdir(path_)
+    tests_path = os.listdir(path_ + "/refactoredFiles/")
 
     # delete last refactored files
-    for t in testsPath:
-        os.remove(os.path.join(Path + "/refactoredFiles/", t))
+    for t in tests_path:
+        os.remove(os.path.join(path_ + "/refactoredFiles/", t))
 
-    for File in FolderPath:
-        # We have all of the java files in this folder now
-        if File.endswith('.java'):
-            EachFilePath = Path + "/" + File
-            print(" ****************" + " in file : " + File + " ****************")
-            EachFile = FileStream(str(EachFilePath))
-            FileName = File.split(".")[0]
-            Refactored = open(Path + "/refactoredFiles/" + FileName + "_Refactored.java", 'w', newline='')
+    for file_ in folder_path:
+        # We have all java files in this folder now
+        if file_.endswith('.java'):
+            file_path = path_ + "/" + file_
+            file_stream = FileStream(str(file_path))
+            file_name = file_.split(".")[0]
+            refactored = open(path_ + "/refactoredFiles/" + file_name + "_Refactored.java", 'w', newline='')
 
-            Lexer = JavaLexer(EachFile)
+            lexer = JavaLexer(file_stream)
+            token_stream = CommonTokenStream(lexer)
+            parser = JavaParserLabeled(token_stream)
+            tree = parser.compilationUnit()
+            rename_field_refactoring_listener = RenameFieldRefactoringListener(
+                token_stream,
+                package_name_,
+                class_identifier_,
+                field_identifier_,
+                field_new_name_
+            )
 
-            TokenStream = CommonTokenStream(Lexer)
-
-            Parser = JavaParserLabeled(TokenStream)
-
-            Tree = Parser.compilationUnit()
-
-            ListenerForReRenameClass = \
-                RenameFieldRefactoringListener(TokenStream, Package_name, class_identifier, field_identifier,
-                                               field_new_name)
-
-            Walker = ParseTreeWalker()
-
-            Walker.walk(ListenerForReRenameClass, Tree)
-
-            Refactored.write(ListenerForReRenameClass.token_stream_rewriter.getDefaultText())
+            walker = ParseTreeWalker()
+            walker.walk(rename_field_refactoring_listener, tree)
+            refactored.write(rename_field_refactoring_listener.token_stream_rewriter.getDefaultText())
 
     print(" %%%%%%%%%%%%%" + " all files finished " + "****************")
 
