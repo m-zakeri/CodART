@@ -1,6 +1,20 @@
 """
+When the name of a package does not explain what the class does (package's functionality), it needs to be changed.
+
+### Pre-conditions:
+
+Todo: Add pre-conditions
+
+### Post-conditions:
+
+Todo: Add post-conditions
+
 
 """
+
+__author__ = 'Morteza Zakeri'
+__version__ = '0.1.2'
+
 
 import os
 import sys
@@ -17,12 +31,16 @@ sys.path.append('../')
 
 
 class FindPackages(JavaParserLabeledListener):
+    """
+    The class find packages
 
-    def __init__(self,
-                 common_token_stream: CommonTokenStream = None):
+    """
+
+    def __init__(self, common_token_stream: CommonTokenStream = None):
         """
-        :param common_token_stream:
+
         """
+
         self.token_stream = common_token_stream
 
         # Move all the tokens in the source code in a buffer, token_stream_rewriter.
@@ -41,15 +59,31 @@ packages = []
 
 
 class RenamePackageRefactoringListener(JavaParserLabeledListener):
-
+    """
+        The class implements Rename Package refactoring.
+    """
     def __init__(self,
                  common_token_stream: CommonTokenStream = None,
                  package_identifier: str = None,
                  package_new_name: str = None,
                  packages_name: list = []):
         """
-        :param common_token_stream:
+         Args:
+
+             common_token_stream (CommonTokenStream): An instance of ANTLR4 CommonTokenStream class
+
+             package_identifier(str): Name of the package in which the refactoring has to be done
+
+             package_new_name(str): The new name of the refactored method
+
+             packages_name(str): Name of the packages in which the refactoring has to be done
+
+        Returns:
+
+            RenamePackageRefactoringListener: An instance of RenamePackageRefactoringListener class
+
         """
+
         self.token_stream = common_token_stream
         self.package_identifier = package_identifier
         self.package_new_name = package_new_name
