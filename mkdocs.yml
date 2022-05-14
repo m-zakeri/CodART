@@ -66,6 +66,10 @@ nav:
         - Pull-up method: refactorings/pull_up_method.md
         - Push-down field: refactorings/push_down_field.md
         - Push-down method: refactorings/push_down_method.md
+        - Rename class: refactorings/rename_class.md
+        - Rename field: refactorings/rename_field.md
+        - Rename method: refactorings/rename_method.md
+        - Rename package: refactorings/rename_method.md
     - Code smells details:
         - Large class: code_smells/large_class.md
         - Long method: code_smells/long_method.md
@@ -75,6 +79,8 @@ nav:
     - Optimization:
         - Population initialization: optimization/initialize.md
         - Search-based refactoring: optimization/search-based_refactoring.md
+    - Utilities:
+        - Project utilities: utilities/project_utils.md
     - Tutorials:
         - ANTLR basics: tutorials/antlr_basics.md
         - ANTLR advanced: tutorials/antlr_advanced.md
