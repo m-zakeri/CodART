@@ -543,6 +543,19 @@
     ExtractClassRefactoringListener
   </a>
   
+    <nav class="md-nav" aria-label="ExtractClassRefactoringListener">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.extract_class.ExtractClassRefactoringListener.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -829,6 +842,54 @@
   
 
           
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rename_class/" class="md-nav__link">
+        Rename class
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rename_field/" class="md-nav__link">
+        Rename field
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rename_method/" class="md-nav__link">
+        Rename method
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rename_package/" class="md-nav__link">
+        Rename package
+      </a>
+    </li>
+  
+
+          
         </ul>
       </nav>
     </li>
@@ -1011,11 +1072,53 @@
         <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_10" type="checkbox" id="__nav_10" >
       
       <label class="md-nav__link" for="__nav_10">
+        Utilities
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Utilities" data-md-level="1">
+        <label class="md-nav__title" for="__nav_10">
+          <span class="md-nav__icon md-icon"></span>
+          Utilities
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../utilities/project_utils/" class="md-nav__link">
+        Project utilities
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_11" type="checkbox" id="__nav_11" >
+      
+      <label class="md-nav__link" for="__nav_11">
         Tutorials
         <span class="md-nav__icon md-icon"></span>
       </label>
       <nav class="md-nav" aria-label="Tutorials" data-md-level="1">
-        <label class="md-nav__title" for="__nav_10">
+        <label class="md-nav__title" for="__nav_11">
           <span class="md-nav__icon md-icon"></span>
           Tutorials
         </label>
@@ -1239,6 +1342,19 @@
     ExtractClassRefactoringListener
   </a>
   
+    <nav class="md-nav" aria-label="ExtractClassRefactoringListener">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.extract_class.ExtractClassRefactoringListener.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -1364,6 +1480,87 @@
 
 
 
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="refactorings.extract_class.ExtractClassRefactoringListener.__init__" class="doc doc-heading">
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">common_token_stream</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">source_class</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">new_class</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">moved_fields</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">moved_methods</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method_map</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-special"><code>special</code></small>
+  </span>
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      
+
+        <details class="quote">
+          <summary>Source code in <code>refactorings\extract_class.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">common_token_stream</span><span class="p">:</span> <span class="n">CommonTokenStream</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">source_class</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">new_class</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">moved_fields</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">moved_methods</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method_map</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span>
+             <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">method_map</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">method_map</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">method_map</span> <span class="o">=</span> <span class="n">method_map</span>
+
+    <span class="k">if</span> <span class="n">moved_methods</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">moved_methods</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">moved_methods</span> <span class="o">=</span> <span class="n">moved_methods</span>
+    <span class="k">if</span> <span class="n">moved_fields</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">moved_fields</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">moved_fields</span> <span class="o">=</span> <span class="n">moved_fields</span>
+
+    <span class="k">if</span> <span class="n">common_token_stream</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;common_token_stream is None&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">token_stream_rewriter</span> <span class="o">=</span> <span class="n">TokenStreamRewriter</span><span class="p">(</span><span class="n">common_token_stream</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">source_class</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;source_class is None&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source_class</span> <span class="o">=</span> <span class="n">source_class</span>
+    <span class="k">if</span> <span class="n">new_class</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;new_class is None&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">new_class</span> <span class="o">=</span> <span class="n">new_class</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">is_source_class</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">detected_field</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">detected_method</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">TAB</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">NEW_LINE</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">code</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">package_name</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">object_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_class</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">new_class</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_class</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_class</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">modifiers</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">do_increase_visibility</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="n">temp</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">moved_methods</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">method_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">method</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">method_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">method</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">method_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">method</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">fields_to_increase_visibility</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="o">*</span><span class="n">temp</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
 
 
 

@@ -13,14 +13,14 @@
         <meta name="author" content="Morteza Zakeri">
       
       
-        <link rel="canonical" href="https://m-zakeri.github.io/refactorings/extract_interface/">
+        <link rel="canonical" href="https://m-zakeri.github.io/refactorings/rename_class/">
       
       <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.2.2, mkdocs-material-7.2.5">
     
     
       
-        <title>Extract interface - CodART Docs (v0.1.2dev)</title>
+        <title>Rename class - CodART Docs (v0.1.2dev)</title>
       
     
     
@@ -73,7 +73,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#extract-interface" class="md-skip">
+        <a href="#rename-class" class="md-skip">
           Skip to content
         </a>
       
@@ -103,7 +103,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Extract interface
+              Rename class
             
           </span>
         </div>
@@ -442,118 +442,11 @@
             
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Extract interface
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../extract_interface/" class="md-nav__link">
         Extract interface
       </a>
-      
-        
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#refactorings.extract_interface" class="md-nav__link">
-    refactorings.extract_interface
-  </a>
-  
-    <nav class="md-nav" aria-label="refactorings.extract_interface">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#refactorings.extract_interface--introduction" class="md-nav__link">
-    Introduction
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#refactorings.extract_interface--pre-and-post-conditions" class="md-nav__link">
-    Pre and post-conditions
-  </a>
-  
-    <nav class="md-nav" aria-label="Pre and post-conditions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#refactorings.extract_interface--pre-conditions" class="md-nav__link">
-    Pre-conditions:
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#refactorings.extract_interface--post-conditions" class="md-nav__link">
-    Post-conditions:
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#refactorings.extract_interface.ExtractInterfaceRefactoring" class="md-nav__link">
-    ExtractInterfaceRefactoring
-  </a>
-  
-    <nav class="md-nav" aria-label="ExtractInterfaceRefactoring">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#refactorings.extract_interface.ExtractInterfaceRefactoring.__init__" class="md-nav__link">
-    __init__()
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#refactorings.extract_interface.main" class="md-nav__link">
-    main()
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -825,11 +718,185 @@
             
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../rename_class/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Rename class
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         Rename class
       </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-1" class="md-nav__link">
+    Implementation 1
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#refactorings.rename_class" class="md-nav__link">
+    refactorings.rename_class
+  </a>
+  
+    <nav class="md-nav" aria-label="refactorings.rename_class">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.rename_class--introduction" class="md-nav__link">
+    Introduction
+  </a>
+  
+    <nav class="md-nav" aria-label="Introduction">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.rename_class--pre-conditions" class="md-nav__link">
+    Pre-conditions:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.rename_class--post-conditions" class="md-nav__link">
+    Post-conditions:
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#refactorings.rename_class.RenameClassRefactoringListener" class="md-nav__link">
+    RenameClassRefactoringListener
+  </a>
+  
+    <nav class="md-nav" aria-label="RenameClassRefactoringListener">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.rename_class.RenameClassRefactoringListener.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#refactorings.rename_class.rename_class" class="md-nav__link">
+    rename_class()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-2" class="md-nav__link">
+    Implementation 2
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#refactorings.rename_class2" class="md-nav__link">
+    refactorings.rename_class2
+  </a>
+  
+    <nav class="md-nav" aria-label="refactorings.rename_class2">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.rename_class2--introduction" class="md-nav__link">
+    Introduction
+  </a>
+  
+    <nav class="md-nav" aria-label="Introduction">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.rename_class2--pre-conditions" class="md-nav__link">
+    Pre-conditions:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.rename_class2--post-conditions" class="md-nav__link">
+    Post-conditions:
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#refactorings.rename_class2.RenameClassRefactoringListener" class="md-nav__link">
+    RenameClassRefactoringListener
+  </a>
+  
+    <nav class="md-nav" aria-label="RenameClassRefactoringListener">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.rename_class2.RenameClassRefactoringListener.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1244,37 +1311,37 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#refactorings.extract_interface" class="md-nav__link">
-    refactorings.extract_interface
-  </a>
-  
-    <nav class="md-nav" aria-label="refactorings.extract_interface">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#refactorings.extract_interface--introduction" class="md-nav__link">
-    Introduction
+  <a href="#implementation-1" class="md-nav__link">
+    Implementation 1
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#refactorings.extract_interface--pre-and-post-conditions" class="md-nav__link">
-    Pre and post-conditions
+      
+        <li class="md-nav__item">
+  <a href="#refactorings.rename_class" class="md-nav__link">
+    refactorings.rename_class
   </a>
   
-    <nav class="md-nav" aria-label="Pre and post-conditions">
+    <nav class="md-nav" aria-label="refactorings.rename_class">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#refactorings.extract_interface--pre-conditions" class="md-nav__link">
+  <a href="#refactorings.rename_class--introduction" class="md-nav__link">
+    Introduction
+  </a>
+  
+    <nav class="md-nav" aria-label="Introduction">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.rename_class--pre-conditions" class="md-nav__link">
     Pre-conditions:
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#refactorings.extract_interface--post-conditions" class="md-nav__link">
+  <a href="#refactorings.rename_class--post-conditions" class="md-nav__link">
     Post-conditions:
   </a>
   
@@ -1291,15 +1358,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#refactorings.extract_interface.ExtractInterfaceRefactoring" class="md-nav__link">
-    ExtractInterfaceRefactoring
+  <a href="#refactorings.rename_class.RenameClassRefactoringListener" class="md-nav__link">
+    RenameClassRefactoringListener
   </a>
   
-    <nav class="md-nav" aria-label="ExtractInterfaceRefactoring">
+    <nav class="md-nav" aria-label="RenameClassRefactoringListener">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#refactorings.extract_interface.ExtractInterfaceRefactoring.__init__" class="md-nav__link">
+  <a href="#refactorings.rename_class.RenameClassRefactoringListener.__init__" class="md-nav__link">
     __init__()
   </a>
   
@@ -1311,9 +1378,76 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#refactorings.extract_interface.main" class="md-nav__link">
-    main()
+  <a href="#refactorings.rename_class.rename_class" class="md-nav__link">
+    rename_class()
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-2" class="md-nav__link">
+    Implementation 2
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#refactorings.rename_class2" class="md-nav__link">
+    refactorings.rename_class2
+  </a>
+  
+    <nav class="md-nav" aria-label="refactorings.rename_class2">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.rename_class2--introduction" class="md-nav__link">
+    Introduction
+  </a>
+  
+    <nav class="md-nav" aria-label="Introduction">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.rename_class2--pre-conditions" class="md-nav__link">
+    Pre-conditions:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.rename_class2--post-conditions" class="md-nav__link">
+    Post-conditions:
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#refactorings.rename_class2.RenameClassRefactoringListener" class="md-nav__link">
+    RenameClassRefactoringListener
+  </a>
+  
+    <nav class="md-nav" aria-label="RenameClassRefactoringListener">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.rename_class2.RenameClassRefactoringListener.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1329,36 +1463,26 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/m-zakeri/CodART/edit/master/docs/refactorings/extract_interface.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/m-zakeri/CodART/edit/master/docs/refactorings/rename_class.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
                 
-                <h1 id="extract-interface">Extract interface</h1>
+                <h1 id="rename-class">Rename class</h1>
+<h2 id="implementation-1">Implementation 1</h2>
 
 
   <div class="doc doc-object doc-module">
 
-<a id="refactorings.extract_interface"></a>
+<a id="refactorings.rename_class"></a>
     <div class="doc doc-contents first">
 
-      <h3 id="refactorings.extract_interface--introduction">Introduction</h3>
-<p>When multiple clients are using the same part of a class interface, or part of the interface in two classes is the same;
-Extract Interface Refactoring moves this identical portion to its own interface.</p>
-<h3 id="refactorings.extract_interface--pre-and-post-conditions">Pre and post-conditions</h3>
-<h4 id="refactorings.extract_interface--pre-conditions">Pre-conditions:</h4>
-<ol>
-<li>
-<p>precondition is whether the package name, all the class names and method names in
-those classes exist.</p>
-</li>
-<li>
-<p>The parameter types and return types of each method should be the same across the
-classes.</p>
-</li>
-</ol>
-<h4 id="refactorings.extract_interface--post-conditions">Post-conditions:</h4>
-<p>No specific Post Condition</p>
+      <h3 id="refactorings.rename_class--introduction">Introduction</h3>
+<p>When the name of a class does not explain what the class does (class's functionality), it needs to be changed.</p>
+<h4 id="refactorings.rename_class--pre-conditions">Pre-conditions:</h4>
+<p>Todo: Add pre-conditions</p>
+<h4 id="refactorings.rename_class--post-conditions">Post-conditions:</h4>
+<p>Todo: Add post-conditions</p>
 
 
 
@@ -1376,8 +1500,8 @@ classes.</p>
 
 
 
-<h2 id="refactorings.extract_interface.ExtractInterfaceRefactoring" class="doc doc-heading">
-        <code>ExtractInterfaceRefactoring</code>
+<h2 id="refactorings.rename_class.RenameClassRefactoringListener" class="doc doc-heading">
+        <code>RenameClassRefactoringListener</code>
 
 
 
@@ -1385,9 +1509,8 @@ classes.</p>
 
     <div class="doc doc-contents ">
 
-      <p>The class that does the process of extract interface refactoring.</p>
-<p>Splits the identical,reused portion of the interface, creates a new interface,
-and moves the split portion to the new interface.</p>
+      <p>The class performs Rename Class refactoring.
+The main listener which parses the file based on the provided information,         using ANTLR parser generator and tokenization methods</p>
 
 
 
@@ -1406,8 +1529,355 @@ and moves the split portion to the new interface.</p>
 
 
 
-<h3 id="refactorings.extract_interface.ExtractInterfaceRefactoring.__init__" class="doc doc-heading">
-<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source_filenames</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">class_names</span><span class="p">,</span> <span class="n">method_keys</span><span class="p">,</span> <span class="n">interface_name</span><span class="p">,</span> <span class="n">interface_filename</span><span class="p">,</span> <span class="n">filename_mapping</span><span class="o">=&lt;</span><span class="n">function</span> <span class="n">ExtractInterfaceRefactoring</span><span class="o">.&lt;</span><span class="k">lambda</span><span class="o">&gt;</span> <span class="n">at</span> <span class="mh">0x000001EC0F8A6040</span><span class="o">&gt;</span><span class="p">)</span></code>
+<h3 id="refactorings.rename_class.RenameClassRefactoringListener.__init__" class="doc doc-heading">
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">java_file_path</span><span class="p">,</span> <span class="n">common_token_stream</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">class_new_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">class_identifier</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">package_identifier</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-special"><code>special</code></small>
+  </span>
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Initializer of rename class refactoring listener</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>java_file_path(str)</code></td>
+        <td><code></code></td>
+        <td><p>Address path to the test/source file</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>common_token_stream</code></td>
+        <td><code>CommonTokenStream</code></td>
+        <td><p>An instance of ANTLR4 CommonTokenStream class</p></td>
+        <td><code>None</code></td>
+      </tr>
+      <tr>
+        <td><code>class_new_name(str)</code></td>
+        <td><code></code></td>
+        <td><p>The new name of the refactored class</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>class_identifier(str)</code></td>
+        <td><code></code></td>
+        <td><p>Name of the class in which the refactoring has to be done</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>package_identifier(str)</code></td>
+        <td><code></code></td>
+        <td><p>Name of the package in which the refactoring has to be done</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>RenameMethodListener</code></td>
+      <td><p>An instance of RenameClassRefactoringListener class</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>refactorings\rename_class.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">java_file_path</span><span class="p">,</span>
+             <span class="n">common_token_stream</span><span class="p">:</span> <span class="n">CommonTokenStream</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">class_new_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">class_identifier</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">package_identifier</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initializer of rename class refactoring listener</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        java_file_path(str): Address path to the test/source file</span>
+
+<span class="sd">        common_token_stream (CommonTokenStream): An instance of ANTLR4 CommonTokenStream class</span>
+
+<span class="sd">        class_new_name(str): The new name of the refactored class</span>
+
+<span class="sd">        class_identifier(str): Name of the class in which the refactoring has to be done</span>
+
+<span class="sd">        package_identifier(str): Name of the package in which the refactoring has to be done</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">        RenameMethodListener: An instance of RenameClassRefactoringListener class</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">file_path</span> <span class="o">=</span> <span class="n">java_file_path</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">token_stream</span> <span class="o">=</span> <span class="n">common_token_stream</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">class_new_name</span> <span class="o">=</span> <span class="n">class_new_name</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">class_identifier</span> <span class="o">=</span> <span class="n">class_identifier</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">package_identifier</span> <span class="o">=</span> <span class="n">package_identifier</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">in_class</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">changed</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">declared_objects_names</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">is_package_imported</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">in_selected_package</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">in_selected_class</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">in_some_package</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1"># Move all the tokens in the source code in a buffer, token_stream_rewriter.</span>
+    <span class="k">if</span> <span class="n">common_token_stream</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">token_stream_rewriter</span> <span class="o">=</span> <span class="n">TokenStreamRewriter</span><span class="p">(</span><span class="n">common_token_stream</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;common_token_stream is None&#39;</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h2 id="refactorings.rename_class.rename_class" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">rename_class</span><span class="p">(</span><span class="n">java_file_path</span><span class="p">,</span> <span class="n">package_identifier</span><span class="p">,</span> <span class="n">class_identifier</span><span class="p">,</span> <span class="n">class_new_name</span><span class="p">,</span> <span class="n">reference</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Main Entry Point to the Listener and Tree Walker</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>java_file_path(str)</code></td>
+        <td><code></code></td>
+        <td><p>Address path to the test/source file</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>scope_class_name(str)</code></td>
+        <td><code></code></td>
+        <td><p>Name of the class in which the refactoring has to be done</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>target_method_name(str)</code></td>
+        <td><code></code></td>
+        <td><p>Name of the method in which the refactoring has to be done</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>new_name(str)</code></td>
+        <td><code></code></td>
+        <td><p>The new name of the refactored method</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>reference(str)</code></td>
+        <td><code></code></td>
+        <td><p>Keeping track for all of the method references in the project scope</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code></code></td>
+      <td><p>No Returns</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>refactorings\rename_class.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">rename_class</span><span class="p">(</span><span class="n">java_file_path</span><span class="p">,</span> <span class="n">package_identifier</span><span class="p">,</span> <span class="n">class_identifier</span><span class="p">,</span> <span class="n">class_new_name</span><span class="p">,</span> <span class="n">reference</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Main Entry Point to the Listener and Tree Walker</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        java_file_path(str): Address path to the test/source file</span>
+
+<span class="sd">        scope_class_name(str): Name of the class in which the refactoring has to be done</span>
+
+<span class="sd">        target_method_name(str): Name of the method in which the refactoring has to be done</span>
+
+<span class="sd">        new_name(str): The new name of the refactored method</span>
+
+<span class="sd">        reference(str): Keeping track for all of the method references in the project scope</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        No Returns</span>
+<span class="sd">&quot;&quot;&quot;</span>
+    <span class="n">stream</span> <span class="o">=</span> <span class="n">FileStream</span><span class="p">(</span><span class="n">java_file_path</span><span class="p">)</span>
+    <span class="n">lexer</span> <span class="o">=</span> <span class="n">JavaLexer</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
+    <span class="n">tokens</span> <span class="o">=</span> <span class="n">CommonTokenStream</span><span class="p">(</span><span class="n">lexer</span><span class="p">)</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">JavaParserLabeled</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
+    <span class="n">tree</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">compilationUnit</span><span class="p">()</span>
+    <span class="n">listener</span> <span class="o">=</span> <span class="n">RenameClassRefactoringListener</span><span class="p">(</span>
+        <span class="n">java_file_path</span><span class="o">=</span><span class="n">java_file_path</span><span class="p">,</span>
+        <span class="n">common_token_stream</span><span class="o">=</span><span class="n">tokens</span><span class="p">,</span>
+        <span class="n">class_new_name</span><span class="o">=</span><span class="n">class_new_name</span><span class="p">,</span>
+        <span class="n">class_identifier</span><span class="o">=</span><span class="n">class_identifier</span><span class="p">,</span>
+        <span class="n">package_identifier</span><span class="o">=</span><span class="n">package_identifier</span>
+    <span class="p">)</span>
+    <span class="n">walker</span> <span class="o">=</span> <span class="n">ParseTreeWalker</span><span class="p">()</span>
+    <span class="n">walker</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">listener</span><span class="p">,</span> <span class="n">tree</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">listener</span><span class="o">.</span><span class="n">changed</span><span class="p">:</span>
+        <span class="c1"># print(java_file_path)</span>
+        <span class="n">new_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="n">java_file_path</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">new_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">listener</span><span class="o">.</span><span class="n">token_stream_rewriter</span><span class="o">.</span><span class="n">getDefaultText</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+
+        <span class="c1"># def enterTypeName1(self, ctx:Java9_v2Parser.TypeName1Context):</span>
+        <span class="c1">#     if self.is_package_imported \</span>
+        <span class="c1">#             or self.package_identifier is None \</span>
+        <span class="c1">#             or self.in_selected_package:</span>
+        <span class="c1">#         if ctx.identifier().getText() == self.class_identifier:</span>
+        <span class="c1">#             print(&quot; type name 1&quot;)</span>
+        <span class="c1">#             self.token_stream_rewriter.replaceIndex(</span>
+        <span class="c1">#                 index=ctx.identifier().start.tokenIndex,</span>
+        <span class="c1">#                 text=self.class_new_name)</span>
+        <span class="c1">#</span>
+        <span class="c1">#</span>
+        <span class="c1"># def enterCompilationUnit1(self, ctx: Java9_v2Parser.CompilationUnit1Context):</span>
+        <span class="c1">#     hidden = self.token_stream.getHiddenTokensToLeft(ctx.start.tokenIndex)</span>
+        <span class="c1">#     self.token_stream_rewriter.replaceRange(from_idx=hidden[0].tokenIndex,</span>
+        <span class="c1">#                                             to_idx=hidden[-1].tokenIndex,</span>
+        <span class="c1">#                                             text=&#39;/*After refactoring (Refactored version)*/\n&#39;)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+<h2 id="implementation-2">Implementation 2</h2>
+
+
+  <div class="doc doc-object doc-module">
+
+<a id="refactorings.rename_class2"></a>
+    <div class="doc doc-contents first">
+
+      <h3 id="refactorings.rename_class2--introduction">Introduction</h3>
+<p>When the name of a class does not explain what the class does (class's functionality), it needs to be changed.</p>
+<p>The module implements a light-weight version of Rename Class refactoring described in <code>rename_class.py</code></p>
+<h4 id="refactorings.rename_class2--pre-conditions">Pre-conditions:</h4>
+<p>Todo: Add pre-conditions</p>
+<h4 id="refactorings.rename_class2--post-conditions">Post-conditions:</h4>
+<p>Todo: Add post-conditions</p>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-class">
+
+
+
+<h2 id="refactorings.rename_class2.RenameClassRefactoringListener" class="doc doc-heading">
+        <code>RenameClassRefactoringListener</code>
+
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>The class implements rename class refactoring</p>
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="refactorings.rename_class2.RenameClassRefactoringListener.__init__" class="doc doc-heading">
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">common_token_stream</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">package_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">class_identifier</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">class_new_name</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-special"><code>special</code></small>
@@ -1430,45 +1900,27 @@ and moves the split portion to the new interface.</p>
   </thead>
   <tbody>
       <tr>
-        <td><code>source_filenames</code></td>
-        <td><code>list</code></td>
-        <td><p>A list of file names to be processed</p></td>
+        <td><code>common_token_stream</code></td>
+        <td><code>CommonTokenStream</code></td>
+        <td><p>An instance of ANTLR4 CommonTokenStream class</p></td>
+        <td><code>None</code></td>
+      </tr>
+      <tr>
+        <td><code>package_name(str)</code></td>
+        <td><code></code></td>
+        <td><p>Name of the package in which the refactoring has to be done</p></td>
         <td><em>required</em></td>
       </tr>
       <tr>
-        <td><code>package_name</code></td>
-        <td><code>str</code></td>
-        <td><p>The name of the package in which the refactoring has to be done (contains the classes)</p></td>
+        <td><code>class_identifier(str)</code></td>
+        <td><code></code></td>
+        <td><p>Name of the class in which the refactoring has to be done</p></td>
         <td><em>required</em></td>
       </tr>
       <tr>
-        <td><code>class_names</code></td>
-        <td><code>list</code></td>
-        <td><p>The classes which are going to implement the new interface</p></td>
-        <td><em>required</em></td>
-      </tr>
-      <tr>
-        <td><code>method_keys</code></td>
-        <td><code>list</code></td>
-        <td><p>The methods which are going to be included in the interface</p></td>
-        <td><em>required</em></td>
-      </tr>
-      <tr>
-        <td><code>filename_mapping</code></td>
-        <td><code>str</code></td>
-        <td><p>Mapping the file's name to the correct format so that it can be processed</p></td>
-        <td><code>&lt;function ExtractInterfaceRefactoring.&lt;lambda&gt; at 0x000001EC0F8A6040&gt;</code></td>
-      </tr>
-      <tr>
-        <td><code>interface_name</code></td>
-        <td><code>str</code></td>
-        <td><p>The new interface name</p></td>
-        <td><em>required</em></td>
-      </tr>
-      <tr>
-        <td><code>interface_filename</code></td>
-        <td><code>str</code></td>
-        <td><p>The new interface file name</p></td>
+        <td><code>class_new_name(str)</code></td>
+        <td><code></code></td>
+        <td><p>The new name of the refactored class</p></td>
         <td><em>required</em></td>
       </tr>
   </tbody>
@@ -1483,52 +1935,52 @@ and moves the split portion to the new interface.</p>
   </thead>
   <tbody>
     <tr>
-      <td><code>object (ExtractInterfaceRefactoring)</code></td>
-      <td><p>An instance of ExtractInterfaceRefactoring class</p></td>
+      <td><code>RenameMethodListener</code></td>
+      <td><p>An instance of RenameClassRefactoringListener class</p></td>
     </tr>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>refactorings\extract_interface.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">source_filenames</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
-        <span class="n">package_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">class_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
-        <span class="n">method_keys</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
-        <span class="n">interface_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">interface_filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">filename_mapping</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[:</span><span class="o">-</span><span class="mi">5</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.java&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.java&quot;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+          <summary>Source code in <code>refactorings\rename_class2.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+             <span class="n">common_token_stream</span><span class="p">:</span> <span class="n">CommonTokenStream</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">package_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">class_identifier</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">class_new_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Args:</span>
 
-<span class="sd">        source_filenames (list): A list of file names to be processed</span>
+<span class="sd">        common_token_stream (CommonTokenStream): An instance of ANTLR4 CommonTokenStream class</span>
 
-<span class="sd">        package_name (str): The name of the package in which the refactoring has to be done (contains the classes)</span>
+<span class="sd">        package_name(str): Name of the package in which the refactoring has to be done</span>
 
-<span class="sd">        class_names (str): The classes which are going to implement the new interface</span>
+<span class="sd">        class_identifier(str): Name of the class in which the refactoring has to be done</span>
 
-<span class="sd">        method_keys (str): The methods which are going to be included in the interface</span>
+<span class="sd">        class_new_name(str): The new name of the refactored class</span>
 
-<span class="sd">        filename_mapping (str): Mapping the file&#39;s name to the correct format so that it can be processed</span>
-
-<span class="sd">        interface_name (str): The new interface name</span>
-
-<span class="sd">        interface_filename (str): The new interface file name</span>
 
 <span class="sd">    Returns:</span>
 
-<span class="sd">        object (ExtractInterfaceRefactoring): An instance of ExtractInterfaceRefactoring class</span>
+<span class="sd">        RenameMethodListener: An instance of RenameClassRefactoringListener class</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">source_filenames</span> <span class="o">=</span> <span class="n">source_filenames</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">package_name</span> <span class="o">=</span> <span class="n">package_name</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">class_names</span> <span class="o">=</span> <span class="n">class_names</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">method_keys</span> <span class="o">=</span> <span class="n">method_keys</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">interface_name</span> <span class="o">=</span> <span class="n">interface_name</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">interface_filename</span> <span class="o">=</span> <span class="n">interface_filename</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">filename_mapping</span> <span class="o">=</span> <span class="n">filename_mapping</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">token_stream</span> <span class="o">=</span> <span class="n">common_token_stream</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">class_new_name</span> <span class="o">=</span> <span class="n">class_new_name</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">class_identifier</span> <span class="o">=</span> <span class="n">class_identifier</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">package_identifier</span> <span class="o">=</span> <span class="n">package_name</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">is_package_imported</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">in_selected_package</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">in_selected_class</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">in_some_package</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1"># Move all the tokens in the source code in a buffer, token_stream_rewriter.</span>
+    <span class="k">if</span> <span class="n">common_token_stream</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">token_stream_rewriter</span> <span class="o">=</span> <span class="n">TokenStreamRewriter</span><span class="p">(</span><span class="n">common_token_stream</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;common_token_stream is None&#39;</span><span class="p">)</span>
 </code></pre></div>
         </details>
     </div>
@@ -1540,56 +1992,17 @@ and moves the split portion to the new interface.</p>
 
 
 
+
+
+
+
+
   </div>
 
     </div>
 
   </div>
 
-
-
-
-  <div class="doc doc-object doc-function">
-
-
-
-<h2 id="refactorings.extract_interface.main" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">main</span><span class="p">(</span><span class="n">source_filenames</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">class_names</span><span class="p">,</span> <span class="n">method_keys</span><span class="p">,</span> <span class="n">interface_name</span><span class="p">,</span> <span class="n">interface_filename</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
-
-
-</h2>
-
-    <div class="doc doc-contents ">
-
-      <p>The main API for extract interface refactoring</p>
-
-        <details class="quote">
-          <summary>Source code in <code>refactorings\extract_interface.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">source_filenames</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">class_names</span><span class="p">,</span> <span class="n">method_keys</span><span class="p">,</span> <span class="n">interface_name</span><span class="p">,</span> <span class="n">interface_filename</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">    The main API for extract interface refactoring</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">extract_interface_object</span> <span class="o">=</span> <span class="n">ExtractInterfaceRefactoring</span><span class="p">(</span>
-        <span class="n">source_filenames</span><span class="o">=</span><span class="n">source_filenames</span><span class="p">,</span>
-        <span class="n">package_name</span><span class="o">=</span><span class="n">package_name</span><span class="p">,</span>
-        <span class="n">class_names</span><span class="o">=</span><span class="n">class_names</span><span class="p">,</span>
-        <span class="n">method_keys</span><span class="o">=</span><span class="n">method_keys</span><span class="p">,</span>
-        <span class="n">interface_name</span><span class="o">=</span><span class="n">interface_name</span><span class="p">,</span>
-        <span class="n">interface_filename</span><span class="o">=</span><span class="n">interface_filename</span><span class="p">,</span>
-    <span class="p">)</span>
-
-    <span class="n">res</span> <span class="o">=</span> <span class="n">extract_interface_object</span><span class="o">.</span><span class="n">do_refactor</span><span class="p">()</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">res</span><span class="p">:</span>
-        <span class="n">config</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Cannot perform extract interface refactoring.&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">res</span>
-</code></pre></div>
-        </details>
-    </div>
-
-  </div>
 
 
 
@@ -1622,7 +2035,7 @@ and moves the split portion to the new interface.</p>
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../extract_class/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Extract class" rel="prev">
+        <a href="../push_down_method/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Push-down method" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -1631,20 +2044,20 @@ and moves the split portion to the new interface.</p>
               <span class="md-footer__direction">
                 Previous
               </span>
-              Extract class
+              Push-down method
             </div>
           </div>
         </a>
       
       
         
-        <a href="../extract_interface2/" class="md-footer__link md-footer__link--next" aria-label="Next: Extract interface 2" rel="next">
+        <a href="../rename_field/" class="md-footer__link md-footer__link--next" aria-label="Next: Rename field" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Extract interface 2
+              Rename field
             </div>
           </div>
           <div class="md-footer__button md-icon">

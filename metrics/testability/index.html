@@ -713,6 +713,54 @@
   
 
           
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings/rename_class/" class="md-nav__link">
+        Rename class
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings/rename_field/" class="md-nav__link">
+        Rename field
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings/rename_method/" class="md-nav__link">
+        Rename method
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../refactorings/rename_package/" class="md-nav__link">
+        Rename package
+      </a>
+    </li>
+  
+
+          
         </ul>
       </nav>
     </li>
@@ -1052,11 +1100,53 @@
         <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_10" type="checkbox" id="__nav_10" >
       
       <label class="md-nav__link" for="__nav_10">
+        Utilities
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Utilities" data-md-level="1">
+        <label class="md-nav__title" for="__nav_10">
+          <span class="md-nav__icon md-icon"></span>
+          Utilities
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../utilities/project_utils/" class="md-nav__link">
+        Project utilities
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_11" type="checkbox" id="__nav_11" >
+      
+      <label class="md-nav__link" for="__nav_11">
         Tutorials
         <span class="md-nav__icon md-icon"></span>
       </label>
       <nav class="md-nav" aria-label="Tutorials" data-md-level="1">
-        <label class="md-nav__title" for="__nav_10">
+        <label class="md-nav__title" for="__nav_11">
           <span class="md-nav__icon md-icon"></span>
           Tutorials
         </label>
@@ -1378,6 +1468,8 @@ to be used in refactoring process in addition to QMOOD metrics.</p>
 
 
 
+
+
   <div class="doc doc-object doc-class">
 
 
@@ -1608,7 +1700,7 @@ Which strategy is used for our final setting? I do not know!</p>
     <span class="n">class_metrics</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;FANIN&#39;</span><span class="p">:</span> <span class="n">UnderstandUtility</span><span class="o">.</span><span class="n">FANIN</span><span class="p">(</span><span class="n">db</span><span class="o">=</span><span class="n">db</span><span class="p">,</span> <span class="n">class_entity</span><span class="o">=</span><span class="n">entity</span><span class="p">)})</span>
     <span class="n">class_metrics</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;FANOUT&#39;</span><span class="p">:</span> <span class="n">UnderstandUtility</span><span class="o">.</span><span class="n">FANOUT</span><span class="p">(</span><span class="n">db</span><span class="o">=</span><span class="n">db</span><span class="p">,</span> <span class="n">class_entity</span><span class="o">=</span><span class="n">entity</span><span class="p">)})</span>
 
-    <span class="n">class_metrics</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;ATFD&#39;</span><span class="p">:</span> <span class="n">UnderstandUtility</span><span class="o">.</span><span class="n">ATFD</span><span class="p">(</span><span class="n">db</span><span class="o">=</span><span class="n">db</span><span class="p">,</span> <span class="n">class_entity</span><span class="o">=</span><span class="n">entity</span><span class="p">)})</span>  <span class="c1">### not implement</span>
+    <span class="n">class_metrics</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;ATFD&#39;</span><span class="p">:</span> <span class="n">UnderstandUtility</span><span class="o">.</span><span class="n">ATFD</span><span class="p">(</span><span class="n">db</span><span class="o">=</span><span class="n">db</span><span class="p">,</span> <span class="n">class_entity</span><span class="o">=</span><span class="n">entity</span><span class="p">)})</span>  <span class="c1"># Not implement</span>
 
     <span class="n">class_metrics</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;CFNAMM&#39;</span><span class="p">:</span> <span class="n">UnderstandUtility</span><span class="o">.</span><span class="n">CFNAMM_Class</span><span class="p">(</span><span class="n">class_name</span><span class="o">=</span><span class="n">entity</span><span class="p">)})</span>
     <span class="n">class_metrics</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;DAC&#39;</span><span class="p">:</span> <span class="n">UnderstandUtility</span><span class="o">.</span><span class="n">get_data_abstraction_coupling</span><span class="p">(</span><span class="n">db</span><span class="o">=</span><span class="n">db</span><span class="p">,</span> <span class="n">class_entity</span><span class="o">=</span><span class="n">entity</span><span class="p">)})</span>
@@ -1951,7 +2043,10 @@ Which strategy is used for our final setting? I do not know!</p>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">df</span> <span class="o">=</span> <span class="n">PreProcess</span><span class="p">()</span><span class="o">.</span><span class="n">compute_metrics_by_class_list</span><span class="p">(</span><span class="n">project_db_path</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># n_job must be set to number of CPU cores</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">PreProcess</span><span class="p">()</span><span class="o">.</span><span class="n">compute_metrics_by_class_list</span><span class="p">(</span>
+        <span class="n">project_db_path</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="o">=</span><span class="mi">0</span>  <span class="c1"># n_job must be set to number of CPU cores, use zero for non-parallel computing of metrics</span>
+    <span class="p">)</span>
     <span class="n">testability_</span> <span class="o">=</span> <span class="n">TestabilityModel</span><span class="p">()</span><span class="o">.</span><span class="n">inference</span><span class="p">(</span><span class="n">df_predict_data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">log_path</span><span class="o">=</span><span class="n">log_path</span><span class="p">)</span>
     <span class="c1"># print(&#39;testability=&#39;, testability_)</span>
     <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">testability_</span> <span class="o">/</span> <span class="n">initial_value</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>

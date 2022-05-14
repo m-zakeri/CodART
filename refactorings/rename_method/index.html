@@ -371,12 +371,14 @@
 
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" type="checkbox" id="__nav_6" checked>
       
       <label class="md-nav__link" for="__nav_6">
         Refactorings details
@@ -713,6 +715,242 @@
   
 
           
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rename_class/" class="md-nav__link">
+        Rename class
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rename_field/" class="md-nav__link">
+        Rename field
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Rename method
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Rename method
+      </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-1" class="md-nav__link">
+    Implementation 1
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#refactorings.rename_method" class="md-nav__link">
+    refactorings.rename_method
+  </a>
+  
+    <nav class="md-nav" aria-label="refactorings.rename_method">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.rename_method--introduction" class="md-nav__link">
+    Introduction
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.rename_method--pre-and-post-conditions" class="md-nav__link">
+    Pre and post conditions
+  </a>
+  
+    <nav class="md-nav" aria-label="Pre and post conditions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.rename_method--pre-conditions" class="md-nav__link">
+    Pre-conditions:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.rename_method--post-conditions" class="md-nav__link">
+    Post-conditions:
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#refactorings.rename_method.RenameMethodListener" class="md-nav__link">
+    RenameMethodListener
+  </a>
+  
+    <nav class="md-nav" aria-label="RenameMethodListener">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.rename_method.RenameMethodListener.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#refactorings.rename_method.get_method_calls" class="md-nav__link">
+    get_method_calls()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#refactorings.rename_method.rename_method" class="md-nav__link">
+    rename_method()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-2" class="md-nav__link">
+    Implementation 2
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#refactorings.rename_method2" class="md-nav__link">
+    refactorings.rename_method2
+  </a>
+  
+    <nav class="md-nav" aria-label="refactorings.rename_method2">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.rename_method2--introduction" class="md-nav__link">
+    Introduction
+  </a>
+  
+    <nav class="md-nav" aria-label="Introduction">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.rename_method2--pre-conditions" class="md-nav__link">
+    Pre-conditions:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.rename_method2--post-conditions" class="md-nav__link">
+    Post-conditions:
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#refactorings.rename_method2.RenameMethodRefactoringListener" class="md-nav__link">
+    RenameMethodRefactoringListener
+  </a>
+  
+    <nav class="md-nav" aria-label="RenameMethodRefactoringListener">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.rename_method2.RenameMethodRefactoringListener.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rename_package/" class="md-nav__link">
+        Rename package
+      </a>
+    </li>
+  
+
+          
         </ul>
       </nav>
     </li>
@@ -895,11 +1133,53 @@
         <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_10" type="checkbox" id="__nav_10" >
       
       <label class="md-nav__link" for="__nav_10">
+        Utilities
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Utilities" data-md-level="1">
+        <label class="md-nav__title" for="__nav_10">
+          <span class="md-nav__icon md-icon"></span>
+          Utilities
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../utilities/project_utils/" class="md-nav__link">
+        Project utilities
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_11" type="checkbox" id="__nav_11" >
+      
+      <label class="md-nav__link" for="__nav_11">
         Tutorials
         <span class="md-nav__icon md-icon"></span>
       </label>
       <nav class="md-nav" aria-label="Tutorials" data-md-level="1">
-        <label class="md-nav__title" for="__nav_10">
+        <label class="md-nav__title" for="__nav_11">
           <span class="md-nav__icon md-icon"></span>
           Tutorials
         </label>
@@ -1045,9 +1325,56 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#implementation-1" class="md-nav__link">
+    Implementation 1
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#refactorings.rename_method" class="md-nav__link">
     refactorings.rename_method
   </a>
+  
+    <nav class="md-nav" aria-label="refactorings.rename_method">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.rename_method--introduction" class="md-nav__link">
+    Introduction
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.rename_method--pre-and-post-conditions" class="md-nav__link">
+    Pre and post conditions
+  </a>
+  
+    <nav class="md-nav" aria-label="Pre and post conditions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.rename_method--pre-conditions" class="md-nav__link">
+    Pre-conditions:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.rename_method--post-conditions" class="md-nav__link">
+    Post-conditions:
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1058,40 +1385,6 @@
   
     <nav class="md-nav" aria-label="RenameMethodListener">
       <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#refactorings.rename_method.RenameMethodListener--introduction" class="md-nav__link">
-    Introduction
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#refactorings.rename_method.RenameMethodListener--pre-and-post-conditions" class="md-nav__link">
-    Pre and Post Conditions
-  </a>
-  
-    <nav class="md-nav" aria-label="Pre and Post Conditions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#refactorings.rename_method.RenameMethodListener--pre-conditions" class="md-nav__link">
-    Pre Conditions:
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#refactorings.rename_method.RenameMethodListener--post-conditions" class="md-nav__link">
-    Post Conditions:
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
         
           <li class="md-nav__item">
   <a href="#refactorings.rename_method.RenameMethodListener.__init__" class="md-nav__link">
@@ -1119,6 +1412,73 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#implementation-2" class="md-nav__link">
+    Implementation 2
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#refactorings.rename_method2" class="md-nav__link">
+    refactorings.rename_method2
+  </a>
+  
+    <nav class="md-nav" aria-label="refactorings.rename_method2">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.rename_method2--introduction" class="md-nav__link">
+    Introduction
+  </a>
+  
+    <nav class="md-nav" aria-label="Introduction">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.rename_method2--pre-conditions" class="md-nav__link">
+    Pre-conditions:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.rename_method2--post-conditions" class="md-nav__link">
+    Post-conditions:
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#refactorings.rename_method2.RenameMethodRefactoringListener" class="md-nav__link">
+    RenameMethodRefactoringListener
+  </a>
+  
+    <nav class="md-nav" aria-label="RenameMethodRefactoringListener">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refactorings.rename_method2.RenameMethodRefactoringListener.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1137,6 +1497,7 @@
                 
                 
                 <h1 id="rename-method">Rename method</h1>
+<h2 id="implementation-1">Implementation 1</h2>
 
 
   <div class="doc doc-object doc-module">
@@ -1144,10 +1505,36 @@
 <a id="refactorings.rename_method"></a>
     <div class="doc doc-contents first">
 
+      <h3 id="refactorings.rename_method--introduction">Introduction</h3>
+<p>When the name of a method does not explain what the method does (method's functionality), it needs to be changed.</p>
+<h3 id="refactorings.rename_method--pre-and-post-conditions">Pre and post conditions</h3>
+<h4 id="refactorings.rename_method--pre-conditions">Pre-conditions:</h4>
+<ol>
+<li>
+<p>User must enter the existing method's name, The source class's name for the refactoring, and the new method name
+     in order to rename.</p>
+</li>
+<li>
+<p>Check if the method exist, then rename it.</p>
+</li>
+</ol>
+<h4 id="refactorings.rename_method--post-conditions">Post-conditions:</h4>
+<ol>
+<li>After refactoring, all the old method names in the project should be changed.</li>
+</ol>
+<p>See whether the method is defined in a superclass or subclass. If so, you must repeat all steps in these classes too.</p>
+<p>The next method is important for maintaining the functionality of the program during the refactoring process. Create
+a new method with a new name. Copy the code of the old method to it. Delete all the code in the old method and,
+instead of it, insert a call for the new method.</p>
+<p>Find all references to the old method and replace them with references to the new one.</p>
+<p>Delete the old method. If the old method is part of a public interface, don’t perform this step. Instead,
+mark the old method as deprecated.</p>
 
 
 
   <div class="doc doc-children">
+
+
 
 
 
@@ -1168,30 +1555,8 @@
 
     <div class="doc doc-contents ">
 
-      <h4 id="refactorings.rename_method.RenameMethodListener--introduction">Introduction</h4>
-<p>When the name of a method does not explain what the method does (method's functionality), it needs to be changed.</p>
-<h4 id="refactorings.rename_method.RenameMethodListener--pre-and-post-conditions">Pre and Post Conditions</h4>
-<h5 id="refactorings.rename_method.RenameMethodListener--pre-conditions">Pre Conditions:</h5>
-<ol>
-<li>
-<p>User must enter the existing method's name, The source class's name for the refactoring, and the new method name
-     in order to rename.</p>
-</li>
-<li>
-<p>Check if the method exist, then rename it.</p>
-</li>
-</ol>
-<h5 id="refactorings.rename_method.RenameMethodListener--post-conditions">Post Conditions:</h5>
-<ol>
-<li>After refactoring, all the old method names in the project should be changed.</li>
-</ol>
-<p>See whether the method is defined in a superclass or subclass. If so, you must repeat all steps in these classes too.</p>
-<p>The next method is important for maintaining the functionality of the program during the refactoring process. Create
-a new method with a new name. Copy the code of the old method to it. Delete all the code in the old method and,
-instead of it, insert a call for the new method.</p>
-<p>Find all references to the old method and replace them with references to the new one.</p>
-<p>Delete the old method. If the old method is part of a public interface, don’t perform this step. Instead,
-mark the old method as deprecated.</p>
+      <p>The class implements Rename Method refactoring.
+The Main listener which parses the file based on the provided information,         using ANTLR parser generator and tokenization methods</p>
 
 
 
@@ -1221,70 +1586,37 @@ mark the old method as deprecated.</p>
 
     <div class="doc doc-contents ">
 
-      <p>The Main listener which parses the file based on the provided information,
-using ANTLR parser generator and tokenization methods</p>
+      <p>Initializer of rename method refactoring listener</p>
+<pre><code>Args:
 
-<p><strong>Parameters:</strong></p>
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Type</th>
-      <th>Description</th>
-      <th>Default</th>
-    </tr>
-  </thead>
-  <tbody>
-      <tr>
-        <td><code>java_file_path(str)</code></td>
-        <td><code></code></td>
-        <td><p>Address path to the test/source file</p></td>
-        <td><em>required</em></td>
-      </tr>
-      <tr>
-        <td><code>scope_class_name(str)</code></td>
-        <td><code></code></td>
-        <td><p>Name of the class in which the refactoring has to be done</p></td>
-        <td><em>required</em></td>
-      </tr>
-      <tr>
-        <td><code>target_method_name(str)</code></td>
-        <td><code></code></td>
-        <td><p>Name of the method in which the refactoring has to be done</p></td>
-        <td><em>required</em></td>
-      </tr>
-      <tr>
-        <td><code>new_name(str)</code></td>
-        <td><code></code></td>
-        <td><p>The new name of the refactored method</p></td>
-        <td><em>required</em></td>
-      </tr>
-  </tbody>
-</table>
-<p><strong>Returns:</strong></p>
-<table>
-  <thead>
-    <tr>
-      <th>Type</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><code></code></td>
-      <td><p>No returns</p></td>
-    </tr>
-  </tbody>
-</table>
+    java_file_path(str): Address path to the test/source file
+
+    common_token_stream (CommonTokenStream): An instance of ANTLR4 CommonTokenStream class
+
+    scope_class_name(str): Name of the class in which the refactoring has to be done
+
+    target_method_name(str): Name of the method in which the refactoring has to be done
+
+    new_name(str): The new name of the refactored method
+
+Returns:
+
+    RenameMethodListener: An instance of RenameMethodListener class
+</code></pre>
+
         <details class="quote">
           <summary>Source code in <code>refactorings\rename_method.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">java_file_path</span><span class="p">,</span> <span class="n">common_token_stream</span><span class="p">,</span> <span class="n">scope_class_name</span><span class="p">,</span> <span class="n">target_method_name</span><span class="p">,</span> <span class="n">new_name</span><span class="p">,</span>
              <span class="n">reference</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The Main listener which parses the file based on the provided information,</span>
-<span class="sd">        using ANTLR parser generator and tokenization methods</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Initializer of rename method refactoring listener</span>
 
 <span class="sd">        Args:</span>
+
 <span class="sd">            java_file_path(str): Address path to the test/source file</span>
+
+<span class="sd">            common_token_stream (CommonTokenStream): An instance of ANTLR4 CommonTokenStream class</span>
 
 <span class="sd">            scope_class_name(str): Name of the class in which the refactoring has to be done</span>
 
@@ -1293,8 +1625,11 @@ using ANTLR parser generator and tokenization methods</p>
 <span class="sd">            new_name(str): The new name of the refactored method</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            No returns</span>
+
+<span class="sd">            RenameMethodListener: An instance of RenameMethodListener class</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">file_path</span> <span class="o">=</span> <span class="n">java_file_path</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">token_stream</span> <span class="o">=</span> <span class="n">common_token_stream</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">token_stream_rewriter</span> <span class="o">=</span> <span class="n">TokenStreamRewriter</span><span class="p">(</span><span class="n">common_token_stream</span><span class="p">)</span>
@@ -1503,7 +1838,7 @@ and returns all of the correct references</p>
     <span class="n">walker</span> <span class="o">=</span> <span class="n">ParseTreeWalker</span><span class="p">()</span>
     <span class="n">walker</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">listener</span><span class="p">,</span> <span class="n">tree</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">listener</span><span class="o">.</span><span class="n">changed</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">java_file_path</span><span class="p">)</span>
+        <span class="c1"># print(java_file_path)</span>
         <span class="n">new_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="n">java_file_path</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
         <span class="n">new_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">listener</span><span class="o">.</span><span class="n">token_stream_rewriter</span><span class="o">.</span><span class="n">getDefaultText</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
 </code></pre></div>
@@ -1511,6 +1846,174 @@ and returns all of the correct references</p>
     </div>
 
   </div>
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+<h2 id="implementation-2">Implementation 2</h2>
+
+
+  <div class="doc doc-object doc-module">
+
+<a id="refactorings.rename_method2"></a>
+    <div class="doc doc-contents first">
+
+      <h3 id="refactorings.rename_method2--introduction">Introduction</h3>
+<p>When the name of a method does not explain what the method does (method's functionality), it needs to be changed.</p>
+<p>The module implements a light-weight version of Rename Method refactoring described in <code>rename_method.py</code></p>
+<h4 id="refactorings.rename_method2--pre-conditions">Pre-conditions:</h4>
+<p>Todo: Add pre-conditions</p>
+<h4 id="refactorings.rename_method2--post-conditions">Post-conditions:</h4>
+<p>Todo: Add post-conditions</p>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-class">
+
+
+
+<h2 id="refactorings.rename_method2.RenameMethodRefactoringListener" class="doc doc-heading">
+        <code>RenameMethodRefactoringListener</code>
+
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>The class implements Rename Method refactoring.
+The Main listener which parses the file based on the provided information,         using ANTLR parser generator and tokenization methods</p>
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="refactorings.rename_method2.RenameMethodRefactoringListener.__init__" class="doc doc-heading">
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">common_token_stream</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">package_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scope_class_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method_identifier</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method_new_name</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-special"><code>special</code></small>
+  </span>
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Initializer of rename method refactoring listener</p>
+<pre><code>Args:
+
+    common_token_stream (CommonTokenStream): An instance of ANTLR4 CommonTokenStream class
+
+    package_name(str): Name of the package in which the refactoring has to be done
+
+    scope_class_name(str): Name of the class in which the refactoring has to be done
+
+    method_identifier(str): Name of the method in which the refactoring has to be done
+
+    method_new_name(str): The new name of the refactored method
+
+Returns:
+
+    RenameMethodListener: An instance of RenameMethodListener class
+</code></pre>
+
+        <details class="quote">
+          <summary>Source code in <code>refactorings\rename_method2.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+             <span class="n">common_token_stream</span><span class="p">:</span> <span class="n">CommonTokenStream</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">package_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">scope_class_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">method_identifier</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">method_new_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Initializer of rename method refactoring listener</span>
+
+<span class="sd">        Args:</span>
+
+<span class="sd">            common_token_stream (CommonTokenStream): An instance of ANTLR4 CommonTokenStream class</span>
+
+<span class="sd">            package_name(str): Name of the package in which the refactoring has to be done</span>
+
+<span class="sd">            scope_class_name(str): Name of the class in which the refactoring has to be done</span>
+
+<span class="sd">            method_identifier(str): Name of the method in which the refactoring has to be done</span>
+
+<span class="sd">            method_new_name(str): The new name of the refactored method</span>
+
+<span class="sd">        Returns:</span>
+
+<span class="sd">            RenameMethodListener: An instance of RenameMethodListener class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">token_stream</span> <span class="o">=</span> <span class="n">common_token_stream</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">class_identifier</span> <span class="o">=</span> <span class="n">scope_class_name</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">method_identifier</span> <span class="o">=</span> <span class="n">method_identifier</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">method_new_name</span> <span class="o">=</span> <span class="n">method_new_name</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">package_identifier</span> <span class="o">=</span> <span class="n">package_name</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">is_package_imported</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">in_class</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">in_selected_package</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1"># Move all the tokens in the source code in a buffer, token_stream_rewriter.</span>
+    <span class="k">if</span> <span class="n">common_token_stream</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">token_stream_rewriter</span> <span class="o">=</span> <span class="n">TokenStreamRewriter</span><span class="p">(</span><span class="n">common_token_stream</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;common_token_stream is None&#39;</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+
 
 
 
@@ -1537,6 +2040,41 @@ and returns all of the correct references</p>
       
         
 <footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        
+        <a href="../rename_field/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Rename field" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Rename field
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../rename_package/" class="md-footer__link md-footer__link--next" aria-label="Next: Rename package" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Rename package
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
