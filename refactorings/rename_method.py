@@ -1,3 +1,38 @@
+"""
+## Introduction
+
+When the name of a method does not explain what the method does (method's functionality), it needs to be changed.
+
+
+## Pre and post conditions
+
+### Pre-conditions:
+
+1. User must enter the existing method's name, The source class's name for the refactoring, and the new method name
+     in order to rename.
+
+2. Check if the method exist, then rename it.
+
+### Post-conditions:
+
+1. After refactoring, all the old method names in the project should be changed.
+
+See whether the method is defined in a superclass or subclass. If so, you must repeat all steps in these classes too.
+
+The next method is important for maintaining the functionality of the program during the refactoring process. Create
+a new method with a new name. Copy the code of the old method to it. Delete all the code in the old method and,
+instead of it, insert a call for the new method.
+
+Find all references to the old method and replace them with references to the new one.
+
+Delete the old method. If the old method is part of a public interface, don’t perform this step. Instead,
+mark the old method as deprecated.
+
+"""
+
+__author__ = 'Morteza Zakeri, Mohammad Ramezani'
+__version__ = '0.3.1'
+
 import os
 
 try:
@@ -9,49 +44,31 @@ except ModuleNotFoundError:
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
-from Refactoring.gen.javaLabeled.JavaLexer import JavaLexer
-from Refactoring.gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
-from Refactoring.gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
+from gen.javaLabeled.JavaLexer import JavaLexer
+from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
+from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 
 class RenameMethodListener(JavaParserLabeledListener):
     """
-    ## Introduction
 
-    When the name of a method does not explain what the method does (method's functionality), it needs to be changed.
+    The class implements Rename Method refactoring.
+    The Main listener which parses the file based on the provided information, \
+        using ANTLR parser generator and tokenization methods
 
-    ## Pre and Post Conditions
-
-    ### Pre Conditions:
-
-    1. User must enter the existing method's name, The source class's name for the refactoring, and the new method name
-         in order to rename.
-
-    2. Check if the method exist, then rename it.
-
-    ### Post Conditions:
-
-    1. After refactoring, all the old method names in the project should be changed.
-
-    See whether the method is defined in a superclass or subclass. If so, you must repeat all steps in these classes too.
-
-    The next method is important for maintaining the functionality of the program during the refactoring process. Create
-    a new method with a new name. Copy the code of the old method to it. Delete all the code in the old method and,
-    instead of it, insert a call for the new method.
-
-    Find all references to the old method and replace them with references to the new one.
-
-    Delete the old method. If the old method is part of a public interface, don’t perform this step. Instead,
-    mark the old method as deprecated.
     """
 
     def __init__(self, java_file_path, common_token_stream, scope_class_name, target_method_name, new_name,
                  reference=None):
-        """The Main listener which parses the file based on the provided information,
-            using ANTLR parser generator and tokenization methods
+        """
+
+        Initializer of rename method refactoring listener
 
             Args:
+
                 java_file_path(str): Address path to the test/source file
+
+                common_token_stream (CommonTokenStream): An instance of ANTLR4 CommonTokenStream class
 
                 scope_class_name(str): Name of the class in which the refactoring has to be done
 
@@ -60,8 +77,11 @@ class RenameMethodListener(JavaParserLabeledListener):
                 new_name(str): The new name of the refactored method
 
             Returns:
-                No returns
+
+                RenameMethodListener: An instance of RenameMethodListener class
+
         """
+
         self.file_path = java_file_path
         self.token_stream = common_token_stream
         self.token_stream_rewriter = TokenStreamRewriter(common_token_stream)
@@ -187,7 +207,7 @@ def rename_method(java_file_path, scope_class_name, target_method_name, new_name
     walker = ParseTreeWalker()
     walker.walk(listener, tree)
     if listener.changed:
-        #print(java_file_path)
+        # print(java_file_path)
         new_file = open(file=java_file_path, mode='w')
         new_file.write(listener.token_stream_rewriter.getDefaultText().replace('\r', ''))
 
@@ -203,8 +223,9 @@ def main():
     rename_method(file_path, class_name, method_name, new_method_name)
 
     # for ref in references:
-        # rename_method(ref["file_path"], ref["scope"].split(".")[0], target_method_name=method_name,
-        #               new_name=new_method_name, reference=ref)
+    # rename_method(ref["file_path"], ref["scope"].split(".")[0], target_method_name=method_name,
+    #               new_name=new_method_name, reference=ref)
+
 
 if __name__ == '__main__':
     main()
