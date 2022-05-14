@@ -11,7 +11,6 @@ IEEE Trans. Softw. Eng., vol. 28, no. 1, pp. 4–17, 2002.
 __version__ = '0.3.0'
 __author__ = 'Morteza Zakeri'
 
-
 import understand as und
 
 from sbse import config
@@ -100,7 +99,7 @@ class DesignMetrics:
             MITs.append(mit)
 
         dbx.close()
-        return sum(MITs) / len(MITs)
+        return sum(MITs) / len(MITs) if len(MITs) > 0 else 0.
 
     @property
     @divide_by_initial_value
@@ -321,12 +320,15 @@ class DesignMetrics:
                 if all_methods == 0:
                     mfa = 0
                 else:
-                     mfa = round((all_methods - local_methods) / all_methods, 5)
+                    mfa = round((all_methods - local_methods) / all_methods, 5)
             else:
                 implemented_methods = 0
                 for interface_entity in implemented_interfaces:
                     implemented_methods += interface_entity.metric(['CountDeclMethodAll']).get('CountDeclMethodAll', 0)
-                mfa = round((all_methods - implemented_methods) / all_methods, 5)
+                if all_methods == 0:
+                    mfa = 0
+                else:
+                    mfa = round((all_methods - implemented_methods) / all_methods, 5)
         # print(class_entity.longname(), mfa)
         return 1. + mfa if mfa >= 0 else 1
 
@@ -500,6 +502,7 @@ class DesignQualityAttributes:
 
 if __name__ == '__main__':
     from codart.utility.directory_utils import update_understand_database
+
     update_understand_database(config.UDB_PATH)
     print(f"UDB path: {config.UDB_PATH}")
 
