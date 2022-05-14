@@ -1,6 +1,25 @@
+"""
+## Introduction
+
+When the name of a class does not explain what the class does (class's functionality), it needs to be changed.
+
+The module implements a light-weight version of Rename Class refactoring described in `rename_class.py`
+
+### Pre-conditions:
+
+Todo: Add pre-conditions
+
+### Post-conditions:
+
+Todo: Add post-conditions
+
+
+"""
+
+
 import os
 import sys
-sys.path.append('../')
+
 
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
@@ -9,10 +28,14 @@ from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 from gen.javaLabeled.JavaLexer import JavaLexer
 
+sys.path.append('../')
+
 
 class RenameClassRefactoringListener(JavaParserLabeledListener):
     """
-    rename class refactoring
+
+    The class implements rename class refactoring
+
     """
 
     def __init__(self,
@@ -22,7 +45,21 @@ class RenameClassRefactoringListener(JavaParserLabeledListener):
                  class_new_name: str = None):
 
         """
-        :param common_token_stream:
+        Args:
+
+            common_token_stream (CommonTokenStream): An instance of ANTLR4 CommonTokenStream class
+
+            package_name(str): Name of the package in which the refactoring has to be done
+
+            class_identifier(str): Name of the class in which the refactoring has to be done
+
+            class_new_name(str): The new name of the refactored class
+
+
+        Returns:
+
+            RenameMethodListener: An instance of RenameClassRefactoringListener class
+
         """
 
         self.token_stream = common_token_stream
