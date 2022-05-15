@@ -11,11 +11,12 @@ import os
 import re
 import json
 import glob
+import shutil
 
 import pandas as pd
 
 import sbse.config as config
-from codart.utility.directory_utils import reset_project, update_understand_database
+from codart.utility.directory_utils import create_understand_database, reset_project, update_understand_database
 from sbse.initialize import REFACTORING_MAIN_MAP
 from sbse.search_based_refactoring2 import log_project_info
 
@@ -31,6 +32,7 @@ class RefactoringSequenceEvaluation:
         # self.project_dir_old = 'C:\\Users\\Administrator\\Downloads\\udbs'
         # self.udb_path_old = 'C:/Users/Administrator/Downloads/udbs\\10_water-simulator.udb'
         self.file_path_base_dir_old = 'C:\\Users\\Administrator\\Downloads\\prj_src'  # Server2 path (to be replaced)
+        # self.file_path_base_dir_old = 'C:\\Users\\Zakeri\\Documents\\CodARTExp\\prj_src'  # Lab PC
 
     def evaluate_sequences(self):
         initial_values_path = glob.glob(os.path.join(self.log_directory, 'quality_attrs_initial_values.csv'))[0]
@@ -41,16 +43,14 @@ class RefactoringSequenceEvaluation:
         )
 
         res_path = glob.glob(os.path.join(self.log_directory, 'best_refactoring_sequences_objectives_extended.csv'))[0]
-        if config.PROBLEM == 2:
-            col_names = ['generation',
-                         'reusability', 'understandability', 'flexibility', 'functionality', 'effectiveness',
-                         'extendability',
-                         'testability', 'modularity']
-        elif config.PROBLEM == 0:
-            col_names = ['generation', 'testability']
-        else:
-            col_names = None
-            return
+        col_names = ['generation', 'reusability', 'understandability', 'flexibility', 'functionality', 'effectiveness',
+                     'extendability', 'testability', 'modularity']
+
+        # if config.PROBLEM == 0:
+        #     col_names = ['generation', 'testability']
+        # else:
+        #     col_names = None
+        #     return
 
         df_res = pd.read_csv(
             res_path,
@@ -64,15 +64,20 @@ class RefactoringSequenceEvaluation:
         print('df_res')
         print(df_res)
 
+
         evaluation_results = []
         for index, row in df_res.iterrows():
             # We should use positive quality attributes
-            raw_improvements = [item - df_initial[col_names[i+1]][0] for i, item in enumerate(row[1:])]
-            relative_improvements = [(item - df_initial[col_names[i+1]][0]) / abs(df_initial[col_names[i+1]][0])
-                                     for i, item in enumerate(row[1:])]
+            raw_improvements = [item - df_initial[col_names[i + 1]].iloc[-1] for i, item in enumerate(row[1:])]
+            relative_improvements = [
+                (item - df_initial[col_names[i + 1]].iloc[-1]) / abs(df_initial[col_names[i + 1]].iloc[-1])
+                for i, item in enumerate(row[1:])
+            ]
 
             quality_gain_raw = [sum(raw_improvements)]
-            quality_gain_relative = [(sum(row[1:]) / sum([df_initial[col][0] for col in col_names[1:]])) - 1]  # single
+            quality_gain_relative = [
+                (sum(row[1:]) / sum([df_initial[col].iloc[-1] for col in col_names[1:]])) - 1
+            ]  # single
 
             evaluation_results.append(
                 [*raw_improvements, *relative_improvements,
@@ -91,7 +96,7 @@ class RefactoringSequenceEvaluation:
         if input_file_path is None:
             input_file_path = glob.glob(os.path.join(self.log_directory, 'best_refactoring_sequences*.json'))[0]
 
-        log_project_info(reset_=True,)
+        log_project_info(reset_=True, )
 
         population = []
         with open(input_file_path, 'r', encoding='utf-8') as fp:
@@ -128,6 +133,18 @@ class RefactoringSequenceEvaluation:
                 update_understand_database(config.UDB_PATH)
                 config.logger.info(f"Executed {refactoring_operation[2]} with status {res}")
 
+            # Dump refactored project
+            dump_path = os.path.join(
+                config.PROJECT_ROOT_DIR,
+                f'{config.PROJECT_NAME}_refactored_with_algorithm{config.PROBLEM}',
+                f'dump{k}'
+            )
+
+            if not os.path.exists(config.PROJECT_ROOT_DIR):
+                os.mkdir(dump_path)
+
+            shutil.copytree(config.PROJECT_PATH, dump_path)
+
             # Compute quality metrics
             log_project_info(
                 reset_=False,
@@ -139,9 +156,10 @@ class RefactoringSequenceEvaluation:
                 testability_verbose=True,
                 testability_log_path=os.path.join(
                     config.PROJECT_LOG_DIR,
-                    f'classes_testability2_for_problem_{config.PROBLEM}_sequence_{k}.csv'
+                    f'classes_testability2_for_problem_{config.PROBLEM}_best_sequence_{k}.csv'
                 )
             )
+
         if reset:
             reset_project()
 
@@ -184,10 +202,17 @@ def execute_refactoring_sequence():
     # execute_from_txt_log(input_file_path=refactoring_sequence_input_file)
 
 
+def measure_ad_hoc_project_quality():
+    # create_understand_database(project_dir=config.PROJECT_PATH, db_dir=config.UDB_ROOT_DIR)
+    log_project_info()
+
+
 if __name__ == '__main__':
+    # measure_ad_hoc_project_quality()
+    # quit()
     reset_project()
     # quit()
     # execute_refactoring_sequence()
     eval_ = RefactoringSequenceEvaluation(log_directory=config.PROJECT_LOG_DIR)
+    eval_.execute_from_json_log(reset=False)
     eval_.evaluate_sequences()
-    # eval_.execute_from_json_log(reset=False)
