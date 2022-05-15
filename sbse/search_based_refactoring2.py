@@ -177,6 +177,7 @@ class RefactoringOperation(Gene):
         logger.info(f"Parameters {self.params}")
         try:
             res = self.main(**self.params)
+            logger.debug(f"Executed refactoring with result {res}")
             return res
         except Exception as e:
             logger.error(f"Unexpected error in executing refactoring:\n {e}")
@@ -262,7 +263,9 @@ class ProblemSingleObjective(Problem):
 
     """
 
-    def __init__(self, n_refactorings_lowerbound=10,
+    def __init__(self,
+                 n_objectives=1,
+                 n_refactorings_lowerbound=10,
                  n_refactorings_upperbound=50,
                  evaluate_in_parallel=False,
                  mode='single'  # 'multi'
@@ -279,9 +282,7 @@ class ProblemSingleObjective(Problem):
 
         """
 
-        super(ProblemSingleObjective, self).__init__(n_var=1,
-                                                     n_obj=1,
-                                                     n_constr=0)
+        super(ProblemSingleObjective, self).__init__(n_var=1, n_obj=n_objectives, n_constr=0)
         self.n_refactorings_lowerbound = n_refactorings_lowerbound
         self.n_refactorings_upperbound = n_refactorings_upperbound
         self.evaluate_in_parallel = evaluate_in_parallel
@@ -364,9 +365,13 @@ class ProblemMultiObjective(Problem):
 
     """
 
-    def __init__(self, n_refactorings_lowerbound=10, n_refactorings_upperbound=50, evaluate_in_parallel=False):
+    def __init__(self, n_objectives=3,
+                 n_refactorings_lowerbound=10,
+                 n_refactorings_upperbound=50,
+                 evaluate_in_parallel=False
+                 ):
         super(ProblemMultiObjective, self).__init__(n_var=1,
-                                                    n_obj=3,
+                                                    n_obj=n_objectives,
                                                     n_constr=0)
         self.n_refactorings_lowerbound = n_refactorings_lowerbound
         self.n_refactorings_upperbound = n_refactorings_upperbound
@@ -446,7 +451,7 @@ class ProblemManyObjective(Problem):
 
     """
 
-    def __init__(self, n_refactorings_lowerbound=10, n_refactorings_upperbound=50,
+    def __init__(self, n_objectives=8, n_refactorings_lowerbound=10, n_refactorings_upperbound=50,
                  evaluate_in_parallel=False, verbose_design_metrics=False,
                  ):
         """
@@ -462,7 +467,7 @@ class ProblemManyObjective(Problem):
             verbose_design_metrics (bool): Whether log the design metrics for each refactoring sequences or not
 
         """
-        super(ProblemManyObjective, self).__init__(n_var=1, n_obj=8, n_constr=0, )
+        super(ProblemManyObjective, self).__init__(n_var=1, n_obj=n_objectives, n_constr=0, )
         self.n_refactorings_lowerbound = n_refactorings_lowerbound
         self.n_refactorings_upperbound = n_refactorings_upperbound
         self.evaluate_in_parallel = evaluate_in_parallel
@@ -1060,6 +1065,7 @@ def main():
     problems = list()  # 0: Genetic (Single), 1: NSGA-II (Multi), 2: NSGA-III (Many) objectives problems
     problems.append(
         ProblemSingleObjective(
+            n_objectives=config.NUMBER_OBJECTIVES,
             n_refactorings_lowerbound=config.LOWER_BAND,
             n_refactorings_upperbound=config.UPPER_BAND,
             evaluate_in_parallel=False,
@@ -1067,6 +1073,7 @@ def main():
     )
     problems.append(
         ProblemMultiObjective(
+            n_objectives=config.NUMBER_OBJECTIVES,
             n_refactorings_lowerbound=config.LOWER_BAND,
             n_refactorings_upperbound=config.UPPER_BAND,
             evaluate_in_parallel=False,
@@ -1074,6 +1081,7 @@ def main():
     )
     problems.append(
         ProblemManyObjective(
+            n_objectives=config.NUMBER_OBJECTIVES,
             n_refactorings_lowerbound=config.LOWER_BAND,
             n_refactorings_upperbound=config.UPPER_BAND,
             evaluate_in_parallel=False,
