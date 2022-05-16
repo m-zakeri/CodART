@@ -23,6 +23,9 @@ PureRandomInitialization: Population, list of Individual
 
 ## Changelog
 
+### version 0.2.4
+    1. Fix objective parameters of the problem classes
+
 ### version 0.2.3
     1. Fix PEP 8 warnings
 
@@ -48,7 +51,7 @@ PureRandomInitialization: Population, list of Individual
 
 """
 
-__version__ = '0.2.3'
+__version__ = '0.2.4'
 __author__ = 'Morteza Zakeri'
 
 import os
@@ -259,7 +262,7 @@ def calc_modularity_objective(path_, arr_):
 class ProblemSingleObjective(Problem):
     """
 
-        The CodART single-objective optimization work with only one objective, testability:
+    The CodART single-objective optimization work with only one objective, testability:
 
     """
 
@@ -274,6 +277,8 @@ class ProblemSingleObjective(Problem):
 
         Args:
 
+            n_objectives (int): Number of objectives
+
             n_refactorings_lowerbound (int): The lower bound of the refactoring sequences
 
             n_refactorings_upperbound (int): The upper bound of the refactoring sequences
@@ -282,11 +287,12 @@ class ProblemSingleObjective(Problem):
 
         """
 
-        super(ProblemSingleObjective, self).__init__(n_var=1, n_obj=n_objectives, n_constr=0)
+        super(ProblemSingleObjective, self).__init__(n_var=1, n_obj=1, n_constr=0)
         self.n_refactorings_lowerbound = n_refactorings_lowerbound
         self.n_refactorings_upperbound = n_refactorings_upperbound
         self.evaluate_in_parallel = evaluate_in_parallel
         self.mode = mode
+        self.n_obj_virtual = n_objectives
 
     def _evaluate(self,
                   x,  #
@@ -294,6 +300,7 @@ class ProblemSingleObjective(Problem):
                   *args,
                   **kwargs):
         """
+
         This method iterate over a population, execute the refactoring operations in each individual sequentially,
         and compute quality attributes for the refactored version of the program, as objectives of the search
 
@@ -326,23 +333,31 @@ class ProblemSingleObjective(Problem):
                 score = testability_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("TEST", 1.0))
             else:
                 # Stage 2 (Multi-objective mode): Considering one objective based on average of 8 objective
-                arr = Array('d', range(8))
+                arr = Array('d', range(self.n_obj_virtual))
                 if self.evaluate_in_parallel:
                     # Stage 2 (Multi-objective mode, parallel): Computing quality attributes
                     p1 = Process(target=calc_qmood_objectives, args=(arr,))
-                    p2 = Process(target=calc_testability_objective, args=(config.UDB_PATH, arr,))
-                    p3 = Process(target=calc_modularity_objective, args=(config.UDB_PATH, arr,))
-                    p1.start(), p2.start(), p3.start()
-                    p1.join(), p2.join(), p3.join()
-                    score = sum([i for i in arr]) / 8.
+                    if self.n_obj_virtual == 8:
+                        p2 = Process(target=calc_testability_objective, args=(config.UDB_PATH, arr,))
+                        p3 = Process(target=calc_modularity_objective, args=(config.UDB_PATH, arr,))
+                        p1.start(), p2.start(), p3.start()
+                        p1.join(), p2.join(), p3.join()
+                    else:
+                        p1.start()
+                        p1.join()
+                    score = sum([i for i in arr]) / self.n_obj_virtual
                 else:
                     # Stage 2 (Multi-objective mode, sequential): Computing quality attributes
                     qmood_quality_attributes = DesignQualityAttributes(udb_path=config.UDB_PATH)
                     o1 = qmood_quality_attributes.average_sum
-                    o2 = testability_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("TEST", 1.0))
-                    o3 = modularity_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("MODULE", 1.0))
+                    if self.n_obj_virtual == 8:
+                        o2 = testability_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("TEST", 1.0))
+                        o3 = modularity_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("MODULE", 1.0))
+                    else:
+                        o2 = 0
+                        o3 = 0
                     del qmood_quality_attributes
-                    score = (o1 * 6. + o2 + o3) / 8.
+                    score = (o1 * 6. + o2 + o3) / self.n_obj_virtual
 
             # Stage 3: Marshal objectives into vector
             objective_values.append([-1 * score])
@@ -365,17 +380,28 @@ class ProblemMultiObjective(Problem):
 
     """
 
-    def __init__(self, n_objectives=3,
+    def __init__(self, n_objectives=8,
                  n_refactorings_lowerbound=10,
                  n_refactorings_upperbound=50,
                  evaluate_in_parallel=False
                  ):
-        super(ProblemMultiObjective, self).__init__(n_var=1,
-                                                    n_obj=n_objectives,
-                                                    n_constr=0)
+        """
+        Args:
+
+            n_objectives (int): Number of objectives
+
+            n_refactorings_lowerbound (int): The lower bound of the refactoring sequences
+
+            n_refactorings_upperbound (int): The upper bound of the refactoring sequences
+
+            evaluate_in_parallel (bool): Whether the objectives evaluate in parallel
+
+        """
+        super(ProblemMultiObjective, self).__init__(n_var=1, n_obj=3, n_constr=0)
         self.n_refactorings_lowerbound = n_refactorings_lowerbound
         self.n_refactorings_upperbound = n_refactorings_upperbound
         self.evaluate_in_parallel = evaluate_in_parallel
+        self.n_obj_virtual = n_objectives
 
     def _evaluate(self,
                   x,  #
@@ -411,7 +437,7 @@ class ProblemMultiObjective(Problem):
                 update_understand_database(config.UDB_PATH)
 
             # Stage 2:
-            arr = Array('d', range(8))
+            arr = Array('d', range(self.n_obj_virtual))
             if self.evaluate_in_parallel:
                 # Stage 2 (parallel mood): Computing quality attributes
                 p1 = Process(target=calc_qmood_objectives, args=(arr,))
@@ -420,8 +446,8 @@ class ProblemMultiObjective(Problem):
                 p1.start(), p2.start(), p3.start()
                 p1.join(), p2.join(), p3.join()
                 o1 = sum([i for i in arr[:6]]) / 6.
-                o2 = arr[7]
-                o3 = arr[8]
+                o2 = arr[6]
+                o3 = arr[7]
             else:
                 # Stage 2 (sequential mood): Computing quality attributes
                 qmood_quality_attributes = DesignQualityAttributes(udb_path=config.UDB_PATH)
@@ -443,11 +469,11 @@ class ProblemManyObjective(Problem):
 
     The CodART many-objective optimization work with eight objective:
 
-    * Objective 1 to 6: QMOOD metrics
+    * Objective 1 to 6: QMOOD design quality attributes
 
-    * Objective 7: Testability
+    * Objective 7: Testability prediction model
 
-    * Objective 8: Modularity
+    * Objective 8: Modularity complex network
 
     """
 
@@ -457,6 +483,8 @@ class ProblemManyObjective(Problem):
         """
 
         Args:
+
+            n_objectives (int): Number of objectives
 
             n_refactorings_lowerbound (int): The lower bound of the refactoring sequences
 
@@ -505,14 +533,18 @@ class ProblemManyObjective(Problem):
                 update_understand_database(config.UDB_PATH)
 
             # Stage 2:
-            arr = Array('d', range(8))
+            arr = Array('d', range(self.n_obj))
             if self.evaluate_in_parallel:
                 # Stage 2 (parallel mood): Computing quality attributes
                 p1 = Process(target=calc_qmood_objectives, args=(arr,))
-                p2 = Process(target=calc_testability_objective, args=(config.UDB_PATH, arr,))
-                p3 = Process(target=calc_modularity_objective, args=(config.UDB_PATH, arr,))
-                p1.start(), p2.start(), p3.start()
-                p1.join(), p2.join(), p3.join()
+                if self.n_obj == 8:
+                    p2 = Process(target=calc_testability_objective, args=(config.UDB_PATH, arr,))
+                    p3 = Process(target=calc_modularity_objective, args=(config.UDB_PATH, arr,))
+                    p1.start(), p2.start(), p3.start()
+                    p1.join(), p2.join(), p3.join()
+                else:
+                    p1.start()
+                    p1.join()
             else:
                 # Stage 2 (sequential mood): Computing quality attributes
                 qmood_quality_attributes = DesignQualityAttributes(udb_path=config.UDB_PATH)
@@ -522,8 +554,10 @@ class ProblemManyObjective(Problem):
                 arr[3] = qmood_quality_attributes.functionality
                 arr[4] = qmood_quality_attributes.effectiveness
                 arr[5] = qmood_quality_attributes.extendability
-                arr[6] = testability_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("TEST", 1.0))
-                arr[7] = modularity_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("MODULE", 1.0))
+                if self.n_obj == 8:
+                    arr[6] = testability_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("TEST", 1.0))
+                    arr[7] = modularity_main(config.UDB_PATH, initial_value=config.CURRENT_METRICS.get("MODULE", 1.0))
+
                 if self.verbose_design_metrics:
                     design_metrics = {
                         "DSC": [qmood_quality_attributes.DSC],
@@ -1017,51 +1051,8 @@ def main():
         upper_band=config.UPPER_BAND
     )
 
-    # Define search algorithms
-    algorithms = list()
-    # 1: GA
-    alg1 = GA(pop_size=config.POPULATION_SIZE,
-              sampling=PopulationInitialization(initializer_object),
-              crossover=AdaptiveSinglePointCrossover(prob=config.CROSSOVER_PROBABILITY),
-              # crossover=get_crossover("real_k_point", n_points=2),
-              mutation=BitStringMutation(prob=config.MUTATION_PROBABILITY, initializer=initializer_object),
-              eliminate_duplicates=ElementwiseDuplicateElimination(cmp_func=is_equal_2_refactorings_list),
-              n_gen=config.NGEN,
-              )
-    algorithms.append(alg1)
-
-    # 2: NSGA II
-    alg2 = NSGA2(pop_size=config.POPULATION_SIZE,
-                 sampling=PopulationInitialization(initializer_object),
-                 crossover=AdaptiveSinglePointCrossover(prob=config.CROSSOVER_PROBABILITY),
-                 # crossover=get_crossover("real_k_point", n_points=2),
-                 mutation=BitStringMutation(prob=config.MUTATION_PROBABILITY, initializer=initializer_object),
-                 eliminate_duplicates=ElementwiseDuplicateElimination(cmp_func=is_equal_2_refactorings_list),
-                 n_gen=config.NGEN,
-                 )
-    algorithms.append(alg2)
-
-    # 3: NSGA III
-    # pop_size must be equal or larger than the number of reference directions
-    number_of_references_points = config.POPULATION_SIZE - int(config.POPULATION_SIZE * 0.20)
-    ref_dirs = get_reference_directions('energy',  # algorithm
-                                        config.NUMBER_OBJECTIVES,  # number of objectives
-                                        number_of_references_points,  # number of reference directions
-                                        seed=1)
-    alg3 = NSGA3(ref_dirs=ref_dirs,
-                 pop_size=config.POPULATION_SIZE,  # 200
-                 sampling=PopulationInitialization(initializer_object),
-                 selection=TournamentSelection(func_comp=binary_tournament),
-                 crossover=AdaptiveSinglePointCrossover(prob=config.CROSSOVER_PROBABILITY, ),
-                 # crossover=get_crossover("real_k_point", n_points=2),
-                 mutation=BitStringMutation(prob=config.MUTATION_PROBABILITY, initializer=initializer_object),
-                 eliminate_duplicates=ElementwiseDuplicateElimination(cmp_func=is_equal_2_refactorings_list),
-                 n_gen=config.NGEN,
-                 )
-    algorithms.append(alg3)
-
     # -------------------------------------------
-    # Define problems
+    # Define optimization problems
     problems = list()  # 0: Genetic (Single), 1: NSGA-II (Multi), 2: NSGA-III (Many) objectives problems
     problems.append(
         ProblemSingleObjective(
@@ -1089,6 +1080,54 @@ def main():
         )
     )
 
+    # Define search algorithms
+    algorithms = list()
+    # 1: GA
+    alg1 = GA(
+        pop_size=config.POPULATION_SIZE,
+        sampling=PopulationInitialization(initializer_object),
+        crossover=AdaptiveSinglePointCrossover(prob=config.CROSSOVER_PROBABILITY),
+        # crossover=get_crossover("real_k_point", n_points=2),
+        mutation=BitStringMutation(prob=config.MUTATION_PROBABILITY, initializer=initializer_object),
+        eliminate_duplicates=ElementwiseDuplicateElimination(cmp_func=is_equal_2_refactorings_list),
+        n_gen=config.NGEN,
+    )
+    algorithms.append(alg1)
+
+    # 2: NSGA-II
+    alg2 = NSGA2(
+        pop_size=config.POPULATION_SIZE,
+        sampling=PopulationInitialization(initializer_object),
+        crossover=AdaptiveSinglePointCrossover(prob=config.CROSSOVER_PROBABILITY),
+        # crossover=get_crossover("real_k_point", n_points=2),
+        mutation=BitStringMutation(prob=config.MUTATION_PROBABILITY, initializer=initializer_object),
+        eliminate_duplicates=ElementwiseDuplicateElimination(cmp_func=is_equal_2_refactorings_list),
+        n_gen=config.NGEN,
+    )
+    algorithms.append(alg2)
+
+    # 3: NSGA-III
+    # pop_size must be equal or larger than the number of reference directions
+    number_of_references_points = config.POPULATION_SIZE - int(config.POPULATION_SIZE * 0.20)
+    ref_dirs = get_reference_directions(
+        'energy',  # algorithm
+        config.NUMBER_OBJECTIVES,  # number of objectives
+        number_of_references_points,  # number of reference directions
+        seed=1
+    )
+    alg3 = NSGA3(
+        ref_dirs=ref_dirs,
+        pop_size=config.POPULATION_SIZE,  # 200
+        sampling=PopulationInitialization(initializer_object),
+        selection=TournamentSelection(func_comp=binary_tournament),
+        crossover=AdaptiveSinglePointCrossover(prob=config.CROSSOVER_PROBABILITY, ),
+        # crossover=get_crossover("real_k_point", n_points=2),
+        mutation=BitStringMutation(prob=config.MUTATION_PROBABILITY, initializer=initializer_object),
+        eliminate_duplicates=ElementwiseDuplicateElimination(cmp_func=is_equal_2_refactorings_list),
+        n_gen=config.NGEN,
+    )
+    algorithms.append(alg3)
+
     # Termination of algorithms
     my_termination = MultiObjectiveDefaultTermination(
         x_tol=None,
@@ -1101,16 +1140,17 @@ def main():
     )
 
     # Do optimization for various problems with various algorithms
-    res = minimize(problem=problems[config.PROBLEM],
-                   algorithm=algorithms[config.PROBLEM],
-                   termination=my_termination,
-                   seed=1,
-                   verbose=False,
-                   copy_algorithm=True,
-                   copy_termination=True,
-                   save_history=False,
-                   callback=LogCallback(),
-                   )
+    res = minimize(
+        problem=problems[config.PROBLEM],
+        algorithm=algorithms[config.PROBLEM],
+        termination=my_termination,
+        seed=1,
+        verbose=False,
+        copy_algorithm=True,
+        copy_termination=True,
+        save_history=False,
+        callback=LogCallback(),
+    )
     # np.save('checkpoint', res.algorithm)
 
     # Log results
