@@ -64,7 +64,6 @@ class RefactoringSequenceEvaluation:
         print('df_res')
         print(df_res)
 
-
         evaluation_results = []
         for index, row in df_res.iterrows():
             # We should use positive quality attributes
@@ -125,18 +124,36 @@ class RefactoringSequenceEvaluation:
 
         # print(population)
         # quit()
+        applicability_map = {
+            'Project': [],
+            'Sequence': [],
+            'Applied refactorings': [],
+            'Rejected refactorings': []
+        }
         for k, refactoring_sequence in enumerate(population):
+            true_refactorings_count = 0
+            false_refactorings_count = 0
             reset_project()
+
             # Apply sequence X to system S
             for refactoring_operation in refactoring_sequence:
                 res = refactoring_operation[0](**refactoring_operation[1])
                 update_understand_database(config.UDB_PATH)
+                if res:
+                    true_refactorings_count += 1
+                else:
+                    false_refactorings_count += 1
                 config.logger.info(f"Executed {refactoring_operation[2]} with status {res}")
+
+            applicability_map['Project'].append(config.PROJECT_NAME)
+            applicability_map['Sequence'].append(k)
+            applicability_map['Applied refactorings'].append(true_refactorings_count)
+            applicability_map['Rejected refactorings'].append(false_refactorings_count)
 
             # Dump refactored project
             dump_path = os.path.join(
                 config.PROJECT_ROOT_DIR,
-                f'{config.PROJECT_NAME}_refactored_with_algorithm{config.PROBLEM}',
+                f'{config.PROJECT_NAME}_refactored_with_algorithm{config.PROBLEM}_rand',
                 f'dump{k}'
             )
 
@@ -160,8 +177,33 @@ class RefactoringSequenceEvaluation:
                 )
             )
 
+        # Log applied and rejected refactorings
+        df = pd.DataFrame(data=applicability_map)
+        df.to_csv(os.path.join(config.PROJECT_LOG_DIR, 'applicability_map.csv'), index=False)
+
         if reset:
             reset_project()
+
+    def analysis_refactoring_sequences(self, input_file_path=None, reset=True):
+        if input_file_path is None:
+            input_file_path = glob.glob(os.path.join(self.log_directory, 'best_refactoring_sequences*.json'))[0]
+        with open(input_file_path, 'r', encoding='utf-8') as fp:
+            population_trimmed = json.load(fp)
+        population = []
+        position_map = {
+            'Project': [],
+            'Refactoring': [],
+            'Position': []
+        }
+        for chromosome in population_trimmed:
+            for i, gene_ in enumerate(chromosome):
+                refactoring_name = gene_[0]
+                position_map['Project'].append(config.PROJECT_NAME)
+                position_map['Refactoring'].append(gene_[0])
+                position_map['Position'].append(i)
+
+        df = pd.DataFrame(data=position_map)
+        df.to_csv(os.path.join(config.PROJECT_LOG_DIR, 'positions_map.csv'), index=False)
 
     def execute_from_txt_log(self, input_file_path):
         """
@@ -216,3 +258,5 @@ if __name__ == '__main__':
     eval_ = RefactoringSequenceEvaluation(log_directory=config.PROJECT_LOG_DIR)
     eval_.execute_from_json_log(reset=False)
     eval_.evaluate_sequences()
+
+    # eval_.analysis_refactoring_sequences()
