@@ -1,3 +1,3 @@
 # Encapsulate field
 
-::: refactorings.encapsulate_field
+::: codart.refactorings.encapsulate_field

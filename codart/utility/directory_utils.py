@@ -10,18 +10,15 @@ import os
 import subprocess
 from multiprocessing.dummy import Pool, Process, Manager
 
-from antlr4 import FileStream, CommonTokenStream
+from antlr4 import FileStream
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 from joblib import Parallel, delayed
 
 import understand as und
 
-from gen.java.JavaLexer import JavaLexer
-from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from java8speedy.parser import sa_javalabeled
-from java8speedy.parser import JavaLabeledLexer
 
-from sbse import config
+from codart import config
 
 
 def git_restore(project_dir):

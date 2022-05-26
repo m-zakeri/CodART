@@ -1,4 +1,4 @@
 # Pull-up constructor
 
-::: refactorings.pullup_constructor
+::: codart.refactorings.pullup_constructor
 

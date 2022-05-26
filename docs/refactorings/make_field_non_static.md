@@ -1,3 +1,3 @@
 # Make field non-static
 
-::: refactorings.make_field_non_static
+::: codart.refactorings.make_field_non_static

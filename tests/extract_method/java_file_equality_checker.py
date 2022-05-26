@@ -1,9 +1,8 @@
 from antlr4 import *
-from gen.javaLabeled.JavaLexer import JavaLexer
+from codart.gen.javaLabeled.JavaLexer import JavaLexer
 
 
-
-def is_equal(file1,file2):
+def is_equal(file1, file2):
     input_stream1 = FileStream(file1)
     lexer1 = JavaLexer(input_stream1)
 
@@ -37,7 +36,7 @@ def is_equal(file1,file2):
             else:
                 print(token1.line)
                 print(token2.line)
-                print(token1.text ,'!=', token2.text,' = ',token1.text != token2.text)
+                print(token1.text, '!=', token2.text, ' = ', token1.text != token2.text)
                 return False
 
         elif token1.type == lexer1.LPAREN:
@@ -54,4 +53,3 @@ def is_equal(file1,file2):
         token2 = lexer2.nextToken()
 
     return True
-

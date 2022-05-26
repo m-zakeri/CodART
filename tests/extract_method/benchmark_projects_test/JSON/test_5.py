@@ -1,4 +1,4 @@
-from refactorings.extract_method import extract_method
+from codart.refactorings.extract_method import extract_method
 from tests.extract_method.candidate_reader import CandidateReader
 import os
 import errno

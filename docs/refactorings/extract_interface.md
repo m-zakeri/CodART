@@ -1,3 +1,3 @@
 # Extract interface
 
-::: refactorings.extract_interface
+::: codart.refactorings.extract_interface

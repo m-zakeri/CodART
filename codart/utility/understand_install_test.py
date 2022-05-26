@@ -1,4 +1,4 @@
-# Test script to verify that the Understand Python API is setup correctly
+# Test script to verify that Understand Python API is installed correctly
 
 import struct
 import shutil
@@ -7,7 +7,7 @@ from setup_understand import *
 
 # Verify Python 3
 
-if (sys.version_info >= (3, 0)):
+if sys.version_info >= (3, 0):
     print("Checking for Python Version >= 3.0 : Pass")
     print("  Python Version: " + str(sys.version_info.major) + "." + str(sys.version_info.minor) + "." + str(
         sys.version_info.micro))
@@ -25,7 +25,7 @@ if not undPath:
     print("  Error: Add scitools/bin/[SYSTEM] to PATH and restart your session")
     quit()
 undPath = os.path.normcase(re.sub(r'und(\.exe)*$', '', undPath, flags=re.IGNORECASE))
-if (undPath):
+if undPath:
     print("Checking for Understand in PATH: Pass")
     print("  found at ", undPath)
 else:
@@ -55,7 +55,7 @@ else:
     print('  Error: Unexpected Directory Structure, the Understand install directory should not be modified. ', undPath)
     quit()
 pythonBit = (struct.calcsize("P") * 8)
-if (pythonBit != understandBit):
+if pythonBit != understandBit:
     print("Checking that Bit versions match: Fail")
     print("  Error: Python is", pythonBit, "bit and Understand is", understandBit, "bit. They need to match")
     quit()
@@ -85,9 +85,9 @@ for testDir in pythonPath:
     cleanDir = os.path.normcase(testDir)
     if cleanDir == pythonDir:
         inPythonPath = True
-    if (cleanDir.find('\"') > 0):
+    if cleanDir.find('\"') > 0:
         print("  Illegal Quote characters were found in PYTHONPATH: " + cleanDir)
-if (not inPythonPath):
+if not inPythonPath:
     print("Checking that PYTHONPATH includes API: Fail")
     print("  Error: Add", pythonDir, "to PYTHONPATH. If it is set you may need to restart your session.")
     quit()
@@ -113,11 +113,11 @@ except ImportError as e:
         candidate = os.path.join(path, 'qt.conf')
         if os.path.exists(candidate):
             qtPaths.append(path)
-    if (len(qtPaths) == 0):
+    if len(qtPaths) == 0:
         print("  Error: QtFiles are missing from the PATH even though", undPath, "was found")
         print("  Unexpected Directory Structure, the Understand install directory should not be modified.")
         quit()
-    if (len(qtPaths) > 1):
+    if len(qtPaths) > 1:
         print("  Error: Multiple Qt Installations in the PATH.")
         print("  Try moving the sti\\bin directory earlier in the path.")
         for path in qtPaths:

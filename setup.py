@@ -10,7 +10,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="codart",  # Replace with your own username
-    version="0.1.1dev",
+    version="0.2.3dev",
     author="Morteza Zakeri",
     author_email="m-zakeri@live.com",
     description="CodART: Free source code automated refactoring toolkit",
@@ -30,12 +30,14 @@ setuptools.setup(
 
     package_dir={
         'codart': 'codart',
-        'gen': 'gen',
-        'metrics': 'metrics',
-        'refactoring_design_patterns': 'refactoring_design_patterns',
-        'refactorings': 'refactorings',
-        'sbse': 'sbse',
-
+        'codart.gen': 'codart.gen',
+        'codart.metrics': 'codart.metrics',
+        'codart.refactoring_design_patterns': 'codart.refactoring_design_patterns',
+        'codart.refactorings': 'codart.refactorings',
+        'codart.sbse': 'codart.sbse',
+        'codart.smells': 'codart.smells',
+        'codart.utility': 'codart.utility',
+        'codart.visualization': 'codart.visualization',
     },
 
     packages=setuptools.find_packages(
@@ -43,19 +45,24 @@ setuptools.setup(
         [
             'codart',
             'codart.*'
-            'gen',
-            'gen.*',
-            'metrics',
-            'metrics.*',
-            'refactoring_design_patterns',
-            'refactoring_design_patterns.*',
-            'refactorings',
-            'refactorings.*',
-            'sbse',
-            'sbse.*',
-
+            'codart.gen',
+            'codart.gen.*',
+            'codart.metrics',
+            'codart.metrics.*',
+            'codart.refactoring_design_patterns',
+            'codart.refactoring_design_patterns.*',
+            'codart.refactorings',
+            'codart.refactorings.*',
+            'codart.sbse',
+            'codart.sbse.*',
+            'codart.smells',
+            'codart.smells.*',
+            'codart.utility',
+            'codart.utility.*',
+            'codart.visualization',
+            'codart.visualization.*',
         ]
     ),
 
-    python_requires=">=3.8",
+    python_requires=">=3.9",
 )

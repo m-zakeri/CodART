@@ -1,7 +1,7 @@
 import unittest
 
 
-from refactorings.extract_method import extract_method
+from codart.refactorings.extract_method import extract_method
 from tests.extract_method.candidate_reader import CandidateReader
 from tests.extract_method.java_file_equality_checker import is_equal
 

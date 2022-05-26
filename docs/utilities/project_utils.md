@@ -2,7 +2,7 @@
 
 ## Directory utils
 
-::: codart.utility.directory_utils
+::: codart.codart.utility.directory_utils
 
 
 

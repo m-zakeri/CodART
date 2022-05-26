@@ -1,3 +1,3 @@
 # Increase method visibility
 
-::: refactorings.increase_method_visibility
+::: codart.refactorings.increase_method_visibility

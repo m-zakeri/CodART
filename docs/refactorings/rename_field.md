@@ -1,6 +1,6 @@
 # Rename field
 
-::: refactorings.rename_field
+::: codart.refactorings.rename_field
 
 
 

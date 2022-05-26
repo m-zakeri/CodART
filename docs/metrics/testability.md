@@ -1,3 +1,3 @@
 # Testability prediction
 
-::: metrics.testability_prediction2
+::: codart.metrics.testability_prediction2

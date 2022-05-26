@@ -1,3 +1,3 @@
 # Make field non-final
 
-::: refactorings.make_field_non_final
+::: codart.refactorings.make_field_non_final

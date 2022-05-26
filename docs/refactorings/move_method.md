@@ -1,6 +1,6 @@
 # Move method
 
-::: refactorings.move_method
+::: codart.refactorings.move_method
 
 
 

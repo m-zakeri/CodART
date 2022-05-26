@@ -4,9 +4,10 @@
     test status: pass
 """
 
-from refactorings.extract_method import extract_method
+from codart.refactorings.extract_method import extract_method
 import os
 import errno
+
 
 def main():
     base_dir = '/mnt/d/Sajad/Uni/Spring00/Compiler/CodART/'

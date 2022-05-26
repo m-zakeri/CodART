@@ -4,8 +4,8 @@ from pathlib import Path
 
 from antlr4 import FileStream, CommonTokenStream
 
-from gen.java.JavaLexer import JavaLexer
-from gen.java.JavaParser import JavaParser
+from codart.gen.java.JavaLexer import JavaLexer
+from codart.gen.java.JavaParser import JavaParser
 
 
 class ProjectParseUsage:

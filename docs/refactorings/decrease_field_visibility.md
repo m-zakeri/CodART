@@ -1,3 +1,3 @@
 # Decrease field visibility
 
-::: refactorings.decrease_field_visibility
+::: codart.refactorings.decrease_field_visibility

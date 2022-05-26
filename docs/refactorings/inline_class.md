@@ -1,3 +1,3 @@
 # Increase method visibility
 
-::: refactorings.inline_class
+::: codart.refactorings.inline_class

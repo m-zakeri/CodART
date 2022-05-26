@@ -1,3 +1,3 @@
 # Extract class
 
-::: refactorings.extract_class
+::: codart.refactorings.extract_class

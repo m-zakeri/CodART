@@ -4,9 +4,10 @@
     test status: pass
 """
 
-from refactorings.extract_method import extract_method
+from codart.refactorings.extract_method import extract_method
 import os
 import errno
+
 
 def main():
     base_dir = '/mnt/d/Sajad/Uni/Spring00/Compiler/CodART/'
@@ -21,7 +22,7 @@ def main():
     _conf = {
         'target_file': base_dir + "benchmark_projects/ganttproject/biz.ganttproject.core/src/main/java/biz/ganttproject/core/calendar/WeekendCalendarImpl.java",
         'output_file': base_dir + "tests/extract_method/out/benchmark_projects/ganttproject/biz.ganttproject.core/src/main/java/biz/ganttproject/core/calendar/WeekendCalendarImpl_test_5.java",
-        'lines': [294,295,296,297,298,299,300,301,302],
+        'lines': [294, 295, 296, 297, 298, 299, 300, 301, 302],
         'new_method_name': 'iterateOnCalender',
     }
     extract_method(_conf)

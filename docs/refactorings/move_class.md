@@ -1,4 +1,4 @@
 # Move class
 
-::: refactorings.move_class
+::: codart.refactorings.move_class
 

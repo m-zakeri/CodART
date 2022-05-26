@@ -4,10 +4,10 @@
 ## Implementation 1
 
 
-::: refactorings.rename_class
+::: codart.refactorings.rename_class
 
 
 ## Implementation 2
 
-::: refactorings.rename_class2
+::: codart.refactorings.rename_class2
 

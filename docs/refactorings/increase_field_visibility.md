@@ -1,3 +1,3 @@
 # Increase field visibility
 
-::: refactorings.increase_field_visibility
+::: codart.refactorings.increase_field_visibility

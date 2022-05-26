@@ -8,10 +8,7 @@ import sys
 # import logging
 
 from dotenv import load_dotenv
-
-# logging.basicConfig(level=logging.DEBUG)
-# logger = logging.getLogger(__file__)
-from sbse.config import logger
+from codart import config
 
 load_dotenv()
 
@@ -30,7 +27,7 @@ sys.path.insert(0, PYTHONPATH)  # Put your path here
 # Import understand if available on the path
 try:
     import understand as und
-    logger.info(f"Loaded understand {und.version()} successfully")
+    config.logger.info(f"Loaded understand {und.version()} successfully")
 except ModuleNotFoundError:
     raise ModuleNotFoundError('Understand not found.')
 except ImportError:

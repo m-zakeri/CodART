@@ -1,3 +1,3 @@
 # Extract method
 
-::: refactorings.extract_method
+::: codart.refactorings.extract_method

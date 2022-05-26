@@ -6,10 +6,8 @@ An implementation of simple symbol table for the following refactorings:
 
 """
 
-
 __version__ = '0.2.0'
 __author__ = 'Morteza Zakeri'
-
 
 import os
 import re  # regular expressions
@@ -23,10 +21,10 @@ from antlr4 import FileStream, ParseTreeWalker, CommonTokenStream
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
 from codart.utility.directory_utils import create_project_parse_tree
-from gen.java.JavaLexer import JavaLexer
-from gen.java.JavaParser import JavaParser
-from gen.java.JavaParserListener import JavaParserListener
-from gen.javaLabeled.JavaLexer import JavaLexer
+from codart.gen.java.JavaLexer import JavaLexer
+from codart.gen.java.JavaParser import JavaParser
+from codart.gen.java.JavaParserListener import JavaParserListener
+from codart.gen.javaLabeled.JavaLexer import JavaLexer
 
 
 class Program:
@@ -78,7 +76,8 @@ class FileInfo:
         return (
                 any(lambda x: x.package_name == package_name for package_import in self.package_imports)
                 or any(lambda x: x.package_name == package_name and x.class_name == class_name for class_import in
-                       self.class_imports))
+                       self.class_imports)
+        )
 
     def has_imported_package(self, package_name: str):
         if self.package_name == package_name:
@@ -126,9 +125,9 @@ class SingleFileElement:
             filename = self.filename
         if filename is None:
             return None
-        file_ = open(filename, 'r')
-        text = file_.read()
-        file_.close()
+        f = open(filename, 'r')
+        text = f.read()
+        f.close()
 
         return text[self.get_first_symbol().start:self.get_last_symbol().stop + 1]
 
@@ -267,6 +266,7 @@ class UtilsListener(JavaParserListener):
     """
 
     """
+
     def __init__(self, filename):
         self.package = Package()
 
@@ -558,11 +558,13 @@ class UtilsListener(JavaParserListener):
                 dims = self.current_field_dims[i]
                 field_init = self.current_field_inits[i]
                 var_ctx = self.current_field_var_ctxs[i]
-                field = Field(package_name=self.package.name,
-                              class_name=self.current_class_identifier,
-                              parser_context=self.current_field_decl[2],
-                              filename=self.filename,
-                              file_info=self.file_info)
+                field = Field(
+                    package_name=self.package.name,
+                    class_name=self.current_class_identifier,
+                    parser_context=self.current_field_decl[2],
+                    filename=self.filename,
+                    file_info=self.file_info
+                )
                 field.modifiers = self.current_field_decl[0]
                 field.modifiers_parser_contexts = self.current_field_decl[3]
                 field.datatype = self.current_field_decl[1] + dims
@@ -684,8 +686,10 @@ class FieldUsageListener(UtilsListener):
         else:
             return
 
-        self.has_imported_source = self.file_info.has_imported_package(self.package.name) or \
-                                   self.file_info.has_imported_class(self.package.name, self.source_class)
+        self.has_imported_source = (
+                self.file_info.has_imported_package(self.package.name)
+                or self.file_info.has_imported_class(self.package.name, self.source_class)
+        )
 
         # import target if we're not in Target and have not imported before
         if self.current_class_name != self.target_class:
@@ -705,10 +709,10 @@ class FieldUsageListener(UtilsListener):
             # add getter and setter
             name = self.field_tobe_moved.name
             method_name = self.field_tobe_moved.name.upper() + self.field_tobe_moved.name[1:-1]
-            type = self.field_tobe_moved.datatype
+            type_ = self.field_tobe_moved.datatype
 
-            getter = f"\tpublic {type} get{method_name}() {{ return this.{name}; }}\n"
-            setter = f"\tpublic void set{method_name}({type} {name}) {{ this.{name} = {name}; }}\n"
+            getter = f"\tpublic {type_} get{method_name}() {{ return this.{name}; }}\n"
+            setter = f"\tpublic void set{method_name}({type_} {name}) {{ this.{name} = {name}; }}\n"
             self.rewriter.insertBeforeIndex(ctx.stop.tokenIndex, getter)
             self.rewriter.insertBeforeIndex(ctx.stop.tokenIndex, setter)
 
@@ -792,10 +796,9 @@ class FieldUsageListener(UtilsListener):
                 try:
                     local_ctx = var_or_exprs.parser_context.parentCtx.parentCtx.parentCtx.parentCtx.parentCtx.parentCtx
                     creator = local_ctx.expression()[0].getText()
-                    if creator.__contains__(
-                            f"new{self.source_class}") and local_ctx.IDENTIFIER().getText() == self.field_name:
+                    if creator.__contains__(f"new{self.source_class}") \
+                            and local_ctx.IDENTIFIER().getText() == self.field_name:
                         self.propagate_field(local_ctx, target_param_name)
-
                 except:
                     pass
 
@@ -884,9 +887,8 @@ def save(rewriter: TokenStreamRewriter, file_name: str, filename_mapping=lambda 
     path = new_filename[:new_filename.rfind('/')]
     if not os.path.exists(path):
         os.makedirs(path)
-    with open(new_filename, mode='w', newline='') as file:
-        print("write?", new_filename)
-        file.write(rewriter.getDefaultText())
+    with open(new_filename, mode='w', newline='') as f:
+        f.write(rewriter.getDefaultText())
 
 
 class MethodUsageListener(UtilsListener):
@@ -905,7 +907,8 @@ class MethodUsageListener(UtilsListener):
         if type(ctx.parentCtx) is JavaParser.CreatorContext:
             if ctx.parentCtx.createdName().IDENTIFIER()[0].getText() not in self.method_names:
                 return
-        text = f"new {self.target_class}()" if ctx.arguments().expressionList() is None else f", new {self.target_class}()"
+        text = f"new {self.target_class}()" \
+            if ctx.arguments().expressionList() is None else f", new {self.target_class}()"
         index = ctx.arguments().RPAREN().symbol.tokenIndex
         self.rewriter.insertBeforeIndex(index, text)
 
@@ -927,7 +930,6 @@ def get_filenames_in_dir(directory_name: str, filter_=lambda x: x.endswith(".jav
     for (dirname, dirnames, filenames) in os.walk(directory_name):
         result.extend([dirname + '/' + name for name in filenames if filter_(name)])
     return result
-
 
 
 def clean_up_dir(files: list) -> list:
@@ -968,50 +970,47 @@ class PreConditionListener(UtilsListener):
             self.can_convert = False
 
 
-
-
-
 def get_program(source_files: list, print_status=False) -> Program:
     program = Program()
     for filename in source_files:
         if print_status:
             print("Parsing " + filename)
-        stream_ = FileStream(filename, encoding='utf8', errors='ignore')
-        lexer_ = JavaLexer(stream_)
-        token_stream_ = CommonTokenStream(lexer_)
-        parser_ = JavaParser(token_stream_)
-        tree_ = parser_.compilationUnit()
-        listener_ = UtilsListener(filename)
-        walker_ = ParseTreeWalker()
-        walker_.walk(listener_, tree_)
+        stream = FileStream(filename, encoding='utf8', errors='ignore')
+        lexer = JavaLexer(stream)
+        token_stream = CommonTokenStream(lexer)
+        parser = JavaParser(token_stream)
+        tree = parser.compilationUnit()
+        listener = UtilsListener(filename)
+        walker = ParseTreeWalker()
+        walker.walk(listener, tree)
 
-        listener_package_name = listener_.package.name or ""
+        listener_package_name = listener.package.name or ""
 
         if not (listener_package_name in program.packages):
-            program.packages[listener_package_name] = listener_.package
+            program.packages[listener_package_name] = listener.package
         else:
-            for classes_name in listener_.package.classes:
-                program.packages[listener_package_name].classes[classes_name] = listener_.package.classes[classes_name]
+            for classes_name in listener.package.classes:
+                program.packages[listener_package_name].classes[classes_name] = listener.package.classes[classes_name]
     return program
 
 
 def get_objects(source_files: str) -> Dict[Any, Any]:
     objects = {}
     for filename in source_files:
-        stream_ = FileStream(filename, encoding='utf8', errors='ignore')
-        lexer_ = JavaLexer(stream_)
-        token_stream_ = CommonTokenStream(lexer_)
-        parser_ = JavaParser(token_stream_)
-        tree_ = parser_.compilationUnit()
-        listener_ = UtilsListener(filename)
-        walker_ = ParseTreeWalker()
-        walker_.walk(listener_, tree_)
+        stream = FileStream(filename, encoding='utf8', errors='ignore')
+        lexer = JavaLexer(stream)
+        token_stream = CommonTokenStream(lexer)
+        parser = JavaParser(token_stream)
+        tree = parser.compilationUnit()
+        listener = UtilsListener(filename)
+        walker = ParseTreeWalker()
+        walker.walk(listener, tree)
 
-        if not (listener_.package.name in objects):
-            objects[listener_.package.name] = listener_.objects_declaration
+        if not (listener.package.name in objects):
+            objects[listener.package.name] = listener.objects_declaration
         else:
-            for class_name in listener_.objects_declaration:
-                objects[listener_.package.name][class_name] = listener_.objects_declaration[class_name]
+            for class_name in listener.objects_declaration:
+                objects[listener.package.name][class_name] = listener.objects_declaration[class_name]
 
     return objects
 
@@ -1026,11 +1025,11 @@ class Rewriter:
             package = program.packages[package_name]
             for class_name in package.classes:
                 _class: Class = package.classes[class_name]
-                token_stream_ = _class.get_token_stream()
-                if token_stream_ not in self.token_streams:
-                    self.token_streams[token_stream_] = (
+                token_stream = _class.get_token_stream()
+                if token_stream not in self.token_streams:
+                    self.token_streams[token_stream] = (
                         _class.filename,
-                        TokenStreamRewriter(token_stream_),
+                        TokenStreamRewriter(token_stream),
                         filename_mapping(_class.filename)
                     )
 
@@ -1068,106 +1067,106 @@ def get_program_with_field_usage(source_files: list, field_name: str, source_cla
     for filename in source_files:
         if print_status:
             print("Parsing " + filename)
-        stream_ = FileStream(filename, encoding='utf8', errors='ignore')
-        lexer_ = JavaLexer(stream_)
-        token_stream_ = CommonTokenStream(lexer_)
-        parser_ = JavaParser(token_stream_)
-        tree_ = parser_.compilationUnit()
-        listener_ = StaticFieldUsageListener(filename, field_name, source_class)
-        walker_ = ParseTreeWalker()
-        walker_.walk(listener_, tree_)
+        stream = FileStream(filename, encoding='utf8', errors='ignore')
+        lexer = JavaLexer(stream)
+        token_stream = CommonTokenStream(lexer)
+        parser = JavaParser(token_stream)
+        tree = parser.compilationUnit()
+        listener = StaticFieldUsageListener(filename, field_name, source_class)
+        walker = ParseTreeWalker()
+        walker.walk(listener, tree)
 
-        if not (listener_.package.name in program.packages):
-            program.packages[listener_.package.name] = listener_.package
+        if not (listener.package.name in program.packages):
+            program.packages[listener.package.name] = listener.package
         else:
-            for classes_name in listener_.package.classes:
-                program.packages[listener_.package.name].classes[classes_name] = listener_.package.classes[classes_name]
+            for classes_name in listener.package.classes:
+                program.packages[listener.package.name].classes[classes_name] = listener.package.classes[classes_name]
     return program
 
 
 def parse_and_walk(file_path: str, listener_class, has_write=False, debug=False, **kwargs):
-    tree_, rewriter = create_project_parse_tree(file_path)
+    tree, rewriter = create_project_parse_tree(file_path)
     if has_write:
         if rewriter is None:
             raise Exception("Failed to create rewriter.")
         kwargs.update({'rewriter': rewriter})
-    listener_ = listener_class(**kwargs)
+    listener = listener_class(**kwargs)
     ParseTreeWalker().walk(
-        listener_,
-        tree_
+        listener,
+        tree
     )
 
     if has_write:
         if not debug:
-            with open(file_path, mode='w', encoding='utf-8', errors='ignore', newline='') as f_:
-                f_.write(listener_.rewriter.getDefaultText())
+            with open(file_path, mode='w', encoding='utf-8', errors='ignore', newline='') as f:
+                f.write(listener.rewriter.getDefaultText())
         else:
-            print(listener_.rewriter.getDefaultText())
+            print(listener.rewriter.getDefaultText())
 
-    return listener_
+    return listener
 
 
 # Tests
 if __name__ == '__main__':
-    source_class = "JSONArray"
-    source_package = "org.json"
-    target_class = "JSONObject"
-    target_package = "org.json"
-    field_name = "myArrayList"
-    path = ""
-    files = get_filenames_in_dir(
-        '/home/loop/Desktop/Ass/Compiler/CodART/benchmark_projects/JSON/src/main/java/org/json/')
-    field = None
+    source_class_ = "JSONArray"
+    source_package_ = "org.json"
+    target_class_ = "JSONObject"
+    target_package_ = "org.json"
+    field_name_ = "myArrayList"
+    # path = ""
+    files1 = get_filenames_in_dir('benchmark_projects/JSON/src/main/java/org/json/')
+    field_ = None
     methods_tobe_update = []
-    for file in files:
-        stream = FileStream(file, encoding='utf8', errors='ignore')
-        lexer = JavaLexer(stream)
-        token_stream = CommonTokenStream(lexer)
-        parser = JavaParser(token_stream)
-        tree = parser.compilationUnit()
-        utilsListener = PreConditionListener(file)
-        walker = ParseTreeWalker()
-        walker.walk(utilsListener, tree)
+    for file_ in files1:
+        stream_ = FileStream(file_, encoding='utf8', errors='ignore')
+        lexer_ = JavaLexer(stream_)
+        token_stream_ = CommonTokenStream(lexer_)
+        parser_ = JavaParser(token_stream_)
+        tree_ = parser_.compilationUnit()
+        listener_ = PreConditionListener(file_)
+        walker_ = ParseTreeWalker()
+        walker_.walk(listener_, tree_)
 
-        if not utilsListener.can_convert:
+        if not listener_.can_convert:
             continue
 
-        if len(utilsListener.package.classes) > 1:
+        if len(listener_.package.classes) > 1:
             exit(1)
 
         # find fields with the type Source first and store it
         field_candidate = set()
-        for klass in utilsListener.package.classes.values():
-            for f in klass.fields.values():
-                if f.datatype == source_class:
-                    field_candidate.add(f.name)
+        for class_ in listener_.package.classes.values():
+            for field_ in class_.fields.values():
+                if field_.datatype == source_class_:
+                    field_candidate.add(field_.name)
 
-        listener = FieldUsageListener(file,
-                                      source_class,
-                                      source_package,
-                                      target_class,
-                                      target_package,
-                                      field_name,
-                                      field_candidate,
-                                      field)
-        walker.walk(listener, tree)
+        listener_ = FieldUsageListener(
+            file_,
+            source_class_,
+            source_package_,
+            target_class_,
+            target_package_,
+            field_name_,
+            field_candidate,
+            field_
+        )
+        walker_.walk(listener_, tree_)
 
-        methods_tobe_update = listener.methods_tobe_updated + methods_tobe_update
+        methods_tobe_update = listener_.methods_tobe_updated + methods_tobe_update
 
-        if file.__contains__(source_class):
-            field = listener.field_tobe_moved
+        if file_.__contains__(source_class_):
+            field_ = listener_.field_tobe_moved
 
     # for method in methods_tobe_update:
     #     print(method.name)
 
-    files2 = [f'{file.split(".")[0]}.rewritten.java' for file in files]
-    for i, file in enumerate(files):
-        stream = FileStream(files2[i], encoding='utf8', errors='ignore')
-        lexer = JavaLexer(stream)
-        token_stream = CommonTokenStream(lexer)
-        parser = JavaParser(token_stream)
-        tree = parser.compilationUnit()
-        listener = MethodUsageListener(file, methods_tobe_update, target_class)
-        walker = ParseTreeWalker()
-        walker.walk(listener, tree)
-
+    files2 = [f'{file.split(".")[0]}.rewritten.java' for file in files1]
+    for i_, file_ in enumerate(files1):
+        stream_ = FileStream(files2[i_], encoding='utf8', errors='ignore')
+        lexer_ = JavaLexer(stream_)
+        token_stream_ = CommonTokenStream(lexer_)
+        parser_ = JavaParser(token_stream_)
+        tree_ = parser_.compilationUnit()
+        listener_ = MethodUsageListener(file_, methods_tobe_update, target_class_)
+        walker_ = ParseTreeWalker()
+        walker_.walk(listener_, tree_)

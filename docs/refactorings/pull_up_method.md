@@ -1,3 +1,3 @@
 # Pull-up method
 
-::: refactorings.pullup_method
+::: codart.refactorings.pullup_method

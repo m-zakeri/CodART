@@ -1,5 +1,5 @@
 # Rename package
 
-::: refactorings.rename_package
+::: codart.refactorings.rename_package
 
 

@@ -1,3 +1,3 @@
 # Make method final  
 
-::: refactorings.make_method_final
+::: codart.refactorings.make_method_final

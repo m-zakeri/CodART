@@ -25,12 +25,11 @@ from antlr4 import *
 # from gen.java9.Java9_v2Parser import Java9_v2Parser  # Old slow grammar parser
 # from java9speedy.parser import sa_java9_v2  # Old slow grammar enhanced by CPP backend
 
-from gen.javaLabeled.JavaLexer import JavaLexer  # Java8 grammar efficient lexer
-from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled  # Java8 grammar efficient parser labeled
+from codart.gen.javaLabeled.JavaLexer import JavaLexer  # Java8 grammar efficient lexer
+from codart.gen.javaLabeled.JavaParserLabeled import JavaParserLabeled  # Java8 grammar efficient parser labeled
 
 # Import refactorings listeners
-from refactorings.encapsulate_field import EncapsulateFiledRefactoringListener  # CodART first refactoring :)
-from refactorings.extract_class import ExtractClassRefactoringListener
+from codart.refactorings.encapsulate_field import EncapsulateFiledRefactoringListener  # CodART first refactoring :)
 
 
 def main(args):

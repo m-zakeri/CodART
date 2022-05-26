@@ -1,6 +1,6 @@
 # Make method non-static
 
-::: refactorings.make_method_non_static
+::: codart.refactorings.make_method_non_static
 
 
-::: refactorings.make_method_non_static2
+::: codart.refactorings.make_method_non_static2
