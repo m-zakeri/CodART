@@ -20,7 +20,7 @@
     
     
       
-        <title>Project utilities - CodART Docs (v0.1.2dev)</title>
+        <title>Project utilities - CodART Docs (v0.2.3dev)</title>
       
     
     
@@ -84,7 +84,7 @@
     
       <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="CodART Docs (v0.1.2dev)" class="md-header__button md-logo" aria-label="CodART Docs (v0.1.2dev)" data-md-component="logo">
+    <a href="../.." title="CodART Docs (v0.2.3dev)" class="md-header__button md-logo" aria-label="CodART Docs (v0.2.3dev)" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
@@ -97,7 +97,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            CodART Docs (v0.1.2dev)
+            CodART Docs (v0.2.3dev)
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -203,13 +203,13 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="CodART Docs (v0.1.2dev)" class="md-nav__button md-logo" aria-label="CodART Docs (v0.1.2dev)" data-md-component="logo">
+    <a href="../.." title="CodART Docs (v0.2.3dev)" class="md-nav__button md-logo" aria-label="CodART Docs (v0.2.3dev)" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
 
     </a>
-    CodART Docs (v0.1.2dev)
+    CodART Docs (v0.2.3dev)
   </label>
   
     <div class="md-nav__source">
@@ -1048,6 +1048,40 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#performance-meter" class="md-nav__link">
+    Performance meter
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#codart.utility.cpu_ram_usage" class="md-nav__link">
+    codart.utility.cpu_ram_usage
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#codart.utility.cpu_ram_usage.ProjectParseUsage" class="md-nav__link">
+    ProjectParseUsage
+  </a>
+  
+    <nav class="md-nav" aria-label="ProjectParseUsage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#codart.utility.cpu_ram_usage.ProjectParseUsage.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1281,6 +1315,40 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#performance-meter" class="md-nav__link">
+    Performance meter
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#codart.utility.cpu_ram_usage" class="md-nav__link">
+    codart.utility.cpu_ram_usage
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#codart.utility.cpu_ram_usage.ProjectParseUsage" class="md-nav__link">
+    ProjectParseUsage
+  </a>
+  
+    <nav class="md-nav" aria-label="ProjectParseUsage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#codart.utility.cpu_ram_usage.ProjectParseUsage.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1398,12 +1466,16 @@
     <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">project_dir</span><span class="p">)</span>
     <span class="n">db_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">project_dir</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;.und&quot;</span>
     <span class="n">db_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">db_dir</span><span class="p">,</span> <span class="n">db_name</span><span class="p">)</span>
-    <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">db_path</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span>
+    <span class="c1"># print(project_dir, db_name, db_path)</span>
+    <span class="c1"># quit()</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">db_path</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">db_path</span>
     <span class="c1"># An example of command-line is:</span>
     <span class="c1"># und create -languages c++ add @myFiles.txt analyze -all myDb.udb</span>
 
-    <span class="n">understand_cmd</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;und&#39;</span><span class="p">,</span> <span class="s1">&#39;create&#39;</span><span class="p">,</span> <span class="s1">&#39;-languages&#39;</span><span class="p">,</span> <span class="s1">&#39;Java&#39;</span><span class="p">,</span> <span class="s1">&#39;add&#39;</span><span class="p">,</span> <span class="n">project_dir</span><span class="p">,</span> <span class="s1">&#39;analyze&#39;</span><span class="p">,</span> <span class="s1">&#39;-all&#39;</span><span class="p">,</span> <span class="n">db_path</span><span class="p">]</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">understand_cmd</span><span class="p">,</span>
+    <span class="n">understand_5_cmd</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;und&#39;</span><span class="p">,</span> <span class="s1">&#39;create&#39;</span><span class="p">,</span> <span class="s1">&#39;-languages&#39;</span><span class="p">,</span> <span class="s1">&#39;Java&#39;</span><span class="p">,</span> <span class="s1">&#39;add&#39;</span><span class="p">,</span> <span class="n">project_dir</span><span class="p">,</span> <span class="s1">&#39;analyze&#39;</span><span class="p">,</span> <span class="s1">&#39;-all&#39;</span><span class="p">,</span> <span class="n">db_path</span><span class="p">]</span>
+    <span class="n">understand_6_cmd</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;und&#39;</span><span class="p">,</span> <span class="s1">&#39;create&#39;</span><span class="p">,</span> <span class="s1">&#39;-db&#39;</span><span class="p">,</span> <span class="n">db_path</span><span class="p">,</span> <span class="s1">&#39;-languages&#39;</span><span class="p">,</span> <span class="s1">&#39;java&#39;</span><span class="p">]</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">understand_6_cmd</span><span class="p">,</span>
                             <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
                             <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
 
@@ -1766,6 +1838,113 @@ Error: The Analysis cannot be performed because the database is locked or read o
     </div>
 
   </div>
+
+<h2 id="performance-meter">Performance meter</h2>
+
+
+  <div class="doc doc-object doc-module">
+
+<a id="codart.utility.cpu_ram_usage"></a>
+    <div class="doc doc-contents first">
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-class">
+
+
+
+<h2 id="codart.utility.cpu_ram_usage.ProjectParseUsage" class="doc doc-heading">
+        <code>ProjectParseUsage</code>
+
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="codart.utility.cpu_ram_usage.ProjectParseUsage.__init__" class="doc doc-heading">
+<code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_dir</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-special"><code>special</code></small>
+  </span>
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>This by calling this class you can measure:
+    - Total consumed memory for keeping all parse trees
+    - Total consumed time for parsing in seconds</p>
+
+        <details class="quote">
+          <summary>Source code in <code>codart\utility\cpu_ram_usage.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_dir</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This by calling this class you can measure:</span>
+<span class="sd">        - Total consumed memory for keeping all parse trees</span>
+<span class="sd">        - Total consumed time for parsing in seconds</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project_root</span> <span class="o">=</span> <span class="n">project_dir</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">parse_trees</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
                 
               
               
@@ -1822,7 +2001,7 @@ Error: The Analysis cannot be performed because the database is locked or read o
       <div class="md-footer-copyright">
         
           <div class="md-footer-copyright__highlight">
-            © 2020-2021 CodART project - Reverse engineering laboratory
+            © 2020-2022 CodART project - Reverse engineering laboratory
           </div>
         
         Made with
