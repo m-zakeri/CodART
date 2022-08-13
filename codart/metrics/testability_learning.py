@@ -1,9 +1,8 @@
 """
-This script implements machine learning models
-for predicting testability for IEEE TSE paper revision 2
+This script implements machine learning models for predicting testability
+for the CodART
 
-T[X] = C(X)/ Effort(X)
-
+## Models
 Model 1: DecisionTreeRegressor
 Model 2: RandomForestRegressor
 Model 3: GradientBoostingRegressor
@@ -11,8 +10,7 @@ Model 4: HistGradientBoostingRegressor
 Model 5: SGDRegressor
 Model 6: MLPRegressor
 
-The results will be saved in sklearn_models6c
-
+## Datasets
 Dataset	Applied preprocessing	Number of metrics
 DS1: (default)	Simple classes elimination, data classes elimination, outliers elimination, and metric standardization	262
 DS2:	DS1 + Feature selection	20
@@ -21,11 +19,19 @@ DS4:	DS1 + Context vector elimination and lexical metrics elimination 	177
 DS5:	DS1 + Systematically generated metrics elimination	71
 DS6:    Top 15 important source code metrics affecting testability
 
+## Model dependent variable
+Testability of class X: T(X) = E[C]/ (1 + omega) ^ (|n| - 1)
+             where E[C] = 1/3*StatementCoverage + 1/3*BranchCoverage + 1/3*MutationCoverage
+
+## Results
+The results will be saved in sklearn_models6c
+
+## Inferences
 Use the method `inference_model2` of the class `Regression` to predict testability of new Java classes.
 
 """
 
-__version__ = '0.7.2'
+__version__ = '0.7.3'
 __author__ = 'Morteza Zakeri'
 
 import os
@@ -51,11 +57,12 @@ from sklearn.ensemble import VotingRegressor
 class Regression(object):
     def __init__(self, df_path: str = None, feature_selection_mode=False):
         self.df = pd.read_csv(df_path, delimiter=',', index_col=False)
-        self.X_train1, self.X_test1, self.y_train, self.y_test = train_test_split(self.df.iloc[:, 1:-1],
-                                                                                  self.df.iloc[:, -1],
-                                                                                  test_size=0.10,
-                                                                                  random_state=117,
-                                                                                  )
+        self.X_train1, self.X_test1, self.y_train, self.y_test = train_test_split(
+            self.df.iloc[:, 1:-1],
+            self.df.iloc[:, -1],
+            test_size=0.10,
+            random_state=117,
+        )
 
         # ---------------------------------------
         # -- Feature selection (For DS2)
@@ -84,7 +91,7 @@ class Regression(object):
         self.scaler.fit(self.X_train1)
         self.X_train = self.scaler.transform(self.X_train1)
         self.X_test = self.scaler.transform(self.X_test1)
-        dump(self.scaler, df_path[:-4]+'.joblib')
+        dump(self.scaler, df_path[:-4] + '.joblib')
 
     def evaluate_model(self, model=None, model_path=None):
         if model is None:
@@ -295,8 +302,8 @@ def create_testability_dataset_with_only_10_important_metrics():
     df_path = r'data_model/DS07610.csv'
     df_new_path = r'data_model/DS07710.csv'
     df = pd.read_csv(df_path, delimiter=',', index_col=False)
-    df.drop(columns=['CSORD_CountDeclClassMethod','CSLEX_NumberOfNewStatements',
-                     'CSLEX_NumberOfReturnAndPrintStatements','CSORD_NumberOfClassConstructors',
+    df.drop(columns=['CSORD_CountDeclClassMethod', 'CSLEX_NumberOfNewStatements',
+                     'CSLEX_NumberOfReturnAndPrintStatements', 'CSORD_NumberOfClassConstructors',
                      'PK_CountDeclClassMethod'], inplace=True)
     df.to_csv(df_new_path, index=False)
 
