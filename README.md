@@ -3,24 +3,87 @@
 ![CodART](docs/figs/logo.png)
 
 
-Source Code Automated Refactoring Toolkit (CodART) is a research project at [IUST reverse engineering laboratory](http://reverse.iust.ac.ir/).
-We have currently focused on automating the [various refactoring operations](https://refactoring.com/catalog/) for Java source codes. The CodART repository is under active development, and it is not a ready-to-use tool. A complete list of refactoring supported by CodART can be found at [CodART refactorings list](https://m-zakeri.github.io/CodART/refactorings_list/).
+Source Code Automated Refactoring Toolkit (CodART) is a refactoring engine with the ability to many-objective program transformation and optimization. We have currently focused on automating the [various refactoring operations](https://refactoring.com/catalog/) for Java source codes. A complete list of refactoring supported by CodART can be found at [CodART refactorings list](https://m-zakeri.github.io/CodART/refactorings_list/).
+
+The CodART project is under active development. The current version of CodeART works fines on our benchmark projects. To understand how CodART works, read the [CodART white-paper](https://m-zakeri.github.io/CodART). 
+Your contribution to the project and your comment in the discussion section would be welcomed. 
+Please feel free to email and ask any question: `m-zakeri[at]live[dot]com`.
 
 
 
 ## Getting started
 
-To start working on CodART you must first read the [CodART white-paper](https://m-zakeri.github.io/CodART).
-In addition, a summary of CodART architecture is discussed in the following:
+### Researchers and end users
+Researchers may use CodART search-based refactoring to reproduce the results of quality optimization on benchmark projects.
 
-### CodART architecture
 
-The high-level architecture of CodART is shown in Figure 1. The source code consists of several Python packages and directories. We briefly describe each component in CodART. 
+0. Clone the project source code!
+
+1. Install `requirements.txt`.
+
+2. Install [Sci-tools Understand](). Make sure Understand API works fine (without error).
+
+3. Add a `.env` file inside the root of the project and put the following settings:
+
+```
+PROJECT_ROOT_DIR="The root path for the projects"
+CSV_ROOT_DIR="JDeodorant outputs csv paht for GodClass and Move class, Optional; only of WARM_START=1"
+UDB_ROOT_DIR="The root path of the projects Understand databases"
+INIT_POP_FILE="The path of initial population, Optional"
+WARM_START=1
+USE_CPP_BACKEND=0
+EXPERIMENTER="Your name, Optional"
+SCRIPT="Executed script, Optional"
+DESCRIPTION="NSGA-III first run after major re-structuring!, Optional"
+```
+
+4. In `.env` file you also can determine the configuration of the search algorithm. The following is a default setting:
+
+```
+NGEN=10
+RESUME_EXECUTION=""
+BENCHMARK_INDEX=2
+POPULATION_SIZE=15
+MAX_ITERATIONS=15
+LOWER_BAND=15
+UPPER_BAND=50
+PROBLEM=2
+NUMBER_OBJECTIVES=8
+MUTATION_PROBABILITY=0.2
+CROSSOVER_PROBABILITY=0.8
+```
+
+* **Note 1:** `BENCHMARK_INDEX` denotes one of the projects in the list of the benchmark project. To see the list of benchmark projects, go to `codart.config.py`. The projects are listed in the `BENCHMARKS` dictionary.
+
+* **Note 2:** The `PROBLEM` option can be set to one of these options: `0`: Simple genetic algorithm, `1`: NSGA-II, `3`: NSGA-III.
+
+* **Note 3:** The `NUMBER_OBJECTIVES` option was not used for PROBLEM=0
+
+
+5. Go to `codart.sbse` packages and run the `search_based_refactoring2.py` script.
+
+* **Note 4**: According to your configuration and size of the projects, it may take several hours for the execution to be finished. 
+
+* **Note 5:** The results of each execution, including generations, objective values, initial population, refactored program, etc., are saved besides the project path, already defined in `.env` file.
+
+
+### Tool Developers
+Tool developers may want to use specific tools of the CodARTs.
+We currently have provided a `setup.py` script that installs CodART on the system to be imported into other projects.
+
+
+
+
+
+
+## CodART architecture
+We discuss a summary of CodART architecture. The high-level architecture of CodART is shown in Figure 1. The source code consists of several Python packages and directories. We briefly describe each component in CodART. 
 
 ![CodART__Architecture](docs/figs/CodART_architecture__v0.1.1.png)
 
 *Figure 1. CodART architecture*
 
+### Repository structure
 
 I. `grammars`: This directory contains three ANTLR4 grammars for the Java programming language: 
 
@@ -60,6 +123,14 @@ X. **Other packages**: The information of other packages will be announced in th
  
 
 
+### News
+
+**Spring 2021:**
+
+**Fall 2020:** CodART was strated as a research project at [IUST reverse engineering laboratory](http://reverse.iust.ac.ir/).
+
+
+
 ### Read more
 
  * [CodART official website and documentation](https://m-zakeri.github.io/CodART)
@@ -68,10 +139,10 @@ X. **Other packages**: The information of other packages will be announced in th
  * [CodART benchmark projects](https://m-zakeri.github.io/CodART/benchmarks/)
  * [CodART team members and contributors](https://m-zakeri.github.io/CodART/about/)
  * [CodART issues](https://github.com/m-zakeri/CodART/issues)
-   
 
 
  * [Catalog of refactorings by Martin Fowler](https://refactoring.com/catalog/)
  * [Refactoring.Guru](https://refactoring.guru/)
+
 
 Follow us!
