@@ -68,7 +68,7 @@ CROSSOVER_PROBABILITY=0.8
 * **Note 5:** The results of each execution, including generations, objective values, initial population, refactored program, etc., are saved besides the project path, already defined in `.env` file.
 
 
-### Tool Developers
+### Tool developers
 Tool developers may want to use specific tools of the CodARTs.
 We currently have provided a `setup.py` script that installs CodART on the system to be imported into other projects.
 
