@@ -9,14 +9,13 @@
         <meta name="description" content="Automated Source Code Refactoring Toolkit">
       
       
-      
         <meta name="author" content="Morteza Zakeri">
       
       
         <link rel="canonical" href="https://m-zakeri.github.io/refactorings/rename_field/">
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.2.2, mkdocs-material-7.2.5">
+      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.4.0">
     
     
       
@@ -24,29 +23,30 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.be71726b.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.69437709.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.3f5d1f46.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.cbb835fc.min.css">
         
       
+      
     
     
     
       
+        
         
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
-        <style>:root{--md-text-font-family:"Roboto";--md-code-font-family:"Roboto Mono"}</style>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
-    
     
     
       <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
-
 
     
     
@@ -63,9 +63,8 @@
     <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent="">
   
     
-    <script>function __prefix(e){return new URL("../..",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
     
-      <script>var palette=__get("__palette");if(null!==palette&&"object"==typeof palette.color)for(var key in palette.color)document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
@@ -82,16 +81,19 @@
       
     </div>
     
-      <header class="md-header" data-md-component="header">
+    
+      
+
+<header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href="../.." title="CodART Docs (v0.2.3dev)" class="md-header__button md-logo" aria-label="CodART Docs (v0.2.3dev)" data-md-component="logo">
       
   
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
     </label>
     <div class="md-header__title" data-md-component="header-title">
       <div class="md-header__ellipsis">
@@ -117,7 +119,7 @@
           <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent=""  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_1">
           
             <label class="md-header__button md-icon" title="Dark mode" for="__palette_2" hidden>
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7 10a2 2 0 0 1 2 2 2 2 0 0 1-2 2 2 2 0 0 1-2-2 2 2 0 0 1 2-2m10-3a5 5 0 0 1 5 5 5 5 0 0 1-5 5H7a5 5 0 0 1-5-5 5 5 0 0 1 5-5h10M7 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3h10a3 3 0 0 0 3-3 3 3 0 0 0-3-3H7z"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6zm0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4zM7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
             </label>
           
         
@@ -126,7 +128,7 @@
           <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="" data-md-color-accent=""  aria-label="Light mode"  type="radio" name="__palette" id="__palette_2">
           
             <label class="md-header__button md-icon" title="Light mode" for="__palette_1" hidden>
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3z"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3Z"/></svg>
             </label>
           
         
@@ -135,22 +137,21 @@
     
     
       <label class="md-header__button md-icon" for="__search">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
       </label>
-      
-<div class="md-search" data-md-component="search" role="dialog">
+      <div class="md-search" data-md-component="search" role="dialog">
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
       <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
       </label>
       <nav class="md-search__options" aria-label="Search">
         
         <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
         </button>
       </nav>
       
@@ -170,11 +171,10 @@
     
     
       <div class="md-header__source">
-        
-<a href="https://github.com/m-zakeri/CodART/" title="Go to repository" class="md-source" data-md-component="source">
+        <a href="https://github.com/m-zakeri/CodART" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
     GitHub
@@ -183,11 +183,14 @@
       </div>
     
   </nav>
+  
 </header>
     
     <div class="md-container" data-md-component="container">
       
       
+        
+          
         
       
       <main class="md-main" data-md-component="main">
@@ -206,18 +209,17 @@
     <a href="../.." title="CodART Docs (v0.2.3dev)" class="md-nav__button md-logo" aria-label="CodART Docs (v0.2.3dev)" data-md-component="logo">
       
   
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
 
     </a>
     CodART Docs (v0.2.3dev)
   </label>
   
     <div class="md-nav__source">
-      
-<a href="https://github.com/m-zakeri/CodART/" title="Go to repository" class="md-source" data-md-component="source">
+      <a href="https://github.com/m-zakeri/CodART" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
     GitHub
@@ -300,10 +302,14 @@
       
         <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
       
-      <label class="md-nav__link" for="__nav_5">
-        Proposals
-        <span class="md-nav__icon md-icon"></span>
-      </label>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5">
+          Proposals
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <nav class="md-nav" aria-label="Proposals" data-md-level="1">
         <label class="md-nav__title" for="__nav_5">
           <span class="md-nav__icon md-icon"></span>
@@ -312,6 +318,7 @@
         <ul class="md-nav__list" data-md-scrollfix>
           
             
+              
   
   
   
@@ -322,8 +329,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -334,8 +343,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -346,8 +357,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -358,6 +371,7 @@
     </li>
   
 
+            
           
         </ul>
       </nav>
@@ -380,10 +394,14 @@
       
         <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" type="checkbox" id="__nav_6" checked>
       
-      <label class="md-nav__link" for="__nav_6">
-        Refactorings details
-        <span class="md-nav__icon md-icon"></span>
-      </label>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6">
+          Refactorings details
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <nav class="md-nav" aria-label="Refactorings details" data-md-level="1">
         <label class="md-nav__title" for="__nav_6">
           <span class="md-nav__icon md-icon"></span>
@@ -392,6 +410,7 @@
         <ul class="md-nav__list" data-md-scrollfix>
           
             
+              
   
   
   
@@ -402,8 +421,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -414,8 +435,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -426,8 +449,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -438,8 +463,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -450,8 +477,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -462,8 +491,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -474,8 +505,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -486,8 +519,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -498,8 +533,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -510,8 +547,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -522,8 +561,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -534,8 +575,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -546,8 +589,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -558,8 +603,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -570,8 +617,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -582,8 +631,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -594,8 +645,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -606,8 +659,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -618,8 +673,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -630,8 +687,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -642,8 +701,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -654,8 +715,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -666,8 +729,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -678,8 +743,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -690,8 +757,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -702,8 +771,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -714,8 +785,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -726,8 +799,10 @@
     </li>
   
 
+            
           
             
+              
   
   
     
@@ -751,6 +826,7 @@
       </a>
       
         
+
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
@@ -818,8 +894,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -830,8 +908,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -842,6 +922,7 @@
     </li>
   
 
+            
           
         </ul>
       </nav>
@@ -862,10 +943,14 @@
       
         <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7" type="checkbox" id="__nav_7" >
       
-      <label class="md-nav__link" for="__nav_7">
-        Code smells details
-        <span class="md-nav__icon md-icon"></span>
-      </label>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_7">
+          Code smells details
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <nav class="md-nav" aria-label="Code smells details" data-md-level="1">
         <label class="md-nav__title" for="__nav_7">
           <span class="md-nav__icon md-icon"></span>
@@ -874,6 +959,7 @@
         <ul class="md-nav__list" data-md-scrollfix>
           
             
+              
   
   
   
@@ -884,8 +970,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -896,8 +984,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -908,6 +998,7 @@
     </li>
   
 
+            
           
         </ul>
       </nav>
@@ -928,10 +1019,14 @@
       
         <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8" type="checkbox" id="__nav_8" >
       
-      <label class="md-nav__link" for="__nav_8">
-        Metrics
-        <span class="md-nav__icon md-icon"></span>
-      </label>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_8">
+          Metrics
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <nav class="md-nav" aria-label="Metrics" data-md-level="1">
         <label class="md-nav__title" for="__nav_8">
           <span class="md-nav__icon md-icon"></span>
@@ -940,6 +1035,7 @@
         <ul class="md-nav__list" data-md-scrollfix>
           
             
+              
   
   
   
@@ -950,6 +1046,7 @@
     </li>
   
 
+            
           
         </ul>
       </nav>
@@ -970,10 +1067,14 @@
       
         <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_9" type="checkbox" id="__nav_9" >
       
-      <label class="md-nav__link" for="__nav_9">
-        Optimization
-        <span class="md-nav__icon md-icon"></span>
-      </label>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_9">
+          Optimization
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <nav class="md-nav" aria-label="Optimization" data-md-level="1">
         <label class="md-nav__title" for="__nav_9">
           <span class="md-nav__icon md-icon"></span>
@@ -982,6 +1083,7 @@
         <ul class="md-nav__list" data-md-scrollfix>
           
             
+              
   
   
   
@@ -992,8 +1094,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -1004,6 +1108,7 @@
     </li>
   
 
+            
           
         </ul>
       </nav>
@@ -1024,10 +1129,14 @@
       
         <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_10" type="checkbox" id="__nav_10" >
       
-      <label class="md-nav__link" for="__nav_10">
-        Utilities
-        <span class="md-nav__icon md-icon"></span>
-      </label>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_10">
+          Utilities
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <nav class="md-nav" aria-label="Utilities" data-md-level="1">
         <label class="md-nav__title" for="__nav_10">
           <span class="md-nav__icon md-icon"></span>
@@ -1036,6 +1145,7 @@
         <ul class="md-nav__list" data-md-scrollfix>
           
             
+              
   
   
   
@@ -1046,6 +1156,7 @@
     </li>
   
 
+            
           
         </ul>
       </nav>
@@ -1066,10 +1177,14 @@
       
         <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_11" type="checkbox" id="__nav_11" >
       
-      <label class="md-nav__link" for="__nav_11">
-        Tutorials
-        <span class="md-nav__icon md-icon"></span>
-      </label>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_11">
+          Tutorials
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <nav class="md-nav" aria-label="Tutorials" data-md-level="1">
         <label class="md-nav__title" for="__nav_11">
           <span class="md-nav__icon md-icon"></span>
@@ -1078,6 +1193,7 @@
         <ul class="md-nav__list" data-md-scrollfix>
           
             
+              
   
   
   
@@ -1088,8 +1204,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -1100,8 +1218,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -1112,8 +1232,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -1124,6 +1246,7 @@
     </li>
   
 
+            
           
         </ul>
       </nav>
@@ -1203,6 +1326,7 @@
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
                     
+
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
@@ -1275,12 +1399,13 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/m-zakeri/CodART/edit/master/docs/refactorings/rename_field.md" title="Edit this page" class="md-content__button md-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
-                  </a>
-                
-                
-                <h1 id="rename-field">Rename field</h1>
+  <a href="https://github.com/m-zakeri/CodART/edit/master/docs/refactorings/rename_field.md" title="Edit this page" class="md-content__button md-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+
+
+<h1 id="rename-field">Rename field</h1>
 
 
   <div class="doc doc-object doc-module">
@@ -1311,7 +1436,9 @@
 
 
 <h2 id="codart.refactorings.rename_field.RenameFieldRefactoringListener" class="doc doc-heading">
-        <code>RenameFieldRefactoringListener</code>
+        <code>
+RenameFieldRefactoringListener            (<span title="codart.gen.javaLabeled.JavaParserLabeledListener.JavaParserLabeledListener">JavaParserLabeledListener</span>)
+        </code>
 
 
 
@@ -1321,6 +1448,143 @@
 
       <p>The class performs Rename Field Refactoring</p>
 
+        <details class="quote">
+          <summary>Source code in <code>codart\refactorings\rename_field.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">RenameFieldRefactoringListener</span><span class="p">(</span><span class="n">JavaParserLabeledListener</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The class performs Rename Field Refactoring</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">common_token_stream</span><span class="p">:</span> <span class="n">CommonTokenStream</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">package_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">scope_class_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">field_identifier</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">field_new_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+
+<span class="sd">            common_token_stream (CommonTokenStream): An instance of ANTLR4 CommonTokenStream class</span>
+
+<span class="sd">            package_name(str): Name of the packages in which the refactoring has to be done</span>
+
+<span class="sd">            scope_class_name(str): Name of the class in which the refactoring has to be done</span>
+
+<span class="sd">            field_identifier(str): Name of the package in which the refactoring has to be done</span>
+
+<span class="sd">            field_new_name(str): The new name of the refactored method</span>
+
+<span class="sd">        Returns:</span>
+
+<span class="sd">            RenameFieldListener: An instance of RenameFieldListener class</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">token_stream</span> <span class="o">=</span> <span class="n">common_token_stream</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">class_identifier</span> <span class="o">=</span> <span class="n">scope_class_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">field_identifier</span> <span class="o">=</span> <span class="n">field_identifier</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">field_new_name</span> <span class="o">=</span> <span class="n">field_new_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">package_identifier</span> <span class="o">=</span> <span class="n">package_name</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_package_imported</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">in_class</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">in_selected_package</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1"># Move all the tokens in the source code in a buffer, token_stream_rewriter.</span>
+        <span class="k">if</span> <span class="n">common_token_stream</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">token_stream_rewriter</span> <span class="o">=</span> <span class="n">TokenStreamRewriter</span><span class="p">(</span><span class="n">common_token_stream</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;common_token_stream is None&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">enterPackageDeclaration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">JavaParserLabeled</span><span class="o">.</span><span class="n">PackageDeclarationContext</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">package_identifier</span> <span class="o">==</span> <span class="n">ctx</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span><span class="o">.</span><span class="n">getText</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">in_selected_package</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Package &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">package_identifier</span> <span class="o">+</span> <span class="s2">&quot; Found&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">enterImportDeclaration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">JavaParserLabeled</span><span class="o">.</span><span class="n">ImportDeclarationContext</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;import&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">package_identifier</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">class_identifier</span> <span class="o">+</span> <span class="s2">&quot;;&quot;</span> \
+                <span class="ow">or</span> <span class="n">ctx</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;import&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">package_identifier</span> <span class="o">+</span> <span class="s2">&quot;.*&quot;</span> <span class="o">+</span> <span class="s2">&quot;;&quot;</span> \
+                <span class="ow">or</span> <span class="n">ctx</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;import&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">package_identifier</span> <span class="o">+</span> <span class="s2">&quot;;&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">is_package_imported</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;package &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">package_identifier</span> <span class="o">+</span> <span class="s2">&quot; imported&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">enterClassDeclaration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">JavaParserLabeled</span><span class="o">.</span><span class="n">ClassDeclarationContext</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_package_imported</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_selected_package</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">IDENTIFIER</span><span class="p">()</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">class_identifier</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">in_class</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">exitClassDeclaration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">JavaParserLabeled</span><span class="o">.</span><span class="n">ClassDeclarationContext</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_package_imported</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_selected_package</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">IDENTIFIER</span><span class="p">()</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">class_identifier</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">in_class</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">enterFieldDeclaration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">JavaParserLabeled</span><span class="o">.</span><span class="n">FieldDeclarationContext</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_class</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">variableDeclarators</span><span class="p">()</span><span class="o">.</span><span class="n">variableDeclarator</span><span class="p">(</span>
+                    <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">variableDeclaratorId</span><span class="p">()</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_identifier</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">token_stream_rewriter</span><span class="o">.</span><span class="n">replaceIndex</span><span class="p">(</span>
+                    <span class="n">index</span><span class="o">=</span><span class="n">ctx</span><span class="o">.</span><span class="n">variableDeclarators</span><span class="p">()</span><span class="o">.</span><span class="n">variableDeclarator</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">variableDeclaratorId</span><span class="p">()</span><span class="o">.</span><span class="n">start</span><span class="o">.</span><span class="n">tokenIndex</span><span class="p">,</span>
+                    <span class="n">text</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">field_new_name</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;field name changed !&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">enterExpression21</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">JavaParserLabeled</span><span class="o">.</span><span class="n">Expression21Context</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_class</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">expression</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_identifier</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">token_stream_rewriter</span><span class="o">.</span><span class="n">replaceIndex</span><span class="p">(</span>
+                    <span class="n">index</span><span class="o">=</span><span class="n">ctx</span><span class="o">.</span><span class="n">expression</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">start</span><span class="o">.</span><span class="n">tokenIndex</span><span class="p">,</span>
+                    <span class="n">text</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">field_new_name</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;expression21 changed! &quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">ctx</span><span class="o">.</span><span class="n">expression</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;this.&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_identifier</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">token_stream_rewriter</span><span class="o">.</span><span class="n">replaceIndex</span><span class="p">(</span>
+                    <span class="n">index</span><span class="o">=</span><span class="n">ctx</span><span class="o">.</span><span class="n">expression</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">start</span><span class="o">.</span><span class="n">tokenIndex</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="n">text</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">field_new_name</span><span class="p">)</span>
+                <span class="c1"># print(&quot;expression21 &quot;, ctx.expression(0).getText(), &quot; changed to: &quot;, &quot;this.&quot;, self.field_new_name)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;expression21 changed! &quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">expression</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_identifier</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">token_stream_rewriter</span><span class="o">.</span><span class="n">replaceIndex</span><span class="p">(</span>
+                    <span class="n">index</span><span class="o">=</span><span class="n">ctx</span><span class="o">.</span><span class="n">expression</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">start</span><span class="o">.</span><span class="n">tokenIndex</span><span class="p">,</span>
+                    <span class="n">text</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">field_new_name</span><span class="p">)</span>
+                <span class="c1"># print(&quot;expression21 &quot;, ctx.expression(1).getText(), &quot; changed to: &quot;, self.field_new_name)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;expression21 changed! &quot;</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">ctx</span><span class="o">.</span><span class="n">expression</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;this.&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_identifier</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">token_stream_rewriter</span><span class="o">.</span><span class="n">replaceIndex</span><span class="p">(</span>
+                    <span class="n">index</span><span class="o">=</span><span class="n">ctx</span><span class="o">.</span><span class="n">expression</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">start</span><span class="o">.</span><span class="n">tokenIndex</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="n">text</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">field_new_name</span><span class="p">)</span>
+                <span class="c1"># print(&quot;expression21 &quot;, ctx.expression(1).getText(), &quot; changed to: &quot;, &quot;this.&quot;, self.field_new_name)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;expression21 changed! &quot;</span><span class="p">)</span>
+
+    <span class="c1"># def enterVariableDeclarator(self, ctx: JavaParserLabeled.VariableDeclaratorContext):</span>
+    <span class="c1">#     print(&quot;8888888888888888888888888888888888888888888888888888888888888888888888888888888888&quot;)</span>
+    <span class="c1">#     x = JavaParserLabeled.VariableInitializer1Context(ctx.variableInitializer(),ctx.)</span>
+    <span class="c1">#     y = JavaParserLabeled.Expression1Context(x.expression(), ctx)</span>
+    <span class="c1">#     print(y.IDENTIFIER())</span>
+    <span class="c1">#     # if self.is_in_scope:</span>
+    <span class="c1">#     #     if ctx.variableInitializer().expression().IDENTIFIER().getText() == self.field_identifier:</span>
+    <span class="c1">#     #         self.token_stream_rewriter.replaceIndex(</span>
+    <span class="c1">#     #             index=ctx.expression().start.tokenIndex,</span>
+    <span class="c1">#     #             text=self.field_new_name)</span>
+    <span class="c1">#     #         print(&quot;8888888888888888888888888888888888888888888888888888888888888888888888888888888888&quot;)</span>
+
+    <span class="k">def</span> <span class="nf">enterVariableInitializer1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">JavaParserLabeled</span><span class="o">.</span><span class="n">VariableInitializer1Context</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_class</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">expression</span><span class="p">()</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_identifier</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">token_stream_rewriter</span><span class="o">.</span><span class="n">replaceIndex</span><span class="p">(</span>
+                    <span class="n">index</span><span class="o">=</span><span class="n">ctx</span><span class="o">.</span><span class="n">expression</span><span class="p">()</span><span class="o">.</span><span class="n">start</span><span class="o">.</span><span class="n">tokenIndex</span><span class="p">,</span>
+                    <span class="n">text</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">field_new_name</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;variable initializer changed&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">ctx</span><span class="o">.</span><span class="n">expression</span><span class="p">()</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;this.&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_identifier</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">token_stream_rewriter</span><span class="o">.</span><span class="n">replaceIndex</span><span class="p">(</span>
+                    <span class="n">index</span><span class="o">=</span><span class="n">ctx</span><span class="o">.</span><span class="n">expression</span><span class="p">()</span><span class="o">.</span><span class="n">start</span><span class="o">.</span><span class="n">tokenIndex</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="n">text</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">field_new_name</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;variable initializer changed&quot;</span><span class="p">)</span>
+    <span class="c1">#</span>
+    <span class="c1"># def enterMethodCall0(self, ctx: JavaParserLabeled.MethodCall0Context):</span>
+    <span class="c1">#     print(ctx.expressionList())</span>
+</code></pre></div>
+        </details>
 
 
 
@@ -1369,25 +1633,25 @@
       </tr>
       <tr>
         <td><code>package_name(str)</code></td>
-        <td><code></code></td>
+        <td></td>
         <td><p>Name of the packages in which the refactoring has to be done</p></td>
         <td><em>required</em></td>
       </tr>
       <tr>
         <td><code>scope_class_name(str)</code></td>
-        <td><code></code></td>
+        <td></td>
         <td><p>Name of the class in which the refactoring has to be done</p></td>
         <td><em>required</em></td>
       </tr>
       <tr>
         <td><code>field_identifier(str)</code></td>
-        <td><code></code></td>
+        <td></td>
         <td><p>Name of the package in which the refactoring has to be done</p></td>
         <td><em>required</em></td>
       </tr>
       <tr>
         <td><code>field_new_name(str)</code></td>
-        <td><code></code></td>
+        <td></td>
         <td><p>The new name of the refactored method</p></td>
         <td><em>required</em></td>
       </tr>
@@ -1485,28 +1749,27 @@
     </div>
 
   </div>
-                
-              
-              
-                
+
+
 
 
               
             </article>
+            
           </div>
         </div>
         
       </main>
       
-        
-<footer class="md-footer">
+        <footer class="md-footer">
   
-    <nav class="md-footer__inner md-grid" aria-label="Footer">
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
         
         <a href="../rename_class/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Rename class" rel="prev">
           <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
           <div class="md-footer__title">
             <div class="md-ellipsis">
@@ -1530,7 +1793,7 @@
             </div>
           </div>
           <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
           </div>
         </a>
       
@@ -1538,18 +1801,19 @@
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
-      <div class="md-footer-copyright">
-        
-          <div class="md-footer-copyright__highlight">
-            © 2020-2022 CodART project - Reverse engineering laboratory
-          </div>
-        
-        Made with
-        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
-          Material for MkDocs
-        </a>
-        
-      </div>
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      © 2020-2022 CodART project - Reverse engineering laboratory
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
       
     </div>
   </div>
@@ -1559,10 +1823,11 @@
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../../assets/javascripts/workers/search.409db549.min.js", "version": null}</script>
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.ecf98df9.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.56a63758.min.js"></script>
+      <script src="../../assets/javascripts/bundle.9c69f0bc.min.js"></script>
       
     
   </body>

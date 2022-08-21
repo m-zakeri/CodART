@@ -9,14 +9,13 @@
         <meta name="description" content="Automated Source Code Refactoring Toolkit">
       
       
-      
         <meta name="author" content="Morteza Zakeri">
       
       
         <link rel="canonical" href="https://m-zakeri.github.io/optimization/search-based_refactoring/">
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.2.2, mkdocs-material-7.2.5">
+      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.4.0">
     
     
       
@@ -24,29 +23,30 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.be71726b.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.69437709.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.3f5d1f46.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.cbb835fc.min.css">
         
       
+      
     
     
     
       
+        
         
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
-        <style>:root{--md-text-font-family:"Roboto";--md-code-font-family:"Roboto Mono"}</style>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
-    
     
     
       <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
-
 
     
     
@@ -63,9 +63,8 @@
     <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent="">
   
     
-    <script>function __prefix(e){return new URL("../..",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
     
-      <script>var palette=__get("__palette");if(null!==palette&&"object"==typeof palette.color)for(var key in palette.color)document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
@@ -82,16 +81,19 @@
       
     </div>
     
-      <header class="md-header" data-md-component="header">
+    
+      
+
+<header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href="../.." title="CodART Docs (v0.2.3dev)" class="md-header__button md-logo" aria-label="CodART Docs (v0.2.3dev)" data-md-component="logo">
       
   
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
     </label>
     <div class="md-header__title" data-md-component="header-title">
       <div class="md-header__ellipsis">
@@ -117,7 +119,7 @@
           <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="" data-md-color-accent=""  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_1">
           
             <label class="md-header__button md-icon" title="Dark mode" for="__palette_2" hidden>
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7 10a2 2 0 0 1 2 2 2 2 0 0 1-2 2 2 2 0 0 1-2-2 2 2 0 0 1 2-2m10-3a5 5 0 0 1 5 5 5 5 0 0 1-5 5H7a5 5 0 0 1-5-5 5 5 0 0 1 5-5h10M7 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3h10a3 3 0 0 0 3-3 3 3 0 0 0-3-3H7z"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6zm0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4zM7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
             </label>
           
         
@@ -126,7 +128,7 @@
           <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="" data-md-color-accent=""  aria-label="Light mode"  type="radio" name="__palette" id="__palette_2">
           
             <label class="md-header__button md-icon" title="Light mode" for="__palette_1" hidden>
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3z"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3Z"/></svg>
             </label>
           
         
@@ -135,22 +137,21 @@
     
     
       <label class="md-header__button md-icon" for="__search">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
       </label>
-      
-<div class="md-search" data-md-component="search" role="dialog">
+      <div class="md-search" data-md-component="search" role="dialog">
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
       <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
       </label>
       <nav class="md-search__options" aria-label="Search">
         
         <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
         </button>
       </nav>
       
@@ -170,11 +171,10 @@
     
     
       <div class="md-header__source">
-        
-<a href="https://github.com/m-zakeri/CodART/" title="Go to repository" class="md-source" data-md-component="source">
+        <a href="https://github.com/m-zakeri/CodART" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
     GitHub
@@ -183,11 +183,14 @@
       </div>
     
   </nav>
+  
 </header>
     
     <div class="md-container" data-md-component="container">
       
       
+        
+          
         
       
       <main class="md-main" data-md-component="main">
@@ -206,18 +209,17 @@
     <a href="../.." title="CodART Docs (v0.2.3dev)" class="md-nav__button md-logo" aria-label="CodART Docs (v0.2.3dev)" data-md-component="logo">
       
   
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
 
     </a>
     CodART Docs (v0.2.3dev)
   </label>
   
     <div class="md-nav__source">
-      
-<a href="https://github.com/m-zakeri/CodART/" title="Go to repository" class="md-source" data-md-component="source">
+      <a href="https://github.com/m-zakeri/CodART" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
     GitHub
@@ -300,10 +302,14 @@
       
         <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
       
-      <label class="md-nav__link" for="__nav_5">
-        Proposals
-        <span class="md-nav__icon md-icon"></span>
-      </label>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5">
+          Proposals
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <nav class="md-nav" aria-label="Proposals" data-md-level="1">
         <label class="md-nav__title" for="__nav_5">
           <span class="md-nav__icon md-icon"></span>
@@ -312,6 +318,7 @@
         <ul class="md-nav__list" data-md-scrollfix>
           
             
+              
   
   
   
@@ -322,8 +329,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -334,8 +343,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -346,8 +357,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -358,6 +371,7 @@
     </li>
   
 
+            
           
         </ul>
       </nav>
@@ -378,10 +392,14 @@
       
         <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_6" type="checkbox" id="__nav_6" >
       
-      <label class="md-nav__link" for="__nav_6">
-        Refactorings details
-        <span class="md-nav__icon md-icon"></span>
-      </label>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6">
+          Refactorings details
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <nav class="md-nav" aria-label="Refactorings details" data-md-level="1">
         <label class="md-nav__title" for="__nav_6">
           <span class="md-nav__icon md-icon"></span>
@@ -390,6 +408,7 @@
         <ul class="md-nav__list" data-md-scrollfix>
           
             
+              
   
   
   
@@ -400,8 +419,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -412,8 +433,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -424,8 +447,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -436,8 +461,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -448,8 +475,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -460,8 +489,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -472,8 +503,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -484,8 +517,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -496,8 +531,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -508,8 +545,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -520,8 +559,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -532,8 +573,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -544,8 +587,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -556,8 +601,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -568,8 +615,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -580,8 +629,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -592,8 +643,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -604,8 +657,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -616,8 +671,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -628,8 +685,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -640,8 +699,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -652,8 +713,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -664,8 +727,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -676,8 +741,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -688,8 +755,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -700,8 +769,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -712,8 +783,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -724,8 +797,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -736,8 +811,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -748,8 +825,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -760,6 +839,7 @@
     </li>
   
 
+            
           
         </ul>
       </nav>
@@ -780,10 +860,14 @@
       
         <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_7" type="checkbox" id="__nav_7" >
       
-      <label class="md-nav__link" for="__nav_7">
-        Code smells details
-        <span class="md-nav__icon md-icon"></span>
-      </label>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_7">
+          Code smells details
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <nav class="md-nav" aria-label="Code smells details" data-md-level="1">
         <label class="md-nav__title" for="__nav_7">
           <span class="md-nav__icon md-icon"></span>
@@ -792,6 +876,7 @@
         <ul class="md-nav__list" data-md-scrollfix>
           
             
+              
   
   
   
@@ -802,8 +887,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -814,8 +901,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -826,6 +915,7 @@
     </li>
   
 
+            
           
         </ul>
       </nav>
@@ -846,10 +936,14 @@
       
         <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8" type="checkbox" id="__nav_8" >
       
-      <label class="md-nav__link" for="__nav_8">
-        Metrics
-        <span class="md-nav__icon md-icon"></span>
-      </label>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_8">
+          Metrics
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <nav class="md-nav" aria-label="Metrics" data-md-level="1">
         <label class="md-nav__title" for="__nav_8">
           <span class="md-nav__icon md-icon"></span>
@@ -858,6 +952,7 @@
         <ul class="md-nav__list" data-md-scrollfix>
           
             
+              
   
   
   
@@ -868,6 +963,7 @@
     </li>
   
 
+            
           
         </ul>
       </nav>
@@ -890,10 +986,14 @@
       
         <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_9" type="checkbox" id="__nav_9" checked>
       
-      <label class="md-nav__link" for="__nav_9">
-        Optimization
-        <span class="md-nav__icon md-icon"></span>
-      </label>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_9">
+          Optimization
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <nav class="md-nav" aria-label="Optimization" data-md-level="1">
         <label class="md-nav__title" for="__nav_9">
           <span class="md-nav__icon md-icon"></span>
@@ -902,6 +1002,7 @@
         <ul class="md-nav__list" data-md-scrollfix>
           
             
+              
   
   
   
@@ -912,8 +1013,10 @@
     </li>
   
 
+            
           
             
+              
   
   
     
@@ -937,6 +1040,7 @@
       </a>
       
         
+
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
@@ -1294,6 +1398,7 @@
     </li>
   
 
+            
           
         </ul>
       </nav>
@@ -1314,10 +1419,14 @@
       
         <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_10" type="checkbox" id="__nav_10" >
       
-      <label class="md-nav__link" for="__nav_10">
-        Utilities
-        <span class="md-nav__icon md-icon"></span>
-      </label>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_10">
+          Utilities
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <nav class="md-nav" aria-label="Utilities" data-md-level="1">
         <label class="md-nav__title" for="__nav_10">
           <span class="md-nav__icon md-icon"></span>
@@ -1326,6 +1435,7 @@
         <ul class="md-nav__list" data-md-scrollfix>
           
             
+              
   
   
   
@@ -1336,6 +1446,7 @@
     </li>
   
 
+            
           
         </ul>
       </nav>
@@ -1356,10 +1467,14 @@
       
         <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_11" type="checkbox" id="__nav_11" >
       
-      <label class="md-nav__link" for="__nav_11">
-        Tutorials
-        <span class="md-nav__icon md-icon"></span>
-      </label>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_11">
+          Tutorials
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <nav class="md-nav" aria-label="Tutorials" data-md-level="1">
         <label class="md-nav__title" for="__nav_11">
           <span class="md-nav__icon md-icon"></span>
@@ -1368,6 +1483,7 @@
         <ul class="md-nav__list" data-md-scrollfix>
           
             
+              
   
   
   
@@ -1378,8 +1494,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -1390,8 +1508,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -1402,8 +1522,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -1414,6 +1536,7 @@
     </li>
   
 
+            
           
         </ul>
       </nav>
@@ -1493,6 +1616,7 @@
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
                     
+
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
@@ -1855,12 +1979,13 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/m-zakeri/CodART/edit/master/docs/optimization/search-based_refactoring.md" title="Edit this page" class="md-content__button md-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
-                  </a>
-                
-                
-                <h1 id="search-based-refactoring-module">Search-based refactoring module</h1>
+  <a href="https://github.com/m-zakeri/CodART/edit/master/docs/optimization/search-based_refactoring.md" title="Edit this page" class="md-content__button md-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+
+
+<h1 id="search-based-refactoring-module">Search-based refactoring module</h1>
 
 
   <div class="doc doc-object doc-module">
@@ -1923,7 +2048,9 @@ using pymoo framework.</p>
 
 
 <h2 id="codart.sbse.search_based_refactoring2.AdaptiveSinglePointCrossover" class="doc doc-heading">
-        <code>AdaptiveSinglePointCrossover</code>
+        <code>
+AdaptiveSinglePointCrossover            (<span title="pymoo.core.crossover.Crossover">Crossover</span>)
+        </code>
 
 
 
@@ -1950,6 +2077,109 @@ to be either belonging to the first tier of the refactoring sequence or belongin
 </li>
 </ul>
 
+        <details class="quote">
+          <summary>Source code in <code>codart\sbse\search_based_refactoring2.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">AdaptiveSinglePointCrossover</span><span class="p">(</span><span class="n">Crossover</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    This class implements solution variation, the adaptive one-point or single-point crossover operator.</span>
+<span class="sd">    The crossover operator combines parents to create offsprings.</span>
+<span class="sd">    It starts by selecting and splitting at random two parent solutions or individuals.</span>
+<span class="sd">    Then, this operator creates two child solutions by putting, for the first child,</span>
+<span class="sd">    the first part of the first parent with the second part of the second parent,</span>
+<span class="sd">    and vice versa for the second child.</span>
+
+<span class="sd">    * Note 1: In the pymoo framework, the crossover operator retrieves the input already with predefined matings.</span>
+<span class="sd">    The default parent selection algorithm is TournamentSelection.</span>
+
+<span class="sd">    * Note 2: It is better to create children that are close to their parents to have a more efficient search process,</span>
+<span class="sd">    a so-called __adaptive crossover__, specifically in many-objective optimization.</span>
+<span class="sd">    Therefore, the cutting point of the one-point crossover operator are controlled by restricting its position</span>
+<span class="sd">    to be either belonging to the first tier of the refactoring sequence or belonging to the last tier.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prob</span><span class="o">=</span><span class="mf">0.9</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Args:</span>
+
+<span class="sd">        prob (float): crossover probability</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Define the crossover: number of parents, number of offsprings, and cross-over probability</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">n_parents</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_offsprings</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">prob</span><span class="o">=</span><span class="n">prob</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_do</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">problem</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        For population X</span>
+
+<span class="sd">        Args:</span>
+
+<span class="sd">            problem (Problem): An instance of pymoo Problem class to be optimized.</span>
+
+<span class="sd">            X (np.array): Population</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># The input of has the following shape (n_parents, n_matings, n_var)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">n_matings</span><span class="p">,</span> <span class="n">n_var</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="c1"># The output will be with the shape (n_offsprings, n_matings, n_var)</span>
+        <span class="c1"># Because there the number of parents and offsprings are equal it keeps the shape of X</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+
+        <span class="c1"># print(X.shape)</span>
+        <span class="c1"># print(X)</span>
+
+        <span class="c1"># for each mating provided</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_matings</span><span class="p">):</span>
+            <span class="c1"># get the first and the second parent (a and b are instance of individuals)</span>
+            <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="c1"># print(&#39;### a&#39;, a)</span>
+            <span class="c1"># print(&#39;### b&#39;, b)</span>
+            <span class="c1"># print(&#39;len a&#39;, len(a))</span>
+            <span class="c1"># print(&#39;len b&#39;, len(b))</span>
+
+            <span class="n">len_min</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">))</span>
+            <span class="n">cross_point_1</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">len_min</span> <span class="o">*</span> <span class="mf">0.30</span><span class="p">))</span>
+            <span class="n">cross_point_2</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">len_min</span> <span class="o">*</span> <span class="mf">0.70</span><span class="p">),</span> <span class="n">len_min</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">:</span>
+                <span class="n">cross_point_final</span> <span class="o">=</span> <span class="n">cross_point_1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cross_point_final</span> <span class="o">=</span> <span class="n">cross_point_2</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;cross_point_final: </span><span class="si">{</span><span class="n">cross_point_final</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">offspring_a</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">offspring_b</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">cross_point_final</span><span class="p">):</span>
+                <span class="n">offspring_a</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+                <span class="n">offspring_b</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cross_point_final</span><span class="p">,</span> <span class="n">len_min</span><span class="p">):</span>
+                <span class="n">offspring_a</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+                <span class="n">offspring_b</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">)):</span>
+                    <span class="n">offspring_a</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)):</span>
+                    <span class="n">offspring_b</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+
+            <span class="c1"># print(&#39;$$$ offspring_a&#39;, offspring_a)</span>
+            <span class="c1"># print(&#39;$$$ offspring_b&#39;, offspring_b)</span>
+            <span class="c1"># print(&#39;len offspring_a&#39;, len(offspring_a))</span>
+            <span class="c1"># print(&#39;len offspring_b&#39;, len(offspring_b))</span>
+
+            <span class="c1"># Join offsprings to offspring population Y</span>
+            <span class="n">Y</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">Y</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">offspring_a</span><span class="p">,</span> <span class="n">offspring_b</span>
+            <span class="c1"># quit()</span>
+
+        <span class="k">return</span> <span class="n">Y</span>
+</code></pre></div>
+        </details>
 
 
 
@@ -2016,7 +2246,9 @@ to be either belonging to the first tier of the refactoring sequence or belongin
 
 
 <h2 id="codart.sbse.search_based_refactoring2.BitStringMutation" class="doc doc-heading">
-        <code>BitStringMutation</code>
+        <code>
+BitStringMutation            (<span title="pymoo.core.mutation.Mutation">Mutation</span>)
+        </code>
 
 
 
@@ -2032,6 +2264,47 @@ For example, for a mutation probability of 0.2, for each dimension, we generate 
 if <code>x &lt; mutation_probability</code> (e.g., 0.2) we change the refactoring operation in that dimension,
 otherwise no changes are taken into account.</p>
 
+        <details class="quote">
+          <summary>Source code in <code>codart\sbse\search_based_refactoring2.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">BitStringMutation</span><span class="p">(</span><span class="n">Mutation</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    This class implements solution variation, a bit-string mutation operator.</span>
+<span class="sd">    The bit-string mutation operator that picks probabilistically one or more refactoring operations from its</span>
+<span class="sd">    or their associated sequence and replaces them by other ones from the initial list of possible refactorings.</span>
+
+<span class="sd">    Each chromosome dimension would be changed according to the mutation probability.</span>
+<span class="sd">    For example, for a mutation probability of 0.2, for each dimension, we generate randomly a number x between 0 and 1,</span>
+<span class="sd">    if `x &lt; mutation_probability` (e.g., 0.2) we change the refactoring operation in that dimension,</span>
+<span class="sd">    otherwise no changes are taken into account.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prob</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">initializer</span><span class="p">:</span> <span class="n">Initialization</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Args:</span>
+
+<span class="sd">             prob (float): mutation probability</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mutation_probability</span> <span class="o">=</span> <span class="n">prob</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initializer</span> <span class="o">=</span> <span class="n">initializer</span>
+
+    <span class="k">def</span> <span class="nf">_do</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">problem</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">individual</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">ro</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">individual</span><span class="p">):</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span>
+                <span class="c1"># with a probability of `mutation_probability` replace the refactoring operation with new one</span>
+                <span class="k">if</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">mutation_probability</span><span class="p">:</span>
+                    <span class="n">random_chromosome</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializer</span><span class="o">.</span><span class="n">population</span><span class="p">)</span>
+                    <span class="n">item</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">random_chromosome</span><span class="p">)</span>
+                    <span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">RefactoringOperation</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">params</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">main</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="n">X</span>
+</code></pre></div>
+        </details>
 
 
 
@@ -2117,7 +2390,9 @@ otherwise no changes are taken into account.</p>
 
 
 <h2 id="codart.sbse.search_based_refactoring2.BitStringMutation2" class="doc doc-heading">
-        <code>BitStringMutation2</code>
+        <code>
+BitStringMutation2            (<span title="pymoo.core.mutation.Mutation">Mutation</span>)
+        </code>
 
 
 
@@ -2128,6 +2403,44 @@ otherwise no changes are taken into account.</p>
       <p>Select an individual to mutate with mutation probability.
 Only flip one refactoring operation in the selected individual.</p>
 
+        <details class="quote">
+          <summary>Source code in <code>codart\sbse\search_based_refactoring2.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">BitStringMutation2</span><span class="p">(</span><span class="n">Mutation</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Select an individual to mutate with mutation probability.</span>
+<span class="sd">        Only flip one refactoring operation in the selected individual.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prob</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">initializer</span><span class="p">:</span> <span class="n">Initialization</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Args:</span>
+
+<span class="sd">            prob (float): mutation probability</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mutation_probability</span> <span class="o">=</span> <span class="n">prob</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initializer</span> <span class="o">=</span> <span class="n">initializer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initializer</span><span class="o">.</span><span class="n">load_population</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_do</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">problem</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">individual</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span>
+            <span class="c1"># with a probability of `mutation_probability` replace the refactoring operation with new one</span>
+            <span class="k">if</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">mutation_probability</span><span class="p">:</span>
+                <span class="c1"># j is a random index in individual</span>
+                <span class="n">j</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">individual</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">random_chromosome</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializer</span><span class="o">.</span><span class="n">population</span><span class="p">)</span>
+                <span class="n">item</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">random_chromosome</span><span class="p">)</span>
+                <span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">RefactoringOperation</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">params</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">main</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+        <span class="k">return</span> <span class="n">X</span>
+</code></pre></div>
+        </details>
 
 
 
@@ -2214,7 +2527,8 @@ Only flip one refactoring operation in the selected individual.</p>
 
 
 <h2 id="codart.sbse.search_based_refactoring2.Gene" class="doc doc-heading">
-        <code>Gene</code>
+        <code>
+Gene        </code>
 
 
 
@@ -2224,6 +2538,39 @@ Only flip one refactoring operation in the selected individual.</p>
 
       <p>The base class for the Gene in genetic algorithms.</p>
 
+        <details class="quote">
+          <summary>Source code in <code>codart\sbse\search_based_refactoring2.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">Gene</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    The base class for the Gene in genetic algorithms.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Args:</span>
+
+<span class="sd">            name (str): Refactoring operation name</span>
+
+<span class="sd">            params (dict): Refactoring operation parameters</span>
+
+<span class="sd">            main (function): Refactoring operation main function (API)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;params&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">main</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;main&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="s1">&#39;(&#39;</span>
+        <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">:</span>
+            <span class="n">parameters</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">param</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="n">parameters</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span>
+</code></pre></div>
+        </details>
 
 
 
@@ -2326,7 +2673,9 @@ Only flip one refactoring operation in the selected individual.</p>
 
 
 <h2 id="codart.sbse.search_based_refactoring2.Individual" class="doc doc-heading">
-        <code>Individual</code>
+        <code>
+Individual            (<span title="list">list</span>, <span title="typing.Generic">Generic</span>)
+        </code>
 
 
 
@@ -2339,6 +2688,54 @@ Each individual (also called, chromosome or solution in the context of genetic p
 is an array of refactoring operations where the order of their execution is accorded by
 their positions in the array.</p>
 
+        <details class="quote">
+          <summary>Source code in <code>codart\sbse\search_based_refactoring2.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">Individual</span><span class="p">(</span><span class="n">List</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    The class define a data structure (list) to hold an individual during the search process.</span>
+<span class="sd">    Each individual (also called, chromosome or solution in the context of genetic programming)</span>
+<span class="sd">    is an array of refactoring operations where the order of their execution is accorded by</span>
+<span class="sd">    their positions in the array.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Args:</span>
+
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Individual</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">refactoring_operations</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">refactoring_operations</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">ref</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refactoring_operations</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">refactoring_operations</span><span class="p">[</span><span class="n">item</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__delitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">refactoring_operations</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">refactoring_operations</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refactoring_operations</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">__object</span><span class="p">:</span> <span class="n">RefactoringOperation</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">refactoring_operations</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">__index</span><span class="p">,</span> <span class="n">__object</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__object</span><span class="p">:</span> <span class="n">RefactoringOperation</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refactoring_operations</span><span class="p">),</span> <span class="n">__object</span><span class="p">)</span>
+</code></pre></div>
+        </details>
 
 
 
@@ -2460,7 +2857,9 @@ their positions in the array.</p>
 
 
 <h2 id="codart.sbse.search_based_refactoring2.LogCallback" class="doc doc-heading">
-        <code>LogCallback</code>
+        <code>
+LogCallback            (<span title="pymoo.core.callback.Callback">Callback</span>)
+        </code>
 
 
 
@@ -2470,6 +2869,89 @@ their positions in the array.</p>
 
       <p>Logging useful information after each iteration of the search algorithms</p>
 
+        <details class="quote">
+          <summary>Source code in <code>codart\sbse\search_based_refactoring2.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">LogCallback</span><span class="p">(</span><span class="n">Callback</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Logging useful information after each iteration of the search algorithms</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="c1"># self.data[&quot;best&quot;] = []</span>
+
+    <span class="k">def</span> <span class="nf">notify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># self.data[&quot;best&quot;].append(algorithm.pop.get(&quot;F&quot;).min())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Generation #</span><span class="si">{</span><span class="n">algorithm</span><span class="o">.</span><span class="n">n_gen</span> <span class="o">+</span> <span class="n">config</span><span class="o">.</span><span class="n">NGEN</span><span class="si">}</span><span class="s1"> was finished:&#39;</span><span class="p">)</span>
+        <span class="c1"># logger.info(f&#39;Best solution:&#39;)</span>
+        <span class="c1"># logger.info(f&#39;{algorithm.pop.get(&quot;F&quot;)}&#39;)</span>
+        <span class="c1"># logger.info(f&#39;Pareto-front solutions:&#39;)</span>
+        <span class="c1"># logger.info(f&#39;{algorithm.pf}&#39;)</span>
+
+        <span class="n">X</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">CV</span><span class="p">,</span> <span class="n">G</span> <span class="o">=</span> <span class="n">algorithm</span><span class="o">.</span><span class="n">opt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="s2">&quot;F&quot;</span><span class="p">,</span> <span class="s2">&quot;CV&quot;</span><span class="p">,</span> <span class="s2">&quot;G&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Optimum solutions:&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">F</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Log evolved population at end of each generation</span>
+        <span class="n">generation_log_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">PROJECT_LOG_DIR</span><span class="si">}</span><span class="s1">generations_logs/&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">generation_log_path</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">generation_log_path</span><span class="p">)</span>
+
+        <span class="n">generation_endof_date_time</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">_%H-%M-%S&#39;</span><span class="p">)</span>
+        <span class="n">population_log_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">generation_log_path</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">&#39;pop_gen</span><span class="si">{</span><span class="n">algorithm</span><span class="o">.</span><span class="n">n_gen</span> <span class="o">+</span> <span class="n">config</span><span class="o">.</span><span class="n">NGEN</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">generation_endof_date_time</span><span class="si">}</span><span class="s1">.json&#39;</span>
+        <span class="p">)</span>
+        <span class="n">pop_opt_log_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">generation_log_path</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">&#39;pop_opt_gen</span><span class="si">{</span><span class="n">algorithm</span><span class="o">.</span><span class="n">n_gen</span> <span class="o">+</span> <span class="n">config</span><span class="o">.</span><span class="n">NGEN</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">generation_endof_date_time</span><span class="si">}</span><span class="s1">.json&#39;</span>
+        <span class="p">)</span>
+
+        <span class="n">pop_opt_objective_value_log</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">PROJECT_LOG_DIR</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">PROJECT_NAME</span><span class="si">}</span><span class="s1">_objectives_log_</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">global_execution_start_time</span><span class="si">}</span><span class="s1">.csv&#39;</span>
+        <span class="p">)</span>
+
+        <span class="n">population_trimmed</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">chromosome</span> <span class="ow">in</span> <span class="n">algorithm</span><span class="o">.</span><span class="n">pop</span><span class="p">:</span>
+            <span class="n">chromosome_new</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">gene_</span> <span class="ow">in</span> <span class="n">chromosome</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">chromosome_new</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">gene_</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">gene_</span><span class="o">.</span><span class="n">params</span><span class="p">))</span>
+            <span class="n">population_trimmed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chromosome_new</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">population_log_file_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">population_trimmed</span><span class="p">,</span> <span class="n">fp</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+        <span class="n">population_trimmed</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">objective_values_content</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">chromosome</span> <span class="ow">in</span> <span class="n">algorithm</span><span class="o">.</span><span class="n">opt</span><span class="p">:</span>
+            <span class="n">chromosome_new</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">gene_</span> <span class="ow">in</span> <span class="n">chromosome</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">chromosome_new</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">gene_</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">gene_</span><span class="o">.</span><span class="n">params</span><span class="p">))</span>
+            <span class="n">population_trimmed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chromosome_new</span><span class="p">)</span>
+
+            <span class="n">objective_values_content</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">algorithm</span><span class="o">.</span><span class="n">n_gen</span> <span class="o">+</span> <span class="n">config</span><span class="o">.</span><span class="n">NGEN</span><span class="si">}</span><span class="s1">,&#39;</span>
+            <span class="k">for</span> <span class="n">gene_objective_</span> <span class="ow">in</span> <span class="n">chromosome</span><span class="o">.</span><span class="n">F</span><span class="p">:</span>
+                <span class="n">objective_values_content</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">gene_objective_</span><span class="si">}</span><span class="s1">,&#39;</span>
+            <span class="n">objective_values_content</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">pop_opt_log_file_path</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">population_trimmed</span><span class="p">,</span> <span class="n">fp</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">pop_opt_objective_value_log</span><span class="p">):</span>
+            <span class="n">writing_mode</span> <span class="o">=</span> <span class="s1">&#39;w&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">writing_mode</span> <span class="o">=</span> <span class="s1">&#39;a&#39;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">pop_opt_objective_value_log</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">writing_mode</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">objective_values_content</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;-&#39;</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+        <span class="c1"># quit()</span>
+</code></pre></div>
+        </details>
 
 
 
@@ -2500,7 +2982,9 @@ their positions in the array.</p>
 
 
 <h2 id="codart.sbse.search_based_refactoring2.PopulationInitialization" class="doc doc-heading">
-        <code>PopulationInitialization</code>
+        <code>
+PopulationInitialization            (<span title="pymoo.core.sampling.Sampling">Sampling</span>)
+        </code>
 
 
 
@@ -2514,6 +2998,57 @@ existing code smells in the program to be refactored.
 The selected refactoring operations are randomly arranged in each individual.
 Assigning randomly a sequence of refactorings to certain code fragments generates the initial population</p>
 
+        <details class="quote">
+          <summary>Source code in <code>codart\sbse\search_based_refactoring2.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">PopulationInitialization</span><span class="p">(</span><span class="n">Sampling</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class create the initial population, x, consists of n_samples, pop_size.</span>
+<span class="sd">    For each refactoring operation, a set of controlling parameters (e.g., actors and roles) is picked based on</span>
+<span class="sd">    existing code smells in the program to be refactored.</span>
+<span class="sd">    The selected refactoring operations are randomly arranged in each individual.</span>
+<span class="sd">    Assigning randomly a sequence of refactorings to certain code fragments generates the initial population</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initializer</span><span class="p">:</span> <span class="n">Initialization</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+
+<span class="sd">            initializer (Initialization): An  initializer object to be used for generating initial population</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PopulationInitialization</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initializer</span> <span class="o">=</span> <span class="n">initializer</span>
+
+    <span class="k">def</span> <span class="nf">_do</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">problem</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Since the problem having only one variable, we return a matrix with the shape (n,1)</span>
+
+<span class="sd">        Args:</span>
+
+<span class="sd">            problem (Problem): An instance of pymoo Problem class to be optimized.</span>
+
+<span class="sd">            n_samples (int): The same population size, pop_size.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">INIT_POP_FILE</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_initializer</span><span class="o">.</span><span class="n">load_population</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">INIT_POP_FILE</span><span class="p">)</span>
+            <span class="n">population</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initializer</span><span class="o">.</span><span class="n">population</span>
+            <span class="n">initial_pop_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">PROJECT_LOG_DIR</span><span class="si">}</span><span class="s1">initial_population_</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">global_execution_start_time</span><span class="si">}</span><span class="s1">.json&#39;</span>
+            <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">NGEN</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_initializer</span><span class="o">.</span><span class="n">dump_population</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">initial_pop_path</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">population</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initializer</span><span class="o">.</span><span class="n">generate_population</span><span class="p">()</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">n_samples</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">Individual</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_samples</span><span class="p">):</span>
+            <span class="n">individual_object</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># list of refactoring operations (Temporarily used instead of Individual class)</span>
+            <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">population</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                <span class="n">individual_object</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">RefactoringOperation</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">ref</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">params</span><span class="o">=</span><span class="n">ref</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">main</span><span class="o">=</span><span class="n">ref</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">individual_object</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x</span>
+</code></pre></div>
+        </details>
 
 
 
@@ -2596,7 +3131,9 @@ Assigning randomly a sequence of refactorings to certain code fragments generate
 
 
 <h2 id="codart.sbse.search_based_refactoring2.ProblemManyObjective" class="doc doc-heading">
-        <code>ProblemManyObjective</code>
+        <code>
+ProblemManyObjective            (<span title="pymoo.core.problem.Problem">Problem</span>)
+        </code>
 
 
 
@@ -2617,6 +3154,143 @@ Assigning randomly a sequence of refactorings to certain code fragments generate
 </li>
 </ul>
 
+        <details class="quote">
+          <summary>Source code in <code>codart\sbse\search_based_refactoring2.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">ProblemManyObjective</span><span class="p">(</span><span class="n">Problem</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    The CodART many-objective optimization work with eight objective:</span>
+
+<span class="sd">    * Objective 1 to 6: QMOOD design quality attributes</span>
+
+<span class="sd">    * Objective 7: Testability prediction model</span>
+
+<span class="sd">    * Objective 8: Modularity complex network</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_objectives</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">n_refactorings_lowerbound</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_refactorings_upperbound</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+                 <span class="n">evaluate_in_parallel</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose_design_metrics</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Args:</span>
+
+<span class="sd">            n_objectives (int): Number of objectives</span>
+
+<span class="sd">            n_refactorings_lowerbound (int): The lower bound of the refactoring sequences</span>
+
+<span class="sd">            n_refactorings_upperbound (int): The upper bound of the refactoring sequences</span>
+
+<span class="sd">            evaluate_in_parallel (bool): Whether the objectives computed in parallel or not</span>
+
+<span class="sd">            verbose_design_metrics (bool): Whether log the design metrics for each refactoring sequences or not</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ProblemManyObjective</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">n_var</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_obj</span><span class="o">=</span><span class="n">n_objectives</span><span class="p">,</span> <span class="n">n_constr</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_refactorings_lowerbound</span> <span class="o">=</span> <span class="n">n_refactorings_lowerbound</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_refactorings_upperbound</span> <span class="o">=</span> <span class="n">n_refactorings_upperbound</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evaluate_in_parallel</span> <span class="o">=</span> <span class="n">evaluate_in_parallel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose_design_metrics</span> <span class="o">=</span> <span class="n">verbose_design_metrics</span>
+
+    <span class="k">def</span> <span class="nf">_evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        This method iterate over a population, execute the refactoring operations in each individual sequentially,</span>
+<span class="sd">        and compute quality attributes for the refactored version of the program, as objectives of the search.</span>
+<span class="sd">        By default, elementwise_evaluation is set to False, which implies the _evaluate retrieves a set of solutions.</span>
+
+<span class="sd">        Args:</span>
+
+<span class="sd">            x (Population): x is a matrix where each row is an individual, and each column a variable.\</span>
+<span class="sd">            We have one variable of type list (Individual) ==&gt; x.shape = (len(Population), 1)</span>
+
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">objective_values</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">individual_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="c1"># Stage 0: Git restore</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Executing git restore.&quot;</span><span class="p">)</span>
+            <span class="n">git_restore</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">PROJECT_PATH</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Updating understand database after git restore.&quot;</span><span class="p">)</span>
+            <span class="n">update_understand_database</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">UDB_PATH</span><span class="p">)</span>
+
+            <span class="c1"># Stage 1: Execute all refactoring operations in the sequence x</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reached an Individual with size </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">individual_</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">refactoring_operation</span> <span class="ow">in</span> <span class="n">individual_</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="n">refactoring_operation</span><span class="o">.</span><span class="n">do_refactoring</span><span class="p">()</span>
+                <span class="c1"># Update Understand DB</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Updating understand database after </span><span class="si">{</span><span class="n">refactoring_operation</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+                <span class="n">update_understand_database</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">UDB_PATH</span><span class="p">)</span>
+
+            <span class="c1"># Stage 2:</span>
+            <span class="n">arr</span> <span class="o">=</span> <span class="n">Array</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_obj</span><span class="p">))</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluate_in_parallel</span><span class="p">:</span>
+                <span class="c1"># Stage 2 (parallel mood): Computing quality attributes</span>
+                <span class="n">p1</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">calc_qmood_objectives</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">arr</span><span class="p">,))</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_obj</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+                    <span class="n">p2</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">calc_testability_objective</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">UDB_PATH</span><span class="p">,</span> <span class="n">arr</span><span class="p">,))</span>
+                    <span class="n">p3</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">calc_modularity_objective</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">UDB_PATH</span><span class="p">,</span> <span class="n">arr</span><span class="p">,))</span>
+                    <span class="n">p1</span><span class="o">.</span><span class="n">start</span><span class="p">(),</span> <span class="n">p2</span><span class="o">.</span><span class="n">start</span><span class="p">(),</span> <span class="n">p3</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                    <span class="n">p1</span><span class="o">.</span><span class="n">join</span><span class="p">(),</span> <span class="n">p2</span><span class="o">.</span><span class="n">join</span><span class="p">(),</span> <span class="n">p3</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">p1</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                    <span class="n">p1</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Stage 2 (sequential mood): Computing quality attributes</span>
+                <span class="n">qmood_quality_attributes</span> <span class="o">=</span> <span class="n">DesignQualityAttributes</span><span class="p">(</span><span class="n">udb_path</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">UDB_PATH</span><span class="p">)</span>
+                <span class="n">arr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">qmood_quality_attributes</span><span class="o">.</span><span class="n">reusability</span>
+                <span class="n">arr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">qmood_quality_attributes</span><span class="o">.</span><span class="n">understandability</span>
+                <span class="n">arr</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">qmood_quality_attributes</span><span class="o">.</span><span class="n">flexibility</span>
+                <span class="n">arr</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">qmood_quality_attributes</span><span class="o">.</span><span class="n">functionality</span>
+                <span class="n">arr</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">qmood_quality_attributes</span><span class="o">.</span><span class="n">effectiveness</span>
+                <span class="n">arr</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">qmood_quality_attributes</span><span class="o">.</span><span class="n">extendability</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_obj</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+                    <span class="n">arr</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">testability_main</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">UDB_PATH</span><span class="p">,</span> <span class="n">initial_value</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">CURRENT_METRICS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;TEST&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
+                    <span class="n">arr</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">modularity_main</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">UDB_PATH</span><span class="p">,</span> <span class="n">initial_value</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">CURRENT_METRICS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;MODULE&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose_design_metrics</span><span class="p">:</span>
+                    <span class="n">design_metrics</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s2">&quot;DSC&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">qmood_quality_attributes</span><span class="o">.</span><span class="n">DSC</span><span class="p">],</span>
+                        <span class="s2">&quot;NOH&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">qmood_quality_attributes</span><span class="o">.</span><span class="n">NOH</span><span class="p">],</span>
+                        <span class="s2">&quot;ANA&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">qmood_quality_attributes</span><span class="o">.</span><span class="n">ANA</span><span class="p">],</span>
+                        <span class="s2">&quot;MOA&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">qmood_quality_attributes</span><span class="o">.</span><span class="n">MOA</span><span class="p">],</span>
+                        <span class="s2">&quot;DAM&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">qmood_quality_attributes</span><span class="o">.</span><span class="n">DAM</span><span class="p">],</span>
+                        <span class="s2">&quot;CAMC&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">qmood_quality_attributes</span><span class="o">.</span><span class="n">CAMC</span><span class="p">],</span>
+                        <span class="s2">&quot;CIS&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">qmood_quality_attributes</span><span class="o">.</span><span class="n">CIS</span><span class="p">],</span>
+                        <span class="s2">&quot;NOM&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">qmood_quality_attributes</span><span class="o">.</span><span class="n">NOM</span><span class="p">],</span>
+                        <span class="s2">&quot;DCC&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">qmood_quality_attributes</span><span class="o">.</span><span class="n">DCC</span><span class="p">],</span>
+                        <span class="s2">&quot;MFA&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">qmood_quality_attributes</span><span class="o">.</span><span class="n">MFA</span><span class="p">],</span>
+                        <span class="s2">&quot;NOP&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">qmood_quality_attributes</span><span class="o">.</span><span class="n">NOP</span><span class="p">]</span>
+                    <span class="p">}</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">log_design_metrics</span><span class="p">(</span><span class="n">design_metrics</span><span class="p">)</span>
+
+                <span class="k">del</span> <span class="n">qmood_quality_attributes</span>
+
+            <span class="c1"># Stage 3: Marshal objectives into vector</span>
+            <span class="n">objective_values</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">arr</span><span class="p">])</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Objective values for individual </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">arr</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Stage 4: Marshal all objectives into out dictionary</span>
+        <span class="n">out</span><span class="p">[</span><span class="s1">&#39;F&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">objective_values</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="c1"># print(&#39;OUT&#39;, out[&#39;F&#39;])</span>
+
+    <span class="k">def</span> <span class="nf">log_design_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">design_metrics</span><span class="p">):</span>
+        <span class="n">design_metrics_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">PROJECT_LOG_DIR</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">PROJECT_NAME</span><span class="si">}</span><span class="s1">_design_metrics_log_</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">global_execution_start_time</span><span class="si">}</span><span class="s1">.csv&#39;</span>
+        <span class="p">)</span>
+
+        <span class="n">df_design_metrics</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">design_metrics</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">design_metrics_path</span><span class="p">):</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">design_metrics_path</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">df_result</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df</span><span class="p">,</span> <span class="n">df_design_metrics</span><span class="p">],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">df_result</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">design_metrics_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df_design_metrics</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">design_metrics_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+        </details>
 
 
 
@@ -2738,7 +3412,9 @@ Assigning randomly a sequence of refactorings to certain code fragments generate
 
 
 <h2 id="codart.sbse.search_based_refactoring2.ProblemMultiObjective" class="doc doc-heading">
-        <code>ProblemMultiObjective</code>
+        <code>
+ProblemMultiObjective            (<span title="pymoo.core.problem.Problem">Problem</span>)
+        </code>
 
 
 
@@ -2759,6 +3435,105 @@ Assigning randomly a sequence of refactorings to certain code fragments generate
 </li>
 </ul>
 
+        <details class="quote">
+          <summary>Source code in <code>codart\sbse\search_based_refactoring2.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">ProblemMultiObjective</span><span class="p">(</span><span class="n">Problem</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    The CodART multi-objective optimization work with three objective:</span>
+
+<span class="sd">    * Objective 1: Mean value of QMOOD metrics</span>
+
+<span class="sd">    * Objective 2: Testability</span>
+
+<span class="sd">    * Objective 3: Modularity</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_objectives</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+                 <span class="n">n_refactorings_lowerbound</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                 <span class="n">n_refactorings_upperbound</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+                 <span class="n">evaluate_in_parallel</span><span class="o">=</span><span class="kc">False</span>
+                 <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+
+<span class="sd">            n_objectives (int): Number of objectives</span>
+
+<span class="sd">            n_refactorings_lowerbound (int): The lower bound of the refactoring sequences</span>
+
+<span class="sd">            n_refactorings_upperbound (int): The upper bound of the refactoring sequences</span>
+
+<span class="sd">            evaluate_in_parallel (bool): Whether the objectives evaluate in parallel</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ProblemMultiObjective</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">n_var</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_obj</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">n_constr</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_refactorings_lowerbound</span> <span class="o">=</span> <span class="n">n_refactorings_lowerbound</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_refactorings_upperbound</span> <span class="o">=</span> <span class="n">n_refactorings_upperbound</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evaluate_in_parallel</span> <span class="o">=</span> <span class="n">evaluate_in_parallel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_obj_virtual</span> <span class="o">=</span> <span class="n">n_objectives</span>
+
+    <span class="k">def</span> <span class="nf">_evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                  <span class="n">x</span><span class="p">,</span>  <span class="c1">#</span>
+                  <span class="n">out</span><span class="p">,</span>
+                  <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                  <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        This method iterate over a population, execute the refactoring operations in each individual sequentially,</span>
+<span class="sd">        and compute quality attributes for the refactored version of the program, as objectives of the search</span>
+
+<span class="sd">        Args:</span>
+
+<span class="sd">            x (Population): x is a matrix where each row is an individual, and each column a variable. \</span>
+<span class="sd">            We have one variable of type list (Individual) ==&gt; x.shape = (len(Population), 1)</span>
+
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">objective_values</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">individual_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="c1"># Stage 0: Git restore</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Executing git restore.&quot;</span><span class="p">)</span>
+            <span class="n">git_restore</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">PROJECT_PATH</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Updating understand database after git restore.&quot;</span><span class="p">)</span>
+            <span class="n">update_understand_database</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">UDB_PATH</span><span class="p">)</span>
+
+            <span class="c1"># Stage 1: Execute all refactoring operations in the sequence x</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reached Individual with Size </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">individual_</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">refactoring_operation</span> <span class="ow">in</span> <span class="n">individual_</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">refactoring_operation</span><span class="o">.</span><span class="n">do_refactoring</span><span class="p">()</span>
+                <span class="c1"># Update Understand DB</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Updating understand database after </span><span class="si">{</span><span class="n">refactoring_operation</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+                <span class="n">update_understand_database</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">UDB_PATH</span><span class="p">)</span>
+
+            <span class="c1"># Stage 2:</span>
+            <span class="n">arr</span> <span class="o">=</span> <span class="n">Array</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_obj_virtual</span><span class="p">))</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluate_in_parallel</span><span class="p">:</span>
+                <span class="c1"># Stage 2 (parallel mood): Computing quality attributes</span>
+                <span class="n">p1</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">calc_qmood_objectives</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">arr</span><span class="p">,))</span>
+                <span class="n">p2</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">calc_testability_objective</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">UDB_PATH</span><span class="p">,</span> <span class="n">arr</span><span class="p">,))</span>
+                <span class="n">p3</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">calc_modularity_objective</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">UDB_PATH</span><span class="p">,</span> <span class="n">arr</span><span class="p">,))</span>
+                <span class="n">p1</span><span class="o">.</span><span class="n">start</span><span class="p">(),</span> <span class="n">p2</span><span class="o">.</span><span class="n">start</span><span class="p">(),</span> <span class="n">p3</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                <span class="n">p1</span><span class="o">.</span><span class="n">join</span><span class="p">(),</span> <span class="n">p2</span><span class="o">.</span><span class="n">join</span><span class="p">(),</span> <span class="n">p3</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+                <span class="n">o1</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">arr</span><span class="p">[:</span><span class="mi">6</span><span class="p">]])</span> <span class="o">/</span> <span class="mf">6.</span>
+                <span class="n">o2</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+                <span class="n">o3</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Stage 2 (sequential mood): Computing quality attributes</span>
+                <span class="n">qmood_quality_attributes</span> <span class="o">=</span> <span class="n">DesignQualityAttributes</span><span class="p">(</span><span class="n">udb_path</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">UDB_PATH</span><span class="p">)</span>
+                <span class="n">o1</span> <span class="o">=</span> <span class="n">qmood_quality_attributes</span><span class="o">.</span><span class="n">average_sum</span>
+                <span class="n">o2</span> <span class="o">=</span> <span class="n">testability_main</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">UDB_PATH</span><span class="p">,</span> <span class="n">initial_value</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">CURRENT_METRICS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;TEST&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
+                <span class="n">o3</span> <span class="o">=</span> <span class="n">modularity_main</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">UDB_PATH</span><span class="p">,</span> <span class="n">initial_value</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">CURRENT_METRICS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;MODULE&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
+                <span class="k">del</span> <span class="n">qmood_quality_attributes</span>
+
+            <span class="c1"># Stage 3: Marshal objectives into vector</span>
+            <span class="n">objective_values</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">o1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">o2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">o3</span><span class="p">])</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Objective values for individual </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">o1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">o2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">o3</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Stage 4: Marshal all objectives into out dictionary</span>
+        <span class="n">out</span><span class="p">[</span><span class="s1">&#39;F&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">objective_values</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+</code></pre></div>
+        </details>
 
 
 
@@ -2872,7 +3647,9 @@ Assigning randomly a sequence of refactorings to certain code fragments generate
 
 
 <h2 id="codart.sbse.search_based_refactoring2.ProblemSingleObjective" class="doc doc-heading">
-        <code>ProblemSingleObjective</code>
+        <code>
+ProblemSingleObjective            (<span title="pymoo.core.problem.Problem">Problem</span>)
+        </code>
 
 
 
@@ -2882,6 +3659,116 @@ Assigning randomly a sequence of refactorings to certain code fragments generate
 
       <p>The CodART single-objective optimization work with only one objective, testability:</p>
 
+        <details class="quote">
+          <summary>Source code in <code>codart\sbse\search_based_refactoring2.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">ProblemSingleObjective</span><span class="p">(</span><span class="n">Problem</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    The CodART single-objective optimization work with only one objective, testability:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">n_objectives</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="n">n_refactorings_lowerbound</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                 <span class="n">n_refactorings_upperbound</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+                 <span class="n">evaluate_in_parallel</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;single&#39;</span>  <span class="c1"># &#39;multi&#39;</span>
+                 <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Args:</span>
+
+<span class="sd">            n_objectives (int): Number of objectives</span>
+
+<span class="sd">            n_refactorings_lowerbound (int): The lower bound of the refactoring sequences</span>
+
+<span class="sd">            n_refactorings_upperbound (int): The upper bound of the refactoring sequences</span>
+
+<span class="sd">            mode (str): &#39;single&#39; or &#39;multi&#39;</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">ProblemSingleObjective</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">n_var</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_obj</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_constr</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_refactorings_lowerbound</span> <span class="o">=</span> <span class="n">n_refactorings_lowerbound</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_refactorings_upperbound</span> <span class="o">=</span> <span class="n">n_refactorings_upperbound</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evaluate_in_parallel</span> <span class="o">=</span> <span class="n">evaluate_in_parallel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_obj_virtual</span> <span class="o">=</span> <span class="n">n_objectives</span>
+
+    <span class="k">def</span> <span class="nf">_evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                  <span class="n">x</span><span class="p">,</span>  <span class="c1">#</span>
+                  <span class="n">out</span><span class="p">,</span>
+                  <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                  <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        This method iterate over a population, execute the refactoring operations in each individual sequentially,</span>
+<span class="sd">        and compute quality attributes for the refactored version of the program, as objectives of the search</span>
+
+<span class="sd">        Args:</span>
+
+<span class="sd">            x (Population): x is a matrix where each row is an individual, and each column a variable.\</span>
+<span class="sd">                We have one variable of type list (Individual) ==&gt; x.shape = (len(Population), 1)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">objective_values</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">individual_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="c1"># Stage 0: Git restore</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Executing git restore.&quot;</span><span class="p">)</span>
+            <span class="n">git_restore</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">PROJECT_PATH</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Updating understand database after git restore.&quot;</span><span class="p">)</span>
+            <span class="n">update_understand_database</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">UDB_PATH</span><span class="p">)</span>
+
+            <span class="c1"># Stage 1: Execute all refactoring operations in the sequence x</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reached Individual with Size </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">individual_</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">refactoring_operation</span> <span class="ow">in</span> <span class="n">individual_</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">refactoring_operation</span><span class="o">.</span><span class="n">do_refactoring</span><span class="p">()</span>
+                <span class="c1"># Update Understand DB</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Updating understand database after </span><span class="si">{</span><span class="n">refactoring_operation</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+                <span class="n">update_understand_database</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">UDB_PATH</span><span class="p">)</span>
+
+            <span class="c1"># Stage 2:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;single&#39;</span><span class="p">:</span>
+                <span class="c1"># Stage 2 (Single objective mode): Considering only one quality attribute, e.g., testability</span>
+                <span class="n">score</span> <span class="o">=</span> <span class="n">testability_main</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">UDB_PATH</span><span class="p">,</span> <span class="n">initial_value</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">CURRENT_METRICS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;TEST&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Stage 2 (Multi-objective mode): Considering one objective based on average of 8 objective</span>
+                <span class="n">arr</span> <span class="o">=</span> <span class="n">Array</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_obj_virtual</span><span class="p">))</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluate_in_parallel</span><span class="p">:</span>
+                    <span class="c1"># Stage 2 (Multi-objective mode, parallel): Computing quality attributes</span>
+                    <span class="n">p1</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">calc_qmood_objectives</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">arr</span><span class="p">,))</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_obj_virtual</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+                        <span class="n">p2</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">calc_testability_objective</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">UDB_PATH</span><span class="p">,</span> <span class="n">arr</span><span class="p">,))</span>
+                        <span class="n">p3</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">calc_modularity_objective</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">UDB_PATH</span><span class="p">,</span> <span class="n">arr</span><span class="p">,))</span>
+                        <span class="n">p1</span><span class="o">.</span><span class="n">start</span><span class="p">(),</span> <span class="n">p2</span><span class="o">.</span><span class="n">start</span><span class="p">(),</span> <span class="n">p3</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                        <span class="n">p1</span><span class="o">.</span><span class="n">join</span><span class="p">(),</span> <span class="n">p2</span><span class="o">.</span><span class="n">join</span><span class="p">(),</span> <span class="n">p3</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">p1</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                        <span class="n">p1</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+                    <span class="n">score</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">arr</span><span class="p">])</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_obj_virtual</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Stage 2 (Multi-objective mode, sequential): Computing quality attributes</span>
+                    <span class="n">qmood_quality_attributes</span> <span class="o">=</span> <span class="n">DesignQualityAttributes</span><span class="p">(</span><span class="n">udb_path</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">UDB_PATH</span><span class="p">)</span>
+                    <span class="n">o1</span> <span class="o">=</span> <span class="n">qmood_quality_attributes</span><span class="o">.</span><span class="n">average_sum</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_obj_virtual</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+                        <span class="n">o2</span> <span class="o">=</span> <span class="n">testability_main</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">UDB_PATH</span><span class="p">,</span> <span class="n">initial_value</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">CURRENT_METRICS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;TEST&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
+                        <span class="n">o3</span> <span class="o">=</span> <span class="n">modularity_main</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">UDB_PATH</span><span class="p">,</span> <span class="n">initial_value</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">CURRENT_METRICS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;MODULE&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">o2</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="n">o3</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">del</span> <span class="n">qmood_quality_attributes</span>
+                    <span class="n">score</span> <span class="o">=</span> <span class="p">(</span><span class="n">o1</span> <span class="o">*</span> <span class="mf">6.</span> <span class="o">+</span> <span class="n">o2</span> <span class="o">+</span> <span class="n">o3</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_obj_virtual</span>
+
+            <span class="c1"># Stage 3: Marshal objectives into vector</span>
+            <span class="n">objective_values</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">score</span><span class="p">])</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Objective values for individual </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2"> in mode </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">score</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Stage 4: Marshal all objectives into out dictionary</span>
+        <span class="n">out</span><span class="p">[</span><span class="s1">&#39;F&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">objective_values</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+</code></pre></div>
+        </details>
 
 
 
@@ -3000,7 +3887,9 @@ Assigning randomly a sequence of refactorings to certain code fragments generate
 
 
 <h2 id="codart.sbse.search_based_refactoring2.RefactoringOperation" class="doc doc-heading">
-        <code>RefactoringOperation</code>
+        <code>
+RefactoringOperation            (<a class="autorefs autorefs-internal" title="codart.sbse.search_based_refactoring2.Gene" href="#codart.sbse.search_based_refactoring2.Gene">Gene</a>)
+        </code>
 
 
 
@@ -3023,6 +3912,71 @@ Assigning randomly a sequence of refactorings to certain code fragments generate
     ```
 </code></pre>
 
+        <details class="quote">
+          <summary>Source code in <code>codart\sbse\search_based_refactoring2.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">RefactoringOperation</span><span class="p">(</span><span class="n">Gene</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    The class define a data structure (dictionary) to hold a refactoring operation</span>
+
+<span class="sd">    Each refactoring operation hold as a dictionary contains the required parameters.</span>
+
+<span class="sd">        Example:</span>
+
+<span class="sd">            ```</span>
+<span class="sd">            make_field_static refactoring is marshaled as the following dict:</span>
+<span class="sd">            params = {</span>
+<span class="sd">                &#39;refactoring_name&#39;: &#39;make_field_static&#39;</span>
+<span class="sd">                &#39;api&#39;: &#39;main_function&#39;</span>
+<span class="sd">                &#39;source_class&#39;: &#39;name_of_source_class&#39;</span>
+<span class="sd">                &#39;field_name&#39;: &#39;name_of_the_field_to_be_static&#39;</span>
+<span class="sd">            }</span>
+<span class="sd">            ```</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Args:</span>
+
+<span class="sd">            name (str): Refactoring operation name</span>
+
+<span class="sd">            params (dict): Refactoring operation parameters</span>
+
+<span class="sd">            main (function): Refactoring operation main function (API)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">RefactoringOperation</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="si">}</span><span class="s1">)</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">do_refactoring</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Check preconditions and apply refactoring operation to source code</span>
+
+<span class="sd">        Returns:</span>
+
+<span class="sd">            result (boolean): The result statues of the applied refactoring</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Running </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameters </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">main</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Executed refactoring with result </span><span class="si">{</span><span class="n">res</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">res</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unexpected error in executing refactoring:</span><span class="se">\n</span><span class="s2"> </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+</code></pre></div>
+        </details>
 
 
 
@@ -3589,28 +4543,27 @@ Only one instance is held to speed up the search algorithm</p>
     </div>
 
   </div>
-                
-              
-              
-                
+
+
 
 
               
             </article>
+            
           </div>
         </div>
         
       </main>
       
-        
-<footer class="md-footer">
+        <footer class="md-footer">
   
-    <nav class="md-footer__inner md-grid" aria-label="Footer">
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
         
         <a href="../initialize/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Population initialization" rel="prev">
           <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
           <div class="md-footer__title">
             <div class="md-ellipsis">
@@ -3634,7 +4587,7 @@ Only one instance is held to speed up the search algorithm</p>
             </div>
           </div>
           <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
           </div>
         </a>
       
@@ -3642,18 +4595,19 @@ Only one instance is held to speed up the search algorithm</p>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
-      <div class="md-footer-copyright">
-        
-          <div class="md-footer-copyright__highlight">
-            © 2020-2022 CodART project - Reverse engineering laboratory
-          </div>
-        
-        Made with
-        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
-          Material for MkDocs
-        </a>
-        
-      </div>
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      © 2020-2022 CodART project - Reverse engineering laboratory
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
       
     </div>
   </div>
@@ -3663,10 +4617,11 @@ Only one instance is held to speed up the search algorithm</p>
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../../assets/javascripts/workers/search.409db549.min.js", "version": null}</script>
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.ecf98df9.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.56a63758.min.js"></script>
+      <script src="../../assets/javascripts/bundle.9c69f0bc.min.js"></script>
       
     
   </body>
