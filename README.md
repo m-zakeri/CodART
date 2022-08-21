@@ -3,7 +3,7 @@
 ![CodART](docs/figs/logo.png)
 
 
-Source Code Automated Refactoring Toolkit (CodART) is a refactoring engine with the ability to perfrom many-objective program transformation and optimization. We have currently focused on automating the [various refactoring operations](https://refactoring.com/catalog/) for Java source codes. A complete list of refactoring supported by CodART can be found at [CodART refactorings list](https://m-zakeri.github.io/CodART/refactorings_list/).
+Source Code Automated Refactoring Toolkit (CodART) is a refactoring engine with the ability to perform many-objective program transformation and optimization. We have currently focused on automating the [various refactoring operations](https://refactoring.com/catalog/) for Java source codes. A complete list of refactoring supported by CodART can be found at [CodART refactorings list](https://m-zakeri.github.io/CodART/refactorings_list/).
 
 The CodART project is under active development. The current version of CodeART works fines on our benchmark projects. To understand how CodART works, read the [CodART white-paper](https://m-zakeri.github.io/CodART). 
 Your contributions to the project and your comments in the discussion section would be welcomed. 
