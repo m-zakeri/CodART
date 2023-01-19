@@ -43,7 +43,7 @@ SOFTWARE.
  * @author JSON.org
  * @version 2016-05-01
  */
-public class CDL {
+public class CDL2023 {
 
     /**
      * Get the next value. The value can be wrapped in quotes. The value can
@@ -103,7 +103,7 @@ public class CDL {
     public static JSONArray rowToJSONArray(JSONTokener x) throws JSONException {
         JSONArray ja = new JSONArray();
         for (;;) {
-            CDL cdl = new CDL();
+            CDL2023 cdl = new CDL2023();
             String value = cdl.getValue(x);
             char c = x.next();
             if (value == null ||
