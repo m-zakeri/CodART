@@ -114,12 +114,12 @@ class RenamePackageRefactoringListener(JavaParserLabeledListener):
 
 
 def main():
-    Path = "../../tests/rename_tests/benchmark"
+    Path = "../../tests/rename_tests/benchmark_projects_test"
     package_identifier = "json"
     new_package_name = "test"
 
     FolderPath = os.listdir(Path)
-    testsPath = os.listdir(Path + "/refactoredFiles/")
+    testsPath = os.listdir(Path + "/JSON_refactored/")
 
     for File in FolderPath:
         # We have all of the java files in this folder now
@@ -141,7 +141,7 @@ def main():
 
     # delete last refactored files
     for t in testsPath:
-        os.remove(os.path.join(Path + "/refactoredFiles/", t))
+        os.remove(os.path.join(Path + "/JSON_refactored/", t))
 
     for File in FolderPath:
         # We have all of the java files in this folder now
@@ -150,7 +150,7 @@ def main():
             print(" ****************" + " in file : " + File + " ****************")
             EachFile = FileStream(str(EachFilePath))
             FileName = File.split(".")[0]
-            Refactored = open(Path + "/refactoredFiles/" + FileName + "_Refactored.java", 'w', newline='')
+            Refactored = open(Path + "/JSON_refactored/" + FileName + "_Refactored.java", 'w', newline='')
 
             Lexer = JavaLexer(EachFile)
 

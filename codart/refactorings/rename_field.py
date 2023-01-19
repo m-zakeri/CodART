@@ -166,18 +166,18 @@ class RenameFieldRefactoringListener(JavaParserLabeledListener):
 
 
 def main():
-    path_ = "../../tests/rename_tests/benchmark"
+    path_ = "../../tests/rename_tests/benchmark_projects_test"
     package_name_ = "org.json"
     class_identifier_ = "HTTP"
     field_identifier_ = "CRLF"
     field_new_name_ = "test"
 
     folder_path = os.listdir(path_)
-    tests_path = os.listdir(path_ + "/refactoredFiles/")
+    tests_path = os.listdir(path_ + "/JSON_refactored/")
 
     # delete last refactored files
     for t in tests_path:
-        os.remove(os.path.join(path_ + "/refactoredFiles/", t))
+        os.remove(os.path.join(path_ + "/JSON_refactored/", t))
 
     for file_ in folder_path:
         # We have all java files in this folder now
@@ -185,7 +185,7 @@ def main():
             file_path = path_ + "/" + file_
             file_stream = FileStream(str(file_path))
             file_name = file_.split(".")[0]
-            refactored = open(path_ + "/refactoredFiles/" + file_name + "_Refactored.java", 'w', newline='')
+            refactored = open(path_ + "/JSON_refactored/" + file_name + "_Refactored.java", 'w', newline='')
 
             lexer = JavaLexer(file_stream)
             token_stream = CommonTokenStream(lexer)

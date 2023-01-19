@@ -3,7 +3,7 @@
 
 When the name of a class does not explain what the class does (class's functionality), it needs to be changed.
 
-The module implements a light-weight version of Rename Class refactoring described in `rename_class.py`
+The module implements a Rename Class refactoring.
 
 ### Pre-conditions:
 
@@ -16,10 +16,8 @@ Todo: Add post-conditions
 
 """
 
-
 import os
 import sys
-
 
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
@@ -113,7 +111,7 @@ class RenameClassRefactoringListener(JavaParserLabeledListener):
                     text=self.class_new_name)
                 print("class name in creator changed")
 
-    def enterClassOrInterfaceType(self, ctx:JavaParserLabeled.ClassOrInterfaceTypeContext):
+    def enterClassOrInterfaceType(self, ctx: JavaParserLabeled.ClassOrInterfaceTypeContext):
         if self.is_package_imported or self.in_selected_package:
             if ctx.IDENTIFIER(0).getText() == self.class_identifier:
                 self.token_stream_rewriter.replaceIndex(
@@ -139,52 +137,53 @@ def change_file_name(old, new):
     new_names.append(new)
 
 
-def main():
-    Path = "../../tests/rename_tests/benchmark"
-    Package_name = "org.json"
-    class_identifier = "CDL"
-    new_class_name = "test"
+def main(project_path, package_name, class_identifier, new_class_name, output_dir):
+    """
 
-    FolderPath = os.listdir(Path)
-    testsPath = os.listdir(Path + "/refactoredFiles/")
+    The main API for rename class refactoring
+
+    """
+    print(project_path)
+    directories = os.listdir(project_path)
+    output_path = os.listdir(os.path.join(project_path, output_dir))
 
     # delete last refactored files
-    for t in testsPath:
-        os.remove(os.path.join(Path + "/refactoredFiles/", t))
+    for t in output_path:
+        os.remove(os.path.join(project_path, output_dir, t))
 
-    for File in FolderPath:
-        # We have all of the java files in this folder now
-        if File.endswith('.java'):
-            EachFilePath = Path + "/" + File
-            print(" ****************" + " in file : " + File + " ****************")
-            EachFile = FileStream(str(EachFilePath))
-            FileName = File.split(".")[0]
-            Refactored = open(Path + "/refactoredFiles/" + FileName + "_Refactored.java", 'w', newline='')
+    for file_ in directories:
+        # We have all Java files in this folder now
+        if file_.endswith('.java'):
+            print(f"Processing java source file: {file_}")
+            file_stream = FileStream(str(os.path.join(project_path, file_)), encoding='utf8')
+            java_lexer = JavaLexer(file_stream)
+            token_stream = CommonTokenStream(java_lexer)
+            parser = JavaParserLabeled(token_stream)
+            parse_tree = parser.compilationUnit()
+            renamer_listener = RenameClassRefactoringListener(token_stream,
+                                                              package_name,
+                                                              class_identifier,
+                                                              new_class_name)
+            walker = ParseTreeWalker()
+            walker.walk(renamer_listener, parse_tree)
+            refactored_file_path = os.path.join(project_path, output_dir, file_.split(".")[0] + '.java')
+            with open(refactored_file_path, 'w', newline='') as f:
+                f.write(renamer_listener.token_stream_rewriter.getDefaultText())
 
-            Lexer = JavaLexer(EachFile)
-
-            TokenStream = CommonTokenStream(Lexer)
-
-            Parser = JavaParserLabeled(TokenStream)
-
-            Tree = Parser.compilationUnit()
-
-            ListenerForReRenameClass =\
-                RenameClassRefactoringListener(TokenStream, Package_name, class_identifier, new_class_name)
-
-            Walker = ParseTreeWalker()
-
-            Walker.walk(ListenerForReRenameClass, Tree)
-
-            Refactored.write(ListenerForReRenameClass.token_stream_rewriter.getDefaultText())
-
-    print("changing public class files name... ")
+    print("Changing public class files names ... ")
     for i in range(len(old_names)):
-        os.rename(Path + "/refactoredFiles/" + old_names[i] + "_Refactored.java",
-                  Path + "/refactoredFiles/" + new_names[i] + "_Refactored.java")
+        os.rename(os.path.join(project_path, output_dir, old_names[i] + ".java"),
+                  os.path.join(project_path, output_dir, new_names[i] + ".java")
+                  )
 
-    print(" %%%%%%%%%%%%%" + " all files finished " + "****************")
+    print("Finished.")
 
 
+# Test module
 if __name__ == "__main__":
-    main()
+    project_path_ = r"../../tests/rename_tests/benchmark_projects_test/JSON/"
+    package_name_ = r"org.json"
+    class_identifier_ = r"CDL"  # Old class name
+    new_class_name_ = r"CDL2023"  # New class name
+    output_dir_ = r"JSON_refactored"
+    main(project_path_, package_name_, class_identifier_, new_class_name_, output_dir_)
