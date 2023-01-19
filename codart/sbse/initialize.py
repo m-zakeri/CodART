@@ -1,4 +1,4 @@
-"""
+\"""
 ## Introduction
 
 This module implements finding refactoring candidates for the search-based algorithms
@@ -767,10 +767,11 @@ class RandomInitialization(Initialization):
 
         """
 
+
+        random_field = random.choice(self._variables)
         _db = und.open(self.udb_path)
         refactoring_main = move_field.main
         params = {"udb_path": str(Path(self.udb_path))}
-        random_field = random.choice(self._variables)
         params.update(random_field)
         classes = _db.ents("Class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static")
         random_class = (random.choice(classes)).longname().split(".")
@@ -839,10 +840,11 @@ class RandomInitialization(Initialization):
 
         """
 
+
+        random_method = random.choice(self._methods)
         _db = und.open(self.udb_path)
         refactoring_main = move_method.main
         params = {"udb_path": str(Path(self.udb_path))}
-        random_method = random.choice(self._methods)
         params.update(random_method)
         classes = _db.ents("Class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static")
         random_class = (random.choice(classes)).longname().split(".")
@@ -858,7 +860,7 @@ class RandomInitialization(Initialization):
             target_package = '.'.join(random_class[:-1])
             target_class = random_class[-1]
         else:
-            return self.init_move_field()
+            return self.init_move_method()
         params.update({
             "target_class": target_class,
             "target_package": target_package
