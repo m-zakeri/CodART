@@ -181,9 +181,10 @@ def main(project_path, package_name, class_identifier, new_class_name, output_di
 
 # Test module
 if __name__ == "__main__":
-    project_path_ = r"../../tests/rename_tests/benchmark_projects_test/JSON/"
-    package_name_ = r"org.json"
+    from codart.refactorings.rename_class2 import main
+    project_path_ = r"/JSON/"  # Project source files root
+    package_name_ = r"org.json"  # Class package name
     class_identifier_ = r"CDL"  # Old class name
-    new_class_name_ = r"CDL2023"  # New class name
-    output_dir_ = r"JSON_refactored"
+    new_class_name_ = r"CDL_Renamed"  # New class name
+    output_dir_ = r"JSON_Refactored"  # Refactored project source files root
     main(project_path_, package_name_, class_identifier_, new_class_name_, output_dir_)
