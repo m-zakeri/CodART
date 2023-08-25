@@ -1,0 +1,6 @@
+ExtractMethod(jetbrains.mps.nodeEditor.cellProviders.AbstractCellListHandler.insertNewChild())
+ExtractMethod(jetbrains.mps.project.AbstractModule.rename())
+ExtractMethod(jetbrains.mps.ide.ui.tree.MPSTree.stringToPath())
+"InlineMethod(jetbrains.mps.lang.editor.cellProviders.SingleRoleCellProvider.createManyCells(),jetbrains.mps.lang.editor.cellProviders.SingleRoleCellProvider.createCell())"
+ExtractMethod(jetbrains.mps.text.impl.TextGenSupport.appendNode())
+"InlineMethod(jetbrains.mps.smodel.adapter.structure.MetaAdapterFactory.getLanguage(),jetbrains.mps.smodel.adapter.structure.MetaAdapterFactory.getLanguage())"

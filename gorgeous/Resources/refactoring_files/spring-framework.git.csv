@@ -1,0 +1,5 @@
+ExtractMethod(org.springframework.test.util.JsonPathExpectationsHelper.exists())
+ExtractMethod(org.springframework.web.servlet.support.WebContentGenerator.checkAndPrepare())
+ExtractClass(org.springframework.web.socket.server.support.DefaultHandshakeHandler)
+ExtractMethod(org.springframework.http.converter.AbstractHttpMessageConverter.write())
+ExtractMethod(org.springframework.core.annotation.AnnotationUtilsTests.synthesizeAnnotationFromMapWithNullAttributeValue())

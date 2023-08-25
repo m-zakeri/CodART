@@ -1,0 +1,7 @@
+ExtractMethod(io.vertx.core.net.TCPSSLOptions.TCPSSLOptions())
+ExtractMethod(io.vertx.core.net.NetClientOptions.NetClientOptions())
+ExtractMethod(io.vertx.core.http.HttpClientOptions.HttpClientOptions())
+ExtractMethod(io.vertx.core.net.NetServerOptions.NetServerOptions())
+ExtractMethod(io.vertx.core.http.HttpServerOptions.HttpServerOptions())
+ExtractMethod(io.vertx.core.net.ClientOptionsBase.ClientOptionsBase())
+"InlineMethod(io.vertx.core.http.impl.HttpServerImpl.ServerHandler.handleHttp(),io.vertx.core.http.impl.HttpServerImpl.ServerHandler.doMessageReceived())"

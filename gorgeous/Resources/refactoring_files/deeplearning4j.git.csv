@@ -1,0 +1,6 @@
+ExtractMethod(org.deeplearning4j.optimize.solver.TestOptimizers.testSphereFnOptHelper())
+ExtractMethod(org.deeplearning4j.translate.CaffeModelToJavaClass.readCaffeModel())
+"MoveMethod(org.deeplearning4j.plot.ListenerTest.testBackTrackLine(),org.deeplearning4j.optimize.solver.BackTrackLineSearchTest)"
+ExtractMethod(org.deeplearning4j.optimize.solvers.BackTrackLineSearch.optimize())
+ExtractMethod(org.deeplearning4j.models.embeddings.loader.WordVectorSerializer.loadGoogleModel())
+ExtractMethod(org.deeplearning4j.nn.layers.OutputLayer.output())

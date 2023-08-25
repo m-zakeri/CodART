@@ -1,0 +1,7 @@
+"InlineMethod(tachyon.worker.block.evictor.LRUEvictor.freeSpace(),tachyon.worker.block.evictor.LRUEvictor.freeSpaceWithView())"
+ExtractMethod(tachyon.worker.block.allocator.MaxFreeAllocator.allocateBlock())
+ExtractMethod(tachyon.client.BlockOutStreamIntegrationTest.enableLocalWriteTest())
+ExtractMethod(tachyon.worker.block.meta.StorageDir.addBlockMeta())
+"PushDownMethod(tachyon.worker.block.meta.BlockMetaBase.getBlockSize(),tachyon.worker.block.meta.BlockMeta)"
+ExtractClass(tachyon.worker.block.meta.BlockMeta)
+ExtractClass(tachyon.worker.block.meta.TempBlockMeta)

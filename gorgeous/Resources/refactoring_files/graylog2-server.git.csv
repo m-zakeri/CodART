@@ -1,0 +1,7 @@
+ExtractMethod(org.graylog2.shared.buffers.processors.DecodingProcessor.processMessage())
+ExtractMethod(org.graylog2.shared.buffers.processors.ProcessBufferProcessor.onEvent())
+"MoveMethod(org.graylog2.indexer.searches.Searches.timestampStatsOfIndex(),org.graylog2.indexer.ranges.EsIndexRangeService)"
+"MoveMethod(org.graylog2.indexer.searches.SearchesTest.testTimestampStatsOfIndexWithNonExistingIndex(),org.graylog2.indexer.ranges.EsIndexRangeServiceTest)"
+"MoveMethod(org.graylog2.indexer.searches.SearchesTest.testTimestampStatsOfIndex(),org.graylog2.indexer.ranges.EsIndexRangeServiceTest)"
+"MoveMethod(org.graylog2.indexer.searches.SearchesTest.testTimestampStatsOfIndexWithEmptyIndex(),org.graylog2.indexer.ranges.EsIndexRangeServiceTest)"
+ExtractClass(integration.BaseRestTest)

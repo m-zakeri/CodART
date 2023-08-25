@@ -1,0 +1,6 @@
+ExtractMethod(org.wordpress.android.ui.prefs.SiteSettingsFragment.onPreferenceChange())
+ExtractMethod(org.wordpress.android.ui.main.SitePickerAdapter.LoadSitesTask.doInBackground())
+ExtractMethod(org.wordpress.android.ui.main.WPMainActivity.onResume())
+ExtractMethod(org.wordpress.android.ui.stats.StatsUtils.openPostInReaderOrInAppWebview())
+ExtractMethod(org.wordpress.android.models.Blog.getIconImageURL())
+"InlineMethod(org.wordpress.android.ui.reader.ReaderPostListFragment.shouldShowTagToolbar(),org.wordpress.android.ui.reader.ReaderPostListFragment.onCreateView())"

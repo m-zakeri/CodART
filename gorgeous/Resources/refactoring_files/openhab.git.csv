@@ -1,0 +1,5 @@
+ExtractMethod(org.openhab.core.library.types.DateTimeTypeTest.parameters())
+ExtractMethod(org.openhab.core.jsr223.internal.engine.scriptmanager.Script.initializeSciptGlobals())
+ExtractMethod(org.openhab.core.jsr223.internal.engine.scriptmanager.Script.initializeSciptGlobals())
+ExtractMethod(org.openhab.binding.insteonplm.internal.message.MsgFactory.processData())
+ExtractMethod(org.openhab.binding.insteonplm.InsteonPLMActiveBinding.updated())

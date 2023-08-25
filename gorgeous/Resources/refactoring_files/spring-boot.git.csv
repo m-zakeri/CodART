@@ -1,0 +1,8 @@
+"MoveMethod(org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration.WebMvcAutoConfigurationAdapter.FaviconConfiguration.setResourceLoader(),org.springframework.boot.autoconfigure.web.ResourceProperties)"
+"InlineMethod(org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration.WebMvcAutoConfigurationAdapter.addStaticIndexHtmlViewControllers(),org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration.WebMvcAutoConfigurationAdapter.addViewControllers())"
+ExtractMethod(org.springframework.boot.actuate.system.ApplicationPidFileWriterTests.overridePidFileWithSpring())
+ExtractMethod(org.springframework.boot.actuate.system.ApplicationPidFileWriterTests.differentEventTypes())
+ExtractMethod(org.springframework.boot.autoconfigure.web.WebMvcAutoConfigurationTests.overrideDateFormat())
+ExtractMethod(org.springframework.boot.actuate.metrics.buffer.BufferMetricReader.findAll())
+ExtractMethod(org.springframework.boot.orm.jpa.EntityScanRegistrar.registerBeanDefinitions())
+ExtractMethod(org.springframework.boot.cloudfoundry.VcapApplicationListener.flatten())

@@ -1,0 +1,5 @@
+ExtractMethod(org.thoughtcrime.securesms.mms.AttachmentManager.setMedia())
+ExtractMethod(org.thoughtcrime.securesms.notifications.NotificationState.getMarkAsReadIntent())
+"InlineMethod(org.thoughtcrime.securesms.components.emoji.EmojiDrawer.init(),org.thoughtcrime.securesms.components.emoji.EmojiDrawer.EmojiDrawer())"
+"InlineMethod(org.thoughtcrime.securesms.components.emoji.EmojiToggle.initializeResources(),org.thoughtcrime.securesms.components.emoji.EmojiToggle.initialize())"
+"InlineMethod(org.thoughtcrime.securesms.recipients.RecipientProvider.getSynchronousRecipient(),org.thoughtcrime.securesms.recipients.RecipientProvider.getRecipient())"

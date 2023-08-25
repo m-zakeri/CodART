@@ -1,0 +1,9 @@
+ExtractMethod(org.apache.drill.exec.vector.$.allocateNewSafe())
+ExtractMethod(org.apache.drill.exec.vector.BitVector.allocateNewSafe())
+ExtractMethod(org.apache.drill.exec.impersonation.TestImpersonationQueries.addMiniDfsBasedStorageAndGenerateTestData())
+ExtractMethod(org.apache.drill.exec.record.selection.SelectionVector4.createNewWrapperCurrent())
+ExtractMethod(org.apache.drill.exec.testing.ControlsInjectionUtil.setControls())
+"InlineMethod(org.apache.drill.exec.server.TestDrillbitResilience.assertCancelled(),org.apache.drill.exec.server.TestDrillbitResilience.assertCancelledWithoutException())"
+ExtractMethod(org.apache.drill.jdbc.impl.DrillCursor.next())
+ExtractMethod(org.apache.drill.exec.planner.sql.handlers.DefaultSqlHandler.getPlan())
+ExtractMethod(org.apache.drill.exec.planner.sql.handlers.DefaultSqlHandler.convertToDrel())

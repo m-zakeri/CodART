@@ -1,0 +1,12 @@
+gitpython
+requests
+python-dotenv
+scitools3
+pandas
+openpyxl
+scikit-learn
+matplotlib
+pymoo
+networkx
+antlr4-python3-runtime
+collection

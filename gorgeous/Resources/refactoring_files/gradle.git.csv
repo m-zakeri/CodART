@@ -1,0 +1,14 @@
+"InlineMethod(org.gradle.api.internal.artifacts.repositories.resolver.DefaultExternalResourceArtifactResolver.resolveMetaDataArtifact(),org.gradle.api.internal.artifacts.repositories.resolver.DefaultExternalResourceArtifactResolver.resolveArtifact())"
+"MoveMethod(org.gradle.play.plugins.PlayApplicationPlugin.Rules.registerOrFindDeploymentHandle(),org.gradle.play.tasks.PlayRun)"
+ExtractMethod(org.gradle.nativeplatform.toolchain.internal.gcc.AbstractGccCompatibleToolChain.select())
+"PushDownMethod(org.gradle.testkit.functional.GradleRunner.setGradleUserHomeDir(),org.gradle.testkit.functional.internal.DefaultGradleRunner)"
+"PushDownMethod(org.gradle.testkit.functional.GradleRunner.getTasks(),org.gradle.testkit.functional.internal.DefaultGradleRunner)"
+"PushDownMethod(org.gradle.testkit.functional.GradleRunner.getArguments(),org.gradle.testkit.functional.internal.DefaultGradleRunner)"
+"PushDownMethod(org.gradle.testkit.functional.GradleRunner.getGradleUserHomeDir(),org.gradle.testkit.functional.internal.DefaultGradleRunner)"
+"PushDownMethod(org.gradle.testkit.functional.GradleRunner.setWorkingDir(),org.gradle.testkit.functional.internal.DefaultGradleRunner)"
+"PushDownMethod(org.gradle.testkit.functional.GradleRunner.setArguments(),org.gradle.testkit.functional.internal.DefaultGradleRunner)"
+"PushDownMethod(org.gradle.testkit.functional.GradleRunner.setTasks(),org.gradle.testkit.functional.internal.DefaultGradleRunner)"
+"PushDownMethod(org.gradle.testkit.functional.GradleRunner.getWorkingDir(),org.gradle.testkit.functional.internal.DefaultGradleRunner)"
+ExtractMethod(org.gradle.platform.base.binary.BaseBinarySpec.getAllSources())
+ExtractMethod(org.gradle.play.plugins.PlayPluginConfigurations.PlayConfiguration.getFileCollection())
+"InlineMethod(org.gradle.tooling.internal.provider.runner.ClientForwardingBuildListener.adaptResult(),org.gradle.tooling.internal.provider.runner.ClientForwardingBuildListener.adaptResult())"

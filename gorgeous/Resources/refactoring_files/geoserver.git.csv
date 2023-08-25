@@ -1,0 +1,6 @@
+ExtractClass(org.geoserver.wfs.response.OGRWrapper)
+ExtractClass(org.geoserver.wfs.response.OgrFormat)
+ExtractClass(org.geoserver.wfs.response.OgrConfiguration)
+ExtractClass(org.geoserver.wfs.response.Ogr2OgrConfigurator)
+"PullUpMethod(org.geoserver.importer.transform.VectorTransformChain.pre(),org.geoserver.importer.transform.TransformChain)"
+"PullUpMethod(org.geoserver.importer.transform.VectorTransformChain.post(),org.geoserver.importer.transform.TransformChain)"

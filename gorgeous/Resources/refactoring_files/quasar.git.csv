@@ -1,0 +1,5 @@
+"InlineMethod(co.paralleluniverse.fibers.Stack.pushMethod(),co.paralleluniverse.fibers.Stack.pushMethod())"
+"InlineMethod(co.paralleluniverse.fibers.Fiber.verifySuspend(),co.paralleluniverse.fibers.Fiber.verifySuspend())"
+"InlineMethod(co.paralleluniverse.fibers.Fiber.checkInstrumentation(),co.paralleluniverse.fibers.Fiber.checkInstrumentation())"
+"InlineMethod(co.paralleluniverse.fibers.Stack.popMethod(),co.paralleluniverse.fibers.Stack.popMethod())"
+ExtractMethod(co.paralleluniverse.strands.channels.reactivestreams.ChannelSubscriber.onSubscribe())

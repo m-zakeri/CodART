@@ -1,0 +1,5 @@
+"PushDownMethod(org.tomahawk.libtomahawk.collection.NativeCollection.getAlbumTimeStamps(),org.tomahawk.libtomahawk.collection.UserCollection)"
+"PullUpMethod(org.tomahawk.libtomahawk.collection.NativeCollection.wipe(),org.tomahawk.libtomahawk.collection.Collection)"
+"PushDownMethod(org.tomahawk.libtomahawk.collection.NativeCollection.getArtistTimeStamps(),org.tomahawk.libtomahawk.collection.UserCollection)"
+"PushDownMethod(org.tomahawk.libtomahawk.collection.NativeCollection.addQuery(),org.tomahawk.libtomahawk.collection.UserCollection)"
+"PushDownMethod(org.tomahawk.libtomahawk.collection.NativeCollection.getQueryTimeStamps(),org.tomahawk.libtomahawk.collection.UserCollection)"

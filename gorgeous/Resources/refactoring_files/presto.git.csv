@@ -1,0 +1,6 @@
+"MoveMethod(com.facebook.presto.sql.planner.PlanPrinter.formatDomain(),com.facebook.presto.sql.planner.PlanPrinter.Visitor)"
+"MoveMethod(com.facebook.presto.sql.planner.PlanPrinter.printConstraint(),com.facebook.presto.sql.planner.PlanPrinter.Visitor)"
+ExtractMethod(com.facebook.presto.operator.scalar.ArraySubscriptOperator.readBlockAndCheckIndex())
+"MoveMethod(com.facebook.presto.sql.planner.RelationPlanner.flipComparison(),com.facebook.presto.sql.ExpressionUtils)"
+ExtractClass(com.facebook.presto.HashPagePartitionFunction)
+ExtractMethod(com.facebook.presto.operator.LookupJoinOperator.needsInput())

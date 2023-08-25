@@ -1,0 +1,17 @@
+ExtractMethod(com.google.javascript.rhino.jstype.NoResolvedType.isSubtype())
+ExtractMethod(com.google.javascript.rhino.jstype.UnionType.isSubtype())
+ExtractMethod(com.google.javascript.rhino.jstype.RecordType.isSubtype())
+ExtractMethod(com.google.javascript.rhino.jstype.TemplatizedType.isSubtype())
+ExtractMethod(com.google.javascript.rhino.jstype.PrototypeObjectType.isSubtype())
+ExtractMethod(com.google.javascript.rhino.jstype.FunctionType.isSubtype())
+ExtractMethod(com.google.javascript.rhino.jstype.ProxyObjectType.isSubtype())
+ExtractMethod(com.google.javascript.rhino.jstype.EnumElementType.isSubtype())
+ExtractMethod(com.google.javascript.rhino.jstype.NoObjectType.isSubtype())
+ExtractMethod(com.google.javascript.rhino.jstype.NoType.isSubtype())
+ExtractMethod(com.google.javascript.rhino.jstype.UnknownType.isSubtype())
+ExtractMethod(com.google.javascript.rhino.jstype.RecordType.isSubtype())
+ExtractMethod(com.google.javascript.rhino.jstype.EnumType.isSubtype())
+ExtractMethod(com.google.javascript.rhino.jstype.ArrowType.isSubtype())
+"InlineMethod(com.google.javascript.jscomp.Es6TemplateLiterals.createUntaggedTemplateLiteral(),com.google.javascript.jscomp.Es6TemplateLiterals.visitTemplateLiteral())"
+ExtractMethod(com.google.javascript.jscomp.parsing.parser.Parser.parseFormalParameterList())
+"InlineMethod(com.google.javascript.jscomp.GlobalTypeInfo.ProcessScope.getRawTypeFromJSType(),com.google.javascript.jscomp.GlobalTypeInfo.ProcessScope.visitOtherPropertyDeclaration())"

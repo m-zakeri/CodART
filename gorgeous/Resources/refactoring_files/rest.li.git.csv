@@ -1,0 +1,10 @@
+"MoveMethod(com.linkedin.restli.examples.TestCompressionServer.contentEncodingGeneratorDataProvider(),com.linkedin.r2.filter.compression.TestClientCompressionFilter)"
+ExtractMethod(com.linkedin.r2.filter.compression.ClientCompressionFilter.onRestRequest())
+"MoveMethod(com.linkedin.r2.filter.CompressionConfig.shouldCompressRequest(),com.linkedin.r2.filter.compression.ClientCompressionFilter)"
+"MoveMethod(com.linkedin.restli.examples.TestCompressionServer.testEncodingGeneration(),com.linkedin.r2.filter.compression.TestClientCompressionFilter)"
+"InlineMethod(com.linkedin.pegasus.generator.TemplateSpecGenerator.generate(),com.linkedin.pegasus.generator.TemplateSpecGenerator.generateRecord())"
+ExtractMethod(com.linkedin.restli.internal.server.methods.response.ErrorResponseBuilder.buildErrorResponse())
+ExtractMethod(com.linkedin.pegasus.generator.JavaDataTemplateGenerator.generateRecord())
+ExtractMethod(com.linkedin.pegasus.generator.JavaDataTemplateGenerator.generateMap())
+ExtractMethod(com.linkedin.pegasus.generator.JavaDataTemplateGenerator.generateUnion())
+ExtractMethod(com.linkedin.pegasus.generator.JavaDataTemplateGenerator.generateArray())

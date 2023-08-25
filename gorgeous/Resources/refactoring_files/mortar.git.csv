@@ -1,0 +1,6 @@
+"MoveMethod(mortar.ObjectGraphServiceTest.cannotRegisterOnDestroyed(),mortar.MortarScopeTest)"
+"MoveMethod(mortar.ObjectGraphServiceTest.isDestroyedGetsSet(),mortar.MortarScopeTest)"
+"MoveMethod(mortar.ObjectGraphServiceTest.isDestroyedStartsFalse(),mortar.MortarScopeTest)"
+"MoveMethod(mortar.ObjectGraphServiceTest.cannotFindChildFromDestroyed(),mortar.MortarScopeTest)"
+"MoveMethod(mortar.ObjectGraphServiceTest.rootDestroyIsIdempotent(),mortar.MortarScopeTest)"
+"MoveMethod(mortar.ObjectGraphServiceTest.destroyIsIdempotent(),mortar.MortarScopeTest)"

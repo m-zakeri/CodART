@@ -1,0 +1,7 @@
+ExtractMethod(io.crate.metadata.doc.DocIndexMetaData.getRoutingCol())
+ExtractMethod(io.crate.metadata.table.TestingTableInfo.Builder.add())
+"PushDownMethod(io.crate.planner.node.dql.ESDQLPlanNode.plan(),io.crate.planner.node.dql.ESGetNode)"
+ExtractMethod(io.crate.planner.consumer.ConsumingPlanner.plan())
+"PullUpMethod(io.crate.planner.node.dql.MergeNodedownstreamNodes(),io.crate.planner.node.dql.AbstractDQLPlanNode)"
+"PullUpMethod(io.crate.planner.node.dql.MergeNode.downstreamExecutionNodeId(),io.crate.planner.node.dql.AbstractDQLPlanNode)"
+"PullUpMethod(io.crate.planner.node.dql.CollectNode.downstreamNodes(),io.crate.planner.node.dql.AbstractDQLPlanNode)"

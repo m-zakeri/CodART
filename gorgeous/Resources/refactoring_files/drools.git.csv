@@ -1,0 +1,7 @@
+ExtractMethod(org.drools.persistence.SingleSessionCommandService.addInterceptor())
+ExtractMethod(org.drools.core.util.ClassUtils.instantiateObject())
+ExtractMethod(org.drools.core.util.ClassUtils.instantiateObject())
+ExtractMethod(org.drools.core.common.AgendaGroupQueueImpl.AgendaGroupQueueImpl())
+ExtractMethod(org.drools.core.phreak.SynchronizedPropagationList.addEntry())
+"MoveMethod(org.drools.core.common.DefaultAgenda.notifyHalt(),org.drools.core.phreak.SynchronizedBypassPropagationList)"
+"MoveMethod(org.drools.reteoo.common.ReteAgenda.notifyHalt(),org.drools.core.phreak.SynchronizedBypassPropagationList)"

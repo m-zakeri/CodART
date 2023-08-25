@@ -1,0 +1,6 @@
+"InlineMethod(io.netty.handler.codec.DefaultTextHeaders.comparator(),io.netty.handler.codec.DefaultTextHeaders.contains())"
+ExtractMethod(io.netty.util.internal.AppendableCharSequence.append())
+ExtractMethod(io.netty.handler.codec.http2.DefaultHttp2RemoteFlowControllerTest.windowUpdateAndFlushShouldTriggerWrite())
+ExtractMethod(io.netty.handler.codec.http2.DefaultHttp2RemoteFlowControllerTest.setup())
+"InlineMethod(io.netty.handler.codec.http2.StreamBufferingEncoder.cancelPendingStreams(),io.netty.handler.codec.http2.StreamBufferingEncoder.close())"
+"InlineMethod(io.netty.handler.ssl.OpenSslEngine.OpenSslSession.getPeerPrincipal(),io.netty.handler.ssl.OpenSslEngine.OpenSslSession.getPeerPrincipal())"

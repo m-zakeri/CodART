@@ -1,0 +1,6 @@
+ExtractMethod(io.fabric8.maven.JsonMojo.getProbe())
+"PullUpMethod(io.fabric8.maven.JsonMojo.isKubernetesJsonArtifact(),io.fabric8.maven.AbstractFabric8Mojo)"
+"PullUpMethod(io.fabric8.maven.ApplyMojo.hasKubernetesJson(),io.fabric8.maven.AbstractFabric8Mojo)"
+"PullUpMethod(io.fabric8.maven.ApplyMojo.getDependencies(),io.fabric8.maven.AbstractFabric8Mojo)"
+ExtractMethod(io.fabric8.maven.CreateGogsWebhook.execute())
+ExtractMethod(io.fabric8.maven.JsonMojo.getLivenessProbe())

@@ -1,0 +1,13 @@
+ExtractMethod(org.infinispan.stream.impl.DistributedCacheStream.remoteIterator())
+ExtractMethod(org.infinispan.stream.impl.DistributedCacheStream.remoteIterator())
+ExtractMethod(org.infinispan.notifications.cachelistener.CacheNotifierImpl.BaseCacheEntryListenerInvocation.shouldInvoke())
+ExtractMethod(org.infinispan.interceptors.TxInterceptor.visitCommitCommand())
+ExtractMethod(org.infinispan.transaction.tm.DummyTransaction.commit())
+ExtractMethod(org.infinispan.test.MultipleCacheManagersTest.assertNoTransactions())
+ExtractMethod(org.infinispan.test.AbstractInfinispanTest.eventually())
+ExtractMethod(org.infinispan.test.AbstractInfinispanTest.eventually())
+ExtractMethod(org.infinispan.interceptors.TxInterceptor.invokeNextInterceptorAndVerifyTransaction())
+"InlineMethod(org.infinispan.interceptors.distribution.TxDistributionInterceptor.remoteGet(),org.infinispan.interceptors.distribution.TxDistributionInterceptor.remoteGet())"
+"InlineMethod(org.infinispan.interceptors.distribution.TxDistributionInterceptor.sendCommitCommand(),org.infinispan.interceptors.distribution.TxDistributionInterceptor.visitCommitCommand())"
+ExtractMethod(org.infinispan.interceptors.distribution.TxDistributionInterceptor.visitRollbackCommand())
+ExtractMethod(org.infinispan.commands.CreateCacheCommand.perform())
