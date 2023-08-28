@@ -36,7 +36,6 @@ from codart.metrics.metrics_jcode_odor import JCodeOdorMetric
 from codart.metrics.metrics_coverability import UnderstandUtility
 from codart.metrics import metrics_names
 
-# patch_sklearn()
 
 
 class TestabilityMetrics:

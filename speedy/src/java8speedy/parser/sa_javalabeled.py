@@ -27,6 +27,7 @@ class SA_ErrorListener:
 
     Not able to do a 1-to-1 bridge of Antlr's error listener
     Instead, this class provides roughly equivalent functionality.
+
     """
 
     def syntaxError(self, input_stream:InputStream, offendingSymbol:Token, char_index:int, line:int, column:int, msg:str):

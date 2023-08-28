@@ -16,7 +16,7 @@ from joblib import Parallel, delayed
 
 import understand as und
 
-from java8speedy.parser import sa_javalabeled
+# from java8speedy.parser import sa_javalabeled
 
 from codart import config
 
@@ -34,6 +34,7 @@ def git_restore(project_dir):
         None
 
     """
+    print(project_dir)
     assert os.path.isdir(project_dir)
     assert os.path.isdir(os.path.join(project_dir, '.git'))
     subprocess.Popen(["git", "restore", "."], cwd=project_dir, stdout=open(os.devnull, 'wb')).wait()
