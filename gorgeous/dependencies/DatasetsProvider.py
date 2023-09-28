@@ -18,7 +18,7 @@ class DataSetsProvider:
     def __init__(self):
         logging.basicConfig(level=logging.INFO)
         # self.__extractor = URLExtract()
-        self.__gitUrlList = open(file="gorgeous/Resources/urls_dataset.txt").readlines()
+        self.__gitUrlList = open(file="Resources/urls_dataset.txt").readlines()
         self.__ResourcePath = dotenv_values().get("RESOURCES_PATH").split(" ")
 
     def get_datasets(self):

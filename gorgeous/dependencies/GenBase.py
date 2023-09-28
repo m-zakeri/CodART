@@ -24,12 +24,13 @@ final_list = []
 actor_list = []
 
 udb_path = (
-    "Resources/und_db/" + dotenv_values().get("RESOURCES_PATH").split(" ")[0] + ".und"
+    "C://Users/98910/CodART/gorgeous/Resources/und_db/" + dotenv_values().get("RESOURCES_PATH").split(" ")[0] + ".und"
 )
+print("project_path:", udb_path)
 project_path = (
-    "Resources/projects/" + dotenv_values().get("RESOURCES_PATH").split(" ")[0]
+    "C://Users/98910/CodART/gorgeous/Resources/projects/" + dotenv_values().get("RESOURCES_PATH").split(" ")[0]
 )
-
+print("project_path:" ,project_path)
 
 def calc_qmood_objectives(arr_):
     qmood_quality_attributes = DesignQualityAttributes(udb_path=udb_path)

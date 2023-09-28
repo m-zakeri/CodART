@@ -182,6 +182,7 @@ class GrammarClass:
         _db = und.open(self.udb_path)
         params = {"udb_path": str(Path(self.udb_path))}
         classes = _db.ents("Type Class ~Unknown ~Anonymous")
+        print(classes)
         random_class = random.choice(classes)
         params.update(
             {
