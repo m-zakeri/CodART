@@ -125,6 +125,15 @@ X. `benchmark_projects`: This directory contains several open-source Java projec
 
 XI. **Other packages**: The information of other packages will be announced in the future.  
  
+### Example to use cli for understand 
+* to using understand
+
+  *     python3 codart/refactoring_cli.py --udb_path "/home/y/Desktop/CodART/benchmark_projects/JSON20201115/JSON20201115.udb" --file_path "/home/y/Desktop/CodART/benchmark_projects/JSON20201115/src/main/java/org/json/JSONML.java" --source_class "JSONML"   --moved_methods "toJSONObject" --moved_fields "" --core 0
+
+* to using openunderstand
+
+  *     python3 codart/refactoring_cli.py --udb_path "/home/y/Desktop/CodART/benchmark_projects/JSON20201115/mydb.udb" --file_path "/home/y/Desktop/CodART/benchmark_projects/JSON20201115/src/main/java/org/json/JSONML.java" --source_class "JSONML"   --moved_methods "toJSONObject" --moved_fields "" --core 1
+
 
 
 ### News

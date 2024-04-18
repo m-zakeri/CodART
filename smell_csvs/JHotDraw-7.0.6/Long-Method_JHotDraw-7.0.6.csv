@@ -1,0 +1,939 @@
+net.n3.nanoxml.NonValidator	protected void processAttList(net.n3.nanoxml.IXMLReader, net.n3.nanoxml.IXMLEntityResolver) throws java.lang.Exception	attributeDefaultValues	B3	0/68
+net.n3.nanoxml.NonValidator	protected void processAttList(net.n3.nanoxml.IXMLReader, net.n3.nanoxml.IXMLEntityResolver) throws java.lang.Exception	attributeDefaultValues	B4	0/65
+net.n3.nanoxml.NonValidator	protected void processAttList(net.n3.nanoxml.IXMLReader, net.n3.nanoxml.IXMLEntityResolver) throws java.lang.Exception	attributeDefaultValues	B6	0/61
+net.n3.nanoxml.NonValidator	protected void processAttList(net.n3.nanoxml.IXMLReader, net.n3.nanoxml.IXMLEntityResolver) throws java.lang.Exception	attributeDefaultValues	B7	0/56
+net.n3.nanoxml.NonValidator	protected void processAttList(net.n3.nanoxml.IXMLReader, net.n3.nanoxml.IXMLEntityResolver) throws java.lang.Exception	attributeDefaultValues	B9	0/52
+net.n3.nanoxml.NonValidator	protected void processAttList(net.n3.nanoxml.IXMLReader, net.n3.nanoxml.IXMLEntityResolver) throws java.lang.Exception	attributeDefaultValues	B10	0/51
+net.n3.nanoxml.NonValidator	protected void processAttList(net.n3.nanoxml.IXMLReader, net.n3.nanoxml.IXMLEntityResolver) throws java.lang.Exception	attributeDefaultValues	B33	0/2
+net.n3.nanoxml.XMLWriter	public void write(net.n3.nanoxml.IXMLElement, boolean, int, boolean) throws java.io.IOException	writer	B1	0/62
+nanoxml.XMLElement	protected void writeEncoded(java.io.Writer, java.lang.String) throws java.io.IOException	writer	B2	0/46
+org.jhotdraw.draw.action.ToolBarButtonFactory	public static void addStrokePlacementButtonTo(javax.swing.JToolBar, org.jhotdraw.draw.DrawingEditor) 	strokePlacementPopupButton	B1	0/41
+net.n3.nanoxml.XMLWriter	private void writeEncoded(java.lang.String) 	writer	B2	0/26
+nanoxml.XMLElement	protected boolean checkCDATA(java.lang.StringBuffer) throws java.io.IOException	buf	B5	0/24
+nanoxml.XMLElement	protected boolean checkCDATA(java.lang.StringBuffer) throws java.io.IOException	buf	B6	0/23
+org.jhotdraw.draw.TriangleFigure	public sealed java.awt.geom.Rectangle2D.Double getFigureDrawBounds() 	width	B1	0/18
+org.jhotdraw.samples.svg.SVGApplicationModel	private void addCreationButtonsTo(javax.swing.JToolBar, org.jhotdraw.draw.DrawingEditor) 	drawLabels	B1	0/18
+org.jhotdraw.samples.svg.SVGPanel	private void addCreationButtonsTo(javax.swing.JToolBar, org.jhotdraw.draw.DrawingEditor) 	drawLabels	B1	0/18
+net.n3.nanoxml.NonValidator	protected void processElement(net.n3.nanoxml.IXMLReader, net.n3.nanoxml.IXMLEntityResolver) throws java.lang.Exception	ch	B3	0/17
+net.n3.nanoxml.NonValidator	protected void processElement(net.n3.nanoxml.IXMLReader, net.n3.nanoxml.IXMLEntityResolver) throws java.lang.Exception	entityResolver	B3	0/17
+net.n3.nanoxml.NonValidator	protected void processElement(net.n3.nanoxml.IXMLReader, net.n3.nanoxml.IXMLEntityResolver) throws java.lang.Exception	str	B3	0/17
+org.jhotdraw.draw.action.ToolBarButtonFactory	public static void addStrokeTypeButtonTo(javax.swing.JToolBar, org.jhotdraw.draw.DrawingEditor) 	strokeTypePopupButton	B1	0/17
+org.jhotdraw.draw.BezierControlPointHandle	public void trackEnd(java.awt.Point, java.awt.Point, int) 	figure	B1	0/17
+org.jhotdraw.draw.BezierControlPointHandle	public void trackEnd(java.awt.Point, java.awt.Point, int) 	figure	B2	0/15
+nanoxml.XMLElement	protected void skipSpecialTag(int) throws java.io.IOException	stringDelimiter	B11	0/16
+nanoxml.XMLElement	protected void resolveEntity(java.lang.StringBuffer) throws java.io.IOException	buf	B2	0/16
+nanoxml.XMLElement	protected void resolveEntity(java.lang.StringBuffer) throws java.io.IOException	buf	B6	0/11
+org.jhotdraw.samples.net.NetApplicationModel	public sealed List<javax.swing.JMenu> createMenus(org.jhotdraw.app.Application, org.jhotdraw.app.Project) 	m	B1	0/15
+org.jhotdraw.samples.pert.PertApplicationModel	public sealed List<javax.swing.JMenu> createMenus(org.jhotdraw.app.Application, org.jhotdraw.app.Project) 	m	B1	0/15
+org.jhotdraw.draw.BezierControlPointHandle	public void trackEnd(java.awt.Point, java.awt.Point, int) 	v	B2	0/15
+net.n3.nanoxml.CDATAReader	public sealed void close() throws java.io.IOException	reader	B1	0/14
+org.jhotdraw.app.action.DeleteAction	public void deleteNextChar(java.awt.event.ActionEvent) 	beep	B1	0/14
+org.jhotdraw.app.action.DeleteAction	public void deleteNextChar(java.awt.event.ActionEvent) 	beep	B2	0/10
+org.jhotdraw.draw.SelectionTool	public sealed void mousePressed(java.awt.event.MouseEvent) 	tracker	B1	0/14
+org.jhotdraw.draw.SelectionTool	public sealed void mousePressed(java.awt.event.MouseEvent) 	tracker	B8	0/2
+org.jhotdraw.draw.action.JPopupButton	private void showPopup(java.awt.event.MouseEvent) 	popupMenu	B2	0/13
+org.jhotdraw.draw.action.JPopupButton	private void showPopup(java.awt.event.MouseEvent) 	x	B2	0/13
+org.jhotdraw.draw.action.JPopupButton	private void showPopup(java.awt.event.MouseEvent) 	y	B2	0/13
+org.jhotdraw.draw.action.ToolBarButtonFactory	public static void addStrokeDashesButtonTo(javax.swing.JToolBar, org.jhotdraw.draw.DrawingEditor) 	strokeDashesPopupButton	B1	0/13
+org.jhotdraw.draw.DelegationSelectionTool	protected void showPopupMenu(org.jhotdraw.draw.Figure, java.awt.Point, java.awt.Component) 	popupActions	B1	0/12
+org.jhotdraw.draw.RoundRectangleFigure	public java.awt.geom.Point2D.Double chop(java.awt.geom.Point2D.Double) 	grow	B1	0/12
+org.jhotdraw.draw.SelectionTool	public sealed void mousePressed(java.awt.event.MouseEvent) 	newTracker	B1	0/12
+org.jhotdraw.draw.ChopBoxConnector	protected java.awt.geom.Point2D.Double chop(org.jhotdraw.draw.Figure, java.awt.geom.Point2D.Double) 	grow	B2	0/12
+org.jhotdraw.draw.ChopEllipseConnector	protected sealed java.awt.geom.Point2D.Double chop(org.jhotdraw.draw.Figure, java.awt.geom.Point2D.Double) 	grow	B2	0/12
+org.jhotdraw.draw.GraphicalCompositeFigure	public java.awt.geom.Point2D.Double chop(java.awt.geom.Point2D.Double) 	grow	B2	0/12
+org.jhotdraw.samples.net.NetApplicationModel	private void addCreationButtonsTo(javax.swing.JToolBar, org.jhotdraw.draw.DrawingEditor) 	labels	B1	0/11
+org.jhotdraw.samples.net.NetPanel	private void addCreationButtonsTo(javax.swing.JToolBar, org.jhotdraw.draw.DrawingEditor) 	labels	B1	0/11
+org.jhotdraw.draw.BezierControlPointHandle	public void trackEnd(java.awt.Point, java.awt.Point, int) 	p2	B3	0/11
+org.jhotdraw.app.OSXPaletteHandler	private void maybeHidePalettes() 	hasFocus	B1	0/10
+org.jhotdraw.app.OSXPaletteHandler	private void maybeHidePalettes() 	hasFocus	B2	0/9
+org.jhotdraw.draw.DelegationSelectionTool	protected void showPopupMenu(org.jhotdraw.draw.Figure, java.awt.Point, java.awt.Component) 	selectionActions	B2	0/10
+org.jhotdraw.draw.DelegationSelectionTool	protected void showPopupMenu(org.jhotdraw.draw.Figure, java.awt.Point, java.awt.Component) 	selectionActions	B4	0/7
+net.n3.nanoxml.NonValidator	protected void processConditionalSection(net.n3.nanoxml.IXMLReader, net.n3.nanoxml.IXMLEntityResolver) throws java.lang.Exception	subreader	B11	0/9
+net.n3.nanoxml.XMLUtil	static void skipTag(net.n3.nanoxml.IXMLReader) throws java.io.IOException, net.n3.nanoxml.XMLParseException	reader	B2	0/9
+org.jhotdraw.app.DefaultMDIApplication	public void show(org.jhotdraw.app.Project) 	i	B6	0/9
+org.jhotdraw.app.DefaultMDIApplication	public void show(org.jhotdraw.app.Project) 	moved	B6	0/9
+org.jhotdraw.app.DefaultOSXApplication	public void show(org.jhotdraw.app.Project) 	i	B6	0/9
+org.jhotdraw.app.DefaultOSXApplication	public void show(org.jhotdraw.app.Project) 	moved	B6	0/9
+org.jhotdraw.app.DefaultSDIApplication	public void show(org.jhotdraw.app.Project) 	i	B8	0/9
+org.jhotdraw.app.DefaultSDIApplication	public void show(org.jhotdraw.app.Project) 	moved	B8	0/9
+org.jhotdraw.draw.BezierScaleHandle	public void trackStep(java.awt.Point, java.awt.Point, int) 	transform	B1	0/9
+org.jhotdraw.draw.action.ToolBarButtonFactory	public static void addFontButtonsTo(javax.swing.JToolBar, org.jhotdraw.draw.DrawingEditor) 	underlineToggleButton	B16	0/9
+org.jhotdraw.draw.action.ToolBarButtonFactory	public static void addStrokeDecorationButtonTo(javax.swing.JToolBar, org.jhotdraw.draw.DrawingEditor) 	strokeDecorationPopupButton	B1	0/9
+net.n3.nanoxml.XMLUtil	static void skipTag(net.n3.nanoxml.IXMLReader) throws java.io.IOException, net.n3.nanoxml.XMLParseException	level	B2	0/9
+net.n3.nanoxml.XMLUtil	static void skipTag(net.n3.nanoxml.IXMLReader) throws java.io.IOException, net.n3.nanoxml.XMLParseException	level	B3	0/8
+net.n3.nanoxml.NonValidator	protected void processConditionalSection(net.n3.nanoxml.IXMLReader, net.n3.nanoxml.IXMLEntityResolver) throws java.lang.Exception	buf	B11	0/9
+net.n3.nanoxml.NonValidator	protected void processConditionalSection(net.n3.nanoxml.IXMLReader, net.n3.nanoxml.IXMLEntityResolver) throws java.lang.Exception	buf	B12	0/7
+net.n3.nanoxml.StdXMLReader	public java.io.Reader openStream(java.lang.String, java.lang.String) throws java.net.MalformedURLException, java.io.FileNotFoundException, java.io.IOException	url	B1	0/9
+net.n3.nanoxml.StdXMLReader	public java.io.Reader openStream(java.lang.String, java.lang.String) throws java.net.MalformedURLException, java.io.FileNotFoundException, java.io.IOException	url	B2	0/5
+org.jhotdraw.draw.DragTracker	public sealed void mousePressed(java.awt.event.MouseEvent) 	oldPoint	B6	0/9
+org.jhotdraw.draw.DragTracker	public sealed void mousePressed(java.awt.event.MouseEvent) 	oldPoint	B7	0/8
+org.jhotdraw.draw.DragTracker	public sealed void mousePressed(java.awt.event.MouseEvent) 	oldPoint	B9	0/4
+org.jhotdraw.draw.BezierTool	public sealed void mouseReleased(java.awt.event.MouseEvent) 	fittedPath	B7	0/9
+org.jhotdraw.draw.BezierTool	public sealed void mouseReleased(java.awt.event.MouseEvent) 	fittedPath	B8	0/7
+org.jhotdraw.draw.BezierTool	public sealed void mouseReleased(java.awt.event.MouseEvent) 	fittedPath	B9	0/2
+org.jhotdraw.samples.svg.figures.SVGPath	protected void readPoints(org.jhotdraw.xml.DOMInput) throws java.io.IOException	child	B7	0/9
+org.jhotdraw.samples.svg.figures.SVGPath	protected void readPoints(org.jhotdraw.xml.DOMInput) throws java.io.IOException	child	B8	0/5
+org.jhotdraw.samples.svg.figures.SVGPath	protected void readPoints(org.jhotdraw.xml.DOMInput) throws java.io.IOException	child	B10	0/3
+org.jhotdraw.app.DefaultMDIApplication	public void show(org.jhotdraw.app.Project) 	loc	B6	0/9
+org.jhotdraw.app.DefaultMDIApplication	public void show(org.jhotdraw.app.Project) 	loc	B9	0/2
+org.jhotdraw.app.DefaultOSXApplication	public void show(org.jhotdraw.app.Project) 	loc	B6	0/9
+org.jhotdraw.app.DefaultOSXApplication	public void show(org.jhotdraw.app.Project) 	loc	B9	0/2
+org.jhotdraw.app.DefaultSDIApplication	public void show(org.jhotdraw.app.Project) 	loc	B8	0/9
+org.jhotdraw.app.DefaultSDIApplication	public void show(org.jhotdraw.app.Project) 	loc	B11	0/2
+net.n3.nanoxml.NonValidator	protected void processEntity(net.n3.nanoxml.IXMLReader, net.n3.nanoxml.IXMLEntityResolver) throws java.lang.Exception	publicID	B9	0/8
+org.jhotdraw.draw.AbstractHandle	protected void drawDiamond(java.awt.Graphics2D, java.awt.Color, java.awt.Color) 	p	B1	0/8
+org.jhotdraw.draw.action.ToolBarButtonFactory	public static void addStrokeWidthButtonTo(javax.swing.JToolBar, org.jhotdraw.draw.DrawingEditor) 	strokeWidthPopupButton	B1	0/8
+org.jhotdraw.samples.net.NetApplicationModel	public sealed void initApplication(org.jhotdraw.app.Application) 	aa	B1	0/8
+org.jhotdraw.samples.net.NetApplicationModel	public sealed void initApplication(org.jhotdraw.app.Application) 	drawLabels	B1	0/8
+org.jhotdraw.samples.net.NetProject	public sealed void init() 	prefs	B1	0/8
+org.jhotdraw.samples.net.NetProject	public sealed void init() 	scrollPane	B1	0/8
+org.jhotdraw.samples.net.NetProject	public sealed void init() 	view	B1	0/8
+org.jhotdraw.samples.pert.PertApplicationModel	public sealed void initApplication(org.jhotdraw.app.Application) 	aa	B1	0/8
+org.jhotdraw.samples.pert.PertApplicationModel	public sealed void initApplication(org.jhotdraw.app.Application) 	drawLabels	B1	0/8
+org.jhotdraw.samples.pert.PertProject	public sealed void init() 	prefs	B1	0/8
+org.jhotdraw.samples.pert.PertProject	public sealed void init() 	scrollPane	B1	0/8
+org.jhotdraw.samples.pert.PertProject	public sealed void init() 	view	B1	0/8
+org.jhotdraw.app.action.OSXTogglePaletteAction	public sealed void putValue(java.lang.String, java.lang.Object) 	app	B1	0/8
+org.jhotdraw.app.action.OSXTogglePaletteAction	public sealed void putValue(java.lang.String, java.lang.Object) 	app	B2	0/7
+org.jhotdraw.app.action.OSXTogglePaletteAction	public sealed void putValue(java.lang.String, java.lang.Object) 	app	B3	0/6
+org.jhotdraw.app.action.OSXTogglePaletteAction	public void setPalette(java.awt.Window) 	app	B3	0/8
+org.jhotdraw.app.action.OSXTogglePaletteAction	public void setPalette(java.awt.Window) 	app	B4	0/6
+org.jhotdraw.app.AbstractApplication	public void addRecentFile(java.io.File) 	prefs	B3	0/8
+org.jhotdraw.app.AbstractApplication	public void addRecentFile(java.io.File) 	prefs	B5	0/5
+org.jhotdraw.draw.action.ToolBarButtonFactory	public static void addFontButtonsTo(javax.swing.JToolBar, org.jhotdraw.draw.DrawingEditor) 	allFonts	B1	0/8
+org.jhotdraw.draw.action.ToolBarButtonFactory	public static void addFontButtonsTo(javax.swing.JToolBar, org.jhotdraw.draw.DrawingEditor) 	allFonts	B2	0/5
+org.jhotdraw.geom.BezierPath	public void transform(java.awt.geom.AffineTransform) 	cp	B1	0/8
+org.jhotdraw.geom.BezierPath	public void transform(java.awt.geom.AffineTransform) 	cp	B2	0/7
+org.jhotdraw.geom.BezierPath	public void transform(java.awt.geom.AffineTransform) 	cp	B3	0/6
+org.jhotdraw.geom.BezierPath	public void transform(java.awt.geom.AffineTransform) 	cp	B4	0/5
+org.jhotdraw.geom.BezierPath	public void transform(java.awt.geom.AffineTransform) 	p	B1	0/8
+org.jhotdraw.geom.BezierPath	public void transform(java.awt.geom.AffineTransform) 	p	B2	0/7
+org.jhotdraw.geom.BezierPath	public void transform(java.awt.geom.AffineTransform) 	p	B3	0/6
+org.jhotdraw.geom.BezierPath	public void transform(java.awt.geom.AffineTransform) 	p	B4	0/5
+org.jhotdraw.draw.action.ToolBarButtonFactory	public static void addSelectionToolTo(javax.swing.JToolBar, org.jhotdraw.draw.DrawingEditor, Collection<javax.swing.Action>, Collection<javax.swing.Action>) 	t	B1	0/8
+org.jhotdraw.draw.action.ToolBarButtonFactory	public static void addSelectionToolTo(javax.swing.JToolBar, org.jhotdraw.draw.DrawingEditor, Collection<javax.swing.Action>, Collection<javax.swing.Action>) 	t	B4	0/6
+org.jhotdraw.draw.action.ToolBarButtonFactory	public static void addSelectionToolTo(javax.swing.JToolBar, org.jhotdraw.draw.DrawingEditor, Collection<javax.swing.Action>, Collection<javax.swing.Action>) 	t	B7	0/3
+net.n3.nanoxml.XMLUtil	static void skipWhitespace(net.n3.nanoxml.IXMLReader, java.lang.StringBuffer) throws java.io.IOException	buffer	B3	0/8
+net.n3.nanoxml.XMLUtil	static void skipWhitespace(net.n3.nanoxml.IXMLReader, java.lang.StringBuffer) throws java.io.IOException	buffer	B6	0/3
+org.jhotdraw.samples.svg.figures.SVGPath	protected void readPoints(org.jhotdraw.xml.DOMInput) throws java.io.IOException	child	B2	0/8
+org.jhotdraw.samples.svg.figures.SVGPath	protected void readPoints(org.jhotdraw.xml.DOMInput) throws java.io.IOException	child	B3	0/5
+org.jhotdraw.samples.svg.figures.SVGPath	protected void readPoints(org.jhotdraw.xml.DOMInput) throws java.io.IOException	child	B5	0/3
+org.jhotdraw.app.DefaultMDIApplication	private void updateOpenRecentMenu(javax.swing.JMenu) 	openRecentMenu	B2	0/7
+org.jhotdraw.app.DefaultOSXApplication	private void updateOpenRecentMenu(javax.swing.JMenu) 	openRecentMenu	B2	0/7
+org.jhotdraw.app.DefaultSDIApplication	private void updateOpenRecentMenu(javax.swing.JMenu) 	openRecentMenu	B2	0/7
+org.jhotdraw.draw.SelectionTool	public void toolDone(org.jhotdraw.draw.ToolEvent) 	tracker	B2	0/7
+org.jhotdraw.draw.TextTool	protected void beginEdit(org.jhotdraw.draw.TextHolder) 	textField	B1	0/7
+org.jhotdraw.draw.action.ToolBarButtonFactory	public static void addFontButtonsTo(javax.swing.JToolBar, org.jhotdraw.draw.DrawingEditor) 	italicToggleButton	B16	0/7
+org.jhotdraw.geom.Geom	public static boolean lineContainsPoint(double, double, double, double, double, double, double) 	r	B1	0/7
+org.jhotdraw.gui.JSheet	private static org.jhotdraw.gui.JSheet createSheet(javax.swing.JOptionPane, java.awt.Component, int) 	contentPane	B4	0/7
+org.jhotdraw.samples.draw.Main	public static void main(java.lang.String[]) 	app	B1	0/7
+org.jhotdraw.samples.draw.Main	public static void main(java.lang.String[]) 	app	B6	0/7
+org.jhotdraw.samples.net.Main	public static void main(java.lang.String[]) 	app	B1	0/7
+org.jhotdraw.samples.net.Main	public static void main(java.lang.String[]) 	app	B6	0/7
+org.jhotdraw.samples.pert.Main	public static void main(java.lang.String[]) 	app	B1	0/7
+org.jhotdraw.samples.pert.Main	public static void main(java.lang.String[]) 	app	B6	0/7
+org.jhotdraw.samples.svg.SVGDrawing	public sealed void read(org.jhotdraw.xml.DOMInput) throws java.io.IOException	child	B17	0/7
+org.jhotdraw.samples.svg.SVGDrawing	public sealed void read(org.jhotdraw.xml.DOMInput) throws java.io.IOException	g	B17	0/7
+org.jhotdraw.samples.svg.SVGLiveConnectApplet	private void initComponents() 	saveButton	B1	0/7
+org.jhotdraw.samples.svg.action.CombineAction	public sealed void groupFigures(org.jhotdraw.draw.DrawingView, org.jhotdraw.draw.CompositeFigure, Collection<org.jhotdraw.draw.Figure>) 	view	B1	0/7
+org.jhotdraw.samples.svg.action.SplitAction	public sealed void groupFigures(org.jhotdraw.draw.DrawingView, org.jhotdraw.draw.CompositeFigure, Collection<org.jhotdraw.draw.Figure>) 	view	B1	0/7
+org.jhotdraw.samples.svg.figures.SVGGroup	public sealed void read(org.jhotdraw.xml.DOMInput) throws java.io.IOException	child	B26	0/7
+org.jhotdraw.samples.svg.figures.SVGGroup	public sealed void read(org.jhotdraw.xml.DOMInput) throws java.io.IOException	g	B26	0/7
+nanoxml.XMLElement	protected void skipComment() throws java.io.IOException	dashesToRead	B2	0/7
+nanoxml.XMLElement	protected void skipComment() throws java.io.IOException	dashesToRead	B3	0/4
+org.jhotdraw.draw.SelectionTool	public void toolDone(org.jhotdraw.draw.ToolEvent) 	newTracker	B2	0/7
+org.jhotdraw.draw.SelectionTool	public void toolDone(org.jhotdraw.draw.ToolEvent) 	newTracker	B4	0/4
+org.jhotdraw.draw.AbstractLineDecoration	public java.awt.geom.Rectangle2D.Double getDrawBounds(org.jhotdraw.draw.Figure, java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	grow	B2	0/7
+org.jhotdraw.app.action.SaveAction	protected void fileSaved(org.jhotdraw.app.Project, java.io.File, java.lang.Object) 	multiOpenId	B2	0/7
+org.jhotdraw.app.action.SaveAction	protected void fileSaved(org.jhotdraw.app.Project, java.io.File, java.lang.Object) 	multiOpenId	B3	0/4
+org.jhotdraw.app.action.SaveAction	protected void fileSaved(org.jhotdraw.app.Project, java.io.File, java.lang.Object) 	multiOpenId	B4	0/2
+org.jhotdraw.util.prefs.ToolBarPrefsHandler	private void locationChanged() 	constraint	B10	0/7
+org.jhotdraw.util.prefs.ToolBarPrefsHandler	private void locationChanged() 	constraint	B5	0/7
+org.jhotdraw.app.action.SaveBeforeAction	public void actionPerformed(java.awt.event.ActionEvent) 	labels	B3	0/6
+org.jhotdraw.app.action.SaveBeforeAction	public void actionPerformed(java.awt.event.ActionEvent) 	p	B3	0/6
+org.jhotdraw.app.action.SaveBeforeAction	public void actionPerformed(java.awt.event.ActionEvent) 	pane	B3	0/6
+org.jhotdraw.draw.DiamondFigure	protected sealed void drawFill(java.awt.Graphics2D) 	diamond	B6	0/6
+org.jhotdraw.draw.DiamondFigure	protected sealed void drawStroke(java.awt.Graphics2D) 	diamond	B6	0/6
+org.jhotdraw.draw.LineConnectionFigure	protected sealed void readPoints(org.jhotdraw.xml.DOMInput) throws java.io.IOException	in	B1	0/6
+org.jhotdraw.draw.LineConnectionFigure	protected sealed void writePoints(org.jhotdraw.xml.DOMOutput) throws java.io.IOException	out	B1	0/6
+org.jhotdraw.draw.TextAreaTool	protected void beginEdit(org.jhotdraw.draw.TextHolder) 	textArea	B1	0/6
+org.jhotdraw.draw.action.ToolBarButtonFactory	public static void addStrokeDashesButtonTo(javax.swing.JToolBar, org.jhotdraw.draw.DrawingEditor) 	fdashes	B3	0/6
+org.jhotdraw.draw.action.ToolBarButtonFactory	public static void addToolTo(javax.swing.JToolBar, org.jhotdraw.draw.DrawingEditor, org.jhotdraw.draw.Tool, java.lang.String, org.jhotdraw.util.ResourceBundleUtil) 	t	B1	0/6
+org.jhotdraw.xml.DefaultDOMFactory	public void addEnum(java.lang.String, Enum#RAW) 	enums	B1	0/6
+org.jhotdraw.draw.GraphicalCompositeFigure	public void setPresentationFigure(org.jhotdraw.draw.Figure) 	newPresentationFigure	B4	0/6
+org.jhotdraw.draw.GraphicalCompositeFigure	public void setPresentationFigure(org.jhotdraw.draw.Figure) 	newPresentationFigure	B5	0/4
+org.jhotdraw.draw.TextAreaFigure	private float drawParagraph(java.awt.Graphics2D, java.text.AttributedCharacterIterator, float, float, float, float[], int) 	tabLocations	B1	0/6
+org.jhotdraw.draw.TextAreaFigure	private float drawParagraph(java.awt.Graphics2D, java.text.AttributedCharacterIterator, float, float, float, float[], int) 	tabLocations	B2	0/4
+org.jhotdraw.xml.DefaultDOMFactory	public void addEnum(java.lang.String, Enum#RAW) 	valueToEnumMap	B1	0/6
+org.jhotdraw.xml.DefaultDOMFactory	public void addEnum(java.lang.String, Enum#RAW) 	valueToEnumMap	B3	0/3
+org.jhotdraw.app.AbstractApplication	public void init() 	recentFiles	B1	0/6
+org.jhotdraw.app.AbstractApplication	public void init() 	recentFiles	B2	0/4
+org.jhotdraw.app.AbstractApplication	public void init() 	recentFiles	B3	0/3
+org.jhotdraw.app.action.ProjectPropertyAction	private void updateSelectedState() 	isSelected	B1	0/6
+org.jhotdraw.app.action.ProjectPropertyAction	private void updateSelectedState() 	isSelected	B2	0/2
+org.jhotdraw.app.action.ToggleProjectPropertyAction	private void updateSelectedState() 	isSelected	B1	0/6
+org.jhotdraw.app.action.ToggleProjectPropertyAction	private void updateSelectedState() 	isSelected	B2	0/2
+org.jhotdraw.draw.DefaultDrawingView	public void handleRequestSecondaryHandles(org.jhotdraw.draw.HandleEvent) 	h	B1	0/6
+org.jhotdraw.draw.DefaultDrawingView	public void handleRequestSecondaryHandles(org.jhotdraw.draw.HandleEvent) 	h	B2	0/3
+org.jhotdraw.draw.DefaultDrawingView	public void handleRequestSecondaryHandles(org.jhotdraw.draw.HandleEvent) 	h	B3	0/2
+org.jhotdraw.app.DefaultOSXApplication	public sealed void init() 	paletteHandler	B1	0/5
+org.jhotdraw.draw.AbstractLineDecoration	public double getDecorationRadius(org.jhotdraw.draw.Figure) 	scaleFactor	B1	0/5
+org.jhotdraw.draw.BezierFigure	public final void removeNode(int) 	oldPoint	B1	0/5
+org.jhotdraw.draw.BezierFigure	public final void removeNode(int) 	path	B1	0/5
+org.jhotdraw.draw.FloatingTextField	public void createOverlay(org.jhotdraw.draw.DrawingView, org.jhotdraw.draw.TextHolder) 	editWidget	B1	0/5
+org.jhotdraw.draw.RoundRectangleFigure	public void setArc(double, double) 	roundrect	B1	0/5
+org.jhotdraw.draw.SelectAreaTracker	public void mouseDragged(java.awt.event.MouseEvent) 	invalidatedArea	B1	0/5
+org.jhotdraw.draw.action.GroupAction	public void groupFigures(org.jhotdraw.draw.DrawingView, org.jhotdraw.draw.CompositeFigure, Collection<org.jhotdraw.draw.Figure>) 	f	B1	0/5
+org.jhotdraw.draw.action.GroupAction	public void groupFigures(org.jhotdraw.draw.DrawingView, org.jhotdraw.draw.CompositeFigure, Collection<org.jhotdraw.draw.Figure>) 	view	B1	0/5
+org.jhotdraw.draw.action.ToolBarButtonFactory	public static void addAttributesButtonsTo(javax.swing.JToolBar, org.jhotdraw.draw.DrawingEditor) 	b	B1	0/5
+org.jhotdraw.draw.action.ToolBarButtonFactory	public static void addColorButtonTo(javax.swing.JToolBar, org.jhotdraw.draw.DrawingEditor, AttributeKey#RAW, Map<java.lang.String,java.awt.Color>, int, java.lang.String, org.jhotdraw.util.ResourceBundleUtil) 	labels	B4	0/5
+org.jhotdraw.draw.action.ToolBarButtonFactory	public static void addFontButtonsTo(javax.swing.JToolBar, org.jhotdraw.draw.DrawingEditor) 	boldToggleButton	B16	0/5
+org.jhotdraw.draw.action.UngroupAction	public void groupFigures(org.jhotdraw.draw.DrawingView, org.jhotdraw.draw.CompositeFigure, Collection<org.jhotdraw.draw.Figure>) 	f	B1	0/5
+org.jhotdraw.draw.action.UngroupAction	public void groupFigures(org.jhotdraw.draw.DrawingView, org.jhotdraw.draw.CompositeFigure, Collection<org.jhotdraw.draw.Figure>) 	view	B1	0/5
+org.jhotdraw.geom.Geom	public static java.awt.Point angleToPoint(java.awt.Rectangle, double) 	y	B5	0/5
+org.jhotdraw.geom.Geom	public static java.awt.geom.Point2D.Double angleToPoint(java.awt.geom.Rectangle2D.Double, double) 	y	B5	0/5
+org.jhotdraw.gui.JSheet	private static org.jhotdraw.gui.JSheet createSheet(javax.swing.JOptionPane, java.awt.Component, int) 	pane	B4	0/5
+org.jhotdraw.samples.draw.DrawApplicationModel	public sealed List<javax.swing.JToolBar> createToolBars(org.jhotdraw.app.Application, org.jhotdraw.app.Project) 	editor	B1	0/5
+org.jhotdraw.samples.draw.DrawProject	private void initComponents() 	scrollPane	B1	0/5
+org.jhotdraw.samples.draw.DrawProject	public sealed void init() 	scrollPane	B1	0/5
+org.jhotdraw.samples.draw.DrawProject	public sealed void init() 	view	B1	0/5
+org.jhotdraw.samples.draw.DrawProject	public void setEditor(org.jhotdraw.draw.DrawingEditor) 	editor	B1	0/5
+org.jhotdraw.samples.draw.DrawProject	public void setEditor(org.jhotdraw.draw.DrawingEditor) 	oldValue	B1	0/5
+org.jhotdraw.samples.draw.Main	public static void main(java.lang.String[]) 	model	B6	0/5
+org.jhotdraw.samples.net.Main	public static void main(java.lang.String[]) 	model	B6	0/5
+org.jhotdraw.samples.net.NetApplicationModel	public sealed List<javax.swing.JToolBar> createToolBars(org.jhotdraw.app.Application, org.jhotdraw.app.Project) 	editor	B1	0/5
+org.jhotdraw.samples.net.NetProject	private void initComponents() 	scrollPane	B1	0/5
+org.jhotdraw.samples.net.NetProject	public void setEditor(org.jhotdraw.draw.DrawingEditor) 	editor	B1	0/5
+org.jhotdraw.samples.net.NetProject	public void setEditor(org.jhotdraw.draw.DrawingEditor) 	oldValue	B1	0/5
+org.jhotdraw.samples.net.figures.NodeFigure	private void createConnectors() 	connectors	B1	0/5
+org.jhotdraw.samples.pert.Main	public static void main(java.lang.String[]) 	model	B6	0/5
+org.jhotdraw.samples.pert.PertApplicationModel	public sealed List<javax.swing.JToolBar> createToolBars(org.jhotdraw.app.Application, org.jhotdraw.app.Project) 	editor	B1	0/5
+org.jhotdraw.samples.pert.PertProject	private void initComponents() 	scrollPane	B1	0/5
+org.jhotdraw.samples.pert.PertProject	public void setEditor(org.jhotdraw.draw.DrawingEditor) 	editor	B1	0/5
+org.jhotdraw.samples.pert.PertProject	public void setEditor(org.jhotdraw.draw.DrawingEditor) 	oldValue	B1	0/5
+org.jhotdraw.samples.svg.Main	public static void main(java.lang.String[]) 	model	B1	0/5
+org.jhotdraw.samples.svg.SVGApplicationModel	private void addAttributesButtonsTo(javax.swing.JToolBar, org.jhotdraw.draw.DrawingEditor) 	b	B1	0/5
+org.jhotdraw.samples.svg.SVGApplicationModel	public sealed List<javax.swing.JToolBar> createToolBars(org.jhotdraw.app.Application, org.jhotdraw.app.Project) 	editor	B1	0/5
+org.jhotdraw.samples.svg.SVGProject	private void initComponents() 	scrollPane	B1	0/5
+org.jhotdraw.samples.svg.SVGProject	public sealed void init() 	scrollPane	B1	0/5
+org.jhotdraw.samples.svg.SVGProject	public sealed void init() 	view	B1	0/5
+org.jhotdraw.samples.svg.SVGProject	public void setEditor(org.jhotdraw.draw.DrawingEditor) 	editor	B1	0/5
+org.jhotdraw.samples.svg.SVGProject	public void setEditor(org.jhotdraw.draw.DrawingEditor) 	oldValue	B1	0/5
+org.jhotdraw.samples.svg.action.CombineAction	public sealed Collection<org.jhotdraw.draw.Figure> ungroupFigures(org.jhotdraw.draw.DrawingView, org.jhotdraw.draw.CompositeFigure) 	path	B3	0/5
+org.jhotdraw.samples.svg.action.SplitAction	public sealed Collection<org.jhotdraw.draw.Figure> ungroupFigures(org.jhotdraw.draw.DrawingView, org.jhotdraw.draw.CompositeFigure) 	path	B3	0/5
+org.jhotdraw.samples.svg.figures.SVGPath	protected void validatePath() 	path	B2	0/5
+org.jhotdraw.util.ResourceBundleUtil	public javax.swing.ImageIcon getImageIcon(java.lang.String, Class#RAW) 	rsrcName	B4	0/5
+org.jhotdraw.xml.DefaultDOMFactory	public void addEnum(java.lang.String, Enum#RAW) 	enums	B1	0/5
+org.jhotdraw.draw.BezierControlPointHandle	private void fireAreaInvalidated(org.jhotdraw.geom.BezierPath.Node) 	vr	B1	0/5
+org.jhotdraw.draw.BezierControlPointHandle	private void fireAreaInvalidated(org.jhotdraw.geom.BezierPath.Node) 	vr	B2	0/4
+org.jhotdraw.draw.BezierNodeHandle	private void fireAreaInvalidated(org.jhotdraw.geom.BezierPath.Node) 	vr	B1	0/5
+org.jhotdraw.draw.BezierNodeHandle	private void fireAreaInvalidated(org.jhotdraw.geom.BezierPath.Node) 	vr	B2	0/4
+org.jhotdraw.samples.net.NetApplicationModel	public sealed List<javax.swing.JMenu> createMenus(org.jhotdraw.app.Application, org.jhotdraw.app.Project) 	m2	B2	0/5
+org.jhotdraw.samples.net.NetApplicationModel	public sealed List<javax.swing.JMenu> createMenus(org.jhotdraw.app.Application, org.jhotdraw.app.Project) 	m2	B3	0/4
+org.jhotdraw.samples.pert.PertApplicationModel	public sealed List<javax.swing.JMenu> createMenus(org.jhotdraw.app.Application, org.jhotdraw.app.Project) 	m2	B2	0/5
+org.jhotdraw.samples.pert.PertApplicationModel	public sealed List<javax.swing.JMenu> createMenus(org.jhotdraw.app.Application, org.jhotdraw.app.Project) 	m2	B3	0/4
+org.jhotdraw.app.action.LoadRecentAction	public sealed void doIt(org.jhotdraw.app.Project) 	multipleOpenId	B2	0/5
+org.jhotdraw.app.action.LoadRecentAction	public sealed void doIt(org.jhotdraw.app.Project) 	multipleOpenId	B3	0/2
+org.jhotdraw.app.action.LoadRecentAction	public sealed void doIt(org.jhotdraw.app.Project) 	project	B2	0/5
+org.jhotdraw.app.action.LoadRecentAction	public sealed void doIt(org.jhotdraw.app.Project) 	project	B5	0/2
+org.jhotdraw.app.action.OpenAction	protected void openFile(javax.swing.JFileChooser, org.jhotdraw.app.Project) 	multipleOpenId	B2	0/5
+org.jhotdraw.app.action.OpenAction	protected void openFile(javax.swing.JFileChooser, org.jhotdraw.app.Project) 	multipleOpenId	B3	0/2
+org.jhotdraw.app.action.OpenAction	protected void openFile(javax.swing.JFileChooser, org.jhotdraw.app.Project) 	project	B2	0/5
+org.jhotdraw.app.action.OpenAction	protected void openFile(javax.swing.JFileChooser, org.jhotdraw.app.Project) 	project	B5	0/2
+org.jhotdraw.app.action.OpenRecentAction	protected void openFile(org.jhotdraw.app.Project) 	multipleOpenId	B2	0/5
+org.jhotdraw.app.action.OpenRecentAction	protected void openFile(org.jhotdraw.app.Project) 	multipleOpenId	B3	0/2
+org.jhotdraw.app.action.OpenRecentAction	protected void openFile(org.jhotdraw.app.Project) 	project	B2	0/5
+org.jhotdraw.app.action.OpenRecentAction	protected void openFile(org.jhotdraw.app.Project) 	project	B5	0/2
+org.jhotdraw.draw.TriangleFigure	protected sealed void drawFill(java.awt.Graphics2D) 	triangle	B1	0/5
+org.jhotdraw.draw.TriangleFigure	protected sealed void drawFill(java.awt.Graphics2D) 	triangle	B2	0/2
+org.jhotdraw.draw.TriangleFigure	protected sealed void drawStroke(java.awt.Graphics2D) 	triangle	B1	0/5
+org.jhotdraw.draw.TriangleFigure	protected sealed void drawStroke(java.awt.Graphics2D) 	triangle	B2	0/2
+org.jhotdraw.draw.TriangleFigure	public boolean contains(java.awt.geom.Point2D.Double) 	triangle	B1	0/5
+org.jhotdraw.draw.TriangleFigure	public boolean contains(java.awt.geom.Point2D.Double) 	triangle	B2	0/2
+org.jhotdraw.draw.TriangleFigure	public java.awt.geom.Point2D.Double chop(java.awt.geom.Point2D.Double) 	triangle	B1	0/5
+org.jhotdraw.draw.TriangleFigure	public java.awt.geom.Point2D.Double chop(java.awt.geom.Point2D.Double) 	triangle	B2	0/2
+org.jhotdraw.draw.action.GroupAction	public void groupFigures(org.jhotdraw.draw.DrawingView, org.jhotdraw.draw.CompositeFigure, Collection<org.jhotdraw.draw.Figure>) 	group	B1	0/5
+org.jhotdraw.draw.action.GroupAction	public void groupFigures(org.jhotdraw.draw.DrawingView, org.jhotdraw.draw.CompositeFigure, Collection<org.jhotdraw.draw.Figure>) 	group	B2	0/2
+org.jhotdraw.draw.action.UngroupAction	public void groupFigures(org.jhotdraw.draw.DrawingView, org.jhotdraw.draw.CompositeFigure, Collection<org.jhotdraw.draw.Figure>) 	group	B1	0/5
+org.jhotdraw.draw.action.UngroupAction	public void groupFigures(org.jhotdraw.draw.DrawingView, org.jhotdraw.draw.CompositeFigure, Collection<org.jhotdraw.draw.Figure>) 	group	B2	0/2
+org.jhotdraw.samples.draw.DrawProject	public void setEditor(org.jhotdraw.draw.DrawingEditor) 	newValue	B1	0/5
+org.jhotdraw.samples.draw.DrawProject	public void setEditor(org.jhotdraw.draw.DrawingEditor) 	newValue	B3	0/2
+org.jhotdraw.samples.net.NetProject	public void setEditor(org.jhotdraw.draw.DrawingEditor) 	newValue	B1	0/5
+org.jhotdraw.samples.net.NetProject	public void setEditor(org.jhotdraw.draw.DrawingEditor) 	newValue	B3	0/2
+org.jhotdraw.samples.pert.PertProject	public void setEditor(org.jhotdraw.draw.DrawingEditor) 	newValue	B1	0/5
+org.jhotdraw.samples.pert.PertProject	public void setEditor(org.jhotdraw.draw.DrawingEditor) 	newValue	B3	0/2
+org.jhotdraw.samples.svg.SVGProject	public void setEditor(org.jhotdraw.draw.DrawingEditor) 	newValue	B1	0/5
+org.jhotdraw.samples.svg.SVGProject	public void setEditor(org.jhotdraw.draw.DrawingEditor) 	newValue	B3	0/2
+org.jhotdraw.draw.DefaultDrawing	public void draw(java.awt.Graphics2D) 	toDraw	B1	0/5
+org.jhotdraw.draw.DefaultDrawing	public void draw(java.awt.Graphics2D) 	toDraw	B2	0/3
+org.jhotdraw.draw.DefaultDrawing	public void draw(java.awt.Graphics2D) 	toDraw	B3	0/2
+org.jhotdraw.draw.action.GroupAction	public void actionPerformed(java.awt.event.ActionEvent) 	edit	B2	0/5
+org.jhotdraw.draw.action.UngroupAction	public void actionPerformed(java.awt.event.ActionEvent) 	edit	B2	0/5
+org.jhotdraw.util.ResourceBundleUtil	public javax.swing.ImageIcon getImageIcon(java.lang.String, Class#RAW) 	imageDir	B4	0/5
+org.jhotdraw.samples.svg.figures.SVGPath	protected void readPoints(org.jhotdraw.xml.DOMInput) throws java.io.IOException	b	B2	0/5
+org.jhotdraw.samples.svg.figures.SVGPath	protected void readPoints(org.jhotdraw.xml.DOMInput) throws java.io.IOException	b	B3	0/2
+net.n3.nanoxml.NonValidator	public void elementStarted(java.lang.String, java.lang.String, int) 	attribs	B1	0/4
+net.n3.nanoxml.StdXMLReader	protected sealed void finalize() throws java.lang.Throwable	currentReader	B1	0/4
+org.jhotdraw.app.DefaultMDIApplication	public sealed void init() 	parentFrame	B1	0/4
+org.jhotdraw.app.DefaultOSXApplication	public void show(org.jhotdraw.app.Project) 	paletteHandler	B11	0/4
+org.jhotdraw.app.action.RedoAction	protected void updateEnabledState() 	isEnabled	B1	0/4
+org.jhotdraw.app.action.UndoAction	protected void updateEnabledState() 	isEnabled	B1	0/4
+org.jhotdraw.draw.AbstractAttributedCompositeFigure	public sealed java.awt.geom.Rectangle2D.Double getFigureDrawBounds() 	width	B1	0/4
+org.jhotdraw.draw.AttributedFigure	public sealed java.awt.geom.Rectangle2D.Double getFigureDrawBounds() 	width	B1	0/4
+org.jhotdraw.draw.BezierLabelLocator	public java.awt.geom.Point2D.Double getRelativeLabelPoint(org.jhotdraw.draw.BezierFigure, org.jhotdraw.draw.Figure) 	dir	B3	0/4
+org.jhotdraw.draw.DefaultDrawingView	public void copy() 	transfer	B9	0/4
+org.jhotdraw.draw.RelativeDecoratorLocator	public sealed java.awt.geom.Point2D.Double locate(org.jhotdraw.draw.Figure) 	r	B1	0/4
+org.jhotdraw.draw.TextAreaFigure	public void basicSetBounds(java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	bounds	B1	0/4
+org.jhotdraw.draw.TextFigure	protected java.awt.font.TextLayout getTextLayout() 	textAttributes	B4	0/4
+org.jhotdraw.draw.action.ToolBarButtonFactory	public static void addSelectionToolTo(javax.swing.JToolBar, org.jhotdraw.draw.DrawingEditor, Collection<javax.swing.Action>, Collection<javax.swing.Action>) 	group	B7	0/4
+org.jhotdraw.geom.Bezier	private static void fitCubic(java.awt.geom.Point2D.Double[], int, int, java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double, double, java.awt.geom.GeneralPath) 	tHatCenter	B13	0/4
+org.jhotdraw.geom.Bezier	private static void fitCubic(java.awt.geom.Point2D.Double[], int, int, java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double, double, org.jhotdraw.geom.BezierPath) 	tHatCenter	B13	0/4
+org.jhotdraw.geom.BezierPath	public void curveTo(double, double, double, double, double, double) 	lastPoint	B3	0/4
+org.jhotdraw.samples.svg.SVGLiveConnectApplet	private void initComponents() 	drawingPanel	B1	0/4
+org.jhotdraw.samples.svg.SVGLiveConnectApplet	private void initComponents() 	loadButton	B1	0/4
+org.jhotdraw.samples.svg.figures.SVGPath	protected void writePoints(org.jhotdraw.xml.DOMOutput) 	out	B2	0/4
+org.jhotdraw.draw.AbstractCompositeFigure	public void addAll(Collection<org.jhotdraw.draw.Figure>) 	f	B2	0/4
+org.jhotdraw.draw.AbstractCompositeFigure	public void addAll(Collection<org.jhotdraw.draw.Figure>) 	f	B3	0/3
+org.jhotdraw.app.DefaultSDIApplication	protected javax.swing.JMenuBar createMenuBar(org.jhotdraw.app.Project, List<javax.swing.Action>) 	m2	B9	0/4
+org.jhotdraw.app.DefaultSDIApplication	protected javax.swing.JMenuBar createMenuBar(org.jhotdraw.app.Project, List<javax.swing.Action>) 	m2	B10	0/3
+org.jhotdraw.draw.LineConnectionFigure	public sealed void remap(Map#RAW) 	newEndFigure	B4	0/4
+org.jhotdraw.draw.LineConnectionFigure	public sealed void remap(Map#RAW) 	newEndFigure	B5	0/3
+org.jhotdraw.gui.datatransfer.CompositeTransferable	public void add(java.awt.datatransfer.Transferable) 	flavors	B2	0/4
+org.jhotdraw.gui.datatransfer.CompositeTransferable	public void add(java.awt.datatransfer.Transferable) 	flavors	B3	0/3
+org.jhotdraw.xml.NanoXMLDOMInput	public java.lang.Object readObject(int) throws java.io.IOException	a	B18	0/4
+org.jhotdraw.xml.NanoXMLDOMInput	public java.lang.Object readObject(int) throws java.io.IOException	a	B19	0/3
+org.jhotdraw.xml.NanoXMLDOMInput	public java.lang.Object readObject(int) throws java.io.IOException	a	B23	0/4
+org.jhotdraw.xml.NanoXMLDOMInput	public java.lang.Object readObject(int) throws java.io.IOException	a	B24	0/3
+org.jhotdraw.xml.NanoXMLDOMInput	public java.lang.Object readObject(int) throws java.io.IOException	a	B28	0/4
+org.jhotdraw.xml.NanoXMLDOMInput	public java.lang.Object readObject(int) throws java.io.IOException	a	B29	0/3
+org.jhotdraw.xml.NanoXMLDOMOutput	public void save(java.io.Writer) throws java.io.IOException	out	B1	0/4
+org.jhotdraw.xml.NanoXMLDOMOutput	public void save(java.io.Writer) throws java.io.IOException	out	B2	0/3
+org.jhotdraw.xml.NanoXMLLiteDOMInput	public java.lang.Object readObject(int) throws java.io.IOException	a	B18	0/4
+org.jhotdraw.xml.NanoXMLLiteDOMInput	public java.lang.Object readObject(int) throws java.io.IOException	a	B19	0/3
+org.jhotdraw.xml.NanoXMLLiteDOMInput	public java.lang.Object readObject(int) throws java.io.IOException	a	B23	0/4
+org.jhotdraw.xml.NanoXMLLiteDOMInput	public java.lang.Object readObject(int) throws java.io.IOException	a	B24	0/3
+org.jhotdraw.xml.NanoXMLLiteDOMInput	public java.lang.Object readObject(int) throws java.io.IOException	a	B28	0/4
+org.jhotdraw.xml.NanoXMLLiteDOMInput	public java.lang.Object readObject(int) throws java.io.IOException	a	B29	0/3
+org.jhotdraw.xml.NanoXMLLiteDOMOutput	public void save(java.io.Writer) throws java.io.IOException	out	B1	0/4
+org.jhotdraw.xml.NanoXMLLiteDOMOutput	public void save(java.io.Writer) throws java.io.IOException	out	B2	0/3
+org.jhotdraw.samples.svg.action.CombineAction	public sealed void groupFigures(org.jhotdraw.draw.DrawingView, org.jhotdraw.draw.CompositeFigure, Collection<org.jhotdraw.draw.Figure>) 	group	B4	0/4
+org.jhotdraw.samples.svg.action.CombineAction	public sealed void groupFigures(org.jhotdraw.draw.DrawingView, org.jhotdraw.draw.CompositeFigure, Collection<org.jhotdraw.draw.Figure>) 	group	B5	0/3
+org.jhotdraw.samples.svg.action.CombineAction	public sealed void groupFigures(org.jhotdraw.draw.DrawingView, org.jhotdraw.draw.CompositeFigure, Collection<org.jhotdraw.draw.Figure>) 	group	B6	0/2
+org.jhotdraw.samples.svg.action.SplitAction	public sealed void groupFigures(org.jhotdraw.draw.DrawingView, org.jhotdraw.draw.CompositeFigure, Collection<org.jhotdraw.draw.Figure>) 	group	B4	0/4
+org.jhotdraw.samples.svg.action.SplitAction	public sealed void groupFigures(org.jhotdraw.draw.DrawingView, org.jhotdraw.draw.CompositeFigure, Collection<org.jhotdraw.draw.Figure>) 	group	B5	0/3
+org.jhotdraw.samples.svg.action.SplitAction	public sealed void groupFigures(org.jhotdraw.draw.DrawingView, org.jhotdraw.draw.CompositeFigure, Collection<org.jhotdraw.draw.Figure>) 	group	B6	0/2
+net.n3.nanoxml.StdXMLBuilder	public void endElement(java.lang.String, java.lang.String, java.lang.String) 	elt	B2	0/4
+net.n3.nanoxml.StdXMLBuilder	public void endElement(java.lang.String, java.lang.String, java.lang.String) 	elt	B3	0/2
+org.jhotdraw.app.action.ToggleToolBarAction	public void setToolBar(javax.swing.JToolBar) 	newValue	B3	0/4
+org.jhotdraw.app.action.ToggleToolBarAction	public void setToolBar(javax.swing.JToolBar) 	newValue	B4	0/2
+org.jhotdraw.app.action.ToggleToolBarAction	public void setToolBar(javax.swing.JToolBar) 	toolBar	B3	0/4
+org.jhotdraw.app.action.ToggleToolBarAction	public void setToolBar(javax.swing.JToolBar) 	toolBar	B4	0/2
+org.jhotdraw.draw.SelectionTool	protected void setTracker(org.jhotdraw.draw.Tool) 	newTracker	B3	0/4
+org.jhotdraw.draw.SelectionTool	protected void setTracker(org.jhotdraw.draw.Tool) 	newTracker	B4	0/2
+org.jhotdraw.draw.TextAreaFigure	protected sealed void drawText(java.awt.Graphics2D) 	tabStops	B3	0/4
+org.jhotdraw.draw.TextAreaFigure	protected sealed void drawText(java.awt.Graphics2D) 	tabStops	B4	0/2
+org.jhotdraw.draw.action.PickAttributesAction	public void pickAttributes() 	editor	B2	0/4
+org.jhotdraw.draw.action.PickAttributesAction	public void pickAttributes() 	editor	B3	0/3
+org.jhotdraw.draw.action.PickAttributesAction	public void pickAttributes() 	editor	B4	0/2
+org.jhotdraw.app.action.ExportAction	public void actionPerformed(java.awt.event.ActionEvent) 	fileChooser	B2	0/4
+org.jhotdraw.app.action.ExportAction	public void actionPerformed(java.awt.event.ActionEvent) 	labels	B2	0/4
+org.jhotdraw.app.action.OSXDropOnDockAction	public void actionPerformed(java.awt.event.ActionEvent) 	p	B2	0/4
+org.jhotdraw.draw.AbstractCompositeFigure	public sealed org.jhotdraw.draw.AbstractCompositeFigure clone() 	thatChild	B3	0/4
+org.jhotdraw.draw.AbstractCompositeFigure	public void layout() 	p	B2	0/4
+org.jhotdraw.draw.LabeledLineConnectionFigure	public sealed org.jhotdraw.draw.LabeledLineConnectionFigure clone() 	thatChild	B3	0/4
+org.jhotdraw.xml.JavaxDOMOutput	public void save(java.io.OutputStream) throws java.io.IOException	w	B2	0/4
+org.jhotdraw.draw.DelegationSelectionTool	protected void showPopupMenu(org.jhotdraw.draw.Figure, java.awt.Point, java.awt.Component) 	bg	B20	0/4
+org.jhotdraw.samples.svg.SVGUtil	public static void readAttributes(org.jhotdraw.draw.Figure, org.jhotdraw.xml.DOMInput) throws java.io.IOException	dashes	B18	0/4
+org.jhotdraw.samples.svg.SVGUtil	public static void readAttributes(org.jhotdraw.draw.Figure, org.jhotdraw.xml.DOMInput) throws java.io.IOException	dashes	B19	0/2
+nanoxml.XMLElement	protected void scanString(java.lang.StringBuffer) throws java.io.IOException	string	B6	0/3
+net.n3.nanoxml.NonValidator	public void elementAttributesProcessed(java.lang.String, java.util.Properties, java.lang.String, int) 	extraAttributes	B2	0/3
+net.n3.nanoxml.StdXMLBuilder	public void addPCData(java.io.Reader, java.lang.String, int) 	size	B5	0/3
+net.n3.nanoxml.StdXMLBuilder	public void startElement(java.lang.String, java.lang.String, java.lang.String, java.lang.String, int) 	fullName	B1	0/3
+net.n3.nanoxml.StdXMLBuilder	public void startElement(java.lang.String, java.lang.String, java.lang.String, java.lang.String, int) 	top	B5	0/3
+net.n3.nanoxml.StdXMLParser	protected void processCDATA() throws java.lang.Exception	reader	B3	0/3
+net.n3.nanoxml.StdXMLParser	protected void processElement(java.lang.String, java.util.Properties) throws java.lang.Exception	r	B56	0/3
+net.n3.nanoxml.StdXMLReader	public boolean atEOF() throws java.io.IOException	ch	B5	0/3
+net.n3.nanoxml.XMLException	public sealed void printStackTrace(java.io.PrintStream) 	stream	B1	0/3
+net.n3.nanoxml.XMLException	public sealed void printStackTrace(java.io.PrintWriter) 	writer	B1	0/3
+org.jhotdraw.app.DefaultApplicationModel	public void putAction(java.lang.String, javax.swing.Action) 	actions	B3	0/3
+org.jhotdraw.app.DefaultMDIApplication	public sealed void init() 	scrollPane	B1	0/3
+org.jhotdraw.app.DefaultOSXApplication	protected javax.swing.JMenuBar createMenuBar(org.jhotdraw.app.Project) 	cbmi	B13	0/3
+org.jhotdraw.app.DefaultSDIApplication	public void hide(org.jhotdraw.app.Project) 	f	B2	0/3
+org.jhotdraw.app.action.Actions	public static void configureJCheckBoxMenuItem(javax.swing.JCheckBoxMenuItem, javax.swing.Action) 	a	B1	0/3
+org.jhotdraw.app.action.Actions	public static void configureJCheckBoxMenuItem(javax.swing.JCheckBoxMenuItem, javax.swing.Action) 	mi	B1	0/3
+org.jhotdraw.draw.AbstractAttributedCompositeFigure	public void setAttributeEnabled(AttributeKey#RAW, boolean) 	forbiddenAttributes	B3	0/3
+org.jhotdraw.draw.AbstractCompositeFigure	public void add(int, org.jhotdraw.draw.Figure) 	figure	B1	0/3
+org.jhotdraw.draw.AbstractConnector	public void read(org.jhotdraw.xml.DOMInput) throws java.io.IOException	in	B3	0/3
+org.jhotdraw.draw.AttributedFigure	public void setAttributeEnabled(AttributeKey#RAW, boolean) 	forbiddenAttributes	B3	0/3
+org.jhotdraw.draw.BezierFigure	public void basicSetPoint(int, java.awt.geom.Point2D.Double) 	node	B2	0/3
+org.jhotdraw.draw.BezierNodeEdit	public sealed void redo() throws javax.swing.undo.CannotRedoException	owner	B1	0/3
+org.jhotdraw.draw.BezierNodeEdit	public sealed void undo() throws javax.swing.undo.CannotUndoException	owner	B1	0/3
+org.jhotdraw.draw.BezierNodeHandle	public sealed void trackDoubleClick(java.awt.Point, int) 	f	B2	0/3
+org.jhotdraw.draw.BidirectionalConnectionTool	protected void trackConnectors(java.awt.event.MouseEvent) 	cc	B12	0/3
+org.jhotdraw.draw.BoxHandleKit.ResizeHandle	protected void setBounds(java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	f	B1	0/3
+org.jhotdraw.draw.ChangeConnectionHandle	public void trackStep(java.awt.Point, java.awt.Point, int) 	p	B9	0/3
+org.jhotdraw.draw.ConnectionHandle	public void trackStep(java.awt.Point, java.awt.Point, int) 	p	B6	0/3
+org.jhotdraw.draw.ConnectionTool	protected void trackConnectors(java.awt.event.MouseEvent) 	cc	B12	0/3
+org.jhotdraw.draw.CreationTool	public sealed void mousePressed(java.awt.event.MouseEvent) 	createdFigure	B1	0/3
+org.jhotdraw.draw.DefaultDrawing	public void basicAdd(int, org.jhotdraw.draw.Figure) 	figures	B1	0/3
+org.jhotdraw.draw.DefaultDrawing	public void basicRemove(org.jhotdraw.draw.Figure) 	figures	B1	0/3
+org.jhotdraw.draw.DefaultDrawingView	public void handleRequestSecondaryHandles(org.jhotdraw.draw.HandleEvent) 	secondaryHandles	B1	0/3
+org.jhotdraw.draw.DefaultDrawingView	public void setDrawing(org.jhotdraw.draw.Drawing) 	d	B3	0/3
+org.jhotdraw.draw.DefaultDrawingView	public void toggleSelection(org.jhotdraw.draw.Figure) 	selectedFigures	B1	0/3
+org.jhotdraw.draw.DelegationSelectionTool	protected void showPopupMenu(org.jhotdraw.draw.Figure, java.awt.Point, java.awt.Component) 	drawingActions	B7	0/3
+org.jhotdraw.draw.GraphicalCompositeFigure	public void setAttributeEnabled(AttributeKey#RAW, boolean) 	forbiddenAttributes	B3	0/3
+org.jhotdraw.draw.LabeledLineConnectionFigure	public void basicAdd(int, org.jhotdraw.draw.Figure) 	children	B1	0/3
+org.jhotdraw.draw.LineConnectionFigure	protected void readLiner(org.jhotdraw.xml.DOMInput) throws java.io.IOException	in	B2	0/3
+org.jhotdraw.draw.LineConnectionFigure	protected void writeLiner(org.jhotdraw.xml.DOMOutput) throws java.io.IOException	out	B2	0/3
+org.jhotdraw.draw.LocatorConnector	public sealed void read(org.jhotdraw.xml.DOMInput) throws java.io.IOException	in	B1	0/3
+org.jhotdraw.draw.LocatorConnector	public sealed void write(org.jhotdraw.xml.DOMOutput) throws java.io.IOException	out	B1	0/3
+org.jhotdraw.draw.MoveHandle	public void trackStep(java.awt.Point, java.awt.Point, int) 	f	B1	0/3
+org.jhotdraw.draw.QuadTreeDrawing	public void basicAdd(int, org.jhotdraw.draw.Figure) 	figures	B1	0/3
+org.jhotdraw.draw.QuadTreeDrawing	public void basicAdd(int, org.jhotdraw.draw.Figure) 	quadTree	B1	0/3
+org.jhotdraw.draw.QuadTreeDrawing	public void basicRemove(org.jhotdraw.draw.Figure) 	figures	B1	0/3
+org.jhotdraw.draw.QuadTreeDrawing	public void basicRemove(org.jhotdraw.draw.Figure) 	quadTree	B1	0/3
+org.jhotdraw.draw.RectangleFigure	protected sealed void drawFill(java.awt.Graphics2D) 	r	B1	0/3
+org.jhotdraw.draw.RectangleFigure	protected sealed void drawStroke(java.awt.Graphics2D) 	r	B1	0/3
+org.jhotdraw.draw.SetBoundsEdit	public sealed void redo() throws javax.swing.undo.CannotRedoException	owner	B1	0/3
+org.jhotdraw.draw.SetBoundsEdit	public sealed void undo() throws javax.swing.undo.CannotUndoException	owner	B1	0/3
+org.jhotdraw.draw.TextAreaTool	public sealed void mousePressed(java.awt.event.MouseEvent) 	textHolder	B2	0/3
+org.jhotdraw.draw.TextFigure	protected java.awt.font.TextLayout getTextLayout() 	text	B2	0/3
+org.jhotdraw.draw.action.AlignAction.East	protected sealed void alignFigures(Collection#RAW, java.awt.geom.Rectangle2D.Double) 	f	B3	0/3
+org.jhotdraw.draw.action.AlignAction.Horizontal	protected sealed void alignFigures(Collection#RAW, java.awt.geom.Rectangle2D.Double) 	f	B3	0/3
+org.jhotdraw.draw.action.AlignAction.North	protected sealed void alignFigures(Collection#RAW, java.awt.geom.Rectangle2D.Double) 	f	B3	0/3
+org.jhotdraw.draw.action.AlignAction.South	protected sealed void alignFigures(Collection#RAW, java.awt.geom.Rectangle2D.Double) 	f	B3	0/3
+org.jhotdraw.draw.action.AlignAction.Vertical	protected sealed void alignFigures(Collection#RAW, java.awt.geom.Rectangle2D.Double) 	f	B3	0/3
+org.jhotdraw.draw.action.AlignAction.West	protected sealed void alignFigures(Collection#RAW, java.awt.geom.Rectangle2D.Double) 	f	B3	0/3
+org.jhotdraw.draw.action.ColorChooserAction	public void actionPerformed(java.awt.event.ActionEvent) 	initialColor	B3	0/3
+org.jhotdraw.draw.action.ToolBarButtonFactory	public static void addSelectionToolTo(javax.swing.JToolBar, org.jhotdraw.draw.DrawingEditor, Collection<javax.swing.Action>, Collection<javax.swing.Action>) 	defaultToolButton	B7	0/3
+org.jhotdraw.draw.action.ToolBarButtonFactory	public static void addSelectionToolTo(javax.swing.JToolBar, org.jhotdraw.draw.DrawingEditor, Collection<javax.swing.Action>, Collection<javax.swing.Action>) 	labels	B7	0/3
+org.jhotdraw.geom.Bezier	private static double computeMaxError(java.awt.geom.Point2D.Double[], int, int, java.awt.geom.Point2D.Double[], double[], int[]) 	dist	B3	0/3
+org.jhotdraw.geom.Bezier	private static double newtonRaphsonRootFind(java.awt.geom.Point2D.Double[], java.awt.geom.Point2D.Double, double) 	Q2_u	B4	0/3
+org.jhotdraw.geom.Bezier	private static java.awt.geom.Point2D.Double[] generateBezier(java.awt.geom.Point2D.Double[], int, int, double[], java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	det_C0_C1	B10	0/3
+org.jhotdraw.geom.Bezier	private static java.awt.geom.Point2D.Double[] generateBezier(java.awt.geom.Point2D.Double[], int, int, double[], java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	v1	B6	0/3
+org.jhotdraw.geom.Bezier	private static java.awt.geom.Point2D.Double[] generateBezier(java.awt.geom.Point2D.Double[], int, int, double[], java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	v2	B6	0/3
+org.jhotdraw.samples.draw.DrawLiveConnectApplet	private void load(java.awt.event.ActionEvent) 	methodName	B1	0/3
+org.jhotdraw.samples.draw.DrawLiveConnectApplet	private void save(java.awt.event.ActionEvent) 	methodName	B1	0/3
+org.jhotdraw.samples.draw.DrawProject	public void setDrawingEditor(org.jhotdraw.draw.DrawingEditor) 	newValue	B3	0/3
+org.jhotdraw.samples.draw.DrawingPanel	private void initComponents() 	scrollPane	B1	0/3
+org.jhotdraw.samples.net.NetPanel	private void initComponents() 	scrollPane	B1	0/3
+org.jhotdraw.samples.net.NetProject	public void setDrawingEditor(org.jhotdraw.draw.DrawingEditor) 	newValue	B3	0/3
+org.jhotdraw.samples.pert.PertPanel	private void initComponents() 	scrollPane	B1	0/3
+org.jhotdraw.samples.pert.PertProject	public void setDrawingEditor(org.jhotdraw.draw.DrawingEditor) 	newValue	B3	0/3
+org.jhotdraw.samples.svg.PathTool	protected sealed void finishCreation(org.jhotdraw.draw.BezierFigure) 	createdPath	B1	0/3
+org.jhotdraw.samples.svg.SVGLiveConnectApplet	private void load(java.awt.event.ActionEvent) 	methodName	B1	0/3
+org.jhotdraw.samples.svg.SVGLiveConnectApplet	private void save(java.awt.event.ActionEvent) 	methodName	B1	0/3
+org.jhotdraw.samples.svg.SVGPanel	private void initComponents() 	scrollPane	B1	0/3
+org.jhotdraw.samples.svg.SVGProject	public void setDrawingEditor(org.jhotdraw.draw.DrawingEditor) 	newValue	B3	0/3
+org.jhotdraw.xml.JavaxDOMOutput	public void addAttribute(java.lang.String, double) 	str	B1	0/3
+org.jhotdraw.xml.JavaxDOMOutput	public void addAttribute(java.lang.String, float) 	str	B1	0/3
+org.jhotdraw.xml.NanoXMLDOMOutput	public void addAttribute(java.lang.String, double) 	str	B1	0/3
+org.jhotdraw.xml.NanoXMLDOMOutput	public void addAttribute(java.lang.String, float) 	str	B1	0/3
+org.jhotdraw.xml.NanoXMLLiteDOMOutput	public void addAttribute(java.lang.String, double) 	str	B1	0/3
+org.jhotdraw.xml.NanoXMLLiteDOMOutput	public void addAttribute(java.lang.String, float) 	str	B1	0/3
+org.jhotdraw.geom.QuadTree2DDouble.QuadNode	public void findIntersects(java.awt.geom.Rectangle2D.Double, HashSet<T>) 	result	B3	0/3
+org.jhotdraw.geom.QuadTree2DDouble.QuadNode	public void findIntersects(java.awt.geom.Rectangle2D.Double, HashSet<T>) 	result	B4	0/2
+net.n3.nanoxml.XMLException	public sealed void printStackTrace(java.io.PrintStream) 	encapsulatedException	B1	0/3
+net.n3.nanoxml.XMLException	public sealed void printStackTrace(java.io.PrintStream) 	encapsulatedException	B2	0/2
+net.n3.nanoxml.XMLException	public sealed void printStackTrace(java.io.PrintWriter) 	encapsulatedException	B1	0/3
+net.n3.nanoxml.XMLException	public sealed void printStackTrace(java.io.PrintWriter) 	encapsulatedException	B2	0/2
+org.jhotdraw.app.action.ToggleToolBarAction	public sealed void putValue(java.lang.String, java.lang.Object) 	toolBar	B1	0/3
+org.jhotdraw.app.action.ToggleToolBarAction	public sealed void putValue(java.lang.String, java.lang.Object) 	toolBar	B2	0/2
+org.jhotdraw.draw.TextAreaFigure	private float drawParagraph(java.awt.Graphics2D, java.text.AttributedCharacterIterator, float, float, float, float[], int) 	i	B2	0/3
+org.jhotdraw.draw.TextAreaFigure	private float drawParagraph(java.awt.Graphics2D, java.text.AttributedCharacterIterator, float, float, float, float[], int) 	i	B3	0/2
+org.jhotdraw.geom.Bezier	public static java.awt.geom.GeneralPath fitCurve(java.awt.Polygon, double) 	d	B1	0/3
+org.jhotdraw.geom.Bezier	public static java.awt.geom.GeneralPath fitCurve(java.awt.Polygon, double) 	d	B2	0/2
+org.jhotdraw.geom.QuadTree2DDouble.QuadNode	public void findContains(java.awt.geom.Point2D.Double, HashSet<T>) 	result	B2	0/3
+org.jhotdraw.geom.QuadTree2DDouble.QuadNode	public void findContains(java.awt.geom.Point2D.Double, HashSet<T>) 	result	B3	0/2
+org.jhotdraw.geom.QuadTree2DDouble.QuadNode	public void findInside(java.awt.geom.Rectangle2D.Double, HashSet<T>) 	result	B2	0/3
+org.jhotdraw.geom.QuadTree2DDouble.QuadNode	public void findInside(java.awt.geom.Rectangle2D.Double, HashSet<T>) 	result	B3	0/2
+org.jhotdraw.samples.pert.figures.TaskFigure	public void updateStartTime() 	newValue	B1	0/3
+org.jhotdraw.samples.pert.figures.TaskFigure	public void updateStartTime() 	newValue	B2	0/2
+org.jhotdraw.xml.JavaxDOMInput	public java.lang.Object readObject(int) throws java.io.IOException	a	B18	0/3
+org.jhotdraw.xml.JavaxDOMInput	public java.lang.Object readObject(int) throws java.io.IOException	a	B19	0/2
+org.jhotdraw.xml.JavaxDOMInput	public java.lang.Object readObject(int) throws java.io.IOException	a	B23	0/3
+org.jhotdraw.xml.JavaxDOMInput	public java.lang.Object readObject(int) throws java.io.IOException	a	B24	0/2
+org.jhotdraw.xml.JavaxDOMInput	public java.lang.Object readObject(int) throws java.io.IOException	a	B28	0/3
+org.jhotdraw.xml.JavaxDOMInput	public java.lang.Object readObject(int) throws java.io.IOException	a	B29	0/2
+org.jhotdraw.app.DefaultMDIApplication	public void hide(org.jhotdraw.app.Project) 	f	B2	0/3
+org.jhotdraw.app.DefaultOSXApplication	public void hide(org.jhotdraw.app.Project) 	f	B2	0/3
+org.jhotdraw.app.action.FocusAction	public void actionPerformed(java.awt.event.ActionEvent) 	frame	B4	0/3
+org.jhotdraw.draw.AbstractCompositeFigure	public void removeAllChildren() 	f	B3	0/3
+org.jhotdraw.draw.LabeledLineConnectionFigure	public void removeAllChildren() 	figure	B3	0/3
+org.jhotdraw.samples.svg.action.CombineAction	public sealed void groupFigures(org.jhotdraw.draw.DrawingView, org.jhotdraw.draw.CompositeFigure, Collection<org.jhotdraw.draw.Figure>) 	child	B5	0/3
+org.jhotdraw.samples.svg.action.SplitAction	public sealed void groupFigures(org.jhotdraw.draw.DrawingView, org.jhotdraw.draw.CompositeFigure, Collection<org.jhotdraw.draw.Figure>) 	child	B5	0/3
+org.jhotdraw.samples.svg.figures.SVGPath	protected void readPoints(org.jhotdraw.xml.DOMInput) throws java.io.IOException	child	B13	0/3
+org.jhotdraw.xml.NanoXMLDOMOutput	public void writeObject(java.lang.Object) throws java.io.IOException	str	B12	0/3
+org.jhotdraw.xml.NanoXMLLiteDOMOutput	public void writeObject(java.lang.Object) throws java.io.IOException	str	B12	0/3
+org.jhotdraw.xml.NanoXMLDOMOutput	public void writeObject(java.lang.Object) throws java.io.IOException	str	B16	0/3
+org.jhotdraw.xml.NanoXMLLiteDOMOutput	public void writeObject(java.lang.Object) throws java.io.IOException	str	B16	0/3
+nanoxml.XMLElement	public double getDoubleAttribute(java.lang.String, double) 	name	B1	0/2
+nanoxml.XMLElement	public int getIntAttribute(java.lang.String, int) 	name	B1	0/2
+nanoxml.XMLElement	public java.lang.Object getAttribute(java.lang.String, java.lang.Object) 	name	B1	0/2
+nanoxml.XMLElement	public void removeAttribute(java.lang.String) 	name	B1	0/2
+nanoxml.XMLElement	public void setAttribute(java.lang.String, java.lang.Object) 	name	B1	0/2
+nanoxml.XMLElement	public void setDoubleAttribute(java.lang.String, double) 	name	B1	0/2
+nanoxml.XMLElement	public void setIntAttribute(java.lang.String, int) 	name	B1	0/2
+net.n3.nanoxml.CDATAReader	public sealed int read(char[], int, int) throws java.io.IOException	size	B3	0/2
+net.n3.nanoxml.ContentReader	public sealed int read(char[], int, int) throws java.io.IOException	size	B1	0/2
+net.n3.nanoxml.PIReader	public sealed int read(char[], int, int) throws java.io.IOException	size	B3	0/2
+net.n3.nanoxml.StdXMLReader	public java.io.Reader openStream(java.lang.String, java.lang.String) throws java.net.MalformedURLException, java.io.FileNotFoundException, java.io.IOException	currentReader	B5	0/2
+net.n3.nanoxml.XMLElement	public void setAttribute(java.lang.String, java.lang.String) 	attributes	B2	0/2
+net.n3.nanoxml.XMLElement	public void setAttribute(java.lang.String, java.lang.String, java.lang.String) 	attributes	B2	0/2
+net.n3.nanoxml.XMLUtil	static void processEntity(java.lang.String, net.n3.nanoxml.IXMLReader, net.n3.nanoxml.IXMLEntityResolver) throws java.io.IOException, net.n3.nanoxml.XMLParseException	reader	B3	0/2
+org.jhotdraw.app.AbstractProject	public void setFile(java.io.File) 	prefs	B1	0/2
+org.jhotdraw.app.DefaultSDIApplication	protected javax.swing.JMenuBar createMenuBar(org.jhotdraw.app.Project, List<javax.swing.Action>) 	cbmi	B10	0/2
+org.jhotdraw.app.DefaultSDIApplication	protected javax.swing.JMenuBar createMenuBar(org.jhotdraw.app.Project, List<javax.swing.Action>) 	cbmi	B10	0/2
+org.jhotdraw.app.OSXPaletteHandler	private void showPalettes() 	palette	B2	0/2
+org.jhotdraw.draw.AbstractAttributedCompositeFigure	public sealed void basicSetAttribute(AttributeKey#RAW, java.lang.Object) 	attributes	B1	0/2
+org.jhotdraw.draw.AbstractCompositeFigure.ChildHandler	public void figureChanged(org.jhotdraw.draw.FigureEvent) 	owner	B2	0/2
+org.jhotdraw.draw.AbstractCompositeFigure	public boolean remove(org.jhotdraw.draw.Figure) 	figure	B3	0/2
+org.jhotdraw.draw.AbstractCompositeFigure	public void basicAdd(int, org.jhotdraw.draw.Figure) 	figure	B1	0/2
+org.jhotdraw.draw.AbstractDrawing	public void fireUndoableEditHappened(javax.swing.undo.UndoableEdit) 	event	B4	0/2
+org.jhotdraw.draw.AbstractDrawing	public void fireUndoableEditHappened(javax.swing.undo.UndoableEdit) 	event	B4	0/2
+org.jhotdraw.draw.AbstractFigure	protected void fireUndoableEditHappened(javax.swing.undo.UndoableEdit) 	event	B4	0/2
+org.jhotdraw.draw.AbstractFigure	protected void fireUndoableEditHappened(javax.swing.undo.UndoableEdit) 	event	B4	0/2
+org.jhotdraw.draw.AbstractTool	public void keyPressed(java.awt.event.KeyEvent) 	f	B10	0/2
+org.jhotdraw.draw.AbstractTool	public void keyPressed(java.awt.event.KeyEvent) 	f	B14	0/2
+org.jhotdraw.draw.AbstractTool	public void keyPressed(java.awt.event.KeyEvent) 	f	B18	0/2
+org.jhotdraw.draw.AbstractTool	public void keyPressed(java.awt.event.KeyEvent) 	f	B22	0/2
+org.jhotdraw.draw.AttributeChangeEdit	public sealed void redo() throws javax.swing.undo.CannotRedoException	owner	B1	0/2
+org.jhotdraw.draw.AttributeChangeEdit	public sealed void undo() throws javax.swing.undo.CannotUndoException	owner	B1	0/2
+org.jhotdraw.draw.BezierFigure	public sealed void basicSetAttribute(AttributeKey#RAW, java.lang.Object) 	path	B1	0/2
+org.jhotdraw.draw.CompositeTransformEdit	public sealed void redo() throws javax.swing.undo.CannotRedoException	owner	B1	0/2
+org.jhotdraw.draw.CompositeTransformEdit	public sealed void undo() throws javax.swing.undo.CannotUndoException	owner	B1	0/2
+org.jhotdraw.draw.ConnectionHandle	public void trackStart(java.awt.Point, int) 	edit	B1	0/2
+org.jhotdraw.draw.CreationTool	public sealed void mousePressed(java.awt.event.MouseEvent) 	anchor	B1	0/2
+org.jhotdraw.draw.DefaultDrawing	public void basicAdd(int, org.jhotdraw.draw.Figure) 	figure	B1	0/2
+org.jhotdraw.draw.DefaultDrawing	public void basicRemove(org.jhotdraw.draw.Figure) 	figure	B1	0/2
+org.jhotdraw.draw.DefaultDrawingEditor	public void add(org.jhotdraw.draw.DrawingView) 	views	B1	0/2
+org.jhotdraw.draw.DefaultDrawingEditor	public void setTool(org.jhotdraw.draw.Tool) 	t	B8	0/2
+org.jhotdraw.draw.DefaultDrawingView	public void handleRequestRemove(org.jhotdraw.draw.HandleEvent) 	selectionHandles	B1	0/2
+org.jhotdraw.draw.DefaultDrawingView	public void selectAll() 	selectedFigures	B1	0/2
+org.jhotdraw.draw.DefaultDrawingView	public void setEmptyDrawingMessage(java.lang.String) 	emptyDrawingLabel	B3	0/2
+org.jhotdraw.draw.DragTracker	public sealed void mouseReleased(java.awt.event.MouseEvent) 	f	B5	0/2
+org.jhotdraw.draw.DragTracker	public void mouseDragged(java.awt.event.MouseEvent) 	f	B5	0/2
+org.jhotdraw.draw.FloatingTextArea	public void setBounds(java.awt.geom.Rectangle2D.Double, java.lang.String) 	editScrollContainer	B1	0/2
+org.jhotdraw.draw.FloatingTextField	public void setBounds(java.awt.Rectangle, java.lang.String) 	editWidget	B1	0/2
+org.jhotdraw.draw.GeometryEdit	public sealed void redo() throws javax.swing.undo.CannotRedoException	owner	B1	0/2
+org.jhotdraw.draw.GeometryEdit	public sealed void undo() throws javax.swing.undo.CannotUndoException	owner	B1	0/2
+org.jhotdraw.draw.GraphicalCompositeFigure.PresentationFigureHandler	public void figureChanged(org.jhotdraw.draw.FigureEvent) 	owner	B2	0/2
+org.jhotdraw.draw.LabeledLineConnectionFigure.ChildHandler	public void figureChanged(org.jhotdraw.draw.FigureEvent) 	owner	B2	0/2
+org.jhotdraw.draw.LabeledLineConnectionFigure	public boolean remove(org.jhotdraw.draw.Figure) 	figure	B3	0/2
+org.jhotdraw.draw.LabeledLineConnectionFigure	public void basicAdd(int, org.jhotdraw.draw.Figure) 	figure	B1	0/2
+org.jhotdraw.draw.LocatorLayouter	public java.awt.geom.Rectangle2D.Double layout(org.jhotdraw.draw.CompositeFigure, java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	child	B6	0/2
+org.jhotdraw.draw.QuadTreeDrawing	public void basicAdd(int, org.jhotdraw.draw.Figure) 	figure	B1	0/2
+org.jhotdraw.draw.QuadTreeDrawing	public void basicRemove(org.jhotdraw.draw.Figure) 	figure	B1	0/2
+org.jhotdraw.draw.QuadTreeDrawing	public void figureChanged(org.jhotdraw.draw.FigureEvent) 	quadTree	B1	0/2
+org.jhotdraw.draw.RestoreDataEdit	public sealed void redo() throws javax.swing.undo.CannotRedoException	figure	B1	0/2
+org.jhotdraw.draw.RestoreDataEdit	public sealed void undo() throws javax.swing.undo.CannotUndoException	figure	B1	0/2
+org.jhotdraw.draw.RotateHandle	public void trackStart(java.awt.Point, int) 	center	B1	0/2
+org.jhotdraw.draw.RoundRectangleFigure	public sealed void read(org.jhotdraw.xml.DOMInput) throws java.io.IOException	roundrect	B1	0/2
+org.jhotdraw.draw.RoundRectangleFigure	public sealed void write(org.jhotdraw.xml.DOMOutput) throws java.io.IOException	out	B1	0/2
+org.jhotdraw.draw.SetBoundsEdit	public sealed boolean replaceEdit(javax.swing.undo.UndoableEdit) 	that	B3	0/2
+org.jhotdraw.draw.TextAreaFigure	private float drawParagraph(java.awt.Graphics2D, java.text.AttributedCharacterIterator, float, float, float, float[], int) 	currentTab	B12	0/2
+org.jhotdraw.draw.TextAreaFigure	protected sealed void drawText(java.awt.Graphics2D) 	paragraphs	B9	0/2
+org.jhotdraw.draw.TransformEdit	public sealed boolean addEdit(javax.swing.undo.UndoableEdit) 	tx	B3	0/2
+org.jhotdraw.draw.TransformEdit	public sealed boolean replaceEdit(javax.swing.undo.UndoableEdit) 	tx	B3	0/2
+org.jhotdraw.draw.TransformEdit	public sealed void redo() throws javax.swing.undo.CannotRedoException	f	B3	0/2
+org.jhotdraw.draw.TransformEdit	public sealed void undo() throws javax.swing.undo.CannotUndoException	f	B3	0/2
+org.jhotdraw.draw.TriangleRotationHandler	public void trackStart(java.awt.Point, int) 	centerBox	B1	0/2
+org.jhotdraw.draw.action.ApplyAttributesAction	public void applyAttributes() 	editor	B2	0/2
+org.jhotdraw.draw.action.MoveAction	public void actionPerformed(java.awt.event.ActionEvent) 	f	B3	0/2
+org.jhotdraw.draw.action.ToolBarButtonFactory	public static void addToolTo(javax.swing.JToolBar, org.jhotdraw.draw.DrawingEditor, org.jhotdraw.draw.Tool, java.lang.String, org.jhotdraw.util.ResourceBundleUtil) 	tool	B1	0/2
+org.jhotdraw.draw.action.ZoomAction	public void actionPerformed(java.awt.event.ActionEvent) 	button	B1	0/2
+org.jhotdraw.draw.action.ZoomEditorAction	public void actionPerformed(java.awt.event.ActionEvent) 	button	B1	0/2
+org.jhotdraw.geom.Bezier	private static double computeMaxError(java.awt.geom.Point2D.Double[], int, int, java.awt.geom.Point2D.Double[], double[], int[]) 	v	B3	0/2
+org.jhotdraw.geom.Bezier	private static double newtonRaphsonRootFind(java.awt.geom.Point2D.Double[], java.awt.geom.Point2D.Double, double) 	Q2	B4	0/2
+org.jhotdraw.geom.QuadTree2DDouble	public void reorganize() 	i	B4	0/2
+org.jhotdraw.gui.JSheet	protected void fireOptionSelected(javax.swing.JOptionPane) 	value	B11	0/2
+org.jhotdraw.samples.draw.DrawLiveConnectApplet	private void initComponents() 	jToolBar1	B1	0/2
+org.jhotdraw.samples.draw.DrawProject	public sealed void init() 	undo	B1	0/2
+org.jhotdraw.samples.draw.DrawingPanel	private void initComponents() 	attributesToolbar	B1	0/2
+org.jhotdraw.samples.draw.DrawingPanel	private void initComponents() 	creationToolbar	B1	0/2
+org.jhotdraw.samples.draw.DrawingPanel	private void initComponents() 	jPanel1	B1	0/2
+org.jhotdraw.samples.draw.DrawingPanel	public void setDrawing(org.jhotdraw.draw.Drawing) 	d	B1	0/2
+org.jhotdraw.samples.net.NetPanel	private void initComponents() 	attributesToolbar	B1	0/2
+org.jhotdraw.samples.net.NetPanel	private void initComponents() 	creationToolbar	B1	0/2
+org.jhotdraw.samples.net.NetPanel	private void initComponents() 	jPanel1	B1	0/2
+org.jhotdraw.samples.net.NetPanel	public void setDrawing(org.jhotdraw.draw.Drawing) 	d	B1	0/2
+org.jhotdraw.samples.net.NetProject	public sealed void init() 	undo	B1	0/2
+org.jhotdraw.samples.pert.PertPanel	private void initComponents() 	attributesToolbar	B1	0/2
+org.jhotdraw.samples.pert.PertPanel	private void initComponents() 	creationToolbar	B1	0/2
+org.jhotdraw.samples.pert.PertPanel	private void initComponents() 	jPanel1	B1	0/2
+org.jhotdraw.samples.pert.PertPanel	public void setDrawing(org.jhotdraw.draw.Drawing) 	d	B1	0/2
+org.jhotdraw.samples.pert.PertProject	public sealed void init() 	undo	B1	0/2
+org.jhotdraw.samples.svg.SVGLiveConnectApplet	private void initComponents() 	jToolBar1	B1	0/2
+org.jhotdraw.samples.svg.SVGPanel	private void initComponents() 	attributesToolbar	B1	0/2
+org.jhotdraw.samples.svg.SVGPanel	private void initComponents() 	creationToolbar	B1	0/2
+org.jhotdraw.samples.svg.SVGPanel	private void initComponents() 	jPanel1	B1	0/2
+org.jhotdraw.samples.svg.SVGPanel	public void setDrawing(org.jhotdraw.draw.Drawing) 	d	B1	0/2
+org.jhotdraw.samples.svg.SVGProject	public sealed void init() 	undo	B1	0/2
+org.jhotdraw.samples.svg.figures.SVGPath	protected void readPoints(org.jhotdraw.xml.DOMInput) throws java.io.IOException	tt	B3	0/2
+org.jhotdraw.samples.svg.figures.SVGPath	protected void readPoints(org.jhotdraw.xml.DOMInput) throws java.io.IOException	tt	B8	0/2
+org.jhotdraw.util.prefs.PreferencesUtil	public static void installFramePrefsHandler(java.util.prefs.Preferences, java.lang.String, java.awt.Window) 	prefs	B3	0/2
+org.jhotdraw.util.prefs.PreferencesUtil	public static void installInternalFramePrefsHandler(java.util.prefs.Preferences, java.lang.String, javax.swing.JInternalFrame, javax.swing.JDesktopPane) 	prefs	B3	0/2
+org.jhotdraw.util.prefs.PreferencesUtil	public static void installPalettePrefsHandler(java.util.prefs.Preferences, java.lang.String, java.awt.Window, int) 	prefs	B3	0/2
+org.jhotdraw.xml.JavaxDOMOutput	public java.lang.Object getPrototype() 	prototypes	B3	0/2
+org.jhotdraw.xml.NanoXMLDOMOutput	public java.lang.Object getPrototype() 	prototypes	B3	0/2
+org.jhotdraw.xml.NanoXMLLiteDOMOutput	public java.lang.Object getPrototype() 	prototypes	B3	0/2
+org.jhotdraw.draw.DiamondFigure	public sealed java.awt.geom.Rectangle2D.Double getFigureDrawBounds() 	growx	B1	1/19
+org.jhotdraw.draw.DiamondFigure	public sealed java.awt.geom.Rectangle2D.Double getFigureDrawBounds() 	growx	B3	0/13
+org.jhotdraw.draw.DiamondFigure	public sealed java.awt.geom.Rectangle2D.Double getFigureDrawBounds() 	growy	B1	1/19
+org.jhotdraw.draw.DiamondFigure	public sealed java.awt.geom.Rectangle2D.Double getFigureDrawBounds() 	growy	B3	0/13
+org.jhotdraw.draw.BezierFigure	protected org.jhotdraw.geom.BezierPath getCappedPath() 	pp	B13	1/9
+org.jhotdraw.draw.ElbowLiner	public void lineout(org.jhotdraw.draw.ConnectionFigure) 	path	B1	2/33
+org.jhotdraw.draw.ElbowLiner	public void lineout(org.jhotdraw.draw.ConnectionFigure) 	path	B3	0/30
+org.jhotdraw.draw.BezierFigure	protected org.jhotdraw.geom.BezierPath getCappedPath() 	pp	B6	1/9
+nanoxml.XMLElement	protected void skipSpecialTag(int) throws java.io.IOException	tagLevel	B11	0/16
+nanoxml.XMLElement	protected void skipSpecialTag(int) throws java.io.IOException	tagLevel	B13	1/6
+nanoxml.XMLElement	protected void skipSpecialTag(int) throws java.io.IOException	tagLevel	B15	0/5
+nanoxml.XMLElement	protected void skipSpecialTag(int) throws java.io.IOException	tagLevel	B16	0/4
+org.jhotdraw.app.action.NewAction	public void actionPerformed(java.awt.event.ActionEvent) 	newP	B1	1/8
+org.jhotdraw.app.action.NewAction	public void actionPerformed(java.awt.event.ActionEvent) 	newP	B2	0/5
+org.jhotdraw.app.action.NewAction	public void actionPerformed(java.awt.event.ActionEvent) 	newP	B5	0/2
+org.jhotdraw.samples.svg.figures.SVGPath	protected void readPoints(org.jhotdraw.xml.DOMInput) throws java.io.IOException	b	B7	1/6
+org.jhotdraw.draw.TextAreaFigure	protected sealed void drawText(java.awt.Graphics2D) 	verticalPos	B3	1/17
+org.jhotdraw.draw.TextAreaFigure	protected sealed void drawText(java.awt.Graphics2D) 	verticalPos	B4	1/15
+org.jhotdraw.draw.TextAreaFigure	protected sealed void drawText(java.awt.Graphics2D) 	verticalPos	B6	1/13
+org.jhotdraw.draw.TextAreaFigure	protected sealed void drawText(java.awt.Graphics2D) 	verticalPos	B7	0/12
+org.jhotdraw.draw.TextAreaFigure	protected sealed void drawText(java.awt.Graphics2D) 	verticalPos	B8	0/11
+org.jhotdraw.draw.TextAreaFigure	protected sealed void drawText(java.awt.Graphics2D) 	verticalPos	B9	2/8
+org.jhotdraw.draw.TextAreaFigure	protected sealed void drawText(java.awt.Graphics2D) 	verticalPos	B11	0/6
+org.jhotdraw.draw.TextAreaFigure	protected sealed void drawText(java.awt.Graphics2D) 	verticalPos	B13	0/2
+org.jhotdraw.app.action.SaveAction	protected void fileSaved(org.jhotdraw.app.Project, java.io.File, java.lang.Object) 	project	B1	1/8
+org.jhotdraw.app.action.SaveAction	protected void fileSaved(org.jhotdraw.app.Project, java.io.File, java.lang.Object) 	project	B2	0/7
+org.jhotdraw.gui.JSheet	public sealed void show() 	timer	B2	1/8
+org.jhotdraw.gui.JSheet	protected void uninstallSheet() 	owner	B2	1/5
+org.jhotdraw.gui.JSheet	protected void uninstallSheet() 	owner	B3	0/3
+org.jhotdraw.app.action.SaveAction	public void actionPerformed(java.awt.event.ActionEvent) 	project	B1	1/7
+org.jhotdraw.app.action.SaveAction	public void actionPerformed(java.awt.event.ActionEvent) 	project	B2	0/5
+org.jhotdraw.gui.JSheet	public sealed void hide() 	timer	B2	1/7
+org.jhotdraw.draw.ChopRoundRectConnector	protected sealed java.awt.geom.Point2D.Double chop(org.jhotdraw.draw.Figure, java.awt.geom.Point2D.Double) 	grow	B1	1/13
+org.jhotdraw.draw.BezierTool	public void mouseDragged(java.awt.event.MouseEvent) 	createdFigure	B1	1/4
+org.jhotdraw.draw.BezierTool	public void mouseDragged(java.awt.event.MouseEvent) 	createdFigure	B4	0/3
+org.jhotdraw.app.action.LoadRecentAction	protected void fileOpened(org.jhotdraw.app.Project, java.io.File, java.lang.Object) 	app	B1	1/4
+org.jhotdraw.app.action.LoadRecentAction	protected void fileOpened(org.jhotdraw.app.Project, java.io.File, java.lang.Object) 	app	B4	0/2
+org.jhotdraw.app.action.OpenAction	protected void fileOpened(org.jhotdraw.app.Project, java.io.File, java.lang.Object) 	app	B1	1/4
+org.jhotdraw.app.action.OpenAction	protected void fileOpened(org.jhotdraw.app.Project, java.io.File, java.lang.Object) 	app	B4	0/2
+org.jhotdraw.app.action.OpenRecentAction	protected void fileOpened(org.jhotdraw.app.Project, java.io.File, java.lang.Object) 	app	B1	1/4
+org.jhotdraw.app.action.OpenRecentAction	protected void fileOpened(org.jhotdraw.app.Project, java.io.File, java.lang.Object) 	app	B4	0/2
+org.jhotdraw.draw.DefaultDrawingView	protected void drawDrawing(java.awt.Graphics2D) 	tx	B4	1/4
+org.jhotdraw.draw.FloatingTextArea	public void createOverlay(org.jhotdraw.draw.DrawingView, org.jhotdraw.draw.TextHolder) 	editWidget	B1	1/6
+org.jhotdraw.draw.FloatingTextArea	public void createOverlay(org.jhotdraw.draw.DrawingView, org.jhotdraw.draw.TextHolder) 	editWidget	B2	0/5
+org.jhotdraw.app.action.ExportAction	public void actionPerformed(java.awt.event.ActionEvent) 	project	B1	1/6
+org.jhotdraw.app.action.ExportAction	public void actionPerformed(java.awt.event.ActionEvent) 	project	B2	0/4
+org.jhotdraw.app.action.NewAction	public void actionPerformed(java.awt.event.ActionEvent) 	multiOpenId	B1	2/7
+org.jhotdraw.app.action.NewAction	public void actionPerformed(java.awt.event.ActionEvent) 	multiOpenId	B2	0/4
+org.jhotdraw.app.action.NewAction	public void actionPerformed(java.awt.event.ActionEvent) 	multiOpenId	B3	0/2
+org.jhotdraw.app.DefaultSDIApplication	protected java.awt.Component wrapProjectComponent(org.jhotdraw.app.Project) 	tb	B3	1/5
+org.jhotdraw.app.DefaultSDIApplication	protected java.awt.Component wrapProjectComponent(org.jhotdraw.app.Project) 	tb	B5	0/3
+org.jhotdraw.draw.BidirectionalConnectionTool	public void mouseDragged(java.awt.event.MouseEvent) 	p	B1	1/5
+org.jhotdraw.draw.BidirectionalConnectionTool	public void mouseDragged(java.awt.event.MouseEvent) 	p	B2	0/3
+org.jhotdraw.xml.JavaxDOMOutput	public void save(java.io.Writer) throws java.io.IOException	out	B1	1/5
+org.jhotdraw.xml.JavaxDOMOutput	public void save(java.io.Writer) throws java.io.IOException	out	B2	0/3
+org.jhotdraw.app.DefaultMDIApplication	protected java.awt.Component wrapDesktopPane(java.awt.Component, LinkedList<javax.swing.Action>) 	tb	B3	1/5
+org.jhotdraw.app.DefaultMDIApplication	protected java.awt.Component wrapDesktopPane(java.awt.Component, LinkedList<javax.swing.Action>) 	tb	B5	0/3
+org.jhotdraw.draw.BezierFigure	protected void drawCaps(java.awt.Graphics2D) 	p2	B7	1/5
+org.jhotdraw.draw.DelegationSelectionTool	protected void showPopupMenu(org.jhotdraw.draw.Figure, java.awt.Point, java.awt.Component) 	button	B19	2/6
+org.jhotdraw.draw.DelegationSelectionTool	protected void showPopupMenu(org.jhotdraw.draw.Figure, java.awt.Point, java.awt.Component) 	button	B19	2/6
+org.jhotdraw.draw.AbstractDrawing	public final void remove(org.jhotdraw.draw.Figure) 	figure	B1	1/4
+org.jhotdraw.draw.AbstractDrawing	public final void remove(org.jhotdraw.draw.Figure) 	figure	B2	0/3
+org.jhotdraw.app.action.LoadRecentAction	protected void fileOpened(org.jhotdraw.app.Project, java.io.File, java.lang.Object) 	w	B2	1/4
+org.jhotdraw.app.action.OpenAction	protected void fileOpened(org.jhotdraw.app.Project, java.io.File, java.lang.Object) 	w	B2	1/4
+org.jhotdraw.app.action.OpenRecentAction	protected void fileOpened(org.jhotdraw.app.Project, java.io.File, java.lang.Object) 	w	B2	1/4
+org.jhotdraw.draw.AbstractFigure	protected void updateDecoratorBounds() 	ep	B2	1/4
+org.jhotdraw.draw.AbstractFigure	protected void updateDecoratorBounds() 	sp	B2	1/4
+org.jhotdraw.app.action.NewAction	public void actionPerformed(java.awt.event.ActionEvent) 	app	B1	1/8
+org.jhotdraw.draw.AttributeKeys	public static java.awt.Stroke getStroke(org.jhotdraw.draw.Figure) 	dashes	B1	2/8
+org.jhotdraw.draw.AttributeKeys	public static java.awt.Stroke getStroke(org.jhotdraw.draw.Figure) 	dashes	B2	0/3
+org.jhotdraw.draw.ConnectionTool	public void mouseDragged(java.awt.event.MouseEvent) 	p	B1	2/8
+org.jhotdraw.draw.ConnectionTool	public void mouseDragged(java.awt.event.MouseEvent) 	p	B2	0/3
+net.n3.nanoxml.StdXMLBuilder	public void addAttribute(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String) throws java.lang.Exception	top	B1	3/7
+net.n3.nanoxml.StdXMLBuilder	public void addAttribute(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String) throws java.lang.Exception	top	B3	0/4
+net.n3.nanoxml.StdXMLBuilder	public void addAttribute(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String) throws java.lang.Exception	top	B5	0/3
+org.jhotdraw.app.action.ExitAction	public void actionPerformed(java.awt.event.ActionEvent) 	documentToBeReviewed	B4	1/3
+org.jhotdraw.app.action.ExitAction	public void actionPerformed(java.awt.event.ActionEvent) 	documentToBeReviewed	B5	0/2
+org.jhotdraw.app.action.SaveBeforeAction	protected void fileSaved(org.jhotdraw.app.Project, java.io.File, java.lang.Object) 	p	B1	1/3
+org.jhotdraw.app.action.SaveBeforeAction	protected void fileSaved(org.jhotdraw.app.Project, java.io.File, java.lang.Object) 	p	B2	0/2
+org.jhotdraw.draw.AbstractDrawing	protected void fireAreaInvalidated(java.awt.geom.Rectangle2D.Double) 	event	B3	1/3
+org.jhotdraw.draw.AbstractDrawing	protected void fireAreaInvalidated(java.awt.geom.Rectangle2D.Double) 	event	B4	0/2
+org.jhotdraw.draw.AbstractDrawing	protected void fireAreaInvalidated(java.awt.geom.Rectangle2D.Double) 	event	B3	1/3
+org.jhotdraw.draw.AbstractDrawing	protected void fireAreaInvalidated(java.awt.geom.Rectangle2D.Double) 	event	B4	0/2
+org.jhotdraw.draw.AbstractDrawing	protected void fireFigureAdded(org.jhotdraw.draw.Figure) 	event	B3	1/3
+org.jhotdraw.draw.AbstractDrawing	protected void fireFigureAdded(org.jhotdraw.draw.Figure) 	event	B4	0/2
+org.jhotdraw.draw.AbstractDrawing	protected void fireFigureAdded(org.jhotdraw.draw.Figure) 	event	B3	1/3
+org.jhotdraw.draw.AbstractDrawing	protected void fireFigureAdded(org.jhotdraw.draw.Figure) 	event	B4	0/2
+org.jhotdraw.draw.AbstractDrawing	protected void fireFigureRemoved(org.jhotdraw.draw.Figure) 	event	B3	1/3
+org.jhotdraw.draw.AbstractDrawing	protected void fireFigureRemoved(org.jhotdraw.draw.Figure) 	event	B4	0/2
+org.jhotdraw.draw.AbstractDrawing	protected void fireFigureRemoved(org.jhotdraw.draw.Figure) 	event	B3	1/3
+org.jhotdraw.draw.AbstractDrawing	protected void fireFigureRemoved(org.jhotdraw.draw.Figure) 	event	B4	0/2
+org.jhotdraw.draw.AbstractFigure	protected void fireAreaInvalidated(java.awt.geom.Rectangle2D.Double) 	event	B4	1/3
+org.jhotdraw.draw.AbstractFigure	protected void fireAreaInvalidated(java.awt.geom.Rectangle2D.Double) 	event	B5	0/2
+org.jhotdraw.draw.AbstractFigure	protected void fireAreaInvalidated(java.awt.geom.Rectangle2D.Double) 	event	B4	1/3
+org.jhotdraw.draw.AbstractFigure	protected void fireAreaInvalidated(java.awt.geom.Rectangle2D.Double) 	event	B5	0/2
+org.jhotdraw.draw.AbstractFigure	protected void fireAttributeChanged(AttributeKey#RAW, java.lang.Object, java.lang.Object) 	event	B4	1/3
+org.jhotdraw.draw.AbstractFigure	protected void fireAttributeChanged(AttributeKey#RAW, java.lang.Object, java.lang.Object) 	event	B5	0/2
+org.jhotdraw.draw.AbstractFigure	protected void fireAttributeChanged(AttributeKey#RAW, java.lang.Object, java.lang.Object) 	event	B4	1/3
+org.jhotdraw.draw.AbstractFigure	protected void fireAttributeChanged(AttributeKey#RAW, java.lang.Object, java.lang.Object) 	event	B5	0/2
+org.jhotdraw.draw.AbstractFigure	protected void fireFigureAdded() 	event	B4	1/3
+org.jhotdraw.draw.AbstractFigure	protected void fireFigureAdded() 	event	B5	0/2
+org.jhotdraw.draw.AbstractFigure	protected void fireFigureAdded() 	event	B4	1/3
+org.jhotdraw.draw.AbstractFigure	protected void fireFigureAdded() 	event	B5	0/2
+org.jhotdraw.draw.AbstractFigure	protected void fireFigureChanged(java.awt.geom.Rectangle2D.Double) 	event	B4	1/3
+org.jhotdraw.draw.AbstractFigure	protected void fireFigureChanged(java.awt.geom.Rectangle2D.Double) 	event	B5	0/2
+org.jhotdraw.draw.AbstractFigure	protected void fireFigureChanged(java.awt.geom.Rectangle2D.Double) 	event	B4	1/3
+org.jhotdraw.draw.AbstractFigure	protected void fireFigureChanged(java.awt.geom.Rectangle2D.Double) 	event	B5	0/2
+org.jhotdraw.draw.AbstractFigure	protected void fireFigureRemoved() 	event	B4	1/3
+org.jhotdraw.draw.AbstractFigure	protected void fireFigureRemoved() 	event	B5	0/2
+org.jhotdraw.draw.AbstractFigure	protected void fireFigureRemoved() 	event	B4	1/3
+org.jhotdraw.draw.AbstractFigure	protected void fireFigureRemoved() 	event	B5	0/2
+org.jhotdraw.draw.AbstractFigure	protected void fireFigureRequestRemove() 	event	B4	1/3
+org.jhotdraw.draw.AbstractFigure	protected void fireFigureRequestRemove() 	event	B5	0/2
+org.jhotdraw.draw.AbstractFigure	protected void fireFigureRequestRemove() 	event	B4	1/3
+org.jhotdraw.draw.AbstractFigure	protected void fireFigureRequestRemove() 	event	B5	0/2
+org.jhotdraw.draw.AbstractHandle	protected void fireAreaInvalidated(java.awt.Rectangle) 	event	B3	1/3
+org.jhotdraw.draw.AbstractHandle	protected void fireAreaInvalidated(java.awt.Rectangle) 	event	B4	0/2
+org.jhotdraw.draw.AbstractHandle	protected void fireAreaInvalidated(java.awt.Rectangle) 	event	B3	1/3
+org.jhotdraw.draw.AbstractHandle	protected void fireAreaInvalidated(java.awt.Rectangle) 	event	B4	0/2
+org.jhotdraw.draw.AbstractHandle	protected void fireHandleRequestRemove(java.awt.Rectangle) 	event	B3	1/3
+org.jhotdraw.draw.AbstractHandle	protected void fireHandleRequestRemove(java.awt.Rectangle) 	event	B4	0/2
+org.jhotdraw.draw.AbstractHandle	protected void fireHandleRequestRemove(java.awt.Rectangle) 	event	B3	1/3
+org.jhotdraw.draw.AbstractHandle	protected void fireHandleRequestRemove(java.awt.Rectangle) 	event	B4	0/2
+org.jhotdraw.draw.AbstractHandle	protected void fireHandleRequestSecondaryHandles() 	event	B3	1/3
+org.jhotdraw.draw.AbstractHandle	protected void fireHandleRequestSecondaryHandles() 	event	B4	0/2
+org.jhotdraw.draw.AbstractHandle	protected void fireHandleRequestSecondaryHandles() 	event	B3	1/3
+org.jhotdraw.draw.AbstractHandle	protected void fireHandleRequestSecondaryHandles() 	event	B4	0/2
+org.jhotdraw.draw.AbstractTool	protected void fireAreaInvalidated(java.awt.Rectangle) 	event	B3	1/3
+org.jhotdraw.draw.AbstractTool	protected void fireAreaInvalidated(java.awt.Rectangle) 	event	B4	0/2
+org.jhotdraw.draw.AbstractTool	protected void fireAreaInvalidated(java.awt.Rectangle) 	event	B3	1/3
+org.jhotdraw.draw.AbstractTool	protected void fireAreaInvalidated(java.awt.Rectangle) 	event	B4	0/2
+org.jhotdraw.draw.AbstractTool	protected void fireToolDone() 	event	B3	1/3
+org.jhotdraw.draw.AbstractTool	protected void fireToolDone() 	event	B4	0/2
+org.jhotdraw.draw.AbstractTool	protected void fireToolDone() 	event	B3	1/3
+org.jhotdraw.draw.AbstractTool	protected void fireToolDone() 	event	B4	0/2
+org.jhotdraw.draw.AbstractTool	protected void fireToolStarted(org.jhotdraw.draw.DrawingView) 	event	B3	1/3
+org.jhotdraw.draw.AbstractTool	protected void fireToolStarted(org.jhotdraw.draw.DrawingView) 	event	B4	0/2
+org.jhotdraw.draw.AbstractTool	protected void fireToolStarted(org.jhotdraw.draw.DrawingView) 	event	B3	1/3
+org.jhotdraw.draw.AbstractTool	protected void fireToolStarted(org.jhotdraw.draw.DrawingView) 	event	B4	0/2
+org.jhotdraw.draw.CreationTool	public void mouseDragged(java.awt.event.MouseEvent) 	createdFigure	B1	1/3
+org.jhotdraw.draw.CreationTool	public void mouseDragged(java.awt.event.MouseEvent) 	createdFigure	B2	0/2
+org.jhotdraw.draw.DefaultDrawingView	protected void fireSelectionChanged() 	event	B4	1/3
+org.jhotdraw.draw.DefaultDrawingView	protected void fireSelectionChanged() 	event	B5	0/2
+org.jhotdraw.draw.LineConnectionFigure.ConnectionHandler	public void figureChanged(org.jhotdraw.draw.FigureEvent) 	owner	B1	1/3
+org.jhotdraw.draw.LineConnectionFigure.ConnectionHandler	public void figureChanged(org.jhotdraw.draw.FigureEvent) 	owner	B2	0/2
+org.jhotdraw.draw.action.AbstractSelectedAction	public void dispose() 	editor	B1	1/3
+org.jhotdraw.draw.action.AbstractSelectedAction	public void dispose() 	editor	B2	0/2
+org.jhotdraw.gui.JSheet	protected void fireOptionSelected(javax.swing.JFileChooser, int) 	sheetEvent	B3	1/3
+org.jhotdraw.gui.JSheet	protected void fireOptionSelected(javax.swing.JFileChooser, int) 	sheetEvent	B4	0/2
+org.jhotdraw.gui.JSheet	protected void fireOptionSelected(javax.swing.JFileChooser, int) 	sheetEvent	B3	1/3
+org.jhotdraw.gui.JSheet	protected void fireOptionSelected(javax.swing.JFileChooser, int) 	sheetEvent	B4	0/2
+org.jhotdraw.gui.JSheet	protected void fireOptionSelected(javax.swing.JOptionPane, int, java.lang.Object, java.lang.Object) 	sheetEvent	B3	1/3
+org.jhotdraw.gui.JSheet	protected void fireOptionSelected(javax.swing.JOptionPane, int, java.lang.Object, java.lang.Object) 	sheetEvent	B4	0/2
+org.jhotdraw.gui.JSheet	protected void fireOptionSelected(javax.swing.JOptionPane, int, java.lang.Object, java.lang.Object) 	sheetEvent	B3	1/3
+org.jhotdraw.gui.JSheet	protected void fireOptionSelected(javax.swing.JOptionPane, int, java.lang.Object, java.lang.Object) 	sheetEvent	B4	0/2
+org.jhotdraw.draw.LabelFigure	public sealed void remap(HashMap#RAW) 	newTarget	B2	1/3
+org.jhotdraw.app.action.OpenRecentAction	public void actionPerformed(java.awt.event.ActionEvent) 	p	B4	1/6
+org.jhotdraw.app.action.OpenRecentAction	public void actionPerformed(java.awt.event.ActionEvent) 	p	B4	1/6
+org.jhotdraw.draw.RotateHandle	public void trackStep(java.awt.Point, java.awt.Point, int) 	transform	B1	1/6
+org.jhotdraw.draw.TextAreaFigure	protected sealed void drawText(java.awt.Graphics2D) 	as	B9	2/6
+org.jhotdraw.draw.TextAreaFigure	protected sealed void drawText(java.awt.Graphics2D) 	as	B11	0/4
+net.n3.nanoxml.StdXMLParser	protected void scanSomeTag(boolean, java.lang.String, java.util.Properties) throws java.lang.Exception	namespaces	B3	3/8
+net.n3.nanoxml.StdXMLParser	protected void scanSomeTag(boolean, java.lang.String, java.util.Properties) throws java.lang.Exception	namespaces	B6	0/3
+org.jhotdraw.draw.ElbowLiner	public void lineout(org.jhotdraw.draw.ConnectionFigure) 	eoutcode	B5	10/13
+org.jhotdraw.draw.ElbowLiner	public void lineout(org.jhotdraw.draw.ConnectionFigure) 	eoutcode	B7	0/3
+org.jhotdraw.draw.ChangeConnectionHandle	public void trackEnd(java.awt.Point, java.awt.Point, int) 	target	B1	1/5
+org.jhotdraw.gui.JSheet	protected void installSheet() 	owner	B2	2/6
+org.jhotdraw.gui.JSheet	protected void installSheet() 	owner	B13	1/4
+org.jhotdraw.gui.JSheet	protected void fireOptionSelected(javax.swing.JOptionPane) 	option	B1	3/14
+org.jhotdraw.app.action.OSXTogglePaletteAction	public void setPalette(java.awt.Window) 	newValue	B4	1/4
+org.jhotdraw.draw.ElbowLiner	public void lineout(org.jhotdraw.draw.ConnectionFigure) 	soutcode	B5	10/13
+org.jhotdraw.geom.Bezier	private static double newtonRaphsonRootFind(java.awt.geom.Point2D.Double[], java.awt.geom.Point2D.Double, double) 	denominator	B4	1/5
+org.jhotdraw.geom.Bezier	private static double newtonRaphsonRootFind(java.awt.geom.Point2D.Double[], java.awt.geom.Point2D.Double, double) 	denominator	B6	1/3
+org.jhotdraw.draw.BezierNodeHandle	public void trackEnd(java.awt.Point, java.awt.Point, int) 	f	B1	3/11
+org.jhotdraw.gui.JSheet	public static void showInputSheet(java.awt.Component, java.lang.Object, int, javax.swing.Icon, java.lang.Object[], java.lang.Object, org.jhotdraw.gui.event.SheetListener) 	pane	B1	2/7
+org.jhotdraw.draw.DefaultDrawingView	protected void drawDrawing(java.awt.Graphics2D) 	emptyDrawingLabel	B1	3/6
+org.jhotdraw.draw.DefaultDrawingView	protected void drawDrawing(java.awt.Graphics2D) 	emptyDrawingLabel	B2	2/5
+org.jhotdraw.draw.DefaultDrawingView	protected void drawDrawing(java.awt.Graphics2D) 	emptyDrawingLabel	B3	0/2
+org.jhotdraw.app.action.ExitAction	protected void reviewNext() 	documentToBeReviewed	B1	2/5
+org.jhotdraw.app.action.ExitAction	protected void reviewNext() 	documentToBeReviewed	B2	2/4
+org.jhotdraw.app.action.ExitAction	protected void reviewNext() 	documentToBeReviewed	B3	1/3
+org.jhotdraw.app.action.ExitAction	protected void reviewNext() 	documentToBeReviewed	B4	0/2
+org.jhotdraw.app.action.DeleteAction	public void deleteNextChar(java.awt.event.ActionEvent) 	doc	B2	5/8
+org.jhotdraw.app.DefaultMDIApplication	public void hide(org.jhotdraw.app.Project) 	desktopPane	B1	2/5
+org.jhotdraw.app.DefaultMDIApplication	public void hide(org.jhotdraw.app.Project) 	desktopPane	B2	1/4
+org.jhotdraw.app.action.LoadRecentAction	public sealed void doIt(org.jhotdraw.app.Project) 	app	B1	1/3
+org.jhotdraw.app.action.MaximizeAction	public void actionPerformed(java.awt.event.ActionEvent) 	frame	B1	1/3
+org.jhotdraw.app.action.MinimizeAction	public void actionPerformed(java.awt.event.ActionEvent) 	frame	B1	1/3
+org.jhotdraw.app.action.OpenAction	protected void openFile(javax.swing.JFileChooser, org.jhotdraw.app.Project) 	app	B1	1/3
+org.jhotdraw.app.action.OpenRecentAction	protected void openFile(org.jhotdraw.app.Project) 	app	B1	1/3
+org.jhotdraw.draw.AbstractDrawing	public final void add(org.jhotdraw.draw.Figure) 	figure	B1	1/3
+org.jhotdraw.draw.DragTracker	public void mouseDragged(java.awt.event.MouseEvent) 	tx	B3	1/3
+org.jhotdraw.draw.MoveHandle	public void trackStep(java.awt.Point, java.awt.Point, int) 	tx	B1	1/3
+org.jhotdraw.draw.SlantedLiner	public void lineout(org.jhotdraw.draw.ConnectionFigure) 	ep	B1	1/3
+org.jhotdraw.draw.SlantedLiner	public void lineout(org.jhotdraw.draw.ConnectionFigure) 	sp	B1	1/3
+org.jhotdraw.geom.Bezier	private static void fitCubic(java.awt.geom.Point2D.Double[], int, int, java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double, double, java.awt.geom.GeneralPath) 	tHatCenter	B1	1/3
+org.jhotdraw.geom.Bezier	private static void fitCubic(java.awt.geom.Point2D.Double[], int, int, java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double, double, org.jhotdraw.geom.BezierPath) 	tHatCenter	B1	1/3
+org.jhotdraw.geom.Bezier	public static org.jhotdraw.geom.BezierPath fitBezierCurve(org.jhotdraw.geom.BezierPath, double) 	tHat1	B1	1/3
+org.jhotdraw.geom.Bezier	public static org.jhotdraw.geom.BezierPath fitBezierCurve(org.jhotdraw.geom.BezierPath, double) 	tHat2	B1	1/3
+org.jhotdraw.gui.JSheet	public sealed void hide() 	endBounds	B2	2/3
+org.jhotdraw.gui.JSheet	public sealed void show() 	startBounds	B2	2/3
+org.jhotdraw.app.action.OSXDropOnDockAction	public void actionPerformed(java.awt.event.ActionEvent) 	app	B1	2/6
+org.jhotdraw.samples.svg.figures.SVGText	public sealed void read(org.jhotdraw.xml.DOMInput) throws java.io.IOException	origin	B1	4/12
+org.jhotdraw.samples.svg.SVGUtil	public static double getDimensionValue(org.jhotdraw.xml.DOMInput, java.lang.String) throws java.io.IOException	scaleFactor	B1	8/21
+org.jhotdraw.samples.svg.SVGUtil	public static double getDimensionValue(org.jhotdraw.xml.DOMInput, java.lang.String) throws java.io.IOException	scaleFactor	B3	8/20
+org.jhotdraw.samples.svg.SVGUtil	public static double getDimensionValue(org.jhotdraw.xml.DOMInput, java.lang.String) throws java.io.IOException	scaleFactor	B5	7/19
+org.jhotdraw.samples.svg.SVGUtil	public static double getDimensionValue(org.jhotdraw.xml.DOMInput, java.lang.String) throws java.io.IOException	scaleFactor	B7	6/18
+net.n3.nanoxml.StdXMLParser	protected void scanSomeTag(boolean, java.lang.String, java.util.Properties) throws java.lang.Exception	reader	B3	3/8
+org.jhotdraw.draw.DragTracker	public sealed void mousePressed(java.awt.event.MouseEvent) 	view	B1	3/8
+org.jhotdraw.draw.RoundRectangleFigure	protected sealed void drawFill(java.awt.Graphics2D) 	r	B1	3/8
+org.jhotdraw.draw.RoundRectangleFigure	protected sealed void drawStroke(java.awt.Graphics2D) 	r	B1	3/8
+org.jhotdraw.draw.DefaultDrawingView	public sealed java.awt.Dimension getPreferredSize() 	translate	B2	3/7
+org.jhotdraw.draw.DefaultDrawingView	public sealed java.awt.Dimension getPreferredSize() 	translate	B3	2/6
+org.jhotdraw.geom.Bezier	private static java.awt.geom.Point2D.Double[] generateBezier(java.awt.geom.Point2D.Double[], int, int, double[], java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	X	B1	10/17
+org.jhotdraw.geom.Bezier	private static java.awt.geom.Point2D.Double[] generateBezier(java.awt.geom.Point2D.Double[], int, int, double[], java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	X	B2	5/10
+org.jhotdraw.geom.Bezier	private static java.awt.geom.Point2D.Double[] generateBezier(java.awt.geom.Point2D.Double[], int, int, double[], java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	X	B4	3/8
+org.jhotdraw.geom.Bezier	private static java.awt.geom.Point2D.Double[] generateBezier(java.awt.geom.Point2D.Double[], int, int, double[], java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	X	B5	2/7
+org.jhotdraw.geom.Bezier	private static java.awt.geom.Point2D.Double[] generateBezier(java.awt.geom.Point2D.Double[], int, int, double[], java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	X	B7	1/6
+org.jhotdraw.draw.TextAreaTool	public sealed void mouseReleased(java.awt.event.MouseEvent) 	createdFigure	B1	4/6
+org.jhotdraw.draw.TextAreaTool	public sealed void mouseReleased(java.awt.event.MouseEvent) 	createdFigure	B2	3/5
+org.jhotdraw.draw.TextAreaTool	public sealed void mouseReleased(java.awt.event.MouseEvent) 	createdFigure	B4	1/3
+org.jhotdraw.draw.TextAreaTool	public sealed void mouseReleased(java.awt.event.MouseEvent) 	createdFigure	B5	0/2
+org.jhotdraw.geom.Bezier	private static java.awt.geom.Point2D.Double bezierII(int, java.awt.geom.Point2D.Double[], double) 	Vtemp	B1	2/5
+org.jhotdraw.gui.JSheet	public static void showOptionSheet(java.awt.Component, java.lang.Object, int, int, javax.swing.Icon, java.lang.Object[], java.lang.Object, org.jhotdraw.gui.event.SheetListener) 	pane	B1	2/5
+org.jhotdraw.geom.BezierPath	public java.awt.geom.Point2D.Double getCenter() 	sx	B1	1/3
+org.jhotdraw.geom.BezierPath	public java.awt.geom.Point2D.Double getCenter() 	sx	B2	1/2
+org.jhotdraw.geom.BezierPath	public java.awt.geom.Point2D.Double getCenter() 	sy	B1	1/3
+org.jhotdraw.geom.BezierPath	public java.awt.geom.Point2D.Double getCenter() 	sy	B2	1/2
+org.jhotdraw.app.DefaultOSXApplication	public void hide(org.jhotdraw.app.Project) 	paletteHandler	B1	2/4
+org.jhotdraw.app.DefaultOSXApplication	public void hide(org.jhotdraw.app.Project) 	paletteHandler	B2	1/3
+org.jhotdraw.draw.DefaultDrawingView	public void duplicate() 	duplicates	B2	2/4
+org.jhotdraw.draw.DefaultDrawingView	public void duplicate() 	duplicates	B3	1/3
+org.jhotdraw.draw.DefaultDrawingView	public void duplicate() 	originalToDuplicateMap	B2	2/4
+org.jhotdraw.draw.DefaultDrawingView	public void duplicate() 	originalToDuplicateMap	B3	1/3
+org.jhotdraw.draw.BezierControlPointHandle	public void trackStep(java.awt.Point, java.awt.Point, int) 	p2	B3	5/6
+org.jhotdraw.draw.action.VerticalGridLayout	public java.awt.Dimension minimumLayoutSize(java.awt.Container) 	h	B1	4/7
+org.jhotdraw.draw.action.VerticalGridLayout	public java.awt.Dimension minimumLayoutSize(java.awt.Container) 	h	B4	3/6
+org.jhotdraw.draw.action.VerticalGridLayout	public java.awt.Dimension minimumLayoutSize(java.awt.Container) 	h	B5	3/5
+org.jhotdraw.draw.action.VerticalGridLayout	public java.awt.Dimension minimumLayoutSize(java.awt.Container) 	h	B6	2/4
+org.jhotdraw.draw.action.VerticalGridLayout	public java.awt.Dimension minimumLayoutSize(java.awt.Container) 	h	B8	0/2
+org.jhotdraw.draw.action.VerticalGridLayout	public java.awt.Dimension preferredLayoutSize(java.awt.Container) 	h	B1	4/7
+org.jhotdraw.draw.action.VerticalGridLayout	public java.awt.Dimension preferredLayoutSize(java.awt.Container) 	h	B4	3/6
+org.jhotdraw.draw.action.VerticalGridLayout	public java.awt.Dimension preferredLayoutSize(java.awt.Container) 	h	B5	3/5
+org.jhotdraw.draw.action.VerticalGridLayout	public java.awt.Dimension preferredLayoutSize(java.awt.Container) 	h	B6	2/4
+org.jhotdraw.draw.action.VerticalGridLayout	public java.awt.Dimension preferredLayoutSize(java.awt.Container) 	h	B8	0/2
+org.jhotdraw.draw.DefaultDrawingView	protected void drawDrawing(java.awt.Graphics2D) 	drawing	B1	3/6
+org.jhotdraw.draw.DefaultDrawingView	protected void drawDrawing(java.awt.Graphics2D) 	drawing	B2	2/5
+org.jhotdraw.draw.DefaultDrawingView	protected void drawDrawing(java.awt.Graphics2D) 	drawing	B4	1/2
+org.jhotdraw.app.action.ExitAction	protected void reviewNext() 	documentToBeReviewed	B1	8/11
+org.jhotdraw.app.action.ExitAction	protected void reviewNext() 	documentToBeReviewed	B2	7/9
+org.jhotdraw.app.action.ExitAction	protected void reviewNext() 	documentToBeReviewed	B7	2/4
+org.jhotdraw.app.action.ExitAction	protected void reviewNext() 	documentToBeReviewed	B9	1/3
+org.jhotdraw.app.action.ExitAction	protected void reviewNext() 	documentToBeReviewed	B10	0/2
+org.jhotdraw.app.action.ExitAction	protected void reviewNext() 	unsavedProject	B1	9/11
+org.jhotdraw.app.action.ExitAction	protected void reviewNext() 	unsavedProject	B2	7/9
+org.jhotdraw.app.action.ExitAction	protected void reviewNext() 	unsavedProject	B7	2/4
+org.jhotdraw.app.action.ExitAction	protected void reviewNext() 	unsavedProject	B9	1/3
+org.jhotdraw.app.action.ExitAction	protected void reviewNext() 	unsavedProject	B10	0/2
+org.jhotdraw.samples.svg.SVGUtil	public static java.awt.geom.AffineTransform getTransform(java.lang.String) throws java.io.IOException	tt	B2	46/47
+net.n3.nanoxml.ContentReader	public sealed int read(char[], int, int) throws java.io.IOException	reader	B7	1/2
+net.n3.nanoxml.ContentReader	public sealed void close() throws java.io.IOException	reader	B6	1/2
+net.n3.nanoxml.StdXMLParser	protected void processAttribute(Vector#RAW, Vector#RAW, Vector#RAW) throws java.lang.Exception	attrNames	B1	1/2
+net.n3.nanoxml.StdXMLParser	protected void processAttribute(Vector#RAW, Vector#RAW, Vector#RAW) throws java.lang.Exception	attrValues	B3	1/2
+net.n3.nanoxml.StdXMLParser	protected void processSpecialTag(boolean) throws java.lang.Exception	reader	B8	1/2
+net.n3.nanoxml.XMLException	public sealed void printStackTrace() 	encapsulatedException	B1	1/2
+org.jhotdraw.app.action.ExitAction	protected void fileSaved(org.jhotdraw.app.Project, java.io.File, java.lang.Object) 	unsavedProject	B1	1/2
+org.jhotdraw.app.action.ExitAction	public void actionPerformed(java.awt.event.ActionEvent) 	unsavedProjectsCount	B4	1/2
+org.jhotdraw.app.action.LoadAction	protected void fileOpened(org.jhotdraw.app.Project, java.io.File, java.lang.Object) 	project	B1	1/2
+org.jhotdraw.app.action.LoadRecentAction	protected void fileOpened(org.jhotdraw.app.Project, java.io.File, java.lang.Object) 	project	B1	1/2
+org.jhotdraw.app.action.OpenAction	protected void fileOpened(org.jhotdraw.app.Project, java.io.File, java.lang.Object) 	project	B1	1/2
+org.jhotdraw.app.action.OpenRecentAction	protected void fileOpened(org.jhotdraw.app.Project, java.io.File, java.lang.Object) 	project	B1	1/2
+org.jhotdraw.draw.AbstractAttributedCompositeFigure	public sealed void removeAttribute(AttributeKey#RAW) 	attributes	B1	1/2
+org.jhotdraw.draw.AttributedFigure	public void removeAttribute(AttributeKey#RAW) 	attributes	B1	1/2
+org.jhotdraw.draw.DefaultDrawingView	private void invalidateHandles() 	secondaryHandles	B1	1/2
+org.jhotdraw.draw.DefaultDrawingView	private void invalidateHandles() 	selectionHandles	B1	1/2
+org.jhotdraw.draw.DelegationSelectionTool	public sealed void mouseDragged(java.awt.event.MouseEvent) 	popupTimer	B1	1/2
+org.jhotdraw.draw.DelegationSelectionTool	public sealed void mouseReleased(java.awt.event.MouseEvent) 	popupTimer	B1	1/2
+org.jhotdraw.draw.FloatingTextArea	public void endOverlay() 	editScrollContainer	B1	1/2
+org.jhotdraw.draw.FloatingTextField	public void endOverlay() 	editWidget	B1	1/2
+org.jhotdraw.draw.GraphicalCompositeFigure	public sealed void basicSetAttribute(AttributeKey#RAW, java.lang.Object) 	attributes	B1	1/2
+org.jhotdraw.draw.TextAreaTool	protected void endEdit() 	textArea	B1	1/2
+org.jhotdraw.draw.TextTool	protected void endEdit() 	textField	B1	1/2
+org.jhotdraw.geom.Bezier	private static double newtonRaphsonRootFind(java.awt.geom.Point2D.Double[], java.awt.geom.Point2D.Double, double) 	Q1	B2	1/2
+org.jhotdraw.geom.Geom	public static boolean lineContainsPoint(double, double, double, double, double, double, double) 	b	B7	1/2
+org.jhotdraw.geom.Geom	public static boolean lineContainsPoint(int, int, int, int, int, int, double) 	b	B7	1/2
+org.jhotdraw.geom.Geom	public static java.awt.geom.Point2D.Double chop(java.awt.Shape, java.awt.geom.Point2D.Double) 	i	B10	1/2
+org.jhotdraw.draw.EllipseFigure	protected sealed void drawFill(java.awt.Graphics2D) 	r	B1	3/6
+org.jhotdraw.draw.EllipseFigure	protected sealed void drawStroke(java.awt.Graphics2D) 	r	B1	3/6
+org.jhotdraw.draw.action.VerticalGridLayout	public java.awt.Dimension minimumLayoutSize(java.awt.Container) 	w	B1	4/7
+org.jhotdraw.draw.action.VerticalGridLayout	public java.awt.Dimension minimumLayoutSize(java.awt.Container) 	w	B4	3/6
+org.jhotdraw.draw.action.VerticalGridLayout	public java.awt.Dimension minimumLayoutSize(java.awt.Container) 	w	B5	3/5
+org.jhotdraw.draw.action.VerticalGridLayout	public java.awt.Dimension minimumLayoutSize(java.awt.Container) 	w	B6	2/4
+org.jhotdraw.draw.action.VerticalGridLayout	public java.awt.Dimension preferredLayoutSize(java.awt.Container) 	w	B1	4/7
+org.jhotdraw.draw.action.VerticalGridLayout	public java.awt.Dimension preferredLayoutSize(java.awt.Container) 	w	B4	3/6
+org.jhotdraw.draw.action.VerticalGridLayout	public java.awt.Dimension preferredLayoutSize(java.awt.Container) 	w	B5	3/5
+org.jhotdraw.draw.action.VerticalGridLayout	public java.awt.Dimension preferredLayoutSize(java.awt.Container) 	w	B6	2/4
+org.jhotdraw.draw.action.VerticalGridLayout	public void layoutContainer(java.awt.Container) 	ncols	B1	3/5
+org.jhotdraw.draw.action.VerticalGridLayout	public void layoutContainer(java.awt.Container) 	ncols	B3	1/2
+org.jhotdraw.app.action.ExitAction	protected void reviewNext() 	unsavedProjectsCount	B1	2/4
+org.jhotdraw.app.action.ExitAction	protected void reviewNext() 	unsavedProjectsCount	B2	2/3
+org.jhotdraw.app.action.ExitAction	protected void reviewNext() 	unsavedProjectsCount	B3	1/2
+org.jhotdraw.geom.Bezier	private static double newtonRaphsonRootFind(java.awt.geom.Point2D.Double[], java.awt.geom.Point2D.Double, double) 	numerator	B2	3/4
+org.jhotdraw.geom.Bezier	private static double newtonRaphsonRootFind(java.awt.geom.Point2D.Double[], java.awt.geom.Point2D.Double, double) 	numerator	B6	1/2
+org.jhotdraw.app.action.OSXTogglePaletteAction	public sealed void putValue(java.lang.String, java.lang.Object) 	palette	B1	4/6
+org.jhotdraw.app.action.OSXTogglePaletteAction	public sealed void putValue(java.lang.String, java.lang.Object) 	palette	B2	3/5
+org.jhotdraw.app.action.OSXTogglePaletteAction	public sealed void putValue(java.lang.String, java.lang.Object) 	palette	B3	2/4
+net.n3.nanoxml.StdXMLParser	protected void scanData() throws java.lang.Exception	builder	B4	3/5
+org.jhotdraw.draw.action.VerticalGridLayout	public java.awt.Dimension minimumLayoutSize(java.awt.Container) 	ncols	B1	3/5
+org.jhotdraw.draw.action.VerticalGridLayout	public java.awt.Dimension preferredLayoutSize(java.awt.Container) 	ncols	B1	3/5
+org.jhotdraw.draw.action.VerticalGridLayout	public void layoutContainer(java.awt.Container) 	h	B1	6/8
+org.jhotdraw.draw.action.VerticalGridLayout	public void layoutContainer(java.awt.Container) 	h	B3	2/4
+org.jhotdraw.draw.action.VerticalGridLayout	public void layoutContainer(java.awt.Container) 	w	B1	6/8
+org.jhotdraw.draw.action.VerticalGridLayout	public void layoutContainer(java.awt.Container) 	w	B3	2/4
+org.jhotdraw.gui.MDIDesktopManager	protected void resizeDesktop() 	x	B1	9/14
+org.jhotdraw.gui.MDIDesktopManager	protected void resizeDesktop() 	y	B1	9/14
+org.jhotdraw.draw.BezierControlPointHandle	private void fireAreaInvalidated(org.jhotdraw.geom.BezierPath.Node) 	dr	B1	2/3
+org.jhotdraw.draw.BezierNodeHandle	private void fireAreaInvalidated(org.jhotdraw.geom.BezierPath.Node) 	dr	B1	2/3
+org.jhotdraw.draw.DragTracker	public sealed void mouseReleased(java.awt.event.MouseEvent) 	tx	B6	2/3
+org.jhotdraw.draw.DragTracker	public sealed void mouseReleased(java.awt.event.MouseEvent) 	tx	B8	2/3
+org.jhotdraw.geom.Bezier	private static double newtonRaphsonRootFind(java.awt.geom.Point2D.Double[], java.awt.geom.Point2D.Double, double) 	Q1_u	B2	2/3
+org.jhotdraw.geom.Geom	public static boolean lineContainsPoint(double, double, double, double, double, double, double) 	x	B7	2/3
+org.jhotdraw.geom.Geom	public static boolean lineContainsPoint(double, double, double, double, double, double, double) 	y	B7	2/3
+org.jhotdraw.geom.Geom	public static boolean lineContainsPoint(int, int, int, int, int, int, double) 	x	B7	2/3
+org.jhotdraw.geom.Geom	public static boolean lineContainsPoint(int, int, int, int, int, int, double) 	y	B7	2/3
+org.jhotdraw.draw.DefaultDrawing	public Collection<org.jhotdraw.draw.Figure> sort(Collection<org.jhotdraw.draw.Figure>) 	unsorted	B2	4/6
+org.jhotdraw.draw.SlantedLiner	public void lineout(org.jhotdraw.draw.ConnectionFigure) 	path	B1	4/6
+org.jhotdraw.draw.ConnectionHandle	public void trackEnd(java.awt.Point, java.awt.Point, int) 	edit	B1	3/4
+net.n3.nanoxml.StdXMLParser	protected void processElement(java.lang.String, java.util.Properties) throws java.lang.Exception	defaultNamespace	B11	4/5
+net.n3.nanoxml.StdXMLParser	protected void processElement(java.lang.String, java.util.Properties) throws java.lang.Exception	defaultNamespace	B12	3/4
+org.jhotdraw.geom.Bezier	private static java.awt.geom.Point2D.Double[] generateBezier(java.awt.geom.Point2D.Double[], int, int, double[], java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	alpha_l	B2	12/14
+org.jhotdraw.geom.Bezier	private static java.awt.geom.Point2D.Double[] generateBezier(java.awt.geom.Point2D.Double[], int, int, double[], java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	alpha_l	B4	10/12
+org.jhotdraw.geom.Bezier	private static java.awt.geom.Point2D.Double[] generateBezier(java.awt.geom.Point2D.Double[], int, int, double[], java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	alpha_l	B5	9/11
+org.jhotdraw.geom.Bezier	private static java.awt.geom.Point2D.Double[] generateBezier(java.awt.geom.Point2D.Double[], int, int, double[], java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	alpha_l	B7	8/10
+org.jhotdraw.geom.Bezier	private static java.awt.geom.Point2D.Double[] generateBezier(java.awt.geom.Point2D.Double[], int, int, double[], java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	alpha_l	B8	7/9
+org.jhotdraw.geom.Bezier	private static java.awt.geom.Point2D.Double[] generateBezier(java.awt.geom.Point2D.Double[], int, int, double[], java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	alpha_l	B10	3/5
+org.jhotdraw.geom.Bezier	private static java.awt.geom.Point2D.Double[] generateBezier(java.awt.geom.Point2D.Double[], int, int, double[], java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	alpha_r	B2	12/14
+org.jhotdraw.geom.Bezier	private static java.awt.geom.Point2D.Double[] generateBezier(java.awt.geom.Point2D.Double[], int, int, double[], java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	alpha_r	B4	10/12
+org.jhotdraw.geom.Bezier	private static java.awt.geom.Point2D.Double[] generateBezier(java.awt.geom.Point2D.Double[], int, int, double[], java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	alpha_r	B5	9/11
+org.jhotdraw.geom.Bezier	private static java.awt.geom.Point2D.Double[] generateBezier(java.awt.geom.Point2D.Double[], int, int, double[], java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	alpha_r	B7	8/10
+org.jhotdraw.geom.Bezier	private static java.awt.geom.Point2D.Double[] generateBezier(java.awt.geom.Point2D.Double[], int, int, double[], java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	alpha_r	B8	7/9
+org.jhotdraw.geom.Bezier	private static java.awt.geom.Point2D.Double[] generateBezier(java.awt.geom.Point2D.Double[], int, int, double[], java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	alpha_r	B10	3/5
+org.jhotdraw.draw.DragTracker	public sealed void mousePressed(java.awt.event.MouseEvent) 	origin	B6	4/5
+org.jhotdraw.draw.RoundRectRadiusHandle	public void trackStep(java.awt.Point, java.awt.Point, int) 	viewArc	B1	4/5
+org.jhotdraw.geom.Geom	public static java.awt.geom.Point2D.Double chop(java.awt.Shape, java.awt.geom.Point2D.Double) 	moveToX	B3	4/5
+org.jhotdraw.geom.Geom	public static java.awt.geom.Point2D.Double chop(java.awt.Shape, java.awt.geom.Point2D.Double) 	moveToY	B3	4/5
+org.jhotdraw.draw.BezierControlPointHandle	public void trackStep(java.awt.Point, java.awt.Point, int) 	figure	B1	12/15
+org.jhotdraw.draw.AbstractLineDecoration	private java.awt.geom.GeneralPath getTransformedDecoratorPath(org.jhotdraw.draw.Figure, java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	transform	B1	5/6
+org.jhotdraw.draw.DefaultDrawingView	public sealed java.awt.Dimension getPreferredSize() 	d	B2	5/6
+org.jhotdraw.geom.Bezier	private static java.awt.geom.Point2D.Double[] generateBezier(java.awt.geom.Point2D.Double[], int, int, double[], java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	det_C0_X	B2	9/10
+org.jhotdraw.geom.Bezier	private static java.awt.geom.Point2D.Double[] generateBezier(java.awt.geom.Point2D.Double[], int, int, double[], java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	det_C0_X	B4	7/8
+org.jhotdraw.geom.Bezier	private static java.awt.geom.Point2D.Double[] generateBezier(java.awt.geom.Point2D.Double[], int, int, double[], java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	det_C0_X	B5	6/7
+org.jhotdraw.geom.Bezier	private static java.awt.geom.Point2D.Double[] generateBezier(java.awt.geom.Point2D.Double[], int, int, double[], java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	det_C0_X	B7	5/6
+org.jhotdraw.geom.Bezier	private static java.awt.geom.Point2D.Double[] generateBezier(java.awt.geom.Point2D.Double[], int, int, double[], java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	det_C0_X	B8	4/5
+org.jhotdraw.geom.Bezier	private static java.awt.geom.Point2D.Double[] generateBezier(java.awt.geom.Point2D.Double[], int, int, double[], java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	det_X_C1	B2	9/10
+org.jhotdraw.geom.Bezier	private static java.awt.geom.Point2D.Double[] generateBezier(java.awt.geom.Point2D.Double[], int, int, double[], java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	det_X_C1	B4	7/8
+org.jhotdraw.geom.Bezier	private static java.awt.geom.Point2D.Double[] generateBezier(java.awt.geom.Point2D.Double[], int, int, double[], java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	det_X_C1	B5	6/7
+org.jhotdraw.geom.Bezier	private static java.awt.geom.Point2D.Double[] generateBezier(java.awt.geom.Point2D.Double[], int, int, double[], java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	det_X_C1	B7	5/6
+org.jhotdraw.geom.Bezier	private static java.awt.geom.Point2D.Double[] generateBezier(java.awt.geom.Point2D.Double[], int, int, double[], java.awt.geom.Point2D.Double, java.awt.geom.Point2D.Double) 	det_X_C1	B8	4/5
+org.jhotdraw.geom.Bezier	private static double computeMaxError(java.awt.geom.Point2D.Double[], int, int, java.awt.geom.Point2D.Double[], double[], int[]) 	splitPoint	B1	12/14
+org.jhotdraw.samples.svg.SVGUtil	public static Map<java.lang.String,java.lang.String> getStyles(java.lang.String) throws java.io.IOException	tt	B3	17/18

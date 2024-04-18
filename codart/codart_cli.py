@@ -1,15 +1,12 @@
 """
-
 The main module of CodART
 This module implements CodART CLI
 To find and run more unit and integration tests please look at `benchmark_projects` and `test` directory
-
 -changelog
 -- Add support switching between different Java grammar
 -- Add JavaParserLabeled.g4
 -- Add C++ backend support for Java9_v2.g2
 -- Start with encapsulate field refactoring
-
 """
 
 __version__ = '0.2.2'
@@ -17,7 +14,6 @@ __author__ = 'Morteza Zakeri'
 
 
 import argparse
-
 from antlr4 import *
 
 # Import different grammars

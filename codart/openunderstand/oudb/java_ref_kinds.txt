@@ -1,0 +1,117 @@
+Call (Callby)
+
+Java Call Nondynamic
+Java Call
+
+
+Cast (Castby)
+
+Java Cast
+
+
+Contain (Containin)
+
+Java Contain
+
+
+Couple (Coupleby)
+
+Java Extend Couple
+Java Couple
+Java Extend Couple External
+Java Extend Couple Implicit External
+Java Extend Couple Implicit
+Java Implement Couple
+
+
+Create (Createby)
+
+Java Create
+
+
+Declare (Declarein)
+
+Java Declare
+
+
+Define (Definein)
+
+Java Define
+Java Define Implicit
+
+
+DotRef (DotRefby)
+
+Java DotRef
+
+
+End (Endby)
+
+Java End
+
+
+Export (Exportby)
+
+Java Export
+
+
+Import (Importby)
+
+Java Import Demand
+Java Import
+
+
+Modify (Modifyby)
+
+Java Modify
+
+
+ModuleUse (ModuleUseby)
+
+Java ModuleUse
+
+
+Override (Overrideby)
+
+Java Override
+
+
+Provide (Provideby)
+
+Java Provide
+
+
+Require (Requireby)
+
+Java Require
+
+
+Set (Setby)
+
+Java Set Init
+Java Set Partial
+Java Set
+
+
+Typed (Typedby)
+
+Java Typed
+
+
+Use (Useby)
+
+Java Use
+Java Use Partial
+Java Use Ptr
+Java Use Return
+
+
+Open (Openby)
+
+Java Open
+
+
+Throw (Throwby)
+
+Java Throw
+

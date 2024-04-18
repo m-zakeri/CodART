@@ -1,0 +1,5 @@
+Refactoring Type	Source Entity	Target Class	Source/Target accessed members	Rate it!
+Move Method	simulator.SA.GridGenerator::getNeighbours(simulator.util.ConsumerAttributes, int):java.util.Vector	simulator.util.ConsumerAttributes	1/3	
+Move Method	simulator.SA.SimulationAgent::updatePricingPolicyToReviewGUI():void	simulator.SA.gui.ReviewGUI	1/3	
+Move Method	simulator.SA.gui.DemandCurveParameterFrame::createParametersPanel(javax.swing.JPanel, simulator.util.Function):void	simulator.util.Function	2/3	
+Move Method	simulator.SA.gui.ScenarioDesignWizard.Step3_1Frame::createParametersPanel(javax.swing.JPanel, simulator.util.Function):void	simulator.util.Function	2/3	

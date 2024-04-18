@@ -28,20 +28,32 @@ __author__ = 'Morteza Zakeri'
 import os
 from pathlib import Path
 import networkx as nx
+from refactorings.abstraction import Refactoring
+import sys
+from utility.core_utils import read_config_core, Core
+
 
 try:
-    import understand as und
+    if read_config_core() == Core.OPEN_UNDERSTAND.value:
+        import openunderstand.ounderstand as und
+    else:
+        sys.path.insert(
+            0,
+            "/home/y/Downloads/Scientific.Toolworks.Understand.5.1.1023.Linux/Understand-5.1.1023-Linux-64bit/scitools/bin/linux64/Python",
+        )
+        os.environ[
+            "LD_LIBRARY_PATH"
+        ] = "/home/y/Downloads/Scientific.Toolworks.Understand.5.1.1023.Linux/Understand-5.1.1023-Linux-64bit/scitools/bin/linux64/Python"
+        import understand as und
 except ImportError as e:
     print(e)
 
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
-
-from codart.gen.javaLabeled.JavaLexer import JavaLexer
-from codart.gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
-from codart.gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
-
-from codart.config import logger
+from gen.javaLabeled.JavaLexer import JavaLexer
+from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
+from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
+from config import logger
 
 
 class DependencyPreConditionListener(JavaParserLabeledListener):
@@ -432,6 +444,7 @@ class NewClassPropagation(JavaParserLabeledListener):
                 )
 
 
+
 class ExtractClassAPI:
     def __init__(self, udb_path, file_path, source_class, new_class, moved_fields, moved_methods,
                  new_file_path=None):
@@ -469,6 +482,7 @@ class ExtractClassAPI:
             self.checked = True
 
     def get_source_class_map(self):
+        print("self.udb_path : ", self.udb_path)
         _db = und.open(self.udb_path)
         class_ents = _db.lookup(self.source_class, "Class")
         class_ent = None
@@ -586,43 +600,47 @@ def get_java_files(directory):
             if file.split('.')[-1] == 'java':
                 yield os.path.join(root, file), file
 
+class Runner(Refactoring):
 
-def main(udb_path, file_path, source_class, moved_fields, moved_methods, *args, **kwargs):
-    new_class = f"{source_class}Extracted"
-    new_file_path = os.path.join(Path(file_path).parent, f"{new_class}.java")
-
-    if not os.path.exists(file_path):
-        logger.error(f'The source class "{source_class}" is nested in {file_path}')
-        return False
-
-    if os.path.exists(new_file_path):
-        logger.error(f'The new class "{new_file_path}" already exist.')
-        return False
-
-    eca = ExtractClassAPI(
-        udb_path=udb_path,
-        file_path=file_path,
-        source_class=source_class,
-        new_class=new_class,
-        moved_fields=moved_fields,
-        moved_methods=moved_methods,
-        new_file_path=new_file_path
-    )
-    eca.get_source_class_map()
-    if len(eca.method_usage_map) == 0:
-        logger.error(f'The method_usage_map is empty: {len(eca.method_usage_map)}')
-        return False
-    else:
-        res = eca.do_refactor()
-        return res
+    def __init__(self):
+        super().__init__()
 
 
-# Tests
-if __name__ == "__main__":
-    main(
-        udb_path="D:/Dev/JavaSample/JavaSample/JavaSample.und",
-        file_path="D:/Dev/JavaSample/JavaSample/src/extract_class/Person.java",
-        source_class="Person",
-        moved_fields=['officeAreaCode', 'officeNumber', ],
-        moved_methods=['getTelephoneNumber', ],
-    )
+    def main(self,
+             udb_path: str = "",
+             file_path: str = "",
+             source_class: str = "",
+             moved_fields: str = "",
+             moved_methods: str = "",
+             *args,
+             **kwargs) -> bool:
+        new_class = f"{source_class}Extracted"
+        new_file_path = os.path.join(Path(file_path).parent,
+                                     f"{new_class}.java")
+
+        if not os.path.exists(file_path):
+            logger.error(
+                f'The source class "{source_class}" is nested in {file_path}')
+            return False
+
+        if os.path.exists(new_file_path):
+            logger.error(f'The new class "{new_file_path}" already exist.')
+            return False
+
+        eca = ExtractClassAPI(
+            udb_path=udb_path,
+            file_path=file_path,
+            source_class=source_class,
+            new_class=new_class,
+            moved_fields=moved_fields,
+            moved_methods=moved_methods,
+            new_file_path=new_file_path,
+        )
+        eca.get_source_class_map()
+        if len(eca.method_usage_map) == 0:
+            logger.error(
+                f'The method_usage_map is empty: {len(eca.method_usage_map)}')
+            return False
+        else:
+            res = eca.do_refactor()
+            return res

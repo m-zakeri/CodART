@@ -1,0 +1,44 @@
+
+<WorkflowLog description="$suite.name" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="WorkflowLog.xsd">
+  <!-- it is possible to insert here a set of attributes for the workflow in general but it is not used in here-->
+  <!--Optional:
+  <Data>
+    <Attribute name="string">string</Attribute>
+  </Data>
+  -->
+  <Source program="$suite.sourceProgram">
+  <!-- it is possible to insert here a set of attributes for the source in general but it is not used in here-->
+    <!--Optional:
+    <Data>
+      <Attribute name="string">string</Attribute>
+    </Data>
+  </Source>
+  -->
+  <Process id="$suite.id" description="$suite.description">
+    <Data>
+#foreach ($attr in $suite.attributes)
+      <Attribute name="$attr.name">$attr.value</Attribute>
+#end
+    </Data>
+#foreach ($test in $suite.tests)
+    <ProcessInstance id="$test.id" description="$test.description">
+      <Data>
+        <Attribute name="string">string</Attribute>
+      </Data>
+#foreach ( $event in $test)
+      <AuditTrailEntry>
+#foreach ( $attr in $event.attributes)
+        <Data>
+          <Attribute name="$attr.name">$attr.value</Attribute>
+        </Data>
+#end
+        <WorkflowModelElement>$event.name</WorkflowModelElement>
+        <EventType>complete</EventType>
+        <Timestamp>$event.time</Timestamp>
+        <Originator>$event.source</Originator>
+      </AuditTrailEntry>
+#end
+    </ProcessInstance>
+#end
+  </Process>
+</WorkflowLog>

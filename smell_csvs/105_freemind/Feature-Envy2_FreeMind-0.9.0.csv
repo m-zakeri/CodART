@@ -1,0 +1,37 @@
+Refactoring Type	Source Entity	Target Class	Source/Target accessed members	Rate it!
+Move Method	freemind.modes.mindmapmode.attributeactors.InsertAttributeActor::act(freemind.modes.attributes.NodeAttributeTableModel, int, java.lang.String, java.lang.String):void	freemind.modes.attributes.NodeAttributeTableModel	0/3	
+Move Method	freemind.modes.mindmapmode.attributeactors.RemoveAttributeActor::act(freemind.modes.attributes.NodeAttributeTableModel, int):void	freemind.modes.attributes.NodeAttributeTableModel	0/3	
+Move Method	freemind.modes.mindmapmode.attributeactors.ImportAttributesDialog::createValueSubTrees(javax.swing.tree.DefaultMutableTreeNode, freemind.modes.attributes.AttributeRegistryElement, freemind.modes.attributes.AttributeRegistry):void	freemind.modes.attributes.AttributeRegistryElement	0/2	
+Move Method	freemind.modes.mindmapmode.attributeactors.SetAttributeNameActor::act(freemind.modes.attributes.NodeAttributeTableModel, int, java.lang.String):void	freemind.modes.attributes.NodeAttributeTableModel	0/2	
+Move Method	freemind.modes.mindmapmode.attributeactors.SetAttributeValueActor::act(freemind.modes.attributes.NodeAttributeTableModel, int, java.lang.String):void	freemind.modes.attributes.NodeAttributeTableModel	0/2	
+Move Method	freemind.view.mindmapview.MindMapLayout::calcYBorderSize(freemind.view.mindmapview.MapView):int	freemind.view.mindmapview.MapView	0/2	
+Move Method	freemind.view.mindmapview.MindMapLayout::calcXBorderSize(freemind.view.mindmapview.MapView):int	freemind.view.mindmapview.MapView	0/2	
+Move Method	freemind.controller.filter.condition.ConditionFactory::loadCondition(freemind.main.XMLElement):freemind.controller.filter.condition.Condition	freemind.main.XMLElement	0/1	
+Move Method	freemind.modes.mindmapmode.MindMapMapModel::saveTXT(freemind.modes.mindmapmode.MindMapNodeModel, java.io.File):boolean	freemind.modes.mindmapmode.MindMapNodeModel	0/1	
+Move Method	freemind.modes.mindmapmode.attributeactors.ImportAttributesDialog::createValueSubTrees(javax.swing.tree.DefaultMutableTreeNode, freemind.modes.attributes.AttributeRegistryElement, freemind.modes.attributes.AttributeRegistry):void	freemind.modes.attributes.AttributeRegistry	0/1	
+Move Method	freemind.modes.mindmapmode.attributeactors.SetAttributeColumnWidthActor::act(freemind.modes.attributes.NodeAttributeTableModel, int, int):void	freemind.modes.attributes.NodeAttributeTableModel	0/1	
+Move Method	freemind.modes.mindmapmode.dialogs.StylePatternFrame::setPatternControls(freemind.controller.actions.generated.instance.PatternPropertyBase, freemind.common.PropertyBean, freemind.common.PropertyBean, java.lang.String, freemind.modes.mindmapmode.dialogs.StylePatternFrame.ValueTransformator):void	freemind.common.PropertyBean	0/1	
+Move Method	freemind.modes.mindmapmode.dialogs.StylePatternFrame::getPatternResult(freemind.controller.actions.generated.instance.PatternPropertyBase, freemind.common.ThreeCheckBoxProperty, freemind.common.PropertyBean, freemind.modes.mindmapmode.dialogs.StylePatternFrame.ValueTransformator):freemind.controller.actions.generated.instance.PatternPropertyBase	freemind.common.ThreeCheckBoxProperty	0/1	
+Move Method	freemind.controller.MapMouseMotionListener::handlePopup(java.awt.event.MouseEvent):void	freemind.controller.Controller	1/3	
+Move Method	freemind.modes.mindmapmode.actions.EditAction::setNodeText(freemind.modes.MindMapNode, java.lang.String):void	freemind.modes.ControllerAdapter	1/3	
+Move Method	plugins.svg.ExportVectorGraphic::fillSVGGraphics2D(freemind.view.mindmapview.MapView):org.apache.batik.svggen.SVGGraphics2D	freemind.view.mindmapview.MapView	1/3	
+Move Method	accessories.plugins.ClonePasteAction.Registration::getMindMapNodes():java.util.Vector	freemind.modes.mindmapmode.MindMapController	1/2	
+Move Method	accessories.plugins.NodeNote::getSplitPaneToScreen(accessories.plugins.NodeNoteRegistration):javax.swing.JSplitPane	accessories.plugins.NodeNoteRegistration	1/2	
+Move Method	freemind.common.IconProperty::setIcon(freemind.modes.MindIcon):void	freemind.modes.MindIcon	1/2	
+Move Method	freemind.modes.common.dialogs.IconSelectionPopupDialog::calculateIndex(freemind.modes.common.dialogs.IconSelectionPopupDialog.Position):int	freemind.modes.common.dialogs.IconSelectionPopupDialog.Position	1/2	
+Move Method	freemind.modes.mindmapmode.MindMapController::updateToolbar(freemind.modes.MindMapNode):void	freemind.modes.mindmapmode.MindMapToolBar	1/2	
+Move Method	freemind.modes.mindmapmode.actions.IconAction::removeAllIcons():void	freemind.modes.ControllerAdapter	1/2	
+Move Method	freemind.modes.mindmapmode.actions.PasteAction::paste(freemind.modes.MindMapNode, freemind.modes.MindMapNode):void	freemind.modes.ControllerAdapter	1/2	
+Move Method	freemind.modes.mindmapmode.actions.ToggleFoldedAction::createSingleFoldAction(boolean, freemind.modes.MindMapNode, boolean):freemind.controller.actions.generated.instance.FoldAction	freemind.modes.ControllerAdapter	1/2	
+Move Method	freemind.modes.mindmapmode.hooks.MindMapHookFactory::createJavaHook(java.lang.String, freemind.extensions.HookDescriptorPluginAction):freemind.extensions.MindMapHook	freemind.extensions.HookDescriptorPluginAction	1/2	
+Move Method	freemind.view.mindmapview.MapView::getSelected():freemind.view.mindmapview.NodeView	freemind.view.mindmapview.MapView.Selected	1/2	
+Move Method	freemind.view.mindmapview.MapView::getSelecteds():java.util.LinkedList	freemind.view.mindmapview.MapView.Selected	1/2	
+Move Method	freemind.view.mindmapview.MapView::getSingleSelectedNodes():java.util.ArrayList	freemind.view.mindmapview.MapView.Selected	1/2	
+Move Method	freemind.view.mindmapview.attributeview.AttributeView::update():void	freemind.view.mindmapview.attributeview.AttributeTable	1/2	
+Move Method	freemind.modes.mindmapmode.actions.DeleteChildAction::deleteWithoutUndo(freemind.modes.MindMapNode):void	freemind.modes.mindmapmode.MindMapController	2/5	
+Move Method	freemind.modes.mindmapmode.actions.JoinNodesAction::joinNodes(freemind.modes.MindMapNode, java.util.List):void	freemind.modes.ControllerAdapter	2/4	
+Move Method	freemind.modes.mindmapmode.actions.NewChildAction::addNewNode(freemind.modes.MindMapNode, int, boolean):freemind.modes.MindMapNode	freemind.modes.ControllerAdapter	2/4	
+Move Method	accessories.plugins.FitToPage::scroll():void	freemind.view.mindmapview.MapView	2/3	
+Move Method	freemind.controller.Controller.OptionSelectionMechanismAction::changeSelection(java.lang.String):void	freemind.controller.Controller	2/3	
+Move Method	freemind.controller.LastOpenedList::open(java.lang.String):boolean	freemind.controller.Controller	2/3	
+Move Method	freemind.view.mindmapview.attributeview.AttributeView::startEditingTable():void	freemind.view.mindmapview.attributeview.AttributeTable	2/3	

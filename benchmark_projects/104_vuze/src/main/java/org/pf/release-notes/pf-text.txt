@@ -1,0 +1,291 @@
+RELEASE NOTES FOR PACKAGE PF-Text
+====================================
+
+Author      : Manfred Duchrow
+Last Update : March 21, 2003
+Version     : 4.3
+
+-------------------------------------------------------------------------------
+
+VERSION 4.3 (21/03/2003)
+
+* New methods in StringUtil
+  - String[] remove( String[], String[] )
+  - String[] remove( String[], String )
+  - String[] removeNull( String[] )
+  - leftPad( int anInteger, int len )
+  - leftPadCh( int anInteger, int len, char ch )
+  - rightPad( int anInteger, int len )
+  - rightPadCh( int anInteger, int len, char ch )
+
+* Optimized performance of methods StringUtil.append() by using
+  System.arraycopy()
+  
+* New methods in CommandLineArguments
+  - CommandLineArguments( String[] args, String switchIndicator )
+  - copy()
+  - addOption()
+  - addOptionWithArgument()
+  - removeOption()
+  - removeOPtionWithArgument()
+
+* MatchAttribute supports now Integer values in the attributes map for proper
+  integer comparisons
+
+-------------------------------------------------------------------------------
+
+VERSION 4.2.1 (13/02/2003)
+
+* New methods in StringPattern to support digit wildcard character
+  - setDigitWildcardChar()
+  - 2 new constructors with a digit wildcard char
+
+  Allows to define match patterns like "AB-###-*" where '#' stands for
+  a single digit character (0-9) which means "AB-263-ff" would match the
+  pattern but "AB-9R1-C" won't.
+
+-------------------------------------------------------------------------------
+
+VERSION 4.2 (04/01/2003)
+
+* New method in StringPattern
+  - hasWildcard()
+
+* MatchAttribute now supports operators
+  - equals
+  - greater
+  - less
+  - greater or equal
+  - less or equal
+
+* Extended LdapFilterParser to recognize <= and >= operators
+
+* Extended MatchRuleChars with
+  - getEqualsChar(), setEqualsChar()
+  - getGreaterChar(), setGreaterChar()
+  - getLessChar(), setLessChar()
+
+* Changed MatchRuleVisitor.attribute() signature to pass the attributes
+  compare operator to it
+
+* Changed SqlMatchRuleVisitor to support the new operators
+
+* Changed LdapMatchRuleVisitor to support the new operators
+
+* Changed MatchRulePrinter to support the new operators
+
+-------------------------------------------------------------------------------
+
+VERSION 4.1.2 (22/11/2002)
+
+* Support special characters in attribute names with
+  MatchRuleChars.setSpecialNameCharacters() and
+  a modified DefaultMatchRuleParser
+  
+-------------------------------------------------------------------------------
+
+VERSION 4.1.1 (24/10/2002)
+
+* BUGFIX: In MatchGroup.doMatch()
+  Rules with different operators inside a group were evaluated wrong because
+  of 'short circuit' implementation.
+  
+-------------------------------------------------------------------------------
+
+VERSION 4.1 (30/09/2002)
+
+* New methods in StringUtil
+  - allParts()
+  - allSubstrings()
+
+* New methods in StringScanner
+  - endReached()
+  - endNotReached()
+  - atEnd()
+  - hasNext()
+  - setPosition()
+
+* New class StringExaminer
+
+* Refactored StringPattern (now using StringExaminer instead of StringScanner)
+
+* Changed all setXXXChar() methods in DefaultMatchRuleParser to
+  visibility 'public'
+
+-------------------------------------------------------------------------------
+
+VERSION 4.0 (19.09.2002)
+
+* New class DefaultMatchRuleParser which parses the normal MatchRule syntax
+  e.g. (attr1{val1,val2} &! attr2{val3} | attr3{val4} )
+
+* New class MatchRulePrinter which converts a MatchRule to a String using
+  the normal MAtchRule syntax
+
+* Re-design of MatchRule, MatchGroup and MatchAttribute
+  - Removed parsing (now done by extra class DefaultMatchRuleParser)
+  - Changed toString()
+
+* New class LdapFilterParser to parse an LDAP search filter to a MatchRule
+
+* Added two instance variables with setters and getters to MatchRuleParseException
+  - position
+  - parseString
+
+* Added new instance variable with setters and getters to MatchAttribute
+  - ignoreCaseInName
+
+* Changed methods in StringUtil
+  - suffix()      ->  Now returns the substring after the first (!) occurance
+                      of the separator
+  - cutHead()     ->  Now returns the substring after the last (!) occurance
+                      of the separator
+  - cutTail()     ->  Now returns the substring before the last (!) occurance
+                      of the separator
+
+* New methods in StringUtil
+  - upTo()
+  - startingFrom()
+  - toMap()
+  - asMap()
+  - toProperties()
+  - asProperties()
+
+* BUGFIX: StringUtil.splitNameValue() didn't remove separators with more than
+  one character correctly.
+
+-------------------------------------------------------------------------------
+
+VERSION 3.5.1 (19.09.2002)
+
+* BUGFIX: org.pf.text.StringPattern didn't handle the following example correct:
+
+    StringPattern.match( "MA_DR_HRBLUB", "*_HR*" )
+    
+    Returned false! After fixing the bug it returns true.
+    During the fix the usage of java.text.CharacterIterator was replaced by
+    org.pf.text.StringScanner.
+
+-------------------------------------------------------------------------------
+
+VERSION 3.5 (17.07.2002)
+
+* New class CommandLineArguments
+
+* BUGFIX: StringUtil.suffix() didn't work correctly for separators with more
+  than one character.
+
+-------------------------------------------------------------------------------
+
+VERSION 3.4 (06.07.2002)
+
+* Added to StringUtil
+  - indexOf( String[] strArray, StringPattern pattern )
+  - contains( String[] strArray, StringPattern pattern)
+  - reverse( String str )
+
+* StringPattern.toString() now returns the pattern string
+
+* Bugfix in StringPattern.matches()
+  Didn't match "London" on pattern "L*n"
+
+-------------------------------------------------------------------------------
+
+VERSION 3.3 (03.07.2002)
+
+* Added to StringUtil
+  - cutHead( String text, String separator )
+  - prefix( String text, String separator )
+  - suffix( String text, String separator )
+
+-------------------------------------------------------------------------------
+
+VERSION 3.2 (30.05.2002)
+
+* Added StringUtil.getDelimitedSubstring( String text, String startDelimiter,
+  																			String endDelimiter )
+
+* Added StringUtil.cutTail( String text, String separator )
+
+-------------------------------------------------------------------------------
+
+VERSION 3.1 (17.05.2002)
+
+- Added StringUtil.copyFrom()
+
+-------------------------------------------------------------------------------
+
+VERSION 3.0 (29.04.2002)
+
+- Added StringUtil.splitNameValue()
+
+- Renamed package from "com.pf.text" to "org.pf.text"
+
+-------------------------------------------------------------------------------
+
+VERSION 2.5.1 (16.01.2002)
+
+- Made StringPattern serializable
+
+-------------------------------------------------------------------------------
+
+VERSION 2.5 (11.01.2002)
+
+- New methods in StringUtil
+  - appendIfNotThere()
+  - indexOf()
+  - indexOfIgnoreCase()
+  - contains()
+  - containsIgnoreCase()
+
+-------------------------------------------------------------------------------
+
+VERSION 2.4 (08.01.2002)
+
+- Made MatchRule, MatchGroup, MatchAttributes and MatchRuleChars serializable
+
+- BUGFIX: StringPattern.match() didn't handle "*xxx" patterns (multiple equal
+  character after asterisk) correctly.
+
+-------------------------------------------------------------------------------
+
+VERSION 2.3 (24.11.2001)
+
+- MatchRule upports now String[] and java.util.List of String as values of
+  attributes inside a map.
+
+-------------------------------------------------------------------------------
+
+VERSION 2.2 (12.11.2001)
+
+- New methods append( String[], String) and append( String[], String[])
+  in StringUtil
+
+- New methods asString( String[], String separator ) and asString( String[])
+  in StringUtil
+
+- MatchRule now supports NOT (!) before a group or attribute even if there's
+  no preceeding AND/OR (&/|) operator.
+
+- Changed LdapMatchRuleVisitor and SqlMatchRuleVisitor to support NOT
+  operation correctly
+
+-------------------------------------------------------------------------------
+
+VERSION 2.1 (09.10.2001)
+
+- Changed MatchGroup and MatchAttribute and some of their methods
+  to be public, which allows external code to build rules as well.
+
+-------------------------------------------------------------------------------
+
+VERSION 2.0 (17.08.2001)
+
+- New interface MatchResultVisitor
+
+- New class SqlMatchResultVisitor
+
+- New class LdapMatchResultVisitor
+
+- New methods leftPad(), leftPadCh(), rightPad(), rightPadCh(),
+  center(), centerCh() in class StringUtil

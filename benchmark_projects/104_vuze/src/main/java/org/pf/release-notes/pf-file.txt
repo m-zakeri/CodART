@@ -1,0 +1,136 @@
+File Utilities Realease-Notes
+Author: Manfred Duchrow
+Last update: July 26, 2003
+Copyright (c) 2000-2003, by Manfred Duchrow. All rights reserved.
+=======================================================================
+
+-----------------------------------------------------------------------
+
+VERSION 2.8 ( July 26, 2003 )
+
+* New interface LineProcessor
+
+* New methods in FileUtil
+  - processTextLines( String, LineProcessor )
+  - processTextLines( InputStream, LineProcessor )
+  - processTextLines( Reader, LineProcessor )
+
+* BUGFIX in FileWalker.walkThrough()
+  NullPointerException if directory.listFiles(..) 
+  returns null for protected directories (e.g. "System Volume")
+
+* New methods in PropertyFileLoader
+  - loadProperties( String, Properties )
+  - loadProperties( InputStream, Properties )
+  - loadProperties( InputStream )
+
+-----------------------------------------------------------------------
+
+VERSION 2.7 ( March 21, 2003 )
+
+* New methods in FileUtil
+  - standardize()
+  - javaFilename()
+
+* Modified FileInfo to use FileUtil.javaFilename()
+
+* New methods in FileLocator
+  - getStandardizedPath()
+  - getStandardizedAbsolutePath()
+
+-----------------------------------------------------------------------
+
+VERSION 2.6 ( February 15, 2003 ) 
+
+* Reduced test data
+
+* ExtendedFileFilter now supports a digit wildcard character for
+  more specific filtering of numeric patterns in filenames.
+
+* FileWalker now supports a digit wildcard character for
+  more specific filtering of numeric patterns in filenames.
+  - setDigitWildcardChar()
+  - new constructor
+
+* New methods in FileFinder
+  - File[] findFiles( String dir, String pattern, boolean recursive,
+																	char digitWildcard )
+	- File[] findFiles( String dir, String pattern, boolean recursive )
+	- File[] findFiles( String dir, String pattern )
+
+-----------------------------------------------------------------------
+
+VERSION 2.5 ( February 7, 2003 )
+
+* New class ClasspathElement
+
+* New methods in FileUtil
+  - close(InputStream)
+  - close(OutputStream)
+
+-----------------------------------------------------------------------
+
+VERSION 2.4 ( October 24, 2002 )
+
+* New methods in FileUtil
+  - readTextFrom( InputStream )
+  - readTextFrom( String ) 
+  - readTextFrom( File )
+  - copyText( reader, writer )
+
+-----------------------------------------------------------------------
+
+VERSION 2.3 ( July 25, 2002 )
+
+* Depends now on PF-Utilities (NamedValueList, NamedValue, NamedText)
+
+* New class ArchiveTOC
+
+* New class FileInfo
+
+* Removed class ZipFileWalker
+
+-----------------------------------------------------------------------
+
+VERSION 2.2.1 ( July 19, 2002 )
+
+* BUGFIX: FileLocator did not recognize existing path that started
+  from root (e.g. /usr/mylib/tets.jar)
+
+-----------------------------------------------------------------------
+
+VERSION 2.2 ( June 21, 2002 )
+
+* New method in FileLocator: realFile()
+
+-----------------------------------------------------------------------
+
+VERSION 2.1 ( May 24, 2002 )
+
+* FileLocator supports now filenames such as
+  "file:\L:\Java\JDK1.3\lib\rt.jar!\java\util\Hashtable.class"
+
+* New methods in FileLocator
+  - toURL()
+  - getAbsolutePath()
+  - isFile()
+  - isDirectory()
+
+* FileFinder now returns a filename even if the file is inside an
+  archive, which means that it exists but is not directly accessable.
+  The best way to open an InputStream on such a file is FileLocator.
+
+* More UnitTests for PropertyFileLoader, FileFinder and FileLocator
+
+-----------------------------------------------------------------------
+
+VERSION 2.0 ( May 18, 2002 )
+
+* New class FileLocator (requires JRE 1.3.1 or later, because JRE 1.3
+  has a bug in zip.dll concerning the timestamp of zipped files)
+
+* New class FileUtil with copyStream() feature
+
+-----------------------------------------------------------------------
+
+

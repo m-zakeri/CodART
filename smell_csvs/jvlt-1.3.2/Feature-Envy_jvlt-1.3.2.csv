@@ -1,0 +1,26 @@
+Refactoring Type	Source Entity	Target Class	Source/Target accessed members	Rate it!
+Move Method	net.sourceforge.jvlt.io.XMLFormatter::getXMLForEntry(Document,Entry)	net.sourceforge.jvlt.core.Entry	0/9
+Move Method	net.sourceforge.jvlt.io.XMLFormatter::getXMLForEntryInfo(Document,Entry)	net.sourceforge.jvlt.core.Entry	0/8
+Move Method	net.sourceforge.jvlt.io.XMLFormatter::getXMLForExample(Document,Example)	net.sourceforge.jvlt.core.Example	0/3
+Move Method	net.sourceforge.jvlt.io.XMLFormatter::getXMLForSenseReverse(Document,Sense)	net.sourceforge.jvlt.core.Sense	0/2
+Move Method	net.sourceforge.jvlt.tools.JVLTUtils::open(String,JVLTModel)	net.sourceforge.jvlt.model.JVLTModel	0/2
+Move Method	net.sourceforge.jvlt.ui.vocabulary.EntryList::getEntryString(Entry)	net.sourceforge.jvlt.core.Entry	0/2
+Move Method	net.sourceforge.jvlt.model.QueryModel::performStatsUpdateAction(StatsUpdateAction,boolean)	net.sourceforge.jvlt.actions.StatsUpdateAction	1/4
+Move Method	net.sourceforge.jvlt.io.DictImporter::getImportedExamples(Dict,Collection<Entry>)	net.sourceforge.jvlt.core.Dict	1/3
+Move Method	net.sourceforge.jvlt.ui.JVLTUI::updateTitle()	net.sourceforge.jvlt.model.JVLTModel	1/3
+Move Method	net.sourceforge.jvlt.core.Entry::getExpireDate()	net.sourceforge.jvlt.core.Entry.Stats	1/2
+Move Method	net.sourceforge.jvlt.core.Entry::getMistakeRatio()	net.sourceforge.jvlt.core.Entry.Stats	1/2
+Move Method	net.sourceforge.jvlt.io.DictImporter::getImportedEntries(Dict)	net.sourceforge.jvlt.core.Dict	1/2
+Move Method	net.sourceforge.jvlt.tools.CSVImportTool::readDict(String)	net.sourceforge.jvlt.io.CSVDictReader	1/2
+Move Method	net.sourceforge.jvlt.ui.JVLTUI::loadVersion(String,String)	net.sourceforge.jvlt.model.JVLTModel	1/2
+Move Method	net.sourceforge.jvlt.ui.JVLTUI::getTablePrinter()	net.sourceforge.jvlt.ui.vocabulary.EntryPanel	1/2
+Move Method	net.sourceforge.jvlt.ui.quiz.QuizModel::loadResult(WizardPanelDescriptor)	net.sourceforge.jvlt.quiz.QuizDict	1/2
+Move Method	net.sourceforge.jvlt.ui.quiz.QuizModel::loadEntry(EntryDescriptor,Entry)	net.sourceforge.jvlt.ui.quiz.EntryDescriptor	1/2
+Move Method	net.sourceforge.jvlt.ui.quiz.QuizModel::saveEntry(EntryDescriptor)	net.sourceforge.jvlt.ui.quiz.EntryDescriptor	1/2
+Move Method	net.sourceforge.jvlt.ui.quiz.ResultEntryTable::setEntries(List<Entry>)	net.sourceforge.jvlt.ui.quiz.ResultEntryTable.Model	1/2
+Move Method	net.sourceforge.jvlt.ui.vocabulary.entrydialog.AbstractEntryDialog::loadState(UIConfig)	net.sourceforge.jvlt.utils.UIConfig	1/2
+Move Method	net.sourceforge.jvlt.ui.vocabulary.entrydialog.CustomFieldPanel::getKeyValuePairs()	net.sourceforge.jvlt.ui.vocabulary.entrydialog.CustomFieldPanel.CustomFieldTableModel	1/2
+Move Method	net.sourceforge.jvlt.ui.vocabulary.entrydialog.CustomFieldPanel::setKeyValuePairs(StringPair[])	net.sourceforge.jvlt.ui.vocabulary.entrydialog.CustomFieldPanel.CustomFieldTableModel	1/2
+Move Method	net.sourceforge.jvlt.io.DictCSVWriter::writeEntry(Writer,DictInfo,Entry)	net.sourceforge.jvlt.core.Entry	2/7
+Move Method	net.sourceforge.jvlt.model.DictModel::setLanguage(String,String)	net.sourceforge.jvlt.metadata.EntryMetaData	2/3
+Move Method	net.sourceforge.jvlt.ui.quiz.QuizModel::saveResult(WizardPanelDescriptor)	net.sourceforge.jvlt.quiz.QuizDict	2/3

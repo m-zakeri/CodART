@@ -16,6 +16,7 @@ pyparsing==3.0.6
 python-dateutil==2.8.2
 python-dotenv~=0.19.1
 python-utils==2.5.6
+peewee==3.14.4
 pytz==2021.3
 scipy~=1.7.3
 six==1.16.0

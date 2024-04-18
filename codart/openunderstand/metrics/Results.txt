@@ -1,0 +1,88 @@
+Average Cyclomatic:{}
+Average Cyclomatic:{'HTMLAreaElementImpl': 0.1875}
+Average Cyclomatic:{'HTMLLegendElementImpl': 0.75}
+Average Cyclomatic:{'HTMLFieldSetElementImpl': 0}
+Average Cyclomatic:{'HTMLModElementImpl': 0.25}
+Average Cyclomatic:{'HTMLMapElementImpl': 0.5}
+Average Cyclomatic:{'HTMLHRElementImpl': 0.125}
+Average Cyclomatic:{'HTMLStyleElementImpl': 0.16666666666666666}
+Average Cyclomatic:{'HTMLHeadingElementImpl': 0.5}
+Average Cyclomatic:{'HTMLOptionElementImpl': 0.7857142857142857}
+Average Cyclomatic:{'HTMLImageElementImpl': 0.038461538461538464}
+Average Cyclomatic:{'HTMLFrameElementImpl': 0.0625}
+Average Cyclomatic:{'HTMLBRElementImpl': 0.5}
+Average Cyclomatic:{'HTMLIFrameElementImpl': 0.05}
+Average Cyclomatic:{'HTMLLabelElementImpl': 0.75}
+Average Cyclomatic:{'HTMLTitleElementImpl': 2.0}
+Average Cyclomatic:{'HTMLTableRowElementImpl': 1.0}
+Average Cyclomatic:{'HTMLOptGroupElementImpl': 0.25}
+Average Cyclomatic:{'HTMLTableSectionElementImpl': 0.7857142857142857}
+Average Cyclomatic:{'HTMLLIElementImpl': 0.25}
+Average Cyclomatic:{'HTMLDOMImplementationImpl': 1.0}
+Average Cyclomatic:{'HTMLDocumentImpl': 1.1515151515151516}
+Average Cyclomatic:{'HTMLSelectElementImpl': 0.2608695652173913}
+Average Cyclomatic:{'HTMLMenuElementImpl': 0.5}
+Average Cyclomatic:{'HTMLMetaElementImpl': 0.125}
+Average Cyclomatic:{'HTMLBuilder': 2.1}
+Average Cyclomatic:{'HTMLDivElementImpl': 0.5}
+Average Cyclomatic:{'HTMLAnchorElementImpl': 0.11538461538461539}
+Average Cyclomatic:{'HTMLTextAreaElementImpl': 0.13636363636363635}
+Average Cyclomatic:{'HTMLBaseFontElementImpl': 0.16666666666666666}
+Average Cyclomatic:{'ObjectFactory': 0, 'ConfigurationError': 1.0}
+Average Cyclomatic:{}
+Average Cyclomatic:{'HTMLAppletElementImpl': 0.045454545454545456}
+Average Cyclomatic:{'SecuritySupport': 0.5}
+Average Cyclomatic:{'HTMLTableCaptionElementImpl': 0.5}
+Average Cyclomatic:{'HTMLObjectElementImpl': 0.058823529411764705}
+Average Cyclomatic:{'NameNodeListImpl': 8.0}
+Average Cyclomatic:{'HTMLPreElementImpl': 0.5}
+Average Cyclomatic:{'HTMLCollectionImpl': 4.0, 'CollectionIndex': 0.3333333333333333}
+Average Cyclomatic:{'HTMLHeadElementImpl': 0.5}
+Average Cyclomatic:{'HTMLFrameSetElementImpl': 0.25}
+Average Cyclomatic:{'HTMLFormElementImpl': 0.1111111111111111}
+Average Cyclomatic:{'HTMLOListElementImpl': 0.16666666666666666}
+Average Cyclomatic:{'HTMLDirectoryElementImpl': 0.5}
+Average Cyclomatic:{'HTMLInputElementImpl': 0.10810810810810811}
+Average Cyclomatic:{'HTMLTableColElementImpl': 0.25}
+Average Cyclomatic:{'HTMLTableCellElementImpl': 0.4}
+Average Cyclomatic:{'HTMLParagraphElementImpl': 0.5}
+Average Cyclomatic:{'HTMLButtonElementImpl': 0.36363636363636365}
+Average Cyclomatic:{'HTMLHtmlElementImpl': 0.5}
+Average Cyclomatic:{'HTMLScriptElementImpl': 0.2857142857142857}
+Average Cyclomatic:{'HTMLParamElementImpl': 0.125}
+Average Cyclomatic:{'HTMLBodyElementImpl': 0.08333333333333333}
+Average Cyclomatic:{'HTMLIsIndexElementImpl': 0.5}
+Average Cyclomatic:{'HTMLElementImpl': 0.5909090909090909}
+Average Cyclomatic:{'HTMLTableElementImpl': 0.8888888888888888}
+Average Cyclomatic:{'HTMLFontElementImpl': 0.16666666666666666}
+Average Cyclomatic:{'HTMLDListElementImpl': 0.5}
+Average Cyclomatic:{'HTMLUListElementImpl': 0.25}
+Average Cyclomatic:{'HTMLLinkElementImpl': 0.05555555555555555}
+Average Cyclomatic:{'HTMLBaseElementImpl': 0.25}
+Average Cyclomatic:{'HTMLQuoteElementImpl': 0.5}
+Average Cyclomatic:{'ImmutableLocation': 0.2}
+Average Cyclomatic:{'XMLEventFactoryImpl': 0.037037037037037035}
+Average Cyclomatic:{'DefaultNamespaceContext': 1.2}
+Average Cyclomatic:{'EmptyLocation': 0.16666666666666666}
+Average Cyclomatic:{'CharactersImpl': 1.4}
+Average Cyclomatic:{'NamespaceImpl': 0.75}
+Average Cyclomatic:{'EntityReferenceImpl': 1.3333333333333333}
+Average Cyclomatic:{'EndDocumentImpl': 1.0}
+Average Cyclomatic:{'StartElementImpl': 1.5}
+Average Cyclomatic:{'CommentImpl': 1.5}
+Average Cyclomatic:{'DTDImpl': 0.6}
+Average Cyclomatic:{'EndElementImpl': 3.0}
+Average Cyclomatic:{'EntityDeclarationImpl': 0.5714285714285714}
+Average Cyclomatic:{'StartDocumentImpl': 0.8571428571428571}
+Average Cyclomatic:{'ElementImpl': 0, 'NoRemoveIterator': 0.3333333333333333}
+Average Cyclomatic:{'AttributeImpl': 0.6}
+Average Cyclomatic:{'NotationDeclarationImpl': 1.0}
+Average Cyclomatic:{'XMLEventImpl': 0.1875}
+Average Cyclomatic:{'ProcessingInstructionImpl': 1.3333333333333333}
+Average Cyclomatic:{'XMLNamespaceBinder': 1.78125}
+Average Cyclomatic:{'XMLNSDocumentScannerImpl': 0, 'NSContentDispatcher': 3.5}
+Average Cyclomatic:{'XMLDocumentScannerImpl': 0, 'XMLDeclDispatcher': 9.0, 'PrologDispatcher': 30.0, 'DTDDispatcher': 16.0, 'ContentDispatcher': 1.8, 'TrailingMiscDispatcher': 21.0}
+Average Cyclomatic:{'XML11NamespaceBinder': 1.0}
+Average Cyclomatic:{}
+Average Cyclomatic:{'XMLVersionDetector': 4.25}
+Average Cyclomatic:{'XMLDTDScannerImpl': 5.857142857142857}

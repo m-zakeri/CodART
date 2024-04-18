@@ -1,0 +1,5 @@
+Refactoring Type	Source Entity	Target Class	Source/Target accessed members	Rate it!
+Move Method	de.progra.charting.CoordSystemUtilities::computeRightMargin():int	de.progra.charting.CoordSystem	1/4	
+Move Method	de.progra.charting.CoordSystemUtilities::computeTopMargin():int	de.progra.charting.CoordSystem	1/4	
+Move Method	de.progra.charting.CoordSystemUtilities::computeYAxisLabelWidth():int	de.progra.charting.CoordSystem	2/4	
+Move Method	de.progra.charting.CoordSystemUtilities::computeXAxisLabelHeight():int	de.progra.charting.CoordSystem	2/3	

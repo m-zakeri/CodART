@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/commons-cli-1.5.0.jar"/>
+	<classpathentry kind="lib" path="lib/commons-csv-1.9.0.jar"/>
+	<classpathentry kind="lib" path="lib/pdfbox-2.0.25.jar"/>
+	<classpathentry kind="lib" path="lib/fontbox-2.0.25.jar"/>
+	<classpathentry kind="lib" path="lib/fontbox-3.0.0-alpha2.jar"/>
+	<classpathentry kind="lib" path="lib/slf4j-api-1.7.35.jar"/>
+	<classpathentry kind="lib" path="lib/slf4j-simple-1.7.32.jar"/>
+	<classpathentry kind="lib" path="lib/jts-core-1.18.1.jar"/>
+	<classpathentry kind="lib" path="lib/gson-2.8.7.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XML Spy v4.1 U (http://www.xmlspy.com) by Boudewijn van Dongen (Technische Universiteit Eindhoven) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:simpleType name="eventtypes">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="schedule"/>
+			<xs:enumeration value="assign"/>
+			<xs:enumeration value="withdraw"/>
+			<xs:enumeration value="reassign"/>
+			<xs:enumeration value="start"/>
+			<xs:enumeration value="suspend"/>
+			<xs:enumeration value="resume"/>
+			<xs:enumeration value="pi_abort"/>
+			<xs:enumeration value="ate_abort"/>
+			<xs:enumeration value="complete"/>
+			<xs:enumeration value="autoskip"/>
+			<xs:enumeration value="manualskip"/>
+			<xs:enumeration value="unknown"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:element name="WorkflowLog">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="Data" minOccurs="0"/>
+				<xs:element ref="Source" minOccurs="0"/>
+				<xs:element ref="Process" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attribute name="description" type="xs:string" use="optional"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Source">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="Data" minOccurs="0"/>
+			</xs:sequence>
+			<xs:attribute name="program" type="xs:string" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Process">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="Data" minOccurs="0"/>
+				<xs:element ref="ProcessInstance" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attribute name="id" type="xs:string" use="required"/>
+			<xs:attribute name="description" type="xs:string" use="optional"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="AuditTrailEntry">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="Data" minOccurs="0"/>
+				<xs:element name="WorkflowModelElement" type="xs:string"/>
+				<xs:element name="EventType">
+					<xs:complexType>
+						<xs:simpleContent>
+							<xs:extension base="eventtypes">
+								<xs:attribute name="unknowntype" type="xs:string" use="optional"/>
+							</xs:extension>
+						</xs:simpleContent>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="Timestamp" minOccurs="0">
+					<xs:complexType>
+						<xs:simpleContent>
+							<xs:extension base="xs:dateTime"/>
+						</xs:simpleContent>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="Originator" type="xs:string" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Data">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Attribute" maxOccurs="unbounded">
+					<xs:complexType>
+						<xs:simpleContent>
+							<xs:extension base="xs:string">
+								<xs:attribute name="name" type="xs:string" use="required"/>
+							</xs:extension>
+						</xs:simpleContent>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ProcessInstance">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="Data" minOccurs="0"/>
+				<xs:element ref="AuditTrailEntry" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attribute name="id" type="xs:string" use="required"/>
+			<xs:attribute name="description" type="xs:string" use="optional"/>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

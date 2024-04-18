@@ -1,0 +1,6 @@
+ 
+tabula-java-v1.0.6
+
+tabula-java is a library for extracting tables from PDF files 
+
+https://github.com/tabulapdf/tabula-java

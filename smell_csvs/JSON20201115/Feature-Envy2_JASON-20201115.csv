@@ -1,0 +1,2 @@
+Refactoring Type	Source Entity	Target Class	Source/Target accessed members	Rate it!
+Move Method	org.json.CDL::getValue(org.json.JSONTokener):java.lang.String	org.json.JSONTokener	0/4	

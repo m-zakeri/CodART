@@ -256,6 +256,8 @@ def main(udb_path: str, source_package: str, target_package: str, class_name: st
     return res
 
 
+class Runner()
+
 # Tests
 def test1():
     res = main(

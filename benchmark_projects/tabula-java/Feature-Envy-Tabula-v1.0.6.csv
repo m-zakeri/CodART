@@ -1,0 +1,4 @@
+Refactoring Type	Source Entity	Target Class	Source/Target accessed members	Rate it!
+Move Method	technology.tabula.ObjectExtractorStreamEngine::getLineBetween(java.awt.geom.Point2D.Float, java.awt.geom.Point2D.Float, technology.tabula.ObjectExtractorStreamEngine.PointComparator):java.awt.geom.Line2D.Float	technology.tabula.ObjectExtractorStreamEngine.PointComparator	0/1	
+Move Method	technology.tabula.RectangleSpatialIndex::contains(technology.tabula.Rectangle):java.util.List<T>	technology.tabula.Rectangle	1/5	
+Move Method	technology.tabula.RectangleSpatialIndex::intersects(technology.tabula.Rectangle):java.util.List<T>	technology.tabula.Rectangle	1/4	

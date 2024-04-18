@@ -1,0 +1,141 @@
+Refactoring Type	Source Entity	Target Class	Source/Target accessed members	Rate it!
+Move Method	weka.classifiers.evaluation.ThresholdCurve::makeInstance(weka.classifiers.evaluation.TwoClassStats, double):weka.core.Instance	weka.classifiers.evaluation.TwoClassStats	0/10	
+Move Method	weka.core.CheckScheme::compareDatasets(weka.core.Instances, weka.core.Instances):void	weka.core.Instances	0/4	
+Move Method	weka.core.CheckScheme::addMissing(weka.core.Instances, int, boolean, boolean):void	weka.core.Instances	0/4	
+Move Method	weka.estimators.CheckEstimator::compareDatasets(weka.core.Instances, weka.core.Instances):void	weka.core.Instances	0/4	
+Move Method	weka.estimators.CheckEstimator::addMissing(weka.core.Instances, int, boolean, boolean, int):void	weka.core.Instances	0/4	
+Move Method	weka.classifiers.bayes.net.search.local.LAGDHillClimber::getAntiOperation(weka.classifiers.bayes.net.search.local.HillClimber.Operation):weka.classifiers.bayes.net.search.local.HillClimber.Operation	weka.classifiers.bayes.net.search.local.HillClimber.Operation	0/3	
+Move Method	weka.clusterers.CheckClusterer::addMissing(weka.core.Instances, int, boolean):void	weka.core.Instances	0/3	
+Move Method	weka.core.neighboursearch.CoverTree::setter(weka.core.neighboursearch.CoverTree.MyHeap, double, int):void	weka.core.neighboursearch.CoverTree.MyHeap	0/3	
+Move Method	weka.estimators.Estimator::getInstancesFromClass(weka.core.Instances, int, int, double, weka.core.Instances):double	weka.core.Instances	0/3	
+Move Method	weka.gui.beans.KnowledgeFlowApp::setUpLogPanel(weka.gui.beans.LogPanel):void	weka.gui.beans.LogPanel	0/3	
+Move Method	weka.classifiers.bayes.net.search.SearchAlgorithm::doMarkovBlanketCorrection(weka.classifiers.bayes.BayesNet, weka.core.Instances):void	weka.core.Instances	0/2	
+Move Method	weka.classifiers.bayes.net.search.global.GeneticSearch::copyParentSets(weka.classifiers.bayes.BayesNet, weka.classifiers.bayes.BayesNet):void	weka.classifiers.bayes.BayesNet	0/2	
+Move Method	weka.classifiers.bayes.net.search.global.RepeatedHillClimber::copyParentSets(weka.classifiers.bayes.BayesNet, weka.classifiers.bayes.BayesNet):void	weka.classifiers.bayes.BayesNet	0/2	
+Move Method	weka.classifiers.bayes.net.search.global.SimulatedAnnealing::copyParentSets(weka.classifiers.bayes.BayesNet, weka.classifiers.bayes.BayesNet):void	weka.classifiers.bayes.BayesNet	0/2	
+Move Method	weka.classifiers.bayes.net.search.global.TabuSearch::copyParentSets(weka.classifiers.bayes.BayesNet, weka.classifiers.bayes.BayesNet):void	weka.classifiers.bayes.BayesNet	0/2	
+Move Method	weka.classifiers.bayes.net.search.local.GeneticSearch::copyParentSets(weka.classifiers.bayes.BayesNet, weka.classifiers.bayes.BayesNet):void	weka.classifiers.bayes.BayesNet	0/2	
+Move Method	weka.classifiers.bayes.net.search.local.RepeatedHillClimber::copyParentSets(weka.classifiers.bayes.BayesNet, weka.classifiers.bayes.BayesNet):void	weka.classifiers.bayes.BayesNet	0/2	
+Move Method	weka.classifiers.bayes.net.search.local.SimulatedAnnealing::copyParentSets(weka.classifiers.bayes.BayesNet, weka.classifiers.bayes.BayesNet):void	weka.classifiers.bayes.BayesNet	0/2	
+Move Method	weka.classifiers.bayes.net.search.local.TabuSearch::copyParentSets(weka.classifiers.bayes.BayesNet, weka.classifiers.bayes.BayesNet):void	weka.classifiers.bayes.BayesNet	0/2	
+Move Method	weka.classifiers.evaluation.MarginCurve::getMargins(weka.core.FastVector):double[]	weka.core.FastVector	0/2	
+Move Method	weka.classifiers.evaluation.ThresholdCurve::getProbabilities(weka.core.FastVector, int):double[]	weka.core.FastVector	0/2	
+Move Method	weka.classifiers.rules.OneR::newNominalRule(weka.core.Attribute, weka.core.Instances, int[]):weka.classifiers.rules.OneR.OneRRule	weka.core.Instances	0/2	
+Move Method	weka.core.neighboursearch.CoverTree::checkMissing(weka.core.Instances):void	weka.core.Instances	0/2	
+Move Method	weka.core.neighboursearch.KDTree::checkMissing(weka.core.Instances):void	weka.core.Instances	0/2	
+Move Method	weka.filters.unsupervised.attribute.PartitionedMultiFilter::generateSubset(weka.core.Instances, weka.core.Range):weka.core.Instances	weka.core.Range	0/2	
+Move Method	weka.gui.beans.AbstractOffscreenChartRenderer::getIndexOfAttribute(weka.core.Instances, java.lang.String):int	weka.core.Instances	0/2	
+Move Method	weka.gui.experiment.ResultsPanel::determineColumnNames(java.lang.String, java.lang.String, weka.core.Instances):java.util.Vector	weka.core.Instances	0/2	
+Move Method	weka.gui.explorer.ClassifierPanel::printPredictionsHeader(java.lang.StringBuffer, weka.classifiers.evaluation.output.prediction.AbstractOutput, java.lang.String):void	weka.classifiers.evaluation.output.prediction.AbstractOutput	0/2	
+Move Method	weka.gui.visualize.VisualizePanel.PlotPanel::inPolyline(weka.core.FastVector, double, double):boolean	weka.core.FastVector	0/2	
+Move Method	weka.gui.visualize.VisualizePanel.PlotPanel::inPoly(weka.core.FastVector, double, double):boolean	weka.core.FastVector	0/2	
+Move Method	weka.classifiers.bayes.net.MarginCalculator::getCPT(int[], int, int[], int[], weka.classifiers.bayes.BayesNet):int	weka.classifiers.bayes.BayesNet	0/1	
+Move Method	weka.classifiers.bayes.net.search.SearchAlgorithm::isArc(weka.classifiers.bayes.BayesNet, int, int):boolean	weka.classifiers.bayes.BayesNet	0/1	
+Move Method	weka.classifiers.bayes.net.search.global.HillClimber::applyArcAddition(weka.classifiers.bayes.BayesNet, int, int, weka.core.Instances):void	weka.classifiers.bayes.BayesNet	0/1	
+Move Method	weka.classifiers.bayes.net.search.global.HillClimber::applyArcDeletion(weka.classifiers.bayes.BayesNet, int, int, weka.core.Instances):void	weka.classifiers.bayes.BayesNet	0/1	
+Move Method	weka.classifiers.trees.DecisionStump::sourceClass(weka.core.Attribute, double[]):java.lang.String	weka.core.Attribute	0/1	
+Move Method	weka.core.xml.XMLSerializationMethodHandler::addMethods(weka.core.xml.MethodHandler, java.lang.reflect.Method, java.lang.reflect.Method[]):void	weka.core.xml.MethodHandler	0/1	
+Move Method	weka.datagenerators.classifiers.classification.BayesNet::setGeneratorOptions(weka.classifiers.bayes.net.BayesNetGenerator, java.util.Vector):void	weka.classifiers.bayes.net.BayesNetGenerator	0/1	
+Move Method	weka.estimators.CheckEstimator::testWithTestValues(weka.estimators.Estimator, java.util.Vector):java.util.Vector	weka.estimators.Estimator	0/1	
+Move Method	weka.gui.PropertySheetPanel.CapabilitiesHelpDialog::listCapabilities(weka.core.Capabilities):java.lang.String	weka.core.Capabilities	0/1	
+Move Method	weka.gui.explorer.AttributeSelectionPanel::visualizeTransformedData(weka.core.Instances):void	weka.core.Instances	0/1	
+Move Method	weka.gui.explorer.ClassifierPanel::visualizeClassifierErrors(weka.gui.visualize.VisualizePanel):void	weka.gui.visualize.VisualizePanel	0/1	
+Move Method	weka.gui.explorer.ClustererPanel::visualizeClusterAssignments(weka.gui.visualize.VisualizePanel):void	weka.gui.visualize.VisualizePanel	0/1	
+Move Method	weka.classifiers.meta.FilteredClassifier::filterInstance(weka.core.Instance):weka.core.Instance	weka.filters.Filter	1/5	
+Move Method	weka.core.neighboursearch.KDTree::afterAddInstance(weka.core.neighboursearch.kdtrees.KDTreeNode):void	weka.core.neighboursearch.kdtrees.KDTreeNode	1/5	
+Move Method	weka.estimators.CheckEstimator::makeTestDataset(int, int, int, weka.estimators.CheckEstimator.AttrTypes, int, int, int):weka.core.Instances	weka.estimators.CheckEstimator.AttrTypes	1/5	
+Move Method	weka.estimators.CheckEstimator::printAttributeSummary(weka.estimators.CheckEstimator.AttrTypes, int):void	weka.estimators.CheckEstimator.AttrTypes	1/5	
+Move Method	weka.gui.beans.TextViewer::visualize(java.lang.String, int, int):void	weka.gui.ResultHistoryPanel	1/5	
+Move Method	weka.classifiers.trees.REPTree.Tree::splitData(int[][][][], double[][][][], int, double, int[][], double[][], weka.core.Instances):void	weka.core.Instances	1/4	
+Move Method	weka.classifiers.trees.j48.EntropyBasedSplitCrit::newEnt(weka.classifiers.trees.j48.Distribution):double	weka.classifiers.trees.j48.Distribution	1/4	
+Move Method	weka.core.neighboursearch.balltrees.TopDownConstructor::processNodesAfterAddInstance(weka.core.neighboursearch.balltrees.BallNode):void	weka.core.neighboursearch.balltrees.BallNode	1/4	
+Move Method	weka.datagenerators.classifiers.classification.RDG1::voteDataset(weka.core.Instances):weka.core.Instances	weka.core.Instances	1/4	
+Move Method	weka.filters.unsupervised.attribute.AddNoise::addNoise(weka.core.Instances, int, int, int, boolean):void	weka.core.Instances	1/4	
+Move Method	weka.gui.HierarchyPropertyParser::showNode(weka.gui.HierarchyPropertyParser.TreeNode, boolean[]):java.lang.String	weka.gui.HierarchyPropertyParser.TreeNode	1/4	
+Move Method	weka.gui.PropertySheetPanel.CapabilitiesHelpDialog::addCapabilities(java.lang.String, weka.core.Capabilities):java.lang.String	weka.core.Capabilities	1/4	
+Move Method	weka.gui.hierarchyvisualizer.HierarchyVisualizerPosition::positionHeight(weka.gui.hierarchyvisualizer.HierarchyVisualizer.Node, double):double	weka.gui.hierarchyvisualizer.HierarchyVisualizer.Node	1/4	
+Move Method	weka.classifiers.evaluation.ConfusionMatrix::addPrediction(weka.classifiers.evaluation.NominalPrediction):void	weka.classifiers.evaluation.NominalPrediction	1/3	
+Move Method	weka.classifiers.trees.RandomTree::backfitData(weka.core.Instances):void	weka.core.Instances	1/3	
+Move Method	weka.classifiers.trees.j48.ClassifierSplitModel::dumpLabel(int, weka.core.Instances):java.lang.String	weka.classifiers.trees.j48.Distribution	1/3	
+Move Method	weka.classifiers.trees.j48.EntropyBasedSplitCrit::oldEnt(weka.classifiers.trees.j48.Distribution):double	weka.classifiers.trees.j48.Distribution	1/3	
+Move Method	weka.classifiers.trees.j48.EntropyBasedSplitCrit::splitEnt(weka.classifiers.trees.j48.Distribution):double	weka.classifiers.trees.j48.Distribution	1/3	
+Move Method	weka.classifiers.trees.j48.GainRatioSplitCrit::splitEnt(weka.classifiers.trees.j48.Distribution, double):double	weka.classifiers.trees.j48.Distribution	1/3	
+Move Method	weka.core.Matrix::getL():weka.core.Matrix	weka.core.matrix.Matrix	1/3	
+Move Method	weka.core.Matrix::getU():weka.core.Matrix	weka.core.matrix.Matrix	1/3	
+Move Method	weka.core.mathematicalexpression.CUP$Parser$actions::CUP$Parser$do_action(int, java_cup.runtime.lr_parser, java.util.Stack, int):java_cup.runtime.Symbol	weka.core.mathematicalexpression.Parser	1/3	
+Move Method	weka.core.neighboursearch.balltrees.MiddleOutConstructor::calcPivot(weka.core.neighboursearch.balltrees.MiddleOutConstructor.MyIdxList, weka.core.neighboursearch.balltrees.MiddleOutConstructor.MyIdxList, weka.core.Instances):weka.core.Instance	weka.core.Instances	1/3	
+Move Method	weka.core.pmml.VectorInstance::dotProduct(double[]):double	weka.core.pmml.Array	1/3	
+Move Method	weka.core.xml.XMLSerialization::getDescriptors(java.lang.Object):java.util.Hashtable	weka.core.xml.PropertyHandler	1/3	
+Move Method	weka.experiment.PairedTTester.Resultset::add(weka.core.Instance):void	weka.core.FastVector	1/3	
+Move Method	weka.filters.unsupervised.instance.subsetbyexpression.CUP$Parser$actions::CUP$Parser$do_action(int, java_cup.runtime.lr_parser, java.util.Stack, int):java_cup.runtime.Symbol	weka.filters.unsupervised.instance.subsetbyexpression.Parser	1/3	
+Move Method	weka.gui.hierarchyvisualizer.HierarchyVisualizerPosition::positionLeafs(weka.gui.hierarchyvisualizer.HierarchyVisualizer.Node, int):int	weka.gui.hierarchyvisualizer.HierarchyVisualizer.Node	1/3	
+Move Method	weka.gui.hierarchyvisualizer.HierarchyVisualizerPosition::positionRest(weka.gui.hierarchyvisualizer.HierarchyVisualizer.Node):double	weka.gui.hierarchyvisualizer.HierarchyVisualizer.Node	1/3	
+Move Method	weka.classifiers.bayes.net.EditableBayesNet::lastActionMsg():java.lang.String	weka.core.FastVector	1/2	
+Move Method	weka.classifiers.bayes.net.MarginCalculator::moralizeNode(weka.classifiers.bayes.net.ParentSet, int, boolean[][]):void	weka.classifiers.bayes.net.ParentSet	1/2	
+Move Method	weka.classifiers.evaluation.EvaluationUtils::getTestPredictions(weka.classifiers.Classifier, weka.core.Instances):weka.core.FastVector	weka.core.Instances	1/2	
+Move Method	weka.classifiers.evaluation.output.prediction.AbstractOutput::printClassifications(weka.classifiers.Classifier, weka.core.Instances):void	weka.core.Instances	1/2	
+Move Method	weka.classifiers.functions.SMO::classAttributeNames():java.lang.String[]	weka.core.Attribute	1/2	
+Move Method	weka.classifiers.lazy.kstar.KStarCache::store(double, double, double):void	weka.classifiers.lazy.kstar.KStarCache.CacheTable	1/2	
+Move Method	weka.classifiers.lazy.kstar.KStarCache::getCacheValues(double):weka.classifiers.lazy.kstar.KStarCache.TableEntry	weka.classifiers.lazy.kstar.KStarCache.CacheTable	1/2	
+Move Method	weka.classifiers.meta.CVParameterSelection::getCVParameter(int):java.lang.String	weka.core.FastVector	1/2	
+Move Method	weka.classifiers.rules.JRip.RipperRule::computeDefAccu(weka.core.Instances):double	weka.core.Instances	1/2	
+Move Method	weka.classifiers.rules.JRip.RipperRule::computeInfoGain(weka.core.Instances, double, weka.classifiers.rules.JRip.Antd):weka.core.Instances	weka.classifiers.rules.JRip.Antd	1/2	
+Move Method	weka.classifiers.rules.RuleStats::getSimpleStats(int):double[]	weka.core.FastVector	1/2	
+Move Method	weka.classifiers.rules.RuleStats::getFiltered(int):weka.core.Instances[]	weka.core.FastVector	1/2	
+Move Method	weka.classifiers.rules.RuleStats::getDistributions(int):double[]	weka.core.FastVector	1/2	
+Move Method	weka.classifiers.trees.DecisionStump::printDist(double[]):java.lang.String	weka.core.Instances	1/2	
+Move Method	weka.classifiers.trees.j48.C45PruneableClassifierTree::getEstimatedErrorsForDistribution(weka.classifiers.trees.j48.Distribution):double	weka.classifiers.trees.j48.Distribution	1/2	
+Move Method	weka.classifiers.trees.lmt.LogisticBase::getYs(weka.core.Instances):double[][]	weka.core.Instances	1/2	
+Move Method	weka.classifiers.trees.lmt.LogisticBase::getFs(weka.core.Instances):double[][]	weka.core.Instances	1/2	
+Move Method	weka.core.AlgVector::getAsInstance(weka.core.Instances, java.util.Random):weka.core.Instance	weka.core.Instances	1/2	
+Move Method	weka.core.Instances::renameAttributeValue(weka.core.Attribute, java.lang.String, java.lang.String):void	weka.core.Attribute	1/2	
+Move Method	weka.core.Matrix::getRow(int):double[]	weka.core.matrix.Matrix	1/2	
+Move Method	weka.core.Matrix::getColumn(int):double[]	weka.core.matrix.Matrix	1/2	
+Move Method	weka.core.Matrix::setColumn(int, double[]):void	weka.core.matrix.Matrix	1/2	
+Move Method	weka.core.Optimization::updateCholeskyFactor(weka.core.matrix.Matrix, double[], double[], double, boolean[]):void	weka.core.matrix.Matrix	1/2	
+Move Method	weka.core.matrix.DoubleVector::subvector(weka.core.matrix.IntVector):weka.core.matrix.DoubleVector	weka.core.matrix.IntVector	1/2	
+Move Method	weka.core.matrix.DoubleVector::unpivoting(weka.core.matrix.IntVector, int):weka.core.matrix.DoubleVector	weka.core.matrix.IntVector	1/2	
+Move Method	weka.core.neighboursearch.balltrees.BottomUpConstructor::calcPivot(weka.core.neighboursearch.balltrees.BottomUpConstructor.TempNode, weka.core.neighboursearch.balltrees.BottomUpConstructor.TempNode, weka.core.Instances):weka.core.Instance	weka.core.Instances	1/2	
+Move Method	weka.core.neighboursearch.balltrees.BottomUpConstructor::calcRadius(weka.core.neighboursearch.balltrees.BottomUpConstructor.TempNode, weka.core.neighboursearch.balltrees.BottomUpConstructor.TempNode):double	weka.core.neighboursearch.balltrees.BottomUpConstructor.TempNode	1/2	
+Move Method	weka.core.neighboursearch.balltrees.MiddleOutConstructor::calcPivot(weka.core.neighboursearch.balltrees.MiddleOutConstructor.TempNode, weka.core.neighboursearch.balltrees.MiddleOutConstructor.TempNode, weka.core.Instances):weka.core.Instance	weka.core.Instances	1/2	
+Move Method	weka.core.neighboursearch.balltrees.MiddleOutConstructor::calcRadius(weka.core.neighboursearch.balltrees.MiddleOutConstructor.TempNode, weka.core.neighboursearch.balltrees.MiddleOutConstructor.TempNode):double	weka.core.neighboursearch.balltrees.MiddleOutConstructor.TempNode	1/2	
+Move Method	weka.core.neighboursearch.balltrees.MiddleOutConstructor::calcRadius(weka.core.neighboursearch.balltrees.MiddleOutConstructor.MyIdxList, weka.core.neighboursearch.balltrees.MiddleOutConstructor.MyIdxList, weka.core.Instance, weka.core.Instances):double	weka.core.neighboursearch.balltrees.MiddleOutConstructor.MyIdxList	1/2	
+Move Method	weka.core.pmml.DerivedFieldMetaInfo::setFieldDefs(weka.core.Instances):void	weka.core.Instances	1/2	
+Move Method	weka.core.pmml.TransformationDictionary::setFieldDefsForDerivedFields(weka.core.Instances):void	weka.core.Instances	1/2	
+Move Method	weka.estimators.CheckEstimator::canSplitUpClass(weka.estimators.CheckEstimator.AttrTypes, int):void	weka.estimators.CheckEstimator.AttrTypes	1/2	
+Move Method	weka.estimators.Estimator::addValues(weka.core.Instances, int, double, double, double):void	weka.core.Instances	1/2	
+Move Method	weka.experiment.PairedTTester.Resultset::dataset(weka.core.Instance):weka.core.FastVector	weka.core.FastVector	1/2	
+Move Method	weka.experiment.PairedTTester.Resultset::sort(int):void	weka.core.FastVector	1/2	
+Move Method	weka.filters.CheckSource::compare(weka.core.Instances, weka.core.Instances):boolean	weka.core.Instances	1/2	
+Move Method	weka.filters.unsupervised.attribute.Add::getNominalLabels():java.lang.String	weka.core.FastVector	1/2	
+Move Method	weka.gui.arffviewer.ArffTableModel::getAttributeColumn(java.lang.String):int	weka.core.Instances	1/2	
+Move Method	weka.gui.arffviewer.ArffTableModel::isClassIndex(int):boolean	weka.core.Instances	1/2	
+Move Method	weka.gui.beans.CostBenefitAnalysis.AnalysisPanel::findIndexForValue(double, weka.core.Instances, int):int	weka.core.Instances	1/2	
+Move Method	weka.gui.beans.KnowledgeFlowApp::runFlow(boolean):void	weka.gui.beans.KnowledgeFlowApp.MainKFPerspective	1/2	
+Move Method	weka.gui.beans.KnowledgeFlowApp::stopFlow():void	weka.gui.beans.KnowledgeFlowApp.MainKFPerspective	1/2	
+Move Method	weka.gui.beans.KnowledgeFlowApp::closeAllTabs():void	weka.gui.beans.KnowledgeFlowApp.MainKFPerspective	1/2	
+Move Method	weka.gui.beans.KnowledgeFlowApp::highlightSubFlow(int, int, int, int):void	weka.gui.beans.KnowledgeFlowApp.MainKFPerspective	1/2	
+Move Method	weka.gui.beans.Sorter::copyStringAttVals(weka.gui.beans.Sorter.InstanceHolder):void	weka.gui.beans.Sorter.InstanceHolder	1/2	
+Move Method	weka.gui.graphvisualizer.DotParser::nodeID(java.io.StreamTokenizer):void	weka.core.FastVector	1/2	
+Move Method	weka.gui.treevisualizer.PlaceNode2::nodeY(weka.gui.treevisualizer.Node):void	weka.gui.treevisualizer.Node	1/2	
+Move Method	weka.gui.visualize.VisualizePanel.PlotPanel::getXCoords(weka.core.FastVector):int[]	weka.core.FastVector	1/2	
+Move Method	weka.gui.visualize.VisualizePanel.PlotPanel::getYCoords(weka.core.FastVector):int[]	weka.core.FastVector	1/2	
+Move Method	weka.classifiers.trees.RandomTree::distribution(double[][], double[][][], int, weka.core.Instances):double	weka.core.Instances	2/5	
+Move Method	weka.classifiers.evaluation.output.prediction.AbstractOutput::printClassifications(weka.classifiers.Classifier, weka.core.converters.ConverterUtils.DataSource):void	weka.core.converters.ConverterUtils.DataSource	2/4	
+Move Method	weka.datagenerators.clusterers.SubspaceCluster::generateGaussianExamples(weka.core.Instances, int, java.util.Random, weka.datagenerators.clusterers.SubspaceClusterDefinition, java.lang.String):void	weka.datagenerators.clusterers.SubspaceClusterDefinition	2/4	
+Move Method	weka.gui.beans.ClassAssigner::assignClass(weka.core.Instances):void	weka.core.Instances	2/4	
+Move Method	weka.classifiers.bayes.net.GUI.Selection::removeFromSelection(int):void	weka.core.FastVector	2/3	
+Move Method	weka.classifiers.bayes.net.search.global.HillClimber::performOperation(weka.classifiers.bayes.BayesNet, weka.core.Instances, weka.classifiers.bayes.net.search.global.HillClimber.Operation):void	weka.classifiers.bayes.net.search.global.HillClimber.Operation	2/3	
+Move Method	weka.classifiers.bayes.net.search.local.HillClimber::performOperation(weka.classifiers.bayes.BayesNet, weka.core.Instances, weka.classifiers.bayes.net.search.local.HillClimber.Operation):void	weka.classifiers.bayes.net.search.local.HillClimber.Operation	2/3	
+Move Method	weka.classifiers.bayes.net.search.local.HillClimber.Cache::put(weka.classifiers.bayes.net.search.local.HillClimber.Operation, double):void	weka.classifiers.bayes.net.search.local.HillClimber.Operation	2/3	
+Move Method	weka.classifiers.bayes.net.search.local.HillClimber.Cache::get(weka.classifiers.bayes.net.search.local.HillClimber.Operation):double	weka.classifiers.bayes.net.search.local.HillClimber.Operation	2/3	
+Move Method	weka.classifiers.bayes.net.search.local.LocalScoreSearchAlgorithm::logScore(int):double	weka.classifiers.bayes.BayesNet	2/3	
+Move Method	weka.classifiers.bayes.net.search.local.LocalScoreSearchAlgorithm::calcNodeScoreADTree(int):double	weka.classifiers.bayes.BayesNet	2/3	
+Move Method	weka.classifiers.lazy.kstar.KStarNominalAttribute::calculateSphereSize(int, double, weka.classifiers.lazy.kstar.KStarWrapper):void	weka.classifiers.lazy.kstar.KStarWrapper	2/3	
+Move Method	weka.classifiers.trees.REPTree.Tree::distribution(double[][], double[][][], int, int[], double[], double[][], weka.core.Instances):double	weka.core.Instances	2/3	
+Move Method	weka.classifiers.trees.REPTree.Tree::numericDistribution(double[][], double[][][], int, int[], double[], double[][], weka.core.Instances, double[]):double	weka.core.Instances	2/3	
+Move Method	weka.classifiers.trees.lmt.ResidualModelSelection::selectModel(weka.core.Instances, double[][], double[][]):weka.classifiers.trees.j48.ClassifierSplitModel	weka.core.Instances	2/3	
+Move Method	weka.datagenerators.clusterers.SubspaceCluster::generateUniformExamples(weka.core.Instances, int, weka.datagenerators.clusterers.SubspaceClusterDefinition, java.lang.String):void	weka.datagenerators.clusterers.SubspaceClusterDefinition	2/3	
+Move Method	weka.datagenerators.clusterers.SubspaceCluster::generateUniformIntegerExamples(weka.core.Instances, int, weka.datagenerators.clusterers.SubspaceClusterDefinition, java.lang.String):void	weka.datagenerators.clusterers.SubspaceClusterDefinition	2/3	
+Move Method	weka.experiment.PairedTTester.DatasetSpecifiers::add(weka.core.Instance):void	weka.core.FastVector	2/3	
+Move Method	weka.gui.visualize.VisualizePanel::setInstances(weka.core.Instances):void	weka.core.Instances	2/3	

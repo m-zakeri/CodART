@@ -1,0 +1,104 @@
+The REST interface is based on HTTP requests and XML data.
+
+In the following "localhost" is used to describe the host address and "8080" the port number.
+Replace with your host address and port number. Port number is configured in the server-agent "felix-config.properties" file with the property for the HTTP port.
+You may invoke the following resources:
+
+RESOURCE: http://localhost:8080/rest/shutdown
+HTTP METHOD: GET
+DESCRIPTION: System.exit() on the server-agent (nice feature!)
+PARAMETERS: none
+RETURN VALUES: nothing
+
+RESOURCE: http://localhost:8080/rest/availability
+HTTP METHOD: GET
+DESCRIPTION: Gives a list of available base measures.
+PARAMETERS: none
+RETURNS: example below, refer to schema at the bottom for details
+  <availability>
+    <!--Zero or more repetitions:-->
+    <baseMeasure>
+      <bmId>10</bmId>
+      <!--Optional:-->
+      <bmClass>string</bmClass>
+      <!--Optional:-->
+      <bmName>string</bmName>
+      <!--Optional:-->
+      <bmDescription>string</bmDescription>
+    </baseMeasure>
+  </availability>
+
+RESOURCE: http://localhost:8080/rest/bmrequest/{bmid}
+HTTP METHOD: POST
+DESCRIPTION: Request a given base measure once
+URL PARAMETERS: bmid = identifier for the BM requested
+RETURNS: nothing but you get callbacks to your own interface as defined in server-agent noen-mfw.properties file.
+
+RESOURCE: http://localhost:8080/rest/bmsubscription/{bmid}
+HTTP METHOD: POST
+DESCRIPTION: Subscribes to a given base measure
+URL PARAMETERS: bmid = identifier for the BM to subscribe to
+BODY PARAMETERS: interval = how often do you want the values to be posted. example below
+  <subscriptionRequest>
+    <interval>10</interval>
+  </subscriptionRequest>
+RETURNS: nothing but you get callbacks to your own interface as defined in server-agent noen-mfw.properties file.
+
+RESOURCE: http://localhost:8080/rest/bmsubscription/{bmid}
+HTTP METHOD: DELETE
+DESCRIPTION: Deletes an existing subscription to a given base measure
+URL PARAMETERS: bmid = identifier for the BM to unsubscribe to
+RETURNS: nothing
+
+RESOURCE: Your endpoint: http://localhost:8080/rest/bmvalue/{bmid}
+When subscribed BM's are available, new values will be posted to that address using HTTP POST and type BmResult from the schema below.
+  EXAMPLE:
+  <bmValue>
+    <!--Optional:-->
+    <value>string</value>
+    <!--Optional:-->
+    <time>2008-09-29T04:49:45</time>
+  </bmValue>
+
+SCHEMA:
+
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="availability" type="availability"/>
+
+  <xs:element name="bm" type="bm"/>
+
+  <xs:element name="bmValue" type="bmValue"/>
+
+  <xs:element name="subscriptionRequest" type="subscriptionRequest"/>
+
+  <xs:complexType name="availability">
+    <xs:sequence>
+      <xs:element name="baseMeasure" type="bm" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="bm">
+    <xs:sequence>
+      <xs:element name="bmId" type="xs:long"/>
+      <xs:element name="bmClass" type="xs:string" minOccurs="0"/>
+      <xs:element name="bmName" type="xs:string" minOccurs="0"/>
+      <xs:element name="bmDescription" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="bmValue">
+    <xs:sequence>
+      <xs:element name="value" type="xs:string" minOccurs="0"/>
+      <xs:element name="time" type="xs:dateTime" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="subscriptionRequest">
+    <xs:sequence>
+      <xs:element name="interval" type="xs:long"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
+

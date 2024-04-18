@@ -1,0 +1,5 @@
+Refactoring Type	Source Entity	Target Class	Source/Target accessed members	Rate it!
+Move Method	org.jhotdraw.draw.BezierFigure::getOutermostPoint():java.awt.geom.Point2D.Double	org.jhotdraw.geom.BezierPath	1/2	
+Move Method	org.jhotdraw.draw.action.SwingWorker::interrupt():void	org.jhotdraw.draw.action.SwingWorker.ThreadVar	1/2	
+Move Method	org.jhotdraw.draw.BezierTool::addPointToFigure(java.awt.geom.Point2D.Double):void	org.jhotdraw.draw.BezierFigure	2/7	
+Move Method	org.jhotdraw.draw.BezierFigure::readPoints(org.jhotdraw.xml.DOMInput):void	org.jhotdraw.geom.BezierPath	2/3	
