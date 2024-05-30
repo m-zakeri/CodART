@@ -2,7 +2,8 @@ import argparse
 from pathlib import Path
 from refactorings.extract_class import Runner
 from configparser import ConfigParser
-
+import git
+import os
 
 def save_config(
         refactor_types: str = None,
@@ -67,10 +68,12 @@ def main_cli():
     parser.add_argument('--project-path', type=str, nargs='+',
                         help='project path ')
     args = parser.parse_args()
-    repo_path = args[6]
+    repo_path = args.project_path[0]
+    print(repo_path)
+    assert os.path.isdir(repo_path)
     repo = git.Repo(repo_path)
-    original_commit = repo.head.commit
-    repo.git.checkout(original_commit)
+    repo.git.restore("--source", "HEAD", "--staged", "--worktree", repo_path)
+    repo.git.clean("-fd")
     print('Reverted back to the original state successfully.')
     new_class = f"{args.source_class}Extracted"
     new_file_path = Path(args.file_path).parent / f"{new_class}.java"

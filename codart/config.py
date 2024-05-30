@@ -3,7 +3,6 @@ import os
 import datetime as dt
 import logging
 # from logging.handlers import TimedRotatingFileHandler
-
 from dotenv import load_dotenv
 
 load_dotenv()
