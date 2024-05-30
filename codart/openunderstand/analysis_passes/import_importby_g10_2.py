@@ -4,7 +4,7 @@ from pathlib import Path
 from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
-from openunderstand.oudb.models import KindModel, EntityModel, ReferenceModel
+from openunderstand.oudb.models import KindModel, EntityModel, ReferenceModel, ProjectModel
 
 PRJ_INDEX = 3
 REF_NAME = "import"
@@ -35,6 +35,15 @@ def get_project_info(index, ref_name):
         "DB_PATH": db_path,
         "PROJECT_PATH": project_path,
     }
+
+
+def find_java_files(root_dir):
+    java_files = []
+    for root, dirs, files in os.walk(root_dir):
+        for file in files:
+            if file.endswith(".java"):
+                java_files.append(file)
+    return java_files
 
 
 def get_parse_tree(file_path):
@@ -70,32 +79,44 @@ class Project:
 
 class ImportListener(JavaParserLabeledListener):
     def __init__(self, files):
+        self.project_files = find_java_files(ProjectModel.select()[0].root)
         self.repository = []
         self.files = files
 
     def enterImportDeclaration(self, ctx: JavaParserLabeled.importDeclaration):
         imported_class_longname = ctx.qualifiedName().getText()
         imported_class_name = imported_class_longname.split(".")[-1]
+        imported_class_file_name = None
 
-        is_built_in = False
-        imported_class_file_name = imported_class_name + ".java"
-        if imported_class_file_name not in [file[0] for file in self.files]:
-            is_built_in = True
+        is_built_in = True
+        for ICN in imported_class_longname.split(".")[::-1]:
+            imported_class_file_name = ICN + ".java"
+            if imported_class_file_name in self.project_files:
+                is_built_in = False
+                break
+
+        if is_built_in:
             imported_class_file_name = None
-
         line = ctx.children[0].symbol.line
         col = ctx.children[0].symbol.column
-
-        self.repository.append(
-            {
-                "imported_class_name": imported_class_name,
-                "imported_class_longname": imported_class_longname,
-                "is_built_in": is_built_in,
-                "imported_class_file_name": imported_class_file_name,
-                "line": line,
-                "column": col,
-            }
-        )
+        if (
+            (ctx.children[1].getText() != "static")
+            or ((ctx.children[1].getText() == "static") and not is_built_in)
+            or (
+                (ctx.children[1].getText() == "static")
+                and ctx.getText().endswith(".*;")
+            )
+        ):
+            self.repository.append(
+                {
+                    "imported_class_name": imported_class_name,
+                    "imported_class_longname": imported_class_longname,
+                    "is_built_in": is_built_in,
+                    "imported_class_file_name": imported_class_file_name,
+                    "line": line,
+                    "column": col,
+                }
+            )
 
 
 class ImportedEntityListener(JavaParserLabeledListener):

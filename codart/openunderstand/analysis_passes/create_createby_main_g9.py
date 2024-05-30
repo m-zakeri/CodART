@@ -112,9 +112,11 @@ class Project:
                 ),
                 _name=ref_dict["scopename"],
                 _type=ref_dict["scopereturntype"],
-                _parent=ref_dict["scope_parent"]
-                if ref_dict["scope_parent"] is not None
-                else file_ent,
+                _parent=(
+                    ref_dict["scope_parent"]
+                    if ref_dict["scope_parent"] is not None
+                    else file_ent
+                ),
                 _longname=ref_dict["scopelongname"],
                 _contents=["scopecontent"],
             )[0]

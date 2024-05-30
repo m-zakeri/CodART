@@ -77,10 +77,10 @@ class DotRef_DotRefBy(JavaParserLabeledListener):
                             "col": col[:-1],
                             "refent": refEntName,
                             "scope_parent": allrefs[-2] if len(allrefs) > 2 else None,
-                            "potential_refent": ".".join(allrefs[:-1])
-                            + "."
-                            + refEntName
-                            if refEntName
-                            else "",
+                            "potential_refent": (
+                                ".".join(allrefs[:-1]) + "." + refEntName
+                                if refEntName
+                                else ""
+                            ),
                         }
                     )

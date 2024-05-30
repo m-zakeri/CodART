@@ -4,7 +4,6 @@ The helper module for couple_coupleby.py, create_createby_g11.py, declare_declar
 Todo: Must be document well
 """
 
-
 __author__ = "Shaghayegh Mobasher , Setayesh kouloubandi ,Parisa Alaie, Zakeri"
 __version__ = "0.1.1"
 
@@ -69,9 +68,9 @@ class ClassPropertiesListener(JavaParserLabeledListener):
                     self.class_properties["parent"] = None
                 else:
                     self.class_properties["parent"] = self.class_longname[-2]
-                self.class_properties[
-                    "modifiers"
-                ] = ClassPropertiesListener.findClassOrInterfaceModifiers(ctx)
+                self.class_properties["modifiers"] = (
+                    ClassPropertiesListener.findClassOrInterfaceModifiers(ctx)
+                )
                 self.class_properties["contents"] = ctx.getText()
 
 
@@ -102,7 +101,7 @@ class InterfacePropertiesListener(JavaParserLabeledListener):
                     self.interface_properties["parent"] = None
                 else:
                     self.interface_properties["parent"] = self.interface_longname[-2]
-                self.interface_properties[
-                    "modifiers"
-                ] = ClassPropertiesListener.findClassOrInterfaceModifiers(ctx)
+                self.interface_properties["modifiers"] = (
+                    ClassPropertiesListener.findClassOrInterfaceModifiers(ctx)
+                )
                 self.interface_properties["contents"] = ctx.getText()

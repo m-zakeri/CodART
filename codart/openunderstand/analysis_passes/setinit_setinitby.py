@@ -3,7 +3,7 @@ from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 
 
-class SetInitAndSetInitByListener(JavaParserLabeledListener):
+class SetInitAndSetByInitListener(JavaParserLabeledListener):
     def __init__(self, file_name):
         self.ex_name = ""
         self.in_expreession_21 = False
@@ -19,6 +19,9 @@ class SetInitAndSetInitByListener(JavaParserLabeledListener):
         self.create_object = False
         self.method_name = ""
         self.class_name = ""
+        self.ent_type = None
+        self.stream = ""
+        self.ss = ""
 
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
         name_of_file = self.file_name.split("\\")[
@@ -50,34 +53,66 @@ class SetInitAndSetInitByListener(JavaParserLabeledListener):
             name_of_file = self.file_name.split("\\")[
                 self.file_name.split("\\").count(0) - 1
             ]
-            set_init_long_name = (
-                name_of_file.replace(".java", "")
-                + "."
-                + self.ex_name
-                + "."
-                + ctx.parentCtx.children[0].getText()
-            )
-            set_init_short_name = ctx.parentCtx.children[0].getText()
-            set_init_type = ctx.parentCtx.parentCtx.parentCtx.children[0].getText()
-            line = (
-                ctx.parentCtx.parentCtx.parentCtx.children[0]
-                .children[0]
-                .children[0]
-                .symbol.line
-            )
-            column = (
-                ctx.parentCtx.parentCtx.parentCtx.children[0]
-                .children[0]
-                .children[0]
-                .symbol.column
-            )
+            node = ctx
+            while node.getRuleIndex() not in (20, 7, 25):
+                node = node.parentCtx
+            if node.getRuleIndex() == 20:
+                self.stream = node.parentCtx.parentCtx.getText()
+                set_init_short_name = ctx.parentCtx.children[0].getText()
+                self.ss = node.children[0].getText()
+                set_init_long_name = (
+                    self.package_name
+                    + "."
+                    + node.children[0].getText()
+                    + "."
+                    + self.ex_name
+                    + "."
+                    + ctx.parentCtx.children[0].getText()
+                )
+            elif node.getRuleIndex() == 25:
+                self.stream = node.parentCtx.parentCtx.getText()
+                set_init_short_name = ctx.parentCtx.children[0].getText()
+                self.ss = node.children[0].getText()
+                set_init_long_name = (
+                    self.package_name
+                    + "."
+                    + node.children[0].getText()
+                    + "."
+                    + self.ex_name
+                    + "."
+                    + ctx.parentCtx.children[0].getText()
+                )
+            else:
+                node1 = ctx
+                while node1.getRuleIndex() != 26:
+                    node1 = node1.parentCtx
+                node2 = ctx
+                while node2.getRuleIndex() != 0:
+                    node2 = node2.parentCtx
+                self.stream = node.parentCtx.parentCtx.getText()
+                self.ss = node2.children[0].children[1].children[2].getText()
+                set_init_short_name = (
+                    node1.children[0].getText()
+                    + "."
+                    + ctx.parentCtx.children[0].getText()
+                )
+                set_init_long_name = (
+                    self.package_name
+                    + "."
+                    + self.ex_name
+                    + "."
+                    + ctx.parentCtx.children[0].getText()
+                )
+            set_init_type = ctx.parentCtx.children[0].getText()
+            line = ctx.parentCtx.children[0].children[0].symbol.line
+            column = ctx.parentCtx.children[0].children[0].symbol.column
             if self.call_function:
                 set_init_value = self.method_name
             elif self.create_object:
                 set_init_value = self.class_name
             else:
                 set_init_value = ctx.getText()
-
+            sss = self.ss + "." + self.ex_name
             self.set_init_by.append(
                 (
                     set_init_short_name,
@@ -88,6 +123,9 @@ class SetInitAndSetInitByListener(JavaParserLabeledListener):
                     line,
                     column,
                     self.ex_name,
+                    self.ent_type,
+                    self.stream,
+                    sss,
                 )
             )
 
@@ -100,16 +138,5 @@ class SetInitAndSetInitByListener(JavaParserLabeledListener):
         self.method_name = ""
         self.class_name = ""
 
-    def enterMethodCall0(self, ctx: JavaParserLabeled.MethodCall0Context):
-        if self.enterd_initialization:
-            if not self.create_object:
-                if not self.call_function:
-                    self.call_function = True
-                    self.method_name = ctx.IDENTIFIER()
-
-    def enterCreatedName0(self, ctx: JavaParserLabeled.CreatedName0Context):
-        if self.enterd_initialization:
-            if not self.create_object:
-                if not self.call_function:
-                    self.create_object = True
-                    self.class_name = ctx.getText() + "(" + ")"
+    def exitPackageDeclaration(self, ctx: JavaParserLabeled.PackageDeclarationContext):
+        self.package_name = ctx.children[1].getText()

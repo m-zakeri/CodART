@@ -2,7 +2,7 @@ import time
 import logging
 import configparser
 from os.path import basename
-from openunderstand.gen.javaLabeled import JavaParserLabeled
+from gen.javaLabeled import JavaParserLabeled
 
 
 class ClassTypeData:
@@ -78,7 +78,7 @@ def setup_config():
     config = configparser.ConfigParser()
     config.read(
         os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "..", "..", "config.ini"
+            os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "config.ini"
         )
     )
     return config

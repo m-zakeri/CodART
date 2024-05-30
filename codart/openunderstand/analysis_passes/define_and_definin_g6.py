@@ -4,7 +4,7 @@ from antlr4 import *
 from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
-from openunderstand.oudb.models import KindModel, EntityModel, ReferenceModel
+from oudb.models import KindModel, EntityModel, ReferenceModel
 
 
 def config_entity_type(type_entity):

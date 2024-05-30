@@ -4,7 +4,6 @@ This module find all OpenUnderstand call and callby references in a Java project
 ## References
 """
 
-
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 import openunderstand.analysis_passes.class_properties as class_properties
@@ -40,8 +39,6 @@ class CallAndCallBy(JavaParserLabeledListener):
         self.local_method_variables = {}
         self.implement = []
         self.classes_repo = []
-
-
 
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
         try:
@@ -115,9 +112,11 @@ class CallAndCallBy(JavaParserLabeledListener):
                                                     "scope_longname": str(
                                                         scope_longname
                                                     ),
-                                                    "scope_parent": scope_parents[-2]
-                                                    if len(scope_parents) > 2
-                                                    else None,
+                                                    "scope_parent": (
+                                                        scope_parents[-2]
+                                                        if len(scope_parents) > 2
+                                                        else None
+                                                    ),
                                                     "scope_contents": cls.getText(),
                                                     "scope_modifiers": class_properties.ClassPropertiesListener.findClassOrInterfaceModifiers(
                                                         context
@@ -150,9 +149,11 @@ class CallAndCallBy(JavaParserLabeledListener):
                                                 "scope_kind": "Class",
                                                 "scope_name": cls.IDENTIFIER().__str__(),
                                                 "scope_longname": str(scope_longname),
-                                                "scope_parent": scope_parents[-2]
-                                                if len(scope_parents) > 2
-                                                else None,
+                                                "scope_parent": (
+                                                    scope_parents[-2]
+                                                    if len(scope_parents) > 2
+                                                    else None
+                                                ),
                                                 "scope_contents": cls.getText(),
                                                 "scope_modifiers": class_properties.ClassPropertiesListener.findClassOrInterfaceModifiers(
                                                     context
@@ -358,9 +359,11 @@ class CallAndCallBy(JavaParserLabeledListener):
                     key,
                     token.line,
                     token.column,
-                    self.current_class_name
-                    if not is_super
-                    else self.class_parents[self.current_class_name],
+                    (
+                        self.current_class_name
+                        if not is_super
+                        else self.class_parents[self.current_class_name]
+                    ),
                 )
             else:
                 self.fill_call_dict(key, token.line, token.column)

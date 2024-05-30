@@ -45,9 +45,9 @@ class ExtendCoupleAndExtendCoupleBy(JavaParserLabeledListener):
                     "scope_kind": "Class",
                     "scope_name": ctx.IDENTIFIER().__str__(),
                     "scope_longname": str(scope_longname),
-                    "scope_parent": scope_parents[-2]
-                    if len(scope_parents) > 2
-                    else None,
+                    "scope_parent": (
+                        scope_parents[-2] if len(scope_parents) > 2 else None
+                    ),
                     "scope_contents": ctx.getText(),
                     "scope_modifiers": class_properties.ClassPropertiesListener.findClassOrInterfaceModifiers(
                         ctx

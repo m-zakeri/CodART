@@ -96,7 +96,7 @@ def get_class_body(path):
 def readFile():
     listOfFiles = list()
     filename = []
-    for (dirpath, dirnames, filenames) in os.walk(
+    for dirpath, dirnames, filenames in os.walk(
         r"E:\uni\compiler\OpenUnderstand\benchmark\calculator_app"
     ):
         for file in filenames:

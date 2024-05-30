@@ -36,6 +36,8 @@ def process_file(file_address):
         lap.couple_listener,
         lap.useby_listener,
         lap.setby_listener,
+        lap.setinitby_listener,
+        lap.setbypartialby_listener,
         lap.dotref_listener,
         lap.throws_listener,
         lap.extend_coupled_listener,

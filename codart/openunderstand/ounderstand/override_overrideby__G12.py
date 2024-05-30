@@ -4,9 +4,6 @@ from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 from openunderstand.analysis_passes import class_properties
 
-DB_PATH = "../../database/calculator_app.oudb"
-PROJECT_PATH = "../../benchmarks_projects/calculator_app"
-PROJECT_NAME = "Calculator App"
 
 
 # class decleration:
@@ -130,9 +127,9 @@ class overridelistener(JavaParserLabeledListener):
                     "scope_kind": "Method",
                     "scope_name": ctx.IDENTIFIER().getText(),
                     "scope_longname": self.packageName + "." + scope_longname,
-                    "scope_parent": scope_parents[-2]
-                    if len(scope_parents) >= 2
-                    else None,
+                    "scope_parent": (
+                        scope_parents[-2] if len(scope_parents) >= 2 else None
+                    ),
                     "scope_contents": self.extract_original_text(ctx),
                     "scope_modifiers": list(reversed(self.modifiers)),
                     "line": line,

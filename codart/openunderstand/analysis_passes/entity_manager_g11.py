@@ -304,9 +304,9 @@ class EntityGenerator:
                 _kind=kind,
                 _name=props["name"],
                 _longname=props["longname"],
-                _parent=props["parent"]
-                if props["parent"] is not None
-                else file_address,
+                _parent=(
+                    props["parent"] if props["parent"] is not None else file_address
+                ),
                 _contents=props["contents"],
             )
         return ent[0]
@@ -323,9 +323,9 @@ class EntityGenerator:
                 _kind=kind,
                 _name=props["name"],
                 _longname=props["longname"],
-                _parent=props["parent"]
-                if props["parent"] is not None
-                else file_address,
+                _parent=(
+                    props["parent"] if props["parent"] is not None else file_address
+                ),
                 _contents=props["contents"],
             )
         return ent[0]

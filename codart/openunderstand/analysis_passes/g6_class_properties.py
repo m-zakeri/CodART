@@ -72,9 +72,9 @@ class ClassPropertiesListener(JavaParserLabeledListener):
                 "name": self.class_longname[-1],
                 "longname": ".".join(self.class_longname),
                 "package_name": self.package_name,
-                "parent": None
-                if len(self.class_longname) == 1
-                else self.class_longname[-2],
+                "parent": (
+                    None if len(self.class_longname) == 1 else self.class_longname[-2]
+                ),
                 "modifiers": ctx.parentCtx.getChild(0).getText(),
                 "contents": self.extractOriginalText(ctx.parentCtx),
             }
@@ -104,9 +104,11 @@ class InterfacePropertiesListener(JavaParserLabeledListener):
             self.interface_properties = {
                 "name": self.interface_longname[-1],
                 "longname": ".".join(self.interface_longname),
-                "parent": None
-                if len(self.interface_longname) == 1
-                else self.interface_longname[-2],
+                "parent": (
+                    None
+                    if len(self.interface_longname) == 1
+                    else self.interface_longname[-2]
+                ),
                 "modifiers": ClassPropertiesListener.findClassOrInterfaceModifiers(ctx),
                 "contents": ctx.getText(),
             }

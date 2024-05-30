@@ -484,8 +484,11 @@ class Db:
         ents = []
         query = EntityModel.select()
         if kindstring:
-            kinds = KindModel.select().where(KindModel._name.contains(kindstring))
-            query = query.where(EntityModel._kind(kinds))
+            kinds = KindModel.select().where(
+                fn.Lower(KindModel._name).contains(kindstring.lower())
+            )
+            query = query.where(EntityModel._kind.in_(kinds))
+
         query = query.where(
             (EntityModel._name.contains(name)) | (EntityModel._longname.contains(name))
         )
@@ -1119,6 +1122,8 @@ class Ent:
 
         Return the parent of the entity or None if none
         """
+        if self._parent is None:
+            return None
         entity = EntityModel.get_by_id(pk=self._parent)
         return Ent(**entity.__dict__.get("__data__"))
 
@@ -1160,30 +1165,32 @@ class Ent:
         returned
         """
         # TODO : check nested references
-        mlist = [j.replace(" ", "") for j in refkindstring.split(",")]
+        mlist = [j.strip() for j in refkindstring.split(",")]
+        # print(mlist)
         refs = []
         for item in mlist:
             query = ReferenceModel.select().where(ReferenceModel._scope == self._id)
             if item:
                 kinds = KindModel.select().where(
-                    (KindModel.is_ent_kind == False) & (KindModel._name.contains(item))
-                    # & (fn.Lower(KindModel._name) == (f"Java {item}").lower())
+                    (KindModel.is_ent_kind == False)
+                    & (KindModel._name.contains(item))
+                    & (fn.Lower(KindModel._name) == (f"Java {item}").lower())
                 )
-                # if len(mlist) > 1:
-                #     print(kinds.count())
-                #     for k in kinds:
-                #         print("kin : ", k._name)
-                #         print(k._id)
-                #     q = ReferenceModel.select().where(ReferenceModel._kind.in_(kinds))
-                #     for it in query:
-                #         # print("it : ", it._kind)
-                #         if str(it._kind) != "Java Define":
-                #             print("X :", it._kind)
-                #             print("X :", "Java Define")
+                if len(mlist) > 0:
+                    print(kinds.count())
+                    for k in kinds:
+                        print("kin : ", k._name)
+                        print(k._id)
+                    q = ReferenceModel.select().where(ReferenceModel._kind.in_(kinds))
+                    for it in query:
+                        print("it : ", it._kind)
+                        if str(it._kind) != "Java Define":
+                            print("X :", it._kind)
+                            print("X :", "Java Define")
 
                 query = query.where(ReferenceModel._kind.in_(kinds))
-                # if len(mlist) > 1:
-                # print(query.count())
+                if len(mlist) > 0:
+                    print(query.count())
 
             if entkindstring:
                 kinds = KindModel.select().where(

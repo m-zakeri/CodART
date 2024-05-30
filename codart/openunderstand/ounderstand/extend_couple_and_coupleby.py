@@ -232,9 +232,9 @@ class ExtendCoupleListener(JavaParserLabeledListener):
             self.inherited_classes.append(
                 {
                     "child_class": self.package_name + "." + child_class,
-                    "parent_class": inherited_class_str
-                    if first_condition
-                    else second_condition,
+                    "parent_class": (
+                        inherited_class_str if first_condition else second_condition
+                    ),
                     "line": line,
                     "column": column,
                     "prefixes": connect_prefix_class.strip(),
@@ -292,9 +292,9 @@ class ExtendCoupleListener(JavaParserLabeledListener):
             self.inherited_classes.append(
                 {
                     "child_class": self.package_name + "." + child_class,
-                    "parent_class": inherited_class_str
-                    if first_condition
-                    else second_condition,
+                    "parent_class": (
+                        inherited_class_str if first_condition else second_condition
+                    ),
                     "line": line,
                     "column": column,
                     "prefixes": connect_prefix_class.strip(),
