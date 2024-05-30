@@ -64,8 +64,14 @@ def main_cli():
                         help='List of methods to be moved')
     parser.add_argument('--core', nargs='+', type=int,
                         help='understand or openunderstand (0\\1)')
-
+    parser.add_argument('--project-path', type=str, nargs='+',
+                        help='project path ')
     args = parser.parse_args()
+    repo_path = args[6]
+    repo = git.Repo(repo_path)
+    original_commit = repo.head.commit
+    repo.git.checkout(original_commit)
+    print('Reverted back to the original state successfully.')
     new_class = f"{args.source_class}Extracted"
     new_file_path = Path(args.file_path).parent / f"{new_class}.java"
     # Sample usage for new configuration settings:

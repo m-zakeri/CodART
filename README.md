@@ -128,11 +128,11 @@ XI. **Other packages**: The information of other packages will be announced in t
 ### Example to use cli for understand 
 * to using understand
 
-  *     python3 codart/refactoring_cli.py --udb_path "/home/y/Desktop/CodART/benchmark_projects/JSON20201115/JSON20201115.udb" --file_path "/home/y/Desktop/CodART/benchmark_projects/JSON20201115/src/main/java/org/json/JSONML.java" --source_class "JSONML"   --moved_methods "toJSONObject" --moved_fields "" --core 0
+  *     --udb_path "/home/y/Desktop/desktop_0./CodART/benchmark_projects/JSON20201115/JSON20201115.und" --file_path "/home/y/Desktop/desktop_0./CodART/benchmark_projects/JSON20201115/src/main/java/org/json/JSONML.java" --source_class "JSONML"   --moved_methods "toJSONObject" --moved_fields "" --core 0 --project-path "/home/y/Desktop/desktop_0./CodART/benchmark_projects/JSON-java"
 
 * to using openunderstand
 
-  *     python3 codart/refactoring_cli.py --udb_path "/home/y/Desktop/CodART/benchmark_projects/JSON20201115/mydb.udb" --file_path "/home/y/Desktop/CodART/benchmark_projects/JSON20201115/src/main/java/org/json/JSONML.java" --source_class "JSONML"   --moved_methods "toJSONObject" --moved_fields "" --core 1
+  *     --udb_path "/home/y/Desktop/desktop_0./CodART/mydb.udb" --file_path "/home/y/Desktop/desktop_0./CodART/benchmark_projects/JSON20201115/src/main/java/org/json/JSONML.java" --source_class "JSONML"   --moved_methods "toJSONObject" --moved_fields "" --core 1 --project-path "/home/y/Desktop/desktop_0./CodART/benchmark_projects/JSON-java"
 
 
 
