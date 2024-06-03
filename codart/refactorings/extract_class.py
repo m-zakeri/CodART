@@ -485,6 +485,15 @@ class ExtractClassAPI:
         print("self.udb_path : ", self.udb_path)
         _db = und.open(self.udb_path)
         class_ents = _db.lookup(self.source_class, "Class")
+        for my_ent in class_ents:
+            print("*" * 20)
+            print(f"Name: {my_ent.name()}")
+            print(f"LongName: {my_ent.longname()}")
+            print(f"Kind: {my_ent.kind().longname()}")
+            print(f"Type: {my_ent.type()}")
+            # print(f"Comments: {my_ent.comments()}")
+            print(f"Parent: {my_ent.parent()}")
+            print(f"Parameters: {my_ent.parameters()}")
         class_ent = None
         for ent in class_ents:
             if ent.parent() is not None:

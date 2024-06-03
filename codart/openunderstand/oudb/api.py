@@ -1,3 +1,4 @@
+import re
 from peewee import fn
 from openunderstand.oudb.models import *
 from dataclasses import dataclass
@@ -494,7 +495,8 @@ class Db:
         )
 
         for ent in query:
-            ents.append(Ent(**ent.__dict__.get("__data__")))
+            if re.search(f'Java\\s+{kindstring}'.lower(), str(ent._kind._name).lower()):
+                ents.append(Ent(**ent.__dict__.get("__data__")))
         return ents
 
     def lookup_uniquename(

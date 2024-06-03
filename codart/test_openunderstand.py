@@ -8,7 +8,7 @@ sys.path.append(join(getcwd(), "openunderstand", "utils"))
 from openunderstand.ounderstand.openunderstand import *
 
 start_parsing(
-    repo_address=join(getcwd(), "benchmark_projects", "JSON20201115"),
+    repo_address=join(getcwd(), "benchmark_projects", "JSON-java"),
     db_address=getcwd(),
     db_name="mydb.udb",
     engine_core="Python3",
