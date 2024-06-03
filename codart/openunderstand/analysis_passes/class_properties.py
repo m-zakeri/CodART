@@ -19,6 +19,9 @@ class ClassPropertiesListener(JavaParserLabeledListener):
         self.class_properties = None
 
     def checkParents(self, c):
+        # reversed(self.class_longname)
+        # myList = []
+        # myList.append(".".join(self.class_longname))
         return set(ClassPropertiesListener.findParents(c)) & set(
             list(reversed(self.class_longname))
         )
@@ -35,8 +38,18 @@ class ClassPropertiesListener(JavaParserLabeledListener):
                 JavaParserLabeled.RULE_interfaceDeclaration,
                 JavaParserLabeled.RULE_constructorDeclaration,
                 JavaParserLabeled.RULE_annotationTypeDeclaration,
+                JavaParserLabeled.RULE_annotationTypeDeclaration,
+                JavaParserLabeled.RULE_genericInterfaceMethodDeclaration,
+                JavaParserLabeled.RULE_packageDeclaration,
+                JavaParserLabeled.RULE_typeDeclaration
             ]:
-                parents.append(current.IDENTIFIER().getText())
+                try:
+                    parents.append(current.IDENTIFIER().getText())
+                except Exception as e:
+                    txt = current.parentCtx.getChild(0).getText()
+                    txt = txt.replace("package", "").replace(";", "").split(".")
+                    for item in txt:
+                        parents.append(item)
             current = current.parentCtx
         return list(reversed(parents))
 
