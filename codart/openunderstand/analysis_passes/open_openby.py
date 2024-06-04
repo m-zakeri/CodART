@@ -9,32 +9,6 @@ PRJ_INDEX = 8
 REF_NAME = "import"
 
 
-def get_project_info(index, ref_name):
-    project_names = [
-        "calculator_app",
-        "JSON",
-        "testing_legacy_code",
-        "jhotdraw-develop",
-        "xerces2j",
-        "jvlt-1.3.2",
-        "jfreechart",
-        "ganttproject",
-        "105_freemind",
-    ]
-    project_name = project_names[index]
-    db_path = f"../databases/{ref_name}/{project_name}"
-    if ref_name == "origin":
-        db_path = db_path + ".udb"
-    else:
-        db_path = db_path + ".oudb"
-    project_path = f"../benchmark/{project_name}"
-    return {
-        "PROJECT_NAME": project_name,
-        "DB_PATH": db_path,
-        "PROJECT_PATH": project_path,
-    }
-
-
 def get_parse_tree(file_path):
     file = FileStream(file_path, encoding="utf-8")
     lexer = JavaLexer(file)
@@ -71,48 +45,18 @@ class OpenListener(JavaParserLabeledListener):
         self.files = files
 
     def _get_class_long_name(self, ctx):
-        type_declaration_ctx = ctx.parentCtx
-        if type(type_declaration_ctx) != JavaParserLabeled.TypeDeclarationContext:
-            type_declaration_ctx = type_declaration_ctx.parentCtx
-            modifiers = type_declaration_ctx.modifier()
-        else:
-            modifiers = type_declaration_ctx.classOrInterfaceModifier()
-        class_or_interface_modifier = " ".join(
-            [modifier.getText() for modifier in modifiers]
-        )
-        class_modifier = ctx.CLASS().getText()
-        identifier = ctx.IDENTIFIER().getText()
-        if ctx.EXTENDS():
-            extends = []
-            extend_identifiers = ctx.typeType().classOrInterfaceType().IDENTIFIER()
-            for i in extend_identifiers:
-                extends.append(i.getText())
-            extends = ", ".join(extends)
-            extends_modifier = ctx.EXTENDS().getText() + f" {extends}"
-        else:
-            extends_modifier = ""
-
+        name_list = []
         if ctx.IMPLEMENTS():
-            implements = []
-            for typeType in ctx.typeList().typeType():
-                implements_identifiers = typeType.classOrInterfaceType().IDENTIFIER()
-                for i in implements_identifiers:
-                    implements.append(i.getText())
-            implements = ",".join(implements)
-            implements_modifier = ctx.IMPLEMENTS().getText() + f" {implements}"
+            for item in ctx.typeType().classOrInterfaceType().IDENTIFIER():
+                name_list.append(ctx.typeType().classOrInterfaceType().parentCtx.parentCtx.parentCtx.parentCtx.getChild(0).getChild(
+                    1).getText() + "."+str(item))
+        elif not (ctx.EXTENDS()):
+            name_list.append(ctx.parentCtx.parentCtx.getChild(0).getChild(1).getText() + "." + ctx.getChild(1).getText())
         else:
-            implements_modifier = ""
-        name_list = [
-            class_modifier,
-            identifier,
-        ]
-        if class_or_interface_modifier:
-            name_list.insert(0, class_or_interface_modifier)
-        if extends_modifier:
-            name_list.append(extends_modifier)
-        if implements_modifier:
-            name_list.append(implements_modifier)
-        return " ".join(name_list)
+            name_list.append(ctx.typeType().classOrInterfaceType().parentCtx.parentCtx.parentCtx.parentCtx.getChild(0).getChild(1).getText() + "." +str(ctx.typeType().classOrInterfaceType().IDENTIFIER()[0]))
+        if len(name_list) == 1:
+            return name_list[0]
+        return ";".join(name_list)
 
     def _get_interface_long_name(self, ctx):
         type_declaration_ctx = ctx.parentCtx
@@ -173,17 +117,28 @@ class OpenListener(JavaParserLabeledListener):
         class_name = ctx.IDENTIFIER().getText()
         line = ctx.children[0].symbol.line
         col = ctx.children[0].symbol.column
-
+        modifiers = []
+        for item in range(len(ctx.parentCtx.children)):
+            if item != (len(ctx.parentCtx.children) - 1):
+                modifiers.append(ctx.parentCtx.getChild(item))
+        kind = self.get_kind_name(prefixes=modifiers, kind="Class")
         self.repository.append(
             {
                 "name": class_name,
                 "longname": class_longname,
                 "line": line,
                 "column": col,
-                "kind": "Class",
+                "kind": self.kind_generator(ctx=ctx.parentCtx, kind="Class"),
                 "body": ctx.getText(),
             }
         )
+
+    def kind_generator(self, ctx, kind: str = "Class") -> str:
+        modifiers = []
+        for item in range(len(ctx.children)):
+            if item != (len(ctx.children) - 1):
+                modifiers.append(ctx.getChild(item))
+        return self.get_kind_name(prefixes=modifiers, kind=kind)
 
     def enterEnumDeclaration(self, ctx: JavaParserLabeled.EnumDeclarationContext):
         enum_longname = self._get_enum_long_name(ctx)
@@ -197,10 +152,12 @@ class OpenListener(JavaParserLabeledListener):
                 "longname": enum_longname,
                 "line": line,
                 "column": col,
-                "kind": "Enum",
+                "kind": self.kind_generator(ctx=ctx.parentCtx, kind="Enum"),
                 "body": ctx.getText(),
             }
         )
+
+
 
     def enterInterfaceDeclaration(
         self, ctx: JavaParserLabeled.InterfaceDeclarationContext
@@ -215,10 +172,46 @@ class OpenListener(JavaParserLabeledListener):
                 "longname": interface_longname,
                 "line": line,
                 "column": col,
-                "kind": "Interface",
+                "kind": self.kind_generator(ctx=ctx.parentCtx, kind="Interface"),
                 "body": ctx.getText(),
             }
         )
+
+    def get_kind_name(self, prefixes, kind):
+        p_static = ""
+        p_abstract = ""
+        p_generic = ""
+        p_type = "Type"
+        p_visibility = "Default"
+        p_member = "Member"
+        if "static" in prefixes:
+            p_static = "Static"
+
+        if "generic" in prefixes:
+            p_generic = "Generic"
+
+        if "abstract" in prefixes:
+            p_abstract = "Abstract"
+        elif "final" in prefixes:
+            p_abstract = "Final"
+
+        if "private" in prefixes:
+            p_visibility = "Private"
+        elif "public" in prefixes:
+            p_visibility = "Public"
+        elif "protected" in prefixes:
+            p_visibility = "Protected"
+
+        if kind.lower() == "Interface".lower():
+            p_member = ""
+            p_static = ""
+
+        if kind.lower() == "Method".lower():
+            p_type = ""
+
+        s = f"Java {p_static} {p_abstract} {p_generic} {kind} {p_type} {p_visibility} {p_member}"
+        s = " ".join(s.split())
+        return s
 
 
 def get_parent(parent_file_name, files):

@@ -99,15 +99,18 @@ class DSCmetric(JavaParserLabeledListener):
             return
         prefix_list = []
         for child in ctx.parentCtx.children:
-            if type(child) == JavaParserLabeled.ClassDeclarationContext:
+            if isinstance(child, JavaParserLabeled.ClassDeclarationContext):
                 break
             prefix_list.append(child.getText())
         if check_generic_class():
             prefix_list.append("generic")
         data = ClassTypeData()
         data.set_child_class(ctx)
-        data.set_parent_class("java.lang.Object")
-        data.set_column(0)
+        if ctx.parentCtx.parentCtx.getChild(0).getChild(1) is None:
+            data.set_parent_class(ctx.parentCtx.parentCtx.parentCtx.parentCtx.parentCtx.parentCtx.getChild(0).getChild(1).getText())
+        else:
+            data.set_parent_class(ctx.parentCtx.parentCtx.getChild(0).getChild(1).getText())
+        data.set_column(ctx.start.column)
         data.set_prefixes(prefix_list=prefix_list)
         data.set_package_name(self.package_name)
         data.set_line(ctx.start.line)

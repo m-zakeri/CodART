@@ -38,8 +38,6 @@ class ExtendCoupleAndExtendCoupleBy(JavaParserLabeledListener):
         col = ctx.children[0].symbol.column
         if ctx.EXTENDS():
             extendedBy = ctx.typeType().classOrInterfaceType().IDENTIFIER(i=0)
-            print("[DEBUG] ExtendCouples: ", scope_parents, scope_longname, extendedBy)
-
             self.implement.append(
                 {
                     "scope_kind": "Class",

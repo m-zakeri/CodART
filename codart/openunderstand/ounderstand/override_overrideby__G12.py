@@ -4,8 +4,6 @@ from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 from openunderstand.analysis_passes import class_properties
 
-
-
 # class decleration:
 class ClassEntityListener(JavaParserLabeledListener):
     def __init__(self):
@@ -240,7 +238,6 @@ class overridelistener(JavaParserLabeledListener):
 
                 self.classes[self.dic["type_ent_longname"]].append(self.dic)
         except Exception as e:
-            print("YO 11")
             print(e)
 
     def enterAnnotation(self, ctx: JavaParserLabeled.AnnotationContext):

@@ -21,12 +21,13 @@ class DefineListener(JavaParserLabeledListener):
 
         ent_start = ctx.qualifiedName().IDENTIFIER()[0]
         ent_name = ctx.qualifiedName().IDENTIFIER()[-1].getText()
-        ent_longname = "/".join(self.package)
-        ent_longname = os.path.join(self.file_address, ent_longname)
+        ent_longname = ".".join(self.package)
         line = ent_start.symbol.line
         column = ent_start.symbol.column
-        print("file address in enterPackageDeclaration : ", self.file_address)
-        print("ent_longname in enterPackageDeclaration : ", ent_longname)
+        self.file_address = self.file_address.replace("/", ".").replace("\\", ".").split(".")
+        self.file_address.pop()
+        self.file_address[len(self.file_address) - 1] = self.file_address[len(self.file_address) - 1] + ".java"
+        self.file_address = ".".join(self.file_address[self.file_address.index("java") + 1:])
         self.defines.append(
             {
                 "contents": ctx.getText(),
@@ -48,14 +49,13 @@ class DefineListener(JavaParserLabeledListener):
             ent_name = ent.getText()
         line = ent.symbol.line
         column = ent.symbol.column
-        print("type : ", type)
-        print("YO 1: ", self.package)
-        print("YO 2: ", ent_parents)
-        scope_longname = ".".join(self.package) + "." + ".".join(ent_parents)
-        print("scope_longname : ", scope_longname)
-        print("ent_name : ", ent_name)
-        print("self.package : ", ".".join(self.package))
-        ent_longname = scope_longname + "." + ent_name
+        ent_name = ent_name.split(".")[-1]
+        for i, item in enumerate(self.package):
+            if item in ent_parents:
+                ent_parents.remove(item)
+                ent_parents.insert(i, item)
+        scope_longname = ".".join(ent_parents)
+        ent_longname = scope_longname
         if len(ent_parents) == 0:
             scope_name = None
         else:
@@ -90,8 +90,6 @@ class DefineListener(JavaParserLabeledListener):
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
         ent = ctx.IDENTIFIER()
         ent_parents = class_properties.ClassPropertiesListener.findParents(ctx)
-        # print("METHOD Type : ", ctx.typeTypeOrVoid().getText())
-        # print("METHOD contents : ", ctx.getText())
         self.add_define_info(
             ent=ent,
             ent_parents=ent_parents,

@@ -4,8 +4,10 @@ import openunderstand.analysis_passes.class_properties as class_properties
 
 
 class DotRef_DotRefBy(JavaParserLabeledListener):
-    state = False
-    class_name = []
+
+    def __init__(self):
+        self.state = False
+        self.class_name = []
 
     def enterPackageDeclaration(self, ctx: JavaParserLabeled.PackageDeclarationContext):
         all_pac = ctx.qualifiedName().IDENTIFIER()

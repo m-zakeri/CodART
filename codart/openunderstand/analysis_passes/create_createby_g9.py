@@ -99,7 +99,6 @@ class CreateAndCreateBy(JavaParserLabeledListener):
 
         return modifiers, parent_type
 
-    create = []
 
     # Add new method for statement15
     def enterStatement15(self, ctx):
@@ -147,9 +146,9 @@ class CreateAndCreateBy(JavaParserLabeledListener):
         self.isVariableInitializer1 = False
         self.isStatement15 = False
 
-    def enterExpression4(self, ctx: JavaParserLabeled.Expression4Context):
+    def processExpression4(self, ctx):
         # Perform the context check before processing the expression4
-        if self.isBlockStatement1 or self.isVariableInitializer1:
+        #if self.isBlockStatement1 or self.isVariableInitializer1:
             modifiers, parent_type = self.findmethodaccess(ctx)
             methodreturn, methodcontext = self.findmethodreturntype(ctx)
 
@@ -162,14 +161,15 @@ class CreateAndCreateBy(JavaParserLabeledListener):
                 scope_longname = self.package_long_name + "." + ".".join(all_parents)
                 [line, col] = str(ctx.start).split(",")[3].split(":")
 
-                # if creator.arrayCreatorRest() or creator.classCreatorRest():
+            #if creator.arrayCreatorRest() or creator.classCreatorRest():
                 # If we're in the correct context for creator1, then check for createdName0
-                # createdName = creator.createdName()
-                # if isinstance(createdName, JavaParserLabeled.CreatedName0Context):
-                # all_parents = class_properties.ClassPropertiesListener.findParents(ctx)
-                # scope_name = all_parents[-1]
-                # scope_longname = self.package_long_name + "." + ".".join(all_parents)
-                # [line, col] = str(ctx.start).split(",")[3].split(":")
+                #createdName = creator.createdName()
+                #if isinstance(createdName, JavaParserLabeled.CreatedName0Context):
+                    #all_parents = class_properties.ClassPropertiesListener.findParents(ctx)
+                    #scope_name = all_parents[-1]
+                    #scope_longname = self.package_long_name + "." + ".".join(all_parents)
+                    #[line, col] = str(ctx.start).split(",")[3].split(":")
+
 
                 self.create.append(
                     {
@@ -182,18 +182,62 @@ class CreateAndCreateBy(JavaParserLabeledListener):
                         "line": line.strip(),
                         "col": col.strip(),
                         "refent": createdName.getText(),
-                        "scope_parent": (
-                            all_parents[-2] if len(all_parents) > 1 else None
-                        ),
-                        "potential_refent": ".".join(all_parents[:-1])
-                        + "."
-                        + createdName.getText(),
+                        "scope_parent": all_parents[-2] if len(all_parents) > 1 else None,
+                        "potential_refent": ".".join(all_parents[:-1]) + "." + createdName.getText(),
                     }
                 )
 
         # Reset the flags whether context condition was met or not
-        self.isBlockStatement1 = False
-        self.isVariableInitializer1 = False
+            self.isBlockStatement1 = False
+            self.isVariableInitializer1 = False
+
+        # def enterExpression4(self, ctx: JavaParserLabeled.Expression4Context):
+    #     # Perform the context check before processing the expression4
+    #     if self.isBlockStatement1 or self.isVariableInitializer1:
+    #         modifiers, parent_type = self.findmethodaccess(ctx)
+    #         methodreturn, methodcontext = self.findmethodreturntype(ctx)
+    #
+    #         # First check to ensure we're working with creator1
+    #         creator = ctx.creator()
+    #         if creator.arrayCreatorRest() or creator.classCreatorRest():
+    #             createdName = creator.createdName()
+    #             all_parents = class_properties.ClassPropertiesListener.findParents(ctx)
+    #             scope_name = all_parents[-1]
+    #             scope_longname = self.package_long_name + "." + ".".join(all_parents)
+    #             [line, col] = str(ctx.start).split(",")[3].split(":")
+    #
+    #             # if creator.arrayCreatorRest() or creator.classCreatorRest():
+    #             # If we're in the correct context for creator1, then check for createdName0
+    #             # createdName = creator.createdName()
+    #             # if isinstance(createdName, JavaParserLabeled.CreatedName0Context):
+    #             # all_parents = class_properties.ClassPropertiesListener.findParents(ctx)
+    #             # scope_name = all_parents[-1]
+    #             # scope_longname = self.package_long_name + "." + ".".join(all_parents)
+    #             # [line, col] = str(ctx.start).split(",")[3].split(":")
+    #
+    #             self.create.append(
+    #                 {
+    #                     "scopename": scope_name,
+    #                     "scopelongname": scope_longname,
+    #                     "scopemodifiers": modifiers,
+    #                     "parent_type": parent_type,
+    #                     "scopereturntype": methodreturn,
+    #                     "scopecontent": methodcontext,
+    #                     "line": line.strip(),
+    #                     "col": col.strip(),
+    #                     "refent": createdName.getText(),
+    #                     "scope_parent": (
+    #                         all_parents[-2] if len(all_parents) > 1 else None
+    #                     ),
+    #                     "potential_refent": ".".join(all_parents[:-1])
+    #                     + "."
+    #                     + createdName.getText(),
+    #                 }
+    #             )
+
+        # Reset the flags whether context condition was met or not
+        # self.isBlockStatement1 = False
+        # self.isVariableInitializer1 = False
 
     def enterPackageDeclaration(self, ctx: JavaParserLabeled.PackageDeclarationContext):
         self.package_long_name = ctx.qualifiedName().getText()

@@ -153,11 +153,11 @@ class ListenersAndParsers:
         try:
             listener = DefineListener(file_address)
             p.Walk(listener, tree)
-            p.addDefineRefs(listener.defines, file_ent)
+            p.addDefineRefs(listener.defines, file_ent, file_address)
             self.logger.info("define success ")
         except Exception as e:
             self.logger.error(
-                "An Error occurred for reference implement in file define:"
+                "An Error occurred for reference define in file define:"
                 + file_address
                 + "\n"
                 + str(e)
@@ -165,42 +165,6 @@ class ListenersAndParsers:
                 + traceback.format_exc()
             )
 
-    # @timer_decorator()
-    # def define_listener(self, tree, file_ent, file_address, p):
-    #     try:
-    #         listener = DefineListener()
-    #         p.Walk(listener, tree)
-    #         package_name = listener.package["package_name"]
-    #         p.add_entity_package(listener.package, file_address)
-    #         p.add_defined_entities(
-    #             listener.classes, "class", package_name, file_address
-    #         )
-    #         p.add_defined_entities(
-    #             listener.interfaces, "interface", package_name, file_address
-    #         )
-    #         p.add_defined_entities(
-    #             listener.fields, "variable", package_name, file_address
-    #         )
-    #         p.add_defined_entities(
-    #             listener.methods, "method", package_name, file_address
-    #         )
-    #         p.add_defined_entities(
-    #             listener.local_variables,
-    #             "local variable",
-    #             package_name,
-    #             file_address,
-    #         )
-    #         p.add_defined_entities(
-    #             listener.formal_parameters, "parameter", package_name, file_address
-    #         )
-    #         self.logger.info("define success ")
-    #     except Exception as e:
-    #         self.logger.error(
-    #             "An Error occurred for reference implement in file define:"
-    #             + file_address
-    #             + "\n"
-    #             + str(e)
-    #         )
 
     @timer_decorator()
     def declare_listener(self, tree, file_ent, file_address, p):
@@ -450,8 +414,8 @@ class ListenersAndParsers:
             my_listener = DSCmetric(package_import_listener.package_name)
             p.Walk(my_listener, tree)
             # c = ClassTypeData()
-            # c.set_file_path(file_address)
             for item in my_listener.dbHandler.classTypes:
+                item.set_file_path(file_address)
                 imported_entity, importing_entity = p.add_imported_entity_factory(item)
                 p.add_references(imported_entity, importing_entity, item)
             self.logger.info("extend implict success ")
@@ -461,6 +425,8 @@ class ListenersAndParsers:
                 + file_address
                 + "\n"
                 + str(e)
+                + "\n"
+                + traceback.format_exc()
             )
 
     @timer_decorator()
@@ -524,9 +490,9 @@ class ListenersAndParsers:
             p.Walk(listener, tree)
             for i in listener.repository:
                 imported_entity = p.add_opened_entity(i)
-                p.add_references_opend(file_ent, imported_entity, i)
+                p.add_references_opend(file_ent, imported_entity, i, file_address)
             self.logger.info("open by success ")
         except Exception as e:
             self.logger.error(
-                "An Error occurred in open by in file :" + file_address + "\n" + str(e)
+                "An Error occurred in open by in file :" + file_address + "\n" + str(e) +"\n"+ traceback.format_exc()
             )

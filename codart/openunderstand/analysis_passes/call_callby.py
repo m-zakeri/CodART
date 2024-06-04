@@ -40,7 +40,10 @@ class CallAndCallBy(JavaParserLabeledListener):
         self.implement = []
         self.classes_repo = []
 
+
+
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
+        self.current_class_name = str(ctx.IDENTIFIER().getText())
         try:
             bodies = ctx.classBody().classBodyDeclaration()
             if bodies is not None:
@@ -238,7 +241,7 @@ class CallAndCallBy(JavaParserLabeledListener):
             token = ctx.getTokens(111)[0].getPayload()
             arg_list = ctx.expressionList()
             arg_count = 0
-            if arg_list is not None:
+            if (arg_list is not None) and (arg_list != ''):
                 arg_list = arg_list.getText()
                 arg_count = arg_list.count(",")
             else:
@@ -326,6 +329,12 @@ class CallAndCallBy(JavaParserLabeledListener):
                 # in this case by is_inherited_method we mean the super class
                 # itself has inherited the called method from another parent class itself
                 # but it won't be necessary cause we don't care about it anymore
+                class_parent_ctx = ctx.parentCtx.parentCtx.parentCtx.parentCtx.parentCtx.parentCtx.parentCtx.parentCtx.parentCtx.parentCtx.getChild(3)
+                class_parent_name = class_parent_ctx.getText()
+                class_current_ctx = ctx.parentCtx.parentCtx.parentCtx.parentCtx.parentCtx.parentCtx.parentCtx.parentCtx.parentCtx.parentCtx.getChild(1)
+                class_current_name = class_current_ctx.getText()
+                self.class_parents.update({class_parent_name: class_parent_ctx})
+                self.class_parents.update({class_current_name: class_current_ctx})
                 method_fullname = self.which_method(
                     self.class_parents[self.current_class_name],
                     str(ctx.IDENTIFIER()),

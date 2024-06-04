@@ -63,8 +63,12 @@ class Project:
     def getFileEntity(self, path: str = "", name: str = ""):
         # kind id: 1
         file = open(path, mode="r")
+        longname = path.replace("/", ".").replace("\\", ".").split(".")
+        longname.pop()
+        longname[len(longname)-1] = longname[len(longname)-1]+".java"
+        longname = ".".join(longname[longname.index("java")+1:])
         file_ent = EntityModel.get_or_create(
-            _kind=1, _name=name, _longname=path, _contents=file.read()
+            _kind=1, _name=name, _longname=longname, _contents=file.read()
         )[0]
         file.close()
         print("processing file:", file_ent)
@@ -316,7 +320,7 @@ class Project:
                 _scope=ent,
             )
 
-    def addDefineRefs(self, ref_dicts, file_ent):
+    def addDefineRefs(self, ref_dicts, file_ent, file_address):
 
         for ref_dict in ref_dicts:
             if ref_dict["scope"] is None:  # the scope is the file
@@ -329,8 +333,6 @@ class Project:
             ent = self.getPackageEntity(
                 file_ent, ref_dict["ent"], ref_dict["ent_longname"]
             )
-            # print("ref_dict[parent] : ", ref_dict["parent"])
-            # print("ref_dict[parent] : ", type(ref_dict["parent"]))
             par = EntityModel.get(_longname=ref_dict["parent"])
             ent, h_c1 = EntityModel.get_or_create(
                 _kind=194,
@@ -341,23 +343,9 @@ class Project:
                 _type=ref_dict["type"],
                 _contents=ref_dict["contents"],
             )
-
-            # scope, h_c2 = EntityModel.get_or_create(
-            #     _kind=195,
-            #     _parent=None,
-            #     _name=type_tuple[10],  # PROBLEM
-            #     _longname=str(type_tuple[1])[:ss],
-            #     _value=None,
-            #     _type=type_tuple[3],
-            #     _contents=type_tuple[8],
-            # )
-            if file_ent._name == "JSONML.java":
-                print("file_ent : ", file_ent._name)
-                print("scope : ", scope._name)
-            # Define: kind id 194
             define_ref = ReferenceModel.get_or_create(
                 _kind=194,
-                _file=file_ent,
+                _file=file_address,
                 _line=ref_dict["line"],
                 _column=ref_dict["col"],
                 _ent=ent,
@@ -367,15 +355,13 @@ class Project:
             # Definein: kind id 195
             definein_ref = ReferenceModel.get_or_create(
                 _kind=195,
-                _file=file_ent,
+                _file=file_address,
                 _line=ref_dict["line"],
                 _column=ref_dict["col"],
                 _scope=ent,
                 _ent=scope,
             )
 
-    def addImplementOrImplementByRefs(self, ref_dicts, file_ent, file_address):
-        pass
 
     def add_create_and_createby_reference(self, ref_dicts, file_address, file_ent):
         for ref_dict in ref_dicts:
@@ -630,8 +616,8 @@ class Project:
                 _ent=ent,
             )
 
-    def get_parent(self, parent_file_path) -> EntityModel:
-        return EntityModel.get_or_none(_longname=parent_file_path)
+    def get_parent(self, longname) -> EntityModel:
+        return EntityModel.get_or_none(_longname=longname)
 
     def getNameEntity(self, prefixes) -> str:
         pattern_static = ""
@@ -756,9 +742,8 @@ class Project:
         return s
 
     def add_opened_entity(self, entity):
-        entity_kind = self.get_kind_name_opened(entity["longname"], entity["kind"])
         imported_entity, _ = EntityModel.get_or_create(
-            _kind=KindModel.get_or_none(_name=entity_kind).get_id(),
+            _kind=KindModel.get_or_none(_name=entity["kind"]).get_id(),
             # _parent=parent_entity.get_id(),
             _parent=None,
             _name=entity["name"],
@@ -767,10 +752,10 @@ class Project:
         )
         return imported_entity
 
-    def add_references_opend(self, importing_ent, imported_ent, ref_dict):
+    def add_references_opend(self, importing_ent, imported_ent, ref_dict, file_address):
         ref, _ = ReferenceModel.get_or_create(
             _kind=234,  # Java Open
-            _file=importing_ent.get_id(),
+            _file=file_address,
             _line=ref_dict["line"],
             _column=ref_dict["column"],
             _ent=imported_ent.get_id(),
@@ -844,6 +829,8 @@ class Project:
             )
 
     def add_references(self, importing_ent, imported_ent, cls_data: ClassTypeData):
+        print("imported_ent : ", imported_ent)
+        print("importing_ent : ", importing_ent)
         ref, _ = ReferenceModel.get_or_create(
             _kind=KindModel.get_or_none(_name="Java Extend Couple Implicit")._id,
             _file_id=importing_ent._id,
@@ -862,7 +849,7 @@ class Project:
         )
 
     def add_imported_entity_factory(self, cls_data: ClassTypeData):
-        parent_entity: EntityModel = self.get_parent(cls_data.file_path)
+        parent_entity = self.get_parent(cls_data.get_long_name)
         kindModel = KindModel.get_or_none(
             _name=self.getNameEntity(cls_data.get_prefixes())
         )
@@ -870,7 +857,7 @@ class Project:
         if kindModel is not None:
             extend_implicit_entity, _ = EntityModel.get_or_create(
                 _kind=kindModel._id,
-                _parent=parent_entity._id,
+                _parent= (parent_entity._id if parent_entity is not None else None),
                 _name=cls_data.get_name(),
                 _type=cls_data.get_type(),
                 _longname=cls_data.get_long_name(),
@@ -1117,17 +1104,18 @@ class Project:
                                 print("ERROR 3 in addoverridereference : ", e)
                     elif x["is_overrided"]:
                         overrideword = list(x.values())
-                        classes = [
-                            list(i[0].values())[0]
-                            for i in [item for item in list(classes.values())]
-                        ]
+                        if not isinstance(classes, list):
+                            classes = [
+                                list(i[0].values())[0]
+                                for i in [item for item in list(classes.values())]
+                            ]
                         if overrideword[0] not in classes:
 
                             ent = EntityModel.get_or_create(
                                 _kind=32,
-                                _name=overrideword[1],
+                                _name=overrideword[2],
                                 _parent=file_ent,
-                                _longname=overrideword,
+                                _longname=overrideword[3],
                                 _contents="",
                             )
                             override_ref = ReferenceModel.get_or_create(
