@@ -56,7 +56,7 @@ class ListenersAndParsers:
                 path=file_address, name=os.path.basename(file_address)
             )
             tree = parse_tree
-            self.logger.info("file parse success")
+            # self.logger.info("file parse success")
             return tree, parse_tree, file_ent
         except Exception as e:
             self.logger.error(
@@ -81,7 +81,7 @@ class ListenersAndParsers:
                 self.entity_gen(
                     file_address=file_address, parse_tree=tree
                 ).get_or_create_variable_entity(res_dict=item)
-            self.logger.info("variable refs success ")
+            # self.logger.info("variable refs success ")
         except Exception as e:
             self.logger.error(
                 "An Error occurred in file variable refs :"
@@ -100,7 +100,7 @@ class ListenersAndParsers:
             p.addExtendCoupleOrExtendCoupleByRefs(
                 listener.implement, file_ent, file_address
             )
-            self.logger.info("extends coupled refs success ")
+            # self.logger.info("extends coupled refs success ")
         except Exception as e:
             self.logger.error(
                 "An Error occurred in file extends coupled refs :"
@@ -115,7 +115,7 @@ class ListenersAndParsers:
             listener = ExtendListener()
             p.Walk(listener, tree)
             p.addTypeRefs(listener.get_refers, file_ent)
-            self.logger.info("extends refs success ")
+            # self.logger.info("extends refs success ")
         except Exception as e:
             self.logger.error(
                 "An Error occurred in file extends refs :"
@@ -130,7 +130,7 @@ class ListenersAndParsers:
             listener = TypedAndTypedByListener()
             p.Walk(listener, tree)
             p.addTypeRefs(listener.get_type, file_ent)
-            self.logger.info("type refs success ")
+            # self.logger.info("type refs success ")
         except Exception as e:
             self.logger.error(
                 "An Error occurred in file type refs :" + file_address + "\n" + str(e)
@@ -142,7 +142,7 @@ class ListenersAndParsers:
             listener = CreateAndCreateBy()
             p.Walk(listener, tree)
             p.addCreateRefs(listener.create, file_ent, file_address)
-            self.logger.info("create refs success ")
+            # self.logger.info("create refs success ")
         except Exception as e:
             self.logger.error(
                 "An Error occurred in file create refs :" + file_address + "\n" + str(e)
@@ -154,7 +154,7 @@ class ListenersAndParsers:
             listener = DefineListener(file_address)
             p.Walk(listener, tree)
             p.addDefineRefs(listener.defines, file_ent, file_address)
-            self.logger.info("define success ")
+            # self.logger.info("define success ")
         except Exception as e:
             self.logger.error(
                 "An Error occurred for reference define in file define:"
@@ -173,7 +173,7 @@ class ListenersAndParsers:
             listener = DeclareAndDeclareinListener()
             p.Walk(listener, tree)
             p.addDeclareRefs(listener.declare, file_ent)
-            self.logger.info("declare success ")
+            # self.logger.info("declare success ")
         except Exception as e:
             self.logger.error(
                 "An Error occurred for reference declare in file:"
@@ -188,7 +188,7 @@ class ListenersAndParsers:
             listener = ModifyListener(entity_generator)
             p.Walk(listener, parse_tree)
             p.add_modify_and_modifyby_reference(listener.modify)
-            self.logger.info("modify success ")
+            # self.logger.info("modify success ")
         except Exception as e:
             self.logger.error(
                 "An Error occurred for reference modify in file:"
@@ -207,7 +207,7 @@ class ListenersAndParsers:
             classesx = listener.get_classes
             extendedlist = listener.get_extendeds
             p.addoverridereference(classesx, extendedlist, file_ent)
-            self.logger.info("overrides success ")
+            # self.logger.info("overrides success ")
         except Exception as e:
             self.logger.error(
                 "An Error occurred in override reference in file :"
@@ -231,7 +231,7 @@ class ListenersAndParsers:
             p.addcouplereference(
                 classescoupleby , couple, file_ent
             )
-            self.logger.info("couple success ")
+            # self.logger.info("couple success ")
         except Exception as e:
             self.logger.error(
                 "An Error occurred in couple reference in file :"
@@ -251,7 +251,7 @@ class ListenersAndParsers:
             p.addThrows_TrowsByRefs(
                 listener.implement, file_ent, file_address, 236, 237, True
             )
-            self.logger.info("Throws success ")
+            # self.logger.info("Throws success ")
         except Exception as e:
             self.logger.error(
                 "An Error occurred in throws in file :"
@@ -270,7 +270,7 @@ class ListenersAndParsers:
             p.addThrows_TrowsByRefs(
                 listener.implement, file_ent, file_address, 198, 199, False
             )
-            self.logger.info("DotRef success ")
+            # self.logger.info("DotRef success ")
         except Exception as e:
             self.logger.error(
                 "An Error occurred in dotref in file :" + file_address + "\n" + str(e)
@@ -283,7 +283,7 @@ class ListenersAndParsers:
             listener = SetAndSetByListener(file_address)
             p.Walk(listener, tree)
             p.addSetRefs(listener.setBy, file_ent, stream)
-            self.logger.info("set Ref success")
+            # self.logger.info("set Ref success")
         except Exception as e:
             self.logger.error(
                 "An Error occurred in set ref in file :" + file_address + "\n" + str(e)
@@ -295,7 +295,7 @@ class ListenersAndParsers:
             listener = SetInitAndSetByInitListener(file_address)
             p.Walk(listener, tree)
             p.addSetInitRefs(listener.set_init_by, file_ent, stream)
-            self.logger.info("setInit Ref success ")
+            # self.logger.info("setInit Ref success ")
         except Exception as e:
             self.logger.error(
                 "An Error occurred in setInit ref in file :"
@@ -312,7 +312,7 @@ class ListenersAndParsers:
             listener = SetPartialAndSetByPartialListener(file_address)
             p.Walk(listener, tree)
             p.addSetPartialRefs(listener.set_by_partial, file_ent, stream)
-            self.logger.info("set Partial Ref success ")
+            # self.logger.info("set Partial Ref success ")
         except Exception as e:
             self.logger.error(
                 "An Error occurred in setInit ref in file :"
@@ -328,7 +328,7 @@ class ListenersAndParsers:
             listener = UseAndUseByListener()
             p.Walk(listener, tree)
             p.addUseRefs(listener.useBy, file_ent, stream)
-            self.logger.info("use ref success ")
+            # self.logger.info("use ref success ")
         except Exception as e:
             self.logger.error(
                 "An Error occurred in use ref in file :" + file_address + "\n" + str(e)
@@ -346,7 +346,7 @@ class ListenersAndParsers:
             )
             p.Walk(listener, tree)
             p.addCallOrCallByRefs(listener.implement, file_ent, file_address)
-            self.logger.info("call ref success ")
+            # self.logger.info("call ref success ")
         except Exception as e:
             self.logger.error(
                 "An Error occurred in call ref in file :" + file_address + "\n" + str(e)
@@ -360,7 +360,7 @@ class ListenersAndParsers:
             p.addCallNonDynamicOrCallNonDynamicByRefs(
                 listener.implement, file_ent, file_address
             )
-            self.logger.info("call non dynamic ref success ")
+            # self.logger.info("call non dynamic ref success ")
         except Exception as e:
             self.logger.error(
                 "An Error occurred in call non dynamic ref in file :"
@@ -379,7 +379,7 @@ class ListenersAndParsers:
             listener = CastAndCastBy(imp.classes)
             p.Walk(listener, tree)
             p.add_cast_by(listener.cast, file_ent, file_address)
-            self.logger.info("cast success ")
+            # self.logger.info("cast success ")
         except Exception as e:
             self.logger.error(
                 "An Error occurred in cast in file :"
@@ -395,7 +395,7 @@ class ListenersAndParsers:
             listener = ContainAndContainBy()
             p.Walk(listener, tree)
             p.add_contain_in(listener.contain, file_ent, file_address)
-            self.logger.info("contain success ")
+            # self.logger.info("contain success ")
         except Exception as e:
             self.logger.error(
                 "An Error occurred in contain in file :"
@@ -418,7 +418,7 @@ class ListenersAndParsers:
                 item.set_file_path(file_address)
                 imported_entity, importing_entity = p.add_imported_entity_factory(item)
                 p.add_references(imported_entity, importing_entity, item)
-            self.logger.info("extend implict success ")
+            # self.logger.info("extend implict success ")
         except Exception as e:
             self.logger.error(
                 "An Error occurred in extend implict in file :"
@@ -435,7 +435,7 @@ class ListenersAndParsers:
             listener = ImportListenerDemand(file_address)
             p.Walk(listener, tree)
             p.add_import_demand(listener.repository, file_address)
-            self.logger.info("import demand success ")
+            # self.logger.info("import demand success ")
         except Exception as e:
             self.logger.error(
                 "An Error occurred in import demand in file :"
@@ -455,7 +455,7 @@ class ListenersAndParsers:
                     i, file_address, listener_import
                 )
                 p.add_references_import(file_ent, imported_entity, i)
-            self.logger.info("import success ")
+            # self.logger.info("import success ")
         except Exception as e:
             self.logger.error(
                 "An Error occurred in import in file :" + file_address + "\n" + str(e)
@@ -472,7 +472,7 @@ class ListenersAndParsers:
                 unresolved_module=listener.useUnresolvedModules,
                 file_address=file_address,
             )
-            self.logger.info("use module by success ")
+            # self.logger.info("use module by success ")
         except Exception as e:
             self.logger.error(
                 "An Error occurred in use module by in file :"
@@ -491,7 +491,7 @@ class ListenersAndParsers:
             for i in listener.repository:
                 imported_entity = p.add_opened_entity(i)
                 p.add_references_opend(file_ent, imported_entity, i, file_address)
-            self.logger.info("open by success ")
+            # self.logger.info("open by success ")
         except Exception as e:
             self.logger.error(
                 "An Error occurred in open by in file :" + file_address + "\n" + str(e) +"\n"+ traceback.format_exc()

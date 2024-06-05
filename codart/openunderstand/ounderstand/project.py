@@ -829,8 +829,6 @@ class Project:
             )
 
     def add_references(self, importing_ent, imported_ent, cls_data: ClassTypeData):
-        print("imported_ent : ", imported_ent)
-        print("importing_ent : ", importing_ent)
         ref, _ = ReferenceModel.get_or_create(
             _kind=KindModel.get_or_none(_name="Java Extend Couple Implicit")._id,
             _file_id=importing_ent._id,
