@@ -152,8 +152,11 @@ class Project:
             )
 
     def addSetRefs(self, d, file_ent, stream: str = ""):
-
         for type_tuple in d:
+            try:
+                EntityModel.get(_name=type_tuple[7])
+            except Exception as e:
+                pass
             par = EntityModel.get(_name=type_tuple[7])
             ss = str(type_tuple[1]).rfind(".")
             ent, h_c1 = EntityModel.get_or_create(
@@ -492,24 +495,30 @@ class Project:
     def add_modify_and_modifyby_reference(ref_dicts):
         for ref_dict in ref_dicts:
             longname = ref_dict["ent"]
-            ent = ModifyListener.get_different_combinations(longname)
+            try:
+                ent = ModifyListener.get_different_combinations(longname)
+            except Exception as e:
+                pass
             scope = ref_dict["scope"]
-            _, _ = ReferenceModel.get_or_create(
-                _kind=208,
-                _file=ref_dict["file"],
-                _line=ref_dict["line"],
-                _column=ref_dict["column"],
-                _ent=ent if ent is not None else "NOT FOUND",
-                _scope=scope,
-            )
-            _, _ = ReferenceModel.get_or_create(
-                _kind=209,
-                _file=ref_dict["file"],
-                _line=ref_dict["line"],
-                _column=ref_dict["column"],
-                _ent=scope,
-                _scope=ent if ent is not None else "NOT FOUND",
-            )
+            try:
+                _, _ = ReferenceModel.get_or_create(
+                    _kind=208,
+                    _file=ref_dict["file"],
+                    _line=ref_dict["line"],
+                    _column=ref_dict["column"],
+                    _ent=ent if ent is not None else "NOT FOUND",
+                    _scope=scope,
+                )
+                _, _ = ReferenceModel.get_or_create(
+                    _kind=209,
+                    _file=ref_dict["file"],
+                    _line=ref_dict["line"],
+                    _column=ref_dict["column"],
+                    _ent=scope,
+                    _scope=ent if ent is not None else "NOT FOUND",
+                )
+            except Exception as e:
+                pass
 
     def addCallNonDynamicOrCallNonDynamicByRefs(
         self, ref_dicts, file_ent, file_address
@@ -876,6 +885,10 @@ class Project:
 
         for ref_dict in ref_dicts:
             try:
+                # print("ref_dict[\"scopemodifiers\"]", ref_dict["scopemodifiers"])
+                # print("kind", self.findKindWithKeywords(
+                #         "Method", ref_dict["scopemodifiers"]
+                #     ))
                 scope = EntityModel.get_or_create(
                     _kind=self.findKindWithKeywords(
                         "Method", ref_dict["scopemodifiers"]
@@ -1360,7 +1373,6 @@ class Project:
 
     def addThrows_TrowsByRefs(self, ref_dicts, file_ent, file_address, id1, id2, Throw):
         for ref_dict in ref_dicts:
-
             scope = EntityModel.get_or_create(
                 _kind=self.findKindWithKeywords("Method", ref_dict["scopemodifiers"]),
                 _name=ref_dict["scopename"],
@@ -1488,9 +1500,6 @@ class Project:
                             if key in classes:
                                 c1 = classes[key]
                                 file_ent2 = file_ent
-                                keykind = self.findKindWithKeywords(
-                                    c1["scope_kind"], c1["scope_modifiers"]
-                                )
                                 ent = EntityModel.get_or_create(
                                     _kind=self.findKindWithKeywords(
                                         c1["scope_kind"], c1["scope_modifiers"]
@@ -1532,5 +1541,5 @@ class Project:
                             )
 
             except Exception as e:
-                print(e)
+                print("A : ", e)
 

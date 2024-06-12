@@ -43,6 +43,8 @@ class SetAndSetByListener(JavaParserLabeledListener):
                 set_value = "String"
 
         sss = self.ss + "." + self.ex_name
+        if self.ex_name == "":
+            self.ex_name = ctx.parentCtx.parentCtx.parentCtx.parentCtx.getChild(0).getText()
         self.setBy.append(
             (
                 set_short_name,

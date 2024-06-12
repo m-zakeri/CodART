@@ -23,7 +23,7 @@ __license__ = "GPL"
 __version__ = "1.0.0"
 
 import os.path
-
+import re
 from openunderstand.oudb.models import EntityModel, KindModel
 from antlr4 import *
 
@@ -126,9 +126,7 @@ class EntityGenerator:
         current = ctx
         while current is not None:
             if (
-                type(current).__name__ == "ClassDeclarationContext"
-                or type(current).__name__ == "MethodDeclarationContext"
-                or type(current).__name__ == "InterfaceDeclarationContext"
+                type(current).__name__ in ["ClassDeclarationContext", "MethodDeclarationContext", "InterfaceDeclarationContext"]
             ):
                 parents.append(current)
             current = current.parentCtx
@@ -158,6 +156,9 @@ class EntityGenerator:
                 method_modifiers = self.get_method_accessor(entity)
                 # print(method_modifiers)
                 parent_entity_kind = self.get_method_kind(method_modifiers)
+                if parent_entity_kind is None:
+                    print("method_modifiers : ", method_modifiers)
+                    print("entity : ", entity)
                 method_ent = EntityModel.get_or_create(
                     _kind=parent_entity_kind,
                     _parent=parent_entity_parent,
@@ -248,8 +249,13 @@ class EntityGenerator:
 
     def get_method_kind(self, modifiers):
         """Return the kind ID based on the modifier"""
+        for s in modifiers[:]:
+            if re.search(r'@SuppressWarnings', s):
+                modifiers.remove(s)
         if "@Override" in modifiers:
             modifiers.remove("@Override")
+        if "@Test" in modifiers:
+            modifiers.remove("@Test")
         if "@Nullable" in modifiers:
             modifiers.remove("@Nullable")
         if "@NotNull" in modifiers:

@@ -66,8 +66,6 @@ class ClassPropertiesListener(JavaParserLabeledListener):
         if self.class_longname[-1] == ctx.IDENTIFIER().getText() and self.checkParents(
             ctx
         ):
-
-            # this is the exact class we wanted.
             self.class_properties = {
                 "name": self.class_longname[-1],
                 "longname": ".".join(self.class_longname),
@@ -75,7 +73,7 @@ class ClassPropertiesListener(JavaParserLabeledListener):
                 "parent": (
                     None if len(self.class_longname) == 1 else self.class_longname[-2]
                 ),
-                "modifiers": ctx.parentCtx.getChild(0).getText(),
+                "modifiers": [item.getText() for item in ctx.parentCtx.parentCtx.children[:-1]],
                 "contents": self.extractOriginalText(ctx.parentCtx),
             }
 

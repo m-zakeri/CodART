@@ -47,11 +47,34 @@ class OpenListener(JavaParserLabeledListener):
     def _get_class_long_name(self, ctx):
         name_list = []
         if ctx.IMPLEMENTS():
-            for item in ctx.typeType().classOrInterfaceType().IDENTIFIER():
-                name_list.append(ctx.typeType().classOrInterfaceType().parentCtx.parentCtx.parentCtx.parentCtx.getChild(0).getChild(
-                    1).getText() + "."+str(item))
+            if ctx.typeType() is not None:
+                for item in ctx.typeType().classOrInterfaceType().IDENTIFIER():
+                    name_list.append(ctx.typeType().classOrInterfaceType().parentCtx.parentCtx.parentCtx.parentCtx.getChild(0).getChild(
+                        1).getText() + "."+str(item))
+            else:
+                try:
+                    for item in ctx.getChild(len(ctx.children) - 1).parentCtx.parentCtx.parentCtx.parentCtx.parentCtx.parentCtx.parentCtx.children:
+                        if item.getText() != "<EOF>":
+                            if item.getChild(0).getText() == "import" and (ctx.getChild(3).getText()) in item.getChild(1).getText().split("."):
+                                parent = item.getChild(1).getText()
+                                name_list.append(str(parent)+"."+str(ctx.IDENTIFIER()))
+                except Exception as e:
+                    for item in ctx.getChild(len(ctx.children) - 2).parentCtx.parentCtx.parentCtx.children:
+                        if item.getText() != "<EOF>":
+                            if item.getChild(0).getText() == "import" and (ctx.getChild(3).getText()) in item.getChild(1).getText().split("."):
+                                parent = item.getChild(1).getText()
+                                name_list.append(str(parent)+"."+str(ctx.IDENTIFIER()))
         elif not (ctx.EXTENDS()):
-            name_list.append(ctx.parentCtx.parentCtx.getChild(0).getChild(1).getText() + "." + ctx.getChild(1).getText())
+            try:
+                name_list.append(ctx.parentCtx.parentCtx.getChild(0).getChild(1).getText() + "." + ctx.getChild(1).getText())
+            except Exception as e:
+                try:
+                    p =ctx.parentCtx.parentCtx.parentCtx.parentCtx.parentCtx.parentCtx.getChild(0)
+                    package = p.getChild(0).getText()
+                    package_seq = p.getChild(1).getText()
+                    name_list.append(package+"."+package_seq+"."+ctx.getChild(1).getText())
+                except Exception as e:
+                    pass
         else:
             name_list.append(ctx.typeType().classOrInterfaceType().parentCtx.parentCtx.parentCtx.parentCtx.getChild(0).getChild(1).getText() + "." +str(ctx.typeType().classOrInterfaceType().IDENTIFIER()[0]))
         if len(name_list) == 1:
@@ -90,26 +113,13 @@ class OpenListener(JavaParserLabeledListener):
         )
 
     def _get_enum_long_name(self, ctx):
-        type_declaration_ctx = ctx.parentCtx
-        class_or_interface_modifier = " ".join(
-            [
-                modifier.getText()
-                for modifier in type_declaration_ctx.classOrInterfaceModifier()
-            ]
-        )
-        enum_modifier = ctx.ENUM().getText()
-        if ctx.IMPLEMENTS():
-            implements_modifier = ctx.IMPLEMENTS().getText()
-        else:
-            implements_modifier = ""
-        identifier = ctx.IDENTIFIER().getText()
-        return " ".join(
-            [
-                class_or_interface_modifier,
-                enum_modifier,
-                implements_modifier,
-                identifier,
-            ]
+        enums = []
+        if ctx.ENUM().getText():
+            parent = ctx.parentCtx.parentCtx.getChild(0).getChild(1).getText()
+            enum_name = ctx.parentCtx.getChild(len(ctx.parentCtx.children) - 1).getChild(1).getText()
+            enums.append(parent+"."+enum_name)
+        return ";".join(
+            enums
         )
 
     def enterClassDeclaration(self, ctx: JavaParserLabeled.ClassDeclarationContext):
@@ -135,9 +145,8 @@ class OpenListener(JavaParserLabeledListener):
 
     def kind_generator(self, ctx, kind: str = "Class") -> str:
         modifiers = []
-        for item in range(len(ctx.children)):
-            if item != (len(ctx.children) - 1):
-                modifiers.append(ctx.getChild(item))
+        for item in range(len(ctx.children) -1):
+            modifiers.append(ctx.getChild(item))
         return self.get_kind_name(prefixes=modifiers, kind=kind)
 
     def enterEnumDeclaration(self, ctx: JavaParserLabeled.EnumDeclarationContext):
@@ -145,7 +154,6 @@ class OpenListener(JavaParserLabeledListener):
         enum_name = enum_longname.split(".")[-1]
         line = ctx.children[0].symbol.line
         col = ctx.children[0].symbol.column
-
         self.repository.append(
             {
                 "name": enum_name,
@@ -180,6 +188,7 @@ class OpenListener(JavaParserLabeledListener):
     def get_kind_name(self, prefixes, kind):
         p_static = ""
         p_abstract = ""
+        enum_class = ""
         p_generic = ""
         p_type = "Type"
         p_visibility = "Default"
@@ -209,7 +218,10 @@ class OpenListener(JavaParserLabeledListener):
         if kind.lower() == "Method".lower():
             p_type = ""
 
-        s = f"Java {p_static} {p_abstract} {p_generic} {kind} {p_type} {p_visibility} {p_member}"
+        if kind.lower() == "Enum".lower():
+            enum_class = "Class"
+
+        s = f"Java {p_static} {p_abstract} {p_generic} {kind} {enum_class} {p_type} {p_visibility} {p_member}"
         s = " ".join(s.split())
         return s
 

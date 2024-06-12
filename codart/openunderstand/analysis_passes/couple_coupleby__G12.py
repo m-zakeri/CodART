@@ -12,7 +12,7 @@ from gen.javaLabeled.JavaLexer import JavaLexer
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 from openunderstand.analysis_passes import class_properties
-
+import re
 class CoupleAndCoupleBy(JavaParserLabeledListener):
     """
     #Todo: Implementing the ANTLR listener pass for Java Couple and Java Coupleby reference kind
@@ -109,8 +109,9 @@ class CoupleAndCoupleBy(JavaParserLabeledListener):
 
     def enterClassOrInterfaceModifier(self, ctx:JavaParserLabeled.ClassOrInterfaceModifierContext):
         parent = ctx.parentCtx
-        if( type(parent).__name__ == 'TypeDeclarationContext'):
-            self.Modifiers.append(ctx.getText())
+        if type(parent).__name__ == 'TypeDeclarationContext':
+            if not re.search(r'@', ctx.getText()):
+                self.Modifiers.append(ctx.getText())
 
 
 

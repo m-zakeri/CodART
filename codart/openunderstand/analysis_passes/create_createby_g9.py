@@ -18,7 +18,7 @@ __author__ = "zahra habibolah, G4"
 from gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
 from gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
 import openunderstand.analysis_passes.class_properties as class_properties
-
+import re
 
 class CreateAndCreateBy(JavaParserLabeledListener):
     def __init__(self):
@@ -170,7 +170,9 @@ class CreateAndCreateBy(JavaParserLabeledListener):
                     #scope_longname = self.package_long_name + "." + ".".join(all_parents)
                     #[line, col] = str(ctx.start).split(",")[3].split(":")
 
-
+                for s in modifiers[:]:
+                    if re.search(r'@', s):
+                        modifiers.remove(s)
                 self.create.append(
                     {
                         "scopename": scope_name,

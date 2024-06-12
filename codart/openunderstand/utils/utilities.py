@@ -55,15 +55,15 @@ class ClassTypeData:
 def timer_decorator():
     def decorator(func):
         def wrapper(self, *args, **kwargs):
-            logger = setup_logger()
-            start_time = time.time()
-            file_address = kwargs.get("file_address")
+            # logger = setup_logger()
+            # start_time = time.time()
+            # file_address = kwargs.get("file_address")
             result = func(self, *args, **kwargs)
-            end_time = time.time()
-            elapsed_time = end_time - start_time
-            logger.info(
-                f"The function '{func.__name__}' with file address '{basename(file_address)}' took {elapsed_time:.2f} seconds to execute."
-            )
+            # end_time = time.time()
+            # elapsed_time = end_time - start_time
+            # logger.info(
+            #     f"The function '{func.__name__}' with file address '{basename(file_address)}' took {elapsed_time:.2f} seconds to execute."
+            # )
             return result
 
         return wrapper

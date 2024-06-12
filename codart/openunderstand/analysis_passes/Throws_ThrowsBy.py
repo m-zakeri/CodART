@@ -48,7 +48,8 @@ class Throws_TrowsBy(JavaParserLabeledListener):
             current = current.parentCtx
         for x in parents:
             if x.classOrInterfaceModifier():
-                modifiers.append(x.classOrInterfaceModifier().getText())
+                if not str(x.classOrInterfaceModifier().getText()).startswith("@"):
+                    modifiers.append(x.classOrInterfaceModifier().getText())
         return modifiers
 
     # def enterClassDeclaration(self, ctx:JavaParserLabeled.ClassDeclarationContext):
@@ -74,7 +75,6 @@ class Throws_TrowsBy(JavaParserLabeledListener):
     #                                        "type_ent_longname": myType_longname})
 
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.EnumDeclarationContext):
-
         if ctx.THROWS():
             modifiers = self.findmethodacess(ctx)
             mothodedreturn, methodcontext = self.findmethodreturntype(ctx)
@@ -82,7 +82,9 @@ class Throws_TrowsBy(JavaParserLabeledListener):
             if refEntName:
                 allrefs = class_properties.ClassPropertiesListener.findParents(
                     ctx
-                )  # self.findParents(ctx)
+                )
+                allrefs[:-1] = reversed(allrefs[:-1])
+                # self.findParents(ctx)
                 refent = allrefs[-1]
                 entlongname = ".".join(allrefs)
                 is_here = throws_parent_finder(
