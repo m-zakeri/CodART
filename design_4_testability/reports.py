@@ -3,14 +3,12 @@ import matplotlib.pyplot as plt
 import os
 import logging
 import pandas as pd
-import understand as und
 
 from design_4_testability.class_diagram_extraction.class_diagram import ClassDiagram
 from codart.refactoring_design_patterns.factory import Factory
 from codart.refactoring_design_patterns.injection import Injection
-from design_4_testability.evaluation.complexity import Complexity
-from design_4_testability.evaluation.testability.design_testability_prediction2 import main as evaluate_testability
-from design_4_testability.evaluation.testability.directory_utils import update_understand_database
+from codart.metrics.evaluation.testability import main as evaluate_testability
+from codart.metrics.evaluation.testability.directory_utils import update_understand_database
 from design_4_testability.utils.utils import File
 import config
 

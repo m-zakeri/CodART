@@ -1,4 +1,4 @@
-# Generated from /media/sadegh/Data/sadegh/iust/compiler/compiler projects/main_project/grammars/JavaParserLabeled.g4 by ANTLR 4.10.1
+# Generated from C:/Users/98910/CodART/grammars/JavaParserLabeled.g4 by ANTLR 4.13.1
 # encoding: utf-8
 from antlr4 import *
 from io import StringIO
@@ -892,7 +892,7 @@ class JavaParserLabeled ( Parser ):
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
-        self.checkVersion("4.10.1")
+        self.checkVersion("4.13.1")
         self._interp = ParserATNSimulator(self, self.atn, self.decisionsToDFA, self.sharedContextCache)
         self._predicates = None
 
@@ -965,7 +965,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 216
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==JavaParserLabeled.IMPORT:
+            while _la==25:
                 self.state = 213
                 self.importDeclaration()
                 self.state = 218
@@ -975,7 +975,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 222
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << JavaParserLabeled.ABSTRACT) | (1 << JavaParserLabeled.CLASS) | (1 << JavaParserLabeled.ENUM) | (1 << JavaParserLabeled.FINAL) | (1 << JavaParserLabeled.INTERFACE) | (1 << JavaParserLabeled.PRIVATE) | (1 << JavaParserLabeled.PROTECTED) | (1 << JavaParserLabeled.PUBLIC) | (1 << JavaParserLabeled.STATIC) | (1 << JavaParserLabeled.STRICTFP))) != 0) or ((((_la - 67)) & ~0x3f) == 0 and ((1 << (_la - 67)) & ((1 << (JavaParserLabeled.SEMI - 67)) | (1 << (JavaParserLabeled.AT - 67)) | (1 << (JavaParserLabeled.IDENTIFIER - 67)))) != 0):
+            while (((_la) & ~0x3f) == 0 and ((1 << _la) & 885032026626) != 0) or ((((_la - 67)) & ~0x3f) == 0 and ((1 << (_la - 67)) & 18141941858305) != 0):
                 self.state = 219
                 self.typeDeclaration()
                 self.state = 224
@@ -1047,7 +1047,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 230
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==JavaParserLabeled.AT or _la==JavaParserLabeled.IDENTIFIER:
+            while _la==106 or _la==111:
                 self.state = 227
                 self.annotation()
                 self.state = 232
@@ -1127,7 +1127,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 239
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==JavaParserLabeled.STATIC:
+            if _la==38:
                 self.state = 238
                 self.match(JavaParserLabeled.STATIC)
 
@@ -1137,7 +1137,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 244
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==JavaParserLabeled.DOT:
+            if _la==69:
                 self.state = 242
                 self.match(JavaParserLabeled.DOT)
                 self.state = 243
@@ -1216,7 +1216,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 261
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [JavaParserLabeled.ABSTRACT, JavaParserLabeled.CLASS, JavaParserLabeled.ENUM, JavaParserLabeled.FINAL, JavaParserLabeled.INTERFACE, JavaParserLabeled.PRIVATE, JavaParserLabeled.PROTECTED, JavaParserLabeled.PUBLIC, JavaParserLabeled.STATIC, JavaParserLabeled.STRICTFP, JavaParserLabeled.AT, JavaParserLabeled.IDENTIFIER]:
+            if token in [1, 9, 16, 18, 28, 33, 34, 35, 38, 39, 106, 111]:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 251
                 self._errHandler.sync(self)
@@ -1232,19 +1232,19 @@ class JavaParserLabeled ( Parser ):
                 self.state = 258
                 self._errHandler.sync(self)
                 token = self._input.LA(1)
-                if token in [JavaParserLabeled.CLASS]:
+                if token in [9]:
                     self.state = 254
                     self.classDeclaration()
                     pass
-                elif token in [JavaParserLabeled.ENUM]:
+                elif token in [16]:
                     self.state = 255
                     self.enumDeclaration()
                     pass
-                elif token in [JavaParserLabeled.INTERFACE]:
+                elif token in [28]:
                     self.state = 256
                     self.interfaceDeclaration()
                     pass
-                elif token in [JavaParserLabeled.AT]:
+                elif token in [106]:
                     self.state = 257
                     self.annotationTypeDeclaration()
                     pass
@@ -1252,7 +1252,7 @@ class JavaParserLabeled ( Parser ):
                     raise NoViableAltException(self)
 
                 pass
-            elif token in [JavaParserLabeled.SEMI]:
+            elif token in [67]:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 260
                 self.match(JavaParserLabeled.SEMI)
@@ -1320,27 +1320,27 @@ class JavaParserLabeled ( Parser ):
             self.state = 268
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [JavaParserLabeled.ABSTRACT, JavaParserLabeled.FINAL, JavaParserLabeled.PRIVATE, JavaParserLabeled.PROTECTED, JavaParserLabeled.PUBLIC, JavaParserLabeled.STATIC, JavaParserLabeled.STRICTFP, JavaParserLabeled.AT, JavaParserLabeled.IDENTIFIER]:
+            if token in [1, 18, 33, 34, 35, 38, 39, 106, 111]:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 263
                 self.classOrInterfaceModifier()
                 pass
-            elif token in [JavaParserLabeled.NATIVE]:
+            elif token in [30]:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 264
                 self.match(JavaParserLabeled.NATIVE)
                 pass
-            elif token in [JavaParserLabeled.SYNCHRONIZED]:
+            elif token in [42]:
                 self.enterOuterAlt(localctx, 3)
                 self.state = 265
                 self.match(JavaParserLabeled.SYNCHRONIZED)
                 pass
-            elif token in [JavaParserLabeled.TRANSIENT]:
+            elif token in [46]:
                 self.enterOuterAlt(localctx, 4)
                 self.state = 266
                 self.match(JavaParserLabeled.TRANSIENT)
                 pass
-            elif token in [JavaParserLabeled.VOLATILE]:
+            elif token in [49]:
                 self.enterOuterAlt(localctx, 5)
                 self.state = 267
                 self.match(JavaParserLabeled.VOLATILE)
@@ -1417,42 +1417,42 @@ class JavaParserLabeled ( Parser ):
             self.state = 278
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [JavaParserLabeled.AT, JavaParserLabeled.IDENTIFIER]:
+            if token in [106, 111]:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 270
                 self.annotation()
                 pass
-            elif token in [JavaParserLabeled.PUBLIC]:
+            elif token in [35]:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 271
                 self.match(JavaParserLabeled.PUBLIC)
                 pass
-            elif token in [JavaParserLabeled.PROTECTED]:
+            elif token in [34]:
                 self.enterOuterAlt(localctx, 3)
                 self.state = 272
                 self.match(JavaParserLabeled.PROTECTED)
                 pass
-            elif token in [JavaParserLabeled.PRIVATE]:
+            elif token in [33]:
                 self.enterOuterAlt(localctx, 4)
                 self.state = 273
                 self.match(JavaParserLabeled.PRIVATE)
                 pass
-            elif token in [JavaParserLabeled.STATIC]:
+            elif token in [38]:
                 self.enterOuterAlt(localctx, 5)
                 self.state = 274
                 self.match(JavaParserLabeled.STATIC)
                 pass
-            elif token in [JavaParserLabeled.ABSTRACT]:
+            elif token in [1]:
                 self.enterOuterAlt(localctx, 6)
                 self.state = 275
                 self.match(JavaParserLabeled.ABSTRACT)
                 pass
-            elif token in [JavaParserLabeled.FINAL]:
+            elif token in [18]:
                 self.enterOuterAlt(localctx, 7)
                 self.state = 276
                 self.match(JavaParserLabeled.FINAL)
                 pass
-            elif token in [JavaParserLabeled.STRICTFP]:
+            elif token in [39]:
                 self.enterOuterAlt(localctx, 8)
                 self.state = 277
                 self.match(JavaParserLabeled.STRICTFP)
@@ -1511,12 +1511,12 @@ class JavaParserLabeled ( Parser ):
             self.state = 282
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [JavaParserLabeled.FINAL]:
+            if token in [18]:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 280
                 self.match(JavaParserLabeled.FINAL)
                 pass
-            elif token in [JavaParserLabeled.AT, JavaParserLabeled.IDENTIFIER]:
+            elif token in [106, 111]:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 281
                 self.annotation()
@@ -1602,7 +1602,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 287
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==JavaParserLabeled.LT:
+            if _la==72:
                 self.state = 286
                 self.typeParameters()
 
@@ -1610,7 +1610,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 291
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==JavaParserLabeled.EXTENDS:
+            if _la==17:
                 self.state = 289
                 self.match(JavaParserLabeled.EXTENDS)
                 self.state = 290
@@ -1620,7 +1620,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 295
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==JavaParserLabeled.IMPLEMENTS:
+            if _la==24:
                 self.state = 293
                 self.match(JavaParserLabeled.IMPLEMENTS)
                 self.state = 294
@@ -1698,7 +1698,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 305
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==JavaParserLabeled.COMMA:
+            while _la==68:
                 self.state = 301
                 self.match(JavaParserLabeled.COMMA)
                 self.state = 302
@@ -1785,7 +1785,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 325
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==JavaParserLabeled.EXTENDS:
+            if _la==17:
                 self.state = 317
                 self.match(JavaParserLabeled.EXTENDS)
                 self.state = 321
@@ -1864,7 +1864,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 332
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==JavaParserLabeled.BITAND:
+            while _la==89:
                 self.state = 328
                 self.match(JavaParserLabeled.BITAND)
                 self.state = 329
@@ -1953,7 +1953,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 339
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==JavaParserLabeled.IMPLEMENTS:
+            if _la==24:
                 self.state = 337
                 self.match(JavaParserLabeled.IMPLEMENTS)
                 self.state = 338
@@ -1965,7 +1965,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 343
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==JavaParserLabeled.AT or _la==JavaParserLabeled.IDENTIFIER:
+            if _la==106 or _la==111:
                 self.state = 342
                 self.enumConstants()
 
@@ -1973,7 +1973,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 346
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==JavaParserLabeled.COMMA:
+            if _la==68:
                 self.state = 345
                 self.match(JavaParserLabeled.COMMA)
 
@@ -1981,7 +1981,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 349
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==JavaParserLabeled.SEMI:
+            if _la==67:
                 self.state = 348
                 self.enumBodyDeclarations()
 
@@ -2135,7 +2135,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 369
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==JavaParserLabeled.LPAREN:
+            if _la==61:
                 self.state = 368
                 self.arguments()
 
@@ -2143,7 +2143,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 372
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==JavaParserLabeled.LBRACE:
+            if _la==63:
                 self.state = 371
                 self.classBody()
 
@@ -2206,7 +2206,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 378
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << JavaParserLabeled.ABSTRACT) | (1 << JavaParserLabeled.BOOLEAN) | (1 << JavaParserLabeled.BYTE) | (1 << JavaParserLabeled.CHAR) | (1 << JavaParserLabeled.CLASS) | (1 << JavaParserLabeled.DOUBLE) | (1 << JavaParserLabeled.ENUM) | (1 << JavaParserLabeled.FINAL) | (1 << JavaParserLabeled.FLOAT) | (1 << JavaParserLabeled.INT) | (1 << JavaParserLabeled.INTERFACE) | (1 << JavaParserLabeled.LONG) | (1 << JavaParserLabeled.NATIVE) | (1 << JavaParserLabeled.PRIVATE) | (1 << JavaParserLabeled.PROTECTED) | (1 << JavaParserLabeled.PUBLIC) | (1 << JavaParserLabeled.SHORT) | (1 << JavaParserLabeled.STATIC) | (1 << JavaParserLabeled.STRICTFP) | (1 << JavaParserLabeled.SYNCHRONIZED) | (1 << JavaParserLabeled.TRANSIENT) | (1 << JavaParserLabeled.VOID) | (1 << JavaParserLabeled.VOLATILE) | (1 << JavaParserLabeled.LBRACE))) != 0) or ((((_la - 67)) & ~0x3f) == 0 and ((1 << (_la - 67)) & ((1 << (JavaParserLabeled.SEMI - 67)) | (1 << (JavaParserLabeled.LT - 67)) | (1 << (JavaParserLabeled.AT - 67)) | (1 << (JavaParserLabeled.IDENTIFIER - 67)))) != 0):
+            while (((_la) & ~0x3f) == 0 and ((1 << _la) & -9222451820917079254) != 0) or ((((_la - 67)) & ~0x3f) == 0 and ((1 << (_la - 67)) & 18141941858337) != 0):
                 self.state = 375
                 self.classBodyDeclaration()
                 self.state = 380
@@ -2284,7 +2284,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 384
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==JavaParserLabeled.LT:
+            if _la==72:
                 self.state = 383
                 self.typeParameters()
 
@@ -2292,7 +2292,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 388
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==JavaParserLabeled.EXTENDS:
+            if _la==17:
                 self.state = 386
                 self.match(JavaParserLabeled.EXTENDS)
                 self.state = 387
@@ -2362,7 +2362,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 396
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << JavaParserLabeled.ABSTRACT) | (1 << JavaParserLabeled.BOOLEAN) | (1 << JavaParserLabeled.BYTE) | (1 << JavaParserLabeled.CHAR) | (1 << JavaParserLabeled.CLASS) | (1 << JavaParserLabeled.DOUBLE) | (1 << JavaParserLabeled.ENUM) | (1 << JavaParserLabeled.FINAL) | (1 << JavaParserLabeled.FLOAT) | (1 << JavaParserLabeled.INT) | (1 << JavaParserLabeled.INTERFACE) | (1 << JavaParserLabeled.LONG) | (1 << JavaParserLabeled.NATIVE) | (1 << JavaParserLabeled.PRIVATE) | (1 << JavaParserLabeled.PROTECTED) | (1 << JavaParserLabeled.PUBLIC) | (1 << JavaParserLabeled.SHORT) | (1 << JavaParserLabeled.STATIC) | (1 << JavaParserLabeled.STRICTFP) | (1 << JavaParserLabeled.SYNCHRONIZED) | (1 << JavaParserLabeled.TRANSIENT) | (1 << JavaParserLabeled.VOID) | (1 << JavaParserLabeled.VOLATILE) | (1 << JavaParserLabeled.LBRACE))) != 0) or ((((_la - 67)) & ~0x3f) == 0 and ((1 << (_la - 67)) & ((1 << (JavaParserLabeled.SEMI - 67)) | (1 << (JavaParserLabeled.LT - 67)) | (1 << (JavaParserLabeled.AT - 67)) | (1 << (JavaParserLabeled.IDENTIFIER - 67)))) != 0):
+            while (((_la) & ~0x3f) == 0 and ((1 << _la) & -9222451820917079254) != 0) or ((((_la - 67)) & ~0x3f) == 0 and ((1 << (_la - 67)) & 18141941858337) != 0):
                 self.state = 393
                 self.classBodyDeclaration()
                 self.state = 398
@@ -2432,7 +2432,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 405
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << JavaParserLabeled.ABSTRACT) | (1 << JavaParserLabeled.BOOLEAN) | (1 << JavaParserLabeled.BYTE) | (1 << JavaParserLabeled.CHAR) | (1 << JavaParserLabeled.CLASS) | (1 << JavaParserLabeled.DEFAULT) | (1 << JavaParserLabeled.DOUBLE) | (1 << JavaParserLabeled.ENUM) | (1 << JavaParserLabeled.FINAL) | (1 << JavaParserLabeled.FLOAT) | (1 << JavaParserLabeled.INT) | (1 << JavaParserLabeled.INTERFACE) | (1 << JavaParserLabeled.LONG) | (1 << JavaParserLabeled.NATIVE) | (1 << JavaParserLabeled.PRIVATE) | (1 << JavaParserLabeled.PROTECTED) | (1 << JavaParserLabeled.PUBLIC) | (1 << JavaParserLabeled.SHORT) | (1 << JavaParserLabeled.STATIC) | (1 << JavaParserLabeled.STRICTFP) | (1 << JavaParserLabeled.SYNCHRONIZED) | (1 << JavaParserLabeled.TRANSIENT) | (1 << JavaParserLabeled.VOID) | (1 << JavaParserLabeled.VOLATILE))) != 0) or ((((_la - 67)) & ~0x3f) == 0 and ((1 << (_la - 67)) & ((1 << (JavaParserLabeled.SEMI - 67)) | (1 << (JavaParserLabeled.LT - 67)) | (1 << (JavaParserLabeled.AT - 67)) | (1 << (JavaParserLabeled.IDENTIFIER - 67)))) != 0):
+            while (((_la) & ~0x3f) == 0 and ((1 << _la) & 920215937700650) != 0) or ((((_la - 67)) & ~0x3f) == 0 and ((1 << (_la - 67)) & 18141941858337) != 0):
                 self.state = 402
                 self.interfaceBodyDeclaration()
                 self.state = 407
@@ -2572,7 +2572,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 412
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if _la==JavaParserLabeled.STATIC:
+                if _la==38:
                     self.state = 411
                     self.match(JavaParserLabeled.STATIC)
 
@@ -3010,7 +3010,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 442
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==JavaParserLabeled.LBRACK:
+            while _la==65:
                 self.state = 438
                 self.match(JavaParserLabeled.LBRACK)
                 self.state = 439
@@ -3022,7 +3022,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 447
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==JavaParserLabeled.THROWS:
+            if _la==45:
                 self.state = 445
                 self.match(JavaParserLabeled.THROWS)
                 self.state = 446
@@ -3082,12 +3082,12 @@ class JavaParserLabeled ( Parser ):
             self.state = 453
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [JavaParserLabeled.LBRACE]:
+            if token in [63]:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 451
                 self.block()
                 pass
-            elif token in [JavaParserLabeled.SEMI]:
+            elif token in [67]:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 452
                 self.match(JavaParserLabeled.SEMI)
@@ -3146,12 +3146,12 @@ class JavaParserLabeled ( Parser ):
             self.state = 457
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [JavaParserLabeled.BOOLEAN, JavaParserLabeled.BYTE, JavaParserLabeled.CHAR, JavaParserLabeled.DOUBLE, JavaParserLabeled.FLOAT, JavaParserLabeled.INT, JavaParserLabeled.LONG, JavaParserLabeled.SHORT, JavaParserLabeled.AT, JavaParserLabeled.IDENTIFIER]:
+            if token in [3, 5, 8, 14, 20, 27, 29, 37, 106, 111]:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 455
                 self.typeType()
                 pass
-            elif token in [JavaParserLabeled.VOID]:
+            elif token in [48]:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 456
                 self.match(JavaParserLabeled.VOID)
@@ -3336,7 +3336,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 469
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==JavaParserLabeled.THROWS:
+            if _la==45:
                 self.state = 467
                 self.match(JavaParserLabeled.THROWS)
                 self.state = 468
@@ -3462,7 +3462,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 485
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [JavaParserLabeled.ABSTRACT, JavaParserLabeled.BOOLEAN, JavaParserLabeled.BYTE, JavaParserLabeled.CHAR, JavaParserLabeled.CLASS, JavaParserLabeled.DEFAULT, JavaParserLabeled.DOUBLE, JavaParserLabeled.ENUM, JavaParserLabeled.FINAL, JavaParserLabeled.FLOAT, JavaParserLabeled.INT, JavaParserLabeled.INTERFACE, JavaParserLabeled.LONG, JavaParserLabeled.NATIVE, JavaParserLabeled.PRIVATE, JavaParserLabeled.PROTECTED, JavaParserLabeled.PUBLIC, JavaParserLabeled.SHORT, JavaParserLabeled.STATIC, JavaParserLabeled.STRICTFP, JavaParserLabeled.SYNCHRONIZED, JavaParserLabeled.TRANSIENT, JavaParserLabeled.VOID, JavaParserLabeled.VOLATILE, JavaParserLabeled.LT, JavaParserLabeled.AT, JavaParserLabeled.IDENTIFIER]:
+            if token in [1, 3, 5, 8, 9, 12, 14, 16, 18, 20, 27, 28, 29, 30, 33, 34, 35, 37, 38, 39, 42, 46, 48, 49, 72, 106, 111]:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 480
                 self._errHandler.sync(self)
@@ -3478,7 +3478,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 483
                 self.interfaceMemberDeclaration()
                 pass
-            elif token in [JavaParserLabeled.SEMI]:
+            elif token in [67]:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 484
                 self.match(JavaParserLabeled.SEMI)
@@ -3816,7 +3816,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 502
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==JavaParserLabeled.COMMA:
+            while _la==68:
                 self.state = 498
                 self.match(JavaParserLabeled.COMMA)
                 self.state = 499
@@ -3897,7 +3897,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 512
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==JavaParserLabeled.LBRACK:
+            while _la==65:
                 self.state = 508
                 self.match(JavaParserLabeled.LBRACK)
                 self.state = 509
@@ -4019,11 +4019,11 @@ class JavaParserLabeled ( Parser ):
             self.state = 534
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [JavaParserLabeled.BOOLEAN, JavaParserLabeled.BYTE, JavaParserLabeled.CHAR, JavaParserLabeled.DOUBLE, JavaParserLabeled.FLOAT, JavaParserLabeled.INT, JavaParserLabeled.LONG, JavaParserLabeled.SHORT, JavaParserLabeled.VOID, JavaParserLabeled.AT, JavaParserLabeled.IDENTIFIER]:
+            if token in [3, 5, 8, 14, 20, 27, 29, 37, 48, 106, 111]:
                 self.state = 524
                 self.typeTypeOrVoid()
                 pass
-            elif token in [JavaParserLabeled.LT]:
+            elif token in [72]:
                 self.state = 525
                 self.typeParameters()
                 self.state = 529
@@ -4050,7 +4050,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 542
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==JavaParserLabeled.LBRACK:
+            while _la==65:
                 self.state = 538
                 self.match(JavaParserLabeled.LBRACK)
                 self.state = 539
@@ -4062,7 +4062,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 547
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==JavaParserLabeled.THROWS:
+            if _la==45:
                 self.state = 545
                 self.match(JavaParserLabeled.THROWS)
                 self.state = 546
@@ -4134,32 +4134,32 @@ class JavaParserLabeled ( Parser ):
             self.state = 557
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [JavaParserLabeled.AT, JavaParserLabeled.IDENTIFIER]:
+            if token in [106, 111]:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 551
                 self.annotation()
                 pass
-            elif token in [JavaParserLabeled.PUBLIC]:
+            elif token in [35]:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 552
                 self.match(JavaParserLabeled.PUBLIC)
                 pass
-            elif token in [JavaParserLabeled.ABSTRACT]:
+            elif token in [1]:
                 self.enterOuterAlt(localctx, 3)
                 self.state = 553
                 self.match(JavaParserLabeled.ABSTRACT)
                 pass
-            elif token in [JavaParserLabeled.DEFAULT]:
+            elif token in [12]:
                 self.enterOuterAlt(localctx, 4)
                 self.state = 554
                 self.match(JavaParserLabeled.DEFAULT)
                 pass
-            elif token in [JavaParserLabeled.STATIC]:
+            elif token in [38]:
                 self.enterOuterAlt(localctx, 5)
                 self.state = 555
                 self.match(JavaParserLabeled.STATIC)
                 pass
-            elif token in [JavaParserLabeled.STRICTFP]:
+            elif token in [39]:
                 self.enterOuterAlt(localctx, 6)
                 self.state = 556
                 self.match(JavaParserLabeled.STRICTFP)
@@ -4282,7 +4282,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 567
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==JavaParserLabeled.COMMA:
+            while _la==68:
                 self.state = 563
                 self.match(JavaParserLabeled.COMMA)
                 self.state = 564
@@ -4350,7 +4350,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 573
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==JavaParserLabeled.ASSIGN:
+            if _la==70:
                 self.state = 571
                 self.match(JavaParserLabeled.ASSIGN)
                 self.state = 572
@@ -4420,7 +4420,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 580
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==JavaParserLabeled.LBRACK:
+            while _la==65:
                 self.state = 576
                 self.match(JavaParserLabeled.LBRACK)
                 self.state = 577
@@ -4514,13 +4514,13 @@ class JavaParserLabeled ( Parser ):
             self.state = 585
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [JavaParserLabeled.LBRACE]:
+            if token in [63]:
                 localctx = JavaParserLabeled.VariableInitializer0Context(self, localctx)
                 self.enterOuterAlt(localctx, 1)
                 self.state = 583
                 self.arrayInitializer()
                 pass
-            elif token in [JavaParserLabeled.BOOLEAN, JavaParserLabeled.BYTE, JavaParserLabeled.CHAR, JavaParserLabeled.DOUBLE, JavaParserLabeled.FLOAT, JavaParserLabeled.INT, JavaParserLabeled.LONG, JavaParserLabeled.NEW, JavaParserLabeled.SHORT, JavaParserLabeled.SUPER, JavaParserLabeled.THIS, JavaParserLabeled.VOID, JavaParserLabeled.DECIMAL_LITERAL, JavaParserLabeled.HEX_LITERAL, JavaParserLabeled.OCT_LITERAL, JavaParserLabeled.BINARY_LITERAL, JavaParserLabeled.FLOAT_LITERAL, JavaParserLabeled.HEX_FLOAT_LITERAL, JavaParserLabeled.BOOL_LITERAL, JavaParserLabeled.CHAR_LITERAL, JavaParserLabeled.STRING_LITERAL, JavaParserLabeled.NULL_LITERAL, JavaParserLabeled.LPAREN, JavaParserLabeled.LT, JavaParserLabeled.BANG, JavaParserLabeled.TILDE, JavaParserLabeled.INC, JavaParserLabeled.DEC, JavaParserLabeled.ADD, JavaParserLabeled.SUB, JavaParserLabeled.AT, JavaParserLabeled.IDENTIFIER]:
+            elif token in [3, 5, 8, 14, 20, 27, 29, 31, 37, 40, 43, 48, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 72, 73, 74, 83, 84, 85, 86, 106, 111]:
                 localctx = JavaParserLabeled.VariableInitializer1Context(self, localctx)
                 self.enterOuterAlt(localctx, 2)
                 self.state = 584
@@ -4596,7 +4596,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 599
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << JavaParserLabeled.BOOLEAN) | (1 << JavaParserLabeled.BYTE) | (1 << JavaParserLabeled.CHAR) | (1 << JavaParserLabeled.DOUBLE) | (1 << JavaParserLabeled.FLOAT) | (1 << JavaParserLabeled.INT) | (1 << JavaParserLabeled.LONG) | (1 << JavaParserLabeled.NEW) | (1 << JavaParserLabeled.SHORT) | (1 << JavaParserLabeled.SUPER) | (1 << JavaParserLabeled.THIS) | (1 << JavaParserLabeled.VOID) | (1 << JavaParserLabeled.DECIMAL_LITERAL) | (1 << JavaParserLabeled.HEX_LITERAL) | (1 << JavaParserLabeled.OCT_LITERAL) | (1 << JavaParserLabeled.BINARY_LITERAL) | (1 << JavaParserLabeled.FLOAT_LITERAL) | (1 << JavaParserLabeled.HEX_FLOAT_LITERAL) | (1 << JavaParserLabeled.BOOL_LITERAL) | (1 << JavaParserLabeled.CHAR_LITERAL) | (1 << JavaParserLabeled.STRING_LITERAL) | (1 << JavaParserLabeled.NULL_LITERAL) | (1 << JavaParserLabeled.LPAREN) | (1 << JavaParserLabeled.LBRACE))) != 0) or ((((_la - 72)) & ~0x3f) == 0 and ((1 << (_la - 72)) & ((1 << (JavaParserLabeled.LT - 72)) | (1 << (JavaParserLabeled.BANG - 72)) | (1 << (JavaParserLabeled.TILDE - 72)) | (1 << (JavaParserLabeled.INC - 72)) | (1 << (JavaParserLabeled.DEC - 72)) | (1 << (JavaParserLabeled.ADD - 72)) | (1 << (JavaParserLabeled.SUB - 72)) | (1 << (JavaParserLabeled.AT - 72)) | (1 << (JavaParserLabeled.IDENTIFIER - 72)))) != 0):
+            if (((_la) & ~0x3f) == 0 and ((1 << _la) & -4613646307401121496) != 0) or ((((_la - 72)) & ~0x3f) == 0 and ((1 << (_la - 72)) & 566935713799) != 0):
                 self.state = 588
                 self.variableInitializer()
                 self.state = 593
@@ -4615,7 +4615,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 597
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if _la==JavaParserLabeled.COMMA:
+                if _la==68:
                     self.state = 596
                     self.match(JavaParserLabeled.COMMA)
 
@@ -4802,7 +4802,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 621
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                while _la==JavaParserLabeled.AT or _la==JavaParserLabeled.IDENTIFIER:
+                while _la==106 or _la==111:
                     self.state = 618
                     self.annotation()
                     self.state = 623
@@ -4814,10 +4814,10 @@ class JavaParserLabeled ( Parser ):
                 self.state = 627
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if _la==JavaParserLabeled.EXTENDS or _la==JavaParserLabeled.SUPER:
+                if _la==17 or _la==40:
                     self.state = 625
                     _la = self._input.LA(1)
-                    if not(_la==JavaParserLabeled.EXTENDS or _la==JavaParserLabeled.SUPER):
+                    if not(_la==17 or _la==40):
                         self._errHandler.recoverInline(self)
                     else:
                         self._errHandler.reportMatch(self)
@@ -4890,7 +4890,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 636
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==JavaParserLabeled.COMMA:
+            while _la==68:
                 self.state = 632
                 self.match(JavaParserLabeled.COMMA)
                 self.state = 633
@@ -4957,7 +4957,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 641
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << JavaParserLabeled.BOOLEAN) | (1 << JavaParserLabeled.BYTE) | (1 << JavaParserLabeled.CHAR) | (1 << JavaParserLabeled.DOUBLE) | (1 << JavaParserLabeled.FINAL) | (1 << JavaParserLabeled.FLOAT) | (1 << JavaParserLabeled.INT) | (1 << JavaParserLabeled.LONG) | (1 << JavaParserLabeled.SHORT))) != 0) or _la==JavaParserLabeled.AT or _la==JavaParserLabeled.IDENTIFIER:
+            if (((_la) & ~0x3f) == 0 and ((1 << _la) & 138111369512) != 0) or _la==106 or _la==111:
                 self.state = 640
                 self.formalParameterList()
 
@@ -5082,7 +5082,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 655
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if _la==JavaParserLabeled.COMMA:
+                if _la==68:
                     self.state = 653
                     self.match(JavaParserLabeled.COMMA)
                     self.state = 654
@@ -5255,7 +5255,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 679
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==JavaParserLabeled.AT or _la==JavaParserLabeled.IDENTIFIER:
+            while _la==106 or _la==111:
                 self.state = 676
                 self.annotation()
                 self.state = 681
@@ -5516,37 +5516,37 @@ class JavaParserLabeled ( Parser ):
             self.state = 699
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [JavaParserLabeled.DECIMAL_LITERAL, JavaParserLabeled.HEX_LITERAL, JavaParserLabeled.OCT_LITERAL, JavaParserLabeled.BINARY_LITERAL]:
+            if token in [51, 52, 53, 54]:
                 localctx = JavaParserLabeled.Literal0Context(self, localctx)
                 self.enterOuterAlt(localctx, 1)
                 self.state = 693
                 self.integerLiteral()
                 pass
-            elif token in [JavaParserLabeled.FLOAT_LITERAL, JavaParserLabeled.HEX_FLOAT_LITERAL]:
+            elif token in [55, 56]:
                 localctx = JavaParserLabeled.Literal1Context(self, localctx)
                 self.enterOuterAlt(localctx, 2)
                 self.state = 694
                 self.floatLiteral()
                 pass
-            elif token in [JavaParserLabeled.CHAR_LITERAL]:
+            elif token in [58]:
                 localctx = JavaParserLabeled.Literal2Context(self, localctx)
                 self.enterOuterAlt(localctx, 3)
                 self.state = 695
                 self.match(JavaParserLabeled.CHAR_LITERAL)
                 pass
-            elif token in [JavaParserLabeled.STRING_LITERAL]:
+            elif token in [59]:
                 localctx = JavaParserLabeled.Literal3Context(self, localctx)
                 self.enterOuterAlt(localctx, 4)
                 self.state = 696
                 self.match(JavaParserLabeled.STRING_LITERAL)
                 pass
-            elif token in [JavaParserLabeled.BOOL_LITERAL]:
+            elif token in [57]:
                 localctx = JavaParserLabeled.Literal4Context(self, localctx)
                 self.enterOuterAlt(localctx, 5)
                 self.state = 697
                 self.match(JavaParserLabeled.BOOL_LITERAL)
                 pass
-            elif token in [JavaParserLabeled.NULL_LITERAL]:
+            elif token in [60]:
                 localctx = JavaParserLabeled.Literal5Context(self, localctx)
                 self.enterOuterAlt(localctx, 6)
                 self.state = 698
@@ -5612,7 +5612,7 @@ class JavaParserLabeled ( Parser ):
             self.enterOuterAlt(localctx, 1)
             self.state = 701
             _la = self._input.LA(1)
-            if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << JavaParserLabeled.DECIMAL_LITERAL) | (1 << JavaParserLabeled.HEX_LITERAL) | (1 << JavaParserLabeled.OCT_LITERAL) | (1 << JavaParserLabeled.BINARY_LITERAL))) != 0)):
+            if not((((_la) & ~0x3f) == 0 and ((1 << _la) & 33776997205278720) != 0)):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
@@ -5668,7 +5668,7 @@ class JavaParserLabeled ( Parser ):
             self.enterOuterAlt(localctx, 1)
             self.state = 703
             _la = self._input.LA(1)
-            if not(_la==JavaParserLabeled.FLOAT_LITERAL or _la==JavaParserLabeled.HEX_FLOAT_LITERAL):
+            if not(_la==55 or _la==56):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
@@ -5734,7 +5734,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 709
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==JavaParserLabeled.IDENTIFIER:
+            while _la==111:
                 self.state = 705
                 self.match(JavaParserLabeled.IDENTIFIER)
                 self.state = 706
@@ -5834,7 +5834,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 726
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==JavaParserLabeled.LPAREN:
+            if _la==61:
                 self.state = 720
                 self.match(JavaParserLabeled.LPAREN)
                 self.state = 723
@@ -5914,7 +5914,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 733
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==JavaParserLabeled.COMMA:
+            while _la==68:
                 self.state = 729
                 self.match(JavaParserLabeled.COMMA)
                 self.state = 730
@@ -6180,7 +6180,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 754
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << JavaParserLabeled.BOOLEAN) | (1 << JavaParserLabeled.BYTE) | (1 << JavaParserLabeled.CHAR) | (1 << JavaParserLabeled.DOUBLE) | (1 << JavaParserLabeled.FLOAT) | (1 << JavaParserLabeled.INT) | (1 << JavaParserLabeled.LONG) | (1 << JavaParserLabeled.NEW) | (1 << JavaParserLabeled.SHORT) | (1 << JavaParserLabeled.SUPER) | (1 << JavaParserLabeled.THIS) | (1 << JavaParserLabeled.VOID) | (1 << JavaParserLabeled.DECIMAL_LITERAL) | (1 << JavaParserLabeled.HEX_LITERAL) | (1 << JavaParserLabeled.OCT_LITERAL) | (1 << JavaParserLabeled.BINARY_LITERAL) | (1 << JavaParserLabeled.FLOAT_LITERAL) | (1 << JavaParserLabeled.HEX_FLOAT_LITERAL) | (1 << JavaParserLabeled.BOOL_LITERAL) | (1 << JavaParserLabeled.CHAR_LITERAL) | (1 << JavaParserLabeled.STRING_LITERAL) | (1 << JavaParserLabeled.NULL_LITERAL) | (1 << JavaParserLabeled.LPAREN) | (1 << JavaParserLabeled.LBRACE))) != 0) or ((((_la - 72)) & ~0x3f) == 0 and ((1 << (_la - 72)) & ((1 << (JavaParserLabeled.LT - 72)) | (1 << (JavaParserLabeled.BANG - 72)) | (1 << (JavaParserLabeled.TILDE - 72)) | (1 << (JavaParserLabeled.INC - 72)) | (1 << (JavaParserLabeled.DEC - 72)) | (1 << (JavaParserLabeled.ADD - 72)) | (1 << (JavaParserLabeled.SUB - 72)) | (1 << (JavaParserLabeled.AT - 72)) | (1 << (JavaParserLabeled.IDENTIFIER - 72)))) != 0):
+            if (((_la) & ~0x3f) == 0 and ((1 << _la) & -4613646307401121496) != 0) or ((((_la - 72)) & ~0x3f) == 0 and ((1 << (_la - 72)) & 566935713799) != 0):
                 self.state = 746
                 self.elementValue()
                 self.state = 751
@@ -6201,7 +6201,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 757
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==JavaParserLabeled.COMMA:
+            if _la==68:
                 self.state = 756
                 self.match(JavaParserLabeled.COMMA)
 
@@ -6332,7 +6332,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 770
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << JavaParserLabeled.ABSTRACT) | (1 << JavaParserLabeled.BOOLEAN) | (1 << JavaParserLabeled.BYTE) | (1 << JavaParserLabeled.CHAR) | (1 << JavaParserLabeled.CLASS) | (1 << JavaParserLabeled.DOUBLE) | (1 << JavaParserLabeled.ENUM) | (1 << JavaParserLabeled.FINAL) | (1 << JavaParserLabeled.FLOAT) | (1 << JavaParserLabeled.INT) | (1 << JavaParserLabeled.INTERFACE) | (1 << JavaParserLabeled.LONG) | (1 << JavaParserLabeled.NATIVE) | (1 << JavaParserLabeled.PRIVATE) | (1 << JavaParserLabeled.PROTECTED) | (1 << JavaParserLabeled.PUBLIC) | (1 << JavaParserLabeled.SHORT) | (1 << JavaParserLabeled.STATIC) | (1 << JavaParserLabeled.STRICTFP) | (1 << JavaParserLabeled.SYNCHRONIZED) | (1 << JavaParserLabeled.TRANSIENT) | (1 << JavaParserLabeled.VOLATILE))) != 0) or ((((_la - 67)) & ~0x3f) == 0 and ((1 << (_la - 67)) & ((1 << (JavaParserLabeled.SEMI - 67)) | (1 << (JavaParserLabeled.AT - 67)) | (1 << (JavaParserLabeled.IDENTIFIER - 67)))) != 0):
+            while (((_la) & ~0x3f) == 0 and ((1 << _la) & 638740960985898) != 0) or ((((_la - 67)) & ~0x3f) == 0 and ((1 << (_la - 67)) & 18141941858305) != 0):
                 self.state = 767
                 self.annotationTypeElementDeclaration()
                 self.state = 772
@@ -6399,7 +6399,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 783
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [JavaParserLabeled.ABSTRACT, JavaParserLabeled.BOOLEAN, JavaParserLabeled.BYTE, JavaParserLabeled.CHAR, JavaParserLabeled.CLASS, JavaParserLabeled.DOUBLE, JavaParserLabeled.ENUM, JavaParserLabeled.FINAL, JavaParserLabeled.FLOAT, JavaParserLabeled.INT, JavaParserLabeled.INTERFACE, JavaParserLabeled.LONG, JavaParserLabeled.NATIVE, JavaParserLabeled.PRIVATE, JavaParserLabeled.PROTECTED, JavaParserLabeled.PUBLIC, JavaParserLabeled.SHORT, JavaParserLabeled.STATIC, JavaParserLabeled.STRICTFP, JavaParserLabeled.SYNCHRONIZED, JavaParserLabeled.TRANSIENT, JavaParserLabeled.VOLATILE, JavaParserLabeled.AT, JavaParserLabeled.IDENTIFIER]:
+            if token in [1, 3, 5, 8, 9, 14, 16, 18, 20, 27, 28, 29, 30, 33, 34, 35, 37, 38, 39, 42, 46, 49, 106, 111]:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 778
                 self._errHandler.sync(self)
@@ -6415,7 +6415,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 781
                 self.annotationTypeElementRest()
                 pass
-            elif token in [JavaParserLabeled.SEMI]:
+            elif token in [67]:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 782
                 self.match(JavaParserLabeled.SEMI)
@@ -6833,7 +6833,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 815
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==JavaParserLabeled.DEFAULT:
+            if _la==12:
                 self.state = 814
                 self.defaultValue()
 
@@ -7000,7 +7000,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 826
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << JavaParserLabeled.ABSTRACT) | (1 << JavaParserLabeled.ASSERT) | (1 << JavaParserLabeled.BOOLEAN) | (1 << JavaParserLabeled.BREAK) | (1 << JavaParserLabeled.BYTE) | (1 << JavaParserLabeled.CHAR) | (1 << JavaParserLabeled.CLASS) | (1 << JavaParserLabeled.CONTINUE) | (1 << JavaParserLabeled.DO) | (1 << JavaParserLabeled.DOUBLE) | (1 << JavaParserLabeled.FINAL) | (1 << JavaParserLabeled.FLOAT) | (1 << JavaParserLabeled.FOR) | (1 << JavaParserLabeled.IF) | (1 << JavaParserLabeled.INT) | (1 << JavaParserLabeled.INTERFACE) | (1 << JavaParserLabeled.LONG) | (1 << JavaParserLabeled.NEW) | (1 << JavaParserLabeled.PRIVATE) | (1 << JavaParserLabeled.PROTECTED) | (1 << JavaParserLabeled.PUBLIC) | (1 << JavaParserLabeled.RETURN) | (1 << JavaParserLabeled.SHORT) | (1 << JavaParserLabeled.STATIC) | (1 << JavaParserLabeled.STRICTFP) | (1 << JavaParserLabeled.SUPER) | (1 << JavaParserLabeled.SWITCH) | (1 << JavaParserLabeled.SYNCHRONIZED) | (1 << JavaParserLabeled.THIS) | (1 << JavaParserLabeled.THROW) | (1 << JavaParserLabeled.TRY) | (1 << JavaParserLabeled.VOID) | (1 << JavaParserLabeled.WHILE) | (1 << JavaParserLabeled.DECIMAL_LITERAL) | (1 << JavaParserLabeled.HEX_LITERAL) | (1 << JavaParserLabeled.OCT_LITERAL) | (1 << JavaParserLabeled.BINARY_LITERAL) | (1 << JavaParserLabeled.FLOAT_LITERAL) | (1 << JavaParserLabeled.HEX_FLOAT_LITERAL) | (1 << JavaParserLabeled.BOOL_LITERAL) | (1 << JavaParserLabeled.CHAR_LITERAL) | (1 << JavaParserLabeled.STRING_LITERAL) | (1 << JavaParserLabeled.NULL_LITERAL) | (1 << JavaParserLabeled.LPAREN) | (1 << JavaParserLabeled.LBRACE))) != 0) or ((((_la - 67)) & ~0x3f) == 0 and ((1 << (_la - 67)) & ((1 << (JavaParserLabeled.SEMI - 67)) | (1 << (JavaParserLabeled.LT - 67)) | (1 << (JavaParserLabeled.BANG - 67)) | (1 << (JavaParserLabeled.TILDE - 67)) | (1 << (JavaParserLabeled.INC - 67)) | (1 << (JavaParserLabeled.DEC - 67)) | (1 << (JavaParserLabeled.ADD - 67)) | (1 << (JavaParserLabeled.SUB - 67)) | (1 << (JavaParserLabeled.AT - 67)) | (1 << (JavaParserLabeled.IDENTIFIER - 67)))) != 0):
+            while (((_la) & ~0x3f) == 0 and ((1 << _la) & -4612354526992372930) != 0) or ((((_la - 67)) & ~0x3f) == 0 and ((1 << (_la - 67)) & 18141942841569) != 0):
                 self.state = 823
                 self.blockStatement()
                 self.state = 828
@@ -7280,12 +7280,12 @@ class JavaParserLabeled ( Parser ):
             self.state = 858
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [JavaParserLabeled.ABSTRACT, JavaParserLabeled.CLASS, JavaParserLabeled.FINAL, JavaParserLabeled.INTERFACE, JavaParserLabeled.PRIVATE, JavaParserLabeled.PROTECTED, JavaParserLabeled.PUBLIC, JavaParserLabeled.STATIC, JavaParserLabeled.STRICTFP, JavaParserLabeled.AT, JavaParserLabeled.IDENTIFIER]:
+            if token in [1, 9, 18, 28, 33, 34, 35, 38, 39, 106, 111]:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 850
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << JavaParserLabeled.ABSTRACT) | (1 << JavaParserLabeled.FINAL) | (1 << JavaParserLabeled.PRIVATE) | (1 << JavaParserLabeled.PROTECTED) | (1 << JavaParserLabeled.PUBLIC) | (1 << JavaParserLabeled.STATIC) | (1 << JavaParserLabeled.STRICTFP))) != 0) or _la==JavaParserLabeled.AT or _la==JavaParserLabeled.IDENTIFIER:
+                while (((_la) & ~0x3f) == 0 and ((1 << _la) & 884763525122) != 0) or _la==106 or _la==111:
                     self.state = 847
                     self.classOrInterfaceModifier()
                     self.state = 852
@@ -7295,11 +7295,11 @@ class JavaParserLabeled ( Parser ):
                 self.state = 855
                 self._errHandler.sync(self)
                 token = self._input.LA(1)
-                if token in [JavaParserLabeled.CLASS]:
+                if token in [9]:
                     self.state = 853
                     self.classDeclaration()
                     pass
-                elif token in [JavaParserLabeled.INTERFACE]:
+                elif token in [28]:
                     self.state = 854
                     self.interfaceDeclaration()
                     pass
@@ -7307,7 +7307,7 @@ class JavaParserLabeled ( Parser ):
                     raise NoViableAltException(self)
 
                 pass
-            elif token in [JavaParserLabeled.SEMI]:
+            elif token in [67]:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 857
                 self.match(JavaParserLabeled.SEMI)
@@ -7905,7 +7905,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 865
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if _la==JavaParserLabeled.COLON:
+                if _la==76:
                     self.state = 863
                     self.match(JavaParserLabeled.COLON)
                     self.state = 864
@@ -7988,7 +7988,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 903
                 self._errHandler.sync(self)
                 token = self._input.LA(1)
-                if token in [JavaParserLabeled.CATCH]:
+                if token in [7]:
                     self.state = 895 
                     self._errHandler.sync(self)
                     _la = self._input.LA(1)
@@ -7998,19 +7998,19 @@ class JavaParserLabeled ( Parser ):
                         self.state = 897 
                         self._errHandler.sync(self)
                         _la = self._input.LA(1)
-                        if not (_la==JavaParserLabeled.CATCH):
+                        if not (_la==7):
                             break
 
                     self.state = 900
                     self._errHandler.sync(self)
                     _la = self._input.LA(1)
-                    if _la==JavaParserLabeled.FINALLY:
+                    if _la==19:
                         self.state = 899
                         self.finallyBlock()
 
 
                     pass
-                elif token in [JavaParserLabeled.FINALLY]:
+                elif token in [19]:
                     self.state = 902
                     self.finallyBlock()
                     pass
@@ -8031,7 +8031,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 911
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                while _la==JavaParserLabeled.CATCH:
+                while _la==7:
                     self.state = 908
                     self.catchClause()
                     self.state = 913
@@ -8041,7 +8041,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 915
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if _la==JavaParserLabeled.FINALLY:
+                if _la==19:
                     self.state = 914
                     self.finallyBlock()
 
@@ -8071,7 +8071,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 929
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                while _la==JavaParserLabeled.CASE or _la==JavaParserLabeled.DEFAULT:
+                while _la==6 or _la==12:
                     self.state = 926
                     self.switchLabel()
                     self.state = 931
@@ -8101,7 +8101,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 940
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << JavaParserLabeled.BOOLEAN) | (1 << JavaParserLabeled.BYTE) | (1 << JavaParserLabeled.CHAR) | (1 << JavaParserLabeled.DOUBLE) | (1 << JavaParserLabeled.FLOAT) | (1 << JavaParserLabeled.INT) | (1 << JavaParserLabeled.LONG) | (1 << JavaParserLabeled.NEW) | (1 << JavaParserLabeled.SHORT) | (1 << JavaParserLabeled.SUPER) | (1 << JavaParserLabeled.THIS) | (1 << JavaParserLabeled.VOID) | (1 << JavaParserLabeled.DECIMAL_LITERAL) | (1 << JavaParserLabeled.HEX_LITERAL) | (1 << JavaParserLabeled.OCT_LITERAL) | (1 << JavaParserLabeled.BINARY_LITERAL) | (1 << JavaParserLabeled.FLOAT_LITERAL) | (1 << JavaParserLabeled.HEX_FLOAT_LITERAL) | (1 << JavaParserLabeled.BOOL_LITERAL) | (1 << JavaParserLabeled.CHAR_LITERAL) | (1 << JavaParserLabeled.STRING_LITERAL) | (1 << JavaParserLabeled.NULL_LITERAL) | (1 << JavaParserLabeled.LPAREN))) != 0) or ((((_la - 72)) & ~0x3f) == 0 and ((1 << (_la - 72)) & ((1 << (JavaParserLabeled.LT - 72)) | (1 << (JavaParserLabeled.BANG - 72)) | (1 << (JavaParserLabeled.TILDE - 72)) | (1 << (JavaParserLabeled.INC - 72)) | (1 << (JavaParserLabeled.DEC - 72)) | (1 << (JavaParserLabeled.ADD - 72)) | (1 << (JavaParserLabeled.SUB - 72)) | (1 << (JavaParserLabeled.AT - 72)) | (1 << (JavaParserLabeled.IDENTIFIER - 72)))) != 0):
+                if (((_la) & ~0x3f) == 0 and ((1 << _la) & 4609725729453654312) != 0) or ((((_la - 72)) & ~0x3f) == 0 and ((1 << (_la - 72)) & 566935713799) != 0):
                     self.state = 939
                     self.expression(0)
 
@@ -8129,7 +8129,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 949
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if _la==JavaParserLabeled.IDENTIFIER:
+                if _la==111:
                     self.state = 948
                     self.match(JavaParserLabeled.IDENTIFIER)
 
@@ -8146,7 +8146,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 954
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if _la==JavaParserLabeled.IDENTIFIER:
+                if _la==111:
                     self.state = 953
                     self.match(JavaParserLabeled.IDENTIFIER)
 
@@ -8336,7 +8336,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 984
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==JavaParserLabeled.BITOR:
+            while _la==90:
                 self.state = 980
                 self.match(JavaParserLabeled.BITOR)
                 self.state = 981
@@ -8461,7 +8461,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 993
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==JavaParserLabeled.SEMI:
+            if _la==67:
                 self.state = 992
                 self.match(JavaParserLabeled.SEMI)
 
@@ -8687,7 +8687,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 1019 
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if not (_la==JavaParserLabeled.CASE or _la==JavaParserLabeled.DEFAULT):
+                if not (_la==6 or _la==12):
                     break
 
             self.state = 1022 
@@ -8699,7 +8699,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 1024 
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << JavaParserLabeled.ABSTRACT) | (1 << JavaParserLabeled.ASSERT) | (1 << JavaParserLabeled.BOOLEAN) | (1 << JavaParserLabeled.BREAK) | (1 << JavaParserLabeled.BYTE) | (1 << JavaParserLabeled.CHAR) | (1 << JavaParserLabeled.CLASS) | (1 << JavaParserLabeled.CONTINUE) | (1 << JavaParserLabeled.DO) | (1 << JavaParserLabeled.DOUBLE) | (1 << JavaParserLabeled.FINAL) | (1 << JavaParserLabeled.FLOAT) | (1 << JavaParserLabeled.FOR) | (1 << JavaParserLabeled.IF) | (1 << JavaParserLabeled.INT) | (1 << JavaParserLabeled.INTERFACE) | (1 << JavaParserLabeled.LONG) | (1 << JavaParserLabeled.NEW) | (1 << JavaParserLabeled.PRIVATE) | (1 << JavaParserLabeled.PROTECTED) | (1 << JavaParserLabeled.PUBLIC) | (1 << JavaParserLabeled.RETURN) | (1 << JavaParserLabeled.SHORT) | (1 << JavaParserLabeled.STATIC) | (1 << JavaParserLabeled.STRICTFP) | (1 << JavaParserLabeled.SUPER) | (1 << JavaParserLabeled.SWITCH) | (1 << JavaParserLabeled.SYNCHRONIZED) | (1 << JavaParserLabeled.THIS) | (1 << JavaParserLabeled.THROW) | (1 << JavaParserLabeled.TRY) | (1 << JavaParserLabeled.VOID) | (1 << JavaParserLabeled.WHILE) | (1 << JavaParserLabeled.DECIMAL_LITERAL) | (1 << JavaParserLabeled.HEX_LITERAL) | (1 << JavaParserLabeled.OCT_LITERAL) | (1 << JavaParserLabeled.BINARY_LITERAL) | (1 << JavaParserLabeled.FLOAT_LITERAL) | (1 << JavaParserLabeled.HEX_FLOAT_LITERAL) | (1 << JavaParserLabeled.BOOL_LITERAL) | (1 << JavaParserLabeled.CHAR_LITERAL) | (1 << JavaParserLabeled.STRING_LITERAL) | (1 << JavaParserLabeled.NULL_LITERAL) | (1 << JavaParserLabeled.LPAREN) | (1 << JavaParserLabeled.LBRACE))) != 0) or ((((_la - 67)) & ~0x3f) == 0 and ((1 << (_la - 67)) & ((1 << (JavaParserLabeled.SEMI - 67)) | (1 << (JavaParserLabeled.LT - 67)) | (1 << (JavaParserLabeled.BANG - 67)) | (1 << (JavaParserLabeled.TILDE - 67)) | (1 << (JavaParserLabeled.INC - 67)) | (1 << (JavaParserLabeled.DEC - 67)) | (1 << (JavaParserLabeled.ADD - 67)) | (1 << (JavaParserLabeled.SUB - 67)) | (1 << (JavaParserLabeled.AT - 67)) | (1 << (JavaParserLabeled.IDENTIFIER - 67)))) != 0)):
+                if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & -4612354526992372930) != 0) or ((((_la - 67)) & ~0x3f) == 0 and ((1 << (_la - 67)) & 18141942841569) != 0)):
                     break
 
         except RecognitionException as re:
@@ -8764,7 +8764,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 1034
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [JavaParserLabeled.CASE]:
+            if token in [6]:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 1026
                 self.match(JavaParserLabeled.CASE)
@@ -8785,7 +8785,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 1031
                 self.match(JavaParserLabeled.COLON)
                 pass
-            elif token in [JavaParserLabeled.DEFAULT]:
+            elif token in [12]:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 1032
                 self.match(JavaParserLabeled.DEFAULT)
@@ -8906,7 +8906,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 1038
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << JavaParserLabeled.BOOLEAN) | (1 << JavaParserLabeled.BYTE) | (1 << JavaParserLabeled.CHAR) | (1 << JavaParserLabeled.DOUBLE) | (1 << JavaParserLabeled.FINAL) | (1 << JavaParserLabeled.FLOAT) | (1 << JavaParserLabeled.INT) | (1 << JavaParserLabeled.LONG) | (1 << JavaParserLabeled.NEW) | (1 << JavaParserLabeled.SHORT) | (1 << JavaParserLabeled.SUPER) | (1 << JavaParserLabeled.THIS) | (1 << JavaParserLabeled.VOID) | (1 << JavaParserLabeled.DECIMAL_LITERAL) | (1 << JavaParserLabeled.HEX_LITERAL) | (1 << JavaParserLabeled.OCT_LITERAL) | (1 << JavaParserLabeled.BINARY_LITERAL) | (1 << JavaParserLabeled.FLOAT_LITERAL) | (1 << JavaParserLabeled.HEX_FLOAT_LITERAL) | (1 << JavaParserLabeled.BOOL_LITERAL) | (1 << JavaParserLabeled.CHAR_LITERAL) | (1 << JavaParserLabeled.STRING_LITERAL) | (1 << JavaParserLabeled.NULL_LITERAL) | (1 << JavaParserLabeled.LPAREN))) != 0) or ((((_la - 72)) & ~0x3f) == 0 and ((1 << (_la - 72)) & ((1 << (JavaParserLabeled.LT - 72)) | (1 << (JavaParserLabeled.BANG - 72)) | (1 << (JavaParserLabeled.TILDE - 72)) | (1 << (JavaParserLabeled.INC - 72)) | (1 << (JavaParserLabeled.DEC - 72)) | (1 << (JavaParserLabeled.ADD - 72)) | (1 << (JavaParserLabeled.SUB - 72)) | (1 << (JavaParserLabeled.AT - 72)) | (1 << (JavaParserLabeled.IDENTIFIER - 72)))) != 0):
+                if (((_la) & ~0x3f) == 0 and ((1 << _la) & 4609725729453916456) != 0) or ((((_la - 72)) & ~0x3f) == 0 and ((1 << (_la - 72)) & 566935713799) != 0):
                     self.state = 1037
                     self.forInit()
 
@@ -8916,7 +8916,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 1042
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << JavaParserLabeled.BOOLEAN) | (1 << JavaParserLabeled.BYTE) | (1 << JavaParserLabeled.CHAR) | (1 << JavaParserLabeled.DOUBLE) | (1 << JavaParserLabeled.FLOAT) | (1 << JavaParserLabeled.INT) | (1 << JavaParserLabeled.LONG) | (1 << JavaParserLabeled.NEW) | (1 << JavaParserLabeled.SHORT) | (1 << JavaParserLabeled.SUPER) | (1 << JavaParserLabeled.THIS) | (1 << JavaParserLabeled.VOID) | (1 << JavaParserLabeled.DECIMAL_LITERAL) | (1 << JavaParserLabeled.HEX_LITERAL) | (1 << JavaParserLabeled.OCT_LITERAL) | (1 << JavaParserLabeled.BINARY_LITERAL) | (1 << JavaParserLabeled.FLOAT_LITERAL) | (1 << JavaParserLabeled.HEX_FLOAT_LITERAL) | (1 << JavaParserLabeled.BOOL_LITERAL) | (1 << JavaParserLabeled.CHAR_LITERAL) | (1 << JavaParserLabeled.STRING_LITERAL) | (1 << JavaParserLabeled.NULL_LITERAL) | (1 << JavaParserLabeled.LPAREN))) != 0) or ((((_la - 72)) & ~0x3f) == 0 and ((1 << (_la - 72)) & ((1 << (JavaParserLabeled.LT - 72)) | (1 << (JavaParserLabeled.BANG - 72)) | (1 << (JavaParserLabeled.TILDE - 72)) | (1 << (JavaParserLabeled.INC - 72)) | (1 << (JavaParserLabeled.DEC - 72)) | (1 << (JavaParserLabeled.ADD - 72)) | (1 << (JavaParserLabeled.SUB - 72)) | (1 << (JavaParserLabeled.AT - 72)) | (1 << (JavaParserLabeled.IDENTIFIER - 72)))) != 0):
+                if (((_la) & ~0x3f) == 0 and ((1 << _la) & 4609725729453654312) != 0) or ((((_la - 72)) & ~0x3f) == 0 and ((1 << (_la - 72)) & 566935713799) != 0):
                     self.state = 1041
                     self.expression(0)
 
@@ -8926,7 +8926,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 1046
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << JavaParserLabeled.BOOLEAN) | (1 << JavaParserLabeled.BYTE) | (1 << JavaParserLabeled.CHAR) | (1 << JavaParserLabeled.DOUBLE) | (1 << JavaParserLabeled.FLOAT) | (1 << JavaParserLabeled.INT) | (1 << JavaParserLabeled.LONG) | (1 << JavaParserLabeled.NEW) | (1 << JavaParserLabeled.SHORT) | (1 << JavaParserLabeled.SUPER) | (1 << JavaParserLabeled.THIS) | (1 << JavaParserLabeled.VOID) | (1 << JavaParserLabeled.DECIMAL_LITERAL) | (1 << JavaParserLabeled.HEX_LITERAL) | (1 << JavaParserLabeled.OCT_LITERAL) | (1 << JavaParserLabeled.BINARY_LITERAL) | (1 << JavaParserLabeled.FLOAT_LITERAL) | (1 << JavaParserLabeled.HEX_FLOAT_LITERAL) | (1 << JavaParserLabeled.BOOL_LITERAL) | (1 << JavaParserLabeled.CHAR_LITERAL) | (1 << JavaParserLabeled.STRING_LITERAL) | (1 << JavaParserLabeled.NULL_LITERAL) | (1 << JavaParserLabeled.LPAREN))) != 0) or ((((_la - 72)) & ~0x3f) == 0 and ((1 << (_la - 72)) & ((1 << (JavaParserLabeled.LT - 72)) | (1 << (JavaParserLabeled.BANG - 72)) | (1 << (JavaParserLabeled.TILDE - 72)) | (1 << (JavaParserLabeled.INC - 72)) | (1 << (JavaParserLabeled.DEC - 72)) | (1 << (JavaParserLabeled.ADD - 72)) | (1 << (JavaParserLabeled.SUB - 72)) | (1 << (JavaParserLabeled.AT - 72)) | (1 << (JavaParserLabeled.IDENTIFIER - 72)))) != 0):
+                if (((_la) & ~0x3f) == 0 and ((1 << _la) & 4609725729453654312) != 0) or ((((_la - 72)) & ~0x3f) == 0 and ((1 << (_la - 72)) & 566935713799) != 0):
                     self.state = 1045
                     localctx.forUpdate = self.expressionList()
 
@@ -9236,7 +9236,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 1074
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==JavaParserLabeled.COMMA:
+            while _la==68:
                 self.state = 1070
                 self.match(JavaParserLabeled.COMMA)
                 self.state = 1071
@@ -9374,7 +9374,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 1095
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [JavaParserLabeled.IDENTIFIER]:
+            if token in [111]:
                 localctx = JavaParserLabeled.MethodCall0Context(self, localctx)
                 self.enterOuterAlt(localctx, 1)
                 self.state = 1077
@@ -9384,7 +9384,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 1080
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << JavaParserLabeled.BOOLEAN) | (1 << JavaParserLabeled.BYTE) | (1 << JavaParserLabeled.CHAR) | (1 << JavaParserLabeled.DOUBLE) | (1 << JavaParserLabeled.FLOAT) | (1 << JavaParserLabeled.INT) | (1 << JavaParserLabeled.LONG) | (1 << JavaParserLabeled.NEW) | (1 << JavaParserLabeled.SHORT) | (1 << JavaParserLabeled.SUPER) | (1 << JavaParserLabeled.THIS) | (1 << JavaParserLabeled.VOID) | (1 << JavaParserLabeled.DECIMAL_LITERAL) | (1 << JavaParserLabeled.HEX_LITERAL) | (1 << JavaParserLabeled.OCT_LITERAL) | (1 << JavaParserLabeled.BINARY_LITERAL) | (1 << JavaParserLabeled.FLOAT_LITERAL) | (1 << JavaParserLabeled.HEX_FLOAT_LITERAL) | (1 << JavaParserLabeled.BOOL_LITERAL) | (1 << JavaParserLabeled.CHAR_LITERAL) | (1 << JavaParserLabeled.STRING_LITERAL) | (1 << JavaParserLabeled.NULL_LITERAL) | (1 << JavaParserLabeled.LPAREN))) != 0) or ((((_la - 72)) & ~0x3f) == 0 and ((1 << (_la - 72)) & ((1 << (JavaParserLabeled.LT - 72)) | (1 << (JavaParserLabeled.BANG - 72)) | (1 << (JavaParserLabeled.TILDE - 72)) | (1 << (JavaParserLabeled.INC - 72)) | (1 << (JavaParserLabeled.DEC - 72)) | (1 << (JavaParserLabeled.ADD - 72)) | (1 << (JavaParserLabeled.SUB - 72)) | (1 << (JavaParserLabeled.AT - 72)) | (1 << (JavaParserLabeled.IDENTIFIER - 72)))) != 0):
+                if (((_la) & ~0x3f) == 0 and ((1 << _la) & 4609725729453654312) != 0) or ((((_la - 72)) & ~0x3f) == 0 and ((1 << (_la - 72)) & 566935713799) != 0):
                     self.state = 1079
                     self.expressionList()
 
@@ -9392,7 +9392,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 1082
                 self.match(JavaParserLabeled.RPAREN)
                 pass
-            elif token in [JavaParserLabeled.THIS]:
+            elif token in [43]:
                 localctx = JavaParserLabeled.MethodCall1Context(self, localctx)
                 self.enterOuterAlt(localctx, 2)
                 self.state = 1083
@@ -9402,7 +9402,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 1086
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << JavaParserLabeled.BOOLEAN) | (1 << JavaParserLabeled.BYTE) | (1 << JavaParserLabeled.CHAR) | (1 << JavaParserLabeled.DOUBLE) | (1 << JavaParserLabeled.FLOAT) | (1 << JavaParserLabeled.INT) | (1 << JavaParserLabeled.LONG) | (1 << JavaParserLabeled.NEW) | (1 << JavaParserLabeled.SHORT) | (1 << JavaParserLabeled.SUPER) | (1 << JavaParserLabeled.THIS) | (1 << JavaParserLabeled.VOID) | (1 << JavaParserLabeled.DECIMAL_LITERAL) | (1 << JavaParserLabeled.HEX_LITERAL) | (1 << JavaParserLabeled.OCT_LITERAL) | (1 << JavaParserLabeled.BINARY_LITERAL) | (1 << JavaParserLabeled.FLOAT_LITERAL) | (1 << JavaParserLabeled.HEX_FLOAT_LITERAL) | (1 << JavaParserLabeled.BOOL_LITERAL) | (1 << JavaParserLabeled.CHAR_LITERAL) | (1 << JavaParserLabeled.STRING_LITERAL) | (1 << JavaParserLabeled.NULL_LITERAL) | (1 << JavaParserLabeled.LPAREN))) != 0) or ((((_la - 72)) & ~0x3f) == 0 and ((1 << (_la - 72)) & ((1 << (JavaParserLabeled.LT - 72)) | (1 << (JavaParserLabeled.BANG - 72)) | (1 << (JavaParserLabeled.TILDE - 72)) | (1 << (JavaParserLabeled.INC - 72)) | (1 << (JavaParserLabeled.DEC - 72)) | (1 << (JavaParserLabeled.ADD - 72)) | (1 << (JavaParserLabeled.SUB - 72)) | (1 << (JavaParserLabeled.AT - 72)) | (1 << (JavaParserLabeled.IDENTIFIER - 72)))) != 0):
+                if (((_la) & ~0x3f) == 0 and ((1 << _la) & 4609725729453654312) != 0) or ((((_la - 72)) & ~0x3f) == 0 and ((1 << (_la - 72)) & 566935713799) != 0):
                     self.state = 1085
                     self.expressionList()
 
@@ -9410,7 +9410,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 1088
                 self.match(JavaParserLabeled.RPAREN)
                 pass
-            elif token in [JavaParserLabeled.SUPER]:
+            elif token in [40]:
                 localctx = JavaParserLabeled.MethodCall2Context(self, localctx)
                 self.enterOuterAlt(localctx, 3)
                 self.state = 1089
@@ -9420,7 +9420,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 1092
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << JavaParserLabeled.BOOLEAN) | (1 << JavaParserLabeled.BYTE) | (1 << JavaParserLabeled.CHAR) | (1 << JavaParserLabeled.DOUBLE) | (1 << JavaParserLabeled.FLOAT) | (1 << JavaParserLabeled.INT) | (1 << JavaParserLabeled.LONG) | (1 << JavaParserLabeled.NEW) | (1 << JavaParserLabeled.SHORT) | (1 << JavaParserLabeled.SUPER) | (1 << JavaParserLabeled.THIS) | (1 << JavaParserLabeled.VOID) | (1 << JavaParserLabeled.DECIMAL_LITERAL) | (1 << JavaParserLabeled.HEX_LITERAL) | (1 << JavaParserLabeled.OCT_LITERAL) | (1 << JavaParserLabeled.BINARY_LITERAL) | (1 << JavaParserLabeled.FLOAT_LITERAL) | (1 << JavaParserLabeled.HEX_FLOAT_LITERAL) | (1 << JavaParserLabeled.BOOL_LITERAL) | (1 << JavaParserLabeled.CHAR_LITERAL) | (1 << JavaParserLabeled.STRING_LITERAL) | (1 << JavaParserLabeled.NULL_LITERAL) | (1 << JavaParserLabeled.LPAREN))) != 0) or ((((_la - 72)) & ~0x3f) == 0 and ((1 << (_la - 72)) & ((1 << (JavaParserLabeled.LT - 72)) | (1 << (JavaParserLabeled.BANG - 72)) | (1 << (JavaParserLabeled.TILDE - 72)) | (1 << (JavaParserLabeled.INC - 72)) | (1 << (JavaParserLabeled.DEC - 72)) | (1 << (JavaParserLabeled.ADD - 72)) | (1 << (JavaParserLabeled.SUB - 72)) | (1 << (JavaParserLabeled.AT - 72)) | (1 << (JavaParserLabeled.IDENTIFIER - 72)))) != 0):
+                if (((_la) & ~0x3f) == 0 and ((1 << _la) & 4609725729453654312) != 0) or ((((_la - 72)) & ~0x3f) == 0 and ((1 << (_la - 72)) & 566935713799) != 0):
                     self.state = 1091
                     self.expressionList()
 
@@ -10392,7 +10392,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 1113
                 localctx.prefix = self._input.LT(1)
                 _la = self._input.LA(1)
-                if not(((((_la - 83)) & ~0x3f) == 0 and ((1 << (_la - 83)) & ((1 << (JavaParserLabeled.INC - 83)) | (1 << (JavaParserLabeled.DEC - 83)) | (1 << (JavaParserLabeled.ADD - 83)) | (1 << (JavaParserLabeled.SUB - 83)))) != 0)):
+                if not(((((_la - 83)) & ~0x3f) == 0 and ((1 << (_la - 83)) & 15) != 0)):
                     localctx.prefix = self._errHandler.recoverInline(self)
                 else:
                     self._errHandler.reportMatch(self)
@@ -10408,7 +10408,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 1115
                 localctx.prefix = self._input.LT(1)
                 _la = self._input.LA(1)
-                if not(_la==JavaParserLabeled.BANG or _la==JavaParserLabeled.TILDE):
+                if not(_la==73 or _la==74):
                     localctx.prefix = self._errHandler.recoverInline(self)
                 else:
                     self._errHandler.reportMatch(self)
@@ -10436,11 +10436,11 @@ class JavaParserLabeled ( Parser ):
                 self.state = 1125
                 self._errHandler.sync(self)
                 token = self._input.LA(1)
-                if token in [JavaParserLabeled.LT, JavaParserLabeled.IDENTIFIER]:
+                if token in [72, 111]:
                     self.state = 1121
                     self._errHandler.sync(self)
                     _la = self._input.LA(1)
-                    if _la==JavaParserLabeled.LT:
+                    if _la==72:
                         self.state = 1120
                         self.typeArguments()
 
@@ -10448,7 +10448,7 @@ class JavaParserLabeled ( Parser ):
                     self.state = 1123
                     self.match(JavaParserLabeled.IDENTIFIER)
                     pass
-                elif token in [JavaParserLabeled.NEW]:
+                elif token in [31]:
                     self.state = 1124
                     self.match(JavaParserLabeled.NEW)
                     pass
@@ -10468,7 +10468,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 1130
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if _la==JavaParserLabeled.LT:
+                if _la==72:
                     self.state = 1129
                     self.typeArguments()
 
@@ -10500,7 +10500,7 @@ class JavaParserLabeled ( Parser ):
                         self.state = 1137
                         localctx.bop = self._input.LT(1)
                         _la = self._input.LA(1)
-                        if not(((((_la - 87)) & ~0x3f) == 0 and ((1 << (_la - 87)) & ((1 << (JavaParserLabeled.MUL - 87)) | (1 << (JavaParserLabeled.DIV - 87)) | (1 << (JavaParserLabeled.MOD - 87)))) != 0)):
+                        if not(((((_la - 87)) & ~0x3f) == 0 and ((1 << (_la - 87)) & 35) != 0)):
                             localctx.bop = self._errHandler.recoverInline(self)
                         else:
                             self._errHandler.reportMatch(self)
@@ -10519,7 +10519,7 @@ class JavaParserLabeled ( Parser ):
                         self.state = 1140
                         localctx.bop = self._input.LT(1)
                         _la = self._input.LA(1)
-                        if not(_la==JavaParserLabeled.ADD or _la==JavaParserLabeled.SUB):
+                        if not(_la==85 or _la==86):
                             localctx.bop = self._errHandler.recoverInline(self)
                         else:
                             self._errHandler.reportMatch(self)
@@ -10576,7 +10576,7 @@ class JavaParserLabeled ( Parser ):
                         self.state = 1154
                         localctx.bop = self._input.LT(1)
                         _la = self._input.LA(1)
-                        if not(((((_la - 71)) & ~0x3f) == 0 and ((1 << (_la - 71)) & ((1 << (JavaParserLabeled.GT - 71)) | (1 << (JavaParserLabeled.LT - 71)) | (1 << (JavaParserLabeled.LE - 71)) | (1 << (JavaParserLabeled.GE - 71)))) != 0)):
+                        if not(((((_la - 71)) & ~0x3f) == 0 and ((1 << (_la - 71)) & 387) != 0)):
                             localctx.bop = self._errHandler.recoverInline(self)
                         else:
                             self._errHandler.reportMatch(self)
@@ -10595,7 +10595,7 @@ class JavaParserLabeled ( Parser ):
                         self.state = 1157
                         localctx.bop = self._input.LT(1)
                         _la = self._input.LA(1)
-                        if not(_la==JavaParserLabeled.EQUAL or _la==JavaParserLabeled.NOTEQUAL):
+                        if not(_la==77 or _la==80):
                             localctx.bop = self._errHandler.recoverInline(self)
                         else:
                             self._errHandler.reportMatch(self)
@@ -10696,7 +10696,7 @@ class JavaParserLabeled ( Parser ):
                         self.state = 1181
                         localctx.bop = self._input.LT(1)
                         _la = self._input.LA(1)
-                        if not(((((_la - 70)) & ~0x3f) == 0 and ((1 << (_la - 70)) & ((1 << (JavaParserLabeled.ASSIGN - 70)) | (1 << (JavaParserLabeled.ADD_ASSIGN - 70)) | (1 << (JavaParserLabeled.SUB_ASSIGN - 70)) | (1 << (JavaParserLabeled.MUL_ASSIGN - 70)) | (1 << (JavaParserLabeled.DIV_ASSIGN - 70)) | (1 << (JavaParserLabeled.AND_ASSIGN - 70)) | (1 << (JavaParserLabeled.OR_ASSIGN - 70)) | (1 << (JavaParserLabeled.XOR_ASSIGN - 70)) | (1 << (JavaParserLabeled.MOD_ASSIGN - 70)) | (1 << (JavaParserLabeled.LSHIFT_ASSIGN - 70)) | (1 << (JavaParserLabeled.RSHIFT_ASSIGN - 70)) | (1 << (JavaParserLabeled.URSHIFT_ASSIGN - 70)))) != 0)):
+                        if not(((((_la - 70)) & ~0x3f) == 0 and ((1 << (_la - 70)) & 17171480577) != 0)):
                             localctx.bop = self._errHandler.recoverInline(self)
                         else:
                             self._errHandler.reportMatch(self)
@@ -10738,7 +10738,7 @@ class JavaParserLabeled ( Parser ):
                             self.state = 1190
                             self._errHandler.sync(self)
                             _la = self._input.LA(1)
-                            if _la==JavaParserLabeled.LT:
+                            if _la==72:
                                 self.state = 1189
                                 self.nonWildcardTypeArguments()
 
@@ -10787,7 +10787,7 @@ class JavaParserLabeled ( Parser ):
                         self.state = 1204
                         localctx.postfix = self._input.LT(1)
                         _la = self._input.LA(1)
-                        if not(_la==JavaParserLabeled.INC or _la==JavaParserLabeled.DEC):
+                        if not(_la==83 or _la==84):
                             localctx.postfix = self._errHandler.recoverInline(self)
                         else:
                             self._errHandler.reportMatch(self)
@@ -10819,7 +10819,7 @@ class JavaParserLabeled ( Parser ):
                         self.state = 1211
                         self._errHandler.sync(self)
                         _la = self._input.LA(1)
-                        if _la==JavaParserLabeled.LT:
+                        if _la==72:
                             self.state = 1210
                             self.typeArguments()
 
@@ -11032,7 +11032,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 1226
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << JavaParserLabeled.BOOLEAN) | (1 << JavaParserLabeled.BYTE) | (1 << JavaParserLabeled.CHAR) | (1 << JavaParserLabeled.DOUBLE) | (1 << JavaParserLabeled.FINAL) | (1 << JavaParserLabeled.FLOAT) | (1 << JavaParserLabeled.INT) | (1 << JavaParserLabeled.LONG) | (1 << JavaParserLabeled.SHORT))) != 0) or _la==JavaParserLabeled.AT or _la==JavaParserLabeled.IDENTIFIER:
+                if (((_la) & ~0x3f) == 0 and ((1 << _la) & 138111369512) != 0) or _la==106 or _la==111:
                     self.state = 1225
                     self.formalParameterList()
 
@@ -11051,7 +11051,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 1235
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                while _la==JavaParserLabeled.COMMA:
+                while _la==68:
                     self.state = 1231
                     self.match(JavaParserLabeled.COMMA)
                     self.state = 1232
@@ -11150,13 +11150,13 @@ class JavaParserLabeled ( Parser ):
             self.state = 1243
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [JavaParserLabeled.BOOLEAN, JavaParserLabeled.BYTE, JavaParserLabeled.CHAR, JavaParserLabeled.DOUBLE, JavaParserLabeled.FLOAT, JavaParserLabeled.INT, JavaParserLabeled.LONG, JavaParserLabeled.NEW, JavaParserLabeled.SHORT, JavaParserLabeled.SUPER, JavaParserLabeled.THIS, JavaParserLabeled.VOID, JavaParserLabeled.DECIMAL_LITERAL, JavaParserLabeled.HEX_LITERAL, JavaParserLabeled.OCT_LITERAL, JavaParserLabeled.BINARY_LITERAL, JavaParserLabeled.FLOAT_LITERAL, JavaParserLabeled.HEX_FLOAT_LITERAL, JavaParserLabeled.BOOL_LITERAL, JavaParserLabeled.CHAR_LITERAL, JavaParserLabeled.STRING_LITERAL, JavaParserLabeled.NULL_LITERAL, JavaParserLabeled.LPAREN, JavaParserLabeled.LT, JavaParserLabeled.BANG, JavaParserLabeled.TILDE, JavaParserLabeled.INC, JavaParserLabeled.DEC, JavaParserLabeled.ADD, JavaParserLabeled.SUB, JavaParserLabeled.AT, JavaParserLabeled.IDENTIFIER]:
+            if token in [3, 5, 8, 14, 20, 27, 29, 31, 37, 40, 43, 48, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 72, 73, 74, 83, 84, 85, 86, 106, 111]:
                 localctx = JavaParserLabeled.LambdaBody0Context(self, localctx)
                 self.enterOuterAlt(localctx, 1)
                 self.state = 1241
                 self.expression(0)
                 pass
-            elif token in [JavaParserLabeled.LBRACE]:
+            elif token in [63]:
                 localctx = JavaParserLabeled.LambdaBody1Context(self, localctx)
                 self.enterOuterAlt(localctx, 2)
                 self.state = 1242
@@ -11446,11 +11446,11 @@ class JavaParserLabeled ( Parser ):
                 self.state = 1261
                 self._errHandler.sync(self)
                 token = self._input.LA(1)
-                if token in [JavaParserLabeled.SUPER, JavaParserLabeled.IDENTIFIER]:
+                if token in [40, 111]:
                     self.state = 1258
                     self.explicitGenericInvocationSuffix()
                     pass
-                elif token in [JavaParserLabeled.THIS]:
+                elif token in [43]:
                     self.state = 1259
                     self.match(JavaParserLabeled.THIS)
                     self.state = 1260
@@ -11552,7 +11552,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 1278
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==JavaParserLabeled.LT:
+            if _la==72:
                 self.state = 1277
                 self.typeArguments()
 
@@ -11654,7 +11654,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 1289
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [JavaParserLabeled.LT]:
+            if token in [72]:
                 localctx = JavaParserLabeled.Creator0Context(self, localctx)
                 self.enterOuterAlt(localctx, 1)
                 self.state = 1280
@@ -11664,7 +11664,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 1282
                 self.classCreatorRest()
                 pass
-            elif token in [JavaParserLabeled.BOOLEAN, JavaParserLabeled.BYTE, JavaParserLabeled.CHAR, JavaParserLabeled.DOUBLE, JavaParserLabeled.FLOAT, JavaParserLabeled.INT, JavaParserLabeled.LONG, JavaParserLabeled.SHORT, JavaParserLabeled.IDENTIFIER]:
+            elif token in [3, 5, 8, 14, 20, 27, 29, 37, 111]:
                 localctx = JavaParserLabeled.Creator1Context(self, localctx)
                 self.enterOuterAlt(localctx, 2)
                 self.state = 1284
@@ -11672,11 +11672,11 @@ class JavaParserLabeled ( Parser ):
                 self.state = 1287
                 self._errHandler.sync(self)
                 token = self._input.LA(1)
-                if token in [JavaParserLabeled.LBRACK]:
+                if token in [65]:
                     self.state = 1285
                     self.arrayCreatorRest()
                     pass
-                elif token in [JavaParserLabeled.LPAREN]:
+                elif token in [61]:
                     self.state = 1286
                     self.classCreatorRest()
                     pass
@@ -11786,7 +11786,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 1306
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [JavaParserLabeled.IDENTIFIER]:
+            if token in [111]:
                 localctx = JavaParserLabeled.CreatedName0Context(self, localctx)
                 self.enterOuterAlt(localctx, 1)
                 self.state = 1291
@@ -11794,7 +11794,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 1293
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if _la==JavaParserLabeled.LT:
+                if _la==72:
                     self.state = 1292
                     self.typeArgumentsOrDiamond()
 
@@ -11802,7 +11802,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 1302
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                while _la==JavaParserLabeled.DOT:
+                while _la==69:
                     self.state = 1295
                     self.match(JavaParserLabeled.DOT)
                     self.state = 1296
@@ -11810,7 +11810,7 @@ class JavaParserLabeled ( Parser ):
                     self.state = 1298
                     self._errHandler.sync(self)
                     _la = self._input.LA(1)
-                    if _la==JavaParserLabeled.LT:
+                    if _la==72:
                         self.state = 1297
                         self.typeArgumentsOrDiamond()
 
@@ -11820,7 +11820,7 @@ class JavaParserLabeled ( Parser ):
                     _la = self._input.LA(1)
 
                 pass
-            elif token in [JavaParserLabeled.BOOLEAN, JavaParserLabeled.BYTE, JavaParserLabeled.CHAR, JavaParserLabeled.DOUBLE, JavaParserLabeled.FLOAT, JavaParserLabeled.INT, JavaParserLabeled.LONG, JavaParserLabeled.SHORT]:
+            elif token in [3, 5, 8, 14, 20, 27, 29, 37]:
                 localctx = JavaParserLabeled.CreatedName1Context(self, localctx)
                 self.enterOuterAlt(localctx, 2)
                 self.state = 1305
@@ -11888,7 +11888,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 1310
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==JavaParserLabeled.LT:
+            if _la==72:
                 self.state = 1309
                 self.nonWildcardTypeArgumentsOrDiamond()
 
@@ -11966,13 +11966,13 @@ class JavaParserLabeled ( Parser ):
             self.state = 1342
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [JavaParserLabeled.RBRACK]:
+            if token in [66]:
                 self.state = 1315
                 self.match(JavaParserLabeled.RBRACK)
                 self.state = 1320
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                while _la==JavaParserLabeled.LBRACK:
+                while _la==65:
                     self.state = 1316
                     self.match(JavaParserLabeled.LBRACK)
                     self.state = 1317
@@ -11984,7 +11984,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 1323
                 self.arrayInitializer()
                 pass
-            elif token in [JavaParserLabeled.BOOLEAN, JavaParserLabeled.BYTE, JavaParserLabeled.CHAR, JavaParserLabeled.DOUBLE, JavaParserLabeled.FLOAT, JavaParserLabeled.INT, JavaParserLabeled.LONG, JavaParserLabeled.NEW, JavaParserLabeled.SHORT, JavaParserLabeled.SUPER, JavaParserLabeled.THIS, JavaParserLabeled.VOID, JavaParserLabeled.DECIMAL_LITERAL, JavaParserLabeled.HEX_LITERAL, JavaParserLabeled.OCT_LITERAL, JavaParserLabeled.BINARY_LITERAL, JavaParserLabeled.FLOAT_LITERAL, JavaParserLabeled.HEX_FLOAT_LITERAL, JavaParserLabeled.BOOL_LITERAL, JavaParserLabeled.CHAR_LITERAL, JavaParserLabeled.STRING_LITERAL, JavaParserLabeled.NULL_LITERAL, JavaParserLabeled.LPAREN, JavaParserLabeled.LT, JavaParserLabeled.BANG, JavaParserLabeled.TILDE, JavaParserLabeled.INC, JavaParserLabeled.DEC, JavaParserLabeled.ADD, JavaParserLabeled.SUB, JavaParserLabeled.AT, JavaParserLabeled.IDENTIFIER]:
+            elif token in [3, 5, 8, 14, 20, 27, 29, 31, 37, 40, 43, 48, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 72, 73, 74, 83, 84, 85, 86, 106, 111]:
                 self.state = 1324
                 self.expression(0)
                 self.state = 1325
@@ -12392,7 +12392,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 1370
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==JavaParserLabeled.COMMA:
+            while _la==68:
                 self.state = 1366
                 self.match(JavaParserLabeled.COMMA)
                 self.state = 1367
@@ -12485,11 +12485,11 @@ class JavaParserLabeled ( Parser ):
             self.state = 1381
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [JavaParserLabeled.IDENTIFIER]:
+            if token in [111]:
                 self.state = 1379
                 self.classOrInterfaceType()
                 pass
-            elif token in [JavaParserLabeled.BOOLEAN, JavaParserLabeled.BYTE, JavaParserLabeled.CHAR, JavaParserLabeled.DOUBLE, JavaParserLabeled.FLOAT, JavaParserLabeled.INT, JavaParserLabeled.LONG, JavaParserLabeled.SHORT]:
+            elif token in [3, 5, 8, 14, 20, 27, 29, 37]:
                 self.state = 1380
                 self.primitiveType()
                 pass
@@ -12504,7 +12504,7 @@ class JavaParserLabeled ( Parser ):
                     self.state = 1386
                     self._errHandler.sync(self)
                     _la = self._input.LA(1)
-                    while _la==JavaParserLabeled.AT or _la==JavaParserLabeled.IDENTIFIER:
+                    while _la==106 or _la==111:
                         self.state = 1383
                         self.annotation()
                         self.state = 1388
@@ -12588,7 +12588,7 @@ class JavaParserLabeled ( Parser ):
             self.enterOuterAlt(localctx, 1)
             self.state = 1396
             _la = self._input.LA(1)
-            if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << JavaParserLabeled.BOOLEAN) | (1 << JavaParserLabeled.BYTE) | (1 << JavaParserLabeled.CHAR) | (1 << JavaParserLabeled.DOUBLE) | (1 << JavaParserLabeled.FLOAT) | (1 << JavaParserLabeled.INT) | (1 << JavaParserLabeled.LONG) | (1 << JavaParserLabeled.SHORT))) != 0)):
+            if not((((_la) & ~0x3f) == 0 and ((1 << _la) & 138111107368) != 0)):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
@@ -12662,7 +12662,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 1404
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==JavaParserLabeled.COMMA:
+            while _la==68:
                 self.state = 1400
                 self.match(JavaParserLabeled.COMMA)
                 self.state = 1401
@@ -12762,13 +12762,13 @@ class JavaParserLabeled ( Parser ):
             self.state = 1415
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [JavaParserLabeled.LPAREN]:
+            if token in [61]:
                 localctx = JavaParserLabeled.SuperSuffix0Context(self, localctx)
                 self.enterOuterAlt(localctx, 1)
                 self.state = 1409
                 self.arguments()
                 pass
-            elif token in [JavaParserLabeled.DOT]:
+            elif token in [69]:
                 localctx = JavaParserLabeled.SuperSuffix1Context(self, localctx)
                 self.enterOuterAlt(localctx, 2)
                 self.state = 1410
@@ -12876,7 +12876,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 1421
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [JavaParserLabeled.SUPER]:
+            if token in [40]:
                 localctx = JavaParserLabeled.ExplicitGenericInvocationSuffix0Context(self, localctx)
                 self.enterOuterAlt(localctx, 1)
                 self.state = 1417
@@ -12884,7 +12884,7 @@ class JavaParserLabeled ( Parser ):
                 self.state = 1418
                 self.superSuffix()
                 pass
-            elif token in [JavaParserLabeled.IDENTIFIER]:
+            elif token in [111]:
                 localctx = JavaParserLabeled.ExplicitGenericInvocationSuffix1Context(self, localctx)
                 self.enterOuterAlt(localctx, 2)
                 self.state = 1419
@@ -12953,7 +12953,7 @@ class JavaParserLabeled ( Parser ):
             self.state = 1425
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << JavaParserLabeled.BOOLEAN) | (1 << JavaParserLabeled.BYTE) | (1 << JavaParserLabeled.CHAR) | (1 << JavaParserLabeled.DOUBLE) | (1 << JavaParserLabeled.FLOAT) | (1 << JavaParserLabeled.INT) | (1 << JavaParserLabeled.LONG) | (1 << JavaParserLabeled.NEW) | (1 << JavaParserLabeled.SHORT) | (1 << JavaParserLabeled.SUPER) | (1 << JavaParserLabeled.THIS) | (1 << JavaParserLabeled.VOID) | (1 << JavaParserLabeled.DECIMAL_LITERAL) | (1 << JavaParserLabeled.HEX_LITERAL) | (1 << JavaParserLabeled.OCT_LITERAL) | (1 << JavaParserLabeled.BINARY_LITERAL) | (1 << JavaParserLabeled.FLOAT_LITERAL) | (1 << JavaParserLabeled.HEX_FLOAT_LITERAL) | (1 << JavaParserLabeled.BOOL_LITERAL) | (1 << JavaParserLabeled.CHAR_LITERAL) | (1 << JavaParserLabeled.STRING_LITERAL) | (1 << JavaParserLabeled.NULL_LITERAL) | (1 << JavaParserLabeled.LPAREN))) != 0) or ((((_la - 72)) & ~0x3f) == 0 and ((1 << (_la - 72)) & ((1 << (JavaParserLabeled.LT - 72)) | (1 << (JavaParserLabeled.BANG - 72)) | (1 << (JavaParserLabeled.TILDE - 72)) | (1 << (JavaParserLabeled.INC - 72)) | (1 << (JavaParserLabeled.DEC - 72)) | (1 << (JavaParserLabeled.ADD - 72)) | (1 << (JavaParserLabeled.SUB - 72)) | (1 << (JavaParserLabeled.AT - 72)) | (1 << (JavaParserLabeled.IDENTIFIER - 72)))) != 0):
+            if (((_la) & ~0x3f) == 0 and ((1 << _la) & 4609725729453654312) != 0) or ((((_la - 72)) & ~0x3f) == 0 and ((1 << (_la - 72)) & 566935713799) != 0):
                 self.state = 1424
                 self.expressionList()
 
