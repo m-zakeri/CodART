@@ -38,10 +38,11 @@ class GrammarClass:
 
     def _procedure(self):
         print("TEST 00 : ", self.chromosome)
-        print("TEST 01 : ", self.chromosome[self.pvot] % 2)
+        if self.pvot < len(self.chromosome):
+            print("TEST 01 : ", self.chromosome[self.pvot] % 2)
 
         if len(self.chromosome) > 0:
-            if len(self.chromosome) > (self.pvot - 1):
+            if len(self.chromosome) > (self.pvot):
                 num = self.chromosome[self.pvot] % 2
                 self.pvot += 1
                 if num == 0:
@@ -162,9 +163,12 @@ class GrammarClass:
 
         if len(self.chromosome) > 1:
             print("TEST 04 : ")
+            print(self.chromosome)
+            print(self.pvot)
             num = self.chromosome[self.pvot] % 4
             print("TEST 05 : ", num)
-            self.pvot += 1
+            if len(self.chromosome) > self.pvot:
+                self.pvot += 1
             if num == 0:
                 return self._extractClass()
             elif num == 1:
@@ -173,8 +177,8 @@ class GrammarClass:
                 return self._pullUpMethod()
             elif num == 3:
                 return self._pushDownMethod()
-            # elif num == 4:
-            #     return self._pullUpConstructor()
+            elif num == 4:
+                return self._pullUpConstructor()
 
         return None
 
@@ -473,7 +477,7 @@ class GrammarClass:
 
             if params["source_class"] != "":
                 candidates.append(params)
-        candid = random.choice(candidates)
+        candid = random.choice(candidates) if candidates else None
         _db.close()
         if pushdown_method.main(
             udb_path=self.udb_path,

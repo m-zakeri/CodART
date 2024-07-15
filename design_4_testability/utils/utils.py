@@ -12,9 +12,9 @@ import json
 
 from antlr4 import *
 
-from design_4_testability.gen.JavaLexer import JavaLexer
-from design_4_testability.gen.JavaParserLabeled import JavaParserLabeled
-from design_4_testability.gen.JavaParserLabeledListener import JavaParserLabeledListener
+from codart.gen.last.JavaLexer import JavaLexer
+from codart.gen.last.JavaParserLabeled import JavaParserLabeled
+from codart.gen.last.JavaParserLabeledListener import JavaParserLabeledListener
 
 from threading import Thread
 import functools

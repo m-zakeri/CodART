@@ -2,7 +2,7 @@ import os
 import subprocess
 os.add_dll_directory("C:\\Program Files\\SciTools\\bin\\pc-win64")
 
-import understand
+
 import understand as und
 from dotenv import dotenv_values
 import json
@@ -63,14 +63,14 @@ class ClsUDB_Metrics:
         return db_path
 
     def get_metrics(self, my_path):
-        db = understand.open("Resources/und_db/" + my_path + ".und")
+        db = und.open("Resources/und_db/" + my_path + ".und")
         metrics = db.metric(dotenv_values().get("LIST_METRICS_CLASS").split(" "))
         for k, v in sorted(metrics.items()):
             print(k, "=", v)
         db.close()
 
     def get_metrics_of_each_function(self, my_path: str):
-        db = understand.open(my_path)
+        db = und.open(my_path)
         for func in db.ents("function,method,procedure"):
             metric = func.metric(dotenv_values().get("LIST_METRICS_METHOD").split(" "))
             for k, v in metric.items():
@@ -78,7 +78,7 @@ class ClsUDB_Metrics:
         db.close()
 
     def get_metrics_of_each_class(self, my_path: str = "", element: list = None):
-        db = understand.open(my_path)
+        db = und.open(my_path)
         for func in db.ents("class"):
             for i in element:
                 metric = func.metric(
@@ -145,7 +145,7 @@ class ClsUDB_Metrics:
         trials = 0
         while result.returncode != 0:
             try:
-                db: understand.Db = understand.open(
+                db: und.Db = und.open(
                     "Resources/und_db/"
                     + dotenv_values().get("RESOURCES_PATH").split(" ")[0]
                     + ".und"
@@ -272,8 +272,8 @@ class DesignMetrics:
             scores.append(class_metric)
 
         dbx.close()
-        return round(sum(scores) / len(scores), 5)
-        # return sum(scores)
+        #return round(sum(scores) / len(scores), 5)
+        return sum(scores)
 
     def print_project_metrics(self):
         dbx = und.open(self.udb_path)

@@ -32,7 +32,7 @@ import pandas as pd
 import understand
 
 
-from design_4_testability.evaluation.testability.directory_utils import export_understand_dependencies_csv
+from codart.utility.directory_utils import export_understand_dependencies_csv
 
 
 class Modularity:

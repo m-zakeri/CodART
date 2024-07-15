@@ -16,7 +16,7 @@ from joblib import Parallel, delayed
 
 import understand as und
 
-from java8speedy.parser import sa_javalabeled
+#from java8speedy.parser import sa_javalabeled
 
 from codart import config
 

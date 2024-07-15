@@ -30,8 +30,8 @@ import time
 
 import understand as und
 
-from design_4_testability.evaluation.metrics import metrics_names
-from design_4_testability.evaluation.metrics.metrics_coverability import UnderstandUtility
+from codart.metrics import metrics_names
+from codart.metrics.metrics_coverability import UnderstandUtility
 
 scaler1 = joblib.load(
     os.path.join(os.path.dirname(__file__),

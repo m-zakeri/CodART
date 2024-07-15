@@ -30,7 +30,7 @@ print("project_path:", udb_path)
 project_path = (
     "C://Users/98910/CodART/gorgeous/Resources/projects/" + dotenv_values().get("RESOURCES_PATH").split(" ")[0]
 )
-print("project_path:" ,project_path)
+print("project_path:", project_path)
 
 def calc_qmood_objectives(arr_):
     qmood_quality_attributes = DesignQualityAttributes(udb_path=udb_path)
@@ -87,7 +87,7 @@ class ProblemSingleObjective(Problem):
                 gc_obj = GrammarClass(
                     project_path=project_path,
                     udb_path=udb_path,
-                    chromosome=j[1:],
+                    chromosome=j[2:],
                 )
 
                 actor_list.append(
@@ -307,13 +307,13 @@ class GenBase:
     CUSTOM
     """
 
-    RANDOM_MODE = 1
+    RANDOM_MODE = 2
 
     def __init__(
         self,
         mod: int = 1,
-        pop_size: int = 21,
-        ge_fitness_evaluations: int = 10000,
+        pop_size: int = 3,
+        ge_fitness_evaluations: int = 100,
         crossover_operator: str = "SP",
         crossover_probability: float = 0.9,
         mutation_operator: str = "INT",

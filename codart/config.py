@@ -31,7 +31,7 @@ INIT_POP_FILE = os.environ.get("INIT_POP_FILE")
 NGEN = int(os.environ.get("NGEN"))
 RESUME_EXECUTION = os.environ.get("RESUME_EXECUTION")
 BENCHMARK_INDEX = int(os.environ.get("BENCHMARK_INDEX", 0))
-
+#print(BENCHMARK_INDEX)
 EXPERIMENTER = os.environ.get("EXPERIMENTER")
 SCRIPT = os.environ.get("SCRIPT")
 DESCRIPTION = os.environ.get("DESCRIPTION")
@@ -139,6 +139,7 @@ BENCHMARKS = {
         'jhotdraw-6.0b1/God-Class_jhotdraw-6.0b1.csv',
     ],
 }
+#print(BENCHMARKS['PROJ'])
 
 PROJECT_PATH = os.path.join(PROJECT_ROOT_DIR, BENCHMARKS['PROJ'][BENCHMARK_INDEX]).replace('/', '\\')
 UDB_PATH = os.path.join(UDB_ROOT_DIR, BENCHMARKS['UDB'][BENCHMARK_INDEX]).replace('/', '\\')

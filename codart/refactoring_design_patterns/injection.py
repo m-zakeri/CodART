@@ -14,9 +14,9 @@ from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
 
-from design_4_testability.gen.JavaLexer import JavaLexer
-from design_4_testability.gen.JavaParserLabeled import JavaParserLabeled
-from design_4_testability.gen.JavaParserLabeledListener import JavaParserLabeledListener
+from codart.gen.last.JavaLexer import JavaLexer
+from codart.gen.last.JavaParserLabeled import JavaParserLabeled
+from codart.gen.last.JavaParserLabeledListener import JavaParserLabeledListener
 
 from design_4_testability.utils.utils import Path, File, Struct, get_parser_and_tokens, get_parser
 from .interface import InterfaceCreator, InterfaceInfoListener
