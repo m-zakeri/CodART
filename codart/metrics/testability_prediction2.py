@@ -34,7 +34,7 @@ from codart.metrics import metrics_names
 from codart.metrics.metrics_coverability import UnderstandUtility
 
 scaler1 = joblib.load(os.path.join(os.path.dirname(__file__), 'data_model/DS07510.joblib'))
-model5 = joblib.load(os.path.join(os.path.dirname(__file__), 'sklearn_models7/VR1_DS5.joblib'))
+model5 = joblib.load(os.path.join(os.path.dirname(__file__), 'data_model/VR1_DS5.joblib'))
 model_branch = joblib.load(os.path.join(os.path.dirname(__file__), 'sklearn_models6/VR6_DS5_branch.joblib'))
 model_line = joblib.load(os.path.join(os.path.dirname(__file__), 'sklearn_models6/VR6_DS5_line.joblib'))
 

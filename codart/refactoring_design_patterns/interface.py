@@ -8,8 +8,8 @@ __author__ = 'Sadegh Jafari, Morteza Zakeri'
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
-from codart.gen.last.JavaParserLabeledListener import JavaParserLabeledListener
-from codart.gen.last.JavaParserLabeled import JavaParserLabeled
+from codart.gen.JavaParserLabeledListener import JavaParserLabeledListener
+from codart.gen.JavaParserLabeled import JavaParserLabeled
 
 from design_4_testability.utils.utils import Path, File, get_parser_and_tokens, get_parser
 from design_4_testability import config

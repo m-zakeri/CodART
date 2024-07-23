@@ -11,6 +11,8 @@ IEEE Trans. Softw. Eng., vol. 28, no. 1, pp. 4–17, 2002.
 __version__ = '0.3.0'
 __author__ = 'Morteza Zakeri'
 
+import os
+os.add_dll_directory("C:\\Program Files\\SciTools\\bin\\pc-win64")
 import understand as und
 
 from codart import config

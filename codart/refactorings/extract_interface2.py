@@ -30,9 +30,9 @@ import os
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
-from codart.gen.javaLabeled.JavaLexer import JavaLexer
-from codart.gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
-from codart.gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
+from codart.gen.JavaLexer import JavaLexer
+from codart.gen.JavaParserLabeledListener import JavaParserLabeledListener
+from codart.gen.JavaParserLabeled import JavaParserLabeled
 from codart import config
 
 

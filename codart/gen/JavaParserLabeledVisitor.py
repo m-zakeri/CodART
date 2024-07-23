@@ -1,9 +1,9 @@
 # Generated from C:/Users/98910/CodART/grammars/JavaParserLabeled.g4 by ANTLR 4.13.1
 from antlr4 import *
 if "." in __name__:
-    from .JavaParserLabeled import JavaParserLabeled
+    from codart.gen.JavaParserLabeled import JavaParserLabeled
 else:
-    from JavaParserLabeled import JavaParserLabeled
+    from codart.gen.JavaParserLabeled import JavaParserLabeled
 
 # This class defines a complete generic visitor for a parse tree produced by JavaParserLabeled.
 

@@ -5,18 +5,11 @@ The module implements dependency injection patterns
 version = '0.1.1'
 author = 'Sadegh Jafari, Morteza Zakeri'
 
-import json
-
-import networkx as nx
-from csv import writer
-
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
-
-from codart.gen.last.JavaLexer import JavaLexer
-from codart.gen.last.JavaParserLabeled import JavaParserLabeled
-from codart.gen.last.JavaParserLabeledListener import JavaParserLabeledListener
+from codart.gen.JavaParserLabeled import JavaParserLabeled
+from codart.gen.JavaParserLabeledListener import JavaParserLabeledListener
 
 from design_4_testability.utils.utils import Path, File, Struct, get_parser_and_tokens, get_parser
 from .interface import InterfaceCreator, InterfaceInfoListener

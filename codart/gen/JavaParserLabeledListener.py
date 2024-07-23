@@ -1,9 +1,9 @@
-# Generated from JavaParserLabeled.g4 by ANTLR 4.9
+# Generated from C:/Users/98910/CodART/grammars/JavaParserLabeled.g4 by ANTLR 4.13.1
 from antlr4 import *
-if __name__ is not None and "." in __name__:
-    from .JavaParserLabeled import JavaParserLabeled
+if "." in __name__:
+    from codart.gen.JavaParserLabeled import JavaParserLabeled
 else:
-    from JavaParserLabeled import JavaParserLabeled
+    from codart.gen.JavaParserLabeled import JavaParserLabeled
 
 # This class defines a complete listener for a parse tree produced by JavaParserLabeled.
 class JavaParserLabeledListener(ParseTreeListener):

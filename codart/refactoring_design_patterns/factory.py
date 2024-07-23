@@ -3,8 +3,8 @@ import networkx as nx
 
 from antlr4 import *
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
-from codart.gen.last.JavaParserLabeledListener import JavaParserLabeledListener
-from codart.gen.last.JavaParserLabeled import JavaParserLabeled
+from codart.gen.JavaParserLabeledListener import JavaParserLabeledListener
+from codart.gen.JavaParserLabeled import JavaParserLabeled
 
 from .interface import InterfaceAdapter, InterfaceCreator
 from design_4_testability.utils.utils import get_parser, get_parser_and_tokens

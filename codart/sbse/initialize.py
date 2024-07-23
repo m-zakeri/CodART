@@ -1,4 +1,4 @@
-\"""
+"""
 ## Introduction
 
 This module implements finding refactoring candidates for the search-based algorithms

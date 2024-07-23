@@ -30,8 +30,8 @@ try:
 except ImportError as e:
     print(e)
 
-from codart.gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
-from codart.gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
+from codart.gen.JavaParserLabeled import JavaParserLabeled
+from codart.gen.JavaParserLabeledListener import JavaParserLabeledListener
 from codart.refactorings.move_field import CheckCycleListener
 from codart.symbol_table import parse_and_walk
 from codart.config import logger
