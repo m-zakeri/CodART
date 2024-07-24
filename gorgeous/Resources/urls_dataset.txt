@@ -1,2 +1,0 @@
-git@github.com:Activiti/Activiti.git aba6f941f8f8d42f767c3ea0ae65ddc18b7f1e8b Activity version:5.17.0
-git@github.com:CyanogenMod/android_frameworks_base.git cd78af9e0d12a166d7c05a9c3e55bd7ea592c5df CyanogenMod version:11.0

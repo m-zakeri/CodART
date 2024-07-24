@@ -1,5 +1,0 @@
-ExtractMethod(com.facebook.login.KatanaProxyLoginMethodHandler.handleResultOk())
-ExtractMethod(com.facebook.FacebookSdk.sdkInitialize())
-ExtractMethod(com.facebook.FacebookSdk.sdkInitialize())
-ExtractMethod(com.facebook.login.KatanaProxyLoginMethodHandler.handleResultOk())
-ExtractMethod(com.facebook.internal.AttributionIdentifiers.getAndroidId())
