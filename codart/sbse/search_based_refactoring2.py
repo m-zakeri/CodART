@@ -76,7 +76,7 @@ from pymoo.algorithms.soo.nonconvex.ga import GA
 from pymoo.algorithms.moo.nsga2 import NSGA2
 from pymoo.algorithms.moo.nsga3 import NSGA3
 from pymoo.util.ref_dirs import get_reference_directions
-from pymoo.factory import get_decision_making
+from pymoo.mcdm.high_tradeoff import HighTradeoffPoints
 
 from pymoo.operators.selection.tournament import TournamentSelection
 from pymoo.optimize import minimize
@@ -1227,7 +1227,7 @@ def main():
     try:
         pf = res.F
         # dm = HighTradeoffPoints()
-        dm = get_decision_making("high-tradeoff")
+        dm = HighTradeoffPoints()
         I = dm.do(pf)
 
         logger.info("============ High-tradeoff points refactoring sequences ============")
