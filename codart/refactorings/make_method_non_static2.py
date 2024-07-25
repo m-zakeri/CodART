@@ -29,9 +29,9 @@ try:
 except ImportError as e:
     print(e)
 
-from codart.gen.javaLabeled.JavaLexer import JavaLexer
-from codart.gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
-from codart.gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
+from codart.gen.JavaLexer import JavaLexer
+from codart.gen.JavaParserLabeled import JavaParserLabeled
+from codart.gen.JavaParserLabeledListener import JavaParserLabeledListener
 
 
 class MakeMethodNonStaticRefactoringListener(JavaParserLabeledListener):

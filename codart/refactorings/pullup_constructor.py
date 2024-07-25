@@ -36,8 +36,8 @@ except ImportError as e:
 
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
-from codart.gen.javaLabeled.JavaParserLabeled import JavaParserLabeled
-from codart.gen.javaLabeled.JavaParserLabeledListener import JavaParserLabeledListener
+from codart.gen.JavaParserLabeled import JavaParserLabeled
+from codart.gen.JavaParserLabeledListener import JavaParserLabeledListener
 
 from codart.symbol_table import parse_and_walk, Program
 

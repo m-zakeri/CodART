@@ -1,5 +1,5 @@
 from antlr4 import *
-from codart.gen.javaLabeled.JavaLexer import JavaLexer
+from codart.gen.JavaLexer import JavaLexer
 
 
 def is_equal(file1, file2):

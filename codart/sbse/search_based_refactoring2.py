@@ -75,11 +75,13 @@ from pymoo.core.sampling import Sampling
 from pymoo.algorithms.soo.nonconvex.ga import GA
 from pymoo.algorithms.moo.nsga2 import NSGA2
 from pymoo.algorithms.moo.nsga3 import NSGA3
+from pymoo.util.ref_dirs import get_reference_directions
+from pymoo.mcdm.high_tradeoff import HighTradeoffPoints
 
-from pymoo.factory import get_reference_directions, get_decision_making
 from pymoo.operators.selection.tournament import TournamentSelection
 from pymoo.optimize import minimize
-from pymoo.util.termination.default import MultiObjectiveDefaultTermination
+from pymoo.termination.default import DefaultMultiObjectiveTermination
+
 
 from codart.metrics.qmood import DesignQualityAttributes
 from codart.metrics.modularity import main as modularity_main
@@ -1129,7 +1131,7 @@ def main():
     algorithms.append(alg3)
 
     # Termination of algorithms
-    my_termination = MultiObjectiveDefaultTermination(
+    my_termination = DefaultMultiObjectiveTermination(
         x_tol=None,
         cv_tol=None,
         f_tol=0.0015,
@@ -1225,7 +1227,7 @@ def main():
     try:
         pf = res.F
         # dm = HighTradeoffPoints()
-        dm = get_decision_making("high-tradeoff")
+        dm = HighTradeoffPoints()
         I = dm.do(pf)
 
         logger.info("============ High-tradeoff points refactoring sequences ============")
