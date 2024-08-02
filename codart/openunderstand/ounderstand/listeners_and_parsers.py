@@ -392,7 +392,7 @@ class ListenersAndParsers:
     @timer_decorator()
     def contain_in_listener(self, tree, file_ent, file_address, p):
         try:
-            listener = ContainAndContainBy()
+            listener = ContainAndContainBy(file_address=file_address)
             p.Walk(listener, tree)
             p.add_contain_in(listener.contain, file_ent, file_address)
             # self.logger.info("contain success ")

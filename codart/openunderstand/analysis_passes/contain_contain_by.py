@@ -4,9 +4,10 @@ import openunderstand.analysis_passes.class_properties as class_properties
 
 
 class ContainAndContainBy(JavaParserLabeledListener):
-    def __init__(self):
+    def __init__(self, file_address):
         self.contain = []
         self.packageInfo = []
+        self.file_address = file_address
 
     def enterPackageDeclaration(self, ctx: JavaParserLabeled.PackageDeclarationContext):
         self.packageInfo = []
@@ -16,14 +17,17 @@ class ContainAndContainBy(JavaParserLabeledListener):
                 longname = str(ctx.qualifiedName().IDENTIFIER()[x])
             else:
                 longname = longname + "." + str(ctx.qualifiedName().IDENTIFIER()[x])
-
+        addr = self.file_address
+        addr = addr.replace("/", ".").replace("\\", ".").split(".")
+        addr.pop()
+        par = addr[len(addr) - 1] + ".java"
         self.packageInfo.append(
             {
                 "name": ctx.qualifiedName().IDENTIFIER()[-1],
                 "longname": longname,
                 "kind": "Package",
-                "contents": "",
-                "parent": None,
+                "contents": ctx.getText(),
+                "parent": par,
                 "type": "Package",
                 "value": None,
             }
@@ -33,30 +37,34 @@ class ContainAndContainBy(JavaParserLabeledListener):
         name = ctx.IDENTIFIER().getText()
         [line, col] = str(ctx.start).split(",")[3].split(":")  # line, column
         col = col[:-1]
-        scope_parents = class_properties.ClassPropertiesListener.findParents(ctx)
+        # scope_parents = class_properties.ClassPropertiesListener.findParents(ctx)
+        b = ctx.parentCtx
+        base = b.parentCtx.getChild(0)
+        pack_seq = base.getChild(1).getText()
+        scope_parents = pack_seq
+        scope_longname = scope_parents+"."+b.getChild(1).getChild(1).getText()
 
-        if len(scope_parents) == 1:
-            scope_longname = scope_parents[0]
-        else:
-            scope_longname = ".".join(scope_parents)
-
-        scope_longname = "." + scope_longname
+        # scope_longname = "." + scope_longname
         packageName = self.packageInfo[0]["name"]
         packageLongName = self.packageInfo[0]["longname"]
-        scope_longname = packageLongName + scope_longname
+        # scope_longname = packageLongName + scope_longname
         packageKind = self.packageInfo[0]["kind"]
         packageContent = self.packageInfo[0]["contents"]
         packageParent = self.packageInfo[0]["parent"]
         packageType = self.packageInfo[0]["type"]
         packageValue = self.packageInfo[0]["value"]
 
-        parent = scope_parents[-2] if len(scope_parents) > 2 else None
+        addr = self.file_address
+        addr = addr.replace("/", ".").replace("\\", ".").split(".")
+        addr.pop()
+        par = addr[len(addr) - 1] + ".java"
+
+        parent = par
         kind = "Class"
         modifiers = (
             class_properties.ClassPropertiesListener.findClassOrInterfaceModifiers(ctx)
         )
         content = ctx.getText()
-
         self.contain.append(
             {
                 "package_name": packageName.getText(),

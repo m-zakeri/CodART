@@ -489,7 +489,6 @@ class Db:
                 fn.Lower(KindModel._name).contains(kindstring.lower())
             )
             query = query.where(EntityModel._kind.in_(kinds))
-
         query = query.where(
             (EntityModel._name.contains(name)) | (EntityModel._longname.contains(name))
         )
