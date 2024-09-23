@@ -125,6 +125,15 @@ X. `benchmark_projects`: This directory contains several open-source Java projec
 
 XI. **Other packages**: The information of other packages will be announced in the future.  
  
+### Example to use cli for understand 
+* to using understand
+
+  *     --udb_path "/home/y/Desktop/desktop_0./CodART/benchmark_projects/JSON20201115/JSON20201115.und" --file_path "/home/y/Desktop/desktop_0./CodART/benchmark_projects/JSON20201115/src/main/java/org/json/JSONML.java" --source_class "JSONML"   --moved_methods "toJSONObject" --moved_fields "" --core 0 --project-path "/home/y/Desktop/desktop_0./CodART/benchmark_projects/JSON-java"
+
+* to using openunderstand
+
+  *     --udb_path "/home/y/Desktop/desktop_0./CodART/mydb.udb" --file_path "/home/y/Desktop/desktop_0./CodART/benchmark_projects/JSON20201115/src/main/java/org/json/JSONML.java" --source_class "JSONML"   --moved_methods "toJSONObject" --moved_fields "" --core 1 --project-path "/home/y/Desktop/desktop_0./CodART/benchmark_projects/JSON-java"
+
 
 
 ### News
