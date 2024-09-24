@@ -8,7 +8,7 @@ networkx==2.8.4
 pandas==1.4.3
 Pillow==9.4.0
 progressbar2==3.55.0
-pymoo==0.6.1.1
+pymoo
 pyparsing==3.0.9
 python-dateutil==2.8.2
 python-dotenv==0.19.1

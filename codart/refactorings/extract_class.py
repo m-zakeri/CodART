@@ -618,11 +618,11 @@ def main(udb_path, file_path, source_class, moved_fields, moved_methods, *args, 
 
 
 # Tests
-if __name__ == "__main__":
-    main(
-        udb_path="D:/Dev/JavaSample/JavaSample/JavaSample.und",
-        file_path="D:/Dev/JavaSample/JavaSample/src/extract_class/Person.java",
-        source_class="Person",
-        moved_fields=['officeAreaCode', 'officeNumber', ],
-        moved_methods=['getTelephoneNumber', ],
-    )
+# if __name__ == "__main__":
+#     main(
+#         udb_path="D:/Dev/JavaSample/JavaSample/JavaSample.und",
+#         file_path="D:/Dev/JavaSample/JavaSample/src/extract_class/Person.java",
+#         source_class="Person",
+#         moved_fields=['officeAreaCode', 'officeNumber', ],
+#         moved_methods=['getTelephoneNumber', ],
+#     )

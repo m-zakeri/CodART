@@ -42,3 +42,10 @@ class Refactoring(ABC):
     @abstractmethod
     def check_post_condition(self, *args, **kwargs) -> bool:
         raise NotImplementedError(f"{type(self).__name__} not implement")
+
+
+
+class RefactoringOperation(ABC):
+    @abstractmethod
+    def execute(self):
+        raise NotImplementedError(f"{type(self).__name__} not implement")

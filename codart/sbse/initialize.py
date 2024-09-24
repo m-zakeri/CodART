@@ -1159,19 +1159,15 @@ class SmellInitialization(RandomInitialization):
         self.dump_population(path=initial_pop_path)
         config.logger.debug(f'Generating a biased initial population was finished.')
         return self.population
-
     def load_extract_class_candidates(self):
         _db = und.open(self.udb_path)
         god_classes = pandas.read_csv(config.GOD_CLASS_PATH, sep="\t")
         candidates = []
         for index, row in god_classes.iterrows():
             moved_fields, moved_methods = [], []
-            # print(row[0].strip())
             try:
                 class_file = _db.lookup(re.compile(row[0].strip() + r'$'), "Class")[0].parent().longname()
-                # print(class_file)
             except:
-                # print('Class file not found')
                 continue
             source_class = row[0].split(".")[-1]
             data = row[1][1:-1]  # skip [ and ]
@@ -1196,8 +1192,6 @@ class SmellInitialization(RandomInitialization):
                     "file_path": class_file
                 }
             )
-        # print(candidates)
-        # quit()
         _db.close()
         return candidates
 
