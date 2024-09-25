@@ -125,6 +125,25 @@ X. `benchmark_projects`: This directory contains several open-source Java projec
 
 XI. **Other packages**: The information of other packages will be announced in the future.  
  
+### add understand scitools in ubuntu 24.04
+  
+    nano ~/.bashrc
+
+***********************************
+
+    export PYTHONPATH="/home/y/PycharmProjects/understand-scitools/Understand-6.5.1201-Linux-64bit/scitools/bin/linux64/Python:$PYTHONPATH"
+    export PATH="/home/y/PycharmProjects/understand-scitools/Understand-6.5.1201-Linux-64bit/scitools/bin/linux64:$PATH"
+    export LD_LIBRARY_PATH="/home/y/PycharmProjects/understand-scitools/Understand-6.5.1201-Linux-64bit/scitools/bin/linux64:$LD_LIBRARY_PATH"
+
+****************************************
+
+    source ~/.bashrc
+
+#### or after activate in venv virtual environment 
+      
+    echo "/home/y/PycharmProjects/understand-scitools/Understand-6.5.1201-Linux-64bit/scitools/bin/linux64/Python" > venv/lib/python3.12/site-packages/understand.pth
+
+
 ### Example to use cli for understand 
 * to using understand
 

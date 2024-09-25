@@ -8,17 +8,19 @@ import understand as und
 import pandas as pd
 import codecs
 
-
 config = ConfigParser()
-
-
+config.read("config.ini")
 logger = logging.getLogger()
+
 
 class SmellInitialization(RandomInitialization):
     def __init__(self, *args, **kwargs):
         super(SmellInitialization, self).__init__(*args, **kwargs)
         self.move_method_candidates = self.load_move_method_candidates()
         self.extract_class_candidates = self.load_extract_class_candidates()
+        self.push_down_method_candidates = self.load_extract_class_candidates()
+        self.pull_up_method_candidates = self.load_extract_class_candidates()
+        self.extract_method_candidates = self.load_extract_method_candidates()
 
     def get_move_method_location(self, row):
         class_info, method_info = row.split("::")
@@ -49,18 +51,18 @@ class SmellInitialization(RandomInitialization):
                 logger.debug(f'Append a refactoring "{name}" to "{j}th" gene of the individual {_}.')
                 reset_project()
                 logger.debug('-' * 100)
-
             self.population.append(individual)
             logger.debug(f'Append individual {_} to population, s')
-
         logger.debug('=' * 100)
         initial_pop_path = f'{config.PROJECT_LOG_DIR}initial_population_{config.global_execution_start_time}.json'
         self.dump_population(path=initial_pop_path)
-        config.logger.debug(f'Generating a biased initial population was finished.')
+        logger.debug(f'Generating a biased initial population was finished.')
         return self.population
+
+
     def load_extract_class_candidates(self):
         _db = und.open(self.udb_path)
-        god_classes = pd.read_csv(config.GOD_CLASS_PATH, sep="\t")
+        god_classes = pd.read_csv(config["RELATIONS"]["GOD_CLASS_PATH"], sep="\t")
         candidates = []
         for index, row in god_classes.iterrows():
             moved_fields, moved_methods = [], []
@@ -94,7 +96,7 @@ class SmellInitialization(RandomInitialization):
 
     def load_move_method_candidates(self):
         feature_envies = pd.read_csv(
-            config.FEATURE_ENVY_PATH, sep=None, engine='python'
+            config["RELATIONS"]["FEATURE_ENVY_PATH"], sep=None, engine='python'
         )
         candidates = []
         for index, row in feature_envies.iterrows():
@@ -114,7 +116,7 @@ class SmellInitialization(RandomInitialization):
     def load_extract_method_candidates(self):
         _db = und.open(self.udb_path)
         long_methods = pd.read_csv(
-            config.LONG_METHOD_PATH, sep='\t', engine='python'
+            config["RELATIONS"]["LONG_METHOD_PATH"], sep='\t', engine='python'
         )
         candidates = []
         for index, row in long_methods.iterrows():
