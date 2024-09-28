@@ -11,6 +11,14 @@ import os
 from learner.sbr_initializer.utils.utility import Utils
 from collections import Counter
 import time
+from codart.refactorings import (
+    move_method,
+    extract_method,
+    extract_class,
+    pullup_method,
+    pushdown_method2,
+)
+
 
 config = ConfigParser()
 config.read("config.ini")
@@ -30,12 +38,9 @@ class SmellInitialization(Initializer):
             *args,
             **kwargs,
         )
-        self.move_method_candidates = self.load_move_method_candidates()
-        self.extract_class_candidates = self.load_extract_class_candidates()
-        self.push_down_method_candidates = self.load_extract_class_candidates()
-        self.pull_up_method_candidates = self.load_extract_class_candidates()
-        self.extract_method_candidates = self.load_extract_method_candidates()
-        self.utils = Utils(logger=logger, initializers=None, population=self.population)
+        self.utils = Utils(
+            logger=logger, initializers=self.initializers, population=self.population
+        )
 
     def generate_population(self):
         logger.debug(f"Generating a biased initial population ...")
@@ -257,19 +262,31 @@ class SmellInitialization(Initializer):
         return candidates
 
     def init_move_method(self):
-        params = random.choice(self.move_method_candidates)
+        params = random.choice(self.load_move_method_candidates())
         params["udb_path"] = self.udb_path
         main = move_method.main
         return main, params, "Move Method"
 
     def init_extract_class(self):
         main = extract_class.main
-        params = random.choice(self.extract_class_candidates)
+        params = random.choice(self.load_extract_class_candidates())
         params["udb_path"] = self.udb_path
         return main, params, "Extract Class"
 
     def init_extract_method(self):
         main = extract_method.main
-        params = random.choice(self.extract_method_candidates)
+        params = random.choice(self.load_extract_class_candidates())
         params["udb_path"] = self.udb_path
         return main, params, "Extract Method"
+
+    def init_pull_up_method(self):
+        main = pullup_method.main
+        params = random.choice(self.load_pull_up_method_candidates())
+        params["udb_path"] = self.udb_path
+        return main, params, "PullUp Method"
+
+    def init_push_down_method(self):
+        main = pullup_method.main
+        params = random.choice(self.load_push_down_method_candidates())
+        params["udb_path"] = self.udb_path
+        return main, params, "PushDown Method"

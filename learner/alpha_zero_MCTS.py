@@ -45,7 +45,7 @@ class TrainerImplement(TrainCodArt):
         )
 
     def start(self):
-        st = SmellInitialization(self.problem)
+        st = SmellInitialization()
         st.generate_population()
 
     def get_state(self):

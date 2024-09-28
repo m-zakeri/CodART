@@ -38,7 +38,6 @@ class ProblemManyObjective(Problem):
     def _evaluate(self, x, out, *args, **kwargs):
         objective_values = []
         for k, individual_ in enumerate(x):
-            # Stage 0: Git restore
             logger.debug("Executing git restore.")
             git_restore(config["Config"]["repo_address"])
             logger.debug("Updating understand database after git restore.")

@@ -24,6 +24,9 @@ class Initializer(ABC, metaclass=DynamicAbstractMetaInitializeRefactoringMethods
         self.upper_band = upper_band
         self.population_size = population_size
         self.refactoring_types = config["REFACTORING"]["types"].split(",")
+        self.initializers = tuple(
+            f"init_{refactoring.strip()}" for refactoring in self.refactoring_types
+        )
 
     @abstractmethod
     def generate_population(self):
