@@ -507,14 +507,8 @@ class DesignQualityAttributes:
 
     @property
     def average_sum(self):
-        attrs = ['reusability', 'flexibility', 'understandability', 'functionality', 'extendability', 'effectiveness', ]
-        all_metrics = []
-        for metric in attrs:
-            cache = getattr(self, f'_{metric}')
-            if cache is None:
-                all_metrics.append(getattr(self, metric))
-            else:
-                all_metrics.append(cache)
+        all_metrics = [getattr(self, attr) if getattr(self, attr) is not None else getattr(self, attr[1:])
+                       for attr in dir(self) if attr.startswith('_') and not attr.startswith('__')]
         return round(sum(all_metrics) / len(all_metrics), 5), round(sum(all_metrics), 5)
 
 
@@ -546,7 +540,6 @@ if __name__ == '__main__':
         "functionality": design_quality_attribute.functionality,
         "effectiveness": design_quality_attribute.effectiveness,
         "extendability": design_quality_attribute.extendability,
-        #
         "average": avg_,
         "sum": sum_
     }

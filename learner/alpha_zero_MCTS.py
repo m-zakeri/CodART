@@ -7,6 +7,7 @@ from pymoo.algorithms.moo.unsga3 import UNSGA3
 from pymoo.optimize import minimize
 from learner.sbr_initializer.problem import ProblemManyObjective
 
+
 class AlphaZeroModel(nn.Module):
     def __init__(self, input_size, output_size):
         super(AlphaZeroModel, self).__init__()

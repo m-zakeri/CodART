@@ -14,43 +14,15 @@ config.read("config.ini")
 logger = logging.getLogger()
 
 
-def calc_testability_objective(path_, arr_):
-    arr_[6] = testability_main(
-        path_, initial_value=config.CURRENT_METRICS.get("TEST", 1.0)
-    )
-
-
-def calc_modularity_objective(path_, arr_):
-    arr_[7] = modularity_main(
-        path_, initial_value=config.CURRENT_METRICS.get("MODULE", 1.0)
-    )
-
-
-def calc_qmood_objectives(arr_):
-    qmood_quality_attributes = DesignQualityAttributes(
-        udb_path=os.path.join(
-            config["Config"]["db_address"], config["Config"]["db_name"]
-        )
-    )
-    arr_[0] = qmood_quality_attributes.reusability
-    arr_[1] = qmood_quality_attributes.understandability
-    arr_[2] = qmood_quality_attributes.flexibility
-    arr_[3] = qmood_quality_attributes.functionality
-    arr_[4] = qmood_quality_attributes.effectiveness
-    arr_[5] = qmood_quality_attributes.extendability
-    arr_[6] = qmood_quality_attributes.modularity
-    arr_[7] = qmood_quality_attributes.testability
-
-
 class ProblemManyObjective(Problem):
 
     def __init__(
         self,
-        n_objectives : int=int(config["Config"]["OBJECTIVE"]),
-        n_refactorings_lowerbound:int=int(config["Config"]["LOWER_BAND"]),
-        n_refactorings_upperbound:int=int(config["Config"]["UPPER_BAND"]),
-        evaluate_in_parallel:bool=False,
-        verbose_design_metrics:bool=False,
+        n_objectives: int = int(config["Config"]["OBJECTIVE"]),
+        n_refactorings_lowerbound: int = int(config["Config"]["LOWER_BAND"]),
+        n_refactorings_upperbound: int = int(config["Config"]["UPPER_BAND"]),
+        evaluate_in_parallel: bool = bool(config["Config"]["evaluate_in_parallel"]),
+        verbose_design_metrics: bool = bool(config["Config"]["verbose_design_metrics"]),
     ):
 
         super(ProblemManyObjective, self).__init__(
@@ -68,9 +40,13 @@ class ProblemManyObjective(Problem):
         for k, individual_ in enumerate(x):
             # Stage 0: Git restore
             logger.debug("Executing git restore.")
-            git_restore(config.PROJECT_PATH)
+            git_restore(config["Config"]["repo_address"])
             logger.debug("Updating understand database after git restore.")
-            update_understand_database(config.UDB_PATH)
+            update_understand_database(
+                os.path.join(
+                    config["Config"]["db_address"], config["Config"]["db_name"]
+                )
+            )
             logger.debug(f"Reached an Individual with size {len(individual_[0])}")
             for refactoring_operation in individual_[0]:
                 res = refactoring_operation.do_refactoring()
@@ -80,11 +56,22 @@ class ProblemManyObjective(Problem):
                 update_understand_database(config.UDB_PATH)
 
             arr = Array("d", range(self.n_obj))
+            qmood_quality_attributes = DesignQualityAttributes(
+                udb_path=os.path.join(
+                    config["Config"]["db_address"], config["Config"]["db_name"]
+                )
+            )
             if self.evaluate_in_parallel:
-                p1 = Process(target=calc_qmood_objectives, args=(arr,))
+                p1 = Process(
+                    target=self.calc_qmood_objectives,
+                    args=(
+                        arr,
+                        qmood_quality_attributes,
+                    ),
+                )
                 if self.n_obj == 8:
                     p2 = Process(
-                        target=calc_testability_objective,
+                        target=self.calc_testability_objective,
                         args=(
                             os.path.join(
                                 config["Config"]["db_address"],
@@ -94,7 +81,7 @@ class ProblemManyObjective(Problem):
                         ),
                     )
                     p3 = Process(
-                        target=calc_modularity_objective,
+                        target=self.calc_modularity_objective,
                         args=(
                             os.path.join(
                                 config["Config"]["db_address"],
@@ -109,10 +96,6 @@ class ProblemManyObjective(Problem):
                     p1.start()
                     p1.join()
             else:
-                # Stage 2 (sequential mood): Computing quality attributes
-                qmood_quality_attributes = DesignQualityAttributes(
-                    udb_path=config.UDB_PATH
-                )
                 arr[0] = qmood_quality_attributes.reusability
                 arr[1] = qmood_quality_attributes.understandability
                 arr[2] = qmood_quality_attributes.flexibility
@@ -159,3 +142,17 @@ class ProblemManyObjective(Problem):
             df_result.to_csv(design_metrics_path, index=False)
         else:
             df_design_metrics.to_csv(design_metrics_path, index=False)
+
+    def calc_qmood_objectives(self, arr_, qmood_quality_attributes):
+        arr_[0] = qmood_quality_attributes.reusability
+        arr_[1] = qmood_quality_attributes.understandability
+        arr_[2] = qmood_quality_attributes.flexibility
+        arr_[3] = qmood_quality_attributes.functionality
+        arr_[4] = qmood_quality_attributes.effectiveness
+        arr_[5] = qmood_quality_attributes.extendability
+
+    def calc_testability_objective(self, arr_, qmood_quality_attributes):
+        arr_[6] = qmood_quality_attributes.testability
+
+    def calc_modularity_objective(self, arr_, qmood_quality_attributes):
+        arr_[7] = qmood_quality_attributes.modularity
