@@ -286,7 +286,7 @@ class SmellInitialization(Initializer):
         return main, params, "PullUp Method"
 
     def init_push_down_method(self):
-        main = pullup_method.main
+        main = pushdown_method2.main
         params = random.choice(self.load_push_down_method_candidates())
         params["udb_path"] = self.udb_path
         return main, params, "PushDown Method"

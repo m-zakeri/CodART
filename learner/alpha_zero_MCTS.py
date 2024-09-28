@@ -49,19 +49,33 @@ class TrainerImplement(TrainCodArt):
         st.generate_population()
 
     def get_state(self):
-        pass
+        # Retrieve the current state related to refactoring operations
+        return self.refactoring_manager.list_operations()
 
     def get_optimizer(self):
-        pass
+        return optim.Adam(self.model.parameters(), lr=0.001)
 
     def search(self, state):
-        pass
+        # Use the model to predict actions based on the current state
+        with torch.no_grad():
+            input_tensor = torch.FloatTensor(state)
+            policy, _ = self.model(input_tensor)
+            return policy.numpy()
 
     def action(self, action_probs=None, *args, **kwargs) -> bool:
-        pass
+        if action_probs is None:
+            raise ValueError("Action probabilities must be provided.")
+        action = torch.multinomial(torch.softmax(torch.FloatTensor(action_probs), dim=0), 1)
+        return action.item()  # Return the chosen action
 
     def reward_function(self, state, action):
-        pass
+        # Evaluate the reward based on the chosen action
+        if action < len(self.refactoring_manager.operations):
+            operation = self.refactoring_manager.operations[action]
+            # Execute the operation and define the reward based on its success
+            operation.execute()
+            return self.evaluate_operation(operation)  # Implement this method based on your metrics
+        return 0
 
     def save(self, file_path: str = "", *args, **kwargs) -> None:
         torch.save(self.model.state_dict(), file_path)
