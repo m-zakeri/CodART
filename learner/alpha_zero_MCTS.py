@@ -1,13 +1,11 @@
 import torch
 import torch.nn as nn
-import torch.optim as optim
-import numpy as np
-import random
+from learner.sbr_initializer.smell import SmellInitialization
 from learner.abstraction import TrainCodArt
 from codart.refactorings.handler import RefactoringManager
 from pymoo.algorithms.moo.unsga3 import UNSGA3
 from pymoo.optimize import minimize
-from pymoo.problems import get_problem
+from learner.sbr_initializer.problem import ProblemManyObjective
 
 class AlphaZeroModel(nn.Module):
     def __init__(self, input_size, output_size):
@@ -16,7 +14,6 @@ class AlphaZeroModel(nn.Module):
         self.fc2 = nn.Linear(128, 128)
         self.policy_head = nn.Linear(128, output_size)
         self.value_head = nn.Linear(128, 1)
-
 
     def forward(self, x):
         x = torch.relu(self.fc1(x))
@@ -29,17 +26,26 @@ class AlphaZeroModel(nn.Module):
 class TrainerImplement(TrainCodArt):
 
     def __init__(self, input_size, output_size):
-        super(TrainerImplement, self).__init__(name="AlphaZero", num_episodes=2, randomly_ending_episode=0.1, model = AlphaZeroModel(input_size=input_size, output_size=output_size))
+        super(TrainerImplement, self).__init__(
+            name="AlphaZero",
+            num_episodes=2,
+            randomly_ending_episode=0.1,
+            model=AlphaZeroModel(input_size=input_size, output_size=output_size),
+        )
         self.refactoring_manager = RefactoringManager()
-        self.problem = get_problem("ackley", n_var=30)
+        self.problem = ProblemManyObjective()
         self.algorithm = UNSGA3(self.problem)
         self.res = minimize(
-                               problem=self.problem,
-                               algorithm=self.algorithm,
-                               termination=('n_gen', 5),
-                               save_history=True,
-                               seed=42
-                            )
+            problem=self.problem,
+            algorithm=self.algorithm,
+            termination=("n_gen", 5),
+            save_history=True,
+            seed=42,
+        )
+
+    def start(self):
+        st = SmellInitialization(self.problem)
+        st.generate_population()
 
     def get_state(self):
         pass

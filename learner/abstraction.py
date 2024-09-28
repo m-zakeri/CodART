@@ -2,16 +2,19 @@ from abc import ABC, abstractmethod
 import torch
 import random
 
+
 class TrainCodArt(ABC):
     """
-        RL training parent class
+    RL training parent class
     """
 
-
-    def __init__(self, name: str = "",
-                 num_episodes:int=1,
-                 randomly_ending_episode:float= None,
-                 model= None):
+    def __init__(
+        self,
+        name: str = "",
+        num_episodes: int = 1,
+        randomly_ending_episode: float = None,
+        model=None,
+    ):
         self._name = name
         self._num_episodes = num_episodes
         self._random = randomly_ending_episode
@@ -55,6 +58,10 @@ class TrainCodArt(ABC):
         self.save()
 
     @abstractmethod
+    def start(self):
+        raise NotImplementedError(f"{type(self).__name__} not implement")
+
+    @abstractmethod
     def get_state(self):
         raise NotImplementedError(f"{type(self).__name__} not implement")
 
@@ -66,7 +73,6 @@ class TrainCodArt(ABC):
     def search(self, state):
         raise NotImplementedError(f"{type(self).__name__} not implement")
 
-
     @abstractmethod
     def reward_function(self, state, action):
         raise NotImplementedError(f"{type(self).__name__} not implement")
@@ -74,7 +80,6 @@ class TrainCodArt(ABC):
     @abstractmethod
     def action(self, action_probs=None, *args, **kwargs) -> bool:
         raise NotImplementedError(f"{type(self).__name__} not implement")
-
 
     def train(self, *args, **kwargs) -> bool:
         optimizer = self.get_optimizer()
@@ -102,7 +107,6 @@ class TrainCodArt(ABC):
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-
 
     @abstractmethod
     def save(self, *args, **kwargs) -> bool:

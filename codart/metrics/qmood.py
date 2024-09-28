@@ -8,15 +8,18 @@ IEEE Trans. Softw. Eng., vol. 28, no. 1, pp. 4–17, 2002.
 
 """
 
-__version__ = '0.3.0'
-__author__ = 'Morteza Zakeri'
+__version__ = '0.3.1'
+__author__ = 'Morteza Zakeri, Amin HZDEV'
 
 import os
-os.add_dll_directory("C:\\Program Files\\SciTools\\bin\\pc-win64")
 import understand as und
+from configparser import ConfigParser
+from codart.metrics.modularity import main as modularity_main
+from codart.metrics.testability_prediction2 import main as testability_main
 
-from codart import config
 
+config = ConfigParser()
+config.read("config.ini")
 
 def divide_by_initial_value(func):
     def wrapper(*args, **kwargs):
@@ -404,14 +407,13 @@ class DesignQualityAttributes:
         6. Effectiveness
     """
 
-    def __init__(self, udb_path):
+    def __init__(self, udb_path: str = ""):
         """
         Implements Project Objectives due to QMOOD design metrics
         :param udb_path: The understand database path
         """
         self.udb_path = udb_path
         self.__qmood = DesignMetrics(udb_path=udb_path)
-        # Calculating once and using multiple times
         self.DSC = self.__qmood.DSC  # Design Size
         self.NOH = self.__qmood.NOH  # Hierarchies
         self.ANA = self.__qmood.ANA  # Abstraction
@@ -423,14 +425,28 @@ class DesignQualityAttributes:
         self.DCC = self.__qmood.DCC  # Coupling
         self.MFA = self.__qmood.MFA  # Inheritance
         self.NOP = self.__qmood.NOP  # Polymorphism
-
-        # For caching results
         self._reusability = None
         self._flexibility = None
         self._understandability = None
         self._functionality = None
         self._extendability = None
         self._effectiveness = None
+        self._modularity = None
+        self._testability = None
+
+    @property
+    def modularity(self):
+        self._modularity = modularity_main(
+            self.udb_path, initial_value=float(config["METRICS"]["initial_value_modularity"])
+        )
+        return round(self._modularity, 5)
+
+    @property
+    def testability(self):
+        self._testability = testability_main(
+            self.udb_path, initial_value=float(config["METRICS"]["initial_value_testability"])
+        )
+        return round(self._testability, 5)
 
     @property
     def reusability(self):
