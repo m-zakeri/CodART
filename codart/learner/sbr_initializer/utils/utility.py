@@ -1,6 +1,13 @@
 import random
 import json
 from abc import abstractmethod, ABCMeta
+import logging
+from configparser import ConfigParser
+
+
+logger = logging.getLogger()
+config = ConfigParser()
+config.read("config.ini")
 
 
 def handle_index_error(func):

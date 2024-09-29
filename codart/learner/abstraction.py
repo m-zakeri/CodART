@@ -1,6 +1,10 @@
 from abc import ABC, abstractmethod
 import torch
 import random
+import os
+import datetime
+from codart.learner.sbr_initializer.utils.utility import logger, config
+import pandas as pd
 
 
 class TrainCodArt(ABC):
@@ -81,7 +85,7 @@ class TrainCodArt(ABC):
     def action(self, action_probs=None, *args, **kwargs) -> bool:
         raise NotImplementedError(f"{type(self).__name__} not implement")
 
-    def train(self, *args, **kwargs) -> bool:
+    def train(self, *args, **kwargs) -> None:
         optimizer = self.get_optimizer()
         for episode in range(self.num_episodes):
             state = self.get_state()
@@ -119,3 +123,31 @@ class TrainCodArt(ABC):
     @abstractmethod
     def get_output(self, *args, **kwargs) -> bool:
         raise NotImplementedError(f"{type(self).__name__} not implement")
+
+    def calc_qmood_objectives(self, arr_, qmood_quality_attributes):
+        arr_[0] = qmood_quality_attributes.reusability
+        arr_[1] = qmood_quality_attributes.understandability
+        arr_[2] = qmood_quality_attributes.flexibility
+        arr_[3] = qmood_quality_attributes.functionality
+        arr_[4] = qmood_quality_attributes.effectiveness
+        arr_[5] = qmood_quality_attributes.extendability
+
+    def calc_testability_objective(self, arr_, qmood_quality_attributes):
+        arr_[6] = qmood_quality_attributes.testability
+
+    def calc_modularity_objective(self, arr_, qmood_quality_attributes):
+        arr_[7] = qmood_quality_attributes.modularity
+
+    def log_design_metrics(self, design_metrics):
+        design_metrics_path = os.path.join(
+            config["Config"]["PROJECT_LOG_DIR"],
+            f"{config["Config"]["PROJECT_NAME"]}_design_metrics_log_{datetime.datetime.time()}.csv",
+        )
+
+        df_design_metrics = pd.DataFrame(data=design_metrics)
+        if os.path.exists(design_metrics_path):
+            df = pd.read_csv(design_metrics_path, index_col=False)
+            df_result = pd.concat([df, df_design_metrics], ignore_index=True)
+            df_result.to_csv(design_metrics_path, index=False)
+        else:
+            df_design_metrics.to_csv(design_metrics_path, index=False)

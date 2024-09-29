@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from learner.sbr_initializer.utils.utility import (
+from codart.learner.sbr_initializer.utils.utility import (
     DynamicAbstractMetaInitializeRefactoringMethods,
 )
 from configparser import ConfigParser

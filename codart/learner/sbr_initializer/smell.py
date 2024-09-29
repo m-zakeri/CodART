@@ -3,12 +3,12 @@ import random
 from configparser import ConfigParser
 import logging
 from codart.utility.directory_utils import reset_project, update_understand_database2
-from learner.sbr_initializer.abstraction import Initializer
+from codart.learner.sbr_initializer.abstraction import Initializer
 import understand as und
 import pandas as pd
 import codecs
 import os
-from learner.sbr_initializer.utils.utility import Utils
+from codart.learner.sbr_initializer.utils.utility import Utils
 from collections import Counter
 import time
 from codart.refactorings import (

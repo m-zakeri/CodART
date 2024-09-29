@@ -1,11 +1,11 @@
 import torch
 import torch.nn as nn
-from learner.sbr_initializer.smell import SmellInitialization
-from learner.abstraction import TrainCodArt
+from codart.learner.sbr_initializer.smell import SmellInitialization
+from codart.learner.abstraction import TrainCodArt
 from codart.refactorings.handler import RefactoringManager
 from pymoo.algorithms.moo.unsga3 import UNSGA3
 from pymoo.optimize import minimize
-from learner.sbr_initializer.problem import ProblemManyObjective
+from codart.learner.sbr_initializer.problem import ProblemManyObjective
 
 
 class AlphaZeroModel(nn.Module):
@@ -65,7 +65,9 @@ class TrainerImplement(TrainCodArt):
     def action(self, action_probs=None, *args, **kwargs) -> bool:
         if action_probs is None:
             raise ValueError("Action probabilities must be provided.")
-        action = torch.multinomial(torch.softmax(torch.FloatTensor(action_probs), dim=0), 1)
+        action = torch.multinomial(
+            torch.softmax(torch.FloatTensor(action_probs), dim=0), 1
+        )
         return action.item()  # Return the chosen action
 
     def reward_function(self, state, action):
@@ -74,7 +76,9 @@ class TrainerImplement(TrainCodArt):
             operation = self.refactoring_manager.operations[action]
             # Execute the operation and define the reward based on its success
             operation.execute()
-            return self.evaluate_operation(operation)  # Implement this method based on your metrics
+            return self.evaluate_operation(
+                operation
+            )  # Implement this method based on your metrics
         return 0
 
     def save(self, file_path: str = "", *args, **kwargs) -> None:

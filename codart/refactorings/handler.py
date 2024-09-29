@@ -1,5 +1,5 @@
 from codart.refactorings.abstraction import RefactoringOperation
-from codart.refactorings import extract_class, move_class, move_method, pushdown_method2, pullup_method
+from codart.refactorings import extract_class, move_class, move_method, pushdown_method2, pullup_method, extract_method
 class RefactoringManager:
     def __init__(self):
         self.operations = []
@@ -9,9 +9,9 @@ class RefactoringManager:
 
     def execute_operations(self):
         """Execute all the operations in the manager."""
-        for operation in self.operations:
+        operations = self.operations.pop()
+        for operation in operations:
             operation.execute()
-        self.clear_operations()
 
     def clear_operations(self):
         """Clear all operations from the list."""
@@ -20,12 +20,12 @@ class RefactoringManager:
 
     def list_operations(self):
         """List all the current operations."""
-        if not self.operations:
+        if not self.operations or len(self.operations) == 0:
             print("No operations to display.")
         else:
             print("Current operations:")
-            for op in self.operations:
-                print(f" - {op.__class__.__name__}")
+            for i, op in enumerate(self.operations[len(self.operations) - 1]):
+                print(f"{i} - {op.__class__.__name__}")
 
 class ExtractClass(RefactoringOperation):
     def __init__(self, udb_path: str = "", moved_methods: list = None, source_class: str = "", file_path: str = "", moved_fields: list = None):
@@ -292,3 +292,28 @@ class MoveMethod(RefactoringOperation):
     @target_class.setter
     def target_class(self, value: str):
         self._target_class = value
+
+
+class ExtractMethod(RefactoringOperation):
+    def __init__(self, file_path: str = "", lines: object = None):
+        self._file_path = file_path
+        self._lines = lines
+
+    @property
+    def file_path(self):
+        return self._file_path
+
+    @file_path.setter
+    def file_path(self, value: str):
+        self._file_path = value
+
+    @property
+    def lines(self):
+        return self._lines
+
+    @lines.setter
+    def lines(self, value: list):
+        self._lines = value
+    def execute(self):
+        print(f"Extracting method {self._file_path} to {self._lines}")
+        extract_method.main(file_path=self.file_path, lines=self.lines)
