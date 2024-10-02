@@ -31,7 +31,9 @@ try:
 except ImportError as e:
     print(e)
 
-from codart.config import logger
+from codart.learner.sbr_initializer.utils.utility import logger, config
+
+# from codart.config import logger
 
 # logging.basicConfig(level=logging.DEBUG)
 # logger = logging.getLogger(__file__)

@@ -34,7 +34,7 @@ from codart.gen.JavaParserLabeled import JavaParserLabeled
 from codart.gen.JavaParserLabeledListener import JavaParserLabeledListener
 from codart.refactorings.move_field import CheckCycleListener
 from codart.symbol_table import parse_and_walk
-from codart.config import logger
+from codart.learner.sbr_initializer.utils.utility import logger, config
 
 # logging.basicConfig(level=logging.DEBUG)
 # logger = logging.getLogger(__file__)

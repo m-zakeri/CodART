@@ -1,3 +1,8 @@
+setuptools
+scikit-learn==1.0.2
+joblib
+numpy==1.21.0
+threadpoolctl
 antlr4-python3-runtime==4.13.1
 certifi==2021.10.8
 cycler==0.11.0
@@ -5,7 +10,7 @@ future==0.18.2
 kiwisolver==1.4.3
 matplotlib==3.5.2
 networkx==2.8.4
-pandas==1.4.3
+pandas
 Pillow==9.4.0
 progressbar2==3.55.0
 pymoo
@@ -15,13 +20,12 @@ python-dotenv==0.19.1
 python-utils==2.5.6
 six==1.16.0
 wincertstore==0.2
-scikit-learn>=1.0.2
 nltk==3.6.5
 pyspellchecker==0.6.2
 pymop==0.2.4
 joblib
 imblearn~=0.0
-setuptools~=58.2.0
+
 seaborn~=0.11.2
 attrs==21.4.0
 Cython==0.29.30
@@ -31,7 +35,5 @@ packaging==21.3
 pluggy==1.0.0
 py==1.11.0
 pytest==7.1.2
-threadpoolctl==3.1.0
 tomli==2.0.1
-numpy
 torch

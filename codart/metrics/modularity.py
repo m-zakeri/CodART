@@ -30,7 +30,7 @@ import networkx.algorithms.community as nx_comm
 
 import understand
 
-from codart import config
+from codart.learner.sbr_initializer.utils.utility import logger, config
 from codart.utility.directory_utils import export_understand_dependencies_csv
 
 
