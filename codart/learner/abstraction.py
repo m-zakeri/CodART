@@ -58,6 +58,7 @@ class TrainCodArt(ABC):
         self._model = value
 
     def do_training(self, *args, **kwargs) -> None:
+        self.start()
         self.train()
         self.save()
 

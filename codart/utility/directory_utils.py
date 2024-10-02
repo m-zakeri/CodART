@@ -9,7 +9,7 @@ import datetime
 import os
 import subprocess
 from multiprocessing.dummy import Pool, Process, Manager
-
+from codart.learner.sbr_initializer.utils.utility import logger, config
 from antlr4 import FileStream
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 from joblib import Parallel, delayed
@@ -18,7 +18,7 @@ import understand as und
 
 #from java8speedy.parser import sa_javalabeled
 
-from codart import config
+# from codart import config
 
 
 def git_restore(project_dir):
@@ -73,9 +73,9 @@ def create_understand_database(project_dir: str = None, db_dir: str = None):
 
     if result.returncode != 0:
         error_ = result.stderr.decode('utf-8')
-        config.logger.debug(f'return code: {result.returncode} msg: {error_}')
+        logger.debug(f'return code: {result.returncode} msg: {error_}')
     else:
-        config.logger.debug(f'Understand project was created successfully!')
+        logger.debug(f'Understand project was created successfully!')
     return db_path
 
 
@@ -131,7 +131,7 @@ def update_understand_database(udb_path):
     trials = 0
     while result.returncode != 0:
         try:
-            db: und.Db = und.open(config.UDB_PATH)
+            db: und.Db = und.open(str(os.path.join(config["Config"]["UDB_PATH"], config["Config"]["db_name"])))
             db.close()
         except:
             pass
@@ -143,7 +143,7 @@ def update_understand_database(udb_path):
             # info_ = result.stdout.decode('utf-8')
             error_ = result.stderr.decode('utf-8')
             # print(info_[:85])
-            config.logger.debug(f'return code: {result.returncode} msg: {error_}')
+            logger.debug(f'return code: {result.returncode} msg: {error_}')
             trials += 1
             if trials > 5:
                 break
@@ -151,9 +151,9 @@ def update_understand_database(udb_path):
     # Try to close und.exe process if it has not been killed automatically
     result = subprocess.run(['taskkill', '/f', '/im', 'und.exe'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if result.returncode != 0:
-        config.logger.debug('The und.exe process is not running')
+        logger.debug('The und.exe process is not running')
     else:
-        config.logger.debug('The und.exe process killed manually')
+        logger.debug('The und.exe process killed manually')
 
 
 def export_understand_dependencies_csv2(csv_path: str, db_path: str):
@@ -169,7 +169,7 @@ def export_understand_dependencies_csv2(csv_path: str, db_path: str):
         command,
         stdout=open(os.devnull, 'wb')
     ).wait()
-    config.logger.debug("Modular dependency graph (MDG.csv) was exported.")
+    logger.debug("Modular dependency graph (MDG.csv) was exported.")
 
 
 def export_understand_dependencies_csv(csv_path: str, db_path: str):
@@ -186,27 +186,27 @@ def export_understand_dependencies_csv(csv_path: str, db_path: str):
     while result.returncode != 0:
         result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         error_ = result.stderr.decode('utf-8')
-        config.logger.debug(f'return code: {result.returncode} msg: {error_}')
+        logger.debug(f'return code: {result.returncode} msg: {error_}')
         trials += 1
         if trials > 5:
             break
-    config.logger.debug("Modular dependency graph (MDG.csv) was exported.")
+    logger.debug("Modular dependency graph (MDG.csv) was exported.")
     # Try to close und.exe process if it has not been killed automatically
     result = subprocess.run(['taskkill', '/f', '/im', 'und.exe'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if result.returncode != 0:
-        config.logger.debug('The und.exe process is not running')
+        logger.debug('The und.exe process is not running')
     else:
-        config.logger.debug('The und.exe process killed manually')
+        logger.debug('The und.exe process killed manually')
 
 
 def reset_project(quit_=False):
     # Stage 0: Git restore
-    config.logger.debug("Executing git restore.")
+    logger.debug("Executing git restore.")
     # git restore .
     # git clean -f -d
-    git_restore(config.PROJECT_PATH)
+    git_restore(config["Config"]["PROJECT_PATH"])
     config.logger.debug("Updating understand database after git restore.")
-    update_understand_database(config.UDB_PATH)
+    update_understand_database(str(os.path.join(config["Config"]["UDB_PATH"], config["Config"]["db_name"])))
     if quit_:
         quit()
 
@@ -326,11 +326,11 @@ def test_typyical_and_parallel_parsing():
 
 
 def test_understand_update():
-    db: und.Db = und.open(config.UDB_PATH)
+    db: und.Db = und.open(str(os.path.join(config["Config"]["UDB_PATH"], config["Config"]["db_name"])))
     for i in range(0, 10):
         lnx = db.language()
         # print(lnx)
-        update_understand_database(config.UDB_PATH)
+        update_understand_database(str(os.path.join(config["Config"]["UDB_PATH"], config["Config"]["db_name"])))
 
 
 if __name__ == '__main__':
