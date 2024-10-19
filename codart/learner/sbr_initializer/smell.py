@@ -73,6 +73,26 @@ class SmellInitialization(Initializer):
         logger.debug(f"Generating a biased initial population was finished.")
         return self.population
 
+    def generate_an_action(self):
+        logger.debug("Generating one random refactor ...")
+        main, params, name = self.utils.select_random()
+        logger.debug(f"Selected refactoring name: {name}")
+        logger.debug(f"Selected refactoring params: {params}")
+        is_correct_refactoring = main(**params)
+        while not is_correct_refactoring:
+            reset_project()
+            main, params, name = self.utils.select_random()
+            logger.debug(f"Retry with refactoring name: {name}")
+            logger.debug(f"Retry with refactoring params: {params}")
+            is_correct_refactoring = main(**params)
+
+        # Optionally update the understand database if needed
+        update_understand_database2(self.udb_path)
+        logger.debug(f"Successfully generated refactor: {name}")
+        reset_project()
+        logger.debug("-" * 100)
+        return main, params, name
+
     def load_extract_class_candidates(self):
         _db = und.open(self.udb_path)
         god_classes = pd.read_csv(config["RELATIONS"]["GOD_CLASS_PATH"], sep="\t")

@@ -154,6 +154,10 @@ XI. **Other packages**: The information of other packages will be announced in t
   *     --udb_path "/home/y/Desktop/desktop_0./CodART/mydb.udb" --file_path "/home/y/Desktop/desktop_0./CodART/benchmark_projects/JSON20201115/src/main/java/org/json/JSONML.java" --source_class "JSONML"   --moved_methods "toJSONObject" --moved_fields "" --core 1 --project-path "/home/y/Desktop/desktop_0./CodART/benchmark_projects/JSON-java"
 
 
+### additional info for learner
+    
+* alphzero pretrianed models link 
+  * https://github.com/cestpasphoto/alpha-zero-general
 
 ### News
 

@@ -9,9 +9,8 @@ class RefactoringManager:
 
     def execute_operations(self):
         """Execute all the operations in the manager."""
-        operations = self.operations.pop()
-        for operation in operations:
-            operation.execute()
+        operation = self.operations.pop()
+        operation.execute()
 
     def clear_operations(self):
         """Clear all operations from the list."""

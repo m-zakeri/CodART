@@ -32,8 +32,8 @@ class TrainerImplement(TrainCodArt):
 
     def __init__(
         self,
-        input_size: int = 100,
-        output_size: int = 100,
+        input_size: int = 8,
+        output_size: int = 1,
         n_obj: int = 8,
         evaluate_in_parallel: bool = True,
         verbose_design_metrics: bool = True,
@@ -51,11 +51,10 @@ class TrainerImplement(TrainCodArt):
         self.n_obj = n_obj
         self.evaluate_in_parallel = (evaluate_in_parallel,)
         self.verbose_design_metrics = (verbose_design_metrics,)
+
     def start(self):
         st = SmellInitialization()
-        for epoch in range(self.num_episodes):
-            self.refactoring_manager.add_operation(st.generate_population())
-
+        self.refactoring_manager.add_operation(st.generate_an_action())
 
     def get_state(self):
         return self.refactoring_manager.list_operations()
