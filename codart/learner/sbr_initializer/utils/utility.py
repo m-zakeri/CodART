@@ -58,6 +58,7 @@ class Utils(object):
     @handle_index_error
     def select_random(self):
         initializer = random.choice(self.initializers)
+        print("initializer : ", initializer)
         self.logger.debug(f">>> Randomly selected refactoring: {initializer.__name__}")
         main_function, params, name = initializer
         if main_function is None:

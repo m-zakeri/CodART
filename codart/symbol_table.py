@@ -21,8 +21,8 @@ from antlr4 import FileStream, ParseTreeWalker, CommonTokenStream
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
 from codart.utility.directory_utils import create_project_parse_tree
-from codart.gen.JavaParser import JavaParser
-from codart.gen.JavaParserListener import JavaParserListener
+from codart.gen.JavaParserLabeled import JavaParserLabeled as JavaParser
+from codart.gen.JavaParserLabeledListener import JavaParserLabeledListener as JavaParserListener
 from codart.gen.JavaLexer import JavaLexer
 
 

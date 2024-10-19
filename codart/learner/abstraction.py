@@ -142,7 +142,7 @@ class TrainCodArt(ABC):
     def log_design_metrics(self, design_metrics):
         design_metrics_path = os.path.join(
             config["Config"]["PROJECT_LOG_DIR"],
-            f"{config["Config"]["PROJECT_NAME"]}_design_metrics_log_{datetime.datetime.time()}.csv",
+            f"{config['Config']['PROJECT_NAME']}_design_metrics_log_{datetime.datetime.time()}.csv",
         )
 
         df_design_metrics = pd.DataFrame(data=design_metrics)

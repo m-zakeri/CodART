@@ -29,8 +29,7 @@ from codart.gen.JavaParserLabeled import JavaParserLabeled
 from codart.gen.JavaParserLabeledListener import JavaParserLabeledListener
 
 from codart.symbol_table import parse_and_walk
-from codart import config
-
+from codart.learner.sbr_initializer.utils.utility import logger, config
 
 class CutMethodListener(JavaParserLabeledListener):
     """

@@ -8,7 +8,7 @@ import understand as und
 import pandas as pd
 import codecs
 import os
-from codart.learner.sbr_initializer.utils.utility import Utils
+from codart.learner.sbr_initializer.utils.utility import Utils, logger, config
 from collections import Counter
 import time
 from codart.refactorings import (
@@ -19,10 +19,6 @@ from codart.refactorings import (
     pushdown_method2,
 )
 
-
-config = ConfigParser()
-config.read("config.ini")
-logger = logging.getLogger()
 
 
 class SmellInitialization(Initializer):
@@ -68,7 +64,7 @@ class SmellInitialization(Initializer):
             self.population.append(individual)
             logger.debug(f"Append individual {_} to population, s")
         logger.debug("=" * 100)
-        initial_pop_path = f"{config["Config"]["PROJECT_LOG_DIR"]}initial_population_{time.time()}.json"
+        initial_pop_path = f"{config['Config']['PROJECT_LOG_DIR']}initial_population_{time.time()}.json"
         self.utils.dump_population(path=initial_pop_path)
         logger.debug(f"Generating a biased initial population was finished.")
         return self.population
