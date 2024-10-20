@@ -20,7 +20,6 @@ from codart.refactorings import (
 )
 
 
-
 class SmellInitialization(Initializer):
 
     def __init__(self, *args, **kwargs):

@@ -49,3 +49,7 @@ class RefactoringOperation(ABC):
     @abstractmethod
     def execute(self):
         raise NotImplementedError(f"{type(self).__name__} not implement")
+
+    @abstractmethod
+    def get_refactoring(self, *args, **kwargs) -> object:
+        raise NotImplementedError(f"{type(self).__name__} not implement")

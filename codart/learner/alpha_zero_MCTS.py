@@ -3,7 +3,7 @@ import torch.nn as nn
 from torch import optim
 from codart.learner.sbr_initializer.smell import SmellInitialization
 from codart.learner.abstraction import TrainCodArt
-from codart.refactorings.handler import RefactoringManager
+from codart.refactorings.handler import RefactoringManager, RefactoringOperation
 from codart.metrics.qmood import DesignQualityAttributes
 import os
 import numpy as np
@@ -51,26 +51,28 @@ class TrainerImplement(TrainCodArt):
         self.n_obj = n_obj
         self.evaluate_in_parallel = (evaluate_in_parallel,)
         self.verbose_design_metrics = (verbose_design_metrics,)
-
+        self.generator = SmellInitialization()
     def start(self):
-        st = SmellInitialization()
-        self.refactoring_manager.add_operation(st.generate_an_action())
+        self.refactoring_manager.add_operation(self.generator.generate_an_action())
 
     def get_state(self):
-        return self.refactoring_manager.list_operations()
+        return self.refactoring_manager.get_operations()
 
     def get_optimizer(self):
         return optim.Adam(self.model.parameters(), lr=0.001)
 
     def search(self, state):
+        self.refactoring_manager.add_operation(self.generator.generate_an_action())
         with torch.no_grad():
             input_tensor = torch.FloatTensor(state)
             policy, _ = self.model(input_tensor)
             return policy.numpy()
 
-    def action(self, action_probs=None, *args, **kwargs) -> bool:
+    def action(self, action_probs: RefactoringOperation = None, *args, **kwargs) -> bool:
+        action_probs.execute()
         if action_probs is None:
             raise ValueError("Action probabilities must be provided.")
+        action_probs = torch.tensor(action_probs.get_refactoring()).float()
         action = torch.multinomial(
             torch.softmax(torch.FloatTensor(action_probs), dim=0), 1
         )

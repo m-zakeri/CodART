@@ -11,6 +11,10 @@ class RefactoringManager:
         """Execute all the operations in the manager."""
         operation = self.operations.pop()
         operation.execute()
+        return operation
+
+    def get_operations(self) -> object:
+        return self.operations[len(self.operations) - 1]
 
     def clear_operations(self):
         """Clear all operations from the list."""
@@ -41,6 +45,8 @@ class ExtractClass(RefactoringOperation):
                            source_class=self._source_class,
                            file_path=self._file_path,
                            moved_fields=self._moved_fields)
+    def get_refactoring(self, *args, **kwargs) -> object:
+        return {"name": "Extracting class", "moved_methods": str(self.moved_methods), "source_class": str(self.source_class), "file_path": str(self.file_path), "moved_fields": self._moved_fields}
 
     @property
     def udb_path(self):
@@ -50,7 +56,6 @@ class ExtractClass(RefactoringOperation):
     def udb_path(self, value: str):
         self._udb_path = value
 
-    # Getter and setter for moved_methods
     @property
     def moved_methods(self):
         return self._moved_methods
@@ -59,7 +64,6 @@ class ExtractClass(RefactoringOperation):
     def moved_methods(self, value: list):
         self._moved_methods = value
 
-    # Getter and setter for source_class
     @property
     def source_class(self):
         return self._source_class
@@ -68,7 +72,6 @@ class ExtractClass(RefactoringOperation):
     def source_class(self, value: str):
         self._source_class = value
 
-    # Getter and setter for file_path
     @property
     def file_path(self):
         return self._file_path
@@ -77,7 +80,6 @@ class ExtractClass(RefactoringOperation):
     def file_path(self, value: str):
         self._file_path = value
 
-    # Getter and setter for moved_fields
     @property
     def moved_fields(self):
         return self._moved_fields
@@ -98,6 +100,9 @@ class MoveClass(RefactoringOperation):
                         source_package=self._source_package,
                         class_name=self._class_name,
                         target_package=self._target_package)
+
+    def get_refactoring(self, *args, **kwargs) -> object:
+        return {"name": "Move class", "source_package": str(self.source_package), "class_name": str(self.class_name), "target_package": str(self.target_package)}
 
     @property
     def udb_path(self):
@@ -144,6 +149,9 @@ class PullupMethod(RefactoringOperation):
                            method_name=self._method_name,
                            children_classes=self._children_classes)
 
+    def get_refactoring(self, *args, **kwargs) -> object:
+        return {"name": "Pull up method", "method_name": str(self.method_name), "children_classes": str(self.children_classes)}
+
     @property
     def udb_path(self):
         return self._udb_path
@@ -184,6 +192,9 @@ class PushdownMethod(RefactoringOperation):
                                source_class=self._source_class,
                                source_package=self._source_package,
                                target_classes=self._target_classes)
+
+    def get_refactoring(self, *args, **kwargs) -> object:
+        return {"name": "Pushing down method", "method_name": str(self.method_name), "source_class": str(self.source_class), "source_package": str(self.source_package), "target_classes": str(self.target_classes)}
 
     @property
     def udb_path(self):
@@ -243,6 +254,9 @@ class MoveMethod(RefactoringOperation):
                          source_package=self._source_package,
                          target_package=self._target_package,
                          target_class=self._target_class)
+
+    def get_refactoring(self, *args, **kwargs) -> object:
+        return {"name": "Move method", "source_class": str(self.source_class), "method_name": str(self.method_name), "source_package": str(self.source_package), "target_class": str(self.target_class)}
 
     @property
     def source_class(self):
@@ -316,3 +330,6 @@ class ExtractMethod(RefactoringOperation):
     def execute(self):
         print(f"Extracting method {self._file_path} to {self._lines}")
         extract_method.main(file_path=self.file_path, lines=self.lines)
+
+    def get_refactoring(self, *args, **kwargs) -> object:
+        return {"name": "Extracting method", "file_path": self.file_path, "lines": self.lines}

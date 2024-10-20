@@ -47,7 +47,9 @@ class Extractor:
                 current_result_line_parts += [
                     "%s,%s,%s" % (context_word1, hashed_path, context_word2)
                 ]
-            space_padding = " " * (int(self.config["COD2VEC"]["MAX_CONTEXTS"]) - len(contexts))
+            space_padding = " " * (
+                int(self.config["COD2VEC"]["MAX_CONTEXTS"]) - len(contexts)
+            )
             result_line = " ".join(current_result_line_parts) + space_padding
             result.append(result_line)
         return result, hash_to_string_dict
