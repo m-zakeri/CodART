@@ -37,6 +37,7 @@ class TrainerImplement(TrainCodArt):
         n_obj: int = 8,
         evaluate_in_parallel: bool = True,
         verbose_design_metrics: bool = True,
+        pretrained_model_path: str = os.path.join("codart", "learner", "alpha_zero_pretrain_thelittleprince", "pretrained_5players.pt"),
     ):
         super(TrainerImplement, self).__init__(
             name="AlphaZero",
@@ -44,6 +45,7 @@ class TrainerImplement(TrainCodArt):
             randomly_ending_episode=0.1,
             model=AlphaZeroModel(input_size=input_size, output_size=output_size),
         )
+
         self.udb_path: str = os.path.join(
             str(config["Config"]["db_address"]), str(config["Config"]["db_name"])
         )
@@ -53,7 +55,9 @@ class TrainerImplement(TrainCodArt):
         self.verbose_design_metrics = (verbose_design_metrics,)
         self.generator = SmellInitialization()
         self.interactive_predictor = InteractivePredictor()
+        self.pretrained_model_path: str = pretrained_model_path
     def start(self):
+        self.model.load_state_dict(state_dict=torch.load(self.pretrained_model_path))
         self.refactoring_manager.add_operation(self.generator.generate_an_action())
 
     def get_state(self):
