@@ -10,7 +10,7 @@ import numpy as np
 from codart.utility.directory_utils import update_understand_database
 from multiprocessing import Process, Array
 from codart.learner.sbr_initializer.utils.utility import logger, config
-
+from codart.learner.cod2vec.interactive_predictor import InteractivePredictor
 
 class AlphaZeroModel(nn.Module):
     def __init__(self, input_size, output_size):
@@ -52,11 +52,12 @@ class TrainerImplement(TrainCodArt):
         self.evaluate_in_parallel = (evaluate_in_parallel,)
         self.verbose_design_metrics = (verbose_design_metrics,)
         self.generator = SmellInitialization()
+        self.interactive_predictor = InteractivePredictor()
     def start(self):
         self.refactoring_manager.add_operation(self.generator.generate_an_action())
 
     def get_state(self):
-        return self.refactoring_manager.get_operations()
+        return {"metrics": self.calculate_metrics(), "codes": self.interactive_predictor.predict()}
 
     def get_optimizer(self):
         return optim.Adam(self.model.parameters(), lr=0.001)
@@ -70,6 +71,7 @@ class TrainerImplement(TrainCodArt):
 
     def action(self, action_probs: RefactoringOperation = None, *args, **kwargs) -> bool:
         action_probs.execute()
+        update_understand_database(udb_path=self.udb_path)
         if action_probs is None:
             raise ValueError("Action probabilities must be provided.")
         action_probs = torch.tensor(action_probs.get_refactoring()).float()
@@ -79,13 +81,23 @@ class TrainerImplement(TrainCodArt):
         return action.item()
 
     def reward_function(self, state, action):
+        return np.array(state["metrics"], dtype=float)
+
+    def save(self, file_path: str = "", *args, **kwargs) -> None:
+        torch.save(self.model.state_dict(), file_path)
+
+    def load(self, file_path: str = "", *args, **kwargs) -> None:
+        self.model.load_state_dict(torch.load(file_path))
+        self.model.eval()
+
+    def get_output(self, input_data, *args, **kwargs) -> bool:
+        with torch.no_grad():
+            input_tensor = torch.FloatTensor(input_data)
+            policy, _ = self.model(input_tensor)
+            return policy.numpy()
+
+    def calculate_metrics(self):
         objective_values = []
-        for refactoring_operation in action:
-            res = refactoring_operation.do_refactoring()
-            logger.debug(
-                f"Updating understand database after {refactoring_operation.name}."
-            )
-            update_understand_database(udb_path=self.udb_path)
         arr = Array("d", range(self.n_obj))
         qmood_quality_attributes = DesignQualityAttributes(udb_path=self.udb_path)
         if self.evaluate_in_parallel:
@@ -147,17 +159,5 @@ class TrainerImplement(TrainCodArt):
 
             objective_values.append([-1 * i for i in arr])
             logger.info(f"Objective values for individual {k}: {[i for i in arr]}")
-        return np.array(objective_values, dtype=float)
+        return objective_values
 
-    def save(self, file_path: str = "", *args, **kwargs) -> None:
-        torch.save(self.model.state_dict(), file_path)
-
-    def load(self, file_path: str = "", *args, **kwargs) -> None:
-        self.model.load_state_dict(torch.load(file_path))
-        self.model.eval()
-
-    def get_output(self, input_data, *args, **kwargs) -> bool:
-        with torch.no_grad():
-            input_tensor = torch.FloatTensor(input_data)
-            policy, _ = self.model(input_tensor)
-            return policy.numpy()

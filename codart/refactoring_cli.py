@@ -2,7 +2,6 @@ import argparse
 from pathlib import Path
 from refactorings.extract_class import main
 from configparser import ConfigParser
-import git
 import os
 
 def save_config(
