@@ -1,10 +1,12 @@
 from abc import ABC, abstractmethod
-import torch
 import random
 import os
 import datetime
-from codart.learner.sbr_initializer.utils.utility import logger, config
 import pandas as pd
+from codart.learner.abstraction_configs import *
+from tqdm import tqdm
+import matplotlib.pyplot as plt
+
 
 
 class TrainCodArt(ABC):
@@ -17,12 +19,22 @@ class TrainCodArt(ABC):
         name: str = "",
         num_episodes: int = 1,
         randomly_ending_episode: float = None,
-        model=None,
+        visualize: bool = True,
     ):
+        self.collector = collector
+        self.frames_per_batch = frames_per_batch
+        self.replay_buffer = replay_buffer
+        self.minibatch_size = minibatch_size
         self._name = name
         self._num_episodes = num_episodes
         self._random = randomly_ending_episode
-        self._model = model
+        self.visualize = visualize
+        self.logs = {
+            "reward": [],
+            "step_count": [],
+            "eval reward (sum)": [],
+            "eval step_count": []
+        }
 
     @property
     def name(self):
@@ -61,6 +73,8 @@ class TrainCodArt(ABC):
         self.start()
         self.train()
         self.save()
+        if self.visualize:  # If visualize is True, call the plot method
+            self.visualize_logs()
 
     @abstractmethod
     def start(self):
@@ -88,6 +102,7 @@ class TrainCodArt(ABC):
 
     def train(self, *args, **kwargs) -> None:
         optimizer = self.get_optimizer()
+        pbar = tqdm(total=self.num_episodes, desc="Episode")
         for episode in range(self.num_episodes):
             state = self.get_state()
             done = False
@@ -99,19 +114,28 @@ class TrainCodArt(ABC):
                 states.append(state)
                 actions.append(action)
                 rewards.append(reward)
+                self.collector.collect(state, action, reward)
                 state = self.get_state()
                 if self.random is not None and random.random() < self.random:
                     done = True
-            states_tensor = torch.FloatTensor(states)
-            actions_tensor = torch.LongTensor(actions)
-            rewards_tensor = torch.FloatTensor(rewards)
-            policy, value = self.model(states_tensor)
-            action_probs = policy.gather(1, actions_tensor.unsqueeze(1)).squeeze()
-            loss = -torch.mean(torch.log(action_probs) * rewards_tensor)
-            print("Episode {}, Loss: {}".format(episode, loss))
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
+            tensordict_data = collector.get_data()
+            GAE(tensordict_data, params=self.model.critic_network_params)
+            for _ in range(self.frames_per_batch // self.minibatch_size):
+                subdata = self.replay_buffer.sample(self.minibatch_size)
+                loss_vals = self.replay_buffer.train(subdata)
+                loss_value = (
+                        loss_vals["loss_objective"]
+                        + loss_vals["loss_critic"]
+                        + loss_vals["loss_entropy"]
+                )
+
+                optimizer.zero_grad()
+                loss_value.backward()
+                optimizer.step()
+            episode_reward_mean = self.collector.get_mean_reward()
+            pbar.set_description(f"Episode Reward Mean: {episode_reward_mean}", refresh=False)
+            pbar.update()
+        pbar.close()
 
     @abstractmethod
     def save(self, *args, **kwargs) -> bool:
@@ -152,3 +176,46 @@ class TrainCodArt(ABC):
             df_result.to_csv(design_metrics_path, index=False)
         else:
             df_design_metrics.to_csv(design_metrics_path, index=False)
+
+    def visualize_logs(self):
+        """Visualize training results and save as PNG files."""
+        # Define the directory where images will be saved
+        save_dir = os.path.join(config["Config"]["PROJECT_LOG_DIR"], "visualizations")
+        os.makedirs(save_dir, exist_ok=True)  # Create the directory if it doesn't exist
+
+        plt.figure(figsize=(10, 10))
+
+        plt.subplot(2, 2, 1)
+        plt.plot(self.logs["reward"], label='Training Rewards (Average)')
+        plt.title("Training Rewards (Average)")
+        plt.xlabel("Episodes")
+        plt.ylabel("Reward")
+        plt.grid()
+        plt.savefig(os.path.join(save_dir, "training_rewards_average.png"))  # Save the figure
+
+        plt.subplot(2, 2, 2)
+        plt.plot(self.logs["step_count"], label='Max Step Count (Training)')
+        plt.title("Max Step Count (Training)")
+        plt.xlabel("Episodes")
+        plt.ylabel("Step Count")
+        plt.grid()
+        plt.savefig(os.path.join(save_dir, "max_step_count_training.png"))  # Save the figure
+
+        plt.subplot(2, 2, 3)
+        plt.plot(self.logs["eval reward (sum)"], label='Return (Test)')
+        plt.title("Return (Test)")
+        plt.xlabel("Episodes")
+        plt.ylabel("Return")
+        plt.grid()
+        plt.savefig(os.path.join(save_dir, "return_test.png"))  # Save the figure
+
+        plt.subplot(2, 2, 4)
+        plt.plot(self.logs["eval step_count"], label='Max Step Count (Test)')
+        plt.title("Max Step Count (Test)")
+        plt.xlabel("Episodes")
+        plt.ylabel("Test Step Count")
+        plt.grid()
+        plt.savefig(os.path.join(save_dir, "max_step_count_test.png"))  # Save the figure
+
+        plt.tight_layout()
+        plt.show()

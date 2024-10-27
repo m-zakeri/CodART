@@ -1,5 +1,4 @@
 import torch
-import torch.nn as nn
 from torch import optim
 from codart.learner.sbr_initializer.smell import SmellInitialization
 from codart.learner.abstraction import TrainCodArt
@@ -11,39 +10,26 @@ from codart.utility.directory_utils import update_understand_database
 from multiprocessing import Process, Array
 from codart.learner.sbr_initializer.utils.utility import logger, config
 from codart.learner.cod2vec.interactive_predictor import InteractivePredictor
-
-class AlphaZeroModel(nn.Module):
-    def __init__(self, input_size, output_size):
-        super(AlphaZeroModel, self).__init__()
-        self.fc1 = nn.Linear(input_size, 128)
-        self.fc2 = nn.Linear(128, 128)
-        self.policy_head = nn.Linear(128, output_size)
-        self.value_head = nn.Linear(128, 1)
-
-    def forward(self, x):
-        x = torch.relu(self.fc1(x))
-        x = torch.relu(self.fc2(x))
-        policy = self.policy_head(x)
-        value = self.value_head(x)
-        return policy, value
-
+from transformers import AutoTokenizer, GPTBigCodeForCausalLM
+from abstraction_configs import critic, policy
 
 class TrainerImplement(TrainCodArt):
 
     def __init__(
         self,
-        input_size: int = 8,
-        output_size: int = 1,
         n_obj: int = 8,
         evaluate_in_parallel: bool = True,
         verbose_design_metrics: bool = True,
-        pretrained_model_path: str = os.path.join("codart", "learner", "alpha_zero_pretrain_thelittleprince", "pretrained_5players.pt"),
+        pretrained_model_path: str = os.path.join("bigcode", "gpt_bigcode-santacoder"),
     ):
+        self.tokenizer = AutoTokenizer.from_pretrained(pretrained_model_path)
+        self.gpt_model = GPTBigCodeForCausalLM.from_pretrained(pretrained_model_path)
+        if torch.cuda.is_available():
+            self.gpt_model = self.gpt_model.half().cuda()
         super(TrainerImplement, self).__init__(
-            name="AlphaZero",
+            name="PPO",
             num_episodes=2,
             randomly_ending_episode=0.1,
-            model=AlphaZeroModel(input_size=input_size, output_size=output_size),
         )
 
         self.udb_path: str = os.path.join(
@@ -88,11 +74,14 @@ class TrainerImplement(TrainCodArt):
         return np.array(state["metrics"], dtype=float)
 
     def save(self, file_path: str = "", *args, **kwargs) -> None:
-        torch.save(self.model.state_dict(), file_path)
+        torch.save(self.replay_buffer.state_dict(), file_path)
+        torch.save(self.gpt_model.state_dict(), file_path)
 
-    def load(self, file_path: str = "", *args, **kwargs) -> None:
-        self.model.load_state_dict(torch.load(file_path))
-        self.model.eval()
+    def load(self, file_path_rl: str = "", file_path_gpt: str = "", *args, **kwargs) -> None:
+        self.replay_buffer.load_state_dict(torch.load(file_path_rl))
+        self.gpt_model.load_state_dict(torch.load(file_path_gpt))
+        self.replay_buffer.eval()
+        self.gpt_model.eval()
 
     def get_output(self, input_data, *args, **kwargs) -> bool:
         with torch.no_grad():
