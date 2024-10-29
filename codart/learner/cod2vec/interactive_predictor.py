@@ -2,11 +2,13 @@ import os
 from common import common
 from extractor import Extractor
 from codart.learner.sbr_initializer.utils.utility import logger, config
+import tensorflow as tf
 try:
     import understand as und
 except ImportError as e:
     print(e)
 
+tf.compat.v1.disable_eager_execution()
 
 SHOW_TOP_CONTEXTS = config.getint("COD2VEC", "SHOW_TOP_CONTEXTS", fallback=10)
 MAX_PATH_LENGTH = config.getint("COD2VEC", "MAX_PATH_LENGTH", fallback=8)
@@ -24,6 +26,7 @@ class InteractivePredictor:
 
     def __init__(self, model, database_path):
         model.predict([])
+        self.sess = tf.compat.v1.Session()
         self.model = model
         self.config = config
         self.path_extractor = Extractor(
@@ -33,6 +36,13 @@ class InteractivePredictor:
             max_path_width=MAX_PATH_WIDTH,
         )
         self.functions_dict = self.extract_functions(database_path)
+        self.saver = tf.compat.v1.train.Saver(max_to_keep=10)
+
+    def _load_inner_model(self):
+        if self.sess is not None:
+            print('Loading model weights from: ' + "/home/y/Downloads/models/java14_model/saved_model_iter8.release.data-00000-of-00001")
+            self.saver.restore(self.sess, "/home/y/Downloads/models/java14_model/saved_model_iter8.release.data-00000-of-00001")
+            print('Done loading model weights')
 
     def extract_functions(self, database_path):
         """Extract functions from the Understand database."""
