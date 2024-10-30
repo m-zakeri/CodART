@@ -36,6 +36,35 @@ public class App {
 		}
 	}
 
+	private static void extractFromSocket(int port) {
+        ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(s_CommandLineValues.NumThreads);
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
+            System.out.println("Waiting for connections on port " + port);
+            while (true) {
+                Socket socket = serverSocket.accept();
+                // Read code from the socket connection
+                BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                StringBuilder codeBuilder = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    codeBuilder.append(line).append(".ENDCODE");
+                }
+
+                // Close socket after reading
+                socket.close();
+
+                // Create and submit the task
+                String code = codeBuilder.toString();
+                ExtractFeaturesTask extractFeaturesTask = new ExtractFeaturesTask(s_CommandLineValues, code);
+                executor.submit(extractFeaturesTask);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            executor.shutdown();
+        }
+    }
+
 	private static void extractDir() {
 		ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(s_CommandLineValues.NumThreads);
 		LinkedList<ExtractFeaturesTask> tasks = new LinkedList<>();
