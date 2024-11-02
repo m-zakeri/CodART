@@ -34,8 +34,10 @@ class ModelCheckpointSaverCallback(Callback):
     """
     @model_wrapper should have a `.save()` method.
     """
-    def __init__(self, model_wrapper, nr_epochs_to_save: int = 1,
-                 logger: logging.Logger = None):
+
+    def __init__(
+        self, model_wrapper, nr_epochs_to_save: int = 1, logger: logging.Logger = None
+    ):
         self.model_wrapper = model_wrapper
         self.nr_epochs_to_save: int = nr_epochs_to_save
         self.logger = logger if logger is not None else logging.getLogger()
@@ -51,9 +53,9 @@ class ModelCheckpointSaverCallback(Callback):
         nr_epochs_trained = epoch + 1
         nr_non_saved_epochs = nr_epochs_trained - self.last_saved_epoch
         if nr_non_saved_epochs >= self.nr_epochs_to_save:
-            self.logger.info('Saving model after {} epochs.'.format(nr_epochs_trained))
+            self.logger.info("Saving model after {} epochs.".format(nr_epochs_trained))
             self.model_wrapper.save()
-            self.logger.info('Done saving model.')
+            self.logger.info("Done saving model.")
             self.last_saved_epoch = nr_epochs_trained
 
 
@@ -79,8 +81,10 @@ class MultiBatchCallback(Callback):
         if self.multi_batch_size == 1 or (batch + 1) % self.multi_batch_size == 0:
             multi_batch_elapsed = time.time() - self._multi_batch_start_time
             if self.average_logs:
-                multi_batch_logs = {log_key: log_value / self.multi_batch_size
-                                    for log_key, log_value in self._multi_batch_logs_sum.items()}
+                multi_batch_logs = {
+                    log_key: log_value / self.multi_batch_size
+                    for log_key, log_value in self._multi_batch_logs_sum.items()
+                }
             else:
                 multi_batch_logs = logs
             self.on_multi_batch_end(batch, multi_batch_logs, multi_batch_elapsed)
@@ -95,17 +99,19 @@ class ModelTrainingProgressLoggerCallback(MultiBatchCallback):
         self.training_status = training_status
         self.avg_throughput: Optional[float] = None
         super(ModelTrainingProgressLoggerCallback, self).__init__(
-            self.config.NUM_BATCHES_TO_LOG_PROGRESS, average_logs=True)
+            self.config.NUM_BATCHES_TO_LOG_PROGRESS, average_logs=True
+        )
 
     def on_train_begin(self, logs=None):
-        self.config.log('Starting training...')
+        self.config.log("Starting training...")
 
     def on_epoch_end(self, epoch, logs=None):
-        self.config.log('Completed epoch #{}: {}'.format(epoch + 1, logs))
+        self.config.log("Completed epoch #{}: {}".format(epoch + 1, logs))
 
     def on_multi_batch_end(self, batch, logs, multi_batch_elapsed):
-        nr_samples_in_multi_batch = self.config.TRAIN_BATCH_SIZE * \
-                                    self.config.NUM_BATCHES_TO_LOG_PROGRESS
+        nr_samples_in_multi_batch = (
+            self.config.TRAIN_BATCH_SIZE * self.config.NUM_BATCHES_TO_LOG_PROGRESS
+        )
         throughput = nr_samples_in_multi_batch / multi_batch_elapsed
         if self.avg_throughput is None:
             self.avg_throughput = throughput
@@ -116,12 +122,16 @@ class ModelTrainingProgressLoggerCallback(MultiBatchCallback):
         remained_time_sec = remained_samples / self.avg_throughput
 
         self.config.log(
-            'Train: during epoch #{epoch} batch {batch}/{tot_batches} ({batch_precision}%) -- '
-            'throughput (#samples/sec): {throughput} -- epoch ETA: {epoch_ETA} -- loss: {loss:.4f}'.format(
+            "Train: during epoch #{epoch} batch {batch}/{tot_batches} ({batch_precision}%) -- "
+            "throughput (#samples/sec): {throughput} -- epoch ETA: {epoch_ETA} -- loss: {loss:.4f}".format(
                 epoch=self.training_status.nr_epochs_trained + 1,
                 batch=batch + 1,
-                batch_precision=int(((batch + 1) / self.config.train_steps_per_epoch) * 100),
+                batch_precision=int(
+                    ((batch + 1) / self.config.train_steps_per_epoch) * 100
+                ),
                 tot_batches=self.config.train_steps_per_epoch,
                 throughput=int(throughput),
                 epoch_ETA=str(datetime.timedelta(seconds=int(remained_time_sec))),
-                loss=logs['loss']))
+                loss=logs["loss"],
+            )
+        )

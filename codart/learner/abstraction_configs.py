@@ -3,11 +3,13 @@ from codart.learner.sbr_initializer.utils.utility import config
 from tensordict.nn import TensorDictModule
 from tensordict.nn.distributions import NormalParamExtractor
 from torch import multiprocessing
+
 # Data collection
 from torchrl.collectors import SyncDataCollector
 from torchrl.data.replay_buffers import ReplayBuffer
 from torchrl.data.replay_buffers.samplers import SamplerWithoutReplacement
 from torchrl.data.replay_buffers.storages import LazyTensorStorage
+
 # Env
 from torchrl.envs import RewardSum, TransformedEnv
 from torchrl.envs.libs.vmas import VmasEnv
@@ -15,10 +17,11 @@ from torchrl.envs.utils import check_env_specs
 
 # Multi-agent network
 from torchrl.modules import MultiAgentMLP, ProbabilisticActor, TanhNormal
+
 # Loss
 from torchrl.objectives import ClipPPOLoss, ValueEstimators
 
-torch.manual_seed(config.getint('TRAINING', 'torch_manual_seed'))
+torch.manual_seed(config.getint("TRAINING", "torch_manual_seed"))
 is_fork = multiprocessing.get_start_method() == "fork"
 device = (
     torch.device(0)
@@ -27,26 +30,26 @@ device = (
 )
 vmas_device = device  # The device where the simulator is run (VMAS can run on GPU)
 
-frames_per_batch = config.getint('TRAINING', 'frames_per_batch')
-n_iters = config.getint('TRAINING', 'n_iters')
+frames_per_batch = config.getint("TRAINING", "frames_per_batch")
+n_iters = config.getint("TRAINING", "n_iters")
 total_frames = frames_per_batch * n_iters
-num_epochs = config.getint('TRAINING', 'num_epochs')
-minibatch_size = config.getint('TRAINING', 'minibatch_size')
-lr = config.getfloat('TRAINING', 'learning_rate')
-max_grad_norm = config.getfloat('TRAINING', 'max_grad_norm')
+num_epochs = config.getint("TRAINING", "num_epochs")
+minibatch_size = config.getint("TRAINING", "minibatch_size")
+lr = config.getfloat("TRAINING", "learning_rate")
+max_grad_norm = config.getfloat("TRAINING", "max_grad_norm")
 
-clip_epsilon = config.getfloat('PPO', 'clip_epsilon')
-gamma = config.getfloat('PPO', 'gamma')
-lmbda = config.getfloat('PPO', 'lambda')
-entropy_eps = config.getfloat('PPO', 'entropy_eps')
-max_steps = config.getint('TRAINING', 'max_steps')  # Episode steps before done
-scenario_name = config.get('PPO', 'scenario_name')
-n_agents = config.getint('PPO', 'n_agents')
-continuous_actions = config.getboolean('PPO', 'continuous_actions')
-centralised = config.getboolean('PPO', 'centralised')
-depth = config.getint('PPO', 'depth')
-num_cells = config.getint('PPO', 'num_cells')
-share_parameters_critic = config.getboolean('PPO', 'share_parameters_critic')
+clip_epsilon = config.getfloat("PPO", "clip_epsilon")
+gamma = config.getfloat("PPO", "gamma")
+lmbda = config.getfloat("PPO", "lambda")
+entropy_eps = config.getfloat("PPO", "entropy_eps")
+max_steps = config.getint("TRAINING", "max_steps")  # Episode steps before done
+scenario_name = config.get("PPO", "scenario_name")
+n_agents = config.getint("PPO", "n_agents")
+continuous_actions = config.getboolean("PPO", "continuous_actions")
+centralised = config.getboolean("PPO", "centralised")
+depth = config.getint("PPO", "depth")
+num_cells = config.getint("PPO", "num_cells")
+share_parameters_critic = config.getboolean("PPO", "share_parameters_critic")
 
 num_vmas_envs = (
     frames_per_batch // max_steps
@@ -74,9 +77,7 @@ share_parameters_policy = True
 
 policy_net = torch.nn.Sequential(
     MultiAgentMLP(
-        n_agent_inputs=env.observation_spec["agents", "observation"].shape[
-            -1
-        ],
+        n_agent_inputs=env.observation_spec["agents", "observation"].shape[-1],
         n_agent_outputs=2 * env.action_spec.shape[-1],  # 2 * n_actions_per_agents
         n_agents=env.n_agents,
         centralised=centralised,  # the policies are decentralised (ie each agent will act from its observation)

@@ -8,7 +8,6 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 
 
-
 class TrainCodArt(ABC):
     """
     RL training parent class
@@ -33,7 +32,7 @@ class TrainCodArt(ABC):
             "reward": [],
             "step_count": [],
             "eval reward (sum)": [],
-            "eval step_count": []
+            "eval step_count": [],
         }
 
     @property
@@ -124,16 +123,18 @@ class TrainCodArt(ABC):
                 subdata = self.replay_buffer.sample(self.minibatch_size)
                 loss_vals = self.replay_buffer.train(subdata)
                 loss_value = (
-                        loss_vals["loss_objective"]
-                        + loss_vals["loss_critic"]
-                        + loss_vals["loss_entropy"]
+                    loss_vals["loss_objective"]
+                    + loss_vals["loss_critic"]
+                    + loss_vals["loss_entropy"]
                 )
 
                 optimizer.zero_grad()
                 loss_value.backward()
                 optimizer.step()
             episode_reward_mean = self.collector.get_mean_reward()
-            pbar.set_description(f"Episode Reward Mean: {episode_reward_mean}", refresh=False)
+            pbar.set_description(
+                f"Episode Reward Mean: {episode_reward_mean}", refresh=False
+            )
             pbar.update()
         pbar.close()
 
@@ -186,23 +187,27 @@ class TrainCodArt(ABC):
         plt.figure(figsize=(10, 10))
 
         plt.subplot(2, 2, 1)
-        plt.plot(self.logs["reward"], label='Training Rewards (Average)')
+        plt.plot(self.logs["reward"], label="Training Rewards (Average)")
         plt.title("Training Rewards (Average)")
         plt.xlabel("Episodes")
         plt.ylabel("Reward")
         plt.grid()
-        plt.savefig(os.path.join(save_dir, "training_rewards_average.png"))  # Save the figure
+        plt.savefig(
+            os.path.join(save_dir, "training_rewards_average.png")
+        )  # Save the figure
 
         plt.subplot(2, 2, 2)
-        plt.plot(self.logs["step_count"], label='Max Step Count (Training)')
+        plt.plot(self.logs["step_count"], label="Max Step Count (Training)")
         plt.title("Max Step Count (Training)")
         plt.xlabel("Episodes")
         plt.ylabel("Step Count")
         plt.grid()
-        plt.savefig(os.path.join(save_dir, "max_step_count_training.png"))  # Save the figure
+        plt.savefig(
+            os.path.join(save_dir, "max_step_count_training.png")
+        )  # Save the figure
 
         plt.subplot(2, 2, 3)
-        plt.plot(self.logs["eval reward (sum)"], label='Return (Test)')
+        plt.plot(self.logs["eval reward (sum)"], label="Return (Test)")
         plt.title("Return (Test)")
         plt.xlabel("Episodes")
         plt.ylabel("Return")
@@ -210,12 +215,14 @@ class TrainCodArt(ABC):
         plt.savefig(os.path.join(save_dir, "return_test.png"))  # Save the figure
 
         plt.subplot(2, 2, 4)
-        plt.plot(self.logs["eval step_count"], label='Max Step Count (Test)')
+        plt.plot(self.logs["eval step_count"], label="Max Step Count (Test)")
         plt.title("Max Step Count (Test)")
         plt.xlabel("Episodes")
         plt.ylabel("Test Step Count")
         plt.grid()
-        plt.savefig(os.path.join(save_dir, "max_step_count_test.png"))  # Save the figure
+        plt.savefig(
+            os.path.join(save_dir, "max_step_count_test.png")
+        )  # Save the figure
 
         plt.tight_layout()
         plt.show()

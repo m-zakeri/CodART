@@ -13,6 +13,7 @@ from codart.learner.cod2vec.interactive_predictor import InteractivePredictor
 from transformers import AutoTokenizer, GPTBigCodeForCausalLM
 from abstraction_configs import critic, policy
 
+
 class TrainerImplement(TrainCodArt):
 
     def __init__(
@@ -42,12 +43,16 @@ class TrainerImplement(TrainCodArt):
         self.generator = SmellInitialization()
         self.interactive_predictor = InteractivePredictor()
         self.pretrained_model_path: str = pretrained_model_path
+
     def start(self):
         self.model.load_state_dict(state_dict=torch.load(self.pretrained_model_path))
         self.refactoring_manager.add_operation(self.generator.generate_an_action())
 
     def get_state(self):
-        return {"metrics": self.calculate_metrics(), "codes": self.interactive_predictor.predict()}
+        return {
+            "metrics": self.calculate_metrics(),
+            "codes": self.interactive_predictor.predict(),
+        }
 
     def get_optimizer(self):
         return optim.Adam(self.model.parameters(), lr=0.001)
@@ -59,7 +64,9 @@ class TrainerImplement(TrainCodArt):
             policy, _ = self.model(input_tensor)
             return policy.numpy()
 
-    def action(self, action_probs: RefactoringOperation = None, *args, **kwargs) -> bool:
+    def action(
+        self, action_probs: RefactoringOperation = None, *args, **kwargs
+    ) -> bool:
         action_probs.execute()
         update_understand_database(udb_path=self.udb_path)
         if action_probs is None:
@@ -77,7 +84,9 @@ class TrainerImplement(TrainCodArt):
         torch.save(self.replay_buffer.state_dict(), file_path)
         torch.save(self.gpt_model.state_dict(), file_path)
 
-    def load(self, file_path_rl: str = "", file_path_gpt: str = "", *args, **kwargs) -> None:
+    def load(
+        self, file_path_rl: str = "", file_path_gpt: str = "", *args, **kwargs
+    ) -> None:
         self.replay_buffer.load_state_dict(torch.load(file_path_rl))
         self.gpt_model.load_state_dict(torch.load(file_path_gpt))
         self.replay_buffer.eval()
@@ -153,4 +162,3 @@ class TrainerImplement(TrainCodArt):
             objective_values.append([-1 * i for i in arr])
             logger.info(f"Objective values for individual {k}: {[i for i in arr]}")
         return objective_values
-

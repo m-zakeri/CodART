@@ -3,6 +3,7 @@ from common import common
 from extractor import Extractor
 from codart.learner.sbr_initializer.utils.utility import logger, config
 import tensorflow as tf
+
 try:
     import understand as und
 except ImportError as e:
@@ -20,6 +21,7 @@ JAR_PATH = config.get(
         "JavaExtractor", "JPredict", "target", "JavaExtractor-0.0.1-SNAPSHOT.jar"
     ),
 )
+
 
 class InteractivePredictor:
     exit_keywords = ["exit", "quit", "q"]
@@ -40,9 +42,15 @@ class InteractivePredictor:
 
     def _load_inner_model(self):
         if self.sess is not None:
-            print('Loading model weights from: ' + "/home/y/Downloads/models/java14_model/saved_model_iter8.release.data-00000-of-00001")
-            self.saver.restore(self.sess, "/home/y/Downloads/models/java14_model/saved_model_iter8.release.data-00000-of-00001")
-            print('Done loading model weights')
+            print(
+                "Loading model weights from: "
+                + "/home/y/Downloads/models/java14_model/saved_model_iter8.release.data-00000-of-00001"
+            )
+            self.saver.restore(
+                self.sess,
+                "/home/y/Downloads/models/java14_model/saved_model_iter8.release.data-00000-of-00001",
+            )
+            print("Done loading model weights")
 
     def extract_functions(self, database_path):
         """Extract functions from the Understand database."""
@@ -56,14 +64,16 @@ class InteractivePredictor:
             file_path = func.filerefs().longname() if func.filerefs() else "N/A"
 
             # Get the function's complete content
-            function_content = func.contents().strip()  # Use contents() to get the full function body
+            function_content = (
+                func.contents().strip()
+            )  # Use contents() to get the full function body
 
             # Populate the dictionary with extracted data
             functions_dict[func.longname()] = {
                 "class_name": class_name,
                 "package_name": package_name,
                 "file_path": file_path,
-                "function_content": function_content  # Store the full content
+                "function_content": function_content,  # Store the full content
             }
 
         return functions_dict
@@ -77,14 +87,18 @@ class InteractivePredictor:
             logger.info(f"  Class Name: {data['class_name']}")
             logger.info(f"  Package Name: {data['package_name']}")
             logger.info(f"  File Path: {data['file_path']}")
-            logger.info(f"  Function Content:\n{data['function_content'][:30]}...")  # Display a snippet
+            logger.info(
+                f"  Function Content:\n{data['function_content'][:30]}..."
+            )  # Display a snippet
 
             # Predicting with cod2vec using the function content directly
-            input_lines = data['function_content']  # Pass the complete function body
+            input_lines = data["function_content"]  # Pass the complete function body
 
             try:
                 # Extract paths for the cod2vec model
-                predict_lines, hash_to_string_dict = self.path_extractor.extract_paths(input_lines)
+                predict_lines, hash_to_string_dict = self.path_extractor.extract_paths(
+                    input_lines
+                )
                 raw_prediction_results = self.model.predict(predict_lines)
                 method_prediction_results = common.parse_prediction_results(
                     raw_prediction_results,
@@ -96,26 +110,32 @@ class InteractivePredictor:
                 # Collect predictions
                 function_predictions = {
                     "function_name": function_name,
-                    "predictions": []
+                    "predictions": [],
                 }
 
-                for raw_prediction, method_prediction in zip(raw_prediction_results, method_prediction_results):
+                for raw_prediction, method_prediction in zip(
+                    raw_prediction_results, method_prediction_results
+                ):
                     prediction_info = {
                         "original_name": method_prediction.original_name,
                         "predicted": [
                             {
                                 "name": name_prob_pair["name"],
-                                "probability": name_prob_pair["probability"]
+                                "probability": name_prob_pair["probability"],
                             }
                             for name_prob_pair in method_prediction.predictions
                         ],
                         "attention_paths": [
                             {
                                 "score": attention_obj["score"],
-                                "context": (attention_obj["token1"], attention_obj["path"], attention_obj["token2"])
+                                "context": (
+                                    attention_obj["token1"],
+                                    attention_obj["path"],
+                                    attention_obj["token2"],
+                                ),
                             }
                             for attention_obj in method_prediction.attention_paths
-                        ]
+                        ],
                     }
                     function_predictions["predictions"].append(prediction_info)
 
@@ -133,6 +153,7 @@ class InteractivePredictor:
 
         return all_predictions  # Return the list of all predictions
 
+
 # Example usage
 if __name__ == "__main__":
     model = None  # Initialize your cod2vec model here
@@ -143,7 +164,9 @@ if __name__ == "__main__":
     # Optionally, print or process the results further
     for prediction in predictions:
         print(f"Function: {prediction['function_name']}")
-        for pred in prediction['predictions']:
+        for pred in prediction["predictions"]:
             print(f"  Original Name: {pred['original_name']}")
-            for item in pred['predicted']:
-                print(f"    Predicted Name: {item['name']} with probability: {item['probability']}")
+            for item in pred["predicted"]:
+                print(
+                    f"    Predicted Name: {item['name']} with probability: {item['probability']}"
+                )

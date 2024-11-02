@@ -22,7 +22,6 @@ import JavaExtractor.Visitors.FunctionVisitor;
 
 @SuppressWarnings("StringEquality")
 public class FeatureExtractor {
-	private CommandLineValues m_CommandLineValues;
 	private static Set<String> s_ParentTypeToAddChildId = Stream
 			.of("AssignExpr", "ArrayAccessExpr", "FieldAccessExpr", "MethodCallExpr")
 			.collect(Collectors.toCollection(HashSet::new));
@@ -32,8 +31,7 @@ public class FeatureExtractor {
 	final static String upSymbol = "^";
 	final static String downSymbol = "_";
 
-	public FeatureExtractor(CommandLineValues commandLineValues) {
-		this.m_CommandLineValues = commandLineValues;
+	public FeatureExtractor() {
 	}
 
 	public ArrayList<ProgramFeatures> extractFeatures(String code) throws ParseException, IOException {
@@ -70,16 +68,12 @@ public class FeatureExtractor {
 				parsed = JavaParser.parse(content);
 			}
 		}
-
 		return parsed;
 	}
 
 	public ArrayList<ProgramFeatures> generatePathFeatures(ArrayList<MethodContent> methods) {
 		ArrayList<ProgramFeatures> methodsFeatures = new ArrayList<>();
 		for (MethodContent content : methods) {
-			if (content.getLength() < m_CommandLineValues.MinCodeLength
-					|| content.getLength() > m_CommandLineValues.MaxCodeLength)
-				continue;
 			ProgramFeatures singleMethodFeatures = generatePathFeaturesForFunction(content);
 			if (!singleMethodFeatures.isEmpty()) {
 				methodsFeatures.add(singleMethodFeatures);
@@ -138,16 +132,10 @@ public class FeatureExtractor {
 		}
 
 		int pathLength = sourceStack.size() + targetStack.size() - 2 * commonPrefix;
-		if (pathLength > m_CommandLineValues.MaxPathLength) {
-			return Common.EmptyString;
-		}
 
 		if (currentSourceAncestorIndex >= 0 && currentTargetAncestorIndex >= 0) {
 			int pathWidth = targetStack.get(currentTargetAncestorIndex).getUserData(Common.ChildId)
 					- sourceStack.get(currentSourceAncestorIndex).getUserData(Common.ChildId);
-			if (pathWidth > m_CommandLineValues.MaxPathWidth) {
-				return Common.EmptyString;
-			}
 		}
 
 		for (int i = 0; i < sourceStack.size() - commonPrefix; i++) {
@@ -191,6 +179,6 @@ public class FeatureExtractor {
 	}
 
 	private Integer saturateChildId(int childId) {
-		return Math.min(childId, m_CommandLineValues.MaxChildId);
+		return Math.min(childId, 999999);
 	}
 }

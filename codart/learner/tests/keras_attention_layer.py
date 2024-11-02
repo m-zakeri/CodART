@@ -10,7 +10,9 @@ class AttentionLayer(Layer):
         super(AttentionLayer, self).__init__(**kwargs)
 
     def build(self, inputs_shape):
-        inputs_shape = inputs_shape if isinstance(inputs_shape, list) else [inputs_shape]
+        inputs_shape = (
+            inputs_shape if isinstance(inputs_shape, list) else [inputs_shape]
+        )
 
         if len(inputs_shape) < 1 or len(inputs_shape) > 2:
             raise ValueError("AttentionLayer expect one or two inputs.")
@@ -27,11 +29,12 @@ class AttentionLayer(Layer):
         attention_param_shape = (self.input_dim, 1)
 
         self.attention_param = self.add_weight(
-            name='attention_param',
+            name="attention_param",
             shape=attention_param_shape,
-            initializer='uniform',
+            initializer="uniform",
             trainable=True,
-            dtype=tf.float32)
+            dtype=tf.float32,
+        )
         super(AttentionLayer, self).build(input_shape)
 
     def call(self, inputs, **kwargs):
@@ -42,10 +45,14 @@ class AttentionLayer(Layer):
 
         actual_input = inputs[0]
         mask = inputs[1] if len(inputs) > 1 else None
-        if mask is not None and not (((len(mask.shape) == 3 and mask.shape[2] == 1) or len(mask.shape) == 2)
-                                     and mask.shape[1] == self.input_length):
-            raise ValueError("`mask` should be of shape (batch, input_length) or (batch, input_length, 1) "
-                             "when calling an AttentionLayer.")
+        if mask is not None and not (
+            ((len(mask.shape) == 3 and mask.shape[2] == 1) or len(mask.shape) == 2)
+            and mask.shape[1] == self.input_length
+        ):
+            raise ValueError(
+                "`mask` should be of shape (batch, input_length) or (batch, input_length, 1) "
+                "when calling an AttentionLayer."
+            )
 
         assert actual_input.shape[-1] == self.attention_param.shape[0]
 
@@ -58,8 +65,12 @@ class AttentionLayer(Layer):
             mask = K.log(mask)
             attention_weights += mask
 
-        attention_weights = K.softmax(attention_weights, axis=1)  # (batch, input_length, 1)
-        result = K.sum(actual_input * attention_weights, axis=1)  # (batch, input_length)  [multiplication uses broadcast]
+        attention_weights = K.softmax(
+            attention_weights, axis=1
+        )  # (batch, input_length, 1)
+        result = K.sum(
+            actual_input * attention_weights, axis=1
+        )  # (batch, input_length)  [multiplication uses broadcast]
         return result, attention_weights
 
     def compute_output_shape(self, input_shape):
