@@ -105,6 +105,10 @@ class InteractivePredictor:
 
             try:
                 # Extract paths for the cod2vec model
+                if input_lines == "":
+                    print("no content for prediction found")
+                    continue
+
                 predict_lines, hash_to_string_dict = self.path_extractor.extract_paths(input_lines)
                 raw_prediction_results = self.model.predict(predict_lines)
 
