@@ -4,7 +4,7 @@ import time
 from typing import Dict, Optional, List, Iterable
 from collections import Counter
 from functools import partial
-
+import os
 from path_context_reader import (
     PathContextReader,
     ModelInputTensorsFormer,
@@ -395,7 +395,7 @@ class Code2VecModel(Code2VecModelBase):
             flat_embed, attention_param
         )  # (batch * max_contexts, 1)
         batched_contexts_weights = tf.reshape(
-            contexts_weights, [-1, self.config['COD2VEC']['MAX_CONTEXTS'], 1]
+            contexts_weights, [-1, self.config.MAX_CONTEXTS, 1]
         )  # (batch, max_contexts, 1)
         mask = tf.math.log(valid_mask)  # (batch, max_contexts)
         mask = tf.expand_dims(mask, axis=2)  # (batch, max_contexts, 1)
@@ -406,7 +406,7 @@ class Code2VecModel(Code2VecModelBase):
 
         batched_embed = tf.reshape(
             flat_embed,
-            shape=[-1, self.config['COD2VEC']['MAX_CONTEXTS'], self.config.CODE_VECTOR_SIZE],
+            shape=[-1, self.config.MAX_CONTEXTS, self.config.CODE_VECTOR_SIZE],
         )
         code_vectors = tf.reduce_sum(
             tf.multiply(batched_embed, attention_weights), axis=1
@@ -520,6 +520,9 @@ class Code2VecModel(Code2VecModelBase):
             ) = self._build_tf_test_graph(reader_output, normalize_scores=True)
 
             self._initialize_session_variables()
+            print("Loading model from:", self.config.MODEL_LOAD_PATH)
+            print("Files in model directory:")
+            print(os.listdir(os.path.dirname(self.config.MODEL_LOAD_PATH)))
             self.saver = tf.compat.v1.train.Saver()
             self._load_inner_model(sess=self.sess)
 

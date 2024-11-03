@@ -96,22 +96,23 @@ class InteractivePredictor:
 
         for function_name, data in self.class_dict.items():
             print(f"\nAnalyzing function: {function_name}")
-            # logger.info(f"  Class Name: {data['class_name']}")
             print(f"  Package Name: {data['package_name']}")
             print(f"  File Path: {data['file_path']}")
-            print(
-                f"  Function Content:\n{data['class_content'][:30]}..."
-            )  # Display a snippet
+            print(f"  Function Content:\n{data['class_content'][:30]}...")  # Display a snippet
 
             # Predicting with cod2vec using the function content directly
             input_lines = data["class_content"]  # Pass the complete function body
 
             try:
                 # Extract paths for the cod2vec model
-                predict_lines, hash_to_string_dict = self.path_extractor.extract_paths(
-                    input_lines
-                )
+                predict_lines, hash_to_string_dict = self.path_extractor.extract_paths(input_lines)
                 raw_prediction_results = self.model.predict(predict_lines)
+
+                # Check if predictions exist
+                if not raw_prediction_results:
+                    logger.warning(f"No predictions made for {function_name}")
+                    continue  # Skip this function if no predictions
+
                 method_prediction_results = common.parse_prediction_results(
                     raw_prediction_results,
                     hash_to_string_dict,
@@ -125,9 +126,8 @@ class InteractivePredictor:
                     "predictions": [],
                 }
 
-                for raw_prediction, method_prediction in zip(
-                    raw_prediction_results, method_prediction_results
-                ):
+                # Iterate through raw predictions and method predictions
+                for raw_prediction, method_prediction in zip(raw_prediction_results, method_prediction_results):
                     prediction_info = {
                         "original_name": method_prediction.original_name,
                         "predicted": [
@@ -150,19 +150,20 @@ class InteractivePredictor:
                         ],
                     }
                     function_predictions["predictions"].append(prediction_info)
+                    print("function_predictions : ", function_predictions)
 
                 # Append each function's predictions to the all_predictions list
                 all_predictions.append(function_predictions)
 
-                if self.config["COD2VEC"]["EXPORT_CODE_VECTORS"]:
+                if self.config["COD2VEC"]["EXPORT_CODE_VECTORS"] and raw_prediction is not None:
                     logger.info("Code vector:")
                     logger.info(" ".join(map(str, raw_prediction.code_vector)))
 
             except ValueError as e:
-                print("ERROR 1 , ", e)
+                print("ERROR 1, ", e)
                 logger.error(f"Error processing function {function_name}: {e}")
             except Exception as general_e:
-                print("ERROR 2 , ", general_e)
+                print("ERROR 2, ", general_e)
                 logger.error(f"An unexpected error occurred: {general_e}")
 
-        return all_predictions  # Return the list of all predictions
+        return all_predictions
