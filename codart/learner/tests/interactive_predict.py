@@ -94,14 +94,14 @@ class InteractivePredictor:
         logger.info("Starting interactive prediction...")
         all_predictions = []  # Initialize a list to hold all predictions
 
-        for function_name, data in self.class_dict.items():
+        for function_name, data in self.functions_dict.items():
             print(f"\nAnalyzing function: {function_name}")
             print(f"  Package Name: {data['package_name']}")
             print(f"  File Path: {data['file_path']}")
-            print(f"  Function Content:\n{data['class_content'][:30]}...")  # Display a snippet
+            print(f"  Function Content:\n{data['function_content'][:30]}...")  # Display a snippet
 
             # Predicting with cod2vec using the function content directly
-            input_lines = data["class_content"]  # Pass the complete function body
+            input_lines = data["function_content"]  # Pass the complete function body
 
             try:
                 # Extract paths for the cod2vec model
@@ -111,7 +111,7 @@ class InteractivePredictor:
 
                 predict_lines, hash_to_string_dict = self.path_extractor.extract_paths(input_lines)
                 raw_prediction_results = self.model.predict(predict_lines)
-
+                print("Prediction results:")
                 # Check if predictions exist
                 if not raw_prediction_results:
                     logger.warning(f"No predictions made for {function_name}")
@@ -154,7 +154,6 @@ class InteractivePredictor:
                         ],
                     }
                     function_predictions["predictions"].append(prediction_info)
-                    print("function_predictions : ", function_predictions)
 
                 # Append each function's predictions to the all_predictions list
                 all_predictions.append(function_predictions)

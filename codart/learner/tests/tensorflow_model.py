@@ -494,9 +494,12 @@ class Code2VecModel(Code2VecModelBase):
         )
 
     def predict(
-        self, predict_data_lines: Iterable[str]
+            self, predict_data_lines: Iterable[str]
     ) -> List[ModelPredictionResults]:
+        print("Starting predict function")
+
         if self.predict_reader is None:
+            print("Initializing PathContextReader")
             self.predict_reader = PathContextReader(
                 vocabs=self.vocabs,
                 model_input_tensors_former=_TFEvaluateModelInputTensorsFormer(),
@@ -504,10 +507,13 @@ class Code2VecModel(Code2VecModelBase):
                 estimator_action=EstimatorAction.Predict,
             )
             self.predict_placeholder = tf.compat.v1.placeholder(tf.string)
+
+            print("Processing input row")
             reader_output = self.predict_reader.process_input_row(
                 self.predict_placeholder
             )
 
+            print("Building TensorFlow test graph")
             (
                 self.predict_top_words_op,
                 self.predict_top_values_op,
@@ -519,45 +525,49 @@ class Code2VecModel(Code2VecModelBase):
                 self.predict_code_vectors,
             ) = self._build_tf_test_graph(reader_output, normalize_scores=True)
 
+            print("Initializing session variables")
             self._initialize_session_variables()
+
             print("Loading model from:", self.config.MODEL_LOAD_PATH)
             print("Files in model directory:")
             print(os.listdir(os.path.dirname(self.config.MODEL_LOAD_PATH)))
+
+            print("Creating TensorFlow saver")
             self.saver = tf.compat.v1.train.Saver()
+            print("Loading inner model")
             self._load_inner_model(sess=self.sess)
 
         prediction_results: List[ModelPredictionResults] = []
-        for line in predict_data_lines:
-            (
-                batch_top_words,
-                batch_top_scores,
-                batch_original_name,
-                batch_attention_weights,
-                batch_path_source_strings,
-                batch_path_strings,
-                batch_path_target_strings,
-                batch_code_vectors,
-            ) = self.sess.run(
-                [
-                    self.predict_top_words_op,
-                    self.predict_top_values_op,
-                    self.predict_original_names_op,
-                    self.attention_weights_op,
-                    self.predict_source_string,
-                    self.predict_path_string,
-                    self.predict_path_target_string,
-                    self.predict_code_vectors,
-                ],
-                feed_dict={self.predict_placeholder: line},
-            )
-            # shapes:
-            #   batch_top_words, top_scores: (batch, top_k)
-            #   batch_original_name: (batch, )
-            #   batch_attention_weights: (batch, max_context, 1)
-            #   batch_path_source_strings, batch_path_strings, batch_path_target_strings: (batch, max_context)
-            #   batch_code_vectors: (batch, code_vector_size)
+        print("Starting to process prediction data lines")
 
-            # remove first axis: (batch=1, ...)
+        for i, line in enumerate(predict_data_lines):
+            try:
+                (
+                    batch_top_words,
+                    batch_top_scores,
+                    batch_original_name,
+                    batch_attention_weights,
+                    batch_path_source_strings,
+                    batch_path_strings,
+                    batch_path_target_strings,
+                    batch_code_vectors,
+                ) = self.sess.run(
+                    [
+                        self.predict_top_words_op,
+                        self.predict_top_values_op,
+                        self.predict_original_names_op,
+                        self.attention_weights_op,
+                        self.predict_source_string,
+                        self.predict_path_string,
+                        self.predict_path_target_string,
+                        self.predict_code_vectors,
+                    ],
+                    feed_dict={self.predict_placeholder: line},
+                )
+            except Exception as e:
+                print(f"Error during session.run() for line {i + 1}: {e}")
+                raise  # Re-raise the exception for further handling if necessary
+
             assert all(
                 tensor.shape[0] == 1
                 for tensor in (
@@ -582,12 +592,14 @@ class Code2VecModel(Code2VecModelBase):
 
             top_words = common.binary_to_string_list(top_words)
             original_name = common.binary_to_string(original_name)
+
             attention_per_context = self._get_attention_weight_per_context(
                 path_source_strings,
                 path_strings,
                 path_target_strings,
                 attention_weights,
             )
+
             prediction_results.append(
                 ModelPredictionResults(
                     original_name=original_name,
@@ -599,6 +611,8 @@ class Code2VecModel(Code2VecModelBase):
                     ),
                 )
             )
+
+        print("Prediction completed successfully")
         return prediction_results
 
     def _save_inner_model(self, path: str):
