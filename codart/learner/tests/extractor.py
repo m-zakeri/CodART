@@ -24,8 +24,12 @@ class Extractor:
                 with sock.makefile('r') as sock_file:
                     for line in sock_file:
                         response.append(line.strip())
+                        if "#ENDRESPONSE" in line:
+                            break
+
 
                 response = "\n".join(response)
+                response = response.replace("#ENDRESPONSE", "")
                 if not response:
                     raise ValueError("No response from server")
 
