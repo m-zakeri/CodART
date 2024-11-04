@@ -1,5 +1,7 @@
-from codart.refactorings.abstraction import RefactoringOperation
+from codart.refactorings.abstraction import RefactoringOperation, RefactoringModel
 from codart.refactorings import extract_class, move_class, move_method, pushdown_method2, pullup_method, extract_method
+
+
 class RefactoringManager:
     def __init__(self):
         self.operations = []
@@ -45,8 +47,14 @@ class ExtractClass(RefactoringOperation):
                            source_class=self._source_class,
                            file_path=self._file_path,
                            moved_fields=self._moved_fields)
-    def get_refactoring(self, *args, **kwargs) -> object:
-        return {"name": "Extracting class", "moved_methods": str(self.moved_methods), "source_class": str(self.source_class), "file_path": str(self.file_path), "moved_fields": self._moved_fields}
+    def get_refactoring(self, *args, **kwargs) -> RefactoringModel:
+        return RefactoringModel(name="Extracting class", params={"moved_methods": str(self.moved_methods), "source_class": str(self.source_class), "file_path": str(self.file_path), "moved_fields": self._moved_fields})
+
+    def is_empty(self) -> bool:
+        return (not self._moved_methods or
+                not self._source_class or
+                not self._file_path or
+                not self._moved_fields)
 
     @property
     def udb_path(self):
@@ -101,8 +109,16 @@ class MoveClass(RefactoringOperation):
                         class_name=self._class_name,
                         target_package=self._target_package)
 
-    def get_refactoring(self, *args, **kwargs) -> object:
-        return {"name": "Move class", "source_package": str(self.source_package), "class_name": str(self.class_name), "target_package": str(self.target_package)}
+    def get_refactoring(self, *args, **kwargs) -> RefactoringModel:
+        return RefactoringModel(name="Move class", params={
+            "source_package": str(self._source_package),
+            "class_name": str(self._class_name),
+            "target_package": str(self._target_package),
+        })
+
+    def is_empty(self) -> bool:
+        """Check if the operation has empty or default values."""
+        return not (self._source_package and self._class_name and self._target_package)
 
     @property
     def udb_path(self):
@@ -149,8 +165,15 @@ class PullupMethod(RefactoringOperation):
                            method_name=self._method_name,
                            children_classes=self._children_classes)
 
-    def get_refactoring(self, *args, **kwargs) -> object:
-        return {"name": "Pull up method", "method_name": str(self.method_name), "children_classes": str(self.children_classes)}
+    def get_refactoring(self, *args, **kwargs) -> RefactoringModel:
+        return RefactoringModel(name="Pull up method", params={
+            "method_name": str(self._method_name),
+            "children_classes": str(self._children_classes),
+        })
+
+    def is_empty(self) -> bool:
+        """Check if the method name and children classes are set."""
+        return not (self._method_name and self._children_classes)
 
     @property
     def udb_path(self):
@@ -187,15 +210,22 @@ class PushdownMethod(RefactoringOperation):
 
     def execute(self):
         print(f"Pushing down method {self._method_name} from {self._source_class} to {self._target_classes}")
-        pushdown_method2.main(udb_path=self._udb_path,
-                               method_name=self._method_name,
-                               source_class=self._source_class,
-                               source_package=self._source_package,
-                               target_classes=self._target_classes)
+        pushdown_method.main(udb_path=self._udb_path,
+                             method_name=self._method_name,
+                             source_class=self._source_class,
+                             source_package=self._source_package,
+                             target_classes=self._target_classes)
 
-    def get_refactoring(self, *args, **kwargs) -> object:
-        return {"name": "Pushing down method", "method_name": str(self.method_name), "source_class": str(self.source_class), "source_package": str(self.source_package), "target_classes": str(self.target_classes)}
+    def get_refactoring(self, *args, **kwargs) -> RefactoringModel:
+        return RefactoringModel(name="Push down method", params={
+            "method_name": str(self._method_name),
+            "source_class": str(self._source_class),
+            "source_package": str(self._source_package),
+            "target_classes": str(self._target_classes),
+        })
 
+    def is_empty(self) -> bool:
+        return not (self._method_name and self._source_class and self._target_classes)
     @property
     def udb_path(self):
         return self._udb_path
@@ -255,9 +285,16 @@ class MoveMethod(RefactoringOperation):
                          target_package=self._target_package,
                          target_class=self._target_class)
 
-    def get_refactoring(self, *args, **kwargs) -> object:
-        return {"name": "Move method", "source_class": str(self.source_class), "method_name": str(self.method_name), "source_package": str(self.source_package), "target_class": str(self.target_class)}
+    def get_refactoring(self, *args, **kwargs) -> RefactoringModel:
+        return RefactoringModel(name="Move method", params={
+            "source_class": str(self._source_class),
+            "method_name": str(self._method_name),
+            "source_package": str(self._source_package),
+            "target_class": str(self._target_class),
+        })
 
+    def is_empty(self) -> bool:
+        return not (self._source_class and self._method_name and self._target_class)
     @property
     def source_class(self):
         return self._source_class
@@ -327,9 +364,16 @@ class ExtractMethod(RefactoringOperation):
     @lines.setter
     def lines(self, value: list):
         self._lines = value
+
     def execute(self):
         print(f"Extracting method {self._file_path} to {self._lines}")
         extract_method.main(file_path=self.file_path, lines=self.lines)
 
-    def get_refactoring(self, *args, **kwargs) -> object:
-        return {"name": "Extracting method", "file_path": self.file_path, "lines": self.lines}
+    def get_refactoring(self, *args, **kwargs) -> RefactoringModel:
+        return RefactoringModel(name="Extracting method", params={
+            "file_path": self.file_path,
+            "lines": str(self.lines),
+        })
+
+    def is_empty(self) -> bool:
+        return not (self._file_path and self._lines)

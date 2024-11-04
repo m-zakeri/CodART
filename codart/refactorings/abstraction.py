@@ -1,5 +1,12 @@
 from abc import ABC, abstractmethod
 from codart.utility.commons.granularity import Granularity
+from pydantic import BaseModel
+from pydantic.types import Dict
+import torch
+
+class RefactoringModel(BaseModel):
+    name: str
+    params:  Dict[str, Dict[str, str]]
 
 
 class Refactoring(ABC):
@@ -51,5 +58,16 @@ class RefactoringOperation(ABC):
         raise NotImplementedError(f"{type(self).__name__} not implement")
 
     @abstractmethod
-    def get_refactoring(self, *args, **kwargs) -> object:
+    def get_refactoring(self, *args, **kwargs) -> RefactoringModel:
         raise NotImplementedError(f"{type(self).__name__} not implement")
+
+    @property
+    @abstractmethod
+    def shape(self):
+        """Returns the shape of the action."""
+        return torch.Size([1])
+
+    @abstractmethod
+    def is_empty(self) -> bool:
+        """Returns True if the operation does not have meaningful data."""
+        raise NotImplementedError(f"{type(self).__name__} does not implement is_empty.")

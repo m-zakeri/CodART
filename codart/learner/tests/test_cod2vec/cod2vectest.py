@@ -1,9 +1,9 @@
 import json
 from multiprocessing import Process
-from codart.learner.tests.interactive_predict import InteractivePredictor
-from codart.learner.tests.tensorflow_model import Code2VecModel
-from codart.learner.tests.config import Config
-from codart.learner.tests.run_java import run_java_extractor
+from codart.learner.tests.test_cod2vec.interactive_predict import InteractivePredictor
+from codart.learner.tests.test_cod2vec.tensorflow_model import Code2VecModel
+from codart.learner.tests.test_cod2vec.config import Config
+from codart.learner.tests.test_cod2vec.run_java import run_java_extractor
 
 
 def start_java_extractor():

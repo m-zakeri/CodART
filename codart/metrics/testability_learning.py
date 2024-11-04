@@ -268,13 +268,12 @@ def train_dateset_g7(ds_number=0):
 
 def create_testability_dataset_with_only_important_metrics():
     """
-    Create DS#6 (DS07610)
-    For use in Mr Esmaeili project
-    Select only top 15 important testability features
-    :return:
+    1 : create_testability_dataset_with_only_important_metrics
+    2 : create_testability_dataset_with_only_10_important_metrics
+    DS<method_tag>RL<version:1><version:1><version:1>.csv
     """
-    df_path = r'data_model/DS07012.csv'
-    df_important_metrics_path = r'data_model/DS07610.csv'
+    df_path = r'data_model/DS1RL100.csv'
+    df_important_metrics_path = r'data_model/DS1RL100.csv'
     df = pd.read_csv(df_path, delimiter=',', index_col=False)
     df_imp = pd.DataFrame()
     df_imp['Class'] = df['Class']  # 0
@@ -299,8 +298,13 @@ def create_testability_dataset_with_only_important_metrics():
 
 
 def create_testability_dataset_with_only_10_important_metrics():
-    df_path = r'data_model/DS07610.csv'
-    df_new_path = r'data_model/DS07710.csv'
+    """
+    1 : create_testability_dataset_with_only_important_metrics
+    2 : create_testability_dataset_with_only_10_important_metrics
+    DS<method_tag>RL<version:1><version:1><version:1>.csv
+    """
+    df_path = r'data_model/DS1RL100.csv'
+    df_new_path = r'data_model/DS2RL100.csv'
     df = pd.read_csv(df_path, delimiter=',', index_col=False)
     df.drop(columns=['CSORD_CountDeclClassMethod', 'CSLEX_NumberOfNewStatements',
                      'CSLEX_NumberOfReturnAndPrintStatements', 'CSORD_NumberOfClassConstructors',
@@ -309,9 +313,9 @@ def create_testability_dataset_with_only_10_important_metrics():
 
 
 def main():
-    train_dateset_g7(ds_number=7)
-    # create_testability_dataset_with_only_important_metrics()
-    # create_testability_dataset_with_only_10_important_metrics()
+    # train_dateset_g7(ds_number=7)
+    create_testability_dataset_with_only_important_metrics()
+    create_testability_dataset_with_only_10_important_metrics()
 
 
 # -----------------------------------------------

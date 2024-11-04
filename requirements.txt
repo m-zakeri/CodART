@@ -34,3 +34,4 @@ torch
 tensorflow
 transformers[torch]
 torchrl-nightly
+pydantic
