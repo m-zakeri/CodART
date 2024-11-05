@@ -45,7 +45,7 @@ MANIFEST
 logs/
 pip-log.txt
 pip-delete-this-directory.txt
-
+sklearn_models7/
 # Unit test / coverage reports
 htmlcov/
 .tox/

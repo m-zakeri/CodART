@@ -194,6 +194,10 @@ class Regression(object):
         print('Fitting model number', model_number)
         clf.fit(X=self.X_train, y=self.y_train)
 
+        output_dir = os.path.dirname(model_path)
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
         print('Writing grid search result ...')
         df = pd.DataFrame(clf.cv_results_, )
         df.to_csv(model_path[:-7] + '_grid_search_cv_results.csv', index=False)
@@ -253,6 +257,8 @@ def train_dateset_g7(ds_number=0):
         reg = Regression(df_path=r'data_model/DS07610.csv')
     elif ds_number == 7:
         reg = Regression(df_path=r'data_model/DS07710.csv')
+    elif ds_number == 8:
+        reg = Regression(df_path=r'learner_testability/data_model/DS_ALL_METRICS_JFLEX.csv')
 
     if reg is None:
         return
@@ -313,9 +319,9 @@ def create_testability_dataset_with_only_10_important_metrics():
 
 
 def main():
-    # train_dateset_g7(ds_number=7)
-    create_testability_dataset_with_only_important_metrics()
-    create_testability_dataset_with_only_10_important_metrics()
+    train_dateset_g7(ds_number=8)
+    # create_testability_dataset_with_only_important_metrics()
+    # create_testability_dataset_with_only_10_important_metrics()
 
 
 # -----------------------------------------------
