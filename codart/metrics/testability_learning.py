@@ -12,7 +12,7 @@ Model 6: MLPRegressor
 
 ## Datasets
 Dataset	Applied preprocessing	Number of metrics
-DS1: (default)	Simple classes elimination, data classes elimination, outliers elimination, and metric standardization	262
+_DS1: (default)	Simple classes elimination, data classes elimination, outliers elimination, and metric standardization	262
 DS2:	DS1 + Feature selection	20
 DS3:	DS1 + Context vector elimination	194
 DS4:	DS1 + Context vector elimination and lexical metrics elimination 	177
@@ -312,8 +312,10 @@ def create_testability_dataset_with_only_10_important_metrics():
     df_path = r'data_model/DS1RL100.csv'
     df_new_path = r'data_model/DS2RL100.csv'
     df = pd.read_csv(df_path, delimiter=',', index_col=False)
-    df.drop(columns=['CSORD_CountDeclClassMethod', 'CSLEX_NumberOfNewStatements',
-                     'CSLEX_NumberOfReturnAndPrintStatements', 'CSORD_NumberOfClassConstructors',
+    df.drop(columns=['CSORD_CountDeclClassMethod',
+                     'CSLEX_NumberOfNewStatements',
+                     'CSLEX_NumberOfReturnAndPrintStatements',
+                     'CSORD_NumberOfClassConstructors',
                      'PK_CountDeclClassMethod'], inplace=True)
     df.to_csv(df_new_path, index=False)
 
@@ -326,6 +328,12 @@ def main():
 
 # -----------------------------------------------
 if __name__ == '__main__':
-    print(datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), '\t Program Start ...')
+    start = datetime.datetime.now()  # Store as a datetime object
+    print(start.strftime('%Y-%m-%d_%H-%M-%S'), '\t Program Start ...')
     main()
-    print(datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), '\t Program End ...')
+    end = datetime.datetime.now()  # Store as a datetime object
+    print(end.strftime('%Y-%m-%d_%H-%M-%S'), '\t Program End ...')
+
+    # Calculate the process time
+    process_time = end - start  # This will be a timedelta object
+    print(f"Process time: {process_time}")

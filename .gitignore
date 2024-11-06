@@ -46,6 +46,7 @@ logs/
 pip-log.txt
 pip-delete-this-directory.txt
 sklearn_models7/
+*.joblib
 # Unit test / coverage reports
 htmlcov/
 .tox/
