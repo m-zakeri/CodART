@@ -1,4 +1,5 @@
-from codart.metrics.data_preparation_evo_suite_4 import PreProcess as pp
+from codart.metrics.data_preparation_evo_suite_4 import PreProcess as PP
+from codart.metrics.testability_prediction import PreProcess
 import understand as und
 import pandas as pd
 
@@ -14,7 +15,7 @@ project_path = "/home/y/jflex/jflex.und"
 
 # evosuite
 
-evop = pp()
+evop = PP()
 db = und.open(project_path)
 class_list = evop.extract_project_classes(db=db)
 print("Class list raw data:", class_list)

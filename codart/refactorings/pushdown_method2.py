@@ -226,14 +226,14 @@ def main(udb_path, source_package, source_class, method_name, target_classes: li
             debug=False
         )
     db.close()
-
-
-# Tests
-if __name__ == '__main__':
-    main(
-        udb_path="D:\Dev\JavaSample\JavaSample\JavaSample.und",
-        source_class="Person",
-        source_package="target_package",
-        method_name="runTest",
-        target_classes=["PersonChild"]
-    )
+#
+#
+# # Tests
+# if __name__ == '__main__':
+#     main(
+#         udb_path="D:\Dev\JavaSample\JavaSample\JavaSample.und",
+#         source_class="Person",
+#         source_package="target_package",
+#         method_name="runTest",
+#         target_classes=["PersonChild"]
+#     )

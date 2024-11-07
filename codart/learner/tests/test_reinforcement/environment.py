@@ -29,12 +29,23 @@ class RefactoringSequenceEnvironment(EnvBase):
     metadata = {}
     batch_locked = False
 
-    def __init__(self, udb_path: str = "", n_obj: int = 8, device: str = "cuda" if torch.cuda.is_available() else "cpu"):
+    def __init__(self, udb_path: str = "/home/y/jflex/jflex.und", n_obj: int = 8, device: Optional[str] = None, seed = None):
         super().__init__(device=device, batch_size=[])
+        if device is None:
+            device = "cuda" if torch.cuda.is_available() else "cpu"
         self.device = device
         self.udb_path = udb_path
         self.n_obj = n_obj
         self.generator = SmellInitialization()
+        self._make_spec(action=self.generator.generate_an_action())
+        if seed is None:
+            seed = torch.empty((), dtype=torch.int64).random_().item()
+        self.set_seed(seed)
+
+    _reset = EnvBase._reset
+    _step = EnvBase._step
+    _set_seed = EnvBase._set_seed
+
 
     def _set_seed(self, seed: Optional[int]):
         rng = torch.manual_seed(seed)
@@ -49,8 +60,8 @@ class RefactoringSequenceEnvironment(EnvBase):
             {
                 "refactoring": action.get_refactoring().name,
                 "params": action.get_refactoring().params,
-                "reward": reward,
-                "done": done,
+                "reward": reward.view(-1, 1),
+                "done": done.view(-1, 1),
             },
             action.shape,
         )
@@ -63,7 +74,8 @@ class RefactoringSequenceEnvironment(EnvBase):
         out = TensorDict(
             {
                 "refactoring": action.get_refactoring().name,
-                "params": action.get_refactoring().params
+                "params": action.get_refactoring().params,
+                # "done": torch.zeros(action.shape, dtype=torch.bool, device=self.device),
             },
             batch_size=action.shape,
         )
@@ -201,6 +213,7 @@ class RefactoringSequenceEnvironment(EnvBase):
 
 
 env = RefactoringSequenceEnvironment()
+env.to(env.device)
 check_env_specs(env)
 
 print("observation_spec:", env.observation_spec)

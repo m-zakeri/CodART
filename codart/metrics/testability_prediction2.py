@@ -26,9 +26,7 @@ import os
 import pandas as pd
 import joblib
 from joblib import Parallel, delayed
-
 import understand as und
-
 from codart.learner.sbr_initializer.utils.utility import logger, config
 from codart.metrics import metrics_names
 from codart.metrics.metrics_coverability import UnderstandUtility

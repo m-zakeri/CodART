@@ -226,9 +226,9 @@ class Regression(object):
 
     def vote(self, model_path=None, dataset_number=1):
         # Trained regressors
-        reg1 = load(r'sklearn_models7/HGBR1_DS{0}.joblib'.format(dataset_number))
-        reg2 = load(r'sklearn_models7/RFR1_DS{0}.joblib'.format(dataset_number))
-        reg3 = load(r'sklearn_models7/MLPR1_DS{0}.joblib'.format(dataset_number))
+        reg1 = load(r'sklearn_models{0}/HGBR1_DS{0}.joblib'.format(dataset_number))
+        reg2 = load(r'sklearn_models{0}/RFR1_DS{0}.joblib'.format(dataset_number))
+        reg3 = load(r'sklearn_models{0}/MLPR1_DS{0}.joblib'.format(dataset_number))
         # reg4 = load(r'sklearn_models7/SGDR1_DS1.joblib')
         ereg = VotingRegressor(
             [('HGBR1_DS{0}'.format(dataset_number), reg1),

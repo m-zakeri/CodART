@@ -30,6 +30,7 @@ def check_compute_metrics_by_class_list(project_name: str = None, database=None,
     dummy_data.insert(1, len(class_entities))
     df = pd.DataFrame(data=[dummy_data], columns=columns)
     df.to_csv(csv_path + project_name + '.csv', index=False, )
+
 class TestabilityMetrics:
     @classmethod
     def get_class_ordinary_metrics_names(cls) -> list:
@@ -864,7 +865,7 @@ class PreProcess:
         df.to_csv(csv_path, index=False)
 
     @classmethod
-    def read_project_classes(cls, project_name: str = None, db=None, df: pd.DataFrame = None):
+    def read_project_0classes(cls, project_name: str = None, db=None, df: pd.DataFrame = None):
         # Check type of df and convert it to DataFrame
         if isinstance(df, list):
             df = pd.DataFrame(df)
