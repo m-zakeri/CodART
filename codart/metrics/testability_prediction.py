@@ -28,7 +28,7 @@ try:
 except ImportError as e:
     print(e)
 
-from sklearn.experimental import enable_hist_gradient_boosting  # noqa
+from sklearn.ensemble import HistGradientBoostingClassifier, HistGradientBoostingRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import QuantileTransformer
 
@@ -1112,12 +1112,25 @@ class PreProcess:
         db = und.open(project_path)
         class_list = cls.extract_project_classes(db=db)
         db.close()
+        # Check if the class_list is empty
+        if not class_list:
+            raise ValueError('No classes found in the project. Please check the project path.')
 
-        res = Parallel(n_jobs=n_jobs, )(
-            delayed(do)(class_entity_long_name, project_path) for class_entity_long_name in class_list
-        )
-        res = list(filter(None, res))
+        # Use Parallel to compute metrics
+        try:
+            res = Parallel(n_jobs=n_jobs)(
+                delayed(cls.do)(class_entity_long_name, project_path) for class_entity_long_name in class_list
+            )
+            # Filter out None results from the computation
+            res = list(filter(None, res))
 
+            # If res is empty after filtering, warn or handle accordingly
+            if not res:
+                raise Warning('All computations returned None. Please check the input data.')
+
+        except Exception as e:
+            print(f"An error occurred during parallel processing: {e}")
+            return pd.DataFrame()  # Return an empty DataFrame or handle accordingl
         columns = ['Class']
         columns.extend(TestabilityMetrics.get_all_metrics_names())
         df = pd.DataFrame(data=res, columns=columns)

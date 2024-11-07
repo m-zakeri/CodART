@@ -65,8 +65,14 @@ class TestabilityMetrics:
         for metric_name in metrics_names.class_lexicon_metrics_names:
             primary_metrics_names.append('CSLEX_' + metric_name)
         return primary_metrics_names
+
     @classmethod
     def compute_java_class_metrics2(cls, db=None, entity=None):
+        method_list = UnderstandUtility.get_method_of_class_java2(db=db, class_name=entity.longname())
+        if method_list is None or not isinstance(method_list, list) or len(method_list) == 0:
+            warnings.warn('No methods found for class "{}". Check if the class is valid or methods are defined.'.format(
+                entity.longname()))
+            return {}  # Return an empty dict or handle as necessary
         class_metrics = entity.metric(entity.metrics())
         j_code_odor_metric = JCodeOdorMetric()
         method_list = UnderstandUtility.get_method_of_class_java2(db=db, class_name=entity.longname())
@@ -859,23 +865,30 @@ class PreProcess:
 
     @classmethod
     def read_project_classes(cls, project_name: str = None, db=None, df: pd.DataFrame = None):
+        # Check type of df and convert it to DataFrame
         if isinstance(df, list):
             df = pd.DataFrame(df)
-        df1 = df.loc[df.Project == project_name]
+
+        # Check if the DataFrame contains the 'Class' column
+        if 'Class' not in df.columns:
+            raise ValueError('The DataFrame does not contain a "Class" column.')
+
         class_entities = list()
-        for index, row in df1.iterrows():
+
+        # Use the existing class names directly from the DataFrame
+        for index, row in df.iterrows():
+            class_name = row['Class']
             # Find relevant class entity
-            class_entity_ = UnderstandUtility.get_class_entity_by_name(db=db, class_name=row['Class'])
+            class_entity_ = UnderstandUtility.get_class_entity_by_name(db=db, class_name=class_name)
             if class_entity_ is not None:
                 method_list = UnderstandUtility.get_method_of_class_java2(db=db, class_entity=class_entity_)
                 if method_list is not None:
                     class_entities.append(class_entity_)
                 else:
-                    # We do not need a class without any method!
-                    warnings.warn('Requested class with name "{0}" does not have any method!'.format(row['Class']))
+                    warnings.warn('Requested class with name "{0}" does not have any method!'.format(class_name))
             else:
-                # if class not found it may be an enum, or interface so we simply ignore it for metric computation
-                warnings.warn('Requested class with name "{0}" was not found int the project!'.format(row['Class']))
+                warnings.warn('Requested class with name "{0}" was not found in the project!'.format(class_name))
+
         return class_entities
 
     @classmethod
@@ -924,57 +937,55 @@ class PreProcess:
 
     @classmethod
     def compute_metrics_by_class_list(cls, project_name: str = None, database=None, class_list=None, csv_path=None):
-        all_class_metrics_value = list()
+        all_class_metrics_value = []
 
-        # print('Calculating project metrics')
-        # project_metrics_dict = TestabilityMetrics.compute_java_project_metrics(db=database)
-        # if project_metrics_dict is None:
-        #     raise TypeError('No project metrics for project {} was found!'.format(project_name))
+        class_entities = cls.read_project_classes(project_name=project_name, db=database, df=class_list)
 
-        class_entities = cls.read_project_classes(project_name=project_name, db=database, df=class_list, )
         for class_entity in class_entities:
             one_class_metrics_value = [class_entity.longname()]
-            # print('Calculating package metrics')
+
+            # Handle package metrics
             package_metrics_dict = TestabilityMetrics.compute_java_package_metrics(db=database,
                                                                                    class_name=class_entity.longname())
             if package_metrics_dict is None:
-                raise TypeError('No package metric for item {} was found'.format(class_entity.longname()))
+                warnings.warn('No package metric for item {} was found.'.format(class_entity.longname()))
+                one_class_metrics_value.extend([None] * len(TestabilityMetrics.get_package_metrics_names()))
+            else:
+                for metric_name in TestabilityMetrics.get_package_metrics_names():
+                    one_class_metrics_value.append(package_metrics_dict.get(metric_name, None))
 
-            # print('Calculating class lexicon metrics')
+            # Handle class lexicon metrics
             class_lexicon_metrics_dict = TestabilityMetrics.compute_java_class_metrics_lexicon(db=database,
                                                                                                entity=class_entity)
             if class_lexicon_metrics_dict is None:
-                raise TypeError('No class lexicon metric for item {} was found'.format(class_entity.longname()))
+                warnings.warn('No class lexicon metric for item {} was found.'.format(class_entity.longname()))
+                one_class_metrics_value.extend([None] * len(TestabilityMetrics.get_class_lexicon_metrics_names()))
+            else:
+                for metric_name in TestabilityMetrics.get_class_lexicon_metrics_names():
+                    one_class_metrics_value.append(class_lexicon_metrics_dict.get(metric_name, None))
 
-            # print('Calculating class ordinary metrics')
+            # Handle class ordinary metrics
             class_ordinary_metrics_dict = TestabilityMetrics.compute_java_class_metrics2(db=database,
                                                                                          entity=class_entity)
             if class_ordinary_metrics_dict is None:
-                raise TypeError('No class ordinary metric for item {} was found'.format(class_entity.longname()))
+                warnings.warn('No class ordinary metric for item {} was found.'.format(class_entity.longname()))
+                one_class_metrics_value.extend([None] * len(TestabilityMetrics.get_class_ordinary_metrics_names()))
+            else:
+                for metric_name in TestabilityMetrics.get_class_ordinary_metrics_names():
+                    one_class_metrics_value.append(class_ordinary_metrics_dict.get(metric_name, None))
 
-            # Write project_metrics_dict
-            # for metric_name in TestabilityMetrics.get_project_metrics_names():
-            #     one_class_metrics_value.append(project_metrics_dict[metric_name])
-
-            # Write package_metrics_dict
-            for metric_name in TestabilityMetrics.get_package_metrics_names():
-                one_class_metrics_value.append(package_metrics_dict[metric_name])
-
-            # Write class_lexicon_metrics_dict
-            for metric_name in TestabilityMetrics.get_class_lexicon_metrics_names():
-                one_class_metrics_value.append(class_lexicon_metrics_dict[metric_name])
-
-            # Write class_ordinary_metrics_dict
-            for metric_name in TestabilityMetrics.get_class_ordinary_metrics_names():
-                one_class_metrics_value.append(class_ordinary_metrics_dict[metric_name])
-
+            # Collect all metrics for this class
             all_class_metrics_value.append(one_class_metrics_value)
 
+        # Prepare DataFrame
         columns = ['Class']
         columns.extend(TestabilityMetrics.get_all_metrics_names())
         df = pd.DataFrame(data=all_class_metrics_value, columns=columns)
+
+        # Save DataFrame to CSV
         print('df for class {0} with shape {1}'.format(project_name, df.shape))
-        df.to_csv(csv_path + project_name + '.csv', index=False)
+        return df
+
 
     # -------------------------------------------
     @classmethod
