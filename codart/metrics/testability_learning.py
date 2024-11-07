@@ -35,7 +35,6 @@ __version__ = '0.7.3'
 __author__ = 'Morteza Zakeri'
 
 import os
-import math
 import datetime
 
 import pandas as pd
@@ -44,25 +43,32 @@ from joblib import dump, load
 
 from sklearn.metrics import *
 from sklearn.preprocessing import QuantileTransformer
-from sklearn.inspection import permutation_importance
 from sklearn.neural_network import MLPRegressor
 from sklearn import linear_model, feature_selection
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import ShuffleSplit, GridSearchCV
-from sklearn import tree, preprocessing
+from sklearn import tree
 from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor, HistGradientBoostingRegressor
 from sklearn.ensemble import VotingRegressor
+from sklearn.metrics import mean_squared_error, mean_absolute_error, median_absolute_error, r2_score
 
 
 class Regression(object):
     def __init__(self, df_path: str = None, feature_selection_mode=False):
         self.df = pd.read_csv(df_path, delimiter=',', index_col=False)
+
+        self.df.dropna(inplace=True)
+
         self.X_train1, self.X_test1, self.y_train, self.y_test = train_test_split(
             self.df.iloc[:, 1:-1],
             self.df.iloc[:, -1],
             test_size=0.10,
             random_state=117,
         )
+
+        # Check for NaN in target variable
+        if self.y_train.isna().sum() > 0:
+            raise ValueError("Training target contains NaN values, please clean your data.")
 
         # ---------------------------------------
         # -- Feature selection (For DS2)
@@ -109,8 +115,8 @@ class Regression(object):
         df['explained_variance_score_variance_weighted'] = [explained_variance_score(y_true, y_pred,
                                                                                      multioutput='variance_weighted')]
         df['mean_absolute_error'] = [mean_absolute_error(y_true, y_pred)]
-        df['mean_squared_error_MSE'] = [mean_squared_error(y_true, y_pred)]
-        df['mean_squared_error_RMSE'] = [mean_squared_error(y_true, y_pred, squared=False)]
+        df['mean_squared_error'] = [mean_squared_error(y_true, y_pred)]
+        df['root_mean_squared_error'] = [mean_squared_error(y_true, y_pred, squared=False)]
         df['median_absolute_error'] = [median_absolute_error(y_true, y_pred)]
 
         if min(y_pred) >= 0:
@@ -259,17 +265,19 @@ def train_dateset_g7(ds_number=0):
         reg = Regression(df_path=r'data_model/DS07710.csv')
     elif ds_number == 8:
         reg = Regression(df_path=r'learner_testability/data_model/DS_ALL_METRICS_JFLEX.csv')
+    elif ds_number == 9:
+        reg = Regression(df_path=r'learner_testability/data_model/DS_EVO_METRICS_JFLEX.csv')
 
     if reg is None:
         return
 
     # reg.regress(model_path=r'sklearn_models7/DTR1_DS1.joblib', model_number=1)
-    reg.regress(model_path=f'sklearn_models7/RFR1_DS{ds_number}.joblib', model_number=2)
+    reg.regress(model_path=f'sklearn_models{ds_number}/RFR1_DS{ds_number}.joblib', model_number=2)
     # reg.regress(model_path=f'sklearn_models7/GBR1_DS{ds_number}.joblib', model_number=3)
-    reg.regress(model_path=f'sklearn_models7/HGBR1_DS{ds_number}.joblib', model_number=4)
+    reg.regress(model_path=f'sklearn_models{ds_number}/HGBR1_DS{ds_number}.joblib', model_number=4)
     # reg.regress(model_path=f'sklearn_models7/SGDR1_DS{ds_number}.joblib', model_number=5)
-    reg.regress(model_path=f'sklearn_models7/MLPR1_DS{ds_number}.joblib', model_number=6)
-    reg.vote(model_path=f'sklearn_models7/VR1_DS{ds_number}.joblib', dataset_number=ds_number)
+    reg.regress(model_path=f'sklearn_models{ds_number}/MLPR1_DS{ds_number}.joblib', model_number=6)
+    reg.vote(model_path=f'sklearn_models{ds_number}/VR1_DS{ds_number}.joblib', dataset_number=ds_number)
 
 
 def create_testability_dataset_with_only_important_metrics():
@@ -322,6 +330,7 @@ def create_testability_dataset_with_only_10_important_metrics():
 
 def main():
     train_dateset_g7(ds_number=8)
+    train_dateset_g7(ds_number=9)
     # create_testability_dataset_with_only_important_metrics()
     # create_testability_dataset_with_only_10_important_metrics()
 
