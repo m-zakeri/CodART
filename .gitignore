@@ -45,7 +45,15 @@ MANIFEST
 logs/
 pip-log.txt
 pip-delete-this-directory.txt
+sklearn_models1/
+sklearn_models2/
+sklearn_models3/
+sklearn_models4/
+sklearn_models5/
+sklearn_models6/
 sklearn_models7/
+sklearn_models8/
+sklearn_models9/
 *.joblib
 # Unit test / coverage reports
 htmlcov/
