@@ -59,11 +59,11 @@ class Utils(object):
     def select_random(self):
         initializer = random.choice(self.initializers)
         print("initializer : ", initializer)
-        self.logger.debug(f">>> Randomly selected refactoring: {initializer.__name__}")
+        self.logger.debug(f">>> Randomly selected refactoring: {initializer.__ne__}")
         main_function, params, name = initializer
-        if main_function is None:
-            print(f"Inside the select_random method {name}")
-            return self.select_random()
+        if not (callable(main_function) and isinstance(params, dict) and isinstance(name, str)):
+            print("Invalid initializer structure:", initializer)
+            return None, None, None
         else:
             return main_function, params, name
 

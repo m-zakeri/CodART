@@ -142,6 +142,7 @@ XI. **Other packages**: The information of other packages will be announced in t
 #### or after activate in venv virtual environment 
       
     echo "/home/y/PycharmProjects/understand-scitools/Understand-6.5.1201-Linux-64bit/scitools/bin/linux64/Python" > venv/lib/python3.12/site-packages/understand.pth
+    echo "/home/y/Downloads/understand/Understand-6.5.1183-Linux-64bit/scitools/bin/linux64" > venv/lib/python3.12/site-packages/understand.pth
 
 
 ### Example to use cli for understand 
