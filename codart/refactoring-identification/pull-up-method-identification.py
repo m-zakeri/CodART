@@ -1,15 +1,13 @@
 import os
 import antlr4
-from antlr4 import *
 from antlr4.InputStream import InputStream
 from codart.gen.JavaLexer import JavaLexer
 from codart.gen.JavaParser import JavaParser
 from codart.gen.JavaParserVisitor import JavaParserVisitor
-from codart.gen.JavaParserLabeled import JavaParserLabeled
-from codart.refactorings.rename_method2 import RenameMethodRefactoringListener
+from codart.refactorings.rename_method2 import main
 
 
-# Custom visitor class to extract method names, bodies, and the class they belong to
+# Visitor class to extract method names, bodies, and the class they belong to
 class MethodBodyVisitor(JavaParserVisitor):
     def __init__(self):
         self.methods = []
@@ -37,6 +35,32 @@ class MethodBodyVisitor(JavaParserVisitor):
         return self.visitChildren(ctx)
 
 
+# Visitor class to extract fields from classes
+class FieldVisitor(JavaParserVisitor):
+    def __init__(self):
+        self.fields = []  # List to store field details
+        self.current_class = None  # Track the current class name
+
+    def visitClassDeclaration(self, ctx):
+        """
+        Visit class declarations to track the current class.
+        """
+        self.current_class = ctx.IDENTIFIER().getText()  # Set the current class name
+        self.visitChildren(ctx)  # Process fields in the class
+        self.current_class = None  # Reset class name after leaving the class
+
+    def visitFieldDeclaration(self, ctx):
+        """
+        Visit field declarations and extract field information.
+        """
+        field_type = ctx.typeType().getText()  # Get the field type
+        variable_declarators = ctx.variableDeclarators().variableDeclarator()
+        for declarator in variable_declarators:
+            field_name = declarator.variableDeclaratorId().getText()  # Get the field name
+            self.fields.append((field_type, field_name, self.current_class))
+        return self.visitChildren(ctx)
+
+
 def extract_methods_from_file(file_path):
     """
     Given a Java file, this function will use ANTLR to parse the file and extract method names, bodies, and classes.
@@ -57,6 +81,40 @@ def extract_methods_from_file(file_path):
     visitor.visit(tree)
 
     return visitor.methods  # Return the list of methods (name, body, class)
+
+
+def extract_fields_from_file(file_path):
+    """
+    Parse a Java file to extract field declarations.
+    """
+    with open(file_path, 'r', encoding='utf-8') as file:
+        content = file.read()
+
+    input_stream = InputStream(content)
+    lexer = JavaLexer(input_stream)
+    token_stream = antlr4.CommonTokenStream(lexer)
+    parser = JavaParser(token_stream)
+
+    # Parse the file starting from the compilation unit
+    tree = parser.compilationUnit()
+    visitor = FieldVisitor()
+
+    # Extract fields using the visitor
+    visitor.visit(tree)
+
+    return visitor.fields
+
+
+def extract_package_name(file_path):
+    """
+    Extract the package name from a Java file.
+    """
+    with open(file_path, 'r', encoding='utf-8') as file:
+        for line in file:
+            line = line.strip()
+            if line.startswith("package "):
+                return line[len("package "):].strip(";")
+    return None  # No package declaration found
 
 
 def find_duplicate_methods_in_directory(directory_path):
@@ -89,63 +147,97 @@ def find_duplicate_methods_in_directory(directory_path):
     for body, method_info in method_bodies.items():
         if len(method_info) > 1:
             original_method = method_info[0]
+            # original_name, original_path, original_class = original_method
+            # original_package = extract_package_name(original_path)  # Extract package name
+
             for duplicate_method in method_info[1:]:
-                duplicate_methods.append((original_method[0], duplicate_method[0], original_method[2], duplicate_method[2]))
-    print("Duplicate methods that need renaming:")
-    for original_method, duplicate_method, original_class, duplicate_class in duplicate_methods:
-        print(f"Original Method: {original_method}, Original Class: {original_class}, "
-              f"Duplicate Method: {duplicate_method}, Duplicate Class: {duplicate_class}")
+                duplicate_methods.append(
+                    (original_method[0], duplicate_method[0], original_method[2], duplicate_method[2]))
+            print("Duplicate methods that need renaming:")
+            for original_method, duplicate_method, original_class, duplicate_class in duplicate_methods:
+                print(f"Original Method: {original_method}, Original Class: {original_class}, "
+                      f"Duplicate Method: {duplicate_method}, Duplicate Class: {duplicate_class}")
 
-    base_path = directory_path
-    package_name = ""
-    for original_method, duplicate_method, original_class, duplicate_class in duplicate_methods:
-        class_identifiers = [original_class, duplicate_class]
-        method_identifiers = [original_method, duplicate_method]
-    method_new_name = original_method
-
-    try:
-        # Clear existing refactored files
-        refactored_path = os.path.join(base_path, "refactored")
-        for filename in os.listdir(refactored_path):
-            file_path = os.path.join(refactored_path, filename)
-            if filename.endswith(".java"):
-                os.remove(file_path)
-
-        for filename in os.listdir(base_path):
-            if filename.endswith(".java"):
-                file_path = os.path.join(base_path, filename)
-                print(f"Processing file: {filename}")
-
+            base_path = directory_path
+            package_name = ""
+            for original_method, duplicate_method, original_class, duplicate_class in duplicate_methods:
+                class_identifier = original_class, duplicate_class
+                method_identifier = original_method, duplicate_method
+                method_new_name = original_method
+                # Rename duplicate method using `RenameMethodRefactoringListener`
                 try:
-                    with open(file_path, 'r') as file:
-                        input_stream = FileStream(file_path)
+                    print(f"Renaming duplicate method '{method_identifier}' in class '{class_identifier}' "
+                          f"to '{method_new_name}' (Package: {package_name})")
+                    # Call the main function to perform renaming
+                    refactored_path = os.path.join(base_path, "refactored")
+                    os.makedirs(refactored_path, exist_ok=True)  # Ensure refactored folder exists
 
-                    lexer = JavaLexer(input_stream)
-                    token_stream = CommonTokenStream(lexer)
-                    parser = JavaParserLabeled(token_stream)
-                    tree = parser.compilationUnit()
+                    # Dynamically set parameters and call refactoring logic
 
-                    listener = RenameMethodRefactoringListener(
-                        token_stream, package_name, class_identifiers, method_identifiers, method_new_name
-                    )
-
-                    walker = ParseTreeWalker()
-                    walker.walk(listener, tree)
-
-                    refactored_file_path = os.path.join(refactored_path, f"{filename.split('.')[0]}_Refactored.java")
-                    with open(refactored_file_path, 'w') as refactored_file:
-                        refactored_file.write(listener.token_stream_rewriter.getDefaultText())
-
+                    main(base_path=directory_path, package_name=package_name, class_identifier=class_identifier,
+                                method_identifier=method_identifier, method_new_name=method_new_name)
                 except Exception as e:
-                    print(f"Error processing file {filename}: {e}")
+                    print(f"Error renaming method {method_identifier}: {e}")
 
-        print("All files have been processed and refactored.")
-
-    except Exception as e:
-        print(f"An error occurred in the main function: {e}")
     return duplicate_methods
 
 
-# Example usage
-directory_path = "C:/Users/98910/Desktop/test"  # Path to your directory with Java files
-duplicate_methods = find_duplicate_methods_in_directory(directory_path)
+def find_duplicate_fields_in_directory(directory_path):
+    """
+    Scan all Java files in the given directory to identify duplicate fields across classes.
+    """
+    field_signatures = {}  # Map to track field signatures and associated classes
+    duplicate_fields = []  # List to store duplicated fields
+
+    # Traverse the directory and process each Java file
+    for root, _, files in os.walk(directory_path):
+        for file_name in files:
+            if file_name.endswith(".java"):  # Process only Java files
+                file_path = os.path.join(root, file_name)
+
+                # Extract fields from the Java file
+                fields = extract_fields_from_file(file_path)
+
+                # Check for duplicate fields
+                for field_type, field_name, class_name in fields:
+                    signature = f"{field_type} {field_name}"  # Create a unique signature for each field
+                    if signature in field_signatures:
+                        field_signatures[signature].append(class_name)  # Add the class to the signature
+                    else:
+                        field_signatures[signature] = [class_name]
+
+    # Identify duplicated fields that exist in more than one class
+    for signature, classes in field_signatures.items():
+        if len(classes) > 1:
+            duplicate_fields.append((signature, classes))
+
+    # Call refactoring method for each duplicated field
+    for signature, classes in duplicate_fields:
+        pullUpFieldRefactoring(signature, classes)
+
+    return duplicate_fields
+
+
+def pullUpFieldRefactoring(field_signature, classes):
+    """
+    Perform refactoring to pull up a duplicated field to a common superclass.
+    """
+    print(f"Refactoring field '{field_signature}' from classes: {', '.join(classes)} to a common superclass.")
+    # Add your actual refactoring logic here
+
+
+# Main function
+if __name__ == "__main__":
+    directory_path = "C:/Users/98910/Desktop/test"  # Path to your directory with Java files
+
+    # Find and refactor duplicate methods
+    duplicate_methods = find_duplicate_methods_in_directory(directory_path)
+    print("Duplicate Methods:")
+    for original, duplicate, original_class, duplicate_class in duplicate_methods:
+        print(f"Method: {original} (Class: {original_class}) is duplicated as {duplicate} (Class: {duplicate_class})")
+
+    # Find and refactor duplicate fields
+    duplicate_fields = find_duplicate_fields_in_directory(directory_path)
+    print("Duplicate Fields:")
+    for signature, classes in duplicate_fields:
+        print(f"Field: {signature} is duplicated in classes: {', '.join(classes)}")
