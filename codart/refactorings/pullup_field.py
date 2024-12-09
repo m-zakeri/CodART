@@ -28,6 +28,8 @@ __author__ = 'Morteza Zakeri'
 
 from codart import symbol_table
 from codart.config import logger, PROJECT_PATH
+import shutil
+import os
 
 
 class PullUpFieldRefactoring:
@@ -44,7 +46,7 @@ class PullUpFieldRefactoring:
                  package_name: str,
                  class_name: str,
                  field_name: str,
-                 filename_mapping=lambda x: (x[:-5] if x.endswith(".java") else x) + ".java"):
+                 filename_mapping=lambda x: (x[:-5] if x.endswith(".java") else x) + ".java", temp_dir="refactored_files"):
         """
 
         Args:
@@ -70,10 +72,23 @@ class PullUpFieldRefactoring:
         self.class_name = class_name
         self.field_name = field_name
         self.filename_mapping = filename_mapping
+        self.temp_dir = temp_dir
+
+    def copy_files(self):
+        """Create a copy of original files in a temporary directory."""
+        if not os.path.exists(self.temp_dir):
+            os.makedirs(self.temp_dir)
+
+        for filename in self.source_filenames:
+            # Copy each file to the temporary directory
+            shutil.copy(filename, self.temp_dir)
 
     def do_refactor(self):
-        program = symbol_table.get_program(self.source_filenames, print_status=False)
+        # First, copy files
+        self.copy_files()
+        program = symbol_table.get_program(self.get_copied_filenames(), print_status=False)
         # print(program.packages)
+
         if (
                 self.package_name not in program.packages
                 or self.class_name not in program.packages[self.package_name].classes
@@ -199,6 +214,10 @@ class PullUpFieldRefactoring:
         #     PullUpFieldRefactoring(self.source_filenames, self.package_name, _class.superclass_name, "id").do_refactor()
         return True
 
+    def get_copied_filenames(self):
+        """Returns the list of copied filenames."""
+        return [os.path.join(self.temp_dir, f) for f in os.listdir(self.temp_dir) if f.endswith(".java")]
+
 
 def main(project_dir: str, package_name: str, children_class: str, field_name: str, *args, **kwargs):
     """
@@ -211,9 +230,14 @@ def main(project_dir: str, package_name: str, children_class: str, field_name: s
         symbol_table.get_filenames_in_dir(project_dir),
         package_name,
         children_class,
-        field_name
+        field_name,
+        temp_dir= project_dir + "/refactored"
         # lambda x: "tests/pullup_field_ant/" + x[len(ant_dir):]
     ).do_refactor()
+    if result:
+        print(f"Successfully pulled up field '{field_name}'.")
+    else:
+        print(f"Failed to pull up field '{field_name}'.")
     # print(f"Success pull-up field {field_name}" if result else f"Cannot  pull-up field {field_name}")
     return result
 
@@ -264,3 +288,4 @@ if __name__ == "__main__":
     # test1()
     # test2()
     test3()
+

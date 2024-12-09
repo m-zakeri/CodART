@@ -1,3 +1,4 @@
+
 """
 
 ## Introduction
@@ -34,6 +35,7 @@ from codart.gen.JavaLexer import JavaLexer
 from codart.gen.JavaParserLabeled import JavaParserLabeled
 from codart.gen.JavaParserLabeledListener import JavaParserLabeledListener
 from codart.config import logger
+
 
 
 class CheckOverrideListener(JavaParserLabeledListener):
@@ -266,8 +268,10 @@ def main(udb_path: str, children_classes: list, method_name: str, *args, **kwarg
 
     # Get method text
     method_text = method_ents[0].contents().strip()
+    print('*******', method_text)
 
     for method_ent in method_ents:
+        print('*******', method_ent.contents().strip())
         if method_ent.contents().strip() != method_text:
             logger.error("Method content is different.")
             db.close()
@@ -352,9 +356,9 @@ def main(udb_path: str, children_classes: list, method_name: str, *args, **kwarg
 
 # Tests
 if __name__ == '__main__':
-    udb_path_ = "D:/IdeaProjects/JSON20201115/JSON20201115.und"
-    children_class_ = ['XMLTokener', 'HTTPTokener']
-    moved_method_ = "nextToken"
+    udb_path_ = "C:/Users/98910/Desktop/test/refactored/refactored/refactored.und"
+    children_class_ = ['Employee', 'Department']
+    moved_method_ = "getTotalAnnualCost"
     main(
         udb_path=udb_path_,
         children_classes=children_class_,
