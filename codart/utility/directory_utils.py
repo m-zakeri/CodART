@@ -14,7 +14,12 @@ from antlr4 import FileStream
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 from joblib import Parallel, delayed
 
+import sys
+import os
+os.add_dll_directory("C:\\Program Files\\SciTools\\bin\\pc-win64\\")
+sys.path.append("C:\\Program Files\\SciTools\\bin\\pc-win64\\python")
 import understand as und
+
 
 #from java8speedy.parser import sa_javalabeled
 
@@ -67,7 +72,7 @@ def create_understand_database(project_dir: str = None, db_dir: str = None):
 
     understand_5_cmd = ['und', 'create', '-languages', 'Java', 'add', project_dir, 'analyze', '-all', db_path]
     understand_6_cmd = ['und', 'create', '-db', db_path, '-languages', 'java']
-    result = subprocess.run(understand_6_cmd,
+    result = subprocess.run(understand_5_cmd,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE)
 

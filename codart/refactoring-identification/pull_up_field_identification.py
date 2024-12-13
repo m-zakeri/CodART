@@ -54,6 +54,7 @@ class FieldVisitor(JavaParserVisitor):
         self.fields = []  # List to store field details
         self.current_class = None  # Track the current class name
 
+
     def visitClassDeclaration(self, ctx):
         """
         Visit class declarations to track the current class.
