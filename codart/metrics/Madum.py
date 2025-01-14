@@ -8,7 +8,7 @@ sys.path.append("C:\\Program Files\\SciTools\\bin\\pc-win64\\python")
 import understand as und
 
 
-# Open the Understand project
+# Open the "Understand" project
 def open_udb(udb_path):
     try:
         db = und.open(udb_path)
@@ -26,10 +26,15 @@ def extract_class_members(class_entity):
     for member in class_entity.ents("Define", "Java Method"):
         method_identifier = f"{member.longname()}({member.parameters()})"
         methods.append((member, method_identifier))  # Include parameter details
-
-    for member in class_entity.ents("Define", "Java Variable"):
+        # print("..", member, "..", member.kind(), "..", member.ref() )
+        for mem in (member.ents("Set, Use, Define, Modify", "Java Variable") +
+                    member.ents("Define, Use, Set", "Java Parameter")):
+            fields.append(mem)
+        for mem2 in member.ents("Override", "Java Method"):
+            method_identifier = f"{mem2.longname()}({mem2.parameters()})"
+            methods.append((mem2, method_identifier))
+    for member in class_entity.ents("Define, Use", "Java Variable"):
         fields.append(member)
-
     return methods, fields
 
 
@@ -62,6 +67,7 @@ def extract_ecg_with_categories(db):
     ecg = {}
 
     for class_entity in db.ents("Class"):
+        # print(class_entity, ":",  class_entity.kind(), ":", class_entity.refs())
         class_name = class_entity.longname()
         methods_with_identifiers, fields = extract_class_members(class_entity)
 
@@ -81,13 +87,13 @@ def extract_ecg_with_categories(db):
 
         for method, method_id in methods_with_identifiers:
             # Emf: Method -> Field accesses
-            for ref in method.refs("Use, Set, Modify", "Variable"):
+            for ref in method.refs("Use, Set, Modify", "Variable") + method.refs("Use, Set, Modify,", "Parameter"):
                 field = ref.ent()
-                if field in fields:
-                    Emf.add((method_id, field.longname()))
+                # if field in fields:
+                Emf.add((method_id, field.longname()))
 
             # Emm: Method -> Method calls
-            for ref in method.refs("Call", "Method"):
+            for ref in method.refs("Call, Extend, Define, Override", "Method"):
                 callee = ref.ent()
                 callee_identifier = f"{callee.longname()}({callee.parameters()})"
                 if callee in [m for m, _ in methods_with_identifiers]:
@@ -111,31 +117,72 @@ def save_ecg_to_file(ecg, output_file):
     print(f"ECG saved to {output_file}")
 
 
-def visualize_ecg(ecg, output_file):
-    graph = Digraph(format="png")
+def visualize_ecg(ecg, output_folder):
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
 
     for class_name, data in ecg.items():
-        subgraph = Digraph(name=f"cluster_{class_name}", graph_attr={"label": class_name})
+        graph = Digraph(format="png", engine="dot")
 
-        # Add methods and fields as nodes
+        # Create individual subgraphs for methods and their accessed fields
         for method in data["M(C)"]:
-            subgraph.node(method, shape="circle", style="filled", fillcolor="lightblue", label=method.split(".")[-1])
-        for field in data["F(C)"]:
-            subgraph.node(field, shape="box", style="filled", fillcolor="lightgreen", label=field.split(".")[-1])
+            subgraph = Digraph(name=f"cluster_{method}")
+            subgraph.attr(style="dashed", label=method.split(".")[-1])
 
-        # Add edges for field accesses and method calls
-        for method, field in data["Emf"]:
-            # Dashed edge for field access
-            subgraph.edge(method, field, color="orange", style="solid")
+            # Add the method node
+            subgraph.node(
+                method,
+                shape="circle",
+                style="filled",
+                fillcolor="lightblue",
+                label="",
+                fixedsize="true",
+                width="1",
+                height="1",
+            )
 
-        for call, call_by in data["Emm"]:
-            # Solid edge for method calls
-            subgraph.edge(call, call_by, color="blue", style="solid")
+            # Add duplicated field nodes accessed by this method
+            for ref_method, field in data["Emf"]:
+                if ref_method == method:  # Add only the fields accessed by this method
+                    field_label = field.split(".")[-1]  # Shorten field name
+                    field_node_id = f"{method}_{field}"  # Unique ID for each field duplication
+                    subgraph.node(
+                        field_node_id,
+                        shape="box",
+                        style="filled",
+                        fillcolor="lightgreen",
+                        label=field_label,
+                        fixedsize="true",
+                        width="1.2",
+                        height="1.2",
+                        fontsize="8"
+                    )
+                    subgraph.edge(method, field_node_id, color="orange", style="solid")  # Link method to field
 
-        graph.subgraph(subgraph)
+            # Add methods called by this method
+            for caller, callee in data["Emm"]:
+                if caller == method:
+                    callee_label = callee.split(".")[-1]
+                    subgraph.node(
+                        callee,
+                        shape="circle",
+                        style="filled",
+                        fillcolor="lightblue",
+                        label=callee_label,
+                        fixedsize="true",
+                        width="2",
+                        height="2",
+                        fontsize="10"
+                    )
+                    subgraph.edge(method, callee, color="blue", style="solid")  # Link caller to callee
 
-    graph.render(output_file)
-    print(f"Graphviz output saved to {output_file}.png")
+            # Add the subgraph for the method to the main graph
+            graph.subgraph(subgraph)
+
+        # Save the graph for the class
+        output_file = os.path.join(output_folder, f"{class_name}_ecg")
+        graph.render(output_file)
+        print(f"Graph for class {class_name} saved to {output_file}.png")
 
 
 # Main Function
@@ -143,13 +190,13 @@ def main():
     path = "C:/Users/98910/Desktop/test_ECG2"
     udb_path = create_understand_database(path, path)
     output_file = "ecg_output_with_categories.json"  # Output file for ECG
-    graphviz_output = "ecg_graphviz_output"
+    output_folder = "ecg_graphs"  # Folder for Graphviz output
 
     db = open_udb(udb_path)
     if db:
         ecg = extract_ecg_with_categories(db)
         save_ecg_to_file(ecg, output_file)
-        visualize_ecg(ecg, graphviz_output)
+        visualize_ecg(ecg, output_folder)
         db.close()
 
 
