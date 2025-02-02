@@ -1,14 +1,14 @@
 from celery import Celery
 from celery.result import AsyncResult
-from application.services.minio_training_controller import ModelTrainingController
+from application.services.minio_training_controller import ModelTrainingService
 import os
 import time
 import traceback
 
 # Celery configuration
 app = Celery('ml_training_tasks',
-             broker='redis://rabbitmq:6379/0',
-             backend='redis://redis:6379/0')
+             broker='amqp://guest:guest@rabbitmq:5672',
+             backend='redis://redis:6379/')
 
 # Configure Celery task settings
 app.conf.update(
@@ -45,7 +45,7 @@ def train_dataset_task(self, dataset_path, ds_number, model_version=None):
         }
 
         # Initialize MinIO Training Controller
-        controller = ModelTrainingController(
+        controller = ModelTrainingService(
             minio_endpoint=os.getenv('MINIO_ENDPOINT', 'minio:9000'),
             minio_access_key=os.getenv('MINIO_ACCESS_KEY', 'minioadmin'),
             minio_secret_key=os.getenv('MINIO_SECRET_KEY', 'minioadmin')

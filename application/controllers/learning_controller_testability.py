@@ -1,6 +1,6 @@
 from celery import Celery
 from celery.result import AsyncResult
-from application.services.minio_training_controller import ModelTrainingController
+from application.services.minio_training_controller import ModelTrainingService
 from fastapi import FastAPI, HTTPException, APIRouter
 import os
 from typing import List, Dict
@@ -28,7 +28,7 @@ async def get_all_datasets():
     """
     try:
         # Initialize MinIO Training Controller
-        controller = ModelTrainingController(
+        controller = ModelTrainingService(
             minio_endpoint=os.getenv('MINIO_ENDPOINT', 'minio:9000'),
             minio_access_key=os.getenv('MINIO_ACCESS_KEY', 'minioadmin'),
             minio_secret_key=os.getenv('MINIO_SECRET_KEY', 'minioadmin')
@@ -71,7 +71,7 @@ async def get_dataset_details(dataset_name: str):
         Dict: Detailed dataset information
     """
     try:
-        controller = ModelTrainingController(
+        controller = ModelTrainingService(
             minio_endpoint=os.getenv('MINIO_ENDPOINT', 'minio:9000'),
             minio_access_key=os.getenv('MINIO_ACCESS_KEY', 'minioadmin'),
             minio_secret_key=os.getenv('MINIO_SECRET_KEY', 'minioadmin')

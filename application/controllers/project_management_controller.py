@@ -1,18 +1,15 @@
-from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Body, APIRouter
+from fastapi import HTTPException, UploadFile, File, Form, APIRouter
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import os
-from typing import List, Dict, Optional
-import tempfile
+from typing import List, Optional
 import shutil
 from datetime import datetime
 import understand as und
-from codart.metrics.data_preparation_evo_suite_4 import PreProcess as PP
-from codart.metrics.testability_prediction import PreProcess
-import pandas as pd
+import redis
 import subprocess
-from pathlib import Path
 import logging
+import hashlib
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -20,28 +17,38 @@ logger = logging.getLogger(__name__)
 
 app = APIRouter(prefix="/projects", tags=["Managing projects for analysis"])
 
+# Redis connection
+redis_client = redis.Redis(
+    host=os.getenv('REDIS_HOST', 'redis'),
+    port=int(os.getenv('REDIS_PORT', 6379)),
+    db=0,
+    decode_responses=True
+)
 
 
-class ProjectUploadConfig(BaseModel):
+class ProjectMetadata(BaseModel):
     project_name: str
     description: Optional[str] = None
+    git_url: Optional[str] = None
+    git_branch: Optional[str] = None
+    git_commit: Optional[str] = None
 
 
-class ExportConfig(BaseModel):
-    project_name: str
-    export_metrics: bool = True
-    export_evo_metrics: bool = True
-    n_jobs: int = 1
+class ProjectInfo(BaseModel):
+    project_path: str
+    db_path: str
+    upload_date: str
+    description: Optional[str] = None
+    git_url: Optional[str] = None
+    git_branch: Optional[str] = None
+    git_commit: Optional[str] = None
+    version_id: str
 
 
-def git_restore(project_dir):
-    """
-        Git restore implementation
-    """
-    assert os.path.isdir(project_dir)
-    assert os.path.isdir(os.path.join(project_dir, '.git'))
-    subprocess.Popen(["git", "restore", "."], cwd=project_dir, stdout=open(os.devnull, 'wb')).wait()
-    subprocess.Popen(["git", "clean", "-f", "-d"], cwd=project_dir, stdout=open(os.devnull, 'wb')).wait()
+def generate_version_id(project_name: str, git_info: dict) -> str:
+    """Generate a unique version ID based on project name and git information"""
+    version_string = f"{project_name}_{git_info.get('git_url', '')}_{git_info.get('git_branch', '')}_{git_info.get('git_commit', '')}"
+    return hashlib.md5(version_string.encode()).hexdigest()[:8]
 
 
 def create_understand_database(project_dir: str, db_dir: str) -> str:
@@ -65,163 +72,235 @@ def create_understand_database(project_dir: str, db_dir: str) -> str:
     return db_path
 
 
-@app.post("/api/projects/upload")
+def save_project_info(project_name: str, version_id: str, project_info: dict):
+    """Save project information to Redis"""
+    # Save version-specific information
+    redis_client.hset(f"project:{project_name}:version:{version_id}", mapping=project_info)
+
+    # Add version to the project's version list
+    redis_client.sadd(f"project:{project_name}:versions", version_id)
+
+    # Update latest version pointer
+    redis_client.set(f"project:{project_name}:latest", version_id)
+
+
+def get_project_versions(project_name: str) -> List[str]:
+    """Get all versions of a project"""
+    return list(redis_client.smembers(f"project:{project_name}:versions"))
+
+
+def get_project_info(project_name: str, version_id: Optional[str] = None) -> Optional[dict]:
+    """Retrieve project information from Redis"""
+    if version_id is None:
+        # Get latest version ID
+        version_id = redis_client.get(f"project:{project_name}:latest")
+        if not version_id:
+            return None
+
+    project_info = redis_client.hgetall(f"project:{project_name}:version:{version_id}")
+    if project_info:
+        project_info['version_id'] = version_id
+    return project_info if project_info else None
+
+
+@app.post("/api/v1/projects/upload")
 async def upload_project(
         file: UploadFile = File(...),
-        config: ProjectUploadConfig = Body(...)
+        project_name: str = Form(...),
+        description: Optional[str] = Form(None),
+        git_url: Optional[str] = Form(None),
+        git_branch: Optional[str] = Form(None),
+        git_commit: Optional[str] = Form(None)
 ):
-    """
-    Upload a project and create its Understand database
-    """
+    """Upload a project and create its Understand database"""
     try:
-        # Create temporary directory for project
-        with tempfile.TemporaryDirectory() as temp_dir:
-            # Save uploaded file
-            project_path = os.path.join(temp_dir, config.project_name)
-            with open(project_path, "wb") as buffer:
-                shutil.copyfileobj(file.file, buffer)
+        # Generate version ID based on git information
+        git_info = {
+            "git_url": git_url,
+            "git_branch": git_branch,
+            "git_commit": git_commit
+        }
+        version_id = generate_version_id(project_name, git_info)
 
-            # Extract if it's a zip file
-            if file.filename.endswith('.zip'):
-                shutil.unpack_archive(project_path, temp_dir)
-
-            # Create Understand database
-            os.mkdir(project_path)
-            db_dir = os.getenv('UNDERSTAND_DB_DIR', config.project_name+'.und')
-            db_path = create_understand_database(temp_dir, db_dir)
-
-            # Upload to MinIO
-            controller = ModelTrainingController(
-                minio_endpoint=os.getenv('MINIO_ENDPOINT', 'minio:9000'),
-                minio_access_key=os.getenv('MINIO_ACCESS_KEY', 'minioadmin'),
-                minio_secret_key=os.getenv('MINIO_SECRET_KEY', 'minioadmin')
+        # Check if this exact version already exists
+        if redis_client.exists(f"project:{project_name}:version:{version_id}"):
+            raise HTTPException(
+                status_code=400,
+                detail="This exact version of the project already exists"
             )
 
-            # Upload both project and database
-            project_bucket = os.getenv('MINIO_PROJECT_BUCKET', 'projects')
-            db_bucket = os.getenv('MINIO_DB_BUCKET', 'understand-dbs')
+        # Base directories for storing projects and databases
+        base_projects_dir = os.getenv('PROJECTS_BASE_DIR', '/opt/projects')
+        base_db_dir = os.getenv('DB_BASE_DIR', '/opt/understand_dbs')
 
-            metadata = {
-                "description": config.description if config.description else "",
-                "upload_date": datetime.now().isoformat(),
-                "original_filename": file.filename
+        # Create version-specific directories
+        project_dir = os.path.join(base_projects_dir, project_name, version_id)
+        db_dir = os.path.join(base_db_dir, project_name, version_id)
+
+        # Create directories if they don't exist
+        os.makedirs(project_dir, exist_ok=True)
+        os.makedirs(db_dir, exist_ok=True)
+
+        # Save uploaded file
+        file_path = os.path.join(project_dir, file.filename)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        # Extract if it's a zip file
+        if file.filename.lower().endswith('.zip'):
+            try:
+                shutil.unpack_archive(file_path, project_dir, format='zip')
+                os.remove(file_path)  # Remove the zip file after extraction
+            except shutil.ReadError as e:
+                raise HTTPException(status_code=400, detail="Invalid zip file format")
+
+        # Create Understand database
+        try:
+            db_path = create_understand_database(project_dir, db_dir)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to create Understand database: {str(e)}")
+
+        # Save project information to Redis
+        project_info = {
+            "project_path": project_dir,
+            "db_path": db_path,
+            "upload_date": datetime.now().isoformat(),
+            "description": description or "",
+            "git_url": git_url or "",
+            "git_branch": git_branch or "",
+            "git_commit": git_commit or ""
+        }
+        save_project_info(project_name, version_id, project_info)
+
+        return JSONResponse(
+            status_code=200,
+            content={
+                "message": "Project uploaded and analyzed successfully",
+                "project_name": project_name,
+                "version_id": version_id,
+                "project_info": project_info
             }
-
-            controller.minio_client.fput_object(
-                project_bucket,
-                config.project_name,
-                project_path,
-                metadata=metadata
-            )
-
-            controller.minio_client.fput_object(
-                db_bucket,
-                os.path.basename(db_path),
-                db_path,
-                metadata=metadata
-            )
-
-            return JSONResponse(
-                status_code=200,
-                content={
-                    "message": "Project uploaded and analyzed successfully",
-                    "project_name": config.project_name,
-                    "db_path": db_path,
-                    "metadata": metadata
-                }
-            )
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error processing project: {str(e)}"
         )
 
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error processing project: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error processing project: {str(e)}")
 
-@app.post("/api/datasets/export-metrics")
-async def export_metrics(config: ExportConfig):
-    """
-    Export metrics for a project using both regular and EvoSuite processing
-    """
+
+@app.get("/api/v1/projects/{project_name}")
+async def get_project(project_name: str, version_id: Optional[str] = None):
+    """Retrieve project information"""
+    if version_id:
+        project_info = get_project_info(project_name, version_id)
+        if not project_info:
+            raise HTTPException(status_code=404, detail=f"Project version {version_id} not found")
+        return JSONResponse(content=project_info)
+    else:
+        # Get all versions
+        versions = get_project_versions(project_name)
+        if not versions:
+            raise HTTPException(status_code=404, detail="Project not found")
+
+        latest_version = redis_client.get(f"project:{project_name}:latest")
+        version_info = []
+        for version in versions:
+            info = get_project_info(project_name, version)
+            if info:
+                version_info.append(info)
+
+        return JSONResponse(content={
+            "project_name": project_name,
+            "latest_version": latest_version,
+            "versions": version_info
+        })
+
+
+@app.delete("/api/v1/projects/{project_name}")
+async def delete_project(project_name: str, version_id: Optional[str] = None):
+    """Delete project files, database, and information"""
     try:
-        controller = ModelTrainingController(
-            minio_endpoint=os.getenv('MINIO_ENDPOINT', 'minio:9000'),
-            minio_access_key=os.getenv('MINIO_ACCESS_KEY', 'minioadmin'),
-            minio_secret_key=os.getenv('MINIO_SECRET_KEY', 'minioadmin')
+        if version_id:
+            # Delete specific version
+            project_info = get_project_info(project_name, version_id)
+            if not project_info:
+                raise HTTPException(status_code=404, detail=f"Project version {version_id} not found")
+
+            # Delete version-specific directories
+            if os.path.exists(project_info['project_path']):
+                shutil.rmtree(project_info['project_path'])
+            if os.path.exists(project_info['db_path']):
+                shutil.rmtree(os.path.dirname(project_info['db_path']))
+
+            # Remove version from Redis
+            await redis_client.delete(f"project:{project_name}:version:{version_id}")
+            await redis_client.srem(f"project:{project_name}:versions", version_id)
+
+            # Update latest version if needed
+            if redis_client.get(f"project:{project_name}:latest") == version_id:
+                versions = get_project_versions(project_name)
+                if versions:
+                    await redis_client.set(f"project:{project_name}:latest", versions[0])
+                else:
+                    await redis_client.delete(f"project:{project_name}:latest")
+        else:
+            # Delete all versions
+            versions = get_project_versions(project_name)
+            for version in versions:
+                project_info = get_project_info(project_name, version)
+                if project_info:
+                    if os.path.exists(project_info['project_path']):
+                        shutil.rmtree(os.path.dirname(project_info['project_path']))
+                    if os.path.exists(project_info['db_path']):
+                        shutil.rmtree(os.path.dirname(project_info['db_path']))
+
+            # Remove all Redis keys for this project
+            await redis_client.delete(f"project:{project_name}:versions")
+            await redis_client.delete(f"project:{project_name}:latest")
+            for version in versions:
+                await redis_client.delete(f"project:{project_name}:version:{version}")
+
+        return JSONResponse(
+            status_code=200,
+            content={
+                "message": f"Project {project_name} {'version ' + version_id if version_id else ''} deleted successfully"
+            }
         )
 
-        # Create temporary directory for processing
-        with tempfile.TemporaryDirectory() as temp_dir:
-            # Get project and database from MinIO
-            project_bucket = os.getenv('MINIO_PROJECT_BUCKET', 'projects')
-            db_bucket = os.getenv('MINIO_DB_BUCKET', 'understand-dbs')
-
-            project_path = os.path.join(temp_dir, config.project_name)
-            db_path = os.path.join(temp_dir, f"{config.project_name}.und")
-
-            # Download project and database
-            controller.minio_client.fget_object(project_bucket, config.project_name, project_path)
-            controller.minio_client.fget_object(db_bucket, f"{config.project_name}.und", db_path)
-
-            results = {}
-
-            # Export regular metrics
-            if config.export_metrics:
-                metric_path = os.path.join(temp_dir, f"metrics_{config.project_name}.csv")
-                p = PreProcess()
-                df = p.compute_metrics_by_class_list(project_path=db_path, n_jobs=config.n_jobs)
-                df.to_csv(metric_path, index=False)
-
-                # Upload metrics to MinIO
-                controller.minio_client.fput_object(
-                    'datasets',
-                    f"metrics_{config.project_name}.csv",
-                    metric_path,
-                    metadata={"type": "regular_metrics"}
-                )
-                results["metrics_path"] = f"metrics_{config.project_name}.csv"
-
-            # Export EvoSuite metrics
-            if config.export_evo_metrics:
-                evo_metric_path = os.path.join(temp_dir, f"evo_metrics_{config.project_name}.csv")
-                evop = PP()
-                db = und.open(db_path)
-                class_list = evop.extract_project_classes(db=db)
-
-                if not isinstance(class_list, pd.DataFrame):
-                    class_list = pd.DataFrame(class_list)
-                if class_list.shape[1] == 1:
-                    class_list.columns = ['Class']
-
-                df = evop.compute_metrics_by_class_list(
-                    class_list=class_list,
-                    csv_path=evo_metric_path,
-                    database=db,
-                    project_name=config.project_name
-                )
-                df.to_csv(evo_metric_path, index=False)
-                db.close()
-
-                # Upload EvoSuite metrics to MinIO
-                controller.minio_client.fput_object(
-                    'datasets',
-                    f"evo_metrics_{config.project_name}.csv",
-                    evo_metric_path,
-                    metadata={"type": "evo_metrics"}
-                )
-                results["evo_metrics_path"] = f"evo_metrics_{config.project_name}.csv"
-
-            return JSONResponse(
-                status_code=200,
-                content={
-                    "message": "Metrics exported successfully",
-                    "project_name": config.project_name,
-                    "results": results
-                }
-            )
-
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error exporting metrics: {str(e)}"
-        )
+        logger.error(f"Error deleting project: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error deleting project: {str(e)}")
+
+
+@app.get("/api/v1/projects")
+async def list_projects():
+    """List all projects with their versions"""
+    try:
+        # Get all project keys from Redis
+        project_keys = redis_client.keys("project:*:latest")
+        projects = []
+
+        for key in project_keys:
+            project_name = key.split(":")[1]
+            versions = get_project_versions(project_name)
+            latest_version = redis_client.get(f"project:{project_name}:latest")
+
+            project_versions = []
+            for version in versions:
+                version_info = get_project_info(project_name, version)
+                if version_info:
+                    project_versions.append(version_info)
+
+            projects.append({
+                "project_name": project_name,
+                "latest_version": latest_version,
+                "versions": project_versions
+            })
+
+        return JSONResponse(content={"projects": projects})
+    except Exception as e:
+        logger.error(f"Error listing projects: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error listing projects: {str(e)}")

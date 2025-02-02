@@ -4,11 +4,10 @@ import joblib
 import pandas as pd
 from minio import Minio
 from io import BytesIO
+from codart.metrics.testability_learning import Regression
 
-from codart.metrics.testability_learning import Regression  # Import from your existing ML script
 
-
-class ModelTrainingController:
+class ModelTrainingService:
     def __init__(self,
                  minio_endpoint: str,
                  minio_access_key: str,
