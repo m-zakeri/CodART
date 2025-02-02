@@ -9,9 +9,9 @@ evo_metric_path = "/home/y/CodArt/codart/metrics/learner_testability/data_model/
 project_path = "/home/y/jflex/jflex.und"
 # testability
 
-# p = PreProcess()
-# df = p.compute_metrics_by_class_list(project_path= project_path, n_jobs=1)
-# df.to_csv(metric_path, index=False)
+p = PreProcess()
+df = p.compute_metrics_by_class_list(project_path= project_path, n_jobs=1)
+df.to_csv(metric_path, index=False)
 
 # evosuite
 

@@ -1,3 +1,4 @@
+/scitools/
 /venv/
 .idea/
 benchmark_projects/JSON/src/main/java/org/json/*.class
