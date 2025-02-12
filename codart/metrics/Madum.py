@@ -23,43 +23,28 @@ def extract_class_members(class_entity):
     methods = []
     fields = []
 
+    for member in class_entity.ents("Define", "Java Variable"):
+        fields.append(member)
     for member in class_entity.ents("Define", "Java Method"):
         method_identifier = f"{member.longname()}({member.parameters()})"
         methods.append((member, method_identifier))  # Include parameter details
         # print("..", member, "..", member.kind(), "..", member.ref() )
-        for mem in (member.ents("Set, Use, Define, Modify", "Java Variable") +
-                    member.ents("Define, Use, Set", "Java Parameter")):
+    #     for mem in (member.ents("Set, Use, Define, Modify", "Java Variable") +
+    #                 member.ents("Define, Use, Set", "Java Parameter")):
+    #         fields.append(mem)
+        for mem in member.ents("Override", "Java Method"):
+            method_identifier = f"{mem.longname()}({mem.parameters()})"
+            methods.append((mem, method_identifier))
+            # override_methods = []
+            # override_methods.append(mem, method_identifier)
+            for mem2 in mem.ents("Set, Modify", "Java Variable"):
+                fields.append(mem2)
+        for mem in member.ents("Set, Modify", "Protected Java Variable"):
+            # print("....", mem.kind(), mem.ref())
             fields.append(mem)
-        for mem2 in member.ents("Override", "Java Method"):
-            method_identifier = f"{mem2.longname()}({mem2.parameters()})"
-            methods.append((mem2, method_identifier))
-    for member in class_entity.ents("Define, Use", "Java Variable"):
-        fields.append(member)
-    return methods, fields
-
-
-# Categorize a method
-def categorize_method(method, fields):
-    """
-    Categorize a method as constructor (c), transformer (t), reporter (r), or other (o).
-    """
-    if method.kind().check("Constructor"):
-        return "c"  # Constructor
-
-        # Check if the method modifies any field
-    modifies_field = any(
-        ref.ent() in fields and ref.kind().check("Set, Modify")
-        for ref in method.refs("Use, Set, Modify", "Variable")
-    )
-    if modifies_field:
-        return "t"  # Transformer
-
-    # Check if the method only returns a field's value
-    accesses_fields = [ref.ent() for ref in method.refs("Use", "Variable")]
-    if all(field in fields for field in accesses_fields) and not modifies_field:
-        return "r"  # Reporter
-
-    return "o"  # Other
+    # for member in class_entity.ents("Define, Use", "Java Variable"):
+    #     fields.append(member)
+    return methods, list(set(fields))
 
 
 # Extract Enhanced Call Graph (ECG) with categorization
@@ -67,30 +52,45 @@ def extract_ecg_with_categories(db):
     ecg = {}
 
     for class_entity in db.ents("Class"):
-        # print(class_entity, ":",  class_entity.kind(), ":", class_entity.refs())
-        class_name = class_entity.longname()
+        # Ignore external classes (Java SDK, third-party libraries)
+        if class_entity.library():
+            continue  # Skip classes like java.lang.RuntimeException
+
+        # Ensure the class is defined within the project
+        file_ref = class_entity.ref("Definein")
+        if not file_ref or not file_ref.file():
+            continue  # Skip if there's no valid file reference
+
+        # Get the file path of the class definition
+        file_path = file_ref.file().longname()
+
+        print(f"Processing class: {class_entity.longname()} in {file_path}")
         methods_with_identifiers, fields = extract_class_members(class_entity)
 
         # Build M(C) and F(C)
         M_C = [method_id for _, method_id in methods_with_identifiers]
         F_C = [field.longname() for field in fields]
-
-        # Categorize methods
-        method_categories = {
-            method_id: categorize_method(method, fields)
-            for method, method_id in methods_with_identifiers
-        }
-
         # Build Emf and Emm
         Emf = set()
         Emm = set()
 
         for method, method_id in methods_with_identifiers:
             # Emf: Method -> Field accesses
-            for ref in method.refs("Use, Set, Modify", "Variable") + method.refs("Use, Set, Modify,", "Parameter"):
-                field = ref.ent()
-                # if field in fields:
-                Emf.add((method_id, field.longname()))
+            method_refs = method.refs()
+            return_refs = method.refs("Return")
+            for field in fields:
+                for ref in method_refs:
+                    if ref.ent().longname() == field.longname():
+                        ref_kind = ref.kind().name()
+                        if method.kind().check("Constructor"):
+                            relation = "c"
+                        elif ref_kind in ["Set", "Modify", "Write"]:
+                            relation = "t"
+                        elif any(ref.ent().longname() == field.longname() for ref in return_refs):
+                            relation = "r"
+                        else:
+                            relation = "o"
+                        Emf.add((method_id, field.longname(), relation))
 
             # Emm: Method -> Method calls
             for ref in method.refs("Call, Extend, Define, Override", "Method"):
@@ -99,10 +99,10 @@ def extract_ecg_with_categories(db):
                 if callee in [m for m, _ in methods_with_identifiers]:
                     Emm.add((method_id, callee_identifier))
 
-        ecg[class_name] = {
+        ecg[class_entity.longname()] = {
             "M(C)": M_C,
             "F(C)": F_C,
-            "Method Categories": method_categories,  # Add categories
+            # "Method Categories": method_categories,  # Add categories
             "Emf": list(Emf),
             "Emm": list(Emm)
         }
@@ -142,7 +142,7 @@ def visualize_ecg(ecg, output_folder):
             )
 
             # Add duplicated field nodes accessed by this method
-            for ref_method, field in data["Emf"]:
+            for ref_method, field, label in data["Emf"]:
                 if ref_method == method:  # Add only the fields accessed by this method
                     field_label = field.split(".")[-1]  # Shorten field name
                     field_node_id = f"{method}_{field}"  # Unique ID for each field duplication
@@ -155,7 +155,7 @@ def visualize_ecg(ecg, output_folder):
                         fixedsize="true",
                         width="1.2",
                         height="1.2",
-                        fontsize="8"
+                        fontsize="10"
                     )
                     subgraph.edge(method, field_node_id, color="orange", style="solid")  # Link method to field
 
