@@ -291,37 +291,7 @@ class TestabilityMetrics:
         return class_metrics
 
 
-def do(class_entity_long_name, project_db_path):
-    import understand as und
-    db = und.open(project_db_path)
-    class_entity = UnderstandUtility.get_class_entity_by_name(class_name=class_entity_long_name, db=db)
-    one_class_metrics_value = [class_entity.longname()]
 
-    package_metrics_dict = TestabilityMetrics.compute_java_package_metrics(db=db, entity=class_entity)
-    if package_metrics_dict is None or len(package_metrics_dict) == 0:
-        return None
-
-    class_lexicon_metrics_dict = TestabilityMetrics.compute_java_class_metrics_lexicon(entity=class_entity)
-    if class_lexicon_metrics_dict is None or len(class_lexicon_metrics_dict) == 0:
-        return None
-
-    class_ordinary_metrics_dict = TestabilityMetrics.compute_java_class_metrics2(db=db, entity=class_entity)
-    if class_ordinary_metrics_dict is None or len(class_ordinary_metrics_dict) == 0:
-        return None
-
-    one_class_metrics_value.extend([package_metrics_dict[metric_name] for
-                                    metric_name in TestabilityMetrics.get_package_metrics_names()])
-
-    one_class_metrics_value.extend([class_lexicon_metrics_dict[metric_name] for
-                                    metric_name in TestabilityMetrics.get_class_lexicon_metrics_names()])
-
-    one_class_metrics_value.extend([class_ordinary_metrics_dict[metric_name] for
-                                    metric_name in TestabilityMetrics.get_class_ordinary_metrics_names()])
-
-    db.close()
-    del db
-
-    return one_class_metrics_value
 
 
 # ------------------------------------------------------------------------
@@ -413,24 +383,24 @@ class TestabilityModel:
         df.to_csv(log_path, index=False)
 
 
-# API
-def main(project_db_path, initial_value=1.0, verbose=False, log_path=None):
-    """
-
-    testability_prediction module API
-
-    """
-
-    df = PreProcess().compute_metrics_by_class_list(
-        project_db_path,
-        n_jobs=0
-    )
-    testability_ = TestabilityModel().inference(df_predict_data=df, verbose=verbose, log_path=log_path)
-    return round(testability_ / initial_value, 5)
-
-
-# Test module
-if __name__ == '__main__':
-    print(f"UDB path: {config.UDB_PATH}")
-    for i in range(0, 1):
-        print('mean testability2 normalize by 1\t', main(config.UDB_PATH, initial_value=1.0, verbose=False))
+# # API
+# def main(project_db_path, initial_value=1.0, verbose=False, log_path=None):
+#     """
+#
+#     testability_prediction module API
+#
+#     """
+#
+#     df = PreProcess().compute_metrics_by_class_list(
+#         project_db_path,
+#         n_jobs=0
+#     )
+#     testability_ = TestabilityModel().inference(df_predict_data=df, verbose=verbose, log_path=log_path)
+#     return round(testability_ / initial_value, 5)
+#
+#
+# # Test module
+# if __name__ == '__main__':
+#     print(f"UDB path: {config.UDB_PATH}")
+#     for i in range(0, 1):
+#         print('mean testability2 normalize by 1\t', main(config.UDB_PATH, initial_value=1.0, verbose=False))

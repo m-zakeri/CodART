@@ -187,3 +187,62 @@ XI. **Other packages**: The information of other packages will be announced in t
 
 
 Follow us!
+
+
+FROM python:3.9-slim
+
+WORKDIR /app
+
+# Install required packages
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    wget \
+    libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy SciTools installation
+COPY scitools /app/scitools
+
+# Set up SciTools environment
+ENV SCITOOLS="/app/scitools"
+ENV PYTHONPATH="/app/scitools/bin/linux64/Python:$PYTHONPATH"
+ENV PATH="/app/scitools/bin/linux64:$PATH"
+ENV LD_LIBRARY_PATH="/app/scitools/bin/linux64:$LD_LIBRARY_PATH"
+
+# Create SciTools configuration directory
+RUN mkdir -p /root/.config/SciTools/
+
+# Set up the license
+RUN und -setofflinereplycode C96BE10F4D48B -expiration 2035-02-08 -maintenance 2035-02-08 && \
+    chmod 644 /root/.config/SciTools/license.dat && \
+    chown root:root /root/.config/SciTools/license.dat
+
+# Verify license and installation
+RUN und version
+
+# Install Python requirements
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt --timeout=120
+
+# Copy application code
+COPY . .
+
+EXPOSE 8000
+
+# Add healthcheck
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD und version || exit 1
+
+CMD ["uvicorn", "application.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+und create  -db /home/y/PycharmProjects/java.und -languages java add /home/y/Desktop/codes/university/JSON-java/ analyze -all
+python codart/metrics/learner_testability/metric_exporter.py 
+und -setlicensecode XXXXXXXXXX
+und -deregisterlicensecode
+und -createofflinerequestcode
+und -setofflinereplycode XXXXXXXX -expiration 2020-12-31 -maintenance
+und –showofflinereturncode
+
+pip download -r requirements.txt -d dependencies
+
+

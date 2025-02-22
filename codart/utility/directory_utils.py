@@ -42,41 +42,73 @@ def git_restore(project_dir):
 
 def create_understand_database(project_dir: str = None, db_dir: str = None):
     """
-    This function creates understand database for the given project directory.
+    Create understand database for the given project directory.
 
     Args:
-
         project_dir (str): The absolute path of project's directory.
-
-        db_dir (str): The absolute directory path to save Understand database (.udb or .und binary file)
+        db_dir (str): The absolute directory path to save Understand database
 
     Returns:
-
         str: Understand database path
-
     """
-    assert os.path.isdir(project_dir)
-    db_name = os.path.basename(os.path.normpath(project_dir)) + ".und"
-    db_path = os.path.join(db_dir, db_name)
-    # print(project_dir, db_name, db_path)
-    # quit()
+    assert os.path.isdir(project_dir), f"Project directory does not exist: {project_dir}"
+
+    db_name = os.path.basename(os.path.normpath(project_dir))
+    db_path = os.path.join(db_dir, f"{db_name}")  # Added .udb extension
+
     if os.path.exists(db_path):
         return db_path
-    # An example of command-line is:
-    # und create -languages c++ add @myFiles.txt analyze -all myDb.udb
 
-    understand_5_cmd = ['und', 'create', '-languages', 'Java', 'add', project_dir, 'analyze', '-all', db_path]
-    understand_6_cmd = ['und', 'create', '-db', db_path, '-languages', 'java']
-    result = subprocess.run(understand_6_cmd,
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE)
+    create_cmd = [
+        'und',
+        'create',
+        '-languages',
+        'java',
+        db_path
+    ]
+    db_path = db_path + '.und'
+    # Second command: Add project files
+    add_cmd = [
+        'und',
+        'add',
+        project_dir,
+        '-db',
+        db_path,
+    ]
 
-    if result.returncode != 0:
-        error_ = result.stderr.decode('utf-8')
-        logger.debug(f'return code: {result.returncode} msg: {error_}')
-    else:
-        logger.debug(f'Understand project was created successfully!')
-    return db_path
+    # Third command: Analyze the database
+    analyze_cmd = [
+        'und',
+        'analyze',
+        '-db',
+        db_path,
+        '-all'
+    ]
+
+    commands = [create_cmd, add_cmd, analyze_cmd]
+
+    try:
+        for cmd in commands:
+            result = subprocess.run(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                check=True  # This will raise CalledProcessError if return code is non-zero
+            )
+            print(f'Successfully executed: {" ".join(cmd)}')
+            print(f'Output: {result.stdout}')
+
+        print('Understand project was created and analyzed successfully!')
+        return db_path
+
+    except subprocess.CalledProcessError as e:
+        print(f'Command failed with return code {e.returncode}')
+        print(f'Error output: {e.stderr}')
+        raise RuntimeError(f"Failed to process Understand database: {e.stderr}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        raise
 
 
 def update_understand_database2(udb_path):

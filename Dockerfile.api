@@ -1,24 +1,57 @@
-FROM python:3.9-slim
+FROM base:v1.0.0
+
+ENV INSTALLDIR=/app/
+ENV PROJECTS_BASE_DIR=/opt/projects
+ENV DB_BASE_DIR=/opt/understand_dbs
+ENV UNDERSTAND_LICENSE="/root/.config/SciTools/License.conf"
+ENV STIDOSUTILDIR="/root/.config/SciTools"
+ENV STIHOME="/app/scitools"
+ENV STILICENSE="/root/.config/SciTools/License.conf"
+
+RUN useradd -ms /bin/bash y
+
+RUN echo "root:toor" | chpasswd
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    wget \
-    libglib2.0-0 \
-    && rm -rf /var/lib/apt/lists/*
+USER root
 
-COPY scitools /app/scitools
+RUN mkdir -p /root/.config/SciTools \
+    /root/.local/share/SciTools/Understand \
+    /opt/projects \
+    /opt/understand_dbs \
+    /app/SciTools && \
+    chown -R root:root /root/.config/SciTools \
+                       /root/.local/share/SciTools \
+                       /opt/projects \
+                       /opt/understand_dbs \
+                       /app/SciTools && \
+    chmod -R 755 /root/.config/SciTools \
+                 /root/.local/share/SciTools \
+                 /app/SciTools
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt --timeout=120
-
-ENV PYTHONPATH="/app/scitools/bin/linux64/Python:$PYTHONPATH"
-ENV PATH="/app/scitools/bin/linux64:$PATH"
-ENV LD_LIBRARY_PATH="/app/scitools/bin/linux64:$LD_LIBRARY_PATH"
-
+COPY requirements.txt ./
+COPY scitools /app/scitools/
+COPY dependencies/* /app/dependencies/
+COPY activate_license.sh /app/activate_license.sh
+COPY cr-keygen-linux-amd64 /app/cr-keygen-linux-amd64
 COPY . .
 
-EXPOSE 8000
+RUN pip3 install --no-cache-dir /app/dependencies/*
 
-CMD ["uvicorn", "application.main:app", "--host", "0.0.0.0", "--port", "8000"]
+ENV PATH=/app/scitools/bin/linux64:$PATH
+ENV PYTHONPATH=/app/scitools/bin/linux64/Python
+ENV LD_LIBRARY_PATH=/app/scitools/bin/linux64
+
+RUN chmod 755 /app/cr-keygen-linux-amd64 && \
+    chmod 755 /app/activate_license.sh
+
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
+
+RUN ln -sf /root/.config/SciTools/License.conf /app/SciTools/License.conf
+
+EXPOSE 8000
+VOLUME ["/opt/projects", "/opt/understand_dbs"]
+
+CMD ["/app/start.sh"]

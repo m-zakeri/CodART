@@ -1,6 +1,6 @@
 antlr4-python3-runtime==4.13.1
 certifi==2021.10.8
-matplotlib==3.5.2
+matplotlib
 networkx==2.8.4
 pandas
 Pillow==11.1.0

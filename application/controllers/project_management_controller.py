@@ -51,25 +51,75 @@ def generate_version_id(project_name: str, git_info: dict) -> str:
     return hashlib.md5(version_string.encode()).hexdigest()[:8]
 
 
-def create_understand_database(project_dir: str, db_dir: str) -> str:
-    """Create Understand database"""
-    db_name = os.path.basename(os.path.normpath(project_dir)) + ".und"
-    db_path = os.path.join(db_dir, db_name)
+def create_understand_database(project_dir: str = None, db_dir: str = None):
+    """
+    Create understand database for the given project directory.
+
+    Args:
+        project_dir (str): The absolute path of project's directory.
+        db_dir (str): The absolute directory path to save Understand database
+
+    Returns:
+        str: Understand database path
+    """
+    assert os.path.isdir(project_dir), f"Project directory does not exist: {project_dir}"
+
+    db_name = os.path.basename(os.path.normpath(project_dir))
+    db_path = os.path.join(db_dir, f"{db_name}")  # Added .udb extension
 
     if os.path.exists(db_path):
         return db_path
 
-    understand_cmd = ['und', 'create', '-db', db_path, '-languages', 'java']
-    result = subprocess.run(understand_cmd,
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE)
+    create_cmd = [
+        'und',
+        'create',
+        '-languages',
+        'java',
+        db_path
+    ]
+    db_path = db_path + '.und'
+    # Second command: Add project files
+    add_cmd = [
+        'und',
+        'add',
+        project_dir,
+        '-db',
+        db_path,
+    ]
 
-    if result.returncode != 0:
-        error_ = result.stderr.decode('utf-8')
-        logger.debug(f'return code: {result.returncode} msg: {error_}')
-        raise Exception(f"Failed to create Understand database: {error_}")
+    # Third command: Analyze the database
+    analyze_cmd = [
+        'und',
+        'analyze',
+        '-db',
+        db_path,
+        '-all'
+    ]
 
-    return db_path
+    commands = [create_cmd, add_cmd, analyze_cmd]
+
+    try:
+        for cmd in commands:
+            result = subprocess.run(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                check=True  # This will raise CalledProcessError if return code is non-zero
+            )
+            print(f'Successfully executed: {" ".join(cmd)}')
+            print(f'Output: {result.stdout}')
+
+        print('Understand project was created and analyzed successfully!')
+        return db_path
+
+    except subprocess.CalledProcessError as e:
+        print(f'Command failed with return code {e.returncode}')
+        print(f'Error output: {e.stderr}')
+        raise RuntimeError(f"Failed to process Understand database: {e.stderr}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        raise
 
 
 def save_project_info(project_name: str, version_id: str, project_info: dict):
@@ -221,45 +271,82 @@ async def get_project(project_name: str, version_id: Optional[str] = None):
 async def delete_project(project_name: str, version_id: Optional[str] = None):
     """Delete project files, database, and information"""
     try:
+        # First verify if project exists
+        versions = redis_client.smembers(f"project:{project_name}:versions")
+        if not versions:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Project {project_name} not found"
+            )
+
         if version_id:
-            # Delete specific version
+            # Verify if specific version exists
+            if not redis_client.hexists(f"project:{project_name}:version:{version_id}", "project_path"):
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Project version {version_id} not found"
+                )
+
+            # Get project info before deletion
             project_info = get_project_info(project_name, version_id)
             if not project_info:
-                raise HTTPException(status_code=404, detail=f"Project version {version_id} not found")
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Project version {version_id} not found"
+                )
 
-            # Delete version-specific directories
-            if os.path.exists(project_info['project_path']):
-                shutil.rmtree(project_info['project_path'])
-            if os.path.exists(project_info['db_path']):
-                shutil.rmtree(os.path.dirname(project_info['db_path']))
+            # Delete project files
+            if project_info.get('project_path') and os.path.exists(project_info['project_path']):
+                try:
+                    shutil.rmtree(os.path.dirname(project_info['project_path']))
+                except Exception as e:
+                    logger.error(f"Error deleting project files: {str(e)}")
 
-            # Remove version from Redis
-            await redis_client.delete(f"project:{project_name}:version:{version_id}")
-            await redis_client.srem(f"project:{project_name}:versions", version_id)
+            # Delete database files
+            if project_info.get('db_path') and os.path.exists(project_info['db_path']):
+                try:
+                    shutil.rmtree(os.path.dirname(project_info['db_path']))
+                except Exception as e:
+                    logger.error(f"Error deleting database files: {str(e)}")
+
+            # Remove from Redis
+            redis_client.delete(f"project:{project_name}:version:{version_id}")
+            redis_client.srem(f"project:{project_name}:versions", version_id)
 
             # Update latest version if needed
-            if redis_client.get(f"project:{project_name}:latest") == version_id:
-                versions = get_project_versions(project_name)
-                if versions:
-                    await redis_client.set(f"project:{project_name}:latest", versions[0])
+            current_latest = redis_client.get(f"project:{project_name}:latest")
+            if current_latest == version_id:
+                remaining_versions = list(redis_client.smembers(f"project:{project_name}:versions"))
+                if remaining_versions:
+                    redis_client.set(f"project:{project_name}:latest", remaining_versions[0])
                 else:
-                    await redis_client.delete(f"project:{project_name}:latest")
+                    redis_client.delete(f"project:{project_name}:latest")
+                    redis_client.delete(f"project:{project_name}:versions")
         else:
             # Delete all versions
-            versions = get_project_versions(project_name)
             for version in versions:
                 project_info = get_project_info(project_name, version)
                 if project_info:
-                    if os.path.exists(project_info['project_path']):
-                        shutil.rmtree(os.path.dirname(project_info['project_path']))
-                    if os.path.exists(project_info['db_path']):
-                        shutil.rmtree(os.path.dirname(project_info['db_path']))
+                    # Delete project files
+                    if project_info.get('project_path') and os.path.exists(project_info['project_path']):
+                        try:
+                            shutil.rmtree(os.path.dirname(project_info['project_path']))
+                        except Exception as e:
+                            logger.error(f"Error deleting project files for version {version}: {str(e)}")
 
-            # Remove all Redis keys for this project
-            await redis_client.delete(f"project:{project_name}:versions")
-            await redis_client.delete(f"project:{project_name}:latest")
-            for version in versions:
-                await redis_client.delete(f"project:{project_name}:version:{version}")
+                    # Delete database files
+                    if project_info.get('db_path') and os.path.exists(project_info['db_path']):
+                        try:
+                            shutil.rmtree(os.path.dirname(project_info['db_path']))
+                        except Exception as e:
+                            logger.error(f"Error deleting database files for version {version}: {str(e)}")
+
+                    # Remove from Redis
+                    redis_client.delete(f"project:{project_name}:version:{version}")
+
+            # Clean up project-level Redis keys
+            redis_client.delete(f"project:{project_name}:versions")
+            redis_client.delete(f"project:{project_name}:latest")
 
         return JSONResponse(
             status_code=200,

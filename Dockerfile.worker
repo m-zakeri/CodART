@@ -1,4 +1,4 @@
-FROM python:3.9-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 
@@ -7,10 +7,15 @@ RUN apt-get update && apt-get install -y \
     wget \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
+
+RUN python3 -m pip install --upgrade pip
+
 COPY scitools /app/scitools
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt --timeout=120
+COPY dependencies/* /app/dependencies/
+
+# Install Python dependencies, only when requirements.txt changes
+RUN pip3 install --no-cache-dir /app/dependencies/*
 
 ENV PYTHONPATH="/app/scitools/bin/linux64/Python:$PYTHONPATH"
 ENV PATH="/app/scitools/bin/linux64:$PATH"

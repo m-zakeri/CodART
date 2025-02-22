@@ -1,6 +1,7 @@
 /scitools/
 /venv/
 .idea/
+/dependencies
 benchmark_projects/JSON/src/main/java/org/json/*.class
 benchmark_projects/refactored/
 codart.egg-info

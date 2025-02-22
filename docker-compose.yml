@@ -1,4 +1,12 @@
-version: '3.8'
+version: '3.9'
+
+# Define internal network that has no internet access
+networks:
+  internal:
+    driver: bridge
+    internal: true
+  default:
+    driver: bridge
 
 services:
   minio:
@@ -12,6 +20,9 @@ services:
     command: server /data --console-address ":9001"
     volumes:
       - minio_storage:/data
+    networks:
+      - default
+      - internal
 
   redis:
     image: redis:alpine
@@ -20,17 +31,36 @@ services:
     command: redis-server --appendonly yes
     volumes:
       - redis_data:/data
+    networks:
+      - default
+      - internal
 
   rabbitmq:
     image: rabbitmq:3-management
     ports:
       - "5672:5672"
       - "15672:15672"
+    networks:
+      - default
+      - internal
+
+
+  base:
+    image: base:v1.0.0
+    build:
+      context: .
+      dockerfile: Dockerfile.base
+    networks:
+      - default
+      - internal
 
   ml-worker:
+    image: ml:v1.0.0
     build:
       context: .
       dockerfile: Dockerfile.worker
+      extra_hosts:
+        - "licensing.scitools.com:127.0.0.1"
     volumes:
       - ./models:/app/models
       - ./data:/app/data
@@ -41,23 +71,38 @@ services:
       - rabbitmq
       - redis
       - minio
+      - base
+    networks:
+      - default
+      - internal
+
 
   api:
+    image: application:v1.0.0
     build:
       context: .
       dockerfile: Dockerfile.api
+      extra_hosts:
+        - "licensing.scitools.com:127.0.0.1"
     ports:
       - "8000:8000"
     environment:
+      - MINIO_ENDPOINT=minio:9000
       - MINIO_ACCESS_KEY=minioadmin
       - MINIO_SECRET_KEY=minioadmin
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - STILICENSE=/app/SciTools/License.conf
+
     depends_on:
       - ml-worker
       - minio
       - rabbitmq
       - redis
+      - base
+    networks:
+      - default
+      - internal  # Only connected to internal network, no internet access
 
 volumes:
   minio_storage:

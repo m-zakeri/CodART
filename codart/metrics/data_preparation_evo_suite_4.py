@@ -410,11 +410,12 @@ class TestabilityMetrics:
         dots_count = 0
 
         try:
-            # print('ec', entity.parent().id())
-            # source_file_entity = db.ent_from_id(entity.parent().id())
+            print('ec', entity.parent().id())
+            source_file_entity = db.ent_from_id(entity.parent().id())
 
-            # print('file', type(source_file_entity), source_file_entity.longname())
-            for lexeme in entity.lexer(show_inactive=False):
+            print('file', type(source_file_entity), source_file_entity.longname())
+            print('file', source_file_entity.longname())
+            for lexeme in entity.lexer():
                 # print(lexeme.text(), ': ', lexeme.token())
                 tokens_list.append(lexeme.text())
                 if lexeme.token() == 'Identifier':
@@ -865,12 +866,13 @@ class PreProcess:
         df.to_csv(csv_path, index=False)
 
     @classmethod
-    def read_project_0classes(cls, project_name: str = None, db=None, df: pd.DataFrame = None):
+    def read_project_classes(cls, project_name: str = None, db=None, df: pd.DataFrame = None):
         # Check type of df and convert it to DataFrame
         if isinstance(df, list):
             df = pd.DataFrame(df)
 
         # Check if the DataFrame contains the 'Class' column
+        # print(df.head())
         if 'Class' not in df.columns:
             raise ValueError('The DataFrame does not contain a "Class" column.')
 
