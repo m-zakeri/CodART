@@ -22,12 +22,6 @@ class SmellInitialization(Initializer):
 
     def __init__(self, *args, **kwargs):
         super(SmellInitialization, self).__init__(
-            udb_path=os.path.join(
-                config["Config"]["db_address"], config["Config"]["db_name"]
-            ),
-            upper_band=int(config["Config"]["UPPER_BAND"]),
-            lower_band=int(config["Config"]["LOWER_BAND"]),
-            population_size=int(config["Config"]["POPULATION_SIZE"]),
             *args,
             **kwargs,
         )

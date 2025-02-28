@@ -133,12 +133,19 @@ class Regression(object):
 
         df.to_csv(model_path[:-7] + '_evaluation_metrics_R1.csv', index=True, index_label='Row')
 
-    def regress(self, model_path: str = None, model_number: int = None):
+    # Add these modifications to the Regression class in codart.metrics.testability_learning
+
+    def regress(self, model_path=None, model_number=None, return_model=False):
         """
         Train testability prediction on different model
-        :param model_path:
-        :param model_number: 1: DTR, 2: RFR, 3: GBR, 4: HGBR, 5: SGDR, 6: MLPR,
-        :return:
+
+        Args:
+            model_path (str, optional): Path to save the model. If None, model is not saved to file.
+            model_number (int): 1: DTR, 2: RFR, 3: GBR, 4: HGBR, 5: SGDR, 6: MLPR
+            return_model (bool): Whether to return the trained model
+
+        Returns:
+            If return_model is True, returns the trained model object
         """
         if model_number == 1:
             regressor = tree.DecisionTreeRegressor(random_state=23, )
@@ -202,46 +209,102 @@ class Regression(object):
         print('Fitting model number', model_number)
         clf.fit(X=self.X_train, y=self.y_train)
 
-        output_dir = os.path.dirname(model_path)
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
+        # Save evaluation results if model_path is provided
+        if model_path:
+            output_dir = os.path.dirname(model_path)
+            if output_dir:  # Only create if there's an actual directory path
+                os.makedirs(output_dir, exist_ok=True)
 
-        print('Writing grid search result ...')
-        df = pd.DataFrame(clf.cv_results_, )
-        df.to_csv(model_path[:-7] + '_grid_search_cv_results.csv', index=False)
-        df = pd.DataFrame()
-        print('Best parameters set found on development set:', clf.best_params_)
-        df['best_parameters_development_set'] = [clf.best_params_]
-        print('Best classifier score on development set:', clf.best_score_)
-        df['best_score_development_set'] = [clf.best_score_]
-        print('best classifier score on test set:', clf.score(self.X_test, self.y_test))
-        df['best_score_test_set:'] = [clf.score(self.X_test, self.y_test)]
-        df.to_csv(model_path[:-7] + '_grid_search_cv_results_best.csv', index=False)
+            print('Writing grid search result ...')
+            df = pd.DataFrame(clf.cv_results_, )
+            df.to_csv(model_path[:-7] + '_grid_search_cv_results.csv', index=False)
+            df = pd.DataFrame()
+            print('Best parameters set found on development set:', clf.best_params_)
+            df['best_parameters_development_set'] = [clf.best_params_]
+            print('Best classifier score on development set:', clf.best_score_)
+            df['best_score_development_set'] = [clf.best_score_]
+            print('best classifier score on test set:', clf.score(self.X_test, self.y_test))
+            df['best_score_test_set:'] = [clf.score(self.X_test, self.y_test)]
+            df.to_csv(model_path[:-7] + '_grid_search_cv_results_best.csv', index=False)
 
         # Save and evaluate the best obtained model
-        print('Writing evaluation result ...')
         clf = clf.best_estimator_
-        y_true, y_pred = self.y_test, clf.predict(self.X_test)
-        dump(clf, model_path)
-        self.evaluate_model(model=clf, model_path=model_path)
-        print('=' * 50)
 
-    def vote(self, model_path=None, dataset_number=1):
-        # Trained regressors
-        reg1 = load(r'sklearn_models{0}/HGBR1_DS{0}.joblib'.format(dataset_number))
-        reg2 = load(r'sklearn_models{0}/RFR1_DS{0}.joblib'.format(dataset_number))
-        reg3 = load(r'sklearn_models{0}/MLPR1_DS{0}.joblib'.format(dataset_number))
-        # reg4 = load(r'sklearn_models7/SGDR1_DS1.joblib')
+        # Save to file if model_path is provided
+        if model_path:
+            print('Writing evaluation result ...')
+            dump(clf, model_path)
+            self.evaluate_model(model=clf, model_path=model_path)
+            print('=' * 50)
+
+        # Return the model if requested
+        if return_model:
+            return clf
+
+    def vote(self, model_path=None, dataset_number=1, models_dict=None, return_model=False):
+        """
+        Create a voting regressor from previously trained models
+
+        Args:
+            model_path (str, optional): Path to save the voting regressor
+            dataset_number (int): Dataset number
+            models_dict (dict, optional): Dictionary of pre-trained models
+            return_model (bool): Whether to return the trained voting regressor
+
+        Returns:
+            If return_model is True, returns the trained voting regressor
+        """
+        from sklearn.ensemble import VotingRegressor
+
+        if models_dict is None:
+            # Load models from files (original method)
+            try:
+                rfr_path = f"sklearn_models{dataset_number}/RFR1_DS{dataset_number}.joblib"
+                hgbr_path = f"sklearn_models{dataset_number}/HGBR1_DS{dataset_number}.joblib"
+                mlpr_path = f"sklearn_models{dataset_number}/MLPR1_DS{dataset_number}.joblib"
+
+                rfr = joblib.load(rfr_path)
+                hgbr = joblib.load(hgbr_path)
+                mlpr = joblib.load(mlpr_path)
+            except FileNotFoundError as e:
+                raise FileNotFoundError(f"Could not find one of the model files: {e}")
+        else:
+            # Use provided models from memory
+            rfr = models_dict.get(f"RFR1_DS{dataset_number}")
+            hgbr = models_dict.get(f"HGBR1_DS{dataset_number}")
+            mlpr = models_dict.get(f"MLPR1_DS{dataset_number}")
+
+            if not all([rfr, hgbr, mlpr]):
+                missing = []
+                if not rfr: missing.append("RFR1")
+                if not hgbr: missing.append("HGBR1")
+                if not mlpr: missing.append("MLPR1")
+                raise ValueError(f"Missing required models in models_dict: {', '.join(missing)}")
+
+        # Create the voting regressor
         ereg = VotingRegressor(
-            [('HGBR1_DS{0}'.format(dataset_number), reg1),
-             ('RFR1_DS{0}'.format(dataset_number), reg2),
-             ('MLPR1_DS{0}'.format(dataset_number), reg3)],
+            [('HGBR1_DS{0}'.format(dataset_number), hgbr),
+             ('RFR1_DS{0}'.format(dataset_number), rfr),
+             ('MLPR1_DS{0}'.format(dataset_number), mlpr)],
             weights=[3. / 6., 2. / 6., 1. / 6.]
         )
-        ereg.fit(self.X_train, self.y_train)
-        dump(ereg, model_path)
-        self.evaluate_model(model=ereg, model_path=model_path)
 
+        # Train the voting regressor
+        ereg.fit(self.X_train, self.y_train)
+
+        # Save and evaluate if model_path is provided
+        if model_path:
+            # Ensure directory exists if specified
+            output_dir = os.path.dirname(model_path)
+            if output_dir:  # Only create if there's an actual directory path
+                os.makedirs(output_dir, exist_ok=True)
+
+            dump(ereg, model_path)
+            self.evaluate_model(model=ereg, model_path=model_path)
+
+        # Return the model if requested
+        if return_model:
+            return ereg
 
 def train_dateset_g7(ds_number=0):
     """

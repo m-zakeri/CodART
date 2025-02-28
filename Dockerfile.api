@@ -35,10 +35,12 @@ COPY activate_license.sh /app/activate_license.sh
 COPY cr-keygen-linux-amd64 /app/cr-keygen-linux-amd64
 COPY application /app/application
 COPY codart /app/codart
+COPY config.ini /app/config.ini
 
 ENV PATH=/app/scitools/bin/linux64:$PATH
 ENV PYTHONPATH=/app/scitools/bin/linux64/Python
 ENV LD_LIBRARY_PATH=/app/scitools/bin/linux64
+ENV STILICENSE=/root/.config/SciTools/License.conf
 
 RUN chmod 755 /app/cr-keygen-linux-amd64 && \
     chmod 755 /app/activate_license.sh

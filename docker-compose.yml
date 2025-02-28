@@ -103,7 +103,7 @@ services:
       - MINIO_SECRET_KEY=minioadmin
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - STILICENSE=/app/SciTools/License.conf
+      - STILICENSE=/root/.config/SciTools/License.conf
     depends_on:
       - ml-worker
       - minio

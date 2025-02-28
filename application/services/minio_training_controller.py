@@ -8,11 +8,11 @@ from codart.metrics.testability_learning import Regression
 
 class ModelTrainingService:
     def __init__(
-        self,
-        minio_endpoint: str,
-        minio_access_key: str,
-        minio_secret_key: str,
-        bucket_name: str = "ml-models",
+            self,
+            minio_endpoint: str,
+            minio_access_key: str,
+            minio_secret_key: str,
+            bucket_name: str = "ml-models",
     ):
         """
         Initialize MinIO client and training controller
@@ -35,6 +35,8 @@ class ModelTrainingService:
             self.minio_client.make_bucket(bucket_name)
 
         self.bucket_name = bucket_name
+        # Dictionary to store models in memory
+        self.models_cache = {}
 
     def download_dataset_from_minio(self, dataset_path: str):
         """
@@ -46,7 +48,14 @@ class ModelTrainingService:
         Returns:
             str: Local path to downloaded dataset
         """
+        # Create temp directory if it doesn't exist
+        os.makedirs("/tmp", exist_ok=True)
+
         local_path = f"/tmp/{os.path.basename(dataset_path)}"
+
+        # Ensure the directory for the local path exists
+        os.makedirs(os.path.dirname(local_path), exist_ok=True)
+
         # Download dataset from MinIO
         self.minio_client.fget_object(
             bucket_name="metrics", object_name=dataset_path, file_path=local_path
@@ -55,14 +64,14 @@ class ModelTrainingService:
         return local_path
 
     def train_dataset_g7(
-        self,
-        ds_number: int,
-        dataset_path: str,
-        project_name: str = None,
-        project_version: str = None,
+            self,
+            ds_number: int,
+            dataset_path: str,
+            project_name: str = None,
+            project_version: str = None,
     ):
         """
-        Train dataset and save models to MinIO
+        Train dataset and save models directly to MinIO without local files
 
         Args:
             ds_number (int): Dataset number to train
@@ -82,6 +91,12 @@ class ModelTrainingService:
         elif project_name:
             project_dir = f"{project_name}/"
 
+        # Ensure temporary directory exists for download
+        os.makedirs("/tmp", exist_ok=True)
+
+        # Create temp directory if it doesn't exist
+        os.makedirs("/tmp", exist_ok=True)
+
         # Download dataset
         local_dataset_path = self.download_dataset_from_minio(dataset_path)
 
@@ -97,43 +112,83 @@ class ModelTrainingService:
         ]
 
         results = {}
+        trained_models = {}
 
+        # First, train all the base models and save them to memory
         for config in model_configs:
-            model_type = config["model_type"]
-            # Include project name and version in local path
-            local_model_dir = f"sklearn_models{ds_number}/{project_dir}"
-            local_model_path = f"{local_model_dir}{model_type}_DS{ds_number}.joblib"
+            if config["model_type"] == "VR1":
+                continue  # Skip VR1 for now, it will be trained after the base models
 
-            # Create directory if not exists
-            os.makedirs(os.path.dirname(local_model_path), exist_ok=True)
+            model_type = config["model_type"]
+            minio_model_path = f"models/DS{ds_number}/{project_dir}{model_type}_DS{ds_number}.joblib"
 
             try:
-                if model_type == "VR1":
-                    # Voting Regressor
-                    reg.vote(model_path=local_model_path, dataset_number=ds_number)
-                else:
-                    # Other Regressors
-                    reg.regress(
-                        model_path=local_model_path, model_number=config["model_number"]
-                    )
+                # Train the model without saving to file, but return it
+                model = reg.regress(
+                    model_path=None,  # Don't save to file
+                    model_number=config["model_number"],
+                    return_model=True  # Return the trained model
+                )
 
-                # Upload model to MinIO
-                # Include project name and version in MinIO path as well
-                minio_model_path = f"models/DS{ds_number}/{project_dir}{model_type}_DS{ds_number}.joblib"
-                self.minio_client.fput_object(
+                # Store the trained model in memory cache for VR1
+                model_key = f"{model_type}_DS{ds_number}"
+                trained_models[model_key] = model
+
+                # Create a buffer for serializing the model
+                model_buffer = BytesIO()
+                joblib.dump(model, model_buffer)
+                model_buffer.seek(0)
+
+                # Upload directly to MinIO
+                self.minio_client.put_object(
                     bucket_name=self.bucket_name,
                     object_name=minio_model_path,
-                    file_path=local_model_path,
+                    data=model_buffer,
+                    length=model_buffer.getbuffer().nbytes,
+                    content_type="application/octet-stream"
                 )
 
                 results[model_type] = {
-                    "local_path": local_model_path,
                     "minio_path": minio_model_path,
                     "trained_at": datetime.datetime.now().isoformat(),
                 }
 
             except Exception as e:
                 results[model_type] = {"error": str(e)}
+
+        # Now train the Voting Regressor using the models in memory
+        try:
+            vr_model_type = "VR1"
+            vr_minio_path = f"models/DS{ds_number}/{project_dir}{vr_model_type}_DS{ds_number}.joblib"
+
+            # Train VR model using in-memory models
+            vr_model = reg.vote(
+                model_path=None,  # Don't save to file
+                dataset_number=ds_number,
+                models_dict=trained_models,  # Pass in-memory models
+                return_model=True  # Return the trained model
+            )
+
+            # Serialize and upload to MinIO
+            vr_buffer = BytesIO()
+            joblib.dump(vr_model, vr_buffer)
+            vr_buffer.seek(0)
+
+            self.minio_client.put_object(
+                bucket_name=self.bucket_name,
+                object_name=vr_minio_path,
+                data=vr_buffer,
+                length=vr_buffer.getbuffer().nbytes,
+                content_type="application/octet-stream"
+            )
+
+            results[vr_model_type] = {
+                "minio_path": vr_minio_path,
+                "trained_at": datetime.datetime.now().isoformat(),
+            }
+
+        except Exception as e:
+            results["VR1"] = {"error": str(e)}
 
         # Calculate total training time
         end_time = datetime.datetime.now()
@@ -142,6 +197,9 @@ class ModelTrainingService:
         # Add project info to results
         if project_name or project_version:
             results["project_info"] = {"name": project_name, "version": project_version}
+
+        # Clean up memory cache
+        trained_models.clear()
 
         return results
 

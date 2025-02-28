@@ -1,5 +1,6 @@
 #!/bin/bash
 # Don't use set -e, since we want to continue even if some commands fail
+set -e
 
 HOME=/root
 LICENSE_FILE="$HOME/.config/SciTools/License.conf"
@@ -86,7 +87,6 @@ cat > "$LICENSE_FILE" << EOF
 REPLYCODE=$REPLY_CODE
 MAINTENANCE=$EXPIRATION
 EXPIRATION=$EXPIRATION
-API=1
 EOF
 chmod 644 "$LICENSE_FILE"
 
@@ -99,17 +99,13 @@ echo "Created symlink from $LICENSE_FILE to $SCITOOLS_LICENSE"
 
 # Apply the license
 echo "Applying license..."
-und -setofflinereplycode "$REPLY_CODE" -expiration "$EXPIRATION" -maintenance "$EXPIRATION" -api > /dev/null 2>&1
+und -setofflinereplycode "$REPLY_CODE" -expiration "$EXPIRATION" -maintenance "$EXPIRATION" > /dev/null 2>&1
 APPLY_RESULT=$?
 if [ $APPLY_RESULT -ne 0 ]; then
     echo "Warning: First license application method returned $APPLY_RESULT, trying alternative methods..."
 
     # Try alternative method
-    und -setlicensecode "$REPLY_CODE" -api > /dev/null 2>&1
-
-    # Also try direct file editing method (if the command-line methods fail)
-    echo "Adding API license field to license file manually..."
-    grep -q "API=" "$LICENSE_FILE" || echo "API=1" >> "$LICENSE_FILE"
+    und -setlicensecode "$REPLY_CODE" > /dev/null 2>&1
 fi
 
 # Check if license is working with a simple version check
@@ -121,22 +117,6 @@ if [ $VERSION_CHECK -ne 0 ]; then
 else
     echo "License appears to be working - 'und version' succeeded"
 fi
-
-# Verify the Python module can be imported
-echo "Verifying Python API license..."
-python3 -c "import understand; print('Python API license OK')" || {
-    echo "Warning: Python API license verification failed, trying to fix..."
-
-    # Make one more attempt to add the API flag
-    echo "Adding API license field to license file manually (final attempt)..."
-    sed -i '/^API=/d' "$LICENSE_FILE"
-    echo "API=1" >> "$LICENSE_FILE"
-
-    # Try again
-    python3 -c "import understand; print('Python API license OK after fix')" || {
-        echo "Python API license still not working, but continuing..."
-    }
-}
 
 echo "Creating test project to verify license..."
 mkdir -p /tmp/test_project
@@ -172,10 +152,6 @@ try:
     import understand
     print("Understand module imported successfully.")
 
-    # First verify we can perform basic operations without a database
-    print("Checking API license without database...")
-    print(f"Understand version: {understand.version()}")
-
     # Try to open the database created by the und command
     db_path = "/tmp/test_project/test_project.und"
     if not os.path.exists(db_path):
@@ -191,11 +167,6 @@ try:
     # Get basic information about the database
     print("\nBasic database information:")
     print(f"  Name: {db.name()}")
-
-    # List all files in the database
-    print("\nFiles in database:")
-    for file in db.ents("File"):
-        print(f"  {file.longname()}")
 
     # Close the database
     print("\nClosing database...")
@@ -220,12 +191,4 @@ PYTHON_TEST_RESULT=$?
 echo "License setup completed with Python test result: $PYTHON_TEST_RESULT"
 # Create a flag file to indicate activation was attempted
 touch /app/SciTools/license_activated
-
-# Print license information
-echo "===== LICENSE SUMMARY ====="
-echo "License location: $LICENSE_FILE"
-echo "License content:"
-cat "$LICENSE_FILE"
-echo "=========================="
-
 exit 0
