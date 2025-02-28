@@ -7,8 +7,7 @@ from typing import List, Dict
 from pydantic import BaseModel
 
 # FastAPI app instance
-app =  APIRouter(prefix="/ml-training-tasks", tags=["ML Training Tasks"])
-
+app = APIRouter(prefix="/ml-training-tasks", tags=["ML Training Tasks"])
 
 
 class DatasetInfo(BaseModel):
@@ -16,87 +15,93 @@ class DatasetInfo(BaseModel):
     size: int
     last_modified: str
     path: str
+    project_name: str
+    metric_type: str
 
 
-@app.get("/api/datasets", response_model=List[DatasetInfo])
-async def get_all_datasets():
+def get_minio_controller():
+    return ModelTrainingService(
+        minio_endpoint=os.getenv("MINIO_ENDPOINT", "minio:9000"),
+        minio_access_key=os.getenv("MINIO_ACCESS_KEY", "minioadmin"),
+        minio_secret_key=os.getenv("MINIO_SECRET_KEY", "minioadmin"),
+    )
+
+
+@app.get("/metrics/api/v1/metrics", response_model=List[DatasetInfo])
+async def get_all_metrics():
     """
-    Retrieve all datasets from MinIO storage.
-
-    Returns:
-        List[DatasetInfo]: List of dataset information including name, size, and last modified date
+    Retrieve all metrics from MinIO storage across all projects.
     """
     try:
-        # Initialize MinIO Training Controller
-        controller = ModelTrainingService(
-            minio_endpoint=os.getenv('MINIO_ENDPOINT', 'minio:9000'),
-            minio_access_key=os.getenv('MINIO_ACCESS_KEY', 'minioadmin'),
-            minio_secret_key=os.getenv('MINIO_SECRET_KEY', 'minioadmin')
-        )
+        controller = get_minio_controller()
+        bucket_name = os.getenv("MINIO_METRICS_BUCKET_NAME", "ml-models")
+        metrics_list = []
 
-        # Get bucket name from environment or use default
-        bucket_name = os.getenv('MINIO_BUCKET_NAME', 'datasets')
-
-        # List all objects in the datasets bucket
-        datasets = []
-        objects = controller.minio_client.list_objects(bucket_name)
+        # List all objects in the metrics bucket
+        objects = controller.minio_client.list_objects(bucket_name, recursive=True)
 
         for obj in objects:
-            dataset_info = DatasetInfo(
+            # Parse project name and metric type from the path
+            path_parts = obj.object_name.split("/")
+            if len(path_parts) >= 2:
+                project_name = path_parts[0]
+                metric_type = path_parts[1] if len(path_parts) > 1 else "unknown"
+
+                metric_info = DatasetInfo(
+                    name=obj.object_name,
+                    size=obj.size,
+                    last_modified=obj.last_modified.isoformat(),
+                    path=f"/api/v1/metrics/{project_name}/{obj.object_name}",
+                    project_name=project_name,
+                    metric_type=metric_type,
+                )
+                metrics_list.append(metric_info)
+
+        return metrics_list
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error retrieving metrics: {str(e)}"
+        )
+
+
+@app.get("/metrics/{project_name}")
+async def get_project_metrics(project_name: str):
+    """
+    Retrieve all metrics for a specific project.
+    """
+    try:
+        controller = get_minio_controller()
+        bucket_name = os.getenv("MINIO_METRICS_BUCKET_NAME", "ml-models")
+        metrics_list = []
+
+        # List objects with project name prefix
+        objects = controller.minio_client.list_objects(
+            bucket_name, prefix=f"{project_name}/", recursive=True
+        )
+
+        for obj in objects:
+            path_parts = obj.object_name.split("/")
+            metric_type = path_parts[1] if len(path_parts) > 1 else "unknown"
+
+            metric_info = DatasetInfo(
                 name=obj.object_name,
                 size=obj.size,
                 last_modified=obj.last_modified.isoformat(),
-                path=f"{bucket_name}/{obj.object_name}"
+                path=f"/api/v1/metrics/{project_name}/{obj.object_name}",
+                project_name=project_name,
+                metric_type=metric_type,
             )
-            datasets.append(dataset_info)
+            metrics_list.append(metric_info)
 
-        return datasets
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error retrieving datasets: {str(e)}"
-        )
-
-
-@app.get("/api/datasets/{dataset_name}")
-async def get_dataset_details(dataset_name: str):
-    """
-    Get detailed information about a specific dataset.
-
-    Args:
-        dataset_name (str): Name of the dataset
-
-    Returns:
-        Dict: Detailed dataset information
-    """
-    try:
-        controller = ModelTrainingService(
-            minio_endpoint=os.getenv('MINIO_ENDPOINT', 'minio:9000'),
-            minio_access_key=os.getenv('MINIO_ACCESS_KEY', 'minioadmin'),
-            minio_secret_key=os.getenv('MINIO_SECRET_KEY', 'minioadmin')
-        )
-
-        bucket_name = os.getenv('MINIO_BUCKET_NAME', 'datasets')
-
-        # Get object stats
-        try:
-            obj = controller.minio_client.stat_object(bucket_name, dataset_name)
-            return {
-                "name": obj.object_name,
-                "size": obj.size,
-                "last_modified": obj.last_modified.isoformat(),
-                "content_type": obj.content_type,
-                "metadata": obj.metadata
-            }
-        except Exception as e:
+        if not metrics_list:
             raise HTTPException(
-                status_code=404,
-                detail=f"Dataset {dataset_name} not found"
+                status_code=404, detail=f"No metrics found for project {project_name}"
             )
+
+        return metrics_list
 
     except Exception as e:
         raise HTTPException(
-            status_code=500,
-            detail=f"Error retrieving dataset details: {str(e)}"
+            status_code=500, detail=f"Error retrieving project metrics: {str(e)}"
         )

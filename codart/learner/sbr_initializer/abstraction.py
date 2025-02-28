@@ -25,7 +25,11 @@ class Initializer(ABC, metaclass=DynamicAbstractMetaInitializeRefactoringMethods
         self.population_size = population_size
         self.refactoring_types = config["REFACTORING"]["types"].split(",")
         self.initializers = tuple(
-            (getattr(self, f"init_{refactoring.strip()}"), {}, f"{refactoring.strip().replace('_', ' ').title()}")
+            (
+                getattr(self, f"init_{refactoring.strip()}"),
+                {},
+                f"{refactoring.strip().replace('_', ' ').title()}",
+            )
             for refactoring in self.refactoring_types
         )
 
@@ -36,4 +40,3 @@ class Initializer(ABC, metaclass=DynamicAbstractMetaInitializeRefactoringMethods
     @abstractmethod
     def generate_an_action(self):
         raise NotImplementedError(f"{type(self).__name__} not implement")
-

@@ -24,19 +24,42 @@ import pandas as pd
 import os
 from codart.learner.sbr_initializer.utils.utility import logger, config
 from codart.learner.sbr_initializer.smell import SmellInitialization
+from multiprocessing import Process, Array
+import io
+from datetime import datetime
+from minio import Minio
+from typing import Dict, Any
+
 
 class RefactoringSequenceEnvironment(EnvBase):
     metadata = {}
     batch_locked = False
 
-    def __init__(self, udb_path: str = "/home/y/jflex/jflex.und", n_obj: int = 8, device: Optional[str] = None, seed = None):
+    def __init__(
+        self,
+        udb_path: str = "/home/y/jflex/jflex.und",
+        n_obj: int = 8,
+        lower_band: int = 1,
+        upper_bound: int = 50,
+        population_size: int = 100,
+        device: Optional[str] = None,
+        seed=None,
+        project_name: str = "",
+    ):
         super().__init__(device=device, batch_size=[])
+        self.project_name = project_name
         if device is None:
             device = "cuda" if torch.cuda.is_available() else "cpu"
         self.device = device
         self.udb_path = udb_path
         self.n_obj = n_obj
-        self.generator = SmellInitialization()
+        self.generator = SmellInitialization(
+            udb_path=udb_path,
+            n_obj=n_obj,
+            lower_band=lower_band,
+            upper_band=upper_bound,
+            population_size=population_size,
+        )
         self._make_spec(action=self.generator.generate_an_action())
         if seed is None:
             seed = torch.empty((), dtype=torch.int64).random_().item()
@@ -45,7 +68,6 @@ class RefactoringSequenceEnvironment(EnvBase):
     _reset = EnvBase._reset
     _step = EnvBase._step
     _set_seed = EnvBase._set_seed
-
 
     def _set_seed(self, seed: Optional[int]):
         rng = torch.manual_seed(seed)
@@ -88,7 +110,7 @@ class RefactoringSequenceEnvironment(EnvBase):
                 high=5.0,
                 dtype=torch.float32,
             ),
-            params=self.make_composite_from_td(action)
+            params=self.make_composite_from_td(action),
         )
         self.state_spec = self.observation_spec.clone()
         self.action_spec = BoundedTensorSpec(
@@ -96,15 +118,19 @@ class RefactoringSequenceEnvironment(EnvBase):
             high=1000,
             dtype=torch.float32,
         )
-        self.reward_spec = UnboundedContinuousTensorSpec(shape=(*action.get_refactoring().shape, 1))
+        self.reward_spec = UnboundedContinuousTensorSpec(
+            shape=(*action.get_refactoring().shape, 1)
+        )
 
     def make_composite_from_td(self, action: RefactoringOperation):
         composite = CompositeSpec(
             {
-                key: self.make_composite_from_td(action)
-                if isinstance(tensor, TensorDictBase)
-                else UnboundedContinuousTensorSpec(
-                    dtype=tensor.dtype, device=tensor.device, shape=tensor.shape
+                key: (
+                    self.make_composite_from_td(action)
+                    if isinstance(tensor, TensorDictBase)
+                    else UnboundedContinuousTensorSpec(
+                        dtype=tensor.dtype, device=tensor.device, shape=tensor.shape
+                    )
                 )
                 for key, tensor in action.get_refactoring().params.items()
             },
@@ -194,28 +220,91 @@ class RefactoringSequenceEnvironment(EnvBase):
     def calc_modularity_objective(self, arr_, qmood_quality_attributes):
         arr_[7] = qmood_quality_attributes.modularity
 
-    def log_design_metrics(self, design_metrics):
-        design_metrics_path = os.path.join(
-            config["Config"]["PROJECT_LOG_DIR"],
-            f"{config['Config']['PROJECT_NAME']}_design_metrics_log_{datetime.datetime.time()}.csv",
-        )
+    def log_design_metrics(self, design_metrics: Dict[str, Any]):
+        """
+        Log design metrics to MinIO storage.
+        """
+        try:
+            if not self.project_name:
+                logger.warning("Project name not set, using 'unknown_project'")
+                self.project_name = "unknown_project"
 
-        df_design_metrics = pd.DataFrame(data=design_metrics)
-        if os.path.exists(design_metrics_path):
-            df = pd.read_csv(design_metrics_path, index_col=False)
-            df_result = pd.concat([df, df_design_metrics], ignore_index=True)
-            df_result.to_csv(design_metrics_path, index=False)
-        else:
-            df_design_metrics.to_csv(design_metrics_path, index=False)
+            # Create DataFrame from metrics
+            df_design_metrics = pd.DataFrame(data=design_metrics)
+
+            # Generate timestamp for the file name
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+            # Construct the object path in MinIO
+            metrics_path = (
+                f"{self.project_name}/design_metrics/design_metrics_log_{timestamp}.csv"
+            )
+
+            # Try to load existing metrics file if it exists
+            try:
+                existing_data = self.minio_client.get_object(
+                    self.metrics_bucket,
+                    f"{self.project_name}/design_metrics/latest.csv",
+                )
+                df_existing = pd.read_csv(existing_data)
+                df_result = pd.concat(
+                    [df_existing, df_design_metrics], ignore_index=True
+                )
+            except Exception as e:
+                print(e)
+                df_result = df_design_metrics
+
+            # Convert DataFrame to CSV in memory
+            csv_buffer = io.StringIO()
+            df_result.to_csv(csv_buffer, index=False)
+            csv_buffer.seek(0)
+            csv_data = csv_buffer.getvalue()
+
+            # Save timestamped version
+            self.minio_client.put_object(
+                self.metrics_bucket,
+                metrics_path,
+                data=io.BytesIO(csv_data.encode()),
+                length=len(csv_data),
+            )
+
+            # Also save as latest version
+            self.minio_client.put_object(
+                self.metrics_bucket,
+                f"{self.project_name}/design_metrics/latest.csv",
+                data=io.BytesIO(csv_data.encode()),
+                length=len(csv_data),
+            )
+
+            # Save metrics metadata
+            metadata = {
+                "timestamp": timestamp,
+                "project_name": self.project_name,
+                "metrics_count": len(design_metrics),
+                "total_records": len(df_result),
+            }
+
+            metadata_buffer = io.BytesIO(str(metadata).encode())
+            self.minio_client.put_object(
+                self.metrics_bucket,
+                f"{self.project_name}/design_metrics/metadata.json",
+                data=metadata_buffer,
+                length=len(str(metadata)),
+            )
+
+            logger.info(f"Design metrics saved to MinIO: {metrics_path}")
+
+        except Exception as e:
+            logger.error(
+                f"Error saving design metrics to MinIO: {str(e)}", exc_info=True
+            )
+            raise
 
 
-
-
-
-env = RefactoringSequenceEnvironment()
-env.to(env.device)
-check_env_specs(env)
-
-print("observation_spec:", env.observation_spec)
-print("state_spec:", env.state_spec)
-print("reward_spec:", env.reward_spec)
+# env = RefactoringSequenceEnvironment()
+# env.to(env.device)
+# check_env_specs(env)
+#
+# print("observation_spec:", env.observation_spec)
+# print("state_spec:", env.state_spec)
+# print("reward_spec:", env.reward_spec)

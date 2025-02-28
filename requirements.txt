@@ -18,3 +18,4 @@ minio
 scikit-learn
 imblearn
 python-multipart
+torchrl

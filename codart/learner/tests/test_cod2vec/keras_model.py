@@ -58,10 +58,14 @@ class Code2VecModel(Code2VecModelBase):
     def _create_keras_model(self):
         # Each input sample consists of a bag of x`MAX_CONTEXTS` tuples (source_terminal, path, target_terminal).
         # The valid mask indicates for each context whether it actually exists or it is just a padding.
-        path_source_token_input = Input((self.config['COD2VEC']['MAX_CONTEXTS'],), dtype=tf.int32)
-        path_input = Input((self.config['COD2VEC']['MAX_CONTEXTS'],), dtype=tf.int32)
-        path_target_token_input = Input((self.config['COD2VEC']['MAX_CONTEXTS'],), dtype=tf.int32)
-        context_valid_mask = Input((self.config['COD2VEC']['MAX_CONTEXTS'],))
+        path_source_token_input = Input(
+            (self.config["COD2VEC"]["MAX_CONTEXTS"],), dtype=tf.int32
+        )
+        path_input = Input((self.config["COD2VEC"]["MAX_CONTEXTS"],), dtype=tf.int32)
+        path_target_token_input = Input(
+            (self.config["COD2VEC"]["MAX_CONTEXTS"],), dtype=tf.int32
+        )
+        context_valid_mask = Input((self.config["COD2VEC"]["MAX_CONTEXTS"],))
 
         # Input paths are indexes, we embed these here.
         paths_embedded = Embedding(

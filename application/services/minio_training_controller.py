@@ -1,18 +1,19 @@
 import os
 import datetime
 import joblib
-import pandas as pd
 from minio import Minio
 from io import BytesIO
 from codart.metrics.testability_learning import Regression
 
 
 class ModelTrainingService:
-    def __init__(self,
-                 minio_endpoint: str,
-                 minio_access_key: str,
-                 minio_secret_key: str,
-                 bucket_name: str = 'ml-models'):
+    def __init__(
+        self,
+        minio_endpoint: str,
+        minio_access_key: str,
+        minio_secret_key: str,
+        bucket_name: str = "ml-models",
+    ):
         """
         Initialize MinIO client and training controller
 
@@ -26,7 +27,7 @@ class ModelTrainingService:
             endpoint=minio_endpoint,
             access_key=minio_access_key,
             secret_key=minio_secret_key,
-            secure=False  # Set to True if using HTTPS
+            secure=False,  # Set to True if using HTTPS
         )
 
         # Create bucket if not exists
@@ -46,28 +47,40 @@ class ModelTrainingService:
             str: Local path to downloaded dataset
         """
         local_path = f"/tmp/{os.path.basename(dataset_path)}"
-
         # Download dataset from MinIO
         self.minio_client.fget_object(
-            bucket_name=self.bucket_name,
-            object_name=dataset_path,
-            file_path=local_path
+            bucket_name="metrics", object_name=dataset_path, file_path=local_path
         )
 
         return local_path
 
-    def train_dataset_g7(self, ds_number: int, dataset_path: str):
+    def train_dataset_g7(
+        self,
+        ds_number: int,
+        dataset_path: str,
+        project_name: str = None,
+        project_version: str = None,
+    ):
         """
         Train dataset and save models to MinIO
 
         Args:
             ds_number (int): Dataset number to train
             dataset_path (str): Path to dataset in MinIO
+            project_name (str, optional): Project name to include in model paths
+            project_version (str, optional): Project version to include in model paths
 
         Returns:
             dict: Training results and model paths
         """
         start_time = datetime.datetime.now()
+
+        # Create project directory structure
+        project_dir = ""
+        if project_name and project_version:
+            project_dir = f"{project_name}/{project_version}/"
+        elif project_name:
+            project_dir = f"{project_name}/"
 
         # Download dataset
         local_dataset_path = self.download_dataset_from_minio(dataset_path)
@@ -77,58 +90,62 @@ class ModelTrainingService:
 
         # Model training configurations
         model_configs = [
-            {'model_number': 2, 'model_type': 'RFR1'},  # RandomForestRegressor
-            {'model_number': 4, 'model_type': 'HGBR1'},  # HistGradientBoostingRegressor
-            {'model_number': 6, 'model_type': 'MLPR1'},  # MLPRegressor
-            {'model_type': 'VR1'}  # Voting Regressor
+            {"model_number": 2, "model_type": "RFR1"},  # RandomForestRegressor
+            {"model_number": 4, "model_type": "HGBR1"},  # HistGradientBoostingRegressor
+            {"model_number": 6, "model_type": "MLPR1"},  # MLPRegressor
+            {"model_type": "VR1"},  # Voting Regressor
         ]
 
         results = {}
 
         for config in model_configs:
-            model_type = config['model_type']
-            local_model_path = f"sklearn_models{ds_number}/{model_type}_DS{ds_number}.joblib"
+            model_type = config["model_type"]
+            # Include project name and version in local path
+            local_model_dir = f"sklearn_models{ds_number}/{project_dir}"
+            local_model_path = f"{local_model_dir}{model_type}_DS{ds_number}.joblib"
 
             # Create directory if not exists
             os.makedirs(os.path.dirname(local_model_path), exist_ok=True)
 
             try:
-                if model_type == 'VR1':
+                if model_type == "VR1":
                     # Voting Regressor
                     reg.vote(model_path=local_model_path, dataset_number=ds_number)
                 else:
                     # Other Regressors
                     reg.regress(
-                        model_path=local_model_path,
-                        model_number=config['model_number']
+                        model_path=local_model_path, model_number=config["model_number"]
                     )
 
                 # Upload model to MinIO
-                minio_model_path = f"models/DS{ds_number}/{model_type}_DS{ds_number}.joblib"
+                # Include project name and version in MinIO path as well
+                minio_model_path = f"models/DS{ds_number}/{project_dir}{model_type}_DS{ds_number}.joblib"
                 self.minio_client.fput_object(
                     bucket_name=self.bucket_name,
                     object_name=minio_model_path,
-                    file_path=local_model_path
+                    file_path=local_model_path,
                 )
 
                 results[model_type] = {
-                    'local_path': local_model_path,
-                    'minio_path': minio_model_path,
-                    'trained_at': datetime.datetime.now().isoformat()
+                    "local_path": local_model_path,
+                    "minio_path": minio_model_path,
+                    "trained_at": datetime.datetime.now().isoformat(),
                 }
 
             except Exception as e:
-                results[model_type] = {
-                    'error': str(e)
-                }
+                results[model_type] = {"error": str(e)}
 
         # Calculate total training time
         end_time = datetime.datetime.now()
-        results['training_time'] = str(end_time - start_time)
+        results["training_time"] = str(end_time - start_time)
+
+        # Add project info to results
+        if project_name or project_version:
+            results["project_info"] = {"name": project_name, "version": project_version}
 
         return results
 
-    def list_trained_models(self, prefix: str = 'models/'):
+    def list_trained_models(self, prefix: str = "models/"):
         """
         List trained models in MinIO
 
@@ -140,9 +157,7 @@ class ModelTrainingService:
         """
         models = []
         objects = self.minio_client.list_objects(
-            bucket_name=self.bucket_name,
-            prefix=prefix,
-            recursive=True
+            bucket_name=self.bucket_name, prefix=prefix, recursive=True
         )
 
         for obj in objects:
@@ -162,8 +177,7 @@ class ModelTrainingService:
         """
         # Download model to memory
         model_data = self.minio_client.get_object(
-            bucket_name=self.bucket_name,
-            object_name=model_path
+            bucket_name=self.bucket_name, object_name=model_path
         )
 
         # Load model from bytes

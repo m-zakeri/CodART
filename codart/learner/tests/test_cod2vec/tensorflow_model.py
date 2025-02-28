@@ -232,7 +232,6 @@ class Code2VecModel(Code2VecModelBase):
                         ],
                     )
 
-
                     top_words = common.binary_to_string_matrix(
                         top_words
                     )  # (batch, top_k)
@@ -494,7 +493,7 @@ class Code2VecModel(Code2VecModelBase):
         )
 
     def predict(
-            self, predict_data_lines: Iterable[str]
+        self, predict_data_lines: Iterable[str]
     ) -> List[ModelPredictionResults]:
         print("Starting predict function")
 

@@ -61,7 +61,11 @@ class Utils(object):
         print("initializer : ", initializer)
         self.logger.debug(f">>> Randomly selected refactoring: {initializer.__ne__}")
         main_function, params, name = initializer
-        if not (callable(main_function) and isinstance(params, dict) and isinstance(name, str)):
+        if not (
+            callable(main_function)
+            and isinstance(params, dict)
+            and isinstance(name, str)
+        ):
             print("Invalid initializer structure:", initializer)
             return None, None, None
         else:

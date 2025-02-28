@@ -1,14 +1,15 @@
 from celery import Celery
-from celery.result import AsyncResult
 from application.services.minio_training_controller import ModelTrainingService
 import os
 import time
 import traceback
 
 # Celery configuration
-app = Celery('ml_training_tasks',
-             broker='amqp://guest:guest@rabbitmq:5672',
-             backend='redis://redis:6379/')
+app = Celery(
+    "ml_training_tasks",
+    broker="amqp://guest:guest@rabbitmq:5672",
+    backend="redis://redis:6379/",
+)
 
 # Configure Celery task settings
 app.conf.update(
@@ -22,7 +23,9 @@ task_metadata = {}
 
 
 @app.task(bind=True)
-def train_dataset_task(self, dataset_path, ds_number, model_version=None):
+def train_dataset_task(
+    self, dataset_path, ds_number, model_version=None, project_name=None
+):
     """
     Celery task for training machine learning dataset
 
@@ -30,6 +33,7 @@ def train_dataset_task(self, dataset_path, ds_number, model_version=None):
         dataset_path (str): Path to dataset in MinIO
         ds_number (int): Dataset number
         model_version (str, optional): Specific model version
+        project_name (str, optional): Project name
 
     Returns:
         dict: Training results
@@ -37,43 +41,44 @@ def train_dataset_task(self, dataset_path, ds_number, model_version=None):
     try:
         # Update task metadata
         task_metadata[self.request.id] = {
-            'status': 'STARTED',
-            'progress': 0,
-            'start_time': time.time(),
-            'dataset_path': dataset_path,
-            'ds_number': ds_number
+            "status": "STARTED",
+            "progress": 0,
+            "start_time": time.time(),
+            "dataset_path": dataset_path,
+            "ds_number": ds_number,
+            "model_version": model_version,
+            "project_name": project_name,
         }
 
         # Initialize MinIO Training Controller
         controller = ModelTrainingService(
-            minio_endpoint=os.getenv('MINIO_ENDPOINT', 'minio:9000'),
-            minio_access_key=os.getenv('MINIO_ACCESS_KEY', 'minioadmin'),
-            minio_secret_key=os.getenv('MINIO_SECRET_KEY', 'minioadmin')
+            minio_endpoint=os.getenv("MINIO_ENDPOINT", "minio:9000"),
+            minio_access_key=os.getenv("MINIO_ACCESS_KEY", "minioadmin"),
+            minio_secret_key=os.getenv("MINIO_SECRET_KEY", "minioadmin"),
+            bucket_name="metrics",
         )
 
         # Update progress
-        self.update_state(state='PROGRESS', meta={'progress': 25})
+        self.update_state(state="PROGRESS", meta={"progress": 25})
 
-        # Train dataset
+        # Train dataset with project info
         results = controller.train_dataset_g7(
             ds_number=ds_number,
-            dataset_path=dataset_path
+            dataset_path=dataset_path,
+            project_name=project_name,
+            project_version=model_version,
         )
 
         # Update final task metadata
-        task_metadata[self.request.id].update({
-            'status': 'COMPLETED',
-            'progress': 100,
-            'results': results
-        })
+        task_metadata[self.request.id].update(
+            {"status": "COMPLETED", "progress": 100, "results": results}
+        )
 
         return results
 
     except Exception as e:
         # Update error metadata
-        task_metadata[self.request.id].update({
-            'status': 'FAILED',
-            'error': str(e),
-            'traceback': traceback.format_exc()
-        })
+        task_metadata[self.request.id].update(
+            {"status": "FAILED", "error": str(e), "traceback": traceback.format_exc()}
+        )
         raise

@@ -1,5 +1,7 @@
 FROM base:v1.0.0
 
+WORKDIR /app
+
 ENV INSTALLDIR=/app/
 ENV PROJECTS_BASE_DIR=/opt/projects
 ENV DB_BASE_DIR=/opt/understand_dbs
@@ -11,8 +13,6 @@ ENV STILICENSE="/root/.config/SciTools/License.conf"
 RUN useradd -ms /bin/bash y
 
 RUN echo "root:toor" | chpasswd
-
-WORKDIR /app
 
 USER root
 
@@ -30,14 +30,11 @@ RUN mkdir -p /root/.config/SciTools \
                  /root/.local/share/SciTools \
                  /app/SciTools
 
-COPY requirements.txt ./
 COPY scitools /app/scitools/
-COPY dependencies/* /app/dependencies/
 COPY activate_license.sh /app/activate_license.sh
 COPY cr-keygen-linux-amd64 /app/cr-keygen-linux-amd64
-COPY . .
-
-RUN pip3 install --no-cache-dir /app/dependencies/*
+COPY application /app/application
+COPY codart /app/codart
 
 ENV PATH=/app/scitools/bin/linux64:$PATH
 ENV PYTHONPATH=/app/scitools/bin/linux64/Python
@@ -49,9 +46,10 @@ RUN chmod 755 /app/cr-keygen-linux-amd64 && \
 COPY start.sh /app/start.sh
 RUN chmod +x /app/start.sh
 
-RUN ln -sf /root/.config/SciTools/License.conf /app/SciTools/License.conf
+# Create symlink between license locations
+RUN ln -sf /root/.config/SciTools/License.conf /app/SciTools/License.conf || true
+RUN ln -sf /app/SciTools/License.conf /root/.config/SciTools/License.conf || true
 
 EXPOSE 8000
-VOLUME ["/opt/projects", "/opt/understand_dbs"]
 
 CMD ["/app/start.sh"]

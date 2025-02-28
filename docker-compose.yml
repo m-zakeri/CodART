@@ -50,6 +50,17 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.base
+    depends_on:
+      - python-base
+    networks:
+      - default
+      - internal
+
+  python-base:
+    image: python-base:v1.0.0
+    build:
+      context: .
+      dockerfile: Dockerfile.python-base
     networks:
       - default
       - internal
@@ -71,7 +82,7 @@ services:
       - rabbitmq
       - redis
       - minio
-      - base
+      - python-base
     networks:
       - default
       - internal
@@ -93,7 +104,6 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - STILICENSE=/app/SciTools/License.conf
-
     depends_on:
       - ml-worker
       - minio
@@ -102,7 +112,7 @@ services:
       - base
     networks:
       - default
-      - internal  # Only connected to internal network, no internet access
+      - internal
 
 volumes:
   minio_storage:

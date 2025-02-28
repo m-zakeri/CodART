@@ -98,7 +98,9 @@ class InteractivePredictor:
             print(f"\nAnalyzing function: {function_name}")
             print(f"  Package Name: {data['package_name']}")
             print(f"  File Path: {data['file_path']}")
-            print(f"  Function Content:\n{data['function_content'][:30]}...")  # Display a snippet
+            print(
+                f"  Function Content:\n{data['function_content'][:30]}..."
+            )  # Display a snippet
 
             # Predicting with cod2vec using the function content directly
             input_lines = data["function_content"]  # Pass the complete function body
@@ -109,7 +111,9 @@ class InteractivePredictor:
                     print("no content for prediction found")
                     continue
 
-                predict_lines, hash_to_string_dict = self.path_extractor.extract_paths(input_lines)
+                predict_lines, hash_to_string_dict = self.path_extractor.extract_paths(
+                    input_lines
+                )
                 raw_prediction_results = self.model.predict(predict_lines)
                 print("Prediction results:")
                 # Check if predictions exist
@@ -131,7 +135,9 @@ class InteractivePredictor:
                 }
 
                 # Iterate through raw predictions and method predictions
-                for raw_prediction, method_prediction in zip(raw_prediction_results, method_prediction_results):
+                for raw_prediction, method_prediction in zip(
+                    raw_prediction_results, method_prediction_results
+                ):
                     prediction_info = {
                         "original_name": method_prediction.original_name,
                         "predicted": [
@@ -158,7 +164,10 @@ class InteractivePredictor:
                 # Append each function's predictions to the all_predictions list
                 all_predictions.append(function_predictions)
 
-                if self.config["COD2VEC"]["EXPORT_CODE_VECTORS"] and raw_prediction is not None:
+                if (
+                    self.config["COD2VEC"]["EXPORT_CODE_VECTORS"]
+                    and raw_prediction is not None
+                ):
                     logger.info("Code vector:")
                     logger.info(" ".join(map(str, raw_prediction.code_vector)))
 

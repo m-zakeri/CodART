@@ -1,0 +1,5 @@
+FROM python:3.12-slim
+
+COPY dependencies/* /app/dependencies/
+
+RUN pip3 install --no-cache-dir /app/dependencies/*

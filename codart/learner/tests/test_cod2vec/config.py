@@ -37,10 +37,10 @@ class Config:
 
     def load_from_args(self):
         self.PREDICT = True
-        self.MODEL_SAVE_PATH = (
-            "/home/y/Downloads/models/java14_model/self/"
+        self.MODEL_SAVE_PATH = "/home/y/Downloads/models/java14_model/self/"
+        self.MODEL_LOAD_PATH = (
+            "/home/y/Downloads/models/java14_model/saved_model_iter8.release"
         )
-        self.MODEL_LOAD_PATH = "/home/y/Downloads/models/java14_model/saved_model_iter8.release"
         self.TRAIN_DATA_PATH_PREFIX = ""
         self.TEST_DATA_PATH = ""
         self.RELEASE = True

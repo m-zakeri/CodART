@@ -51,6 +51,7 @@ from sklearn import tree
 from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor, HistGradientBoostingRegressor
 from sklearn.ensemble import VotingRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_error, median_absolute_error, r2_score
+import math
 
 
 class Regression(object):
@@ -116,7 +117,8 @@ class Regression(object):
                                                                                      multioutput='variance_weighted')]
         df['mean_absolute_error'] = [mean_absolute_error(y_true, y_pred)]
         df['mean_squared_error'] = [mean_squared_error(y_true, y_pred)]
-        df['root_mean_squared_error'] = [mean_squared_error(y_true, y_pred, squared=False)]
+        mse = mean_squared_error(y_true, y_pred)
+        df['root_mean_squared_error'] = [math.sqrt(mse)]
         df['median_absolute_error'] = [median_absolute_error(y_true, y_pred)]
 
         if min(y_pred) >= 0:
@@ -328,21 +330,21 @@ def create_testability_dataset_with_only_10_important_metrics():
     df.to_csv(df_new_path, index=False)
 
 
-def main():
-    train_dateset_g7(ds_number=8)
-    train_dateset_g7(ds_number=9)
-    # create_testability_dataset_with_only_important_metrics()
-    # create_testability_dataset_with_only_10_important_metrics()
-
-
-# -----------------------------------------------
-if __name__ == '__main__':
-    start = datetime.datetime.now()  # Store as a datetime object
-    print(start.strftime('%Y-%m-%d_%H-%M-%S'), '\t Program Start ...')
-    main()
-    end = datetime.datetime.now()  # Store as a datetime object
-    print(end.strftime('%Y-%m-%d_%H-%M-%S'), '\t Program End ...')
-
-    # Calculate the process time
-    process_time = end - start  # This will be a timedelta object
-    print(f"Process time: {process_time}")
+# def main():
+#     train_dateset_g7(ds_number=8)
+#     train_dateset_g7(ds_number=9)
+#     # create_testability_dataset_with_only_important_metrics()
+#     # create_testability_dataset_with_only_10_important_metrics()
+#
+#
+# # -----------------------------------------------
+# if __name__ == '__main__':
+#     start = datetime.datetime.now()  # Store as a datetime object
+#     print(start.strftime('%Y-%m-%d_%H-%M-%S'), '\t Program Start ...')
+#     main()
+#     end = datetime.datetime.now()  # Store as a datetime object
+#     print(end.strftime('%Y-%m-%d_%H-%M-%S'), '\t Program End ...')
+#
+#     # Calculate the process time
+#     process_time = end - start  # This will be a timedelta object
+#     print(f"Process time: {process_time}")

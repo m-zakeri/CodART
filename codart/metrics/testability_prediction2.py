@@ -30,12 +30,29 @@ import understand as und
 from codart.learner.sbr_initializer.utils.utility import logger, config
 from codart.metrics import metrics_names
 from codart.metrics.metrics_coverability import UnderstandUtility
+from application.services.minio_model_loader import MinioModelLoader
 
 
-scaler1 = joblib.load(config['MODEL_PATHS']['scaler1_path'])
-model5 = joblib.load(config['MODEL_PATHS']['model5_path'])
-model_branch = joblib.load(config['MODEL_PATHS']['model_branch_path'])
-model_line = joblib.load(config['MODEL_PATHS']['model_line_path'])
+
+# scaler1 = joblib.load(config['MODEL_PATHS']['scaler1_path'])
+# model5 = joblib.load(config['MODEL_PATHS']['model5_path'])
+# model_branch = joblib.load(config['MODEL_PATHS']['model_branch_path'])
+# model_line = joblib.load(config['MODEL_PATHS']['model_line_path'])
+
+
+loader = MinioModelLoader(
+    minio_endpoint=os.getenv('MINIO_ENDPOINT', 'minio:9000'),
+    minio_access_key=os.getenv('MINIO_ACCESS_KEY', 'minioadmin'),
+    minio_secret_key=os.getenv('MINIO_SECRET_KEY', 'minioadmin'),
+    bucket_name='metrics',
+    dataset_number=0
+)
+
+# Load models from MinIO
+scaler = loader.load_model('RFR1')  # Scaler is saved with RFR1
+model = loader.load_model('HGBR1')  # Main model
+model_branch = loader.load_model('MLPR1')  # Branch coverage model
+model_line = loader.load_model('VR1')  # Line coverage model
 
 
 class TestabilityMetrics:
@@ -384,19 +401,19 @@ class TestabilityModel:
 
 
 # # API
-# def main(project_db_path, initial_value=1.0, verbose=False, log_path=None):
-#     """
-#
-#     testability_prediction module API
-#
-#     """
-#
-#     df = PreProcess().compute_metrics_by_class_list(
-#         project_db_path,
-#         n_jobs=0
-#     )
-#     testability_ = TestabilityModel().inference(df_predict_data=df, verbose=verbose, log_path=log_path)
-#     return round(testability_ / initial_value, 5)
+def main(project_db_path, initial_value=1.0, verbose=False, log_path=None):
+    """
+
+    testability_prediction module API
+
+    """
+
+    df = PreProcess().compute_metrics_by_class_list(
+        project_db_path,
+        n_jobs=0
+    )
+    testability_ = TestabilityModel().inference(df_predict_data=df, verbose=verbose, log_path=log_path)
+    return round(testability_ / initial_value, 5)
 #
 #
 # # Test module

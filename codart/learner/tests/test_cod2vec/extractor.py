@@ -12,7 +12,7 @@ class Extractor:
 
     def extract_paths(self, java_code):
         try:
-            java_code = java_code+"#ENDCODE"
+            java_code = java_code + "#ENDCODE"
             with socket.create_connection((self.host, self.port)) as sock:
                 print("Sending Java code...")
                 for line in java_code.splitlines():
@@ -21,12 +21,11 @@ class Extractor:
 
                 # Receive the response from the server
                 response = []
-                with sock.makefile('r') as sock_file:
+                with sock.makefile("r") as sock_file:
                     for line in sock_file:
                         response.append(line.strip())
                         if "#ENDRESPONSE" in line:
                             break
-
 
                 response = "\n".join(response)
                 response = response.replace("#ENDRESPONSE", "")
@@ -44,7 +43,9 @@ class Extractor:
                     method_name = parts[0]
                     current_result_line_parts = [method_name]
                     contexts = parts[1:]  # Assuming the rest are contexts
-                    for context in contexts[: int(self.config['COD2VEC']['MAX_CONTEXTS'])]:
+                    for context in contexts[
+                        : int(self.config["COD2VEC"]["MAX_CONTEXTS"])
+                    ]:
                         context_parts = context.split(",")
                         context_word1 = context_parts[0]
                         context_path = context_parts[1]
@@ -54,7 +55,9 @@ class Extractor:
                         current_result_line_parts += [
                             "%s,%s,%s" % (context_word1, hashed_path, context_word2)
                         ]
-                    space_padding = " " * (int(self.config['COD2VEC']['MAX_CONTEXTS']) - len(contexts))
+                    space_padding = " " * (
+                        int(self.config["COD2VEC"]["MAX_CONTEXTS"]) - len(contexts)
+                    )
                     result_line = " ".join(current_result_line_parts) + space_padding
                     result.append(result_line)
                 return result, hash_to_string_dict
