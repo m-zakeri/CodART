@@ -23,7 +23,7 @@ class Initializer(ABC, metaclass=DynamicAbstractMetaInitializeRefactoringMethods
         self.lower_band = lower_band
         self.upper_band = upper_band
         self.population_size = population_size
-        self.refactoring_types = config["REFACTORING"]["types"].split(",")
+        self.refactoring_types = ["extract_class","move_method","pull_up_method","push_down_method","extract_method"]
         self.initializers = tuple(
             (
                 getattr(self, f"init_{refactoring.strip()}"),

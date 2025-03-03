@@ -9,6 +9,9 @@ ENV UNDERSTAND_LICENSE="/root/.config/SciTools/License.conf"
 ENV STIDOSUTILDIR="/root/.config/SciTools"
 ENV STIHOME="/app/scitools"
 ENV STILICENSE="/root/.config/SciTools/License.conf"
+ENV QT_X11_NO_MITSHM=1
+ENV QT_QPA_PLATFORM=offscreen
+ENV QT_QPA_FONTDIR=/usr/share/fonts/truetype
 
 RUN useradd -ms /bin/bash y
 

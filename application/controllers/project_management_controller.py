@@ -10,7 +10,6 @@ import redis
 import subprocess
 import logging
 import hashlib
-import asyncio
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -52,7 +51,7 @@ def generate_version_id(project_name: str, git_info: dict) -> str:
     return hashlib.md5(version_string.encode()).hexdigest()[:8]
 
 
-async def create_understand_database(project_dir: str = None, db_dir: str = None):
+def create_understand_database(project_dir: str = None, db_dir: str = None):
     """
     Create understand database for the given project directory.
 
@@ -89,38 +88,37 @@ async def create_understand_database(project_dir: str = None, db_dir: str = None
 
     commands = [create_cmd, add_cmd, analyze_cmd]
 
+    # Set environment variables to avoid Qt mutex issues
+    env = {
+        **os.environ,
+        "QT_QPA_PLATFORM": "minimal",
+        "QT_NO_SSL": "1",
+        "QT_MUTEX_WAIT_TIME": "0",
+    }
+
     try:
         for cmd in commands:
-            # Using asyncio.create_subprocess_exec for async subprocess execution
-            process = await asyncio.create_subprocess_exec(
-                *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+            # Using subprocess.run for synchronous execution
+            logger.debug(f"Running command: {' '.join(cmd)}")
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                check=True,
+                env=env
             )
 
-            # Await the process completion
-            stdout, stderr = await process.communicate()
+            logger.debug(f"Command output: {result.stdout}")
+            logger.debug(f"Successfully executed: {' '.join(cmd)}")
 
-            # Convert bytes to string
-            stdout_str = stdout.decode("utf-8")
-            stderr_str = stderr.decode("utf-8")
-
-            # Check if process was successful
-            if process.returncode != 0:
-                raise RuntimeError(
-                    f"Command failed with return code {process.returncode}: {stderr_str}"
-                )
-
-            print(f'Successfully executed: {" ".join(cmd)}')
-            print(f"Output: {stdout_str}")
-
-        print("Understand project was created and analyzed successfully!")
+        logger.info("Understand project was created and analyzed successfully!")
         return db_path
 
-    except asyncio.CancelledError:
-        # Handle cancellation specifically
-        print("Database creation was cancelled")
-        raise
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Command failed with return code {e.returncode}: {e.stderr}")
+        raise RuntimeError(f"Command failed with return code {e.returncode}: {e.stderr}")
     except Exception as e:
-        print(f"An unexpected error occurred: {e}")
+        logger.error(f"An unexpected error occurred: {str(e)}")
         raise
 
 
@@ -144,7 +142,7 @@ def get_project_versions(project_name: str) -> List[str]:
 
 
 def get_project_info(
-    project_name: str, version_id: Optional[str] = None
+        project_name: str, version_id: Optional[str] = None
 ) -> Optional[dict]:
     """Retrieve project information from Redis"""
     if version_id is None:
@@ -161,12 +159,12 @@ def get_project_info(
 
 @app.post("/projects/upload")
 async def upload_project(
-    file: UploadFile = File(...),
-    project_name: str = Form(...),
-    description: Optional[str] = Form(None),
-    git_url: Optional[str] = Form(None),
-    git_branch: Optional[str] = Form(None),
-    git_commit: Optional[str] = Form(None),
+        file: UploadFile = File(...),
+        project_name: str = Form(...),
+        description: Optional[str] = Form(None),
+        git_url: Optional[str] = Form(None),
+        git_branch: Optional[str] = Form(None),
+        git_commit: Optional[str] = Form(None),
 ):
     """Upload a project and create its Understand database"""
     try:
@@ -210,10 +208,11 @@ async def upload_project(
             except shutil.ReadError as e:
                 raise HTTPException(status_code=400, detail="Invalid zip file format")
 
-        # Create Understand database
+        # Create Understand database (synchronously)
         try:
-            db_path = await create_understand_database(project_dir, db_dir)
+            db_path = create_understand_database(project_dir, db_dir)
         except Exception as e:
+            logger.error(f"Failed to create Understand database: {str(e)}", exc_info=True)
             raise HTTPException(
                 status_code=500,
                 detail=f"Failed to create Understand database: {str(e)}",
@@ -296,7 +295,7 @@ async def delete_project(project_name: str, version_id: Optional[str] = None):
         if version_id:
             # Verify if specific version exists
             if not redis_client.hexists(
-                f"project:{project_name}:version:{version_id}", "project_path"
+                    f"project:{project_name}:version:{version_id}", "project_path"
             ):
                 raise HTTPException(
                     status_code=404, detail=f"Project version {version_id} not found"
@@ -311,7 +310,7 @@ async def delete_project(project_name: str, version_id: Optional[str] = None):
 
             # Delete project files
             if project_info.get("project_path") and os.path.exists(
-                project_info["project_path"]
+                    project_info["project_path"]
             ):
                 try:
                     shutil.rmtree(os.path.dirname(project_info["project_path"]))
@@ -349,7 +348,7 @@ async def delete_project(project_name: str, version_id: Optional[str] = None):
                 if project_info:
                     # Delete project files
                     if project_info.get("project_path") and os.path.exists(
-                        project_info["project_path"]
+                            project_info["project_path"]
                     ):
                         try:
                             shutil.rmtree(os.path.dirname(project_info["project_path"]))
@@ -360,7 +359,7 @@ async def delete_project(project_name: str, version_id: Optional[str] = None):
 
                     # Delete database files
                     if project_info.get("db_path") and os.path.exists(
-                        project_info["db_path"]
+                            project_info["db_path"]
                     ):
                         try:
                             shutil.rmtree(os.path.dirname(project_info["db_path"]))

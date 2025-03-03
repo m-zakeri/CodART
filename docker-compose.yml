@@ -44,7 +44,6 @@ services:
       - default
       - internal
 
-
   base:
     image: base:v1.0.0
     build:
@@ -87,17 +86,61 @@ services:
       - default
       - internal
 
-
   api:
     image: application:v1.0.0
+    privileged: true
     build:
       context: .
       dockerfile: Dockerfile.api
       extra_hosts:
         - "licensing.scitools.com:127.0.0.1"
+    volumes:
+      - /sys/class/dmi:/sys/class/dmi
+      - /proc:/host/proc
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /dev/shm:/dev/shm
+    devices:
+      - /dev/dri:/dev/dri
+    ipc: host
+    hostname: understand-fixed
+    mac_address: 02:42:ac:11:00:02
+    shm_size: 8g
+    mem_limit: 12g
+    restart: unless-stopped
+    cap_add:
+      - SYS_PTRACE
+      - SYS_RESOURCE
+    security_opt:
+      - seccomp=unconfined
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+      core:
+        soft: -1
+        hard: -1
+      memlock:
+        soft: -1
+        hard: -1
     ports:
       - "8000:8000"
     environment:
+      - HOSTNAME=understand-fixed
+      - DISPLAY=:0
+      - QT_X11_NO_MITSHM=1
+      - QT_QPA_PLATFORM=offscreen
+      - QT_DEBUG_PLUGINS=1
+      - QT_LOGGING_RULES=qt.qpa.*=true;qt.core.plugin.*=true
+      - QT_ENABLE_GLYPH_CACHE_WORKAROUND=1
+      - QT_OPENGL=software
+      - QT_FORCE_STDERR_LOGGING=1
+      - QT_GRAPHICSSYSTEM=native
+      - QT_NO_GLIB=1
+      - QT_MUTEX_WAIT_TIME=60000
+      - QT_THREAD_PRIORITY_SCALE=0
+      - QTWEBENGINE_DISABLE_SANDBOX=1
+      - QSG_RENDER_LOOP=basic
+      - XDG_RUNTIME_DIR=/tmp/runtime-root
       - MINIO_ENDPOINT=minio:9000
       - MINIO_ACCESS_KEY=minioadmin
       - MINIO_SECRET_KEY=minioadmin
@@ -110,6 +153,39 @@ services:
       - rabbitmq
       - redis
       - base
+      - sonarqube
+
+    networks:
+      - default
+      - internal
+  sonarqube:
+    image: sonarqube:lts-community
+    depends_on:
+      - sonar_db
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://sonar_db:5432/sonar
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar
+    ports:
+      - "9001:9000"
+    volumes:
+      - sonarqube_conf:/opt/sonarqube/conf
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+      - sonarqube_temp:/opt/sonarqube/temp
+    networks:
+      - default
+      - internal
+  sonar_db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonar
+      POSTGRES_DB: sonar
+    volumes:
+      - sonar_db:/var/lib/postgresql
+      - sonar_db_data:/var/lib/postgresql/data
     networks:
       - default
       - internal
@@ -117,3 +193,10 @@ services:
 volumes:
   minio_storage:
   redis_data:
+  sonarqube_conf:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:
+  sonarqube_temp:
+  sonar_db:
+  sonar_db_data:

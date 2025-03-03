@@ -56,41 +56,6 @@ async def test_environment_specs(udb_path: str = None):
     except Exception as e:
         logger.error(f"Error checking file permissions: {str(e)}")
 
-    # Verify if it's a valid Understand database
-    try:
-        # Try to validate using the und command
-        cmd = ["und", "list", "-db", udb_path]
-        logger.debug(f"Running command: {' '.join(cmd)}")
-
-        result = subprocess.run(
-            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=10
-        )
-
-        if result.returncode != 0:
-            logger.error(f"Understand command failed: {result.stderr}")
-            # Try to repair the database
-            repair_cmd = ["und", "repair", "-db", udb_path]
-            logger.debug(f"Attempting repair with command: {' '.join(repair_cmd)}")
-            repair_result = subprocess.run(
-                repair_cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                timeout=30,
-            )
-            if repair_result.returncode != 0:
-                raise HTTPException(
-                    status_code=500,
-                    detail=f"Database validation failed and repair attempt was unsuccessful: {repair_result.stderr}",
-                )
-            logger.info(f"Database repaired successfully")
-
-    except subprocess.TimeoutExpired:
-        logger.error("Understand command timed out")
-        raise HTTPException(status_code=500, detail="Database validation timed out")
-    except Exception as e:
-        logger.error(f"Error validating database: {str(e)}")
-
     try:
         logger.debug(
             f"Creating RefactoringSequenceEnvironment with udb_path={udb_path}"
