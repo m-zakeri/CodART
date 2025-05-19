@@ -71,3 +71,25 @@ class RefactoringOperation(ABC):
     def is_empty(self) -> bool:
         """Returns True if the operation does not have meaningful data."""
         raise NotImplementedError(f"{type(self).__name__} does not implement is_empty.")
+
+
+class EmptyRefactoring(RefactoringOperation):
+    """A concrete implementation of RefactoringOperation that represents an empty operation."""
+
+    def __init__(self):
+        self._empty = True
+
+    def execute(self):
+        # Do nothing implementation
+        print("Executing empty refactoring operation")
+        return True
+
+    def get_refactoring(self, *args, **kwargs) -> RefactoringModel:
+        return RefactoringModel(name="Empty", params={"empty": {"value": "True"}})
+
+    @property
+    def shape(self):
+        return torch.Size([1])
+
+    def is_empty(self) -> bool:
+        return True

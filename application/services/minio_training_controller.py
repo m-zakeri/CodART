@@ -8,11 +8,11 @@ from codart.metrics.testability_learning import Regression
 
 class ModelTrainingService:
     def __init__(
-            self,
-            minio_endpoint: str,
-            minio_access_key: str,
-            minio_secret_key: str,
-            bucket_name: str = "ml-models",
+        self,
+        minio_endpoint: str,
+        minio_access_key: str,
+        minio_secret_key: str,
+        bucket_name: str = "ml-models",
     ):
         """
         Initialize MinIO client and training controller
@@ -64,11 +64,11 @@ class ModelTrainingService:
         return local_path
 
     def train_dataset_g7(
-            self,
-            ds_number: int,
-            dataset_path: str,
-            project_name: str = None,
-            project_version: str = None,
+        self,
+        ds_number: int,
+        dataset_path: str,
+        project_name: str = None,
+        project_version: str = None,
     ):
         """
         Train dataset and save models directly to MinIO without local files
@@ -120,14 +120,16 @@ class ModelTrainingService:
                 continue  # Skip VR1 for now, it will be trained after the base models
 
             model_type = config["model_type"]
-            minio_model_path = f"models/DS{ds_number}/{project_dir}{model_type}_DS{ds_number}.joblib"
+            minio_model_path = (
+                f"models/DS{ds_number}/{project_dir}{model_type}_DS{ds_number}.joblib"
+            )
 
             try:
                 # Train the model without saving to file, but return it
                 model = reg.regress(
                     model_path=None,  # Don't save to file
                     model_number=config["model_number"],
-                    return_model=True  # Return the trained model
+                    return_model=True,  # Return the trained model
                 )
 
                 # Store the trained model in memory cache for VR1
@@ -145,7 +147,7 @@ class ModelTrainingService:
                     object_name=minio_model_path,
                     data=model_buffer,
                     length=model_buffer.getbuffer().nbytes,
-                    content_type="application/octet-stream"
+                    content_type="application/octet-stream",
                 )
 
                 results[model_type] = {
@@ -166,7 +168,7 @@ class ModelTrainingService:
                 model_path=None,  # Don't save to file
                 dataset_number=ds_number,
                 models_dict=trained_models,  # Pass in-memory models
-                return_model=True  # Return the trained model
+                return_model=True,  # Return the trained model
             )
 
             # Serialize and upload to MinIO
@@ -179,7 +181,7 @@ class ModelTrainingService:
                 object_name=vr_minio_path,
                 data=vr_buffer,
                 length=vr_buffer.getbuffer().nbytes,
-                content_type="application/octet-stream"
+                content_type="application/octet-stream",
             )
 
             results[vr_model_type] = {

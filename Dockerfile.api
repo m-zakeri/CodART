@@ -5,13 +5,8 @@ WORKDIR /app
 ENV INSTALLDIR=/app/
 ENV PROJECTS_BASE_DIR=/opt/projects
 ENV DB_BASE_DIR=/opt/understand_dbs
-ENV UNDERSTAND_LICENSE="/root/.config/SciTools/License.conf"
-ENV STIDOSUTILDIR="/root/.config/SciTools"
-ENV STIHOME="/app/scitools"
-ENV STILICENSE="/root/.config/SciTools/License.conf"
-ENV QT_X11_NO_MITSHM=1
-ENV QT_QPA_PLATFORM=offscreen
-ENV QT_QPA_FONTDIR=/usr/share/fonts/truetype
+ENV HOSTNAME="root"
+
 
 RUN useradd -ms /bin/bash y
 
@@ -19,41 +14,38 @@ RUN echo "root:toor" | chpasswd
 
 USER root
 
-RUN mkdir -p /root/.config/SciTools \
-    /root/.local/share/SciTools/Understand \
-    /opt/projects \
-    /opt/understand_dbs \
-    /app/SciTools && \
-    chown -R root:root /root/.config/SciTools \
-                       /root/.local/share/SciTools \
-                       /opt/projects \
-                       /opt/understand_dbs \
-                       /app/SciTools && \
-    chmod -R 755 /root/.config/SciTools \
-                 /root/.local/share/SciTools \
-                 /app/SciTools
+RUN mkdir -p /opt/projects \
+             /opt/understand_dbs
+RUN chown -R root:root /opt/projects \
+                 /opt/understand_dbs
+
 
 COPY scitools /app/scitools/
 COPY activate_license.sh /app/activate_license.sh
 COPY cr-keygen-linux-amd64 /app/cr-keygen-linux-amd64
 COPY application /app/application
 COPY codart /app/codart
+COPY pmd /app/pmd
 COPY config.ini /app/config.ini
 
-ENV PATH=/app/scitools/bin/linux64:$PATH
-ENV PYTHONPATH=/app/scitools/bin/linux64/Python
-ENV LD_LIBRARY_PATH=/app/scitools/bin/linux64
-ENV STILICENSE=/root/.config/SciTools/License.conf
+RUN chown -R root:root /app/scitools && \
+    chown -R root:root /app/cr-keygen-linux-amd64 && \
+    chown -R root:root /app/activate_license.sh
 
-RUN chmod 755 /app/cr-keygen-linux-amd64 && \
+RUN chmod 755 /app/scitools && \
+    chmod 755 /app/cr-keygen-linux-amd64 && \
     chmod 755 /app/activate_license.sh
+
+ENV STIDOSUTILDIR="/root/.config/SciTools"
+ENV STIHOME="/app/scitools"
+ENV STILICENSE="/root/.config/SciTools/License.conf"
+ENV PATH=/app/scitools/bin/linux64:$PATH
+ENV PYTHONPATH=/app/scitools/bin/linux64/Python:$PYTHONPATH
+ENV LD_LIBRARY_PATH=/app/scitools/bin/linux64:$LD_LIBRARY_PATH
 
 COPY start.sh /app/start.sh
 RUN chmod +x /app/start.sh
-
-# Create symlink between license locations
-RUN ln -sf /root/.config/SciTools/License.conf /app/SciTools/License.conf || true
-RUN ln -sf /app/SciTools/License.conf /root/.config/SciTools/License.conf || true
+RUN chown -R root:root /app/start.sh
 
 EXPOSE 8000
 

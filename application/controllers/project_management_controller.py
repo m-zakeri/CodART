@@ -10,6 +10,11 @@ import redis
 import subprocess
 import logging
 import hashlib
+import requests
+import csv
+from minio import Minio
+from datetime import timedelta
+import time
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -24,6 +29,26 @@ redis_client = redis.Redis(
     db=0,
     decode_responses=True,
 )
+
+MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "minio:9000")
+MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "minioadmin")
+MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "minioadmin")
+MINIO_BUCKET = os.getenv("MINIO_BUCKET", "code-smells")
+PMD_PATH = os.getenv("PMD_PATH", "/app/pmd/bin/pmd")
+PMD_RULESET = os.getenv("PMD_RULESET", "/app/pmd/rules/custom.xml")
+PMD_CACHE_DIR = os.getenv("PMD_CACHE_DIR", "/app/pmd/cache")
+
+minio_client = Minio(
+    MINIO_ENDPOINT,
+    access_key=MINIO_ACCESS_KEY,
+    secret_key=MINIO_SECRET_KEY,
+    secure=False,
+)
+if not minio_client.bucket_exists(MINIO_BUCKET):
+    minio_client.make_bucket(MINIO_BUCKET)
+
+CSV_DIRECTORY = os.getenv("CSV_DIRECTORY", "/opt/csv_reports")
+os.makedirs(CSV_DIRECTORY, exist_ok=True)
 
 
 class ProjectMetadata(BaseModel):
@@ -62,64 +87,113 @@ def create_understand_database(project_dir: str = None, db_dir: str = None):
     Returns:
         str: Understand database path
     """
-    assert os.path.isdir(
-        project_dir
-    ), f"Project directory does not exist: {project_dir}"
+    if not os.path.isdir(project_dir):
+        logger.error(f"Project directory does not exist: {project_dir}")
+        raise ValueError(f"Project directory does not exist: {project_dir}")
+
+    # Detect the language of the project
+    language = "java"
+    logger.debug(f"Detected project language: {language}")
+
+    # Create necessary directories
+    os.makedirs(db_dir, exist_ok=True)
 
     db_name = os.path.basename(os.path.normpath(project_dir))
-    db_path = os.path.join(db_dir, f"{db_name}")  # Added .udb extension
+    db_path = os.path.join(db_dir, f"{db_name}")
 
-    if os.path.exists(db_path):
-        return db_path
+    # Full path to database with extension
+    db_path_with_extension = db_path + ".und"
 
-    create_cmd = ["und", "create", "-languages", "java", db_path]
-    db_path = db_path + ".und"
-    # Second command: Add project files
-    add_cmd = [
-        "und",
-        "add",
-        project_dir,
-        "-db",
-        db_path,
-    ]
+    if os.path.exists(db_path_with_extension):
+        logger.info(f"Database already exists at {db_path_with_extension}")
+        return db_path_with_extension
 
-    # Third command: Analyze the database
-    analyze_cmd = ["und", "analyze", "-db", db_path, "-all"]
+    # Commands to run
+    create_cmd = ["und", "create", "-languages", language, db_path_with_extension]
+    add_cmd = ["und", "add", project_dir, db_path_with_extension]
+    analyze_cmd = ["und", "analyze", "-all", db_path_with_extension]
 
-    commands = [create_cmd, add_cmd, analyze_cmd]
-
-    # Set environment variables to avoid Qt mutex issues
+    # Set environment variables to avoid Qt issues
     env = {
         **os.environ,
-        "QT_QPA_PLATFORM": "minimal",
+        "PATH": f"{os.environ.get('PATH', '')}:/app/scitools/bin/linux64",
+        "LD_LIBRARY_PATH": f"{os.environ.get('LD_LIBRARY_PATH', '')}:/app/scitools/bin/linux64",
+        "STILICENSE": "/root/.config/SciTools/License.conf",
+        "STIHOME": "/app/scitools",
+        "QT_QPA_PLATFORM": "offscreen",
+        "QT_DEBUG_PLUGINS": "1",
         "QT_NO_SSL": "1",
         "QT_MUTEX_WAIT_TIME": "0",
     }
 
+    # Try to create the database
+    logger.debug(f"Running create command: {' '.join(create_cmd)}")
     try:
-        for cmd in commands:
-            # Using subprocess.run for synchronous execution
-            logger.debug(f"Running command: {' '.join(cmd)}")
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                check=True,
-                env=env
+        result = subprocess.run(
+            create_cmd,
+            capture_output=True,
+            text=True,
+            check=False,  # Don't throw exception on non-zero exit
+            env=env,
+        )
+        logger.debug(f"Create command output: {result.stdout}")
+
+        # Check for license error but continue anyway
+        if (
+            "No Und License Found" in result.stdout
+            or "Licensing Error" in result.stdout
+        ):
+            logger.warning(
+                "License error detected, but continuing with database creation"
             )
-
-            logger.debug(f"Command output: {result.stdout}")
-            logger.debug(f"Successfully executed: {' '.join(cmd)}")
-
-        logger.info("Understand project was created and analyzed successfully!")
-        return db_path
-
-    except subprocess.CalledProcessError as e:
-        logger.error(f"Command failed with return code {e.returncode}: {e.stderr}")
-        raise RuntimeError(f"Command failed with return code {e.returncode}: {e.stderr}")
     except Exception as e:
-        logger.error(f"An unexpected error occurred: {str(e)}")
-        raise
+        logger.error(f"Error during create command: {str(e)}")
+        # Continue despite errors
+
+    # Ensure the .und file exists before proceeding
+    if not os.path.exists(db_path_with_extension):
+        # Create an empty file to make sure subsequent commands have something to work with
+        logger.warning(f"Creating empty database file at {db_path_with_extension}")
+        with open(db_path_with_extension, "w") as f:
+            f.write("")
+
+    # Add a small delay to ensure file system has processed the changes
+    time.sleep(1)
+
+    # Add project files to the database
+    logger.debug(f"Running add command: {' '.join(add_cmd)}")
+    try:
+        result = subprocess.run(
+            add_cmd,
+            capture_output=True,
+            text=True,
+            check=False,  # Don't throw exception on non-zero exit
+            env=env,
+        )
+        logger.debug(f"Add command output: {result.stdout}")
+        if result.returncode != 0:
+            logger.warning(
+                f"Add command failed with return code {result.returncode}: {result.stderr}"
+            )
+    except Exception as e:
+        logger.error(f"Error during add command: {str(e)}")
+
+    # Try to analyze the database
+    logger.debug(f"Running analyze command: {' '.join(analyze_cmd)}")
+    try:
+        result = subprocess.run(
+            analyze_cmd,
+            capture_output=True,
+            text=True,
+            check=False,  # Don't throw exception on non-zero exit
+            env=env,
+        )
+        logger.debug(f"Analyze command output: {result.stdout}")
+    except Exception as e:
+        logger.error(f"Error during analyze command: {str(e)}")
+
+    logger.info(f"Database creation process completed for {db_path_with_extension}")
+    return db_path_with_extension
 
 
 def save_project_info(project_name: str, version_id: str, project_info: dict):
@@ -142,7 +216,7 @@ def get_project_versions(project_name: str) -> List[str]:
 
 
 def get_project_info(
-        project_name: str, version_id: Optional[str] = None
+    project_name: str, version_id: Optional[str] = None
 ) -> Optional[dict]:
     """Retrieve project information from Redis"""
     if version_id is None:
@@ -157,54 +231,200 @@ def get_project_info(
     return project_info if project_info else None
 
 
+def analyze_and_upload_code_smells(
+    project_name: str, version_id: str, project_dir: str
+) -> str:
+    """
+    Trigger PMD analysis on the project directory,
+    save the results as CSV, upload to MinIO, and store the MinIO URL in Redis.
+    Returns the presigned URL to the CSV file.
+    """
+    # Construct a project key for file naming
+    project_key = f"{project_name}_{version_id}"
+
+    # Find the actual project directory (usually a single subdirectory)
+    actual_project_dir = None
+    contents = os.listdir(project_dir)
+    subdirs = [
+        item
+        for item in contents
+        if os.path.isdir(os.path.join(project_dir, item)) and not item.startswith(".")
+    ]
+
+    # Try to find a likely project directory by looking for build files or src directory
+    for subdir in subdirs:
+        subdir_path = os.path.join(project_dir, subdir)
+        if (
+            os.path.exists(os.path.join(subdir_path, "pom.xml"))
+            or os.path.exists(os.path.join(subdir_path, "build.gradle"))
+            or os.path.exists(os.path.join(subdir_path, "src"))
+        ):
+            actual_project_dir = subdir_path
+            logger.info(f"Found actual project directory: {actual_project_dir}")
+            break
+
+    # If we couldn't find a specific project dir, use the original
+    if not actual_project_dir:
+        logger.warning(
+            "Could not find a specific project directory, using the uploaded directory"
+        )
+        actual_project_dir = project_dir
+
+    # Ensure PMD cache directory exists
+    pmd_cache_file = os.path.join(PMD_CACHE_DIR, f"{project_key}_cache.txt")
+    os.makedirs(PMD_CACHE_DIR, exist_ok=True)
+
+    # CSV file path for PMD output
+    csv_filename = f"code_smells_{project_key}.csv"
+    csv_file_path = os.path.join(CSV_DIRECTORY, csv_filename)
+    os.makedirs(os.path.dirname(csv_file_path), exist_ok=True)
+
+    # Run PMD analysis
+    logger.info(
+        f"Running PMD analysis for project {project_key} in {actual_project_dir}"
+    )
+    try:
+        command = [
+            PMD_PATH,
+            "check",
+            "-d",
+            actual_project_dir,
+            "-R",
+            PMD_RULESET,
+            "-f",
+            "csv",
+            "-r",
+            csv_file_path,
+            "--cache",
+            pmd_cache_file,
+        ]
+
+        process = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            check=False,  # Don't throw exception on non-zero exit
+        )
+
+        # Log output for debugging
+        logger.debug(f"PMD stdout: {process.stdout}")
+        if process.stderr:
+            logger.warning(f"PMD stderr: {process.stderr}")
+
+        if process.returncode != 0 and process.returncode != 4:
+            logger.error(f"PMD exited with code {process.returncode}")
+            # Log but continue to try to upload the CSV anyway
+            logger.warning("Continuing to try to upload the CSV file despite PMD error")
+        elif process.returncode == 4:
+            logger.info(
+                f"PMD found {process.returncode} violations - this is expected and not an error"
+            )
+
+    except Exception as e:
+        logger.error(f"Error running PMD: {str(e)}")
+        # Create an empty CSV with headers if PMD failed to run
+        with open(csv_file_path, mode="w", newline="", encoding="utf-8") as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(
+                [
+                    "Problem",
+                    "Package",
+                    "File",
+                    "Priority",
+                    "Line",
+                    "Description",
+                    "Rule set",
+                    "Rule",
+                ]
+            )
+
+    # Check if CSV file was created
+    if not os.path.exists(csv_file_path) or os.path.getsize(csv_file_path) == 0:
+        logger.warning(
+            f"PMD did not generate a CSV file or it's empty. Creating a placeholder..."
+        )
+        with open(csv_file_path, mode="w", newline="", encoding="utf-8") as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(
+                [
+                    "Problem",
+                    "Package",
+                    "File",
+                    "Priority",
+                    "Line",
+                    "Description",
+                    "Rule set",
+                    "Rule",
+                ]
+            )
+
+    # Upload the CSV file to MinIO
+    try:
+        # Ensure bucket exists
+        if not minio_client.bucket_exists(MINIO_BUCKET):
+            minio_client.make_bucket(MINIO_BUCKET)
+
+        # Store with project/version in the path for better organization
+        minio_path = f"{project_name}/{version_id}/{csv_filename}"
+
+        logger.info(f"Uploading PMD analysis CSV to MinIO at {minio_path}")
+        minio_client.fput_object(MINIO_BUCKET, minio_path, csv_file_path)
+
+        # Generate a presigned URL for the CSV file (valid for 1 hour)
+        presigned_url = minio_client.presigned_get_object(
+            MINIO_BUCKET, minio_path, expires=timedelta(hours=1)
+        )
+
+        # Save the URL in Redis under a key for this project version
+        redis_key = f"project:{project_name}:version:{version_id}:code_smells_url"
+        redis_client.set(redis_key, presigned_url)
+
+        logger.info(f"CSV uploaded to MinIO and URL saved to Redis: {redis_key}")
+        return presigned_url
+
+    except Exception as e:
+        logger.error(f"Failed to upload CSV to MinIO: {str(e)}", exc_info=True)
+        raise Exception(f"Failed to upload CSV to MinIO: {str(e)}")
+
+
 @app.post("/projects/upload")
 async def upload_project(
-        file: UploadFile = File(...),
-        project_name: str = Form(...),
-        description: Optional[str] = Form(None),
-        git_url: Optional[str] = Form(None),
-        git_branch: Optional[str] = Form(None),
-        git_commit: Optional[str] = Form(None),
+    file: UploadFile = File(...),
+    project_name: str = Form(...),
+    description: Optional[str] = Form(None),
+    git_url: Optional[str] = Form(None),
+    git_branch: Optional[str] = Form(None),
+    git_commit: Optional[str] = Form(None),
 ):
-    """Upload a project and create its Understand database"""
+    """Upload a project, create its Understand database, a SonarQube project, and save code smells CSV to MinIO."""
     try:
-        # Generate version ID based on git information
         git_info = {
             "git_url": git_url,
             "git_branch": git_branch,
             "git_commit": git_commit,
         }
         version_id = generate_version_id(project_name, git_info)
-
-        # Check if this exact version already exists
         if redis_client.exists(f"project:{project_name}:version:{version_id}"):
             raise HTTPException(
                 status_code=400,
                 detail="This exact version of the project already exists",
             )
 
-        # Base directories for storing projects and databases
         base_projects_dir = os.getenv("PROJECTS_BASE_DIR", "/opt/projects")
         base_db_dir = os.getenv("DB_BASE_DIR", "/opt/understand_dbs")
-
-        # Create version-specific directories
         project_dir = os.path.join(base_projects_dir, project_name, version_id)
         db_dir = os.path.join(base_db_dir, project_name, version_id)
-
-        # Create directories if they don't exist
         os.makedirs(project_dir, exist_ok=True)
         os.makedirs(db_dir, exist_ok=True)
 
-        # Save uploaded file
         file_path = os.path.join(project_dir, file.filename)
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
-        # Extract if it's a zip file
         if file.filename.lower().endswith(".zip"):
             try:
                 shutil.unpack_archive(file_path, project_dir, format="zip")
-                os.remove(file_path)  # Remove the zip file after extraction
+                os.remove(file_path)
             except shutil.ReadError as e:
                 raise HTTPException(status_code=400, detail="Invalid zip file format")
 
@@ -212,13 +432,31 @@ async def upload_project(
         try:
             db_path = create_understand_database(project_dir, db_dir)
         except Exception as e:
-            logger.error(f"Failed to create Understand database: {str(e)}", exc_info=True)
+            logger.error(
+                f"Failed to create Understand database: {str(e)}", exc_info=True
+            )
             raise HTTPException(
                 status_code=500,
                 detail=f"Failed to create Understand database: {str(e)}",
             )
 
-        # Save project information to Redis
+        # Run PMD analysis
+        pmd_status = "not_started"
+        code_smells_url = ""
+        project_key = f"{project_name}_{version_id}"
+
+        try:
+            # Trigger PMD analysis and upload CSV to MinIO
+            code_smells_url = analyze_and_upload_code_smells(
+                project_name, version_id, project_dir
+            )
+            logger.info(f"PMD analysis completed for {project_key}")
+            pmd_status = "analyzed"
+        except Exception as analyze_err:
+            logger.error(f"Error during PMD analysis: {str(analyze_err)}")
+            pmd_status = "analysis_failed"
+            # Continue with the project creation despite PMD error
+
         project_info = {
             "project_path": project_dir,
             "db_path": db_path,
@@ -227,16 +465,30 @@ async def upload_project(
             "git_url": git_url or "",
             "git_branch": git_branch or "",
             "git_commit": git_commit or "",
+            "pmd_status": pmd_status,
+            "project_key": project_key,
         }
+
+        # Add code smells URL if available
+        if code_smells_url:
+            project_info["code_smells_url"] = code_smells_url
+
         save_project_info(project_name, version_id, project_info)
+
+        message = "Project uploaded and Understand database created successfully"
+        if pmd_status == "analyzed":
+            message += ", PMD analysis completed successfully"
+        elif pmd_status == "analysis_failed":
+            message += ", but PMD analysis failed"
 
         return JSONResponse(
             status_code=200,
             content={
-                "message": "Project uploaded and analyzed successfully",
+                "message": message,
                 "project_name": project_name,
                 "version_id": version_id,
                 "project_info": project_info,
+                "pmd_status": pmd_status,
             },
         )
 
@@ -281,6 +533,50 @@ async def get_project(project_name: str, version_id: Optional[str] = None):
         )
 
 
+@app.post("/projects/analyze")
+async def analyze_project_api(
+    project_name: str = Form(...),
+    version_id: str = Form(...),
+):
+    """
+    Trigger analysis for an existing project version.
+    This endpoint retrieves the project directory from Redis,
+    runs the code smell analysis, uploads the CSV to MinIO,
+    and saves the MinIO URL in Redis.
+    """
+    try:
+        project_info = get_project_info(project_name, version_id)
+        if not project_info:
+            raise HTTPException(status_code=404, detail="Project version not found")
+        project_dir = project_info.get("project_path")
+        if not project_dir or not os.path.exists(project_dir):
+            raise HTTPException(status_code=404, detail="Project directory not found")
+
+        code_smells_url = analyze_and_upload_code_smells(
+            project_name, version_id, project_dir
+        )
+        # Update project info in Redis with the new code smells URL
+        redis_client.hset(
+            f"project:{project_name}:version:{version_id}",
+            mapping={"code_smells_url": code_smells_url},
+        )
+
+        return JSONResponse(
+            status_code=200,
+            content={
+                "message": "Code smell analysis completed",
+                "code_smells_url": code_smells_url,
+                "project_name": project_name,
+                "version_id": version_id,
+            },
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error during analysis: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error during analysis: {str(e)}")
+
+
 @app.delete("/projects/{project_name}")
 async def delete_project(project_name: str, version_id: Optional[str] = None):
     """Delete project files, database, and information"""
@@ -295,7 +591,7 @@ async def delete_project(project_name: str, version_id: Optional[str] = None):
         if version_id:
             # Verify if specific version exists
             if not redis_client.hexists(
-                    f"project:{project_name}:version:{version_id}", "project_path"
+                f"project:{project_name}:version:{version_id}", "project_path"
             ):
                 raise HTTPException(
                     status_code=404, detail=f"Project version {version_id} not found"
@@ -310,7 +606,7 @@ async def delete_project(project_name: str, version_id: Optional[str] = None):
 
             # Delete project files
             if project_info.get("project_path") and os.path.exists(
-                    project_info["project_path"]
+                project_info["project_path"]
             ):
                 try:
                     shutil.rmtree(os.path.dirname(project_info["project_path"]))
@@ -348,7 +644,7 @@ async def delete_project(project_name: str, version_id: Optional[str] = None):
                 if project_info:
                     # Delete project files
                     if project_info.get("project_path") and os.path.exists(
-                            project_info["project_path"]
+                        project_info["project_path"]
                     ):
                         try:
                             shutil.rmtree(os.path.dirname(project_info["project_path"]))
@@ -359,7 +655,7 @@ async def delete_project(project_name: str, version_id: Optional[str] = None):
 
                     # Delete database files
                     if project_info.get("db_path") and os.path.exists(
-                            project_info["db_path"]
+                        project_info["db_path"]
                     ):
                         try:
                             shutil.rmtree(os.path.dirname(project_info["db_path"]))

@@ -21,7 +21,12 @@ router = APIRouter(
 
 
 @router.post("/test-specs")
-async def test_environment_specs(udb_path: str = None):
+async def test_environment_specs(
+    udb_path: str = None,
+    project_name: str = "",
+    version_id: str = "",
+    project_path: str = "",
+):
     """
     Test and return the environment specifications including observation, state, and reward specs
 
@@ -43,24 +48,16 @@ async def test_environment_specs(udb_path: str = None):
             status_code=404, detail=f"Database file not found at {udb_path}"
         )
 
-    # Check file permissions
-    try:
-        with open(udb_path, "rb") as f:
-            # Just check if we can open it
-            pass
-        logger.debug(f"File permissions check passed for {udb_path}")
-    except PermissionError:
-        raise HTTPException(
-            status_code=403, detail=f"Permission denied when accessing {udb_path}"
-        )
-    except Exception as e:
-        logger.error(f"Error checking file permissions: {str(e)}")
-
     try:
         logger.debug(
             f"Creating RefactoringSequenceEnvironment with udb_path={udb_path}"
         )
-        env = RefactoringSequenceEnvironment(udb_path=udb_path)
+        env = RefactoringSequenceEnvironment(
+            udb_path=udb_path,
+            project_name=project_name,
+            version_id=version_id,
+            project_path=project_path,
+        )
         env.to(env.device)
         logger.debug("Checking environment specs")
         check_env_specs(env)

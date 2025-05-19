@@ -420,16 +420,16 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
     return True
 
 
-# Tests
-if __name__ == '__main__':
-    from codart.utility.directory_utils import update_understand_database
-
-    update_understand_database("C:/Users/Administrator/Downloads/udbs/jvlt-1.3.2.udb")
-    main(
-        source_class="XMLFormatter",
-        source_package="net.sourceforge.jvlt.io",
-        target_class="Entry",
-        target_package="net.sourceforge.jvlt.core",
-        method_name="getXMLForEntryInfo",
-        udb_path="C:/Users/Administrator/Downloads/udbs/jvlt-1.3.2.udb"
-    )
+# # Tests
+# if __name__ == '__main__':
+#     from codart.utility.directory_utils import update_understand_database
+#
+#     update_understand_database("C:/Users/Administrator/Downloads/udbs/jvlt-1.3.2.udb")
+#     main(
+#         source_class="XMLFormatter",
+#         source_package="net.sourceforge.jvlt.io",
+#         target_class="Entry",
+#         target_package="net.sourceforge.jvlt.core",
+#         method_name="getXMLForEntryInfo",
+#         udb_path="C:/Users/Administrator/Downloads/udbs/jvlt-1.3.2.udb"
+#     )

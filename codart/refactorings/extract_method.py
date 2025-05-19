@@ -107,6 +107,105 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
     # Overriding required methods to satisfy our extraction requirements
     ######################################
 
+    def analyze_extracted_lines_for_exceptions(self, ctx, parser, tokens):
+        """
+        Analyzes the extracted lines to check if they throw any exceptions.
+        Returns a set of exception types that are thrown within the extracted lines.
+        """
+        # Set to store unique exception types
+        thrown_exceptions = set()
+        tokens.fill()
+
+        # Create a subparser for the extracted code to analyze its structure
+        for line_num in range(self.first_line, self.last_line + 1):
+            # Get token indices for the line range
+            start_token_idx = None
+            end_token_idx = None
+            print("EM tokens : ", tokens)
+            for i in range(len(tokens.tokens)):
+                token = tokens.get(i)
+                if token.line == line_num and start_token_idx is None:
+                    start_token_idx = i
+                if token.line > line_num and end_token_idx is None and start_token_idx is not None:
+                    end_token_idx = i - 1
+                    break
+
+            if start_token_idx is not None and end_token_idx is not None:
+                # Look for throw statements
+                for i in range(start_token_idx, end_token_idx + 1):
+                    token = tokens.get(i)
+                    if token.text == "throw":
+                        # Look ahead to find the exception type
+                        for j in range(i + 1, end_token_idx + 1):
+                            ahead_token = tokens.get(j)
+                            if ahead_token.text == "new":
+                                # Found the start of an exception instantiation, get the type
+                                if j + 1 <= end_token_idx:
+                                    exception_type = tokens.get(j + 1).text
+                                    thrown_exceptions.add(exception_type)
+                                    break
+
+                # Look for method calls that might throw checked exceptions
+                for i in range(start_token_idx, end_token_idx + 1):
+                    token = tokens.get(i)
+                    if token.type == JavaLexer.IDENTIFIER:
+                        method_name = token.text
+                        # List of common methods that throw exceptions
+                        exception_throwing_methods = {
+                            "read": "IOException",
+                            "write": "IOException",
+                            "close": "IOException",
+                            "parseInt": "NumberFormatException",
+                            "parseDouble": "NumberFormatException",
+                            "get": "IndexOutOfBoundsException",
+                            "getConnection": "SQLException"
+                        }
+
+                        if method_name in exception_throwing_methods:
+                            thrown_exceptions.add(exception_throwing_methods[method_name])
+
+        # If we're in a try block, check if exceptions are already caught
+        try_blocks = self._find_enclosing_try_blocks(ctx, parser)
+        if try_blocks:
+            for try_block in try_blocks:
+                caught_exceptions = self._get_caught_exceptions(try_block)
+                # Remove exceptions that are caught by catch blocks
+                thrown_exceptions = thrown_exceptions - caught_exceptions
+
+        return thrown_exceptions
+
+    def _find_enclosing_try_blocks(self, ctx, parser):
+        """
+        Find try blocks that enclose the extracted lines.
+        """
+        try_blocks = []
+        # Traverse up the parse tree to find try statements
+        parent = ctx.parentCtx
+        while parent is not None:
+            if isinstance(parent, JavaParserLabeled.Statement6Context):  # This is a try block
+                try_blocks.append(parent)
+            parent = parent.parentCtx
+        return try_blocks
+
+    def _get_caught_exceptions(self, try_block):
+        """
+        Get the set of exceptions caught by the catch blocks of a try statement.
+        """
+        caught_exceptions = set()
+        # Extract catch clauses from the try block
+        catch_clauses = [child for child in try_block.children
+                         if isinstance(child, JavaParserLabeled.CatchClauseContext)]
+
+        for catch in catch_clauses:
+            catch_type = catch.catchType()
+            if catch_type:
+                # Extract exception types from the catch clause
+                qualified_names = catch_type.qualifiedName()
+                for qname in qualified_names:
+                    caught_exceptions.add(qname.getText())
+
+        return caught_exceptions
+
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
         self.methods_name.append(ctx.IDENTIFIER().getText())
         # checks if this is the method containing target lines
@@ -122,12 +221,19 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
                     print("Target Method is static.")
                     break
 
-            # checks if method throws any exception
-            if ctx.qualifiedNameList():
-                self.exception_thrown_in_target_method = ctx.qualifiedNameList().getText()
-                print("Target Method throws exception.")
-                # TODO : check extracted lines for exception occurrence instead ,
-                #  as they may not throw exception even though their parent method does
+            # Get parser and tokens for exception analysis
+            parser = ctx.parser
+            tokens = parser.getTokenStream()
+
+            # Analyze extracted lines for exceptions
+            thrown_exceptions = self.analyze_extracted_lines_for_exceptions(ctx, parser, tokens)
+
+            if thrown_exceptions:
+                self.exception_thrown_in_target_method = ','.join(thrown_exceptions)
+                print(f"Extracted lines throw exceptions: {self.exception_thrown_in_target_method}")
+            else:
+                # The extracted lines don't throw exceptions
+                self.exception_thrown_in_target_method = None
 
             # save method's last line number
             self.method_stop_line = ctx.stop.line
@@ -136,7 +242,6 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
         self.is_in_target_method = False
 
     def enterConstructorDeclaration(self, ctx: JavaParserLabeled.ConstructorDeclarationContext):
-
         # checks if this Constructor contains target lines
         if ctx.start.line <= self.first_line and ctx.stop.line >= self.last_line:
             print("Found Constructor containing target lines.")
@@ -150,12 +255,19 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
                     print("Target Method is static.")
                     break
 
-            # checks if Constructor throws any exception
-            if ctx.qualifiedNameList():
-                self.exception_thrown_in_target_method = ctx.qualifiedNameList().getText()
-                print("Target Method throws exception.")
-                # TODO : check extracted lines for exception occurrence instead ,
-                #  as they may not throw exception even though their parent method does
+            # Get parser and tokens for exception analysis
+            parser = ctx.parser
+            tokens = parser.getTokenStream()
+
+            # Analyze extracted lines for exceptions
+            thrown_exceptions = self.analyze_extracted_lines_for_exceptions(ctx, parser, tokens)
+
+            if thrown_exceptions:
+                self.exception_thrown_in_target_method = ','.join(thrown_exceptions)
+                print(f"Extracted lines throw exceptions: {self.exception_thrown_in_target_method}")
+            else:
+                # The extracted lines don't throw exceptions
+                self.exception_thrown_in_target_method = None
 
             # save method's last line number
             self.method_stop_line = ctx.stop.line
@@ -270,14 +382,31 @@ class ExtractMethodRefactoring(JavaParserLabeledListener):
                 self.assigning_value_mid = True
 
     def enterEveryRule(self, ctx: ParserRuleContext):
-
         # checks if we are in target method
         if self.is_in_target_method:
+            # Get the line range of this rule context
+            ctx_start_line = ctx.start.line
+            ctx_stop_line = ctx.stop.line
+
+            # Skip validation for very small contexts (like individual tokens)
+            if ctx_start_line == ctx_stop_line:
+                return
+
+            # Skip validation for certain rule contexts that are common parts of methods
+            if isinstance(ctx, JavaParserLabeled.MethodDeclarationContext) or \
+                    isinstance(ctx, JavaParserLabeled.ConstructorDeclarationContext) or \
+                    isinstance(ctx, JavaParserLabeled.ClassBodyContext):
+                return
 
             # checks if every statements are is either completely inside or outside of extracting lines
-            if set(range(ctx.start.line, ctx.stop.line + 1)) & set(self.lines):
-                if not set(self.lines).issubset(set(range(ctx.start.line, ctx.stop.line + 1))) and \
-                        not set(range(ctx.start.line, ctx.stop.line + 1)).issubset(self.lines):
+            line_range = set(range(ctx_start_line, ctx_stop_line + 1))
+            if line_range & set(self.lines):  # If there's any overlap
+                # If not completely inside and not completely outside
+                if not line_range.issubset(set(self.lines)) and not set(self.lines).issubset(line_range):
+                    # Add debug logging
+                    print(
+                        f"Invalid extraction: Rule context {ctx.__class__.__name__} at lines {ctx_start_line}-{ctx_stop_line}")
+                    print(f"Selected lines: {sorted(self.lines)}")
                     self.is_result_valid = False
 
     def enterPrimary4(self, ctx: JavaParserLabeled.Primary4Context):
@@ -503,13 +632,13 @@ def main(file_path, lines: dict):
     print("Finished Extract Method")
 
 
-# Tests
-if __name__ == "__main__":
-    index = 0
-    print(len("D:/Final Project/IdeaProjects/"))
-    json_file_ = json.load(open('json-extract-method.json', 'r'))
-    file_path_ = json_file_[index]["file_path"][30:]
-    lines_ = json_file_[index]["lines"]
-    print(file_path_)
-    print(lines_)
-    main(file_path_, lines_)
+# # Tests
+# if __name__ == "__main__":
+#     index = 0
+#     print(len("D:/Final Project/IdeaProjects/"))
+#     json_file_ = json.load(open('json-extract-method.json', 'r'))
+#     file_path_ = json_file_[index]["file_path"][30:]
+#     lines_ = json_file_[index]["lines"]
+#     print(file_path_)
+#     print(lines_)
+#     main(file_path_, lines_)

@@ -246,3 +246,7 @@ und –showofflinereturncode
 pip download -r requirements.txt -d dependencies
 
 
+modify below code use pmd insted of sonar qube below is an example of uding pmd :
+./pmd check -d /home/y/Desktop/codes/university/JSON-java -R custom.xml -f csv -r pmd-report.csv --cache /home/y/Desktop/codes/university/testpmd/pmd-bin-7.11.0/bin/mycache.txt
+
+below is the code to modify give me exact parts they need to modify :

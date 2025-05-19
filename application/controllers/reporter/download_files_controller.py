@@ -119,6 +119,76 @@ async def download_metrics(
         )
 
 
+@router.get("/codesmells/{project_name}")
+async def download_codesmells(project_name: str, version_id: Optional[str] = None):
+    """
+    Download code smells CSV for a project version.
+    If version_id is provided, downloads the specific CSV file.
+    Otherwise, downloads all code smells CSV files for the project as a zip.
+    """
+    try:
+        controller = get_minio_controller()
+        # Use environment variable MINIO_CODESMELLS_BUCKET or default to "sonarqube-reports"
+        codesmells_bucket = os.getenv("MINIO_CODESMELLS_BUCKET", "sonarqube-reports")
+
+        if version_id:
+            # Construct the file name based on project name and version_id
+            file_name = f"code_smells_{project_name}_{version_id}.csv"
+            try:
+                data = controller.minio_client.get_object(codesmells_bucket, file_name)
+                return StreamingResponse(
+                    data,
+                    media_type="text/csv",
+                    headers={
+                        "Content-Disposition": f'attachment; filename="{file_name}"'
+                    },
+                )
+            except Exception as e:
+                logger.error(f"Error downloading code smells file: {str(e)}")
+                raise HTTPException(
+                    status_code=404, detail=f"Code smells file not found: {file_name}"
+                )
+        else:
+            # If no version_id is provided, download all code smells CSV files for this project as a zip
+            # We assume that all files follow the naming pattern "code_smells_{project_name}_<version>.csv"
+            prefix = f"code_smells_{project_name}_"
+            objects = controller.minio_client.list_objects(
+                codesmells_bucket, prefix=prefix, recursive=True
+            )
+
+            zip_buffer = io.BytesIO()
+            file_found = False
+            with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+                for obj in objects:
+                    file_found = True
+                    # Retrieve file contents and write into the zip using the object name as relative path
+                    file_data = controller.minio_client.get_object(
+                        codesmells_bucket, obj.object_name
+                    ).read()
+                    zip_file.writestr(obj.object_name, file_data)
+                if not file_found:
+                    raise HTTPException(
+                        status_code=404,
+                        detail=f"No code smells files found for project {project_name}",
+                    )
+            zip_buffer.seek(0)
+            zip_filename = f"{project_name}-codesmells.zip"
+            return StreamingResponse(
+                zip_buffer,
+                media_type="application/zip",
+                headers={
+                    "Content-Disposition": f'attachment; filename="{zip_filename}"'
+                },
+            )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error downloading code smells: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=500, detail=f"Error downloading code smells: {str(e)}"
+        )
+
+
 @router.get("/models/{project_name}")
 async def download_models(project_name: str, version_id: Optional[str] = None):
     """

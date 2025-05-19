@@ -4,7 +4,8 @@ from codart.utility.directory_utils import reset_project, update_understand_data
 from codart.learner.sbr_initializer.abstraction import Initializer
 import understand as und
 import pandas as pd
-import codecs
+from codart.refactorings.handler import MoveMethod, PullupMethod, PushdownMethod, MoveClass, ExtractMethod, ExtractClass
+from codart.refactorings.abstraction import EmptyRefactoring
 import os
 from codart.learner.sbr_initializer.utils.utility import Utils, logger, config
 from collections import Counter
@@ -16,7 +17,9 @@ from codart.refactorings import (
     pullup_method,
     pushdown_method2,
 )
-
+import requests
+import redis
+from io import StringIO
 
 class SmellInitialization(Initializer):
 
@@ -25,8 +28,13 @@ class SmellInitialization(Initializer):
             *args,
             **kwargs,
         )
+        self.project_path=kwargs.get('project_path', '')
         self.utils = Utils(
-            logger=logger, initializers=self.initializers, population=self.population
+            logger=logger,
+            initializers=self.initializers,
+            population=self.population,
+            project_name=kwargs.get('project_name', ''),
+            version_id=kwargs.get('version_id', '')
         )
 
     def generate_population(self):
@@ -40,7 +48,7 @@ class SmellInitialization(Initializer):
                 logger.debug(f"Refactoring params: {params}")
                 is_correct_refactoring = main(**params)
                 while is_correct_refactoring is False:
-                    reset_project()
+                    reset_project(project_path=self.project_path, udb_path=self.udb_path)
                     main, params, name = self.utils.select_random()
                     logger.debug(f"Refactoring name: {name}")
                     logger.debug(f"Refactoring params: {params}")
@@ -50,7 +58,7 @@ class SmellInitialization(Initializer):
                 logger.debug(
                     f'Append a refactoring "{name}" to "{j}th" gene of the individual {_}.'
                 )
-                reset_project()
+                reset_project(project_path=self.project_path, udb_path=self.udb_path)
                 logger.debug("-" * 100)
             self.population.append(individual)
             logger.debug(f"Append individual {_} to population, s")
@@ -61,239 +69,769 @@ class SmellInitialization(Initializer):
         return self.population
 
     def generate_an_action(self):
-        logger.debug("Generating one random refactor ...")
-        main, params, name = self.utils.select_random()
-        logger.debug(f"Selected refactoring name: {name}")
-        logger.debug(f"Selected refactoring params: {params}")
-        is_correct_refactoring = main(**params)
-        while not is_correct_refactoring:
-            reset_project()
-            main, params, name = self.utils.select_random()
-            logger.debug(f"Retry with refactoring name: {name}")
-            logger.debug(f"Retry with refactoring params: {params}")
-            is_correct_refactoring = main(**params)
+        logger.debug("Generating one random refactoring...")
+        available_initializers = []
+        available_initializers = [
+            (self.init_move_method, "Move Method"),
+            (self.init_extract_class, "Extract Class"),
+            # (self.init_extract_method, "Extract Method"),
+            (self.init_pull_up_method, "Pull Up Method"),
+            (self.init_push_down_method, "Push Down Method")
+        ]
+        if not available_initializers:
+            logger.error("No refactoring candidates available for any refactoring type!")
+            return EmptyRefactoring()
 
-        # Optionally update the understand database if needed
-        update_understand_database2(self.udb_path)
-        logger.debug(f"Successfully generated refactor: {name}")
-        reset_project()
-        logger.debug("-" * 100)
-        return main, params, name
+        # Try each available initializer until one works
+        random.shuffle(available_initializers)
 
-    def load_extract_class_candidates(self):
-        _db = und.open(self.udb_path)
-        god_classes = pd.read_csv(config["RELATIONS"]["GOD_CLASS_PATH"], sep="\t")
+        try:
+            # Try each available initializer until one works
+            for initializer, initializer_name in available_initializers:
+                try:
+                    logger.debug(f"Trying initializer: {initializer_name}")
+                    result = initializer()
+
+                    # Check if initializer returned None (no candidates)
+                    if result is None or result[0] is None:
+                        logger.warning(f"No candidates for {initializer_name}, skipping")
+                        continue
+
+                    main, params, name = result
+                    logger.debug(f"Selected refactoring name: {name}")
+                    logger.debug(f"Selected refactoring params: {params}")
+
+                    try:
+                        is_correct_refactoring = main(**params)
+                        if is_correct_refactoring:
+                            # Success! Update database and return RefactoringOperation
+                            update_understand_database2(self.udb_path)
+                            logger.debug(f"Successfully generated refactor: {name}")
+
+                            # Create a RefactoringOperation based on the type
+                            if name == "Move Method":
+                                return MoveMethod(
+                                    source_class=params.get("source_class", ""),
+                                    method_name=params.get("method_name", ""),
+                                    udb_path=params.get("udb_path", ""),
+                                    source_package=params.get("source_package", ""),
+                                    target_package=params.get("target_package", ""),
+                                    target_class=params.get("target_class", "")
+                                )
+                            elif name == "Extract Class":
+                                return ExtractClass(
+                                    udb_path=params.get("udb_path", ""),
+                                    moved_methods=params.get("moved_methods", []),
+                                    source_class=params.get("source_class", ""),
+                                    file_path=params.get("file_path", ""),
+                                    moved_fields=params.get("moved_fields", [])
+                                )
+                            elif name == "Extract Method":
+                                return ExtractMethod(
+                                    file_path=params.get("file_path", ""),
+                                    lines=params.get("lines", {})
+                                )
+                            elif name == "Pull Up Method":
+                                return PullupMethod(
+                                    udb_path=params.get("udb_path", ""),
+                                    method_name=params.get("method_name", ""),
+                                    children_classes=params.get("children_classes", [])
+                                )
+                            elif name == "Push Down Method":
+                                return PushdownMethod(
+                                    udb_path=params.get("udb_path", ""),
+                                    method_name=params.get("method_name", ""),
+                                    source_class=params.get("source_class", ""),
+                                    source_package=params.get("source_package", ""),
+                                    target_classes=params.get("target_classes", [])
+                                )
+                            elif name == "Move Class":
+                                return MoveClass(
+                                    udb_path=params.get("udb_path", ""),
+                                    class_name=params.get("source_class", ""),
+                                    source_package=params.get("source_package", ""),
+                                    target_package=params.get("target_classes", [])
+                                )
+                            else:
+                                logger.warning(f"Unknown refactoring type: {name}, creating empty operation")
+                                return EmptyRefactoring()
+                        else:
+                            logger.warning(f"{initializer_name} returned False - resetting project")
+                            reset_project(project_path=self.project_path, udb_path=self.udb_path)
+                    except Exception as inner_e:
+                        logger.error(f"Error executing {initializer_name}: {str(inner_e)}")
+                        import traceback
+                        logger.error(f"Traceback: {traceback.format_exc()}")
+                        reset_project(project_path=self.project_path, udb_path=self.udb_path)
+                        continue
+                except Exception as e:
+                    logger.error(f"Error in {initializer_name}: {str(e)}")
+                    import traceback
+                    logger.error(f"Traceback: {traceback.format_exc()}")
+                    reset_project(project_path=self.project_path, udb_path=self.udb_path)
+                    continue
+
+            # If all initializers failed, return an empty RefactoringOperation
+            logger.warning("All refactoring initializers failed, returning an empty operation")
+            return EmptyRefactoring()
+
+        except Exception as e:
+            logger.error(f"Error generating refactoring action: {str(e)}")
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            return EmptyRefactoring()
+
+    def load_move_method_candidates(self, project_name: str = "", version_id: str = ""):
+        # Fetch the code smells URL from Redis
+        redis_client = redis.Redis(
+            host=os.getenv("REDIS_HOST", "redis"),
+            port=int(os.getenv("REDIS_PORT", 6379)),
+            db=0,
+            decode_responses=True,
+        )
+        csv_url = redis_client.get(f"project:{project_name}:version:{version_id}:code_smells_url")
+
+        if not csv_url:
+            logger.error(f"Could not find code smells URL for project {project_name} version {version_id}")
+            return []
+
+        # Download CSV from MinIO
+        response = requests.get(csv_url)
+        if response.status_code != 200:
+            logger.error(f"Failed to download code smells CSV: {response.status_code}")
+            return []
+
+        # Parse CSV data
+        csv_data = StringIO(response.text)
+        pmd_results = pd.read_csv(csv_data)
+
+        # Filter for feature envy issues (Law of Demeter violations)
+        feature_envies = pmd_results[pmd_results['Rule'].str.contains('LawOfDemeter', case=False, na=False)]
+
         candidates = []
-        for index, row in god_classes.iterrows():
-            moved_fields, moved_methods = [], []
+
+        # Open the UDB to get actual method information
+        _db = und.open(self.udb_path)
+        try:
+            # Get all classes in the project
+            classes = {ent.longname(): ent for ent in _db.ents("class ~unknown ~anonymous")}
+            print("MOVEMETHOD CLASSES SCITOOLS : ", classes)
+            print("MOVEMETHOD CLASSES PMD : ", feature_envies)
+            for index, row in feature_envies.iterrows():
+                try:
+                    # Extract source information from the Package and File columns
+                    source_package = row['Package']
+                    file_path = row['File']
+                    source_class_name = os.path.basename(file_path).replace('.java', '')
+
+                    # Find the class in the UDB
+                    source_class_longname = f"{source_package}.{source_class_name}"
+                    source_class = classes.get(source_class_longname)
+
+                    if not source_class:
+                        logger.warning(f"Could not find class {source_class_longname} in UDB")
+                        continue
+
+                    # Find the method containing the line number from the description
+                    line_number = row.get('Line', 0)
+
+                    # Get all methods in the source class
+                    methods = source_class.ents("define", "method")
+
+                    # Find a method that contains the line number
+                    method = None
+                    for m in methods:
+                        if not hasattr(m, 'line') or not m.line():
+                            continue
+
+                        # Get start and end line numbers
+                        start_line = m.line()
+                        end_line = m.line() + m.metric(["CountLineCode"])
+
+                        if start_line <= line_number <= end_line:
+                            method = m
+                            break
+
+                    if not method:
+                        # If we couldn't find a method by line number, just pick one randomly
+                        if methods:
+                            method = random.choice(methods)
+                        else:
+                            continue
+
+                    # Extract target class from the Description
+                    description = row['Description']
+                    target_match = re.search(r"on foreign value `([^`]+)`", description)
+                    if target_match:
+                        target_class_name = target_match.group(1)
+
+                        # Try to find the target class in the UDB
+                        target_class = next((c for c in classes.values() if c.simplename() == target_class_name), None)
+
+                        if not target_class:
+                            # If not found, just pick another class that's not the source class
+                            other_classes = [c for c in classes.values() if c.longname() != source_class_longname]
+                            if other_classes:
+                                target_class = random.choice(other_classes)
+                            else:
+                                continue
+
+                        target_package = ".".join(target_class.longname().split(".")[:-1])
+                        target_class_name = target_class.simplename()
+                    else:
+                        # If we can't extract target class, pick a random one that's not the source
+                        other_classes = [c for c in classes.values() if c.longname() != source_class_longname]
+                        if not other_classes:
+                            continue
+
+                        target_class = random.choice(other_classes)
+                        target_package = ".".join(target_class.longname().split(".")[:-1])
+                        target_class_name = target_class.simplename()
+
+                    candidates.append({
+                        "source_package": source_package,
+                        "source_class": source_class_name,
+                        "method_name": method.simplename(),
+                        "target_package": target_package,
+                        "target_class": target_class_name,
+                    })
+                except Exception as e:
+                    logger.warning(f"Error processing PMD result: {str(e)}")
+                    continue
+        finally:
+            _db.close()
+
+        # If no candidates were found, create some default ones based on class hierarchy
+        # if not candidates:
+        #     logger.warning("No move method candidates found from PMD, generating fallback candidates")
+        #     candidates = self._generate_fallback_move_method_candidates()
+
+        return candidates
+
+    def _generate_fallback_move_method_candidates(self):
+        """Generate some fallback move method candidates if PMD doesn't provide any"""
+        candidates = []
+        _db = und.open(self.udb_path)
+
+        try:
+            classes = list(_db.ents("class ~unknown ~anonymous"))
+            # Need at least 2 classes to move a method between them
+            if len(classes) < 2:
+                return []
+
+            # Pick a few random classes to work with
+            sample_size = min(5, len(classes))
+            sample_classes = random.sample(classes, sample_size)
+
+            for source_class in sample_classes:
+                methods = source_class.ents("define", "method ~constructor")
+                if not methods:
+                    continue
+
+                method = random.choice(methods)
+
+                # Pick a target class different from the source
+                target_classes = [c for c in classes if c.id() != source_class.id()]
+                if not target_classes:
+                    continue
+
+                target_class = random.choice(target_classes)
+
+                source_package = ".".join(source_class.longname().split(".")[:-1])
+                target_package = ".".join(target_class.longname().split(".")[:-1])
+
+                candidates.append({
+                    "source_package": source_package,
+                    "source_class": source_class.simplename(),
+                    "method_name": method.simplename(),
+                    "target_package": target_package,
+                    "target_class": target_class.simplename(),
+                })
+
+        except Exception as e:
+            logger.error(f"Error generating fallback move method candidates: {str(e)}")
+        finally:
+            _db.close()
+
+        return candidates
+
+    def load_extract_method_candidates(self, project_name=None, version_id=None):
+        """Load extract method candidates from code smells or generate fallback candidates"""
+        # Use config values if parameters are not provided
+        if not project_name:
+            project_name = config["PROJECT"]["NAME"]
+        if not version_id:
+            version_id = config["PROJECT"]["VERSION"]
+
+        candidates = []
+
+        # Get code smells from redis/minio
+        try:
+            redis_client = redis.Redis(
+                host=os.getenv("REDIS_HOST", "redis"),
+                port=int(os.getenv("REDIS_PORT", 6379)),
+                db=0,
+                decode_responses=True,
+            )
+            csv_url = redis_client.get(f"project:{project_name}:version:{version_id}:code_smells_url")
+
+            if csv_url:
+                # Download CSV from MinIO
+                response = requests.get(csv_url)
+                if response.status_code == 200:
+                    # Parse CSV data
+                    csv_data = StringIO(response.text)
+                    pmd_results = pd.read_csv(csv_data)
+
+                    # Filter for Long Method or complex method smells
+                    method_smells = pmd_results[pmd_results['Rule'].isin([
+                        'CyclomaticComplexity', 'NPathComplexity', 'ExcessiveMethodLength',
+                        'CognitiveComplexity', 'StdCyclomaticComplexity'
+                    ])]
+
+                    for _, row in method_smells.iterrows():
+                        file_path = row['File']
+                        line_number = row.get('Line', 0)
+
+                        # Only get a few consecutive lines within the method
+                        # This is a simplification - you'd need to analyze the file to get valid statement lines
+                        if line_number > 0:
+                            # Create a mapping of line numbers with a simple value (doesn't need to be preserved)
+                            # Extract 3-5 consecutive lines starting from the identified problem line
+                            num_lines = random.randint(3, 5)
+                            lines = {line_number + i: True for i in range(num_lines)}
+
+                            candidates.append({
+                                "file_path": file_path,
+                                "lines": lines
+                            })
+        except Exception as e:
+            logger.warning(f"Error loading PMD results for extract method candidates: {str(e)}")
+
+        # If no candidates found, create fallback candidates
+        if not candidates:
+            # Find some Java files in the project
             try:
-                class_file = (
-                    _db.lookup(re.compile(row[0].strip() + r"$"), "Class")[0]
-                    .parent()
-                    .longname()
-                )
+                _db = und.open(self.udb_path)
+                file_ents = _db.ents("file ~unknown ~unresolved")
+                java_files = [f.longname() for f in file_ents if f.longname().endswith('.java')]
+
+                if java_files:
+                    for _ in range(min(5, len(java_files))):
+                        file_path = random.choice(java_files)
+
+                        # Pick random line range (this is a simplified approach)
+                        start_line = random.randint(20, 50)  # Just some reasonable line numbers
+                        num_lines = random.randint(3, 8)
+                        lines = {start_line + i: True for i in range(num_lines)}
+
+                        candidates.append({
+                            "file_path": file_path,
+                            "lines": lines
+                        })
+                _db.close()
             except Exception as e:
+                logger.error(f"Error generating fallback extract method candidates: {str(e)}")
+
+        return candidates
+
+    def load_extract_class_candidates(self, project_name=None, version_id=None):
+        """Load extract class candidates from PMD CSV stored in MinIO"""
+        # Use config values if parameters are not provided
+        if not project_name:
+            project_name = config["PROJECT"]["NAME"]
+        if not version_id:
+            version_id = config["PROJECT"]["VERSION"]
+
+        # Fetch the code smells URL from Redis
+        redis_client = redis.Redis(
+            host=os.getenv("REDIS_HOST", "redis"),
+            port=int(os.getenv("REDIS_PORT", 6379)),
+            db=0,
+            decode_responses=True,
+        )
+        csv_url = redis_client.get(f"project:{project_name}:version:{version_id}:code_smells_url")
+
+        if not csv_url:
+            logger.error(f"Could not find code smells URL for project {project_name} version {version_id}")
+            return []
+
+        # Download CSV from MinIO
+        response = requests.get(csv_url)
+        if response.status_code != 200:
+            logger.error(f"Failed to download code smells CSV: {response.status_code}")
+            return []
+
+        # Parse CSV data
+        csv_data = StringIO(response.text)
+        pmd_results = pd.read_csv(csv_data)
+
+        # Filter for God Class issues
+        god_classes = pmd_results[pmd_results['Rule'].isin(['GodClass', 'TooManyMethods', 'ExcessivePublicCount'])]
+
+        candidates = []
+        processed_classes = set()
+
+        for index, row in god_classes.iterrows():
+            # Skip if we've already processed this class
+            if row['File'] in processed_classes:
                 continue
-            source_class = row[0].split(".")[-1]
-            data = row[1][1:-1]
-            data = data.split(",")
-            for field_or_method in data:
-                field_or_method = field_or_method.strip()
-                if "(" in field_or_method:
-                    moved_methods.append(field_or_method.split("::")[1].split("(")[0])
-                elif len(field_or_method.split(" ")) == 2:
-                    moved_fields.append(field_or_method.split(" ")[-1])
-            candidates.append(
-                {
+
+            processed_classes.add(row['File'])
+
+            # Extract class information
+            source_package = row['Package']
+            file_path = row['File']
+            source_class = os.path.basename(file_path).replace('.java', '')
+
+            # We need to open the UDB to get fields and methods
+            _db = und.open(self.udb_path)
+
+            try:
+                # Try to find the class in the UDB
+                ent = _db.lookup(f"{source_package}.{source_class}", "class")
+
+                if not ent:
+                    logger.warning(f"Could not find class {source_package}.{source_class} in UDB")
+                    continue
+
+                if len(ent) > 0:
+                    ent = ent[0]
+
+                # Get methods and fields for the class
+                moved_methods = []
+                moved_fields = []
+
+                # Get a subset of methods (up to 30% of methods)
+                methods = ent.ents("Define", "Method")
+                if methods:
+                    num_methods_to_move = max(1, len(methods) // 3)  # Move about 1/3 of methods
+                    for i in range(min(num_methods_to_move, len(methods))):
+                        method = methods[i]
+                        moved_methods.append(method.simplename())
+
+                # Get a subset of fields (up to 30% of fields)
+                fields = ent.ents("Define", "Variable")
+                if fields:
+                    num_fields_to_move = max(1, len(fields) // 3)  # Move about 1/3 of fields
+                    for i in range(min(num_fields_to_move, len(fields))):
+                        field = fields[i]
+                        moved_fields.append(field.simplename())
+
+                candidates.append({
                     "source_class": source_class,
                     "moved_fields": moved_fields,
                     "moved_methods": moved_methods,
-                    "file_path": class_file,
+                    "file_path": file_path,
+                })
+
+            except Exception as e:
+                logger.error(f"Error processing class {source_class}: {str(e)}")
+            finally:
+                _db.close()
+
+        return candidates
+
+    # 3. Updated load_push_down_method_candidates function
+    def load_push_down_method_candidates(self, project_name=None, version_id=None):
+        """Load push down method candidates based on class hierarchy in UDB"""
+        # For push-down method, we need class hierarchy information which isn't directly in the PMD results
+        # So we'll use the UDB as before but filter based on PMD results if possible
+
+        # First get the code smells to identify problematic classes
+        if not project_name:
+            project_name = config["PROJECT"]["NAME"]
+        if not version_id:
+            version_id = config["PROJECT"]["VERSION"]
+
+        # Fetch the code smells URL from Redis
+        redis_client = redis.Redis(
+            host=os.getenv("REDIS_HOST", "redis"),
+            port=int(os.getenv("REDIS_PORT", 6379)),
+            db=0,
+            decode_responses=True,
+        )
+        csv_url = redis_client.get(f"project:{project_name}:version:{version_id}:code_smells_url")
+
+        problematic_classes = set()
+        if csv_url:
+            try:
+                # Download CSV from MinIO
+                response = requests.get(csv_url)
+                if response.status_code == 200:
+                    # Parse CSV data
+                    csv_data = StringIO(response.text)
+                    pmd_results = pd.read_csv(csv_data)
+
+                    # Get classes with high complexity or too many methods
+                    complex_classes = pmd_results[pmd_results['Rule'].isin(['CyclomaticComplexity', 'TooManyMethods'])]
+
+                    for _, row in complex_classes.iterrows():
+                        class_name = os.path.basename(row['File']).replace('.java', '')
+                        problematic_classes.add(class_name)
+            except Exception as e:
+                logger.warning(f"Error loading PMD results for push down candidates: {str(e)}")
+
+        # Now use the UDB to find hierarchy information
+        _db = und.open(self.udb_path)
+        candidates = []
+
+        try:
+            # Get all public classes
+            class_entities = _db.ents("Class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static")
+
+            # Prioritize problematic classes
+            if problematic_classes:
+                prioritized_entities = [e for e in class_entities if e.simplename() in problematic_classes]
+                # Add the rest
+                prioritized_entities.extend([e for e in class_entities if e.simplename() not in problematic_classes])
+                class_entities = prioritized_entities
+
+            for ent in class_entities:
+                params = {
+                    "source_class": "",
+                    "source_package": "",
+                    "method_name": "",
+                    "target_classes": [],
                 }
-            )
-        _db.close()
-        return candidates
+                method_names = []
 
-    def load_move_method_candidates(self):
-        feature_envies = pd.read_csv(
-            config["RELATIONS"]["FEATURE_ENVY_PATH"], sep=None, engine="python"
-        )
-        candidates = []
-        for index, row in feature_envies.iterrows():
-            source_package, source_class, method_name = (
-                self.utils.get_move_method_location(row[1])
-            )
-            target_info = row[2].split(".")
-            target_package = ".".join(target_info[:-1])
-            target_class = target_info[-1]
-            candidates.append(
-                {
-                    "source_package": source_package,
-                    "source_class": source_class,
-                    "method_name": method_name,
-                    "target_package": target_package,
-                    "target_class": target_class,
-                }
-            )
-        return candidates
+                # Get subclasses
+                for ref in ent.refs("Extendby ~Implicit", "Public Class"):
+                    params["source_class"] = ent.simplename()
+                    ln = ent.longname().split(".")
+                    params["source_package"] = ln[0] if len(ln) > 1 else ""
+                    params["target_classes"].append(ref.ent().simplename())
 
-    def load_extract_method_candidates(self):
-        _db = und.open(self.udb_path)
-        long_methods = pd.read_csv(
-            config["RELATIONS"]["LONG_METHOD_PATH"], sep="\t", engine="python"
-        )
-        candidates = []
-        for index, row in long_methods.iterrows():
-            lines = {}
-            class_info = row[0].strip().split(".")[-1]
-            class_file = _db.lookup(class_info + ".java", "File")
-            if class_file:
-                class_file = class_file[0].longname()
-            else:
-                continue
-            _bytes = open(class_file, mode="rb").read()
-            file_content = codecs.decode(_bytes, errors="strict")
-            lines_info = row[5]
-            for i in lines_info.split(")"):
-                if i == "":
+                # Get methods
+                for ref in ent.refs("Define", "Method"):
+                    method_names.append(ref.ent().simplename())
+
+                if method_names:
+                    params["method_name"] = random.choice(method_names)
+                else:
                     continue
-                values = i.split(",")
-                char_number = values[0][1:].strip()
-                length = values[1].strip()
-                should_copy = False if values[2].strip() == "F" else True
-                if char_number and length:
-                    char_number = int(char_number)
-                    length = char_number + int(length)
-                    start = len(file_content[:char_number].split("\n"))
-                    stop = len(file_content[:length].split("\n"))
-                    for line in range(start, stop + 1):
-                        lines[line] = should_copy
-            candidates.append({"file_path": class_file, "lines": lines})
 
-        _db.close()
-        return candidates
-
-    def load_push_down_method_candidates(self):
-        _db = und.open(self.udb_path)
-        candidates = []
-        class_entities = _db.ents(
-            "Class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static"
-        )
-
-        for ent in class_entities:
-            params = {
-                "source_class": "",
-                "source_package": "",
-                "method_name": "",
-                "target_classes": [],
-            }
-            method_names = []
-
-            for ref in ent.refs("Extendby ~Implicit", "Public Class"):
-                params["source_class"] = ent.simplename()
-                ln = ent.longname().split(".")
-                params["source_package"] = ln[0] if len(ln) > 1 else ""
-                params["target_classes"].append(ref.ent().simplename())
-
-            for ref in ent.refs("Define", "Method"):
-                method_names.append(ref.ent().simplename())
-
-            if method_names:
-                params["method_name"] = random.choice(method_names)
-            else:
-                continue
-
-            if params["target_classes"]:
-                params["target_classes"] = [random.choice(params["target_classes"])]
-            else:
-                continue
-
-            if params["source_class"] != "":
-                candidates.append(params)
-
-        _db.close()
-        return candidates
-
-    def load_pull_up_method_candidates(self):
-        _db = und.open(self.udb_path)
-        candidates = []
-        class_entities = _db.ents(
-            "Class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static"
-        )
-        common_methods = []
-
-        for ent in class_entities:
-            children = []
-            class_method_dict = {}
-            father_methods = []
-
-            for met_ref in ent.refs("Define", "Method ~Override"):
-                method = met_ref.ent()
-                father_methods.append(method.simplename())
-
-            for ref in ent.refs("Extendby"):
-                child = ref.ent()
-                if not child.kind().check("public class"):
+                if params["target_classes"]:
+                    params["target_classes"] = [random.choice(params["target_classes"])]
+                else:
                     continue
-                child_name = child.simplename()
-                children.append(child_name)
-                if child_name not in class_method_dict:
-                    class_method_dict[child_name] = []
 
-                for met_ref in child.refs("Define", "Method"):
+                if params["source_class"] != "":
+                    candidates.append(params)
+
+        except Exception as e:
+            logger.error(f"Error analyzing class hierarchy: {str(e)}")
+        finally:
+            _db.close()
+
+        return candidates
+
+    # 4. Updated load_pull_up_method_candidates function
+    def load_pull_up_method_candidates(self, project_name=None, version_id=None):
+        """Load pull up method candidates based on class hierarchy in UDB"""
+        # For pull-up method, we need class hierarchy information which isn't directly in the PMD results
+        # So we'll use the UDB as before but filter based on PMD results if possible
+
+        # First get the code smells to identify problematic classes
+        if not project_name:
+            project_name = config["PROJECT"]["NAME"]
+        if not version_id:
+            version_id = config["PROJECT"]["VERSION"]
+
+        # Fetch the code smells URL from Redis
+        redis_client = redis.Redis(
+            host=os.getenv("REDIS_HOST", "redis"),
+            port=int(os.getenv("REDIS_PORT", 6379)),
+            db=0,
+            decode_responses=True,
+        )
+        csv_url = redis_client.get(f"project:{project_name}:version:{version_id}:code_smells_url")
+
+        problematic_classes = set()
+        if csv_url:
+            try:
+                # Download CSV from MinIO
+                response = requests.get(csv_url)
+                if response.status_code == 200:
+                    # Parse CSV data
+                    csv_data = StringIO(response.text)
+                    pmd_results = pd.read_csv(csv_data)
+
+                    # Get classes with duplicate code or similar issues
+                    duplicate_classes = pmd_results[
+                        pmd_results['Rule'].isin(['DuplicatedBlocks', 'CyclomaticComplexity'])]
+
+                    for _, row in duplicate_classes.iterrows():
+                        class_name = os.path.basename(row['File']).replace('.java', '')
+                        problematic_classes.add(class_name)
+            except Exception as e:
+                logger.warning(f"Error loading PMD results for pull up candidates: {str(e)}")
+
+        # Now use the UDB to find hierarchy information
+        _db = und.open(self.udb_path)
+        candidates = []
+
+        try:
+            # Get all public classes
+            class_entities = _db.ents("Class ~Unknown ~Anonymous ~TypeVariable ~Private ~Static")
+
+            # Prioritize problematic classes
+            if problematic_classes:
+                prioritized_entities = [e for e in class_entities if e.simplename() in problematic_classes]
+                # Add the rest
+                prioritized_entities.extend([e for e in class_entities if e.simplename() not in problematic_classes])
+                class_entities = prioritized_entities
+
+            common_methods = []
+
+            for ent in class_entities:
+                children = []
+                class_method_dict = {}
+                father_methods = []
+
+                # Get methods in parent class
+                for met_ref in ent.refs("Define", "Method ~Override"):
                     method = met_ref.ent()
-                    method_name = method.simplename()
+                    father_methods.append(method.simplename())
 
-                    if method.ents("Override"):
+                # Get child classes and their methods
+                for ref in ent.refs("Extendby"):
+                    child = ref.ent()
+                    if not child.kind().check("public class"):
                         continue
+                    child_name = child.simplename()
+                    children.append(child_name)
+                    if child_name not in class_method_dict:
+                        class_method_dict[child_name] = []
 
-                    if method_name not in father_methods:
-                        common_methods.append(method_name)
-                        class_method_dict[child_name].append(method_name)
+                    for met_ref in child.refs("Define", "Method"):
+                        method = met_ref.ent()
+                        method_name = method.simplename()
 
-            counts = Counter(common_methods)
-            common_methods = [value for value, count in counts.items() if count > 1]
-            if len(common_methods) > 0:
-                random_method = random.choice(common_methods)
-                children = [
-                    k for k, v in class_method_dict.items() if random_method in v
-                ]
-                if len(children) > 1:
-                    candidates.append(
-                        {
-                            "method_name": random.choice(common_methods),
-                            "children_classes": children,
-                        }
-                    )
-        _db.close()
+                        if method.ents("Override"):
+                            continue
+
+                        if method_name not in father_methods:
+                            common_methods.append(method_name)
+                            class_method_dict[child_name].append(method_name)
+
+                # Find methods that appear in multiple child classes
+                counts = Counter(common_methods)
+                common_methods = [value for value, count in counts.items() if count > 1]
+                if len(common_methods) > 0:
+                    random_method = random.choice(common_methods)
+                    children = [
+                        k for k, v in class_method_dict.items() if random_method in v
+                    ]
+                    if len(children) > 1:
+                        candidates.append(
+                            {
+                                "method_name": random.choice(common_methods),
+                                "children_classes": children,
+                            }
+                        )
+        except Exception as e:
+            logger.error(f"Error analyzing class hierarchy for pull-up method: {str(e)}")
+        finally:
+            _db.close()
+
         return candidates
 
     def init_move_method(self):
-        params = random.choice(self.load_move_method_candidates())
+        params = random.choice(self.load_move_method_candidates(self.project_name, self.version_id))
         params["udb_path"] = self.udb_path
         main = move_method.main
         return main, params, "Move Method"
 
     def init_extract_class(self):
         main = extract_class.main
-        params = random.choice(self.load_extract_class_candidates())
+        params = random.choice(self.load_extract_class_candidates(self.project_name, self.version_id))
         params["udb_path"] = self.udb_path
         return main, params, "Extract Class"
 
     def init_extract_method(self):
-        main = extract_method.main
-        params = random.choice(self.load_extract_class_candidates())
-        params["udb_path"] = self.udb_path
-        return main, params, "Extract Method"
+        """Initialize extract method refactoring with appropriate parameters"""
+        try:
+            candidates = self.load_extract_method_candidates(self.project_name, self.version_id)
+
+            # Check if candidates list is empty
+            if not candidates:
+                logger.warning("No extract method candidates found, returning None")
+                return None, None, None
+
+            # Try up to 3 different candidates in case some fail
+            random.shuffle(candidates)
+
+            max_attempts = min(3, len(candidates))
+            for i in range(max_attempts):
+                try:
+                    params = candidates[i]
+                    logger.debug(f"Trying extract method candidate {i + 1}/{max_attempts}: {params}")
+
+                    # Validate if the file exists
+                    if not os.path.isfile(params["file_path"]):
+                        logger.warning(f"File {params['file_path']} does not exist, skipping candidate")
+                        continue
+
+                    # Validate line numbers against file length
+                    try:
+                        with open(params["file_path"], 'r', encoding='utf-8', errors='ignore') as f:
+                            file_lines = sum(1 for _ in f)
+
+                        # Check if all line numbers are within file bounds
+                        invalid_lines = [line_num for line_num in params["lines"].keys() if line_num > file_lines]
+                        if invalid_lines:
+                            logger.warning(
+                                f"Invalid line numbers {invalid_lines} in {params['file_path']}, skipping candidate")
+                            continue
+
+                        # Check if the lines form a continuous block (this is often a requirement)
+                        line_nums = sorted(params["lines"].keys())
+                        if line_nums[-1] - line_nums[0] + 1 != len(line_nums):
+                            logger.warning(f"Lines {line_nums} do not form a continuous block, skipping candidate")
+                            continue
+                    except Exception as e:
+                        logger.warning(f"Error validating file lines: {str(e)}")
+                        continue
+
+                    # If all checks pass, proceed with this candidate
+                    main = extract_method.main
+                    return main, params, "Extract Method"
+                except Exception as e:
+                    logger.warning(f"Failed to initialize extract method with candidate {i + 1}: {str(e)}")
+                    continue
+
+            # If we've tried all candidates and none worked, return None
+            logger.warning("All extract method candidates failed, returning None")
+            return None, None, None
+        except Exception as e:
+            logger.error(f"Error in init_extract_method: {str(e)}")
+            return None, None, None
 
     def init_pull_up_method(self):
+        candidates = self.load_pull_up_method_candidates(self.project_name, self.version_id)
+
+        # Check if candidates list is empty
+        if not candidates:
+            logger.warning("No pull up method candidates found, returning None")
+            # Return None to indicate no valid candidates
+            return None, None, None
+
+        # If we have candidates, proceed as before
         main = pullup_method.main
-        params = random.choice(self.load_pull_up_method_candidates())
+        params = random.choice(candidates)
         params["udb_path"] = self.udb_path
         return main, params, "PullUp Method"
 
     def init_push_down_method(self):
         main = pushdown_method2.main
-        params = random.choice(self.load_push_down_method_candidates())
+        params = random.choice(self.load_push_down_method_candidates(self.project_name, self.version_id))
         params["udb_path"] = self.udb_path
         return main, params, "PushDown Method"
+
+    def init_extract_method(self):
+        """Initialize extract method refactoring with appropriate parameters"""
+        main = extract_method.main
+        params = random.choice(self.load_extract_method_candidates(self.project_name, self.version_id))
+        return main, params, "Extract Method"

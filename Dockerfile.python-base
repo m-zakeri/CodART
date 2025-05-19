@@ -1,4 +1,4 @@
-FROM alpine:edge
+FROM ubuntu:jammy-20250415.1
 
 RUN apk upgrade --update-cache --available && \
     apk add openssl && \
@@ -6,14 +6,17 @@ RUN apk upgrade --update-cache --available && \
 
 FROM python:3.12-slim
 
+USER root
+
+
 WORKDIR /app
 
-# Configure the system to use the compiled OpenSSL
-ENV PATH=/usr/local/ssl/bin:$PATH
-ENV LD_LIBRARY_PATH=/usr/local/ssl/lib:$LD_LIBRARY_PATH
+ENV PATH=/app/scitools/bin/linux64:$PATH
+ENV PYTHONPATH=/app/scitools/bin/linux64/Python:$PYTHONPATH
+ENV LD_LIBRARY_PATH=/app/scitools/bin/linux64:$LD_LIBRARY_PATH
 ENV CFLAGS="-I/usr/local/ssl/include"
 ENV LDFLAGS="-L/usr/local/ssl/lib"
 
 COPY dependencies/* /app/dependencies/
 
-RUN pip3 install --no-cache-dir /app/dependencies/*
+RUN pip3 install /app/dependencies/*

@@ -1,7 +1,5 @@
 from abc import ABC, abstractmethod
-from codart.learner.sbr_initializer.utils.utility import (
-    DynamicAbstractMetaInitializeRefactoringMethods,
-)
+from codart.learner.sbr_initializer.utils.utility import (DynamicAbstractMetaInitializeRefactoringMethods)
 from configparser import ConfigParser
 
 config = ConfigParser()
@@ -15,10 +13,14 @@ class Initializer(ABC, metaclass=DynamicAbstractMetaInitializeRefactoringMethods
         lower_band: int = 0,
         upper_band: int = 50,
         population_size: int = 50,
+        project_name: str = "",
+        version_id: str = "",
         *args,
         **kwargs,
     ):
         self.udb_path = udb_path
+        self.project_name = project_name
+        self.version_id = version_id
         self.population = []
         self.lower_band = lower_band
         self.upper_band = upper_band

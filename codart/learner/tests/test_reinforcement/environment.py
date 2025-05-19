@@ -6,7 +6,6 @@ import tqdm
 from tensordict import TensorDict, TensorDictBase
 from tensordict.nn import TensorDictModule
 from torch import nn
-from torchrl.data import BoundedTensorSpec, CompositeSpec, UnboundedContinuousTensorSpec
 from torchrl.envs import (
     CatTensors,
     EnvBase,
@@ -29,6 +28,7 @@ import io
 from datetime import datetime
 from minio import Minio
 from typing import Dict, Any
+from torchrl.data import Bounded, BoundedTensorSpec, CompositeSpec, UnboundedContinuousTensorSpec
 
 
 class RefactoringSequenceEnvironment(EnvBase):
@@ -36,15 +36,17 @@ class RefactoringSequenceEnvironment(EnvBase):
     batch_locked = False
 
     def __init__(
-        self,
-        udb_path: str = "/home/y/jflex/jflex.und",
-        n_obj: int = 8,
-        lower_band: int = 1,
-        upper_bound: int = 50,
-        population_size: int = 100,
-        device: Optional[str] = None,
-        seed=None,
-        project_name: str = "",
+            self,
+            udb_path: str = "/home/y/jflex/jflex.und",
+            n_obj: int = 8,
+            lower_band: int = 1,
+            upper_bound: int = 50,
+            population_size: int = 100,
+            device: Optional[str] = None,
+            seed=None,
+            project_name: str = "",
+            version_id: str = "",
+            project_path: str = ""
     ):
         super().__init__(device=device, batch_size=[])
         self.project_name = project_name
@@ -53,12 +55,17 @@ class RefactoringSequenceEnvironment(EnvBase):
         self.device = device
         self.udb_path = udb_path
         self.n_obj = n_obj
+        self.evaluate_in_parallel = False  # Default value for evaluate_in_parallel
+        self.verbose_design_metrics = False  # Default value for verbose_design_metrics
         self.generator = SmellInitialization(
             udb_path=udb_path,
+            project_name=project_name,
+            version_id=version_id,
             n_obj=n_obj,
             lower_band=lower_band,
             upper_band=upper_bound,
             population_size=population_size,
+            project_path=project_path
         )
         self._make_spec(action=self.generator.generate_an_action())
         if seed is None:
@@ -89,54 +96,96 @@ class RefactoringSequenceEnvironment(EnvBase):
         )
         return out
 
-    def _reset(self, action: RefactoringOperation):
-        if action is None or action.is_empty():
+    def _reset(self, action: RefactoringOperation = None):
+        if action is None:
             action = self.generator.generate_an_action()
+        if action is not None and action.is_empty():
+            action = self.generator.generate_an_action()
+
         update_understand_database(udb_path=self.udb_path)
         out = TensorDict(
             {
                 "refactoring": action.get_refactoring().name,
                 "params": action.get_refactoring().params,
-                # "done": torch.zeros(action.shape, dtype=torch.bool, device=self.device),
             },
             batch_size=action.shape,
         )
         return out
 
     def _make_spec(self, action: RefactoringOperation):
+        if action is None or action.is_empty():
+            shape = (1,)
+        else:
+            shape = action.shape
+
+        # Update to use low/high instead of minimum/maximum
         self.observation_spec = CompositeSpec(
-            refactoring=BoundedTensorSpec(
-                low=0,
-                high=5.0,
+            refactoring=Bounded(
+                shape=shape,
+                low=0,  # Use low instead of minimum
+                high=5.0,  # Use high instead of maximum
                 dtype=torch.float32,
             ),
             params=self.make_composite_from_td(action),
         )
         self.state_spec = self.observation_spec.clone()
-        self.action_spec = BoundedTensorSpec(
-            low=0,
-            high=1000,
+
+        # Update action_spec
+        self.action_spec = Bounded(
+            shape=shape,
+            low=0,  # Use low instead of minimum
+            high=1000,  # Use high instead of maximum
             dtype=torch.float32,
         )
-        self.reward_spec = UnboundedContinuousTensorSpec(
-            shape=(*action.get_refactoring().shape, 1)
-        )
+
+        # Make sure reward spec has consistent shape
+        reward_shape = (*shape, 1)
+        self.reward_spec = UnboundedContinuousTensorSpec(shape=reward_shape)
 
     def make_composite_from_td(self, action: RefactoringOperation):
-        composite = CompositeSpec(
-            {
-                key: (
-                    self.make_composite_from_td(action)
-                    if isinstance(tensor, TensorDictBase)
-                    else UnboundedContinuousTensorSpec(
-                        dtype=tensor.dtype, device=tensor.device, shape=tensor.shape
+        """
+        Create a composite spec from a refactoring operation's parameters.
+
+        This handles the nested dictionary structure in RefactoringModel.params
+        where each parameter is a dict with a 'value' key containing a string.
+
+        Args:
+            action: A RefactoringOperation instance
+
+        Returns:
+            A CompositeSpec representing the structure of the action's parameters
+        """
+        # Handle None or empty actions
+        if action is None or action.is_empty():
+            return CompositeSpec(shape=(1,))
+
+        try:
+            # Get the refactoring model
+            refactoring_model = action.get_refactoring()
+            params = refactoring_model.params
+
+            # Create a CompositeSpec with UnboundedContinuousTensorSpec for each parameter
+            param_specs = {}
+            for key, param_dict in params.items():
+                # Each param_dict is expected to be {'value': str_value}
+                if isinstance(param_dict, dict) and 'value' in param_dict:
+                    # Create a spec for string values
+                    param_specs[key] = UnboundedContinuousTensorSpec(
+                        shape=(1,),
+                        dtype=torch.float32,
+                        device=self.device
                     )
-                )
-                for key, tensor in action.get_refactoring().params.items()
-            },
-            shape=action.shape,
-        )
-        return composite
+
+            # Create the composite spec with all parameter specs
+            composite = CompositeSpec(
+                param_specs,
+                shape=action.shape,
+            )
+            return composite
+        except Exception as e:
+            # Fallback to a basic composite spec if there's an error
+            print(f"Warning: Error in make_composite_from_td: {e}")
+            return CompositeSpec(shape=action.shape)
 
     def reward_function(self):
         return np.array(self.calculate_metrics(), dtype=float)
@@ -200,10 +249,10 @@ class RefactoringSequenceEnvironment(EnvBase):
                 }
                 self.log_design_metrics(design_metrics)
 
-                del qmood_quality_attributes
+            del qmood_quality_attributes
 
-            objective_values.append([-1 * i for i in arr])
-            logger.info(f"Objective values for individual {k}: {[i for i in arr]}")
+        objective_values = [[-1 * i for i in arr]]
+        logger.info(f"Objective values: {[i for i in arr]}")
         return objective_values
 
     def calc_qmood_objectives(self, arr_, qmood_quality_attributes):
@@ -225,6 +274,10 @@ class RefactoringSequenceEnvironment(EnvBase):
         Log design metrics to MinIO storage.
         """
         try:
+            if not hasattr(self, 'minio_client') or not hasattr(self, 'metrics_bucket'):
+                logger.warning("MinIO client or metrics bucket not configured, skipping metrics logging")
+                return
+
             if not self.project_name:
                 logger.warning("Project name not set, using 'unknown_project'")
                 self.project_name = "unknown_project"
@@ -298,8 +351,6 @@ class RefactoringSequenceEnvironment(EnvBase):
             logger.error(
                 f"Error saving design metrics to MinIO: {str(e)}", exc_info=True
             )
-            raise
-
 
 # env = RefactoringSequenceEnvironment()
 # env.to(env.device)
