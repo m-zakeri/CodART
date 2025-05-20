@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 # FastAPI router instance - using the same prefix as export
-router = APIRouter(prefix="/download", tags=["Metrics Management"])
+router = APIRouter(tags=["Metrics Management"])
 
 
 class MetricType(str, Enum):
@@ -133,7 +133,7 @@ async def download_codesmells(project_name: str, version_id: Optional[str] = Non
 
         if version_id:
             # Construct the file name based on project name and version_id
-            file_name = f"code_smells_{project_name}_{version_id}.csv"
+            file_name = f"{project_name}/{version_id}/code_smells_{project_name}_{version_id}.csv"
             try:
                 data = controller.minio_client.get_object(codesmells_bucket, file_name)
                 return StreamingResponse(

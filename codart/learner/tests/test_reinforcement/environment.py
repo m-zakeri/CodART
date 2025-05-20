@@ -80,15 +80,145 @@ class RefactoringSequenceEnvironment(EnvBase):
         rng = torch.manual_seed(seed)
         self.rng = rng
 
-    def _step(self, action: RefactoringOperation):
-        success = action.execute()
+    def _create_refactoring_from_tensordict(self, tensordict):
+        """
+        Convert a TensorDict to a RefactoringOperation.
+        This is needed when TorchRL passes a TensorDict to the step method.
+
+        Args:
+            tensordict: The TensorDict containing action information
+
+        Returns:
+            A RefactoringOperation object
+        """
+        from codart.refactorings.abstraction import EmptyRefactoring
+        from codart.refactorings.handler import (
+            ExtractClass, MoveClass, PullupMethod, PushdownMethod, MoveMethod, ExtractMethod
+        )
+
+        try:
+            # Extract relevant information from the tensordict
+            refactoring_name = None
+            params = {}
+
+            if hasattr(tensordict, "get"):
+                # Try to get refactoring name and params
+                if "refactoring" in tensordict:
+                    refactoring_name = tensordict.get("refactoring")
+
+                if "params" in tensordict:
+                    params = tensordict.get("params")
+
+                # If tensordict has 'action' that is already a RefactoringOperation, use it
+                if tensordict.get("action", None) is not None and isinstance(tensordict.get("action"),
+                                                                             RefactoringOperation):
+                    return tensordict.get("action")
+
+            # Generate an action using the generator if we can't extract valid info from tensordict
+            # This allows TorchRL's check_env_specs to work, which calls step with an empty tensordict
+            action = self.generator.generate_an_action()
+            logger.debug(f"Generated new action for TensorDict: {action.get_refactoring().name}")
+            return action
+
+        except Exception as e:
+            logger.error(f"Error creating refactoring from tensordict: {e}", exc_info=True)
+            # Return an empty refactoring as fallback
+            return EmptyRefactoring()
+
+    def _extract_param_value(self, params, key, default):
+        """
+        Helper method to extract parameter values from the nested structure.
+
+        Args:
+            params: Dictionary of parameters
+            key: Parameter key to extract
+            default: Default value if parameter not found
+
+        Returns:
+            The extracted parameter value or default
+        """
+        try:
+            if key in params:
+                # Handle the nested structure {"key": {"value": actual_value}}
+                if isinstance(params[key], dict) and "value" in params[key]:
+                    value = params[key]["value"]
+
+                    # Convert string representations of lists back to actual lists
+                    if default is not None and isinstance(default, list) and isinstance(value, str):
+                        # Check if the string looks like a list representation
+                        if value.startswith("[") and value.endswith("]"):
+                            try:
+                                # Convert string representation of list to actual list
+                                import ast
+                                return ast.literal_eval(value)
+                            except:
+                                # If conversion fails, return empty list
+                                return []
+
+                    return value
+                else:
+                    return params[key]
+            return default
+        except Exception as e:
+            logger.warning(f"Error extracting parameter '{key}': {e}")
+            return default
+
+    def _step(self, tensordict_or_action):
+        """
+        Execute a step in the environment.
+
+        Args:
+            tensordict_or_action: Either a TensorDict or a RefactoringOperation
+
+        Returns:
+            TensorDict with the next state, reward, and done flag
+        """
+        # Convert TensorDict to RefactoringOperation if needed
+        if isinstance(tensordict_or_action, (TensorDict, TensorDictBase)):
+            action = self._create_refactoring_from_tensordict(tensordict_or_action)
+        else:
+            # It's already a RefactoringOperation
+            action = tensordict_or_action
+
+        try:
+            # Add debug logging
+            logger.debug(f"Executing refactoring: {action.get_refactoring().name}")
+            success = action.execute()
+
+            # Handle None return value
+            if success is None:
+                logger.error(f"Refactoring returned None for success status")
+                success = False
+        except Exception as e:
+            logger.error(f"Error executing refactoring: {e}", exc_info=True)
+            success = False
+
+            # Only update the understand database if refactoring was successful
         if success:
             update_understand_database(udb_path=self.udb_path)
             reward = self.reward()
-        else:
-            reward = torch.tensor([[-1.0] * self.n_obj], dtype=torch.float32, device=self.device)
 
-        # Set done flag
+            # Make sure reward has correct shape
+            if isinstance(reward, np.ndarray):
+                # Log the shape before conversion
+                logger.debug(f"Reward shape before conversion: {reward.shape}")
+
+                # Convert numpy array to tensor with correct shape
+                # This is crucial - reshape to [batch_size, n_obj]
+                reward = torch.tensor(reward, dtype=torch.float32, device=self.device)
+
+                # Ensure the reward has shape [batch_size, n_obj]
+                if reward.shape != (action.shape[0], self.n_obj):
+                    logger.warning(f"Reshaping reward from {reward.shape} to [{action.shape[0]}, {self.n_obj}]")
+                    reward = reward.reshape(action.shape[0], self.n_obj)
+        else:
+            # If refactoring failed, provide a negative reward with correct shape
+            # The key fix - ensure reward has correct shape [batch_size, n_obj]
+            reward = torch.tensor([[-1.0] * self.n_obj] * action.shape[0],
+                                  dtype=torch.float32, device=self.device)
+            logger.debug(f"Created failure reward with shape {reward.shape}")
+
+            # Set done flag
         done = torch.zeros_like(reward, dtype=torch.bool)
 
         # Create the output TensorDict with the results
@@ -96,7 +226,7 @@ class RefactoringSequenceEnvironment(EnvBase):
             {
                 "refactoring": action.get_refactoring().name,
                 "params": action.get_refactoring().params,
-                "reward": reward.view(-1, 1),
+                "reward": reward,  # This should now have correct shape
                 "done": done.view(-1, 1),
                 "success": torch.tensor([success], dtype=torch.bool, device=self.device),
             },

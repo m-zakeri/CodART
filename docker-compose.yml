@@ -151,6 +151,9 @@ services:
       - MINIO_ENDPOINT=minio:9000
       - MINIO_ACCESS_KEY=00jFBl7n9Jn0ex0XL7m1
       - MINIO_SECRET_KEY=kYfujzkdSGjXKLN9oQhPDIVgRUaZRijvj1yaXmIZ
+      - MINIO_CODESMELLS_BUCKET=code-smells
+      - REDIS_CLIENT_NAME=redis
+      - REDIS_PASSWORD=redis
       - REDIS_HOST=redis
       - REDIS_PORT=6379
     depends_on:

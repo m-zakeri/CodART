@@ -286,138 +286,167 @@ def get_source_class_map(db, source_class: str):
     return method_usage_map, class_ent
 
 
-def main(source_class: str, source_package: str, target_class: str, target_package: str, method_name: str,
-         udb_path: str, *args, **kwargs):
-    """
-
-
-    """
-
-    import_statement = None
-    if source_package != target_package:
-        import_statement = f"\nimport {target_package}.{target_class};"
-    instance_name = target_class.lower() + "ByCodArt"
+def main(source_class, source_package, target_class, target_package, method_name, udb_path, *args, **kwargs):
+    # Add a preliminary check to catch non-existent methods earlier
     db = und.open(udb_path)
-    method_map, class_ent = get_source_class_map(db, source_class)
-    if class_ent is None:
-        logger.error("Class entity is None")
-        return False
 
-    # Strong overlay precondition
-    # if class_ent.refs("Extend ~Implicit, ExtendBy, Implement"):
-    #     logger.error("Class is in inheritance or implements an interface.")
-    #     db.close()
-    #     return False
+    # Check if the method exists in the source class
+    full_method_name = f"{source_package}.{source_class}.{method_name}"
+    method_ent = db.lookup(full_method_name, "Method")
 
-    # Check if method is static
-    method_ent = db.lookup(f"{source_package}.{source_class}.{method_name}", "Method")
-    if len(method_ent) >= 1:
-        method_ent = method_ent[0]
-    else:
-        logger.error("Entity not found.")
+    if len(method_ent) < 1:
+        logger.error(f"Method not found: {full_method_name}")
+        logger.debug("This method does not exist in the source class")
+
+        # Log available methods to help debug
+        logger.error(f"Available methods for {source_package}.{source_class}:")
+        class_ents = db.lookup(source_class, "Class")
+        for ent in class_ents:
+            logger.error(f"Class: {ent.longname()}")
+            for ref in ent.refs("Define", "Method"):
+                logger.error(f"  Method: {ref.ent().longname()}")
+
         db.close()
         return False
 
-    if method_ent.simplename() != method_name:
-        logger.error("Can not move method duo to duplicated entities.")
-        logger.info(f"{method_ent}, {method_ent.kindname()}")
-        db.close()
-        return False
-
-    if source_package == target_package and source_class == target_class:
-        logger.error("Can not move to self.")
-        db.close()
-        return False
-
-    is_static = STATIC in method_ent.kindname()
-    # Find usages
-    usages = {}
-
-    for ref in method_ent.refs("Callby"):
-        file = ref.file().longname()
-        if file in usages:
-            usages[file].append(ref.line())
-        else:
-            usages[file] = [ref.line(), ]
-
+    result = True
     try:
-        src_class_file = db.lookup(f"{source_package}.{source_class}.java", "File")[0].longname()
-        target_class_file = db.lookup(f"{target_package}.{target_class}.java", "File")[0].longname()
-    except IndexError:
-        logger.error("This is a nested method.")
-        logger.info(f"{source_package}.{source_class}.java")
-        logger.info(f"{target_package}.{target_class}.java")
+        import_statement = None
+        if source_package != target_package:
+            import_statement = f"\nimport {target_package}.{target_class};"
+        instance_name = target_class.lower() + "ByCodArt"
+        db = und.open(udb_path)
+        method_map, class_ent = get_source_class_map(db, source_class)
+        if class_ent is None:
+            logger.error("Class entity is None")
+            return False
+
+        # Strong overlay precondition
+        # if class_ent.refs("Extend ~Implicit, ExtendBy, Implement"):
+        #     logger.error("Class is in inheritance or implements an interface.")
+        #     db.close()
+        #     return False
+
+        # Check if method is static
+        method_ent = db.lookup(f"{source_package}.{source_class}.{method_name}", "Method")
+        if len(method_ent) >= 1:
+            method_ent = method_ent[0]
+        else:
+            logger.error(f"Entity not found: {source_package}.{source_class}.{method_name}")
+            # Add more detailed logging
+            logger.error(f"Available methods for {source_package}.{source_class}:")
+            class_ents = db.lookup(source_class, "Class")
+            for ent in class_ents:
+                logger.error(f"Class: {ent.longname()}")
+                for ref in ent.refs("Define", "Method"):
+                    logger.error(f"  Method: {ref.ent().longname()}")
+            db.close()
+            return False
+
+        if method_ent.simplename() != method_name:
+            logger.error(
+                f"Can not move method due to duplicated entities. Found: {method_ent.simplename()}, Expected: {method_name}")
+            logger.info(f"{method_ent}, {method_ent.kindname()}")
+            db.close()
+            return False
+
+        if source_package == target_package and source_class == target_class:
+            logger.error("Can not move to self.")
+            db.close()
+            return False
+
+        is_static = STATIC in method_ent.kindname()
+        # Find usages
+        usages = {}
+
+        for ref in method_ent.refs("Callby"):
+            file = ref.file().longname()
+            if file in usages:
+                usages[file].append(ref.line())
+            else:
+                usages[file] = [ref.line(), ]
+
+        try:
+            src_class_file = db.lookup(f"{source_package}.{source_class}.java", "File")[0].longname()
+            target_class_file = db.lookup(f"{target_package}.{target_class}.java", "File")[0].longname()
+        except IndexError:
+            logger.error("This is a nested method.")
+            logger.info(f"{source_package}.{source_class}.java")
+            logger.info(f"{target_package}.{target_class}.java")
+            db.close()
+            return False
+
         db.close()
-        return False
 
-    db.close()
-
-    # Check if there is an cycle
-    listener = parse_and_walk(
-        file_path=target_class_file,
-        listener_class=CheckCycleListener,
-        class_name=source_class
-    )
-
-    if not listener.is_valid:
-        logger.error(f"Can not move method because there is a cycle between {source_class}, {target_class}")
-        # db.close()
-        return False
-
-    # Propagate Changes
-    for file in usages.keys():
-        public_class_name = os.path.basename(file).split(".")[0]
-        is_in_target_class = public_class_name == target_class
-        parse_and_walk(
-            file_path=file,
-            listener_class=PropagateListener,
-            has_write=True,
-            method_name=method_name,
-            new_name=f"{instance_name}.{method_name}",
-            lines=usages[file],
-            is_in_target_class=is_in_target_class,
-            method_map=method_map,
+        # Check if there is an cycle
+        listener = parse_and_walk(
+            file_path=target_class_file,
+            listener_class=CheckCycleListener,
+            class_name=source_class
         )
-    # exit(-1)
-    # Do the cut and paste!
-    # Cut
-    listener = parse_and_walk(
-        file_path=src_class_file,
-        listener_class=CutMethodListener,
-        has_write=True,
-        class_name=target_class,
-        instance_name=instance_name,
-        method_name=method_name,
-        is_static=is_static,
-        import_statement=import_statement,
-    )
 
-    method_text = listener.method_text
+        if not listener.is_valid:
+            logger.error(f"Can not move method because there is a cycle between {source_class}, {target_class}")
+            # db.close()
+            return False
 
-    # Paste
-    listener = parse_and_walk(
-        file_path=target_class_file,
-        listener_class=PasteMethodListener,
-        has_write=True,
-        method_text=method_text,
-        source_class=source_class,
-        method_map=method_map,
-        imports=listener.imports,
-    )
+        # Propagate Changes
+        for file in usages.keys():
+            public_class_name = os.path.basename(file).split(".")[0]
+            is_in_target_class = public_class_name == target_class
+            parse_and_walk(
+                file_path=file,
+                listener_class=PropagateListener,
+                has_write=True,
+                method_name=method_name,
+                new_name=f"{instance_name}.{method_name}",
+                lines=usages[file],
+                is_in_target_class=is_in_target_class,
+                method_map=method_map,
+            )
+        # exit(-1)
+        # Do the cut and paste!
+        # Cut
+        listener = parse_and_walk(
+            file_path=src_class_file,
+            listener_class=CutMethodListener,
+            has_write=True,
+            class_name=target_class,
+            instance_name=instance_name,
+            method_name=method_name,
+            is_static=is_static,
+            import_statement=import_statement,
+        )
 
-    # Post-Paste: Reference Injection
-    parse_and_walk(
-        file_path=target_class_file,
-        listener_class=ReferenceInjectorAndConstructorListener,
-        has_write=True,
-        method_text=method_text,
-        source_class=source_class,
-        method_map=method_map,
-        imports=None,
-        has_empty_cons=listener.has_empty_cons,
-    )
-    # db.close()
-    return True
+        method_text = listener.method_text
+
+        # Paste
+        listener = parse_and_walk(
+            file_path=target_class_file,
+            listener_class=PasteMethodListener,
+            has_write=True,
+            method_text=method_text,
+            source_class=source_class,
+            method_map=method_map,
+            imports=listener.imports,
+        )
+
+        # Post-Paste: Reference Injection
+        parse_and_walk(
+            file_path=target_class_file,
+            listener_class=ReferenceInjectorAndConstructorListener,
+            has_write=True,
+            method_text=method_text,
+            source_class=source_class,
+            method_map=method_map,
+            imports=None,
+            has_empty_cons=listener.has_empty_cons,
+        )
+    except Exception as e:
+        print("ERROR MOVE METHOD : ",e)
+        result = False
+    logger.debug(f"Move Method returning {result}")
+    return result
 
 
 # # Tests

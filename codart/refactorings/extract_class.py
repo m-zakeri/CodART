@@ -594,9 +594,21 @@ def main(udb_path, file_path, source_class, moved_fields, moved_methods, *args, 
         logger.error(f'The source class "{source_class}" is nested in {file_path}')
         return False
 
+    # In main() function of extract_class.py, modify line 611-616:
     if os.path.exists(new_file_path):
         logger.error(f'The new class "{new_file_path}" already exist.')
-        return False
+        # Add additional log to track what's returned
+        logger.debug(f"Attempting to remove existing file: {new_file_path}")
+        try:
+            # Try to delete and continue instead of returning False
+            os.remove(new_file_path)
+            logger.info(f"Successfully deleted existing file: {new_file_path}")
+        except Exception as e:
+            logger.error(f"Failed to delete existing file: {str(e)}")
+            # Make sure you're returning exactly False, not None
+            result = False
+            logger.debug(f"Returning {result} from main() due to file exists")
+            return result
 
     eca = ExtractClassAPI(
         udb_path=udb_path,

@@ -55,7 +55,9 @@ class MinioModelLoader:
             except Exception as e:
                 if "NoSuchKey" in str(e) or "Not found" in str(e):
                     # Model doesn't exist, create a dummy model
-                    logger.warning(f"Model {model_path} not found in MinIO, creating dummy model")
+                    logger.warning(
+                        f"Model {model_path} not found in MinIO, creating dummy model"
+                    )
                     return self._create_dummy_model(model_type)
                 else:
                     raise
@@ -76,17 +78,17 @@ class MinioModelLoader:
         X_dummy = np.array([[0, 0, 0, 0], [1, 1, 1, 1]])
         y_dummy = np.array([0, 1])
 
-        if model_type == 'RFR1':
+        if model_type == "RFR1":
             # This is the scaler
             model = StandardScaler()
             model.fit(X_dummy)
-        elif model_type == 'HGBR1':
+        elif model_type == "HGBR1":
             model = GradientBoostingRegressor(n_estimators=10)
             model.fit(X_dummy, y_dummy)
-        elif model_type == 'MLPR1':
+        elif model_type == "MLPR1":
             model = MLPRegressor(hidden_layer_sizes=(10,), max_iter=100)
             model.fit(X_dummy, y_dummy)
-        elif model_type == 'VR1':
+        elif model_type == "VR1":
             model = RandomForestRegressor(n_estimators=10)
             model.fit(X_dummy, y_dummy)
         else:
@@ -102,7 +104,9 @@ class MinioModelLoader:
     def _save_dummy_model(self, model, model_type):
         """Save a dummy model to MinIO for future use"""
         try:
-            model_path = f"models/DS{self.ds_number}/{model_type}_DS{self.ds_number}.joblib"
+            model_path = (
+                f"models/DS{self.ds_number}/{model_type}_DS{self.ds_number}.joblib"
+            )
 
             # Create the directory structure if it doesn't exist
             dir_path = f"models/DS{self.ds_number}"
@@ -118,7 +122,7 @@ class MinioModelLoader:
                 object_name=model_path,
                 data=buffer,
                 length=buffer.getbuffer().nbytes,
-                content_type="application/octet-stream"
+                content_type="application/octet-stream",
             )
             logger.info(f"Saved dummy model to {model_path}")
         except Exception as e:
