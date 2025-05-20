@@ -1,6 +1,6 @@
 from codart.refactorings.abstraction import RefactoringOperation, RefactoringModel
 from codart.refactorings import extract_class, move_class, move_method, pushdown_method2, pullup_method, extract_method
-
+import torch
 
 class RefactoringManager:
     def __init__(self):

@@ -81,16 +81,24 @@ class RefactoringSequenceEnvironment(EnvBase):
         self.rng = rng
 
     def _step(self, action: RefactoringOperation):
-        action.execute()
-        update_understand_database(udb_path=self.udb_path)
-        reward = self.reward()
+        success = action.execute()
+        if success:
+            update_understand_database(udb_path=self.udb_path)
+            reward = self.reward()
+        else:
+            reward = torch.tensor([[-1.0] * self.n_obj], dtype=torch.float32, device=self.device)
+
+        # Set done flag
         done = torch.zeros_like(reward, dtype=torch.bool)
+
+        # Create the output TensorDict with the results
         out = TensorDict(
             {
                 "refactoring": action.get_refactoring().name,
                 "params": action.get_refactoring().params,
                 "reward": reward.view(-1, 1),
                 "done": done.view(-1, 1),
+                "success": torch.tensor([success], dtype=torch.bool, device=self.device),
             },
             action.shape,
         )
