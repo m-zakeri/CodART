@@ -1,6 +1,5 @@
 version: '3.9'
 
-# Define internal network that has no internet access
 networks:
   internal:
     driver: bridge
@@ -44,6 +43,15 @@ services:
       - default
       - internal
 
+  python-base:
+    image: python-base:v1.0.0
+    build:
+      context: .
+      dockerfile: Dockerfile.python-base
+    networks:
+      - default
+      - internal
+
   base:
     image: base:v1.0.0
     build:
@@ -51,15 +59,6 @@ services:
       dockerfile: Dockerfile.base
     depends_on:
       - python-base
-    networks:
-      - default
-      - internal
-
-  python-base:
-    image: python-base:v1.0.0
-    build:
-      context: .
-      dockerfile: Dockerfile.python-base
     networks:
       - default
       - internal
@@ -82,6 +81,9 @@ services:
       - redis
       - minio
       - python-base
+    extra_hosts:
+      - "licensing.scitools.com:127.0.0.1"
+      - "stats.scitools.com:127.0.0.1"
     networks:
       - default
       - internal
@@ -92,16 +94,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.api
-      extra_hosts:
-        - "licensing.scitools.com:127.0.0.1"
+    extra_hosts:
+      - "licensing.scitools.com:127.0.0.1"
+      - "stats.scitools.com:127.0.0.1"
     volumes:
-      - /sys/class/dmi:/sys/class/dmi
-      - /proc:/host/proc
-      - /tmp/.X11-unix:/tmp/.X11-unix
-      - /dev/shm:/dev/shm
       - scitools_root_config:/root/.config/SciTools
-      - scitools_root_config_id:/root/.local/share/SciTools
-      - scitools_app_license:/app/SciTools
       - scitools_python_api:/root/.local/share/SciTools/Understand
       - und_dbs:/opt/understand_dbs
       - projects:/opt/projects
@@ -123,36 +120,47 @@ services:
       nofile:
         soft: 65536
         hard: 65536
-      core:
-        soft: -1
-        hard: -1
-      memlock:
-        soft: -1
-        hard: -1
     ports:
       - "8000:8000"
     environment:
-      - UND_LICENSE_PATH=/root/.config/SciTools/License.conf
-      - UNDERSTAND_API_LICENSE=/root/.local/share/SciTools/Understand/python_api.cfg
+      # Application environment variables
+      - INSTALLDIR=/app/
+      - PROJECTS_BASE_DIR=/opt/projects
+      - DB_BASE_DIR=/opt/understand_dbs
       - HOSTNAME=api
       - XDG_RUNTIME_DIR=/tmp/runtime-root
+
+      # Understand license environment variables
+      - STIDOSUTILDIR=/root/.config/SciTools
+      - STIHOME=/app/scitools
+      - STILICENSE=/root/.config/SciTools/License.conf
+      - UNDERSTAND_API_LICENSE=/root/.local/share/SciTools/Understand/python_api.cfg
+
+      # Path environment variables
+      - PATH=/app/scitools/bin/linux64:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      - PYTHONPATH=/app:/app/scitools/bin/linux64/Python
+      - LD_LIBRARY_PATH=/app/scitools/bin/linux64
+
+      # Qt environment variables
+      - QT_QPA_PLATFORM=offscreen
+      - QT_DEBUG_PLUGINS=0
+      - QT_NO_SSL=1
+      - QT_MUTEX_WAIT_TIME=0
+
+      # External service connections
       - MINIO_ENDPOINT=minio:9000
       - MINIO_ACCESS_KEY=00jFBl7n9Jn0ex0XL7m1
       - MINIO_SECRET_KEY=kYfujzkdSGjXKLN9oQhPDIVgRUaZRijvj1yaXmIZ
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - STILICENSE=/root/.config/SciTools/License.conf
     depends_on:
-      - ml-worker
       - minio
       - rabbitmq
       - redis
       - base
-
     networks:
       - default
       - internal
-
 
 volumes:
   minio_storage:
@@ -161,6 +169,4 @@ volumes:
   projects:
   csv_pmd:
   scitools_root_config:
-  scitools_app_license:
   scitools_python_api:
-  scitools_root_config_id:

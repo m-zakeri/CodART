@@ -1,22 +1,33 @@
 FROM ubuntu:jammy-20250415.1
 
-RUN apk upgrade --update-cache --available && \
-    apk add openssl && \
-    rm -rf /var/cache/apk/*
-
-FROM python:3.12-slim
-
 USER root
-
-
 WORKDIR /app
 
-ENV PATH=/app/scitools/bin/linux64:$PATH
-ENV PYTHONPATH=/app/scitools/bin/linux64/Python:$PYTHONPATH
-ENV LD_LIBRARY_PATH=/app/scitools/bin/linux64:$LD_LIBRARY_PATH
-ENV CFLAGS="-I/usr/local/ssl/include"
-ENV LDFLAGS="-L/usr/local/ssl/lib"
+# Set environment variables to make installation non-interactive
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Etc/UTC
 
-COPY dependencies/* /app/dependencies/
+# Install software-properties-common to get add-apt-repository
+RUN apt-get update && \
+    apt-get install -y software-properties-common && \
+    add-apt-repository ppa:deadsnakes/ppa && \
+    apt-get update && \
+    apt-get install -y python3.12 python3.12-dev python3.12-venv && \
+    apt-get install -y --no-install-recommends build-essential curl && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    ln -sf /usr/bin/python3.12 /usr/bin/python3 && \
+    ln -sf /usr/bin/python3 /usr/bin/python
 
-RUN pip3 install /app/dependencies/*
+# Install pip using the ensurepip module (available in Python 3.12)
+RUN python3.12 -m ensurepip --upgrade && \
+    ln -sf /usr/local/bin/pip3.12 /usr/bin/pip3 || ln -sf /usr/bin/pip3.12 /usr/bin/pip3 && \
+    ln -sf /usr/bin/pip3 /usr/bin/pip
+
+RUN pip3 install --no-cache-dir --upgrade pip setuptools wheel
+
+COPY dependencies/ /app/dependencies
+COPY requirements.txt /app/
+
+# Install wheel files
+RUN pip3 install --no-index --find-links=/app/dependencies/ /app/dependencies/*.whl
