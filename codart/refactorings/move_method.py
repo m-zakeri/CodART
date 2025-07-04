@@ -24,6 +24,7 @@ from pathlib import Path
 # import logging
 
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
+os.add_dll_directory("C:\\Program Files\\SciTools\\bin\\pc-win64")
 
 try:
     import understand as und
@@ -43,17 +44,11 @@ STATIC = "Static Method"
 
 
 class CutMethodListener(JavaParserLabeledListener):
-    """
 
-
-    """
 
     def __init__(self, class_name: str, instance_name: str, method_name: str, is_static: bool, import_statement: str,
                  rewriter: TokenStreamRewriter):
-        """
 
-
-        """
 
         self.class_name = class_name
         self.method_name = method_name
@@ -90,24 +85,29 @@ class CutMethodListener(JavaParserLabeledListener):
         self.is_member = False
 
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
-        if self.is_member and ctx.IDENTIFIER().getText() == self.method_name:
+        if ctx.IDENTIFIER().getText() == self.method_name:
             self.do_delete = True
 
-    def exitClassBodyDeclaration2(self, ctx: JavaParserLabeled.ClassBodyDeclaration2Context):
+    def exitMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
         if self.do_delete:
-            self.method_text = self.rewriter.getText(
+            parent = ctx.parentCtx.parentCtx
+
+            full_text = self.rewriter.getText(
                 program_name=self.rewriter.DEFAULT_PROGRAM_NAME,
-                start=ctx.start.tokenIndex,
-                stop=ctx.stop.tokenIndex
+                start=parent.start.tokenIndex,
+                stop=parent.stop.tokenIndex
             )
-            if self.is_static:
-                replace_text = f"public static {self.class_name} {self.instance_name} = new {self.class_name}();"
-            else:
-                replace_text = f"public {self.class_name} {self.instance_name} = new {self.class_name}();"
+
+            self.method_text = full_text.strip()
+
+            print("✅ Extracted method text (with modifiers):")
+            print(self.method_text)
+
+            replace_text = f"{self.class_name} {self.instance_name} = new {self.class_name}();"
             self.rewriter.replace(
                 program_name=self.rewriter.DEFAULT_PROGRAM_NAME,
-                from_idx=ctx.start.tokenIndex,
-                to_idx=ctx.stop.tokenIndex,
+                from_idx=parent.start.tokenIndex,
+                to_idx=parent.stop.tokenIndex,
                 text=replace_text
             )
 
@@ -178,6 +178,7 @@ class ReferenceInjectorAndConstructorListener(PasteMethodListener):
     def enterMethodDeclaration(self, ctx: JavaParserLabeled.MethodDeclarationContext):
         identifier = ctx.IDENTIFIER()
         self.fields = self.method_map.get(identifier.getText())
+
         if self.fields:
             if ctx.formalParameters().getText() == "()":
                 text = f"{self.source_class} ref"
@@ -212,54 +213,48 @@ class ReferenceInjectorAndConstructorListener(PasteMethodListener):
                     text="ref."
                 )
 
-
 class PropagateListener(JavaParserLabeledListener):
     def __init__(self, method_name: str, new_name: str, lines: list, is_in_target_class: bool, method_map: dict,
                  rewriter: TokenStreamRewriter):
         self.method_name = method_name
         self.new_name = new_name
-        self.lines = lines
+        self.lines = set(lines) if lines else set()
         self.method_map = method_map
         self.fields = None
         self.rewriter = rewriter
         self.is_in_target_class = is_in_target_class
 
-    def enterMethodCall0(self, ctx: JavaParserLabeled.MethodCall0Context):
-        identifier = ctx.IDENTIFIER()
-        self.fields = self.method_map.get(identifier.getText())
-        if identifier and ctx.start.line in self.lines and identifier.getText() == self.method_name:
-            if self.fields:
-                parent = ctx.parentCtx
-                caller = parent.children[0]
-                caller = self.rewriter.getText(
-                    program_name=self.rewriter.DEFAULT_PROGRAM_NAME,
-                    start=caller.start.tokenIndex,
-                    stop=caller.stop.tokenIndex
-                )
-
-                if ctx.expressionList():
-                    self.rewriter.insertAfterToken(
-                        token=ctx.expressionList().stop,
-                        text=", " + caller,
-                        program_name=self.rewriter.DEFAULT_PROGRAM_NAME
-                    )
+    def enterMethodCall(self, ctx: JavaParserLabeled.MethodCallContext):
+        if ctx.IDENTIFIER().getText() == self.method_name:
+            line_no = ctx.start.line
+            if not self.lines or line_no in self.lines:
+                if self.is_in_target_class:
+                    new_text = f"this.{self.method_name}()"
                 else:
-                    self.rewriter.insertAfter(
-                        index=ctx.stop.tokenIndex - 1,
-                        text=caller,
-                        program_name=self.rewriter.DEFAULT_PROGRAM_NAME
-                    )
+                    new_text = f"{self.new_name}()"
 
+                self.rewriter.replace(
+                    program_name=self.rewriter.DEFAULT_PROGRAM_NAME,
+                    from_idx=ctx.start.tokenIndex,
+                    to_idx=ctx.stop.tokenIndex,
+                    text=new_text
+                )
+
+    def enterEveryRule(self, ctx):
+        if hasattr(ctx, 'IDENTIFIER'):
+            try:
+                name = ctx.IDENTIFIER().getText()
+                if name == self.method_name:
+                    print(f"[FOUND] {type(ctx).__name__} → {name} at line {ctx.start.line}")
+            except:
+                pass
+
+    def _replace_method_call(self, ctx, token):
+        if not self.lines or ctx.start.line in self.lines:
             if self.is_in_target_class:
-                self.rewriter.replaceSingleToken(
-                    token=ctx.parentCtx.start,
-                    text="this"
-                )
+                self.rewriter.replaceSingleToken(token, f"this.{self.method_name}")
             else:
-                self.rewriter.replaceSingleToken(
-                    token=ctx.start,
-                    text=self.new_name
-                )
+                self.rewriter.replaceSingleToken(token, self.new_name)
 
     def exitMethodCall0(self, ctx: JavaParserLabeled.MethodCall0Context):
         self.fields = None
@@ -288,10 +283,7 @@ def get_source_class_map(db, source_class: str):
 
 def main(source_class: str, source_package: str, target_class: str, target_package: str, method_name: str,
          udb_path: str, *args, **kwargs):
-    """
 
-
-    """
 
     import_statement = None
     if source_package != target_package:
@@ -365,19 +357,24 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
         return False
 
     # Propagate Changes
-    for file in usages.keys():
+    files_to_update = set(usages.keys())
+    files_to_update.add(src_class_file)
+
+    for file in files_to_update:
         public_class_name = os.path.basename(file).split(".")[0]
         is_in_target_class = public_class_name == target_class
+
         parse_and_walk(
             file_path=file,
             listener_class=PropagateListener,
             has_write=True,
             method_name=method_name,
             new_name=f"{instance_name}.{method_name}",
-            lines=usages[file],
+            lines=[],
             is_in_target_class=is_in_target_class,
             method_map=method_map,
         )
+
     # exit(-1)
     # Do the cut and paste!
     # Cut
@@ -391,6 +388,8 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
         is_static=is_static,
         import_statement=import_statement,
     )
+    print("=== CUT RESULT ===")
+    print(listener.method_text)
 
     method_text = listener.method_text
 
@@ -404,8 +403,9 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
         method_map=method_map,
         imports=listener.imports,
     )
+    print("=== PASTE SUCCESS ===")
+    print("Target file was written to:", target_class_file)
 
-    # Post-Paste: Reference Injection
     parse_and_walk(
         file_path=target_class_file,
         listener_class=ReferenceInjectorAndConstructorListener,
@@ -416,20 +416,21 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
         imports=None,
         has_empty_cons=listener.has_empty_cons,
     )
+
     # db.close()
     return True
 
 
 # Tests
 if __name__ == '__main__':
-    from codart.utility.directory_utils import update_understand_database
+    # from codart.utility.directory_utils import update_understand_database
 
-    update_understand_database("C:/Users/Administrator/Downloads/udbs/jvlt-1.3.2.udb")
+    # update_understand_database("C:/Users/Administrator/Downloads/udbs/jvlt-1.3.2.udb")
     main(
-        source_class="XMLFormatter",
-        source_package="net.sourceforge.jvlt.io",
-        target_class="Entry",
-        target_package="net.sourceforge.jvlt.core",
-        method_name="getXMLForEntryInfo",
-        udb_path="C:/Users/Administrator/Downloads/udbs/jvlt-1.3.2.udb"
+        source_class="SourceClass",
+        source_package="net.example.source",
+        target_class="TargetClass",
+        target_package="net.example.target",
+        method_name="methodToMove",
+        udb_path="C:/Users/Lenovo/Desktop/test_project/test_project.und"
     )
