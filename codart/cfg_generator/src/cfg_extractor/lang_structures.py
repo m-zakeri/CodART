@@ -1,8 +1,8 @@
 import networkx as nx
 
-from cfg_generator.src.antlr.gen.JavaParser import JavaParser
-from cfg_generator.src.antlr.rule_utils import is_break
-from cfg_generator.src.graph.utils import (shift_node_labels,
+from codart.cfg_generator.src.antlr.gen.JavaParser import JavaParser
+from codart.cfg_generator.src.antlr.rule_utils import is_break
+from codart.cfg_generator.src.graph.utils import (shift_node_labels,
                              head_node, last_node,
                              split_on_break, split_on_continue, split_on_return, split_on_throw,
                              compose, solve_null_nodes)

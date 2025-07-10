@@ -3,7 +3,7 @@ from typing import List, Any
 import networkx as nx
 from networkx import DiGraph
 
-from cfg_generator.src.data_structures.graph.builder_interface import IDiGraphBuilder
+from codart.cfg_generator.src.data_structures.graph.builder_interface import IDiGraphBuilder
 
 
 class NxDiGraphBuilder(IDiGraphBuilder):

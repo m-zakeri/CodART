@@ -1,8 +1,8 @@
 from functools import reduce
-from cfg_generator.src.antlr.gen.JavaParser import JavaParser
-from cfg_generator.src.antlr.gen.JavaParserVisitor import JavaParserVisitor
-from cfg_generator.src.data_structures.graph.networkx_builder import NxDiGraphBuilder as DiGraphBuilder
-from cfg_generator.src.cfg_extractor.language_structure.digraph_embedder import DiGraphEmbedder
+from codart.cfg_generator.src.antlr.gen.JavaParser import JavaParser
+from codart.cfg_generator.src.antlr.gen.JavaParserVisitor import JavaParserVisitor
+from codart.cfg_generator.src.data_structures.graph.networkx_builder import NxDiGraphBuilder as DiGraphBuilder
+from codart.cfg_generator.src.cfg_extractor.language_structure.digraph_embedder import DiGraphEmbedder
 
 class CFGExtractorVisitor(JavaParserVisitor):
     """

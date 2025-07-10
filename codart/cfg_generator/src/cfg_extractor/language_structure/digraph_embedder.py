@@ -1,12 +1,12 @@
 from typing import List, Tuple, Any, Union
 from antlr4 import RuleContext
-from cfg_generator.src.data_structures.graph.builder_interface import IDiGraphBuilder
-from cfg_generator.src.cfg_extractor.language_structure.structure_pattern_interface import ILanguagePattern
-from cfg_generator.src.data_structures.graph.builder_interface import IDiGraphBuilder
-from cfg_generator.src.data_structures.graph.networkx_builder import NxDiGraphBuilder as DiGraphBuilder
+from codart.cfg_generator.src.data_structures.graph.builder_interface import IDiGraphBuilder
+from codart.cfg_generator.src.cfg_extractor.language_structure.structure_pattern_interface import ILanguagePattern
+from codart.cfg_generator.src.data_structures.graph.builder_interface import IDiGraphBuilder
+from codart.cfg_generator.src.data_structures.graph.networkx_builder import NxDiGraphBuilder as DiGraphBuilder
 from enum import Enum, auto
-from cfg_generator.src.antlr.rule_utils import is_break, is_return, is_continue, is_throw, extract_exact_text
-from cfg_generator.src.antlr.gen.JavaParser import JavaParser
+from codart.cfg_generator.src.antlr.rule_utils import is_break, is_return, is_continue, is_throw, extract_exact_text
+from codart.cfg_generator.src.antlr.gen.JavaParser import JavaParser
 from antlr4.xpath.XPath import XPath
 from functools import reduce
 import operator

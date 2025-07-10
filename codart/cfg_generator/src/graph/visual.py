@@ -3,9 +3,9 @@ from collections import defaultdict
 
 import graphviz as gv
 import re
-from cfg_generator.src.data_structures.graph.builder_interface import IDiGraphBuilder
-from cfg_generator.src.antlr.rule_utils import extract_exact_text
-from cfg_generator.src.graph.utils import head_node, last_node
+from codart.cfg_generator.src.data_structures.graph.builder_interface import IDiGraphBuilder
+from codart.cfg_generator.src.antlr.rule_utils import extract_exact_text
+from codart.cfg_generator.src.graph.utils import head_node, last_node
 
 FONT_SIZE = "22"
 PEN_WIDTH = "2"

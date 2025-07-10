@@ -1,9 +1,9 @@
 from antlr4 import *
 from antlr4 import CommonTokenStream, FileStream
-from cfg_generator.src.antlr.gen.JavaLexer import JavaLexer
-from cfg_generator.src.antlr.gen.JavaParser import JavaParser
-from cfg_generator.src.cfg_extractor.cfg_extractor_visitor import CFGExtractorVisitor
-from cfg_generator.src.graph.visual import draw_CFG
+from codart.cfg_generator.src.antlr.gen.JavaLexer import JavaLexer
+from codart.cfg_generator.src.antlr.gen.JavaParser import JavaParser
+from codart.cfg_generator.src.cfg_extractor.cfg_extractor_visitor import CFGExtractorVisitor
+from codart.cfg_generator.src.graph.visual import draw_CFG
 import os
 from pathlib import Path
 

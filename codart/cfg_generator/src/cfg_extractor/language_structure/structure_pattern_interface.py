@@ -1,8 +1,8 @@
 import abc
 from typing import List
 
-from cfg_generator.src.antlr.gen.JavaParser import RuleContext
-from cfg_generator.src.data_structures.graph.builder_interface import IDiGraphBuilder
+from codart.cfg_generator.src.antlr.gen.JavaParser import RuleContext
+from codart.cfg_generator.src.data_structures.graph.builder_interface import IDiGraphBuilder
 
 
 class ILanguagePattern(metaclass=abc.ABCMeta):

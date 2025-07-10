@@ -1,6 +1,6 @@
 from antlr4 import CommonTokenStream, ParserRuleContext
 
-from cfg_generator.src.antlr.gen.JavaLexer import JavaLexer
+from codart.cfg_generator.src.antlr.gen.JavaLexer import JavaLexer
 
 
 def extract_exact_text(token_stream: CommonTokenStream, rule: ParserRuleContext) -> str:
