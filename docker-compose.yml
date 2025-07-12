@@ -25,6 +25,7 @@ services:
 
   redis:
     image: redis:alpine
+    hostname: redis
     ports:
       - "6379:6379"
     command: redis-server --appendonly yes
@@ -34,6 +35,7 @@ services:
       - default
       - internal
 
+
   rabbitmq:
     image: rabbitmq:3-management
     ports:
@@ -42,6 +44,11 @@ services:
     networks:
       - default
       - internal
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   python-base:
     image: python-base:v1.0.0
@@ -63,30 +70,27 @@ services:
       - default
       - internal
 
-  ml-worker:
-    image: ml:v1.0.0
+
+  ui:
+    image: ml-platform-ui:v1.0.0
     build:
-      context: .
-      dockerfile: Dockerfile.worker
-      extra_hosts:
-        - "licensing.scitools.com:127.0.0.1"
-    volumes:
-      - ./models:/app/models
-      - ./data:/app/data
+      context: ./ui
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
     environment:
-      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - NODE_ENV=production
     depends_on:
-      - rabbitmq
-      - redis
-      - minio
-      - python-base
-    extra_hosts:
-      - "licensing.scitools.com:127.0.0.1"
-      - "stats.scitools.com:127.0.0.1"
+      - api
     networks:
       - default
-      - internal
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost" ]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
 
   api:
     image: application:v1.0.0
@@ -156,6 +160,8 @@ services:
       - REDIS_PASSWORD=redis
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
     depends_on:
       - minio
       - rabbitmq

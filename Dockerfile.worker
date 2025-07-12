@@ -1,7 +1,0 @@
-FROM python-base:v1.0.0
-
-COPY codart /app/codart
-COPY application /app/application
-COPY config.ini /app/config.ini
-
-CMD ["celery", "-A", "application.celery_workers.ml_training_task", "worker", "--loglevel=info"]

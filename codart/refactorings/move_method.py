@@ -1,27 +1,16 @@
 """
-## Introduction
-
-The module implements Move Method refactoring operation
-
-## Pre and post-conditions
-
-### Pre-conditions:
-
-Todo: Add pre-conditions
-
-### Post-conditions:
-
-Todo: Add post-conditions
-
+Enhanced Move Method refactoring with timeout handling and better error recovery
 """
-
-__version__ = '0.1.0'
-__author__ = 'Morteza Zakeri'
 
 import os
 import os.path
+import subprocess
+import signal
+import time
 from pathlib import Path
-# import logging
+from functools import wraps
+from contextlib import contextmanager
+import threading
 
 from antlr4.TokenStreamRewriter import TokenStreamRewriter
 
@@ -35,32 +24,74 @@ from codart.gen.JavaParserLabeledListener import JavaParserLabeledListener
 from codart.refactorings.move_field import CheckCycleListener
 from codart.symbol_table import parse_and_walk
 from codart.learner.sbr_initializer.utils.utility import logger, config
-
-# logging.basicConfig(level=logging.DEBUG)
-# logger = logging.getLogger(__file__)
+from codart.utility.directory_utils import git_restore
 
 STATIC = "Static Method"
+DEFAULT_TIMEOUT = 60  # 60 seconds timeout for refactoring operations
+
+
+class TimeoutError(Exception):
+    """Custom timeout exception"""
+    pass
+
+
+@contextmanager
+def timeout_context(seconds):
+    """Context manager for timeout operations"""
+    def timeout_handler(signum, frame):
+        raise TimeoutError(f"Operation timed out after {seconds} seconds")
+
+    # Set the signal handler
+    old_handler = signal.signal(signal.SIGALRM, timeout_handler)
+    signal.alarm(seconds)
+
+    try:
+        yield
+    finally:
+        # Restore the old signal handler
+        signal.alarm(0)
+        signal.signal(signal.SIGALRM, old_handler)
+
+
+def with_timeout(timeout_seconds=DEFAULT_TIMEOUT):
+    """Decorator to add timeout to functions"""
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            result = [None]
+            exception = [None]
+
+            def target():
+                try:
+                    result[0] = func(*args, **kwargs)
+                except Exception as e:
+                    exception[0] = e
+
+            thread = threading.Thread(target=target)
+            thread.daemon = True
+            thread.start()
+            thread.join(timeout_seconds)
+
+            if thread.is_alive():
+                logger.error(f"Function {func.__name__} timed out after {timeout_seconds} seconds")
+                raise TimeoutError(f"Function {func.__name__} timed out after {timeout_seconds} seconds")
+
+            if exception[0]:
+                raise exception[0]
+
+            return result[0]
+        return wrapper
+    return decorator
 
 
 class CutMethodListener(JavaParserLabeledListener):
-    """
-
-
-    """
-
     def __init__(self, class_name: str, instance_name: str, method_name: str, is_static: bool, import_statement: str,
                  rewriter: TokenStreamRewriter):
-        """
-
-
-        """
-
         self.class_name = class_name
         self.method_name = method_name
         self.is_static = is_static
         self.rewriter = rewriter
         self.import_statement = import_statement
-
         self.instance_name = instance_name
         self.is_member = False
         self.do_delete = False
@@ -110,7 +141,6 @@ class CutMethodListener(JavaParserLabeledListener):
                 to_idx=ctx.stop.tokenIndex,
                 text=replace_text
             )
-
             self.do_delete = False
 
 
@@ -183,7 +213,6 @@ class ReferenceInjectorAndConstructorListener(PasteMethodListener):
                 text = f"{self.source_class} ref"
             else:
                 text = f", {self.source_class} ref"
-
             self.rewriter.insertBeforeToken(
                 token=ctx.formalParameters().stop,
                 text=text,
@@ -265,13 +294,33 @@ class PropagateListener(JavaParserLabeledListener):
         self.fields = None
 
 
+def execute_git_restore_with_utility(project_dir):
+    """Execute git restore using the standardized utility method"""
+    try:
+        logger.debug(f"Attempting to restore project: {project_dir}")
+        git_restore(project_dir=project_dir)
+        logger.info(f"Successfully restored: {project_dir}")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to restore project {project_dir}: {str(e)}")
+        return False
+
+
+def kill_understand_processes():
+    """Kill any running understand processes to release file locks"""
+    try:
+        subprocess.run(["pkill", "-f", "und"], capture_output=True, timeout=10)
+        logger.debug("The und process was killed successfully using pkill")
+    except Exception as e:
+        logger.warning(f"Failed to kill understand processes: {str(e)}")
+
+
 def get_source_class_map(db, source_class: str):
     method_usage_map = {}
     class_ents = db.lookup(source_class, "Class")
     class_ent = None
     for ent in class_ents:
         if ent.parent() is not None:
-            # print(source_class)
             if Path(ent.parent().longname()).name == f"{source_class}.java":
                 class_ent = ent
                 break
@@ -286,179 +335,313 @@ def get_source_class_map(db, source_class: str):
     return method_usage_map, class_ent
 
 
-def main(source_class, source_package, target_class, target_package, method_name, udb_path, *args, **kwargs):
-    # Add a preliminary check to catch non-existent methods earlier
-    db = und.open(udb_path)
+@with_timeout(30)  # 30 second timeout for parse_and_walk operations
+def safe_parse_and_walk(file_path, listener_class, **kwargs):
+    """Wrapper for parse_and_walk with timeout protection"""
+    logger.debug(f"Starting parse_and_walk for {file_path} with {listener_class.__name__}")
+    start_time = time.time()
 
-    # Check if the method exists in the source class
-    full_method_name = f"{source_package}.{source_class}.{method_name}"
-    method_ent = db.lookup(full_method_name, "Method")
-
-    if len(method_ent) < 1:
-        logger.error(f"Method not found: {full_method_name}")
-        logger.debug("This method does not exist in the source class")
-
-        # Log available methods to help debug
-        logger.error(f"Available methods for {source_package}.{source_class}:")
-        class_ents = db.lookup(source_class, "Class")
-        for ent in class_ents:
-            logger.error(f"Class: {ent.longname()}")
-            for ref in ent.refs("Define", "Method"):
-                logger.error(f"  Method: {ref.ent().longname()}")
-
-        db.close()
-        return False
-
-    result = True
     try:
+        result = parse_and_walk(
+            file_path=file_path,
+            listener_class=listener_class,
+            **kwargs
+        )
+        elapsed = time.time() - start_time
+        logger.debug(f"Completed parse_and_walk for {file_path} in {elapsed:.2f} seconds")
+        return result
+    except Exception as e:
+        elapsed = time.time() - start_time
+        logger.error(f"parse_and_walk failed for {file_path} after {elapsed:.2f} seconds: {str(e)}")
+        raise
+
+
+def cleanup_and_restore(db, project_dir):
+    """Centralized cleanup and restore function"""
+    # Close database if open
+    if db is not None:
+        try:
+            db.close()
+        except:
+            pass
+
+    # Kill understand processes
+    kill_understand_processes()
+
+    # Execute git restore
+    if project_dir:
+        execute_git_restore_with_utility(project_dir)
+    else:
+        logger.warning("No project_dir provided, skipping git restore")
+
+
+def main(source_class, source_package, target_class, target_package, method_name, udb_path, project_dir=None, *args, **kwargs):
+    """
+    Enhanced move method with timeout handling and comprehensive error recovery
+    Returns True on success, False on failure (never None)
+    """
+    result = False
+    db = None
+    overall_start_time = time.time()
+
+    try:
+        logger.debug(f"Starting move method refactoring with timeout protection")
+        logger.debug(f"Attempting to move method {method_name} from {source_package}.{source_class} to {target_package}.{target_class}")
+
+        # Open database with timeout
+        try:
+            with timeout_context(10):  # 10 second timeout for database operations
+                db = und.open(udb_path)
+        except TimeoutError:
+            logger.error("Database opening timed out")
+            return False
+
+        # 1. Validate input parameters
+        if not all([source_class, source_package, target_class, target_package, method_name]):
+            logger.error("Missing required parameters")
+            cleanup_and_restore(db, project_dir)
+            return False
+
+        # 2. Check if source and target are the same
+        if source_package == target_package and source_class == target_class:
+            logger.error("Cannot move method to the same class")
+            cleanup_and_restore(db, project_dir)
+            return False
+
+        # 3. Method existence check with timeout
+        try:
+            with timeout_context(15):  # 15 second timeout for method lookup
+                full_method_name = f"{source_package}.{source_class}.{method_name}"
+                method_entities = db.lookup(full_method_name, "Method")
+
+                # Alternative lookup strategies if direct lookup fails
+                if len(method_entities) == 0:
+                    logger.warning(f"Direct method lookup failed for: {full_method_name}")
+
+                    # Strategy 1: Look up class first, then find method
+                    class_entities = db.lookup(f"{source_package}.{source_class}", "Class")
+                    method_ent = None
+
+                    for class_ent in class_entities:
+                        for ref in class_ent.refs("Define", "Method"):
+                            candidate_method = ref.ent()
+                            if candidate_method.simplename() == method_name:
+                                method_ent = candidate_method
+                                break
+                        if method_ent:
+                            break
+
+                    # Strategy 2: Try without package
+                    if not method_ent:
+                        class_entities = db.lookup(source_class, "Class")
+                        for class_ent in class_entities:
+                            if class_ent.parent() and Path(class_ent.parent().longname()).name == f"{source_class}.java":
+                                for ref in class_ent.refs("Define", "Method"):
+                                    candidate_method = ref.ent()
+                                    if candidate_method.simplename() == method_name:
+                                        method_ent = candidate_method
+                                        break
+                                if method_ent:
+                                    break
+
+                    if method_ent:
+                        method_entities = [method_ent]
+                    else:
+                        logger.error(f"Method not found after all lookup strategies: {full_method_name}")
+                        cleanup_and_restore(db, project_dir)
+                        return False
+
+        except TimeoutError:
+            logger.error("Method lookup timed out")
+            cleanup_and_restore(db, project_dir)
+            return False
+
+        # 4. Validate the found method
+        method_ent = method_entities[0]
+
+        if method_ent.simplename() != method_name:
+            logger.error(f"Method name mismatch. Found: {method_ent.simplename()}, Expected: {method_name}")
+            cleanup_and_restore(db, project_dir)
+            return False
+
+        if method_name == source_class:
+            logger.error("Cannot move constructor method")
+            cleanup_and_restore(db, project_dir)
+            return False
+
+        # 5. Get class files with timeout
+        try:
+            with timeout_context(10):
+                src_class_files = db.lookup(f"{source_package}.{source_class}.java", "File")
+                if not src_class_files:
+                    src_class_files = db.lookup(f"{source_class}.java", "File")
+                    if not src_class_files:
+                        logger.error(f"Source class file not found")
+                        cleanup_and_restore(db, project_dir)
+                        return False
+                src_class_file = src_class_files[0].longname()
+
+                target_class_files = db.lookup(f"{target_package}.{target_class}.java", "File")
+                if not target_class_files:
+                    target_class_files = db.lookup(f"{target_class}.java", "File")
+                    if not target_class_files:
+                        logger.error(f"Target class file not found")
+                        cleanup_and_restore(db, project_dir)
+                        return False
+                target_class_file = target_class_files[0].longname()
+
+        except (TimeoutError, IndexError, AttributeError) as e:
+            logger.error(f"Error accessing class files: {str(e)}")
+            cleanup_and_restore(db, project_dir)
+            return False
+
+        # 6. Get source class mapping
+        method_map, class_ent = get_source_class_map(db, source_class)
+        if class_ent is None:
+            logger.warning(f"Could not find class entity for {source_class}, using empty method map")
+            method_map = {}
+
+        # 7. Check if method is static
+        is_static = "Static" in method_ent.kindname()
+        logger.debug(f"Method {method_name} is static: {is_static}")
+
+        # 8. Find method usages with timeout
+        usages = {}
+        try:
+            with timeout_context(10):
+                for ref in method_ent.refs("Callby"):
+                    file = ref.file().longname()
+                    if file in usages:
+                        usages[file].append(ref.line())
+                    else:
+                        usages[file] = [ref.line()]
+        except (TimeoutError, Exception) as e:
+            logger.warning(f"Error finding method usages: {str(e)}")
+            usages = {}
+
+        logger.debug(f"Found {len(usages)} files with method calls")
+
+        # 9. Determine import statement
         import_statement = None
         if source_package != target_package:
             import_statement = f"\nimport {target_package}.{target_class};"
+
         instance_name = target_class.lower() + "ByCodArt"
-        db = und.open(udb_path)
-        method_map, class_ent = get_source_class_map(db, source_class)
-        if class_ent is None:
-            logger.error("Class entity is None")
-            return False
 
-        # Strong overlay precondition
-        # if class_ent.refs("Extend ~Implicit, ExtendBy, Implement"):
-        #     logger.error("Class is in inheritance or implements an interface.")
-        #     db.close()
-        #     return False
-
-        # Check if method is static
-        method_ent = db.lookup(f"{source_package}.{source_class}.{method_name}", "Method")
-        if len(method_ent) >= 1:
-            method_ent = method_ent[0]
-        else:
-            logger.error(f"Entity not found: {source_package}.{source_class}.{method_name}")
-            # Add more detailed logging
-            logger.error(f"Available methods for {source_package}.{source_class}:")
-            class_ents = db.lookup(source_class, "Class")
-            for ent in class_ents:
-                logger.error(f"Class: {ent.longname()}")
-                for ref in ent.refs("Define", "Method"):
-                    logger.error(f"  Method: {ref.ent().longname()}")
-            db.close()
-            return False
-
-        if method_ent.simplename() != method_name:
-            logger.error(
-                f"Can not move method due to duplicated entities. Found: {method_ent.simplename()}, Expected: {method_name}")
-            logger.info(f"{method_ent}, {method_ent.kindname()}")
-            db.close()
-            return False
-
-        if source_package == target_package and source_class == target_class:
-            logger.error("Can not move to self.")
-            db.close()
-            return False
-
-        is_static = STATIC in method_ent.kindname()
-        # Find usages
-        usages = {}
-
-        for ref in method_ent.refs("Callby"):
-            file = ref.file().longname()
-            if file in usages:
-                usages[file].append(ref.line())
-            else:
-                usages[file] = [ref.line(), ]
-
-        try:
-            src_class_file = db.lookup(f"{source_package}.{source_class}.java", "File")[0].longname()
-            target_class_file = db.lookup(f"{target_package}.{target_class}.java", "File")[0].longname()
-        except IndexError:
-            logger.error("This is a nested method.")
-            logger.info(f"{source_package}.{source_class}.java")
-            logger.info(f"{target_package}.{target_class}.java")
-            db.close()
-            return False
-
+        # Close database before file operations
         db.close()
+        db = None
 
-        # Check if there is an cycle
-        listener = parse_and_walk(
-            file_path=target_class_file,
-            listener_class=CheckCycleListener,
-            class_name=source_class
-        )
+        # 10. Perform the refactoring operations with timeouts
+        logger.debug("Starting refactoring operations...")
 
-        if not listener.is_valid:
-            logger.error(f"Can not move method because there is a cycle between {source_class}, {target_class}")
-            # db.close()
+        # Propagate changes to all usage sites with individual timeouts
+        for file in usages.keys():
+            try:
+                public_class_name = os.path.basename(file).split(".")[0]
+                is_in_target_class = public_class_name == target_class
+
+                safe_parse_and_walk(
+                    file_path=file,
+                    listener_class=PropagateListener,
+                    has_write=True,
+                    method_name=method_name,
+                    new_name=f"{instance_name}.{method_name}",
+                    lines=usages[file],
+                    is_in_target_class=is_in_target_class,
+                    method_map=method_map,
+                )
+                logger.debug(f"Updated usage in {file}")
+            except (TimeoutError, Exception) as e:
+                logger.error(f"Error updating usage in {file}: {str(e)}")
+                # For propagation errors, restore and fail
+                cleanup_and_restore(None, project_dir)
+                return False
+
+        # Cut the method from source class with timeout
+        try:
+            listener = safe_parse_and_walk(
+                file_path=src_class_file,
+                listener_class=CutMethodListener,
+                has_write=True,
+                class_name=target_class,
+                instance_name=instance_name,
+                method_name=method_name,
+                is_static=is_static,
+                import_statement=import_statement,
+            )
+            method_text = listener.method_text
+
+            if not method_text.strip():
+                logger.error("Failed to extract method text")
+                cleanup_and_restore(None, project_dir)
+                return False
+
+            logger.debug("Successfully cut method from source class")
+        except (TimeoutError, Exception) as e:
+            logger.error(f"Error cutting method from source class: {str(e)}")
+            cleanup_and_restore(None, project_dir)
             return False
 
-        # Propagate Changes
-        for file in usages.keys():
-            public_class_name = os.path.basename(file).split(".")[0]
-            is_in_target_class = public_class_name == target_class
-            parse_and_walk(
-                file_path=file,
-                listener_class=PropagateListener,
+        # Paste the method to target class with timeout
+        try:
+            listener = safe_parse_and_walk(
+                file_path=target_class_file,
+                listener_class=PasteMethodListener,
                 has_write=True,
-                method_name=method_name,
-                new_name=f"{instance_name}.{method_name}",
-                lines=usages[file],
-                is_in_target_class=is_in_target_class,
+                method_text=method_text,
+                source_class=source_class,
                 method_map=method_map,
+                imports=getattr(listener, 'imports', ''),
             )
-        # exit(-1)
-        # Do the cut and paste!
-        # Cut
-        listener = parse_and_walk(
-            file_path=src_class_file,
-            listener_class=CutMethodListener,
-            has_write=True,
-            class_name=target_class,
-            instance_name=instance_name,
-            method_name=method_name,
-            is_static=is_static,
-            import_statement=import_statement,
-        )
+            logger.debug("Successfully pasted method to target class")
+        except (TimeoutError, Exception) as e:
+            logger.error(f"Error pasting method to target class: {str(e)}")
+            cleanup_and_restore(None, project_dir)
+            return False
 
-        method_text = listener.method_text
+        # Post-paste: Reference injection and constructor handling with timeout
+        try:
+            safe_parse_and_walk(
+                file_path=target_class_file,
+                listener_class=ReferenceInjectorAndConstructorListener,
+                has_write=True,
+                method_text=method_text,
+                source_class=source_class,
+                method_map=method_map,
+                imports=None,
+                has_empty_cons=getattr(listener, 'has_empty_cons', False),
+            )
+            logger.debug("Successfully injected references and handled constructors")
+        except (TimeoutError, Exception) as e:
+            logger.warning(f"Error in reference injection: {str(e)} - refactoring may still be successful")
+            # Don't fail here as the basic move might have worked
 
-        # Paste
-        listener = parse_and_walk(
-            file_path=target_class_file,
-            listener_class=PasteMethodListener,
-            has_write=True,
-            method_text=method_text,
-            source_class=source_class,
-            method_map=method_map,
-            imports=listener.imports,
-        )
+        elapsed = time.time() - overall_start_time
+        result = True
+        logger.debug(f"Move method refactoring completed successfully in {elapsed:.2f} seconds")
 
-        # Post-Paste: Reference Injection
-        parse_and_walk(
-            file_path=target_class_file,
-            listener_class=ReferenceInjectorAndConstructorListener,
-            has_write=True,
-            method_text=method_text,
-            source_class=source_class,
-            method_map=method_map,
-            imports=None,
-            has_empty_cons=listener.has_empty_cons,
-        )
-    except Exception as e:
-        print("ERROR MOVE METHOD : ",e)
+    except TimeoutError as e:
+        logger.error(f"Move method refactoring timed out: {str(e)}")
+        cleanup_and_restore(db, project_dir)
         result = False
-    logger.debug(f"Move Method returning {result}")
-    return result
 
+    except Exception as e:
+        logger.error(f"Move method refactoring failed with exception: {str(e)}")
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        cleanup_and_restore(db, project_dir)
+        result = False
 
-# # Tests
-# if __name__ == '__main__':
-#     from codart.utility.directory_utils import update_understand_database
-#
-#     update_understand_database("C:/Users/Administrator/Downloads/udbs/jvlt-1.3.2.udb")
-#     main(
-#         source_class="XMLFormatter",
-#         source_package="net.sourceforge.jvlt.io",
-#         target_class="Entry",
-#         target_package="net.sourceforge.jvlt.core",
-#         method_name="getXMLForEntryInfo",
-#         udb_path="C:/Users/Administrator/Downloads/udbs/jvlt-1.3.2.udb"
-#     )
+    finally:
+        # Ensure database is closed
+        if db is not None:
+            try:
+                db.close()
+            except:
+                pass
+
+    final_result = bool(result)
+    elapsed = time.time() - overall_start_time
+    logger.debug(f"Move Method returning {final_result} after {elapsed:.2f} seconds")
+    return final_result

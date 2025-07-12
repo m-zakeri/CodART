@@ -9,6 +9,15 @@ codart.egg-info
 dist
 gorgeous/Resources
 
+node_modules/
+build/
+.env.local
+.env.*.local
+npm-debug.log*
+.DS_Store
+.eslintcache
+coverage/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

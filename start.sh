@@ -77,4 +77,11 @@ fi
 
 # Start the application
 cd /app
+
+# Start Celery worker in background
+echo "Starting Celery worker..."
+celery -A application.celery_workers.ml_training_task worker --loglevel=info -Q celery,ml_training,ml_evaluation &
+
+# Start the API server in foreground
+echo "Starting API server..."
 exec uvicorn application.main:app --host 0.0.0.0 --port 8000

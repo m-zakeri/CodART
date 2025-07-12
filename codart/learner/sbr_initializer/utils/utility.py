@@ -50,12 +50,13 @@ class DynamicAbstractMetaInitializeRefactoringMethods(ABCMeta):
 
 
 class Utils(object):
-    def __init__(self, logger, population, initializers, project_name="", version_id=""):
+    def __init__(self, logger, population, initializers, project_name="", version_id="", project_dir:str = ""):
         self.logger = logger
         self.population = population
         self.initializers = initializers
         self.project_name = project_name
         self.version_id = version_id
+        self.project_dir = project_dir
 
     @handle_index_error
     def select_random(self):

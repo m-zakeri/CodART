@@ -1,4 +1,3 @@
-import torch
 from codart.learner.sbr_initializer.utils.utility import config
 from tensordict.nn import TensorDictModule
 from tensordict.nn.distributions import NormalParamExtractor
@@ -20,6 +19,9 @@ from torchrl.modules import MultiAgentMLP, ProbabilisticActor, TanhNormal
 
 # Loss
 from torchrl.objectives import ClipPPOLoss, ValueEstimators
+import torch
+
+
 
 torch.manual_seed(config.getint("TRAINING", "torch_manual_seed"))
 is_fork = multiprocessing.get_start_method() == "fork"

@@ -2,6 +2,7 @@ from codart.refactorings.abstraction import RefactoringOperation, RefactoringMod
 from codart.refactorings import extract_class, move_class, move_method, pushdown_method2, pullup_method, extract_method
 import torch
 
+
 class RefactoringManager:
     def __init__(self):
         self.operations = []
@@ -33,12 +34,13 @@ class RefactoringManager:
                 print(f"{i} - {op.__class__.__name__}")
 
 class ExtractClass(RefactoringOperation):
-    def __init__(self, udb_path: str = "", moved_methods: list = None, source_class: str = "", file_path: str = "", moved_fields: list = None):
+    def __init__(self, udb_path: str = "", moved_methods: list = None, source_class: str = "", file_path: str = "", moved_fields: list = None, project_dir: str=""):
         self._udb_path = udb_path
         self._moved_methods = moved_methods if moved_methods is not None else []
         self._source_class = source_class
         self._file_path = file_path
         self._moved_fields = moved_fields if moved_fields is not None else []
+        self._project_dir = project_dir
 
     def execute(self):
         print(f"Extracting class {self._source_class} from {self._file_path}")
@@ -46,7 +48,8 @@ class ExtractClass(RefactoringOperation):
                            moved_methods=self._moved_methods,
                            source_class=self._source_class,
                            file_path=self._file_path,
-                           moved_fields=self._moved_fields)
+                           moved_fields=self._moved_fields,
+                           project_dir=self._project_dir)
 
     def get_refactoring(self, *args, **kwargs) -> RefactoringModel:
         # Convert parameters to the expected nested dictionary structure
@@ -310,13 +313,14 @@ class PushdownMethod(RefactoringOperation):
 
 
 class MoveMethod(RefactoringOperation):
-    def __init__(self, source_class: str = "", method_name: str = "", udb_path: str = "", source_package: str = "", target_package: str = "", target_class: str = ""):
+    def __init__(self, source_class: str = "", method_name: str = "", udb_path: str = "", source_package: str = "", target_package: str = "", target_class: str = "", project_dir:str = None):
         self._source_class = source_class
         self._method_name = method_name
         self._udb_path = udb_path
         self._source_package = source_package
         self._target_package = target_package
         self._target_class = target_class
+        self._project_dir = project_dir
 
     def execute(self):
         print(f"Moving method {self._method_name} from {self._source_class} to {self._target_class}")
@@ -325,7 +329,9 @@ class MoveMethod(RefactoringOperation):
                          udb_path=self._udb_path,
                          source_package=self._source_package,
                          target_package=self._target_package,
-                         target_class=self._target_class)
+                         target_class=self._target_class,
+                         project_dir=self._project_dir
+                         )
 
     def get_refactoring(self, *args, **kwargs) -> RefactoringModel:
         # Convert parameters to the expected nested dictionary structure

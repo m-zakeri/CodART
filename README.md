@@ -1,252 +1,371 @@
-# CodART
+# CodART - Source Code Automated Refactoring Toolkit
 
 ![CodART](docs/figs/codart.png)
 
+## System Architecture Overview
 
-Source Code Automated Refactoring Toolkit (CodART) is a refactoring engine with the ability to perform many-objective program transformation and optimization. We have currently focused on automating the [various refactoring operations](https://refactoring.com/catalog/) for Java source codes. A complete list of refactoring supported by CodART can be found at [CodART refactorings list](https://m-zakeri.github.io/CodART/refactorings_list/).
+![CodART System Architecture](codart_system_arch.png)
 
-The CodART project is under active development. The current version of CodeART works fines on our benchmark projects. To understand how CodART works, read the [CodART white-paper](https://m-zakeri.github.io/CodART). 
-Your contributions to the project and your comments in the discussion section would be welcomed. 
-Also, feel free to email and ask any question: 
-`m-zakeri[at]live[dot]com`.
+*Overall system architecture showing containerized services*
 
+![CodART Reinforcement Learning Architecture](codart_rl_arch.png)
 
+*Reinforcement learning components and data flow*
 
-## Getting started
+![CodART ML Pipeline](codart_ml_pipeline.png)
 
-### Researchers and end users
-Researchers may use CodART search-based refactoring to reproduce the results of quality optimization on benchmark projects.
+*Machine learning training pipeline workflow*
 
+## Overview
 
-0. Clone the project source code!
+CodART (Source Code Automated Refactoring Toolkit) is a multi-objective program transformation and optimization engine that combines search-based software engineering (SBSE) with automated refactoring operations to improve Java source code quality. The system now includes a modern web-based interface, containerized deployment, and advanced machine learning capabilities for intelligent code refactoring.
 
-1. Install `requirements.txt`.
+### Key Features
 
-2. Install [Sci-tools Understand](https://www.scitools.com). Make sure Understand API works fine (without error).
+- **Automated Java Refactoring**: Supports 40+ refactoring operations including Extract Class, Move Method, Extract Interface, and more
+- **Multi-Objective Optimization**: Uses NSGA-II and NSGA-III algorithms to optimize 8+ quality metrics simultaneously
+- **Machine Learning Integration**: Reinforcement learning (PPO) for intelligent refactoring sequence generation
+- **Web-based UI**: Modern React interface for project management and ML training
+- **Containerized Architecture**: Docker-based deployment with microservices
+- **Real-time Monitoring**: Task tracking and progress monitoring for long-running operations
 
-3. Add a `.env` file inside the root of the project and put the following settings:
+## Quick Start with Docker
 
+### Prerequisites
+
+- Docker and Docker Compose
+- At least 8GB RAM and 4 CPU cores
+- SciTools Understand license (for code analysis)
+
+### 1. Clone and Setup
+
+```bash
+git clone https://github.com/m-zakeri/CodART.git
+cd CodART
 ```
-PROJECT_ROOT_DIR="The root path for the projects"
-CSV_ROOT_DIR="JDeodorant outputs csv paht for GodClass and Move class, Optional; only of WARM_START=1"
-UDB_ROOT_DIR="The root path of the projects Understand databases"
-INIT_POP_FILE="The path of initial population, Optional"
-WARM_START=1
-USE_CPP_BACKEND=0
-EXPERIMENTER="Your name, Optional"
-SCRIPT="Executed script, Optional"
-DESCRIPTION="NSGA-III first run after major re-structuring!, Optional"
-```
 
-4. In `.env` file you also can determine the configuration of the search algorithm. The following is a default setting:
+### 2. Environment Configuration
 
-```
-NGEN=10
-RESUME_EXECUTION=""
+Create a `.env` file in the project root:
+
+```bash
+# Project Configuration
+PROJECT_ROOT_DIR="/opt/projects"
+UDB_ROOT_DIR="/opt/understand_dbs"
 BENCHMARK_INDEX=2
+
+# Search Algorithm Settings
 POPULATION_SIZE=15
 MAX_ITERATIONS=15
-LOWER_BAND=15
-UPPER_BAND=50
-PROBLEM=2
+PROBLEM=2  # 0: Genetic, 1: NSGA-II, 2: NSGA-III
 NUMBER_OBJECTIVES=8
-MUTATION_PROBABILITY=0.2
-CROSSOVER_PROBABILITY=0.8
+
+# MinIO Credentials
+MINIO_ACCESS_KEY=00jFBl7n9Jn0ex0XL7m1
+MINIO_SECRET_KEY=kYfujzkdSGjXKLN9oQhPDIVgRUaZRijvj1yaXmIZ
 ```
 
-* **Note 1:** `BENCHMARK_INDEX` denotes one of the projects in the list of the benchmark project. To see the list of benchmark projects, go to `codart.config.py`. The projects are listed in the `BENCHMARKS` dictionary.
+### 3. Build and Run
+
+```bash
+# Build and start all services
+docker-compose up --build
+
+# Or run in background
+docker-compose up -d --build
+```
+
+### 4. Access the Application
+
+- **Web Interface**: http://localhost:3000
+- **API Documentation**: http://localhost:8000/docs
+- **MinIO Console**: http://localhost:9001 (admin/admin)
+- **RabbitMQ Management**: http://localhost:15672 (guest/guest)
 
-* **Note 2:** The `PROBLEM` option can be set to one of these options: `0`: Simple genetic algorithm, `1`: NSGA-II, `3`: NSGA-III.
+## Architecture Components
 
-* **Note 3:** The `NUMBER_OBJECTIVES` option was not used for PROBLEM=0
+### Core Services
 
+#### API Container (`api`)
+- **FastAPI Backend**: RESTful API for all operations
+- **Celery Worker**: Handles ML training and analysis tasks
+- **SciTools Understand**: Code parsing and analysis engine
+- **Combined Architecture**: API and worker run in same container for license sharing
+
+#### User Interface (`ui`)
+- **React Frontend**: Modern web interface with real-time updates
+- **Project Management**: Upload and manage Java projects
+- **ML Training Interface**: Configure and monitor training sessions
+- **Task Monitoring**: Real-time progress tracking with localStorage persistence
+
+#### Storage Layer
+- **MinIO**: Object storage for models, reports, and temporary files
+- **Redis**: Task result backend and caching
+- **Docker Volumes**: Persistent data storage
+
+#### Message Queue
+- **RabbitMQ**: Async task processing with queues:
+  - `ml_training`: Machine learning training tasks
+  - `ml_evaluation`: Model evaluation tasks
+  - `celery`: General background tasks
+
+### Key Directories
+
+```
+CodART/
+├── application/           # FastAPI web service
+│   ├── controllers/       # API endpoints
+│   ├── services/         # Business logic
+│   └── celery_workers/   # Background task handlers
+├── codart/               # Core refactoring engine
+│   ├── refactorings/     # Refactoring implementations
+│   ├── metrics/          # Quality metrics (QMOOD, testability)
+│   ├── smells/           # Code smell detection
+│   ├── sbse/             # Search-based optimization
+│   └── learner/          # Machine learning components
+├── ui/                   # React frontend
+└── benchmark_projects/   # Test projects
+```
+
+## Usage Workflows
+
+### 1. Web Interface Workflow
+
+1. **Project Upload**: Upload Java projects via web interface
+2. **Project Analysis**: Generate Understand databases and detect code smells
+3. **ML Training Configuration**: Set training parameters and objectives
+4. **Training Execution**: Monitor real-time progress and task status
+5. **Results Analysis**: Download trained models and analysis reports
+
+### 2. CLI Workflow
+
+```bash
+# Direct refactoring execution
+python codart/refactoring_cli.py --project-path /path/to/project
+
+# Search-based optimization
+python codart/sbse/search_based_refactoring2.py
+
+# Individual refactoring testing
+python tests/extract_method/test_1.py
+```
 
-5. Go to `codart.sbse` packages and run the `search_based_refactoring2.py` script.
+### 3. API Integration
 
-* **Note 4**: According to your configuration and size of the projects, it may take several hours for the execution to be finished. 
+```bash
+# Upload project
+curl -X POST "http://localhost:8000/projects/upload" \
+  -F "file=@project.zip" \
+  -F "project_name=MyProject"
 
-* **Note 5:** The results of each execution, including generations, objective values, initial population, refactored program, etc., are saved besides the project path, already defined in `.env` file.
+# Start ML training
+curl -X POST "http://localhost:8000/ml-training/train" \
+  -H "Content-Type: application/json" \
+  -d '{"project_id": "123", "config": {...}}'
 
+# Monitor task
+curl "http://localhost:8000/tasks/{task_id}/status"
+```
 
-### Tool developers
-Tool developers may want to use specific tools of the CodARTs.
-We currently have provided a `setup.py` script that installs CodART on the system to be imported into other projects.
+## Machine Learning Features
 
+### Reinforcement Learning Training
 
+The system uses Proximal Policy Optimization (PPO) to learn optimal refactoring sequences:
 
+- **Environment**: `RefactoringSequenceEnvironment` simulates code transformation
+- **State**: Current code metrics and smell indicators
+- **Actions**: Available refactoring operations
+- **Rewards**: Multi-objective improvement in quality metrics
+- **Training**: Experience replay with policy and value networks
 
+### Quality Objectives
 
+The system optimizes for 8 design quality objectives:
 
-## CodART architecture
-We discuss a summary of CodART architecture. The high-level architecture of CodART is shown in Figure 1. The source code consists of several Python packages and directories. We briefly describe each component in CodART. 
+1. **ANA** (Average Number of Ancestors)
+2. **CAMC** (Cohesion Among Methods in Class)
+3. **CIS** (Class Interface Size)
+4. **DAM** (Data Access Metric)
+5. **DCC** (Direct Class Coupling)
+6. **DSC** (Design Size in Classes)
+7. **MFA** (Measure of Functional Abstraction)
+8. **MOA** (Measure of Aggregation)
 
-![CodART__Architecture](docs/figs/CodART_architecture__v0.1.1.png)
+### Supported Refactorings
 
-*Figure 1. CodART architecture*
+**Structural Refactorings:**
+- Extract Class, Extract Method, Extract Interface
+- Move Method, Move Field, Move Class
+- Inline Class, Collapse Hierarchy
 
-### Repository structure
+**Access Control:**
+- Increase/Decrease Field/Method Visibility
+- Encapsulate Field
 
-I. `grammars`: The directory contains three ANTLR v4 grammars for the Java programming language: 
+**Inheritance Operations:**
+- Pull Up Method/Field/Constructor
+- Push Down Method/Field
+- Make Class Abstract/Concrete/Final
 
-1.	`Java9_v2.g4`: This grammar was used in the initial version of CodART. The main problem of this grammar is that parsing large source code files is performed very slow due to some decisions used in grammar design. We have switched to the fast grammar `JavaParserLabled.g4`.
-      
-2.	`JavaLexer.g4`: The lexer of Java fast grammar. This lexer is used for both fast parsers, i.e., `JavaParser.g4` and JavaParserLabeled.
-      
-3.	`JavaParser.g4`: The original parser of Java fast grammar. This parser is currently used in some refactoring. In the future release, this grammar will be replaced with `JavaPaseredLabled.g4`.
-      
-4.	`JavaParserLabeled.g4`: This file contains the same `JavaParsar.g4` grammar. The only difference is that the rules with more than one extension are labeled with a specific name. The ANTLR parser generator thus generates separate visitor and listener methods for each extension. This grammar facilitates the development of some refactoring. It is the preferred parser in CodART project.
+**Code Quality:**
+- Rename Class/Method/Field/Package
+- Remove Dead Code
+- Replace Conditional with Polymorphism
 
+## Configuration
 
-II. `codart.gen`: The `codart.gen` packages contain all generated source code for the parser, lexer, visitor, and listener for different grammars available in the grammars' directory. To develop refactorings and code smells, `codart.gen.JavaLabled` package, which contains `JavaParserLabled.g4` generated source code, must be used. The content of this package is generated _automatically_, and therefore it should _not_ be modified _manually_. Modules within this gen package are just for importing and using in other modules.
+### Environment Variables
 
+```bash
+# Core Paths
+PROJECT_ROOT_DIR="/opt/projects"
+UDB_ROOT_DIR="/opt/understand_dbs"
 
-III. `speedy`: The python implementation for ANTLR is less efficient than Java or C++ implementation. The `speedy` component implements a Java parser with a C++ back-end, improving the efficiency and speed of parsing. It uses speedy-antlr implementation with some minor changes.  The current version of the speedy module use `java9_v2.g4` grammar, which inherently slow as described. To switch to C++ back-end, first, the speedy module must be installed on the client system. It requires a C++ compiler. We _recommended_ to CodART developers using the Python back-end as switching to C++ back-end would be done transparently in the future release. The Python back-end saves debugging and developing time.
+# SciTools Understand
+STILICENSE="/root/.config/SciTools/License.conf"
+STIHOME="/app/scitools"
 
+# Algorithm Configuration
+POPULATION_SIZE=15
+MAX_ITERATIONS=15
+PROBLEM=2  # Algorithm: 0=GA, 1=NSGA-II, 2=NSGA-III
+NUMBER_OBJECTIVES=8
 
-IV. `codart.refactorings`: The `codart.refactorings` package is the main package in the CodART project and contains numerous Python modules that form the kernel functionalities of CodART. Each module implements the automation of one refactoring operation according to standard practices. The modules may include several classes which _inherit_ from ANTLR listeners. Sub-packages in this module contain refactorings, which are in an early step of development or deprecated version of an existing refactoring. This package is under active development and testing. The module in the root packages can be used for testing purposes.
+# Service URLs
+CELERY_BROKER_URL="amqp://guest:guest@rabbitmq:5672//"
+CELERY_RESULT_BACKEND="redis://redis:6379/0"
+MINIO_ENDPOINT="minio:9000"
+```
 
+### Benchmark Projects
 
-V. `codart.refactoring_design_patters`: The `codart.refactoring_design_pattern` package contain modules that implement refactoring to a specific design pattern automatically. 
+The system includes 14 benchmark projects:
 
+- JSON20201115, JFreeChart, Weka, FreeMind
+- Commons-codec, JRDF, JMetal, AntApache
+- And more...
 
-VI. `codart.smells`: The `codart.smells` package implements the automatic detection of software code and design smells relevant to the refactoring operation supported by CodART. Each smell corresponds to one or more refactoring in the refactoring package.
+Configure via `BENCHMARK_INDEX` in config.py.
 
+## Development
 
-VII. `codart.metrics`: The `codart.metrics` packages contain several modules that implement the computation of the most well-known source code metrics. These metrics used to detect code smells and measuring the quality of software in terms of quality attributed. 
+### Local Development Setup
 
+```bash
+# Install dependencies
+pip install -r requirements.txt
 
-VIII. `codart.sbse`: The `codart.sbse` packages include scripts that implement the search-based refactoring processes. It mainly uses Pymoo multi-objective framework to find the best sequence of refactoring operations to maximize the source code and design quality.
+# Setup SciTools Understand
+export PYTHONPATH="/path/to/understand/Python:$PYTHONPATH"
+export PATH="/path/to/understand/bin:$PATH"
 
+# Run API server
+uvicorn application.main:app --reload
 
-IX. `tests`: The test directory contains individual test data and test cases that are used for developing specific refactorings. Typically, each test case is a single Java file that contains one or more Java classes.
+# Run UI development server
+cd ui && npm start
+```
 
+### Adding New Refactorings
 
-X. `benchmark_projects`: This directory contains several open-source Java projects formerly used in automated refactoring researches by many researchers. Once the implementation of refactoring is completed, it will be executed and tested on all projects in this benchmark to ensure the generalization of functionality proposed by the implementation.  
+1. Implement refactoring in `codart/refactorings/`
+2. Inherit from ANTLR listener/visitor classes
+3. Add tests in `tests/` directory
+4. Update refactoring registry in `handler.py`
 
-XI. **Other packages**: The information of other packages will be announced in the future.  
- 
-### add understand scitools in ubuntu 24.04
-  
-    nano ~/.bashrc
+### Testing
 
-***********************************
+```bash
+# Run individual refactoring tests
+python tests/extract_method/test_1.py
 
-    export PYTHONPATH="/home/y/PycharmProjects/understand-scitools/Understand-6.5.1201-Linux-64bit/scitools/bin/linux64/Python:$PYTHONPATH"
-    export PATH="/home/y/PycharmProjects/understand-scitools/Understand-6.5.1201-Linux-64bit/scitools/bin/linux64:$PATH"
-    export LD_LIBRARY_PATH="/home/y/PycharmProjects/understand-scitools/Understand-6.5.1201-Linux-64bit/scitools/bin/linux64:$LD_LIBRARY_PATH"
+# Test on benchmark projects
+python codart/sbse/search_based_refactoring2.py
+```
 
-****************************************
+## Troubleshooting
 
-    source ~/.bashrc
+### Common Issues
 
-#### or after activate in venv virtual environment 
-      
-    echo "/home/y/PycharmProjects/understand-scitools/Understand-6.5.1201-Linux-64bit/scitools/bin/linux64/Python" > venv/lib/python3.12/site-packages/understand.pth
-    echo "/home/y/Downloads/understand/Understand-6.5.1183-Linux-64bit/scitools/bin/linux64" > venv/lib/python3.12/site-packages/understand.pth
+**SciTools License Error:**
+```bash
+# Check license status
+docker exec -it codart_api_1 und license
 
+# Reactivate license
+docker exec -it codart_api_1 /app/activate_license.sh
+```
 
-### Example to use cli for understand 
-* to using understand
+**Memory Issues:**
+- Increase container memory limit in docker-compose.yml
+- Reduce population size in configuration
+- Use smaller benchmark projects for testing
 
-  *     --udb_path "/home/y/Desktop/desktop_0./CodART/benchmark_projects/JSON20201115/JSON20201115.und" --file_path "/home/y/Desktop/desktop_0./CodART/benchmark_projects/JSON20201115/src/main/java/org/json/JSONML.java" --source_class "JSONML"   --moved_methods "toJSONObject" --moved_fields "" --core 0 --project-path "/home/y/Desktop/desktop_0./CodART/benchmark_projects/JSON-java"
+**Build Failures:**
+```bash
+# Clean rebuild
+docker-compose down -v
+docker-compose build --no-cache
+docker-compose up
+```
 
-* to using openunderstand
+### Performance Optimization
 
-  *     --udb_path "/home/y/Desktop/desktop_0./CodART/mydb.udb" --file_path "/home/y/Desktop/desktop_0./CodART/benchmark_projects/JSON20201115/src/main/java/org/json/JSONML.java" --source_class "JSONML"   --moved_methods "toJSONObject" --moved_fields "" --core 1 --project-path "/home/y/Desktop/desktop_0./CodART/benchmark_projects/JSON-java"
+- Use fast grammar `JavaParserLabeled.g4` for new development
+- Enable C++ backend for faster parsing (optional)
+- Configure appropriate population size based on available resources
+- Use SSD storage for Docker volumes
 
+## Contributing
 
-### additional info for learner
-    
-* alphzero pretrianed models link 
-  * https://github.com/cestpasphoto/alpha-zero-general
+We welcome contributions! Please:
 
-### News
+1. Fork the repository
+2. Create a feature branch
+3. Add tests for new functionality
+4. Ensure all tests pass
+5. Submit a pull request
 
-**Summer 2022:** User instructions to install or running CodART were added. 
+### Development Guidelines
 
-**Spring 2022:** Version [v0.2.3](https://github.com/m-zakeri/CodART/releases/tag/v0.2.3) was released. It works fine on the benchmark projects. 
+- Follow existing code patterns and naming conventions
+- Use `JavaParserLabeled.g4` for new refactoring implementations
+- Test on individual files before benchmark projects
+- Document new refactoring operations
+- Follow security best practices
 
-**Spring 2021:** A milestone in development. First set of refactoring operation was released.
+## Citation
 
-**Fall 2020:** CodART was started as a research project at [IUST reverse engineering laboratory](http://reverse.iust.ac.ir/).
+If you use CodART in your research, please cite:
 
+```bibtex
+@misc{codart2024,
+  title={CodART: Source Code Automated Refactoring Toolkit},
+  author={Zakeri, Morteza and contributors},
+  year={2024},
+  url={https://github.com/m-zakeri/CodART}
+}
+```
 
+## License
 
-### Read more
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
- * [CodART official website and documentation](https://m-zakeri.github.io/CodART)
- * [CodART refactoring list](https://m-zakeri.github.io/CodART/refactorings_list/)
- * [CodART code smells list](https://m-zakeri.github.io/CodART/code_smells_list/)
- * [CodART benchmark projects](https://m-zakeri.github.io/CodART/benchmarks/)
- * [CodART team members and contributors](https://m-zakeri.github.io/CodART/about/)
- * [CodART issues](https://github.com/m-zakeri/CodART/issues)
+## Links
 
+- [Official Documentation](https://m-zakeri.github.io/CodART)
+- [Refactoring Catalog](https://m-zakeri.github.io/CodART/refactorings_list/)
+- [Code Smells Reference](https://m-zakeri.github.io/CodART/code_smells_list/)
+- [Benchmark Projects](https://m-zakeri.github.io/CodART/benchmarks/)
+- [API Documentation](http://localhost:8000/docs) (when running locally)
 
- * [Catalog of refactorings by Martin Fowler](https://refactoring.com/catalog/)
- * [Refactoring.Guru](https://refactoring.guru/)
+## Support
 
+- **Issues**: [GitHub Issues](https://github.com/m-zakeri/CodART/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/m-zakeri/CodART/discussions)
+- **Email**: m-zakeri[at]live[dot]com
 
-Follow us!
+---
 
-
-FROM python:3.9-slim
-
-WORKDIR /app
-
-# Install required packages
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    wget \
-    libglib2.0-0 \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy SciTools installation
-COPY scitools /app/scitools
-
-# Set up SciTools environment
-ENV SCITOOLS="/app/scitools"
-ENV PYTHONPATH="/app/scitools/bin/linux64/Python:$PYTHONPATH"
-ENV PATH="/app/scitools/bin/linux64:$PATH"
-ENV LD_LIBRARY_PATH="/app/scitools/bin/linux64:$LD_LIBRARY_PATH"
-
-# Create SciTools configuration directory
-RUN mkdir -p /root/.config/SciTools/
-
-# Set up the license
-RUN und -setofflinereplycode C96BE10F4D48B -expiration 2035-02-08 -maintenance 2035-02-08 && \
-    chmod 644 /root/.config/SciTools/license.dat && \
-    chown root:root /root/.config/SciTools/license.dat
-
-# Verify license and installation
-RUN und version
-
-# Install Python requirements
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt --timeout=120
-
-# Copy application code
-COPY . .
-
-EXPOSE 8000
-
-# Add healthcheck
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD und version || exit 1
-
-CMD ["uvicorn", "application.main:app", "--host", "0.0.0.0", "--port", "8000"]
-
-und create  -db /home/y/PycharmProjects/java.und -languages java add /home/y/Desktop/codes/university/JSON-java/ analyze -all
-python codart/metrics/learner_testability/metric_exporter.py 
-und -setlicensecode XXXXXXXXXX
-und -deregisterlicensecode
-und -createofflinerequestcode
-und -setofflinereplycode XXXXXXXX -expiration 2020-12-31 -maintenance
-und –showofflinereturncode
-
-pip download -r requirements.txt -d dependencies
-
-
-modify below code use pmd insted of sonar qube below is an example of uding pmd :
-./pmd check -d /home/y/Desktop/codes/university/JSON-java -R custom.xml -f csv -r pmd-report.csv --cache /home/y/Desktop/codes/university/testpmd/pmd-bin-7.11.0/bin/mycache.txt
-
-below is the code to modify give me exact parts they need to modify :
+*CodART is actively developed at [IUST Reverse Engineering Laboratory](http://reverse.iust.ac.ir/)*
