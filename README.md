@@ -25,6 +25,8 @@ CodART (Source Code Automated Refactoring Toolkit) is a multi-objective program 
 - **Automated Java Refactoring**: Supports 40+ refactoring operations including Extract Class, Move Method, Extract Interface, and more
 - **Multi-Objective Optimization**: Uses NSGA-II and NSGA-III algorithms to optimize 8+ quality metrics simultaneously
 - **Machine Learning Integration**: Reinforcement learning (PPO) for intelligent refactoring sequence generation
+- **Testability Prediction**: Advanced ML models predict code testability using 262+ source code metrics
+- **Code Smell Detection**: PMD 7.11.0 integration with custom rulesets for automated quality analysis
 - **Web-based UI**: Modern React interface for project management and ML training
 - **Containerized Architecture**: Docker-based deployment with microservices
 - **Real-time Monitoring**: Task tracking and progress monitoring for long-running operations
@@ -90,6 +92,7 @@ docker-compose up -d --build
 - **FastAPI Backend**: RESTful API for all operations
 - **Celery Worker**: Handles ML training and analysis tasks
 - **SciTools Understand**: Code parsing and analysis engine
+- **PMD Integration**: Code smell detection with custom rulesets
 - **Combined Architecture**: API and worker run in same container for license sharing
 
 #### User Interface (`ui`)
@@ -108,6 +111,22 @@ docker-compose up -d --build
   - `ml_training`: Machine learning training tasks
   - `ml_evaluation`: Model evaluation tasks
   - `celery`: General background tasks
+
+### Quality Analysis Components
+
+#### Code Smell Detection (PMD)
+- **PMD 7.11.0**: Integrated static analysis tool
+- **Custom Rulesets**: Tailored rules for design patterns, complexity, and best practices
+- **Automated Detection**: GodClass, LawOfDemeter, CyclomaticComplexity, etc.
+- **CSV Reporting**: Structured output for refactoring candidate selection
+- **MinIO Storage**: Cloud-based report archival and retrieval
+
+#### Testability Prediction Engine
+- **ML Models**: 7 different model types (RandomForest, GradientBoosting, MLP, etc.)
+- **Metric Analysis**: 262 comprehensive source code metrics
+- **Real-time Prediction**: Integration with refactoring operations
+- **Model Variants**: Lightweight (68 metrics), Ultra-light (10 metrics), Design-based
+- **Distributed Training**: Celery-based ML pipeline with model versioning
 
 ### Key Directories
 
@@ -169,6 +188,44 @@ curl "http://localhost:8000/tasks/{task_id}/status"
 
 ## Machine Learning Features
 
+### Testability Prediction Models
+
+CodART implements comprehensive testability prediction using multiple ML approaches:
+
+#### Model Architecture
+- **RandomForestRegressor**: Primary ensemble model for robust predictions
+- **GradientBoostingRegressor**: High-accuracy gradient-based learning
+- **MLPRegressor**: Neural network for complex pattern recognition
+- **VotingRegressor**: Ensemble combining top 3 models for optimal accuracy
+
+#### Metric Categories
+- **Package Metrics** (59): Module-level design quality indicators
+- **Class Lexical Metrics** (17): Code complexity and readability measures
+- **Class Ordinary Metrics** (186): Comprehensive structural analysis
+- **Total**: 262 source code metrics for comprehensive analysis
+
+#### Model Variants
+- **Full Model**: 262 metrics for maximum accuracy
+- **Lightweight**: 68 metrics for fast real-time prediction
+- **Ultra-light**: 10 most important metrics for instant feedback
+- **Design-based**: Graph network analysis using NetworkX
+
+### PMD Code Smell Detection
+
+Integrated PMD 7.11.0 provides automated code quality analysis:
+
+#### Detection Categories
+- **Design Issues**: GodClass, LawOfDemeter, CyclomaticComplexity
+- **Best Practices**: LooseCoupling, UnusedPrivateMethod
+- **Code Style**: UnnecessaryModifier, ProperLogger
+- **Complexity**: NPathComplexity, CognitiveComplexity
+
+#### Integration Points
+- **Refactoring Guidance**: PMD results guide candidate selection
+- **Real-time Analysis**: Automated execution on project upload
+- **Cloud Storage**: Results archived in MinIO for persistent access
+- **Custom Rules**: Tailored ruleset for refactoring-specific analysis
+
 ### Reinforcement Learning Training
 
 The system uses Proximal Policy Optimization (PPO) to learn optimal refactoring sequences:
@@ -225,6 +282,11 @@ UDB_ROOT_DIR="/opt/understand_dbs"
 # SciTools Understand
 STILICENSE="/root/.config/SciTools/License.conf"
 STIHOME="/app/scitools"
+
+# PMD Configuration
+PMD_PATH="/app/pmd/bin/pmd"
+PMD_RULESET="/app/pmd/rules/custom.xml"
+PMD_CACHE_DIR="/app/pmd/cache"
 
 # Algorithm Configuration
 POPULATION_SIZE=15

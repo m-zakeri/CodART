@@ -56,9 +56,14 @@ class ModelTrainingService:
         # Ensure the directory for the local path exists
         os.makedirs(os.path.dirname(local_path), exist_ok=True)
 
+        # Remove 'metrics/' prefix from dataset_path if it exists since bucket is already 'metrics'
+        object_name = dataset_path
+        if object_name.startswith("metrics/"):
+            object_name = object_name[8:]  # Remove 'metrics/' prefix
+
         # Download dataset from MinIO
         self.minio_client.fget_object(
-            bucket_name="metrics", object_name=dataset_path, file_path=local_path
+            bucket_name="metrics", object_name=object_name, file_path=local_path
         )
 
         return local_path

@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from application.controllers import (
     learning_controller_testability,
     task_controller,
@@ -11,6 +12,14 @@ from application.controllers.reporter import (
 from application.controllers.rl import test_controller, rl_controller
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Include routers
 app.include_router(learning_controller_testability.app, prefix="/api/v1/learning")

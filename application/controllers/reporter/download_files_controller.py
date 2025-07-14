@@ -26,6 +26,7 @@ def get_minio_controller():
         minio_endpoint=os.getenv("MINIO_ENDPOINT", "minio:9000"),
         minio_access_key=os.getenv("MINIO_ACCESS_KEY", "minioadmin"),
         minio_secret_key=os.getenv("MINIO_SECRET_KEY", "minioadmin"),
+        bucket_name="metrics",
     )
 
 
@@ -196,12 +197,12 @@ async def download_models(project_name: str, version_id: Optional[str] = None):
     """
     try:
         controller = get_minio_controller()
-        models_bucket = os.getenv("MINIO_MODELS_BUCKET", "models")
+        # Models are stored in metrics bucket under models/ path
+        models_bucket = "metrics"
 
         try:
-            prefix = (
-                f"{project_name}/{version_id}/" if version_id else f"{project_name}/"
-            )
+            # Look for models in the training format: models/DS*/project_name/version_id/
+            prefix = f"models/"
             objects = controller.minio_client.list_objects(
                 models_bucket, prefix=prefix, recursive=True
             )
@@ -210,19 +211,26 @@ async def download_models(project_name: str, version_id: Optional[str] = None):
             with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
                 model_files_found = False
                 for obj in objects:
-                    if obj.object_name.endswith(".joblib"):
+                    # Check if this object is a joblib file for our project/version
+                    if (obj.object_name.endswith(".joblib") and
+                        project_name in obj.object_name and
+                        (not version_id or version_id in obj.object_name)):
+                        
                         model_files_found = True
+                        logger.info(f"Found model file: {obj.object_name}")
+                        
                         data = controller.minio_client.get_object(
                             models_bucket, obj.object_name
                         ).read()
 
-                        rel_path = obj.object_name.replace(f"{project_name}/", "", 1)
-                        zip_file.writestr(rel_path, data)
+                        # Use just the filename for the zip
+                        filename = obj.object_name.split('/')[-1]
+                        zip_file.writestr(filename, data)
 
             if not model_files_found:
                 raise HTTPException(
                     status_code=404,
-                    detail=f"No model files found for project {project_name}",
+                    detail=f"No trained model files found for project '{project_name}'{f' version \'{version_id}\'' if version_id else ''}. Train testability models first.",
                 )
 
             zip_buffer.seek(0)
@@ -259,37 +267,74 @@ async def download_specific_joblib(
     project_name: str, version_id: str, metric_type: Optional[MetricType] = None
 ):
     """
-    Download specific joblib file for a project version.
+    Download joblib model files for a specific project version.
+    Creates a zip bundle of all available model files for that project.
     """
     try:
         controller = get_minio_controller()
-        models_bucket = os.getenv("MINIO_MODELS_BUCKET", "models")
+        # Model files are stored in the metrics bucket under models/ path (not metrics/models/)
+        models_bucket = "metrics"
 
-        # Construct the joblib file path
-        if metric_type:
-            file_name = f"{project_name}_{metric_type}_{version_id}.joblib"
-        else:
-            file_name = f"{project_name}_{version_id}.joblib"
-
-        file_path = f"{project_name}/{version_id}/{file_name}"
-
+        # Look for model files in the testability training format: models/DS*/project_name/version_id/
+        # Pattern: models/DS{ds_number}/{project_name}/{version_id}/{model_type}_DS{ds_number}.joblib
+        prefix = f"models/"
+        
         try:
-            data = controller.minio_client.get_object(models_bucket, file_path)
-            return StreamingResponse(
-                data,
-                media_type="application/octet-stream",
-                headers={"Content-Disposition": f'attachment; filename="{file_name}"'},
+            objects = controller.minio_client.list_objects(
+                models_bucket, prefix=prefix, recursive=True
             )
+
+            zip_buffer = io.BytesIO()
+            model_files_found = False
+            
+            with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+                for obj in objects:
+                    # Check if this object is a joblib file for our project/version
+                    obj_path_parts = obj.object_name.split('/')
+                    if (len(obj_path_parts) >= 4 and 
+                        obj.object_name.endswith(".joblib") and
+                        project_name in obj.object_name and
+                        version_id in obj.object_name):
+                        
+                        model_files_found = True
+                        logger.info(f"Found model file: {obj.object_name}")
+                        
+                        # Download the model data
+                        data = controller.minio_client.get_object(
+                            models_bucket, obj.object_name
+                        ).read()
+
+                        # Use just the filename for the zip
+                        filename = obj.object_name.split('/')[-1]
+                        zip_file.writestr(filename, data)
+
+            if not model_files_found:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"No trained model files found for project '{project_name}' version '{version_id}'. Train testability models first."
+                )
+
+            zip_buffer.seek(0)
+            filename = f"{project_name}-{version_id}-models.zip"
+
+            return StreamingResponse(
+                zip_buffer,
+                media_type="application/zip",
+                headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+            )
+
         except Exception as e:
-            logger.error(f"Error downloading joblib file: {str(e)}")
+            if isinstance(e, HTTPException):
+                raise e
+            logger.error(f"Error creating joblib bundle: {str(e)}")
             raise HTTPException(
-                status_code=404, detail=f"Joblib file not found: {file_path}"
+                status_code=500, detail=f"Error creating joblib bundle: {str(e)}"
             )
 
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error downloading joblib file: {str(e)}", exc_info=True)
+        logger.error(f"Error downloading joblib files: {str(e)}", exc_info=True)
         raise HTTPException(
-            status_code=500, detail=f"Error downloading joblib file: {str(e)}"
+            status_code=500, detail=f"Error downloading joblib files: {str(e)}"
         )

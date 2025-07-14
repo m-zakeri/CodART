@@ -19,3 +19,4 @@ scikit-learn
 imblearn
 python-multipart
 torchrl
+diagrams
