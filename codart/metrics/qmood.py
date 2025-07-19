@@ -37,7 +37,15 @@ class DesignMetrics:
     """
 
     def __init__(self, udb_path):
+
+
         self.udb_path = udb_path
+        try:
+            dbx = und.open(self.udb_path)
+            print("Understand database opened successfully.")
+            dbx.close()
+        except Exception as e:
+            print(f"Error opening Understand database: {e}")
 
         filter1 = "Java Class ~TypeVariable ~Anonymous ~Enum, Java Interface"
         filter3 = "Java Class ~Unresolved ~Unknown ~TypeVariable ~Anonymous ~Enum ~Jar ~Library ~Standard, Java Interface"
@@ -97,7 +105,15 @@ class DesignMetrics:
         for class_entity in known_class_entities:
             if "Interface" in class_entity.kindname():
                 continue
-            mit = class_entity.metric(['MaxInheritanceTree'])['MaxInheritanceTree']
+
+            metrics = class_entity.metric(['MaxInheritanceTree'])
+            print(f"Metrics for {class_entity.longname()}: {metrics}")
+
+            mit = metrics.get('MaxInheritanceTree', 0)
+            if mit is None:
+                print(f"Warning: 'MaxInheritanceTree' is None for {class_entity.longname()}")
+                mit = 0
+
             MITs.append(mit)
 
         dbx.close()
@@ -310,44 +326,54 @@ class DesignMetrics:
         :return: Ratio of the number of inherited methods per the total number of methods within a class.
         """
         metrics = class_entity.metric(['CountDeclMethod', 'CountDeclMethodAll'])
-        local_methods = metrics.get('CountDeclMethod')
-        all_methods = metrics.get('CountDeclMethodAll')
-        # print(class_entity.longname(), metrics)
+
+
+        local_methods = metrics.get('CountDeclMethod', 0) if metrics.get('CountDeclMethod') is not None else 0
+        all_methods = metrics.get('CountDeclMethodAll', 0) if metrics.get('CountDeclMethodAll') is not None else 0
+
+        print(
+            f"MFA Metrics for {class_entity.longname()}: CountDeclMethod={local_methods}, CountDeclMethodAll={all_methods}")
 
         if "Interface" in class_entity.kindname():
             return 2.
-        else:
-            implemented_interfaces = class_entity.ents('Java Implement Couple', '~Unknown')
-            if len(implemented_interfaces) == 0:
-                if all_methods == 0:
-                    mfa = 0
-                else:
-                    mfa = round((all_methods - local_methods) / all_methods, 5)
+
+        implemented_interfaces = class_entity.ents('Java Implement Couple', '~Unknown')
+
+        if len(implemented_interfaces) == 0:
+            if all_methods == 0:
+                mfa = 0
             else:
-                implemented_methods = 0
-                for interface_entity in implemented_interfaces:
-                    implemented_methods += interface_entity.metric(['CountDeclMethodAll']).get('CountDeclMethodAll', 0)
-                if all_methods == 0:
-                    mfa = 0
-                else:
-                    mfa = round((all_methods - implemented_methods) / all_methods, 5)
-        # print(class_entity.longname(), mfa)
+                mfa = round((all_methods - local_methods) / all_methods, 5)
+        else:
+            implemented_methods = 0
+            for interface_entity in implemented_interfaces:
+                count = interface_entity.metric(['CountDeclMethodAll']).get('CountDeclMethodAll', 0)
+                implemented_methods += count if count is not None else 0
+
+            if all_methods == 0:
+                mfa = 0
+            else:
+                mfa = round((all_methods - implemented_methods) / all_methods, 5)
+
         return 1. + mfa if mfa >= 0 else 1
 
     def NOP_class_level(self, class_entity: und.Ent):
         """
         NOP - Class Level Number of Polymorphic Methods
         Any method that can be used by a class and its descendants.
-       :param class_entity: The class entity
+        :param class_entity: The class entity
         :return: Counts of the number of methods in a class excluding private, static and final ones.
         """
         if "Final" in class_entity.kindname():
             return 0
 
-        all_methods = class_entity.metric(['CountDeclMethodAll']).get('CountDeclMethodAll', 0)
-        # private_methods = class_entity.metric(['CountDeclMethodPrivate']).get('CountDeclMethodPrivate', 0)
-        # static_methods = class_entity.metric(['CountDeclClassMethod']).get('CountDeclClassMethod', 0)
-        # final_methods = 0
+        metrics = class_entity.metric(['CountDeclMethodAll'])
+
+
+        all_methods = metrics.get('CountDeclMethodAll', 0) if metrics.get('CountDeclMethodAll') is not None else 0
+
+        print(f"NOP Metrics for {class_entity.longname()}: CountDeclMethodAll={all_methods}")
+
         if "Interface" in class_entity.kindname():
             return all_methods
 
@@ -356,8 +382,8 @@ class DesignMetrics:
         for ref in class_entity.refs('Define', kind_filter):
             if "Final" in ref.ent().kindname() or "Private" in ref.ent().kindname() or "Static" in ref.ent().kindname():
                 private_or_static_or_final += 1
+
         number_of_polymorphic_methods = all_methods - private_or_static_or_final
-        # print(class_entity.longname(), number_of_polymorphic_methods)
         return number_of_polymorphic_methods if number_of_polymorphic_methods >= 0 else 0
 
     def get_classes_simple_names(self, filter_string: str = None) -> set:
@@ -376,13 +402,18 @@ class DesignMetrics:
         dbx: und.Db = und.open(self.udb_path)
         filter2 = "Java Class ~Unknown ~TypeVariable ~Anonymous ~Enum, Java Interface"
         known_class_entities = dbx.ents(filter2)
+
         for class_entity in known_class_entities:
             class_metric = class_level_design_metric(class_entity)
+
+            if class_metric is None:
+                print(f"Warning: {class_level_design_metric.__name__} returned None for {class_entity.longname()}")
+                class_metric = 0
+
             scores.append(class_metric)
 
         dbx.close()
-        return round(sum(scores) / len(scores), 5)
-        # return sum(scores)
+        return round(sum(scores) / len(scores), 5) if len(scores) > 0 else 0.
 
     def print_project_metrics(self):
         dbx = und.open(self.udb_path)
@@ -507,6 +538,9 @@ if __name__ == '__main__':
 
     update_understand_database(config.UDB_PATH)
     print(f"UDB path: {config.UDB_PATH}")
+
+    if not os.path.exists(config.UDB_PATH):
+        raise FileNotFoundError(f"Database file not found: {config.UDB_PATH}")
 
     design_quality_attribute = DesignQualityAttributes(config.UDB_PATH)
     metrics_dict = {
