@@ -14,7 +14,7 @@ from diagrams.onprem.client import Users
 from diagrams.onprem.compute import Server
 from diagrams.programming.framework import React, Fastapi
 from diagrams.programming.language import Python, Java
-from diagrams.onprem.analytics import Spark
+from diagrams.onprem.analytics import Databricks
 from diagrams.onprem.monitoring import Grafana
 from diagrams.generic.storage import Storage
 from diagrams.generic.compute import Rack
@@ -44,9 +44,9 @@ with Diagram("CodART System Architecture", show=False, filename="codart_system_a
         
     # Machine Learning Layer
     with Cluster("ML & Testability Models"):
-        testability_models = Python("Testability Prediction\n(RandomForest, GradientBoosting)")
-        ml_pipeline = Python("ML Training Pipeline\n(PyTorch, TensorDict)")
-        rl_environment = Python("RL Environment\n(PPO Algorithm)")
+        testability_models = Python("Testability Prediction\n(scikit-learn: RandomForest, GradientBoosting)")
+        ml_pipeline = Python("ML Training Pipeline\n(PyTorch, TorchRL)")
+        rl_environment = Python("RL Environment\n(TorchRL PPO Algorithm)")
             
     # External Services
     with Cluster("External Dependencies"):
@@ -125,13 +125,13 @@ with Diagram("CodART Reinforcement Learning Architecture", show=False, filename=
             smell_init = Python("SmellInitialization\n(PMD Integration)")
             refactor_mgr = Python("RefactoringManager\n(Apply Operations)")
             metrics = Python("QualityMetrics\n(QMOOD, Testability)")
-            testability_pred = Spark("Testability Predictor\n(ML Models)")
+            testability_pred = Python("Testability Predictor\n(scikit-learn Models)")
     
     # Agent & Training Layer
     with Cluster("RL Agent & Training"):
-        with Cluster("Neural Networks"):
-            policy_net = Spark("Policy Network\n(Actor)")
-            value_net = Spark("Value Network\n(Critic)")
+        with Cluster("Neural Networks (PyTorch)"):
+            policy_net = Python("Policy Network\n(PyTorch Actor)")
+            value_net = Python("Value Network\n(PyTorch Critic)")
         
         with Cluster("Training Components"):
             trainer = Python("RefactoringTrainer\n(PPO Algorithm)")
