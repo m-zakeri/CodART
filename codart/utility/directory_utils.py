@@ -87,7 +87,7 @@ def force_cleanup():
         logger.debug(f"[CLEANUP] Could not get memory info after cleanup: {e}")
 
 
-def run_subprocess_with_monitoring(cmd, cwd=None, timeout=300, stage_name="subprocess"):
+def run_subprocess_with_monitoring(cmd, cwd=None, timeout=3600, stage_name="subprocess"):
     """
     Run subprocess with memory monitoring and proper cleanup.
 
@@ -138,7 +138,7 @@ def run_subprocess_with_monitoring(cmd, cwd=None, timeout=300, stage_name="subpr
             time.sleep(1)
 
         # Get final result
-        stdout, stderr = process.communicate(timeout=10)
+        stdout, stderr = process.communicate()
         returncode = process.returncode
 
         if returncode == 0:
@@ -260,7 +260,6 @@ def git_restore(project_dir: str = ""):
         success, result = run_subprocess_with_monitoring(
             ["git", "restore", "."],
             cwd=actual_project_dir,
-            timeout=120,
             stage_name="git restore"
         )
 
@@ -272,7 +271,6 @@ def git_restore(project_dir: str = ""):
         success, result = run_subprocess_with_monitoring(
             ["git", "clean", "-f", "-d"],
             cwd=actual_project_dir,
-            timeout=120,
             stage_name="git clean"
         )
 
@@ -304,7 +302,6 @@ def configure_safe_directory(project_dir):
     try:
         success, result = run_subprocess_with_monitoring(
             ["git", "config", "--global", "--add", "safe.directory", project_dir],
-            timeout=30,
             stage_name="git config safe directory"
         )
 
@@ -337,7 +334,6 @@ def initialize_git_repository(project_dir):
         success, result = run_subprocess_with_monitoring(
             ["git", "init"],
             cwd=project_dir,
-            timeout=60,
             stage_name="git init"
         )
 
@@ -349,7 +345,6 @@ def initialize_git_repository(project_dir):
         success, result = run_subprocess_with_monitoring(
             ["git", "add", "."],
             cwd=project_dir,
-            timeout=180,
             stage_name="git add"
         )
 
@@ -361,7 +356,6 @@ def initialize_git_repository(project_dir):
         success, result = run_subprocess_with_monitoring(
             ["git", "commit", "-m", "Initial commit"],
             cwd=project_dir,
-            timeout=120,
             stage_name="git commit"
         )
 
@@ -406,7 +400,6 @@ def update_understand_database(udb_path):
 
         success, result = run_subprocess_with_monitoring(
             understand_6_cmd,
-            timeout=300,
             stage_name=f"und analyze (attempt {trials + 1})"
         )
 
@@ -463,8 +456,7 @@ def cleanup_understand_processes():
             check_result = subprocess.run(
                 cmd_info['check'],
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                timeout=2
+                stderr=subprocess.PIPE
             )
 
             if check_result.returncode == 0:
@@ -472,8 +464,7 @@ def cleanup_understand_processes():
                 kill_result = subprocess.run(
                     cmd_info['execute'],
                     stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    timeout=5
+                    stderr=subprocess.PIPE
                 )
 
                 if kill_result.returncode == 0:
