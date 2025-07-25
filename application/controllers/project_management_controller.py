@@ -241,14 +241,25 @@ def get_project_info(
 
 
 def analyze_and_upload_code_smells(
-    project_name: str, version_id: str, project_dir: str
+        project_name: str, version_id: str, project_dir: str
 ) -> str:
     """
     Trigger PMD analysis on the project directory,
     save the results as CSV, upload to MinIO, and store the MinIO URL in Redis.
     Returns the presigned URL to the CSV file.
     """
-    # Construct a project key for file naming
+    # Store the original project name for consistency
+    original_project_name = project_name
+
+    # If this is a task-style name, extract the base name
+    if project_name.startswith("json_task_"):
+        base_project_name = "json"
+    elif "_task_" in project_name:
+        base_project_name = project_name.split("_task_")[0]
+    else:
+        base_project_name = project_name
+
+    # Use the task name for the project key to maintain uniqueness
     project_key = f"{project_name}_{version_id}"
 
     # Find the actual project directory (usually a single subdirectory)
@@ -264,9 +275,9 @@ def analyze_and_upload_code_smells(
     for subdir in subdirs:
         subdir_path = os.path.join(project_dir, subdir)
         if (
-            os.path.exists(os.path.join(subdir_path, "pom.xml"))
-            or os.path.exists(os.path.join(subdir_path, "build.gradle"))
-            or os.path.exists(os.path.join(subdir_path, "src"))
+                os.path.exists(os.path.join(subdir_path, "pom.xml"))
+                or os.path.exists(os.path.join(subdir_path, "build.gradle"))
+                or os.path.exists(os.path.join(subdir_path, "src"))
         ):
             actual_project_dir = subdir_path
             logger.info(f"Found actual project directory: {actual_project_dir}")
@@ -322,7 +333,6 @@ def analyze_and_upload_code_smells(
 
         if process.returncode != 0 and process.returncode != 4:
             logger.error(f"PMD exited with code {process.returncode}")
-            # Log but continue to try to upload the CSV anyway
             logger.warning("Continuing to try to upload the CSV file despite PMD error")
         elif process.returncode == 4:
             logger.info(
@@ -367,34 +377,59 @@ def analyze_and_upload_code_smells(
                 ]
             )
 
-    # Upload the CSV file to MinIO
+    # Upload the CSV file to MinIO with MULTIPLE naming patterns for compatibility
     try:
         # Ensure bucket exists
         if not minio_client.bucket_exists(MINIO_BUCKET):
             minio_client.make_bucket(MINIO_BUCKET)
 
-        # Store with project/version in the path for better organization
-        minio_path = f"{project_name}/{version_id}/{csv_filename}"
+        # Upload with multiple paths for maximum compatibility
+        upload_paths = [
+            # Primary path: use the full project name (task name)
+            f"{project_name}/{version_id}/{csv_filename}",
 
-        logger.info(f"Uploading PMD analysis CSV to MinIO at {minio_path}")
-        minio_client.fput_object(MINIO_BUCKET, minio_path, csv_file_path)
+            # Secondary path: use base project name for backward compatibility
+            f"{base_project_name}/{version_id}/code_smells_{base_project_name}_{version_id}.csv",
+        ]
 
-        # Generate a presigned URL for the CSV file (valid for 1 hour)
-        presigned_url = minio_client.presigned_get_object(
-            MINIO_BUCKET, minio_path, expires=timedelta(hours=1)
-        )
+        presigned_urls = []
 
-        # Save the URL in Redis under a key for this project version
-        redis_key = f"project:{project_name}:version:{version_id}:code_smells_url"
-        redis_client.set(redis_key, presigned_url)
+        for minio_path in upload_paths:
+            try:
+                logger.info(f"Uploading PMD analysis CSV to MinIO at {minio_path}")
+                minio_client.fput_object(MINIO_BUCKET, minio_path, csv_file_path)
 
-        logger.info(f"CSV uploaded to MinIO and URL saved to Redis: {redis_key}")
-        return presigned_url
+                # Generate a presigned URL for the CSV file (valid for 24 hours)
+                presigned_url = minio_client.presigned_get_object(
+                    MINIO_BUCKET, minio_path, expires=timedelta(hours=24)
+                )
+                presigned_urls.append(presigned_url)
+                logger.info(f"Successfully uploaded to {minio_path}")
+
+            except Exception as e:
+                logger.warning(f"Failed to upload to {minio_path}: {str(e)}")
+
+        if not presigned_urls:
+            raise Exception("Failed to upload to any MinIO path")
+
+        # Use the first successful URL as the primary one
+        primary_url = presigned_urls[0]
+
+        # Save URLs in Redis under multiple keys for compatibility
+        redis_keys = [
+            f"project:{project_name}:version:{version_id}:code_smells_url",
+            f"project:{base_project_name}:version:{version_id}:code_smells_url",
+        ]
+
+        for redis_key in redis_keys:
+            redis_client.set(redis_key, primary_url, ex=86400)  # 24 hours
+            logger.info(f"CSV URL saved to Redis: {redis_key}")
+
+        return primary_url
 
     except Exception as e:
         logger.error(f"Failed to upload CSV to MinIO: {str(e)}", exc_info=True)
         raise Exception(f"Failed to upload CSV to MinIO: {str(e)}")
-
 
 @app.post("/projects/upload")
 async def upload_project(

@@ -515,102 +515,68 @@ class SmellInitialization(Initializer):
                 logger.debug("Using cached CSV data")
                 return self._csv_cache.copy()  # Return a copy to prevent modifications
 
-            # Use original project name for file lookups
-            file_project_name = self.original_project_name
+            # Extract base project name from task-style names
+            base_project_name = self.original_project_name
+            if base_project_name.startswith("json_task_"):
+                base_project_name = "json"  # Convert task name back to original
+            elif "_task_" in base_project_name:
+                # Handle other project types: "project_task_xxx" -> "project"
+                base_project_name = base_project_name.split("_task_")[0]
+
+            # Try multiple naming patterns to find the CSV
             object_paths = [
-                f"{file_project_name}/{version_id}/code_smells_{file_project_name}_{version_id}.csv",
-                f"{file_project_name}/{version_id}/pmd_results.csv",
+                # Current task-based naming (what the training system expects)
+                f"{project_name}/{version_id}/code_smells_{project_name}_{version_id}.csv",
+
+                # Original project naming (what upload might have used)
+                f"{base_project_name}/{version_id}/code_smells_{base_project_name}_{version_id}.csv",
+
+                # Mixed patterns for compatibility
+                f"{project_name}/{version_id}/code_smells_{base_project_name}_{version_id}.csv",
+                f"{base_project_name}/{version_id}/code_smells_{project_name}_{version_id}.csv",
+
+                # PMD results patterns
+                f"{project_name}/{version_id}/pmd_results.csv",
+                f"{base_project_name}/{version_id}/pmd_results.csv",
+
+                # Fallback patterns without version prefix
+                f"{project_name}/{version_id}/code_smells.csv",
+                f"{base_project_name}/{version_id}/code_smells.csv",
             ]
 
             # Try to get CSV data using direct MinIO access
             csv_data = None
+            successful_path = None
+
             for object_path in object_paths:
                 try:
                     logger.info(f"Trying to download {object_path} from MinIO")
                     response = self.minio_client.get_object(minio_bucket, object_path)
                     data = response.read()
                     csv_data = StringIO(data.decode('utf-8'))
+                    successful_path = object_path
                     logger.info(f"Successfully downloaded {object_path} from MinIO")
                     break
                 except Exception as e:
-                    logger.warning(f"Could not download {object_path}: {str(e)}")
+                    logger.debug(f"Could not download {object_path}: {str(e)}")
                     continue
 
             # If direct MinIO access failed, try Redis URL as fallback
             if csv_data is None:
                 logger.info("Direct MinIO access failed, trying Redis URL")
+                csv_data = self._try_redis_url_fallback(project_name, version_id, base_project_name)
 
-                # Get the URL from Redis
-                csv_url = self.redis_client.get(f"project:{project_name}:version:{version_id}:code_smells_url")
-
-                if csv_url:
-                    logger.info(f"Got URL from Redis: {csv_url}")
-
-                    # Try to extract object path from URL and generate a fresh presigned URL
-                    try:
-                        from urllib.parse import urlparse
-                        parsed_url = urlparse(csv_url)
-                        path = parsed_url.path
-                        # Remove leading slash and bucket name
-                        parts = path.split('/')
-                        if len(parts) > 2:  # We expect at least /bucket/path
-                            bucket_name = parts[1]
-                            object_name = '/'.join(parts[2:])
-
-                            if bucket_name == minio_bucket:
-                                # Generate a fresh presigned URL
-                                fresh_url = self.minio_client.presigned_get_object(
-                                    minio_bucket,
-                                    object_name,
-                                    expires=timedelta(hours=1)  # 1 hour
-                                )
-                                logger.info(f"Generated fresh presigned URL: {fresh_url}")
-
-                                # Try the fresh URL
-                                response = requests.get(fresh_url)
-                                if response.status_code == 200:
-                                    csv_data = StringIO(response.text)
-                                    logger.info("Successfully downloaded using fresh presigned URL")
-                    except Exception as e:
-                        logger.warning(f"Error generating fresh presigned URL: {str(e)}")
-
-                    # If we still don't have the data, try the original URL with different auth methods
-                    if csv_data is None:
-                        # Try without auth
-                        try:
-                            logger.info("Trying original URL without auth")
-                            response = requests.get(csv_url)
-                            if response.status_code == 200:
-                                csv_data = StringIO(response.text)
-                                logger.info("Successfully downloaded using original URL without auth")
-                            else:
-                                logger.warning(f"HTTP error {response.status_code} when downloading without auth")
-                        except Exception as e:
-                            logger.warning(f"Error with original URL: {str(e)}")
-
-                        # Try with basic auth as last resort
-                        if csv_data is None:
-                            try:
-                                logger.info("Trying with basic auth")
-                                response = requests.get(
-                                    csv_url,
-                                    auth=HTTPBasicAuth(minio_access_key, minio_secret_key)
-                                )
-                                if response.status_code == 200:
-                                    csv_data = StringIO(response.text)
-                                    logger.info("Successfully downloaded using basic auth")
-                                else:
-                                    logger.warning(
-                                        f"HTTP error {response.status_code} when downloading with basic auth")
-                            except Exception as e:
-                                logger.warning(f"Error with basic auth: {str(e)}")
-
-            # If we still don't have CSV data, create minimal empty DataFrame with expected columns
+            # If we still don't have CSV data, create fallback data
             if csv_data is None:
                 logger.warning("All attempts to get CSV data failed, generating fallback data")
-                # Create some basic fallback data to allow the system to function
                 fallback_data = self._generate_fallback_csv_data(project_name, version_id)
                 csv_data = StringIO(fallback_data)
+
+                # Upload the fallback data for future use
+                try:
+                    self._upload_fallback_csv(fallback_data, project_name, version_id)
+                except Exception as e:
+                    logger.debug(f"Could not upload fallback CSV: {e}")
 
             # Parse the CSV data
             df = pd.read_csv(csv_data)
@@ -626,6 +592,76 @@ class SmellInitialization(Initializer):
             logger.error(f"Error in get_code_smells_csv: {str(e)}", exc_info=True)
             # Return an empty DataFrame with the expected columns
             return pd.DataFrame(columns=["Rule", "Line", "Package", "File", "Priority", "Description"])
+
+    def _try_redis_url_fallback(self, project_name: str, version_id: str, base_project_name: str):
+        """Try to get CSV data from Redis URL with multiple project name patterns"""
+
+        # Try different Redis key patterns
+        redis_keys = [
+            f"project:{project_name}:version:{version_id}:code_smells_url",
+            f"project:{base_project_name}:version:{version_id}:code_smells_url",
+        ]
+
+        for redis_key in redis_keys:
+            try:
+                csv_url = self.redis_client.get(redis_key)
+                if csv_url:
+                    logger.info(f"Got URL from Redis key {redis_key}: {csv_url}")
+
+                    # Try to generate fresh presigned URL from the stored URL
+                    csv_data = self._download_from_url(csv_url)
+                    if csv_data:
+                        return csv_data
+
+            except Exception as e:
+                logger.debug(f"Error with Redis key {redis_key}: {str(e)}")
+                continue
+
+        return None
+
+    def _download_from_url(self, csv_url: str):
+        """Download CSV from URL with multiple auth methods"""
+        try:
+            # First, try to extract object path and generate fresh URL
+            from urllib.parse import urlparse
+            parsed_url = urlparse(csv_url)
+            path = parsed_url.path
+
+            # Remove leading slash and bucket name
+            parts = path.split('/')
+            if len(parts) > 2:  # We expect at least /bucket/path
+                bucket_name = parts[1]
+                object_name = '/'.join(parts[2:])
+
+                if bucket_name == minio_bucket:
+                    # Generate a fresh presigned URL
+                    fresh_url = self.minio_client.presigned_get_object(
+                        minio_bucket,
+                        object_name,
+                        expires=timedelta(hours=1)
+                    )
+                    logger.info(f"Generated fresh presigned URL")
+
+                    # Try the fresh URL
+                    response = requests.get(fresh_url)
+                    if response.status_code == 200:
+                        logger.info("Successfully downloaded using fresh presigned URL")
+                        return StringIO(response.text)
+
+        except Exception as e:
+            logger.debug(f"Error generating fresh presigned URL: {str(e)}")
+
+        # Fallback: try original URL without auth
+        try:
+            logger.info("Trying original URL without auth")
+            response = requests.get(csv_url)
+            if response.status_code == 200:
+                logger.info("Successfully downloaded using original URL without auth")
+                return StringIO(response.text)
+        except Exception as e:
+            logger.debug(f"Error with original URL: {str(e)}")
+
+        return None
 
     def _generate_fallback_csv_data(self, project_name: str, version_id: str):
         """Generate fallback CSV data when no code smell analysis is available"""
