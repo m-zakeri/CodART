@@ -18,26 +18,33 @@
 
 ## Overview
 
-CodART (Source Code Automated Refactoring Toolkit) is a multi-objective program transformation and optimization engine that combines search-based software engineering (SBSE) with automated refactoring operations to improve Java source code quality. The system now includes a modern web-based interface, containerized deployment, and advanced machine learning capabilities for intelligent code refactoring.
+CodART (Source Code Automated Refactoring Toolkit) is a multi-objective program transformation and optimization engine that combines search-based software engineering (SBSE) with automated refactoring operations to improve Java source code quality. The system includes a modern web-based interface, containerized deployment with Docker, reinforcement learning capabilities using PPO algorithms, and advanced machine learning models for testability prediction and intelligent code refactoring.
+
+**Key Innovation**: CodART integrates traditional search-based refactoring with modern reinforcement learning to create an intelligent system that learns optimal refactoring sequences, making it unique in the automated software refactoring domain.
 
 ### Key Features
 
 - **Automated Java Refactoring**: Supports 40+ refactoring operations including Extract Class, Move Method, Extract Interface, and more
-- **Multi-Objective Optimization**: Uses NSGA-II and NSGA-III algorithms to optimize 8+ quality metrics simultaneously
-- **Machine Learning Integration**: Reinforcement learning (PPO) for intelligent refactoring sequence generation
-- **Testability Prediction**: Advanced ML models predict code testability using 262+ source code metrics
+- **Multi-Objective Optimization**: Uses NSGA-II and NSGA-III algorithms to optimize 8+ QMOOD quality metrics simultaneously
+- **Reinforcement Learning**: PPO (Proximal Policy Optimization) algorithm for intelligent refactoring sequence generation
+- **Testability Prediction**: Advanced ML models (RandomForest, GradientBoosting, MLP, VotingRegressor) predict code testability using 262+ source code metrics
 - **Code Smell Detection**: PMD 7.11.0 integration with custom rulesets for automated quality analysis
-- **Web-based UI**: Modern React interface for project management and ML training
-- **Containerized Architecture**: Docker-based deployment with microservices
-- **Real-time Monitoring**: Task tracking and progress monitoring for long-running operations
+- **SciTools Understand Integration**: Professional code analysis engine for parsing and metrics computation
+- **Web-based UI**: Modern React interface with real-time progress tracking and project management
+- **Containerized Architecture**: Docker-based deployment with microservices including API, UI, MinIO, Redis, RabbitMQ
+- **ANTLR4-based Parsing**: Three grammar variants optimized for different parsing performance needs
+- **Benchmark Integration**: 14 benchmark projects for testing and validation including JSON, JFreeChart, Weka
 
 ## Quick Start with Docker
 
 ### Prerequisites
 
-- Docker and Docker Compose
-- At least 8GB RAM and 4 CPU cores
-- SciTools Understand license (for code analysis)
+- **Docker and Docker Compose** (Latest versions)
+- **System Requirements**: At least 8GB RAM and 4 CPU cores (12GB+ recommended for large projects)
+- **SciTools Understand License**: Professional license required for code analysis
+  - Academic licenses available for research purposes
+  - License activation requires internet connectivity
+- **Storage**: Minimum 20GB free disk space for containers and project data
 
 ### 1. Clone and Setup
 
@@ -54,17 +61,29 @@ Create a `.env` file in the project root:
 # Project Configuration
 PROJECT_ROOT_DIR="/opt/projects"
 UDB_ROOT_DIR="/opt/understand_dbs"
-BENCHMARK_INDEX=2
+BENCHMARK_INDEX=2  # Index from codart/config.py (0-13)
 
 # Search Algorithm Settings
 POPULATION_SIZE=15
 MAX_ITERATIONS=15
-PROBLEM=2  # 0: Genetic, 1: NSGA-II, 2: NSGA-III
-NUMBER_OBJECTIVES=8
+PROBLEM=2  # 0: Simple Genetic, 1: NSGA-II, 2: NSGA-III
+NUMBER_OBJECTIVES=8  # QMOOD metrics count
+MUTATION_PROBABILITY=0.2
+CROSSOVER_PROBABILITY=0.8
 
-# MinIO Credentials
+# Warm Start Options (Optional)
+WARM_START=1  # Enable warm start from previous results
+INIT_POP_FILE="/path/to/initial_population.csv"  # Optional
+CSV_ROOT_DIR="/path/to/jdeodorant_csv"  # Optional
+
+# MinIO Credentials (Change for production)
 MINIO_ACCESS_KEY=00jFBl7n9Jn0ex0XL7m1
 MINIO_SECRET_KEY=kYfujzkdSGjXKLN9oQhPDIVgRUaZRijvj1yaXmIZ
+
+# Experimental Settings (Optional)
+USE_CPP_BACKEND=0  # Enable C++ parser backend for performance
+EXPERIMENTER="Your Name"  # For research tracking
+DESCRIPTION="Experiment description"  # For result documentation
 ```
 
 ### 3. Build and Run
@@ -79,10 +98,26 @@ docker-compose up -d --build
 
 ### 4. Access the Application
 
-- **Web Interface**: http://localhost:3000
-- **API Documentation**: http://localhost:8000/docs
-- **MinIO Console**: http://localhost:9001 (admin/admin)
+- **Web Interface**: http://localhost:3000 (React UI)
+- **API Documentation**: http://localhost:8000/docs (FastAPI Swagger)
+- **MinIO Console**: http://localhost:9001 (minioadmin/minioadmin)
 - **RabbitMQ Management**: http://localhost:15672 (guest/guest)
+- **Redis CLI**: `docker exec -it codart_redis_1 redis-cli` (Direct access)
+
+### 5. Initial Setup
+
+```bash
+# Verify all services are running
+docker-compose ps
+
+# Check SciTools Understand license
+docker exec -it codart_api_1 und license
+
+# Upload a test project via web interface or API
+curl -X POST "http://localhost:8000/projects/upload" \
+  -F "file=@your_project.zip" \
+  -F "project_name=TestProject"
+```
 
 ## Architecture Components
 
@@ -128,62 +163,140 @@ docker-compose up -d --build
 - **Model Variants**: Lightweight (68 metrics), Ultra-light (10 metrics), Design-based
 - **Distributed Training**: Celery-based ML pipeline with model versioning
 
-### Key Directories
+### Project Structure
 
 ```
 CodART/
-├── application/           # FastAPI web service
-│   ├── controllers/       # API endpoints
-│   ├── services/         # Business logic
-│   └── celery_workers/   # Background task handlers
-├── codart/               # Core refactoring engine
-│   ├── refactorings/     # Refactoring implementations
-│   ├── metrics/          # Quality metrics (QMOOD, testability)
-│   ├── smells/           # Code smell detection
-│   ├── sbse/             # Search-based optimization
-│   └── learner/          # Machine learning components
-├── ui/                   # React frontend
-└── benchmark_projects/   # Test projects
+├── application/              # FastAPI web service and APIs
+│   ├── controllers/          # REST API endpoints
+│   │   ├── learning_controller_testability.py
+│   │   ├── project_management_controller.py
+│   │   ├── rl/              # Reinforcement learning endpoints
+│   │   └── reporter/        # Export and download controllers
+│   ├── services/            # Business logic services
+│   │   ├── minio_training_controller.py
+│   │   └── config_integration.py
+│   ├── celery_workers/      # Background task processors
+│   │   ├── ml_training_task.py
+│   │   └── model_prediction_task.py
+│   └── main.py             # FastAPI application entry point
+├── codart/                  # Core refactoring engine
+│   ├── gen/                # ANTLR4-generated parsers
+│   │   ├── JavaParserLabeled.py      # Labeled grammar (preferred)
+│   │   ├── JavaParserLabeledVisitor.py
+│   │   └── JavaParserLabeledListener.py
+│   ├── refactorings/       # 40+ refactoring implementations
+│   │   ├── extract_class.py, extract_method.py
+│   │   ├── move_method.py, move_field.py
+│   │   ├── pullup_method.py, pushdown_method.py
+│   │   └── handler.py      # Refactoring registry
+│   ├── metrics/            # Quality metrics computation
+│   │   ├── qmood.py        # QMOOD metrics (8 objectives)
+│   │   ├── testability_prediction.py
+│   │   └── learner_testability/  # ML models for testability
+│   ├── smells/             # Code smell detection
+│   │   ├── long_method.py
+│   │   └── map_smell_refactoring.py
+│   ├── sbse/               # Search-based software engineering
+│   │   ├── search_based_refactoring2.py  # Main SBSE engine
+│   │   └── simple_genetics.py
+│   ├── learner/            # Machine learning components
+│   │   ├── genetic.py      # Genetic algorithms
+│   │   ├── alpha_zero_MCTS.py  # Monte Carlo Tree Search
+│   │   └── sbr_initializer/    # RL environment setup
+│   └── utility/            # Common utilities
+│       └── setup_understand.py
+├── ui/                     # React frontend application
+│   ├── src/               # React source code
+│   ├── public/            # Static assets
+│   ├── Dockerfile         # UI container build
+│   └── nginx.conf         # Production web server config
+├── benchmark_projects/     # Test projects (14 Java projects)
+├── tests/                  # Individual refactoring test cases
+├── pmd/                   # PMD 7.11.0 code analysis tool
+│   ├── bin/pmd           # PMD executable
+│   ├── rules/custom.xml  # Custom rulesets
+│   └── lib/              # PMD dependencies
+├── scitools/              # SciTools Understand installation
+│   ├── bin/              # Understand binaries
+│   └── plugins/          # Analysis plugins
+├── grammars/              # ANTLR4 grammar files
+│   ├── JavaParserLabeled.g4  # Preferred fast grammar
+│   ├── JavaParser.g4         # Original fast grammar
+│   └── Java9_v2.g4          # Legacy slow grammar
+├── docker-compose.yml     # Multi-service orchestration
+├── Dockerfile.api         # API container build
+├── Dockerfile.base        # Base image with dependencies
+└── requirements.txt       # Python dependencies
 ```
 
 ## Usage Workflows
 
 ### 1. Web Interface Workflow
 
-1. **Project Upload**: Upload Java projects via web interface
-2. **Project Analysis**: Generate Understand databases and detect code smells
-3. **ML Training Configuration**: Set training parameters and objectives
-4. **Training Execution**: Monitor real-time progress and task status
-5. **Results Analysis**: Download trained models and analysis reports
+1. **Project Upload**: Upload Java projects (ZIP format) via web interface
+2. **Understand Database Creation**: Automatic `.und` database generation for code analysis
+3. **PMD Code Smell Detection**: Automated smell detection using custom rulesets
+4. **ML Training Configuration**: Configure RL training parameters and objectives
+5. **Training Execution**: Monitor real-time progress with Celery task tracking
+6. **Model Evaluation**: View training metrics and model performance
+7. **Results Download**: Export trained models, reports, and refactored code
 
 ### 2. CLI Workflow
 
 ```bash
-# Direct refactoring execution
-python codart/refactoring_cli.py --project-path /path/to/project
+# Direct refactoring execution with SciTools Understand
+python codart/refactoring_cli.py \
+  --udb_path "/path/to/project.und" \
+  --file_path "/path/to/SourceClass.java" \
+  --source_class "ClassName" \
+  --moved_methods "method1,method2" \
+  --core 0  # 0=Understand, 1=OpenUnderstand
 
-# Search-based optimization
+# Search-based multi-objective optimization
 python codart/sbse/search_based_refactoring2.py
 
 # Individual refactoring testing
 python tests/extract_method/test_1.py
+
+# Testability prediction
+python codart/metrics/testability_prediction.py --project-path /path/to/project
+
+# Code smell detection with PMD
+./pmd/bin/pmd check -d /path/to/source -R pmd/rules/custom.xml -f csv
 ```
 
 ### 3. API Integration
 
 ```bash
-# Upload project
+# Upload and analyze project
 curl -X POST "http://localhost:8000/projects/upload" \
   -F "file=@project.zip" \
   -F "project_name=MyProject"
 
-# Start ML training
+# Start ML training with full configuration
 curl -X POST "http://localhost:8000/ml-training/train" \
   -H "Content-Type: application/json" \
-  -d '{"project_id": "123", "config": {...}}'
+  -d '{
+    "project_id": "123",
+    "config": {
+      "population_size": 15,
+      "max_iterations": 20,
+      "problem_type": 2,
+      "objectives": ["ANA", "CAMC", "CIS", "DAM", "DCC", "DSC", "MFA", "MOA"]
+    }
+  }'
 
-# Monitor task
+# Monitor training progress
 curl "http://localhost:8000/tasks/{task_id}/status"
+
+# Download results
+curl "http://localhost:8000/projects/{project_id}/download/models" -o models.zip
+
+# Get testability prediction
+curl -X POST "http://localhost:8000/testability/predict" \
+  -H "Content-Type: application/json" \
+  -d '{"project_path": "/opt/projects/MyProject", "model_type": "voting_regressor"}'
 ```
 
 ## Machine Learning Features
@@ -275,75 +388,203 @@ The system optimizes for 8 design quality objectives:
 ### Environment Variables
 
 ```bash
-# Core Paths
-PROJECT_ROOT_DIR="/opt/projects"
-UDB_ROOT_DIR="/opt/understand_dbs"
+# Core Paths (Container)
+PROJECT_ROOT_DIR="/opt/projects"          # Java projects storage
+UDB_ROOT_DIR="/opt/understand_dbs"        # Understand database files
+CSV_ROOT_DIR="/opt/csv_reports"           # PMD analysis reports
 
-# SciTools Understand
+# SciTools Understand Configuration
 STILICENSE="/root/.config/SciTools/License.conf"
-STIHOME="/app/scitools"
+STIHOME="/app/scitools"                   # Understand installation
+STIDOSUTILDIR="/root/.config/SciTools"    # License directory
+UNDERSTAND_API_LICENSE="/root/.local/share/SciTools/Understand/python_api.cfg"
 
 # PMD Configuration
-PMD_PATH="/app/pmd/bin/pmd"
-PMD_RULESET="/app/pmd/rules/custom.xml"
-PMD_CACHE_DIR="/app/pmd/cache"
+PMD_PATH="/app/pmd/bin/pmd"               # PMD executable
+PMD_RULESET="/app/pmd/rules/custom.xml"   # Custom analysis rules
+PMD_CACHE_DIR="/app/pmd/cache"            # PMD cache directory
 
-# Algorithm Configuration
-POPULATION_SIZE=15
-MAX_ITERATIONS=15
-PROBLEM=2  # Algorithm: 0=GA, 1=NSGA-II, 2=NSGA-III
-NUMBER_OBJECTIVES=8
+# SBSE Algorithm Configuration
+POPULATION_SIZE=15                        # GA population size
+MAX_ITERATIONS=15                         # Maximum generations
+NGEN=10                                   # Alternative iteration setting
+PROBLEM=2                                 # 0=GA, 1=NSGA-II, 2=NSGA-III
+NUMBER_OBJECTIVES=8                       # QMOOD metrics count
+MUTATION_PROBABILITY=0.2                  # Mutation rate
+CROSSOVER_PROBABILITY=0.8                 # Crossover rate
+LOWER_BAND=15                            # Lower bound for metrics
+UPPER_BAND=50                            # Upper bound for metrics
 
-# Service URLs
+# Warm Start Configuration
+WARM_START=1                             # Enable warm start
+INIT_POP_FILE=""                         # Initial population file
+RESUME_EXECUTION=""                       # Resume from checkpoint
+
+# Service URLs (Container Network)
 CELERY_BROKER_URL="amqp://guest:guest@rabbitmq:5672//"
 CELERY_RESULT_BACKEND="redis://redis:6379/0"
 MINIO_ENDPOINT="minio:9000"
+MINIO_ACCESS_KEY="00jFBl7n9Jn0ex0XL7m1"
+MINIO_SECRET_KEY="kYfujzkdSGjXKLN9oQhPDIVgRUaZRijvj1yaXmIZ"
+
+# Performance Options
+USE_CPP_BACKEND=0                        # Enable C++ parser (faster)
+QT_QPA_PLATFORM="offscreen"              # Headless Qt for Understand
+
+# Research Tracking (Optional)
+EXPERIMENTER="Researcher Name"
+SCRIPT="search_based_refactoring2.py"
+DESCRIPTION="Experiment description"
 ```
 
 ### Benchmark Projects
 
-The system includes 14 benchmark projects:
+The system includes 14 benchmark projects (defined in `codart/config.py`):
 
-- JSON20201115, JFreeChart, Weka, FreeMind
-- Commons-codec, JRDF, JMetal, AntApache
-- And more...
+| Index | Project | Description | Size |
+|-------|---------|-------------|------|
+| 0 | JSON20201115 | JSON parsing library | Small |
+| 1 | JFreeChart | Chart generation library | Large |
+| 2 | Weka | Machine learning toolkit | Large |
+| 3 | FreeMind | Mind mapping software | Medium |
+| 4 | Commons-codec | Apache commons codec | Small |
+| 5 | JRDF | RDF framework | Medium |
+| 6 | JMetal | Multi-objective optimization | Medium |
+| 7 | AntApache | Build automation tool | Large |
+| 8-13 | Additional projects | Various Java applications | Varies |
 
-Configure via `BENCHMARK_INDEX` in config.py.
+**Configuration**: Set `BENCHMARK_INDEX` (0-13) in `.env` file or `codart/config.py`.
+
+**Project Structure**: Each benchmark includes:
+- Source code in standard Maven/Gradle structure
+- Pre-generated `.und` database file
+- PMD analysis reports (CSV format)
+- Initial metrics baseline
+- Code smell detection results
 
 ## Development
 
 ### Local Development Setup
 
 ```bash
-# Install dependencies
+# Install Python dependencies
 pip install -r requirements.txt
 
-# Setup SciTools Understand
-export PYTHONPATH="/path/to/understand/Python:$PYTHONPATH"
-export PATH="/path/to/understand/bin:$PATH"
+# Setup SciTools Understand (Local Installation)
+export PYTHONPATH="/opt/scitools/bin/linux64/Python:$PYTHONPATH"
+export PATH="/opt/scitools/bin/linux64:$PATH"
+export LD_LIBRARY_PATH="/opt/scitools/bin/linux64:$LD_LIBRARY_PATH"
 
-# Run API server
-uvicorn application.main:app --reload
+# Activate Understand license
+und -setofflinereplycode YOUR_LICENSE_CODE
 
-# Run UI development server
-cd ui && npm start
+# Install PMD (if not using Docker)
+wget https://github.com/pmd/pmd/releases/download/pmd_releases%2F7.11.0/pmd-bin-7.11.0.zip
+unzip pmd-bin-7.11.0.zip -d /opt/pmd
+
+# Start development services
+# Terminal 1: API server
+uvicorn application.main:app --reload --host 0.0.0.0 --port 8000
+
+# Terminal 2: Celery worker
+celery -A application.celery_workers.ml_training_task worker --loglevel=info
+
+# Terminal 3: UI development server
+cd ui && npm install && npm start
+
+# Terminal 4: Redis (if not using Docker)
+redis-server
+
+# Terminal 5: RabbitMQ (if not using Docker)
+rabbitmq-server
+```
+
+### Grammar Development
+
+```bash
+# Generate parser from grammar (requires ANTLR4)
+cd grammars
+antlr4 -Dlanguage=Python3 JavaParserLabeled.g4 -visitor -listener
+mv *.py ../codart/gen/
+
+# Test grammar parsing speed
+python tests/grammar_speed_tests/test_performance.py
 ```
 
 ### Adding New Refactorings
 
-1. Implement refactoring in `codart/refactorings/`
-2. Inherit from ANTLR listener/visitor classes
-3. Add tests in `tests/` directory
-4. Update refactoring registry in `handler.py`
+1. **Create refactoring module** in `codart/refactorings/`:
+   ```python
+   from codart.gen.JavaParserLabeledListener import JavaParserLabeledListener
+   
+   class MyRefactoring(JavaParserLabeledListener):
+       def __init__(self, source_class, target_info):
+           self.source_class = source_class
+           # Implementation details
+   ```
+
+2. **Inherit from appropriate base class**:
+   - `JavaParserLabeledListener` (recommended)
+   - `JavaParserLabeledVisitor` (for complex traversals)
+   - Import from `codart.gen.JavaLabled` package
+
+3. **Add comprehensive tests** in `tests/` directory:
+   ```bash
+   tests/my_refactoring/
+   ├── test_1.py           # Main test script
+   ├── input.java          # Test input code
+   ├── expected.java       # Expected output
+   └── README.md           # Test documentation
+   ```
+
+4. **Register refactoring** in `codart/refactorings/handler.py`:
+   ```python
+   from .my_refactoring import MyRefactoring
+   
+   REFACTORING_REGISTRY = {
+       'my_refactoring': MyRefactoring,
+       # ... other refactorings
+   }
+   ```
+
+5. **Test on benchmark projects**:
+   ```bash
+   python codart/sbse/search_based_refactoring2.py
+   ```
+
+6. **Update documentation** with refactoring details and examples
 
 ### Testing
 
 ```bash
 # Run individual refactoring tests
 python tests/extract_method/test_1.py
+python tests/move_method/test_move_method.py
+python tests/pullup_method/test_pullup.py
 
-# Test on benchmark projects
+# Test specific refactoring with custom input
+python -c "from codart.refactorings.extract_class import ExtractClass; \
+           ec = ExtractClass('input.java', 'SourceClass', ['field1', 'method1']); \
+           ec.do_refactor()"
+
+# Run all tests in a category
+find tests/ -name "test_*.py" -exec python {} \;
+
+# Test on benchmark projects (full SBSE)
 python codart/sbse/search_based_refactoring2.py
+
+# Test PMD integration
+./pmd/bin/pmd check -d benchmark_projects/JSON20201115/src \
+    -R pmd/rules/custom.xml -f csv -r results.csv
+
+# Test Understand integration
+python codart/utility/understand_install_test.py
+
+# Test ML components
+python codart/metrics/testability_prediction.py --test
+
+# Performance testing
+python tests/grammar_speed_tests/benchmark_parsing.py
 ```
 
 ## Troubleshooting
