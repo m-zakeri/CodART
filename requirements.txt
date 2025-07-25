@@ -20,3 +20,4 @@ imblearn
 python-multipart
 torchrl
 diagrams
+psutil

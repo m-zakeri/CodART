@@ -87,33 +87,3 @@ class MakeMethodNonFinalRefactoringListener(JavaParserLabeledListener):
                         to_idx=grand_parent_ctx.modifier(i).stop.tokenIndex,
                         text=''
                     )
-
-
-if __name__ == '__main__':
-    udb_path = "/home/ali/Desktop/code/TestProject/TestProject.udb"
-    source_class = "App"
-    method_name = "testMethod"
-    # initialize with understand
-    main_file = ""
-    db = und.open(udb_path)
-    for cls in db.ents("class"):
-        if cls.simplename() == source_class:
-            main_file = cls.parent().longname()
-
-    stream = FileStream(main_file, encoding='utf8', errors='ignore')
-    lexer = JavaLexer(stream)
-    token_stream = CommonTokenStream(lexer)
-    parser = JavaParserLabeled(token_stream)
-    parser.getTokenStream()
-    parse_tree = parser.compilationUnit()
-    my_listener = MakeMethodNonFinalRefactoringListener(
-        common_token_stream=token_stream,
-        source_class=source_class,
-        method_name=method_name
-    )
-    walker = ParseTreeWalker()
-    walker.walk(t=parse_tree, listener=my_listener)
-
-    with open(main_file, mode='w', encoding='utf8', errors='ignore', newline='') as f:
-        f.write(my_listener.token_stream_rewriter.getDefaultText())
-    db.close()

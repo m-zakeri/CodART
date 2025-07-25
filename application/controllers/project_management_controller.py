@@ -104,9 +104,18 @@ def create_understand_database(project_dir: str = None, db_dir: str = None):
     # Full path to database with extension
     db_path_with_extension = db_path + ".und"
 
+    # Check if the expected .und file exists
     if os.path.exists(db_path_with_extension):
         logger.info(f"Database already exists at {db_path_with_extension}")
         return db_path_with_extension
+    
+    # If not, check for any existing .und file in the directory and use it
+    if os.path.exists(db_dir):
+        for file in os.listdir(db_dir):
+            if file.endswith('.und'):
+                existing_db_path = os.path.join(db_dir, file)
+                logger.info(f"Found existing database at {existing_db_path}")
+                return existing_db_path
 
     # Commands to run
     create_cmd = ["und", "create", "-languages", language, db_path_with_extension]

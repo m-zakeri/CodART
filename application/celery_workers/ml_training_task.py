@@ -3,10 +3,26 @@ from application.services.minio_training_controller import ModelTrainingService
 import os
 import time
 import traceback
+import gc
 from datetime import datetime
 from logging import getLogger
 from typing import Any, Dict, Optional
+
+# Initialize SciTools Understand for the Celery worker
+import sys
+sys.path.append('/app/scitools/bin/linux64/Python')
+os.environ['LD_LIBRARY_PATH'] = '/app/scitools/bin/linux64'
+os.environ['STIHOME'] = '/app/scitools'
+
+# Import after setting up the environment
 from codart.learner.tests.test_reinforcement.train import RefactoringTrainer
+
+# Try to import psutil, but don't fail if it's not available
+try:
+    import psutil
+    HAS_PSUTIL = True
+except ImportError:
+    HAS_PSUTIL = False
 
 
 logger = getLogger(__name__)
@@ -30,11 +46,30 @@ app.conf.update(
     result_serializer='json',
     timezone='UTC',
     enable_utc=True,
+    result_extended=True,
+    task_send_sent_event=True,
+    result_expires=3600,
     task_routes={
         'ml_training_tasks.train_refactoring_model': {'queue': 'ml_training'},
         'ml_training_tasks.evaluate_model': {'queue': 'ml_evaluation'},
-    }
+    },
+    # Add memory management settings
+    worker_prefetch_multiplier=1,  # Prevent worker from prefetching too many tasks
+    task_acks_late=True,  # Acknowledge tasks only after completion
+    worker_max_tasks_per_child=1,  # Restart worker after each task to prevent memory leaks
+    worker_max_memory_per_child=10000000,  # 10GB memory limit per child worker (in KB)
+    task_reject_on_worker_lost=True,  # Reject tasks if worker is lost
+    task_acks_on_failure_or_timeout=True,  # Acknowledge tasks even on failure/timeout
+    # Fix deprecation warning for broker connection retry
+    broker_connection_retry_on_startup=True,  # Keep retrying broker connections on startup
+    # Suppress root user warning
+    worker_disable_rate_limits=True,
 )
+
+# Suppress Celery's root user warning
+import warnings
+from celery.platforms import check_privileges
+warnings.filterwarnings('ignore', category=UserWarning, module='celery.platforms')
 
 # Global task metadata storage (consider using Redis or database in production)
 task_metadata = {}
@@ -121,6 +156,15 @@ def train_refactoring_model(self,
 
     task_id = self.request.id
     logger.info(f"Starting training task {task_id}")
+    
+    # Monitor initial memory usage if psutil is available
+    if HAS_PSUTIL:
+        process = psutil.Process(os.getpid())
+        initial_memory = process.memory_info().rss / 1024 / 1024  # MB
+        logger.info(f"Initial memory usage: {initial_memory:.2f} MB")
+    else:
+        initial_memory = 0
+        logger.info("psutil not available, memory monitoring disabled")
 
     try:
         # Update task state
@@ -137,8 +181,12 @@ def train_refactoring_model(self,
         _validate_config(env_config, 'Environment')
         _validate_config(minio_config, 'MinIO')
 
-        # Add task ID to project name for unique identification
-        env_config['project_name'] = f"{env_config['project_name']}_task_{task_id}"
+        # Store original project name for file lookups
+        original_project_name = env_config['project_name']
+        
+        # Add task ID to project name for unique identification if not already set
+        if not env_config['project_name'].endswith(f"_task_{task_id}"):
+            env_config['project_name'] = f"{env_config['project_name']}_task_{task_id}"
 
         # Update progress
         self.update_state(
@@ -164,13 +212,93 @@ def train_refactoring_model(self,
                 }
             )
 
+        # Ensure database exists before training
+        self.update_state(
+            state='PROGRESS',
+            meta={
+                'status': 'Checking/creating database...',
+                'progress': 8,
+                'timestamp': datetime.now().isoformat()
+            }
+        )
+        
+        # Check if database exists and create if needed
+        udb_path = env_config.get('udb_path', '')
+        if udb_path and not os.path.exists(udb_path):
+            try:
+                from codart.utility.directory_utils import create_understand_database
+                import hashlib
+                
+                # Extract project info from path
+                path_parts = udb_path.split('/')
+                if len(path_parts) >= 4:
+                    project_name = path_parts[-3]
+                    version_id = path_parts[-2]
+                    project_path = f"/opt/projects/{project_name}/{version_id}"
+                    
+                    if os.path.exists(project_path):
+                        os.makedirs(os.path.dirname(udb_path), exist_ok=True)
+                        create_understand_database(project_path, os.path.dirname(udb_path))
+                        logger.info(f"Created database at {udb_path}")
+                    else:
+                        logger.warning(f"Project path {project_path} not found, proceeding with fallback")
+                else:
+                    logger.warning(f"Could not parse database path {udb_path}, proceeding with fallback")
+            except Exception as e:
+                logger.error(f"Failed to create database: {e}")
+                logger.warning("Proceeding with fallback mode")
+
+        # Pass the original project name for file lookups
         trainer = RefactoringTrainer(
-            env_config=env_config,
+            env_config={**env_config, 'original_project_name': original_project_name},
             minio_config=minio_config
         )
 
         # Add progress callback to trainer
         trainer.progress_callback = progress_callback
+
+        # Handle resume/fine-tuning if specified
+        if training_options and training_options.get('resume_from_checkpoint'):
+            checkpoint_path = training_options.get('checkpoint_path')
+            fine_tune = training_options.get('fine_tune', False)
+            
+            self.update_state(
+                state='PROGRESS',
+                meta={
+                    'status': f'Loading checkpoint for {"fine-tuning" if fine_tune else "resuming"}...',
+                    'progress': 12,
+                    'timestamp': datetime.now().isoformat()
+                }
+            )
+
+            try:
+                if checkpoint_path:
+                    # Load specific checkpoint
+                    trainer.load_checkpoint(minio_path=checkpoint_path, fine_tune=fine_tune)
+                else:
+                    # Find and load latest checkpoint
+                    available_checkpoints = trainer.list_available_checkpoints()
+                    if available_checkpoints:
+                        # Look for final checkpoint first, then latest
+                        latest_checkpoint = None
+                        for cp in available_checkpoints:
+                            if 'final' in cp:
+                                latest_checkpoint = cp
+                                break
+                        if not latest_checkpoint:
+                            latest_checkpoint = available_checkpoints[0]
+                        
+                        trainer.load_checkpoint(minio_path=latest_checkpoint, fine_tune=fine_tune)
+                        logger.info(f"Loaded checkpoint: {latest_checkpoint}")
+                    else:
+                        logger.warning("No checkpoints found, starting from scratch")
+
+            except Exception as e:
+                logger.error(f"Failed to load checkpoint: {e}")
+                if training_options.get('require_checkpoint', False):
+                    raise
+                else:
+                    logger.warning("Continuing with fresh training despite checkpoint load failure")
 
         # Update progress
         self.update_state(
@@ -211,6 +339,17 @@ def train_refactoring_model(self,
         }
 
         logger.info(f"Training task {task_id} completed successfully")
+        
+        # Monitor final memory usage and cleanup if psutil is available
+        if HAS_PSUTIL:
+            final_memory = process.memory_info().rss / 1024 / 1024  # MB
+            logger.info(f"Final memory usage: {final_memory:.2f} MB (increase: {final_memory - initial_memory:.2f} MB)")
+        else:
+            logger.info("Training completed (memory monitoring disabled)")
+        
+        # Force garbage collection
+        gc.collect()
+        
         return result
 
     except Exception as e:
@@ -231,8 +370,16 @@ def train_refactoring_model(self,
             }
         )
 
-        # Re-raise the exception for Celery to handle
-        raise Exception(error_message)
+        # Force garbage collection even on failure
+        gc.collect()
+        
+        # Return failure result instead of raising to avoid serialization issues
+        return {
+            'status': 'FAILURE',
+            'error': error_message,
+            'traceback': error_traceback,
+            'timestamp': datetime.now().isoformat()
+        }
 
 
 @app.task(bind=True, name='ml_training_tasks.evaluate_model')
@@ -304,7 +451,7 @@ def evaluate_model(self,
             }
         )
 
-        raise Exception(error_message)
+        raise
 
 
 @app.task(bind=True, name='ml_training_tasks.get_training_status')
@@ -415,7 +562,7 @@ def cleanup_old_results(minio_config: Dict[str, Any],
 
     except Exception as e:
         logger.error(f"Cleanup failed for project {project_name}: {e}")
-        raise Exception(f"Cleanup failed: {str(e)}")
+        raise
 
 
 @app.task(name='ml_training_tasks.list_training_results')
@@ -469,4 +616,4 @@ def list_training_results(minio_config: Dict[str, Any],
 
     except Exception as e:
         logger.error(f"Failed to list results: {e}")
-        raise Exception(f"Failed to list results: {str(e)}")
+        raise

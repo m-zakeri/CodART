@@ -2,7 +2,8 @@ import torch
 import numpy as np
 from tensordict import TensorDict
 from torchrl.envs import Transform
-from torchrl.data import CompositeSpec, UnboundedContinuousTensorSpec, BoundedTensorSpec
+from torchrl.data import CompositeSpec
+from torchrl.data.tensor_specs import UnboundedContinuousTensorSpec, BoundedTensorSpec
 from codart.learner.sbr_initializer.utils.utility import logger
 
 
@@ -12,7 +13,7 @@ class RefactoringTransform(Transform):
     """
 
     def __init__(self):
-        super().__init__()
+        super().__init__(in_keys=[], out_keys=["step_count", "episode_reward"])
         self.reward_accumulator = 0.0
         self.step_count = 0
 
@@ -49,6 +50,9 @@ class RefactoringTransform(Transform):
 
         # Add step count
         transformed['step_count'] = torch.tensor([0], dtype=torch.long)
+
+        # Add episode reward to ensure consistent keys
+        transformed['episode_reward'] = torch.tensor([self.reward_accumulator], dtype=torch.float32)
 
         return transformed
 

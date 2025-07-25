@@ -129,14 +129,15 @@ async def download_codesmells(project_name: str, version_id: Optional[str] = Non
     """
     try:
         controller = get_minio_controller()
-        # Use environment variable MINIO_CODESMELLS_BUCKET or default to "sonarqube-reports"
-        codesmells_bucket = os.getenv("MINIO_CODESMELLS_BUCKET", "sonarqube-reports")
+        # Use environment variable MINIO_CODESMELLS_BUCKET or default to "code-smells" to match upload bucket
+        codesmells_bucket = os.getenv("MINIO_CODESMELLS_BUCKET", "code-smells")
 
         if version_id:
-            # Construct the file name based on project name and version_id
-            file_name = f"{project_name}/{version_id}/code_smells_{project_name}_{version_id}.csv"
+            # Construct the file path based on project name and version_id
+            file_path = f"{project_name}/{version_id}/code_smells_{project_name}_{version_id}.csv"
+            file_name = f"code_smells_{project_name}_{version_id}.csv"
             try:
-                data = controller.minio_client.get_object(codesmells_bucket, file_name)
+                data = controller.minio_client.get_object(codesmells_bucket, file_path)
                 return StreamingResponse(
                     data,
                     media_type="text/csv",
@@ -147,12 +148,12 @@ async def download_codesmells(project_name: str, version_id: Optional[str] = Non
             except Exception as e:
                 logger.error(f"Error downloading code smells file: {str(e)}")
                 raise HTTPException(
-                    status_code=404, detail=f"Code smells file not found: {file_name}"
+                    status_code=404, detail=f"Code smells file not found: {file_path}"
                 )
         else:
             # If no version_id is provided, download all code smells CSV files for this project as a zip
-            # We assume that all files follow the naming pattern "code_smells_{project_name}_<version>.csv"
-            prefix = f"code_smells_{project_name}_"
+            # Files are stored in path format: {project_name}/{version_id}/code_smells_{project_name}_{version_id}.csv
+            prefix = f"{project_name}/"
             objects = controller.minio_client.list_objects(
                 codesmells_bucket, prefix=prefix, recursive=True
             )

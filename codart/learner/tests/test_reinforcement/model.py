@@ -3,9 +3,10 @@ import torch.nn as nn
 from tensordict.nn import TensorDictModule
 from tensordict.nn.distributions import NormalParamExtractor
 from torchrl.modules import ProbabilisticActor, TanhNormal
-from torchrl.data import CompositeSpec, UnboundedContinuousTensorSpec
+from torchrl.data import CompositeSpec
+from torchrl.data.tensor_specs import UnboundedContinuousTensorSpec
 from torch.distributions import Categorical
-from codart.learner.sbr_initializer.utils.utility import config
+from codart.learner.sbr_initializer.utils.utility import config, logger
 
 
 class RefactoringPolicyNetwork(nn.Module):
@@ -47,35 +48,51 @@ class RefactoringPolicyNetwork(nn.Module):
             nn.Linear(hidden_size, n_refactoring_types),
         )
 
-        # Continuous action parameters (mean and std)
-        self.action_mean = nn.Sequential(
+        # Continuous action parameters - IMPORTANT: Use 'loc' and 'scale' for TanhNormal
+        self.action_loc = nn.Sequential(
             nn.Linear(hidden_size, hidden_size),
             nn.Tanh(),
             nn.Linear(hidden_size, action_size),
         )
 
-        self.action_std = nn.Sequential(
+        self.action_scale = nn.Sequential(
             nn.Linear(hidden_size, hidden_size),
             nn.Tanh(),
             nn.Linear(hidden_size, action_size),
-            nn.Softplus(),  # Ensure positive std
+            nn.Softplus(),  # Ensure positive scale
         )
 
-    def forward(self, observation):
+    def forward(self, refactoring, refactoring_type, success):
+        """
+        Forward pass that accepts individual tensors (TensorDictModule handles the extraction)
+        """
+        # Debug logging
+        logger.debug(f"Policy network input shapes - refactoring: {refactoring.shape}, "
+                     f"refactoring_type: {refactoring_type.shape}, success: {success.shape}")
+
+        # Ensure tensors have the right shape and dtype
+        refactoring = refactoring.float().unsqueeze(-1) if refactoring.dim() == 1 else refactoring.float()
+        refactoring_type = refactoring_type.float().unsqueeze(
+            -1) if refactoring_type.dim() == 1 else refactoring_type.float()
+        success = success.float().unsqueeze(-1) if success.dim() == 1 else success.float()
+
+        # Concatenate input features
+        observation = torch.cat([refactoring, refactoring_type, success], dim=-1)
+        logger.debug(f"Concatenated observation shape: {observation.shape}")
+
         features = self.feature_extractor(observation)
 
         # Get refactoring type logits
         refactoring_logits = self.refactoring_policy(features)
 
-        # Get continuous action parameters
-        action_mean = self.action_mean(features)
-        action_std = self.action_std(features) + 1e-6  # Add small epsilon for numerical stability
+        # Get continuous action parameters - FIXED: Use 'loc' and 'scale'
+        action_loc = self.action_loc(features)
+        action_scale = self.action_scale(features) + 1e-6  # Add small epsilon for numerical stability
 
-        return {
-            'refactoring_logits': refactoring_logits,
-            'action_mean': action_mean,
-            'action_std': action_std
-        }
+        logger.debug(f"Output shapes - refactoring_logits: {refactoring_logits.shape}, "
+                     f"action_loc: {action_loc.shape}, action_scale: {action_scale.shape}")
+
+        return refactoring_logits, action_loc, action_scale
 
 
 class RefactoringValueNetwork(nn.Module):
@@ -111,9 +128,26 @@ class RefactoringValueNetwork(nn.Module):
         # Value head for multi-objective rewards
         self.value_head = nn.Linear(hidden_size, n_objectives)
 
-    def forward(self, observation):
+    def forward(self, refactoring, refactoring_type, success):
+        """
+        Forward pass that accepts individual tensors (TensorDictModule handles the extraction)
+        """
+        # Debug logging
+        logger.debug(f"Value network input shapes - refactoring: {refactoring.shape}, "
+                     f"refactoring_type: {refactoring_type.shape}, success: {success.shape}")
+
+        # Ensure tensors have the right shape and dtype
+        refactoring = refactoring.float().unsqueeze(-1) if refactoring.dim() == 1 else refactoring.float()
+        refactoring_type = refactoring_type.float().unsqueeze(
+            -1) if refactoring_type.dim() == 1 else refactoring_type.float()
+        success = success.float().unsqueeze(-1) if success.dim() == 1 else success.float()
+
+        # Concatenate input features
+        observation = torch.cat([refactoring, refactoring_type, success], dim=-1)
         features = self.feature_extractor(observation)
         values = self.value_head(features)
+
+        logger.debug(f"Value output shape: {values.shape}")
         return values
 
 
@@ -127,13 +161,14 @@ def create_policy_module(env):
         action_size=1
     )
 
-    # Wrap in TensorDictModule
+    # FIXED: Use correct output keys for TanhNormal distribution
     policy_module = TensorDictModule(
         policy_net,
         in_keys=["refactoring", "refactoring_type", "success"],
-        out_keys=["refactoring_logits", "action_mean", "action_std"]
+        out_keys=["refactoring_logits", "loc", "scale"]  # Changed from action_mean/action_std to loc/scale
     )
 
+    logger.info("Policy module created successfully")
     return policy_module
 
 
@@ -151,16 +186,18 @@ def create_value_module(env):
         out_keys=["state_value"]
     )
 
+    logger.info("Value module created successfully")
     return value_module
 
 
 def create_probabilistic_actor(policy_module, env):
     """Create probabilistic actor for action sampling"""
 
+    # FIXED: Use correct in_keys that match TanhNormal parameter names
     actor = ProbabilisticActor(
         module=policy_module,
         spec=env.action_spec,
-        in_keys=["action_mean", "action_std"],
+        in_keys=["loc", "scale"],  # Changed from action_mean/action_std to loc/scale
         out_keys=["action"],
         distribution_class=TanhNormal,
         distribution_kwargs={
@@ -171,4 +208,5 @@ def create_probabilistic_actor(policy_module, env):
         log_prob_key="sample_log_prob",
     )
 
+    logger.info("Probabilistic actor created successfully")
     return actor

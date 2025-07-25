@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Upload, Download, Play, Pause, Trash2, FileText, Activity, Package, AlertCircle, CheckCircle, Clock, X, RefreshCw, Moon, Sun, Save, Database, Brain, TrendingUp, BarChart3, Settings, Target } from 'lucide-react';
+import { Upload, Download, Play, Pause, Trash2, FileText, Activity, Package, AlertCircle, CheckCircle, Clock, X, RefreshCw, Moon, Sun, Save, Database, Brain, TrendingUp, BarChart3, Settings, Target, GitBranch, RotateCcw, Square, PlayCircle, History, Archive, Zap, Sparkles, ChevronRight, Info } from 'lucide-react';
 
 // API Configuration
 const API_BASE_URL = 'http://localhost:8000';
@@ -116,6 +116,8 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [taskHistory, setTaskHistory] = useState(() => StorageManager.load(STORAGE_KEYS.TASK_HISTORY, []));
   const [mlModels, setMlModels] = useState(() => StorageManager.load(STORAGE_KEYS.ML_MODELS, []));
+  const [predictionResults, setPredictionResults] = useState([]);
+  const [predictionHistory, setPredictionHistory] = useState(() => StorageManager.load('prediction-history', []));
   const [testabilityTasks, setTestabilityTasks] = useState([]);
   const [availableMetrics, setAvailableMetrics] = useState([]);
 
@@ -272,6 +274,76 @@ const App = () => {
       getTaskStatus(taskId);
     } catch (error) {
       showNotification('Failed to cancel task: ' + error.message, 'error');
+    }
+  };
+
+  // Stop training gracefully
+  const stopTraining = async (taskId, saveCheckpoint = true) => {
+    try {
+      await ApiClient.request(`/api/v1/rl-handler/api/v1/ml-training/stop/${taskId}?save_checkpoint=${saveCheckpoint}`, {
+        method: 'POST',
+      });
+      showNotification(`Task ${taskId} stopped ${saveCheckpoint ? 'with checkpoint saved' : 'immediately'}`, 'info');
+      getTaskStatus(taskId);
+    } catch (error) {
+      showNotification('Failed to stop task: ' + error.message, 'error');
+    }
+  };
+
+  // Resume/Fine-tune training
+  const resumeTraining = async (resumeConfig) => {
+    try {
+      setIsLoading(true);
+      const response = await ApiClient.request('/api/v1/rl-handler/api/v1/ml-training/resume', {
+        method: 'POST',
+        body: JSON.stringify(resumeConfig),
+      });
+
+      const taskData = {
+        task_id: response.task_id,
+        project_name: resumeConfig.project_name,
+        status: response.status,
+        type: resumeConfig.fine_tune ? 'RL_FINE_TUNE' : 'RL_RESUME',
+        timestamp: response.timestamp,
+        config: resumeConfig
+      };
+
+      // Save to history and update UI
+      const updatedHistory = StorageManager.addToList(STORAGE_KEYS.TASK_HISTORY, taskData);
+      setTaskHistory(updatedHistory);
+
+      showNotification(response.message, 'success');
+      return response;
+    } catch (error) {
+      showNotification('Failed to resume/fine-tune training: ' + error.message, 'error');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Get available checkpoints
+  const getAvailableCheckpoints = async (projectName) => {
+    try {
+      const response = await ApiClient.request(`/api/v1/rl-handler/api/v1/ml-training/checkpoints/${projectName}`);
+      return response;
+    } catch (error) {
+      console.error('Failed to fetch checkpoints:', error);
+      return { available_checkpoints: [], total_checkpoints: 0 };
+    }
+  };
+
+  // Cleanup old checkpoints
+  const cleanupCheckpoints = async (projectName, keepLatest = 5) => {
+    try {
+      const response = await ApiClient.request(`/api/v1/rl-handler/api/v1/ml-training/checkpoints/${projectName}/cleanup?keep_latest=${keepLatest}`, {
+        method: 'POST',
+      });
+      showNotification(`Cleanup completed: ${response.deleted_checkpoints} checkpoints removed`, 'success');
+      return response;
+    } catch (error) {
+      showNotification('Failed to cleanup checkpoints: ' + error.message, 'error');
+      throw error;
     }
   };
 
@@ -434,6 +506,61 @@ const App = () => {
     }
   };
 
+  // Prediction Functions
+  const predictRefactoringSequence = async (predictionRequest) => {
+    try {
+      setIsLoading(true);
+      const response = await ApiClient.request('/api/v1/rl-handler/api/v1/ml-training/predict', {
+        method: 'POST',
+        body: JSON.stringify(predictionRequest),
+      });
+
+      const predictionData = {
+        ...response,
+        prediction_id: `pred_${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        request_params: predictionRequest
+      };
+
+      // Save to history
+      const updatedHistory = StorageManager.addToList('prediction-history', predictionData, 50);
+      setPredictionHistory(updatedHistory);
+      setPredictionResults([predictionData]);
+
+      showNotification(`Prediction generated! Found ${response.predictions.length} recommendations`, 'success');
+      return response;
+    } catch (error) {
+      showNotification('Prediction failed: ' + error.message, 'error');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getAvailableModels = async (projectName) => {
+    try {
+      const response = await ApiClient.request(`/api/v1/rl-handler/api/v1/ml-training/models/${projectName}`);
+      return response.available_models || [];
+    } catch (error) {
+      console.error('Failed to fetch available models:', error);
+      return [];
+    }
+  };
+
+  const loadModelForInference = async (projectName, checkpointPath) => {
+    try {
+      const response = await ApiClient.request(`/api/v1/rl-handler/api/v1/ml-training/models/${projectName}/load`, {
+        method: 'POST',
+        body: JSON.stringify({ checkpoint_path: checkpointPath }),
+      });
+      showNotification(`Model loaded successfully for ${projectName}`, 'success');
+      return response;
+    } catch (error) {
+      showNotification('Failed to load model: ' + error.message, 'error');
+      throw error;
+    }
+  };
+
   // Render Projects Tab
   const renderProjects = () => (
     <div className="space-y-6">
@@ -497,6 +624,15 @@ const App = () => {
         darkMode={darkMode}
         isLoading={isLoading}
       />
+      
+      <RLCheckpointManager 
+        projects={projects}
+        darkMode={darkMode}
+        getAvailableCheckpoints={getAvailableCheckpoints}
+        cleanupCheckpoints={cleanupCheckpoints}
+        resumeTraining={resumeTraining}
+        isLoading={isLoading}
+      />
     </div>
   );
 
@@ -530,12 +666,13 @@ const App = () => {
             </div>
           ) : (
             taskHistory.map((task) => (
-              <TaskCard
+              <EnhancedTaskCard
                 key={task.task_id}
                 task={task}
                 darkMode={darkMode}
                 onCancel={cancelTraining}
                 onRefresh={() => getTaskStatus(task.task_id)}
+                stopTraining={stopTraining}
               />
             ))
           )}
@@ -596,6 +733,31 @@ const App = () => {
     </div>
   );
 
+  // Render Predictions Tab
+  const renderPredictions = () => (
+    <div className="space-y-6">
+      <RefactoringPredictionForm
+        onSubmit={predictRefactoringSequence}
+        projects={projects}
+        darkMode={darkMode}
+        isLoading={isLoading}
+        getAvailableModels={getAvailableModels}
+        loadModelForInference={loadModelForInference}
+      />
+      
+      <PredictionResultsSection
+        predictionResults={predictionResults}
+        predictionHistory={predictionHistory}
+        darkMode={darkMode}
+        onClearHistory={() => {
+          setPredictionHistory([]);
+          StorageManager.save('prediction-history', []);
+        }}
+        setPredictionResults={setPredictionResults}
+      />
+    </div>
+  );
+
   // Render Metrics and Downloads Tab
   const renderMetricsAndDownloads = () => (
     <div className="space-y-6">
@@ -650,6 +812,7 @@ const App = () => {
             {[
               { id: 'projects', label: 'Projects', icon: Package },
               { id: 'training', label: 'ML Training', icon: Brain },
+              { id: 'predictions', label: 'Refactoring Predictions', icon: Sparkles },
               { id: 'tasks', label: 'Task Monitor', icon: Activity },
               { id: 'testability', label: 'Testability Training', icon: Target },
               { id: 'metrics', label: 'Metrics & Downloads', icon: BarChart3 },
@@ -677,6 +840,7 @@ const App = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {activeTab === 'projects' && renderProjects()}
         {activeTab === 'training' && renderTraining()}
+        {activeTab === 'predictions' && renderPredictions()}
         {activeTab === 'tasks' && renderTasks()}
         {activeTab === 'testability' && renderTestabilityTraining()}
         {activeTab === 'metrics' && renderMetricsAndDownloads()}
@@ -1028,8 +1192,8 @@ const MLTrainingForm = ({ onSubmit, projects, selectedProject, darkMode, isLoadi
       ...trainingConfig,
       env_config: {
         ...trainingConfig.env_config,
-        udb_path: `/opt/understand_dbs/${trainingConfig.env_config.project_name}/${trainingConfig.env_config.version_id}/${trainingConfig.env_config.project_name}.und`,
-        project_path: `/opt/projects/${trainingConfig.env_config.project_name}/${trainingConfig.env_config.version_id}/source`
+        udb_path: `/opt/understand_dbs/${trainingConfig.env_config.project_name}/${trainingConfig.env_config.version_id}/${trainingConfig.env_config.version_id}.und`,
+        project_path: `/opt/projects/${trainingConfig.env_config.project_name}/${trainingConfig.env_config.version_id}`
       }
     };
 
@@ -1222,6 +1386,546 @@ const MLTrainingForm = ({ onSubmit, projects, selectedProject, darkMode, isLoadi
             </>
           )}
         </button>
+      </div>
+    </div>
+  );
+};
+
+// RL Checkpoint Management Component
+const RLCheckpointManager = ({ projects, darkMode, getAvailableCheckpoints, cleanupCheckpoints, resumeTraining, isLoading }) => {
+  const [selectedProject, setSelectedProject] = useState('');
+  const [checkpoints, setCheckpoints] = useState([]);
+  const [loadingCheckpoints, setLoadingCheckpoints] = useState(false);
+  const [showResumeModal, setShowResumeModal] = useState(false);
+  const [selectedCheckpoint, setSelectedCheckpoint] = useState('');
+
+  const loadCheckpoints = async (projectName) => {
+    if (!projectName) return;
+    
+    setLoadingCheckpoints(true);
+    try {
+      const response = await getAvailableCheckpoints(projectName);
+      setCheckpoints(response.available_checkpoints || []);
+    } catch (error) {
+      console.error('Failed to load checkpoints:', error);
+      setCheckpoints([]);
+    } finally {
+      setLoadingCheckpoints(false);
+    }
+  };
+
+  const handleProjectChange = (projectName) => {
+    setSelectedProject(projectName);
+    setCheckpoints([]);
+    if (projectName) {
+      loadCheckpoints(projectName);
+    }
+  };
+
+  const handleCleanup = async () => {
+    if (!selectedProject) return;
+    
+    if (window.confirm(`Are you sure you want to cleanup old checkpoints for ${selectedProject}? This will keep only the latest 5 checkpoints.`)) {
+      try {
+        await cleanupCheckpoints(selectedProject);
+        loadCheckpoints(selectedProject); // Refresh list
+      } catch (error) {
+        console.error('Cleanup failed:', error);
+      }
+    }
+  };
+
+  const formatCheckpointName = (checkpointPath) => {
+    const parts = checkpointPath.split('/');
+    const filename = parts[parts.length - 1];
+    return filename.replace('checkpoint_', '').replace('.pth', '');
+  };
+
+  const inputClass = `w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+    darkMode 
+      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+      : 'bg-white border-gray-300 text-gray-900'
+  }`;
+
+  return (
+    <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-lg p-6`}>
+      <h3 className={`text-lg font-semibold mb-6 flex items-center ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+        <Archive className="w-5 h-5 mr-2 text-blue-600" />
+        RL Checkpoint Management
+      </h3>
+
+      <div className="space-y-6">
+        {/* Project Selection */}
+        <div>
+          <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+            Select Project
+          </label>
+          <select
+            value={selectedProject}
+            onChange={(e) => handleProjectChange(e.target.value)}
+            className={inputClass}
+          >
+            <option value="">Choose a project...</option>
+            {projects.map((project, index) => {
+              const projectName = project.project_name || project.name;
+              return (
+                <option key={index} value={projectName}>
+                  {projectName}
+                </option>
+              );
+            })}
+          </select>
+        </div>
+
+        {/* Checkpoints List */}
+        {selectedProject && (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h4 className={`text-md font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                Available Checkpoints ({checkpoints.length})
+              </h4>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => loadCheckpoints(selectedProject)}
+                  disabled={loadingCheckpoints}
+                  className={`p-2 ${darkMode ? 'text-blue-400 hover:bg-blue-900' : 'text-blue-600 hover:bg-blue-50'} rounded transition`}
+                  title="Refresh checkpoints"
+                >
+                  <RefreshCw className={`w-4 h-4 ${loadingCheckpoints ? 'animate-spin' : ''}`} />
+                </button>
+                <button
+                  onClick={handleCleanup}
+                  disabled={!selectedProject || checkpoints.length === 0}
+                  className={`px-3 py-1 text-xs rounded transition ${
+                    darkMode 
+                      ? 'bg-yellow-900 text-yellow-200 hover:bg-yellow-800' 
+                      : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
+                  }`}
+                  title="Cleanup old checkpoints"
+                >
+                  <Archive className="w-3 h-3 inline mr-1" />
+                  Cleanup
+                </button>
+              </div>
+            </div>
+
+            {loadingCheckpoints ? (
+              <div className={`p-4 text-center ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />
+                Loading checkpoints...
+              </div>
+            ) : checkpoints.length === 0 ? (
+              <div className={`p-4 text-center ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                No checkpoints found for this project
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {checkpoints.map((checkpoint, index) => (
+                  <div 
+                    key={index}
+                    className={`p-3 border rounded-lg flex items-center justify-between ${
+                      darkMode 
+                        ? 'bg-gray-700 border-gray-600 hover:bg-gray-650' 
+                        : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                    } transition cursor-pointer`}
+                    onClick={() => setSelectedCheckpoint(checkpoint)}
+                  >
+                    <div className="flex items-center">
+                      <input
+                        type="radio"
+                        name="checkpoint"
+                        value={checkpoint}
+                        checked={selectedCheckpoint === checkpoint}
+                        onChange={() => setSelectedCheckpoint(checkpoint)}
+                        className="mr-3"
+                      />
+                      <div>
+                        <p className={`text-sm font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                          {formatCheckpointName(checkpoint)}
+                        </p>
+                        <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                          {checkpoint}
+                        </p>
+                      </div>
+                    </div>
+                    {checkpoint.includes('final') && (
+                      <span className={`px-2 py-1 text-xs rounded ${
+                        darkMode 
+                          ? 'bg-green-900 text-green-200' 
+                          : 'bg-green-100 text-green-800'
+                      }`}>
+                        Final
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Resume/Fine-tune Controls */}
+            {checkpoints.length > 0 && (
+              <div className="flex gap-3 mt-4">
+                <button
+                  onClick={() => setShowResumeModal(true)}
+                  disabled={!selectedCheckpoint}
+                  className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-400 transition duration-200 flex items-center justify-center"
+                >
+                  <PlayCircle className="w-4 h-4 mr-2" />
+                  Resume Training
+                </button>
+                <button
+                  onClick={() => setShowResumeModal(true)}
+                  disabled={!selectedCheckpoint}
+                  className="flex-1 bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 disabled:bg-gray-400 transition duration-200 flex items-center justify-center"
+                >
+                  <GitBranch className="w-4 h-4 mr-2" />
+                  Fine-tune
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Resume/Fine-tune Modal */}
+      {showResumeModal && (
+        <RLResumeModal
+          isOpen={showResumeModal}
+          onClose={() => setShowResumeModal(false)}
+          selectedProject={selectedProject}
+          selectedCheckpoint={selectedCheckpoint}
+          projects={projects}
+          darkMode={darkMode}
+          resumeTraining={resumeTraining}
+          isLoading={isLoading}
+        />
+      )}
+    </div>
+  );
+};
+
+// RL Resume/Fine-tune Modal Component
+const RLResumeModal = ({ isOpen, onClose, selectedProject, selectedCheckpoint, projects, darkMode, resumeTraining, isLoading }) => {
+  const [resumeConfig, setResumeConfig] = useState({
+    project_name: selectedProject,
+    checkpoint_path: selectedCheckpoint,
+    fine_tune: false,
+    new_env_config: null,
+    training_options: {
+      n_iters: 10,
+      learning_rate: 0.0003,
+      frames_per_batch: 6000
+    }
+  });
+
+  const [targetProject, setTargetProject] = useState(selectedProject);
+
+  useEffect(() => {
+    setResumeConfig(prev => ({
+      ...prev,
+      project_name: selectedProject,
+      checkpoint_path: selectedCheckpoint
+    }));
+    setTargetProject(selectedProject);
+  }, [selectedProject, selectedCheckpoint]);
+
+  const handleSubmit = async () => {
+    try {
+      // Prepare config for fine-tuning if needed
+      const finalConfig = { ...resumeConfig };
+      
+      if (resumeConfig.fine_tune && targetProject !== selectedProject) {
+        // Fine-tuning on different project
+        const targetProjectData = projects.find(p => (p.project_name || p.name) === targetProject);
+        if (targetProjectData) {
+          finalConfig.new_env_config = {
+            project_name: targetProject,
+            udb_path: `/opt/understand_dbs/${targetProject}/${targetProjectData.version_id || 'latest'}/${targetProjectData.version_id || 'latest'}.und`,
+            project_path: `/opt/projects/${targetProject}/${targetProjectData.version_id || 'latest'}`
+          };
+        }
+      }
+
+      await resumeTraining(finalConfig);
+      onClose();
+    } catch (error) {
+      console.error('Failed to resume/fine-tune:', error);
+    }
+  };
+
+  const inputClass = `w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+    darkMode 
+      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+      : 'bg-white border-gray-300 text-gray-900'
+  }`;
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto`}>
+        <div className="flex items-center justify-between mb-6">
+          <h3 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+            Resume/Fine-tune Training
+          </h3>
+          <button
+            onClick={onClose}
+            className={`p-2 ${darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition`}
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="space-y-6">
+          {/* Mode Selection */}
+          <div>
+            <label className={`block text-sm font-medium mb-3 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+              Training Mode
+            </label>
+            <div className="grid grid-cols-2 gap-4">
+              <label className={`flex items-center p-4 border rounded-lg cursor-pointer ${
+                !resumeConfig.fine_tune 
+                  ? (darkMode ? 'bg-blue-900 border-blue-700' : 'bg-blue-50 border-blue-300')
+                  : (darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-300')
+              }`}>
+                <input
+                  type="radio"
+                  name="mode"
+                  checked={!resumeConfig.fine_tune}
+                  onChange={() => setResumeConfig(prev => ({ ...prev, fine_tune: false }))}
+                  className="mr-3"
+                />
+                <div>
+                  <p className={`font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>Resume Training</p>
+                  <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Continue from checkpoint</p>
+                </div>
+              </label>
+              
+              <label className={`flex items-center p-4 border rounded-lg cursor-pointer ${
+                resumeConfig.fine_tune 
+                  ? (darkMode ? 'bg-purple-900 border-purple-700' : 'bg-purple-50 border-purple-300')
+                  : (darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-300')
+              }`}>
+                <input
+                  type="radio"
+                  name="mode"
+                  checked={resumeConfig.fine_tune}
+                  onChange={() => setResumeConfig(prev => ({ ...prev, fine_tune: true }))}
+                  className="mr-3"
+                />
+                <div>
+                  <p className={`font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>Fine-tune</p>
+                  <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Adapt to new project</p>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          {/* Target Project (for fine-tuning) */}
+          {resumeConfig.fine_tune && (
+            <div>
+              <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                Target Project for Fine-tuning
+              </label>
+              <select
+                value={targetProject}
+                onChange={(e) => setTargetProject(e.target.value)}
+                className={inputClass}
+              >
+                {projects.map((project, index) => {
+                  const projectName = project.project_name || project.name;
+                  return (
+                    <option key={index} value={projectName}>
+                      {projectName}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+          )}
+
+          {/* Training Options */}
+          <div className={`border rounded-lg p-4 ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}>
+            <h4 className={`text-md font-semibold mb-3 ${darkMode ? 'text-white' : 'text-gray-900'}`}>Training Options</h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Iterations
+                </label>
+                <input
+                  type="number"
+                  value={resumeConfig.training_options.n_iters}
+                  onChange={(e) => setResumeConfig(prev => ({
+                    ...prev,
+                    training_options: { ...prev.training_options, n_iters: parseInt(e.target.value) }
+                  }))}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Learning Rate
+                </label>
+                <input
+                  type="number"
+                  step="0.0001"
+                  value={resumeConfig.training_options.learning_rate}
+                  onChange={(e) => setResumeConfig(prev => ({
+                    ...prev,
+                    training_options: { ...prev.training_options, learning_rate: parseFloat(e.target.value) }
+                  }))}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Frames per Batch
+                </label>
+                <input
+                  type="number"
+                  value={resumeConfig.training_options.frames_per_batch}
+                  onChange={(e) => setResumeConfig(prev => ({
+                    ...prev,
+                    training_options: { ...prev.training_options, frames_per_batch: parseInt(e.target.value) }
+                  }))}
+                  className={inputClass}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Checkpoint Info */}
+          <div className={`p-4 border rounded-lg ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}>
+            <h4 className={`text-sm font-medium mb-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>Checkpoint Information</h4>
+            <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              <strong>Source Project:</strong> {selectedProject}
+            </p>
+            <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              <strong>Checkpoint:</strong> {selectedCheckpoint}
+            </p>
+            {resumeConfig.fine_tune && targetProject !== selectedProject && (
+              <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mt-2`}>
+                <strong>Note:</strong> Model will be fine-tuned for project "{targetProject}"
+              </p>
+            )}
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-3">
+            <button
+              onClick={onClose}
+              className={`flex-1 px-4 py-2 border rounded-md transition ${
+                darkMode
+                  ? 'border-gray-600 text-gray-300 hover:bg-gray-700'
+                  : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={isLoading}
+              className={`flex-1 px-4 py-2 rounded-md transition ${
+                resumeConfig.fine_tune
+                  ? 'bg-purple-600 hover:bg-purple-700'
+                  : 'bg-blue-600 hover:bg-blue-700'
+              } text-white disabled:bg-gray-400 flex items-center justify-center`}
+            >
+              {isLoading ? (
+                <RefreshCw className="w-4 h-4 animate-spin mr-2" />
+              ) : resumeConfig.fine_tune ? (
+                <GitBranch className="w-4 h-4 mr-2" />
+              ) : (
+                <PlayCircle className="w-4 h-4 mr-2" />
+              )}
+              {resumeConfig.fine_tune ? 'Start Fine-tuning' : 'Resume Training'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Enhanced Task Card with RL Management Controls
+const EnhancedTaskCard = ({ task, darkMode, onCancel, onRefresh, stopTraining }) => {
+  const isRLTask = task.type === 'RL_TRAINING' || task.type === 'RL_RESUME' || task.type === 'RL_FINE_TUNE';
+  const canStop = task.status === 'PROGRESS' || task.status === 'PENDING';
+
+  return (
+    <div className={`p-6 ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'} transition`}>
+      <div className="flex items-center justify-between">
+        <div className="flex-1">
+          <div className="flex items-center gap-3 mb-2">
+            <h4 className={`font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+              {task.project_name}
+            </h4>
+            <StatusBadge status={task.status} darkMode={darkMode} />
+            {isRLTask && (
+              <span className={`px-2 py-1 text-xs rounded ${
+                task.type === 'RL_FINE_TUNE' 
+                  ? (darkMode ? 'bg-purple-900 text-purple-200' : 'bg-purple-100 text-purple-800')
+                  : task.type === 'RL_RESUME'
+                  ? (darkMode ? 'bg-blue-900 text-blue-200' : 'bg-blue-100 text-blue-800') 
+                  : (darkMode ? 'bg-green-900 text-green-200' : 'bg-green-100 text-green-800')
+              }`}>
+                {task.type === 'RL_FINE_TUNE' ? 'Fine-tune' : task.type === 'RL_RESUME' ? 'Resume' : 'RL'}
+              </span>
+            )}
+          </div>
+          <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} space-y-1`}>
+            <p>Task ID: <span className="font-mono">{task.task_id}</span></p>
+            <p>Type: {task.type}</p>
+            <p>Started: {new Date(task.timestamp).toLocaleString()}</p>
+          </div>
+          
+          {(task.status === 'PROGRESS' && task.progress !== undefined) && (
+            <div className="mt-4">
+              <ProgressBar 
+                progress={task.progress} 
+                label={`Training Progress (Iteration ${task.current_iteration || 'N/A'})`}
+                color={isRLTask ? "green" : "blue"} 
+                darkMode={darkMode} 
+              />
+            </div>
+          )}
+          
+          {task.error && (
+            <div className={`mt-3 p-3 ${darkMode ? 'bg-red-900 border-red-700' : 'bg-red-50 border-red-200'} border rounded-md`}>
+              <p className={`text-sm ${darkMode ? 'text-red-200' : 'text-red-800'}`}>{task.error}</p>
+            </div>
+          )}
+        </div>
+        
+        <div className="flex items-center gap-2 ml-4">
+          <button
+            onClick={onRefresh}
+            className={`p-2 ${darkMode ? 'text-blue-400 hover:bg-blue-900' : 'text-blue-600 hover:bg-blue-50'} rounded transition`}
+            title="Refresh Status"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </button>
+          
+          {isRLTask && canStop && (
+            <button
+              onClick={() => stopTraining(task.task_id, true)}
+              className={`p-2 ${darkMode ? 'text-yellow-400 hover:bg-yellow-900' : 'text-yellow-600 hover:bg-yellow-50'} rounded transition`}
+              title="Stop with Checkpoint"
+            >
+              <Square className="w-4 h-4" />
+            </button>
+          )}
+          
+          {canStop && (
+            <button
+              onClick={() => onCancel(task.task_id)}
+              className={`p-2 ${darkMode ? 'text-red-400 hover:bg-red-900' : 'text-red-600 hover:bg-red-50'} rounded transition`}
+              title="Cancel Task"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -1893,6 +2597,651 @@ const MetricsDownloadSection = ({ availableMetrics, projects, darkMode, onDownlo
                 </div>
               </div>
             ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Refactoring Prediction Form Component
+const RefactoringPredictionForm = ({ onSubmit, projects, darkMode, isLoading, getAvailableModels, loadModelForInference }) => {
+  const [predictionConfig, setPredictionConfig] = useState({
+    project_name: '',
+    model_checkpoint: '',
+    max_steps: 10,
+    temperature: 1.0
+  });
+  const [availableModels, setAvailableModels] = useState([]);
+  const [loadingModels, setLoadingModels] = useState(false);
+  const [selectedModel, setSelectedModel] = useState(null);
+
+  const loadModels = async (projectName) => {
+    if (!projectName) return;
+    
+    setLoadingModels(true);
+    try {
+      const models = await getAvailableModels(projectName);
+      setAvailableModels(models);
+      
+      // Auto-select latest model if available
+      if (models.length > 0) {
+        const latestModel = models[0]; // Already sorted by modification time
+        setPredictionConfig(prev => ({
+          ...prev,
+          model_checkpoint: latestModel.checkpoint_path
+        }));
+        setSelectedModel(latestModel);
+      }
+    } catch (error) {
+      console.error('Failed to load models:', error);
+      setAvailableModels([]);
+    } finally {
+      setLoadingModels(false);
+    }
+  };
+
+  const handleProjectChange = (projectName) => {
+    setPredictionConfig(prev => ({
+      ...prev,
+      project_name: projectName,
+      model_checkpoint: ''
+    }));
+    setAvailableModels([]);
+    setSelectedModel(null);
+    
+    if (projectName) {
+      loadModels(projectName);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!predictionConfig.project_name) {
+      alert('Please select a project');
+      return;
+    }
+    
+    if (!predictionConfig.model_checkpoint) {
+      alert('Please select a model checkpoint');
+      return;
+    }
+
+    await onSubmit(predictionConfig);
+  };
+
+  const formatModelName = (model) => {
+    const parts = model.checkpoint_path.split('/');
+    const filename = parts[parts.length - 1];
+    return filename.replace('checkpoint_', '').replace('.pth', '');
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const inputClass = `w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+    darkMode 
+      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+      : 'bg-white border-gray-300 text-gray-900'
+  }`;
+
+  return (
+    <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-lg p-6`}>
+      <h3 className={`text-lg font-semibold mb-6 flex items-center ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+        <Sparkles className="w-5 h-5 mr-2 text-purple-600" />
+        Generate Refactoring Sequence Predictions
+      </h3>
+
+      <div className="space-y-6">
+        {/* Project Selection */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+              Select Project *
+            </label>
+            <select
+              value={predictionConfig.project_name}
+              onChange={(e) => handleProjectChange(e.target.value)}
+              className={inputClass}
+            >
+              <option value="">Choose a project...</option>
+              {projects.map((project, index) => {
+                const projectName = project.project_name || project.name;
+                return (
+                  <option key={index} value={projectName}>
+                    {projectName}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+
+          <div>
+            <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+              Max Refactoring Steps
+            </label>
+            <input
+              type="number"
+              value={predictionConfig.max_steps}
+              onChange={(e) => setPredictionConfig(prev => ({
+                ...prev,
+                max_steps: parseInt(e.target.value) || 10
+              }))}
+              className={inputClass}
+              min="1"
+              max="50"
+            />
+          </div>
+        </div>
+
+        {/* Model Selection */}
+        {predictionConfig.project_name && (
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className={`block text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                Select Model Checkpoint *
+              </label>
+              <button
+                onClick={() => loadModels(predictionConfig.project_name)}
+                disabled={loadingModels}
+                className={`p-1 ${darkMode ? 'text-gray-400 hover:text-blue-400' : 'text-gray-600 hover:text-blue-600'} transition`}
+                title="Refresh models"
+              >
+                <RefreshCw className={`w-3 h-3 ${loadingModels ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
+            
+            {loadingModels ? (
+              <div className={`p-4 text-center ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2" />
+                Loading available models...
+              </div>
+            ) : availableModels.length === 0 ? (
+              <div className={`p-4 text-center ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                <Brain className="w-8 h-8 mx-auto mb-2" />
+                No trained models found for this project. Train a model first!
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {availableModels.map((model, index) => (
+                  <div
+                    key={index}
+                    className={`p-3 border rounded-lg cursor-pointer transition ${
+                      predictionConfig.model_checkpoint === model.checkpoint_path
+                        ? (darkMode ? 'bg-purple-900 border-purple-700' : 'bg-purple-50 border-purple-300')
+                        : (darkMode ? 'bg-gray-700 border-gray-600 hover:bg-gray-650' : 'bg-gray-50 border-gray-200 hover:bg-gray-100')
+                    }`}
+                    onClick={() => {
+                      setPredictionConfig(prev => ({
+                        ...prev,
+                        model_checkpoint: model.checkpoint_path
+                      }));
+                      setSelectedModel(model);
+                    }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <input
+                          type="radio"
+                          name="model"
+                          value={model.checkpoint_path}
+                          checked={predictionConfig.model_checkpoint === model.checkpoint_path}
+                          onChange={() => {
+                            setPredictionConfig(prev => ({
+                              ...prev,
+                              model_checkpoint: model.checkpoint_path
+                            }));
+                            setSelectedModel(model);
+                          }}
+                          className="mr-3"
+                        />
+                        <div>
+                          <p className={`text-sm font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                            {formatModelName(model)}
+                          </p>
+                          <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                            {formatFileSize(model.size)} • {new Date(model.last_modified).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      {model.checkpoint_path.includes('final') && (
+                        <span className={`px-2 py-1 text-xs rounded ${
+                          darkMode 
+                            ? 'bg-green-900 text-green-200' 
+                            : 'bg-green-100 text-green-800'
+                        }`}>
+                          Final
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Advanced Options */}
+        <div className={`border rounded-lg p-4 ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}>
+          <h4 className={`text-md font-semibold mb-3 ${darkMode ? 'text-white' : 'text-gray-900'}`}>Advanced Options</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                Temperature (Sampling Randomness)
+              </label>
+              <input
+                type="number"
+                step="0.1"
+                min="0.1"
+                max="2.0"
+                value={predictionConfig.temperature}
+                onChange={(e) => setPredictionConfig(prev => ({
+                  ...prev,
+                  temperature: parseFloat(e.target.value) || 1.0
+                }))}
+                className={inputClass}
+              />
+              <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mt-1`}>
+                Lower = more deterministic, Higher = more random
+              </p>
+            </div>
+            
+            <div>
+              <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                Confidence Threshold
+              </label>
+              <input
+                type="number"
+                step="0.1"
+                min="0.1"
+                max="1.0"
+                value={0.3}
+                disabled
+                className={`${inputClass} opacity-50`}
+              />
+              <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mt-1`}>
+                Fixed at 0.3 for now
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Model Info */}
+        {selectedModel && (
+          <div className={`border rounded-lg p-4 ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}>
+            <h4 className={`text-sm font-medium mb-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>Selected Model Info</h4>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <strong>Model:</strong> {formatModelName(selectedModel)}
+                </p>
+                <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <strong>Size:</strong> {formatFileSize(selectedModel.size)}
+                </p>
+              </div>
+              <div>
+                <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <strong>Created:</strong> {new Date(selectedModel.last_modified).toLocaleString()}
+                </p>
+                <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <strong>Path:</strong> {selectedModel.checkpoint_name}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Submit Button */}
+        <button
+          onClick={handleSubmit}
+          disabled={!predictionConfig.project_name || !predictionConfig.model_checkpoint || isLoading}
+          className="w-full bg-purple-600 text-white py-3 px-4 rounded-md hover:bg-purple-700 disabled:bg-gray-400 transition duration-200 flex items-center justify-center text-lg font-medium"
+        >
+          {isLoading ? (
+            <>
+              <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
+              Generating Predictions...
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-5 h-5 mr-2" />
+              Generate Refactoring Predictions
+            </>
+          )}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// Prediction Results Section Component
+const PredictionResultsSection = ({ predictionResults, predictionHistory, darkMode, onClearHistory, setPredictionResults }) => {
+  const [selectedPrediction, setSelectedPrediction] = useState(null);
+  const [showDetails, setShowDetails] = useState(false);
+
+  const getRefactoringTypeColor = (type) => {
+    const colors = {
+      'Move Method': 'bg-blue-100 text-blue-800',
+      'Extract Class': 'bg-green-100 text-green-800',
+      'Extract Method': 'bg-purple-100 text-purple-800',
+      'Pull Up Method': 'bg-orange-100 text-orange-800',
+      'Push Down Method': 'bg-red-100 text-red-800',
+      'Move Class': 'bg-indigo-100 text-indigo-800'
+    };
+    
+    const darkColors = {
+      'Move Method': 'bg-blue-900 text-blue-200',
+      'Extract Class': 'bg-green-900 text-green-200',
+      'Extract Method': 'bg-purple-900 text-purple-200',
+      'Pull Up Method': 'bg-orange-900 text-orange-200',
+      'Push Down Method': 'bg-red-900 text-red-200',
+      'Move Class': 'bg-indigo-900 text-indigo-200'
+    };
+    
+    return darkMode ? (darkColors[type] || 'bg-gray-700 text-gray-300') : (colors[type] || 'bg-gray-100 text-gray-800');
+  };
+
+  const getConfidenceColor = (confidence) => {
+    if (confidence >= 0.7) return darkMode ? 'text-green-400' : 'text-green-600';
+    if (confidence >= 0.5) return darkMode ? 'text-yellow-400' : 'text-yellow-600';
+    return darkMode ? 'text-red-400' : 'text-red-600';
+  };
+
+  const formatImprovement = (improvement) => {
+    if (!improvement) return 'N/A';
+    const entries = Object.entries(improvement);
+    if (entries.length === 0) return 'N/A';
+    
+    const topImprovement = entries.reduce((max, [key, value]) => 
+      Math.abs(value) > Math.abs(max[1]) ? [key, value] : max
+    );
+    
+    return `${topImprovement[0]}: ${topImprovement[1] >= 0 ? '+' : ''}${topImprovement[1].toFixed(3)}`;
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Current Results */}
+      {predictionResults.length > 0 && (
+        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-lg`}>
+          <div className={`px-6 py-4 border-b ${darkMode ? 'bg-gray-900 border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
+            <h3 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+              Latest Prediction Results
+            </h3>
+          </div>
+          
+          {predictionResults.map((result, index) => (
+            <div key={index} className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h4 className={`text-lg font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                    {result.project_name}
+                  </h4>
+                  <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Model: {result.model_checkpoint} • {result.predictions.length} recommendations
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Generated: {new Date(result.timestamp).toLocaleString()}
+                  </p>
+                  <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Execution: {result.execution_time?.toFixed(2)}s
+                  </p>
+                </div>
+              </div>
+
+              {/* Recommendations */}
+              <div className="space-y-3">
+                {result.predictions.map((prediction, idx) => (
+                  <div 
+                    key={idx} 
+                    className={`p-4 border rounded-lg transition cursor-pointer ${
+                      darkMode 
+                        ? 'bg-gray-700 border-gray-600 hover:bg-gray-650' 
+                        : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                    }`}
+                    onClick={() => {
+                      setSelectedPrediction(prediction);
+                      setShowDetails(true);
+                    }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <span className={`px-2 py-1 text-xs font-medium rounded ${
+                          darkMode ? 'bg-gray-600 text-gray-200' : 'bg-gray-200 text-gray-800'
+                        }`}>
+                          Step {prediction.step}
+                        </span>
+                        <span className={`px-2 py-1 text-xs font-medium rounded ${getRefactoringTypeColor(prediction.refactoring_type)}`}>
+                          {prediction.refactoring_type}
+                        </span>
+                        <span className={`text-sm font-medium ${getConfidenceColor(prediction.confidence)}`}>
+                          {(prediction.confidence * 100).toFixed(1)}%
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                          {formatImprovement(prediction.expected_improvement)}
+                        </span>
+                        <ChevronRight className={`w-4 h-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`} />
+                      </div>
+                    </div>
+                    
+                    <div className="mt-2">
+                      <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                        Target: {prediction.target_class}
+                        {prediction.target_method && ` → ${prediction.target_method}`}
+                      </p>
+                      <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
+                        {prediction.rationale}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Total Improvement Summary */}
+              {result.total_expected_improvement && (
+                <div className={`mt-4 p-4 border rounded-lg ${
+                  darkMode ? 'bg-gray-700 border-gray-600' : 'bg-blue-50 border-blue-200'
+                }`}>
+                  <h5 className={`text-sm font-medium mb-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                    Total Expected Improvement
+                  </h5>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {Object.entries(result.total_expected_improvement).map(([objective, value]) => (
+                      <div key={objective} className="text-center">
+                        <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                          {objective}
+                        </p>
+                        <p className={`text-sm font-medium ${value >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {value >= 0 ? '+' : ''}{value.toFixed(3)}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Prediction History */}
+      <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-lg`}>
+        <div className={`px-6 py-4 border-b ${darkMode ? 'bg-gray-900 border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
+          <div className="flex items-center justify-between">
+            <h3 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+              Prediction History
+            </h3>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={onClearHistory}
+                className={`px-3 py-1 text-xs rounded transition ${
+                  darkMode 
+                    ? 'bg-red-900 text-red-200 hover:bg-red-800' 
+                    : 'bg-red-100 text-red-800 hover:bg-red-200'
+                }`}
+              >
+                Clear History
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className={`divide-y ${darkMode ? 'divide-gray-700' : 'divide-gray-200'}`}>
+          {predictionHistory.length === 0 ? (
+            <div className="p-12 text-center">
+              <History className={`w-16 h-16 mx-auto ${darkMode ? 'text-gray-600' : 'text-gray-300'} mb-4`} />
+              <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                No prediction history yet. Generate your first prediction above!
+              </p>
+            </div>
+          ) : (
+            predictionHistory.map((prediction, index) => (
+              <div 
+                key={index} 
+                className={`p-4 ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'} transition cursor-pointer`}
+                onClick={() => setPredictionResults([prediction])}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <h4 className={`font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                        {prediction.project_name}
+                      </h4>
+                      <span className={`px-2 py-1 text-xs rounded ${
+                        darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'
+                      }`}>
+                        {prediction.predictions.length} recommendations
+                      </span>
+                    </div>
+                    <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} space-y-1`}>
+                      <p>Generated: {new Date(prediction.timestamp).toLocaleString()}</p>
+                      <p>Model: {prediction.model_checkpoint}</p>
+                      <p>Execution: {prediction.execution_time?.toFixed(2)}s</p>
+                    </div>
+                  </div>
+                  <ChevronRight className={`w-4 h-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`} />
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* Prediction Details Modal */}
+      {showDetails && selectedPrediction && (
+        <PredictionDetailsModal
+          prediction={selectedPrediction}
+          isOpen={showDetails}
+          onClose={() => setShowDetails(false)}
+          darkMode={darkMode}
+        />
+      )}
+    </div>
+  );
+};
+
+// Prediction Details Modal Component
+const PredictionDetailsModal = ({ prediction, isOpen, onClose, darkMode }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto`}>
+        <div className="flex items-center justify-between mb-6">
+          <h3 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+            Refactoring Prediction Details
+          </h3>
+          <button
+            onClick={onClose}
+            className={`p-2 ${darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition`}
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="space-y-6">
+          {/* Basic Info */}
+          <div className={`p-4 border rounded-lg ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}>
+            <h4 className={`text-lg font-medium mb-3 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+              Step {prediction.step}: {prediction.refactoring_type}
+            </h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <strong>Target Class:</strong> {prediction.target_class}
+                </p>
+                {prediction.target_method && (
+                  <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                    <strong>Target Method:</strong> {prediction.target_method}
+                  </p>
+                )}
+              </div>
+              <div>
+                <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <strong>Confidence:</strong> {(prediction.confidence * 100).toFixed(1)}%
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Rationale */}
+          <div>
+            <h4 className={`text-md font-medium mb-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+              Rationale
+            </h4>
+            <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'} p-3 border rounded ${
+              darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'
+            }`}>
+              {prediction.rationale}
+            </p>
+          </div>
+
+          {/* Expected Improvements */}
+          {prediction.expected_improvement && (
+            <div>
+              <h4 className={`text-md font-medium mb-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                Expected Improvements
+              </h4>
+              <div className="grid grid-cols-2 gap-2">
+                {Object.entries(prediction.expected_improvement).map(([objective, value]) => (
+                  <div 
+                    key={objective} 
+                    className={`p-2 border rounded text-center ${
+                      darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'
+                    }`}
+                  >
+                    <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                      {objective}
+                    </p>
+                    <p className={`text-sm font-medium ${value >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {value >= 0 ? '+' : ''}{value.toFixed(4)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Parameters */}
+          {prediction.parameters && Object.keys(prediction.parameters).length > 0 && (
+            <div>
+              <h4 className={`text-md font-medium mb-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                Parameters
+              </h4>
+              <div className={`p-3 border rounded ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}>
+                <pre className={`text-xs ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                  {JSON.stringify(prediction.parameters, null, 2)}
+                </pre>
+              </div>
+            </div>
           )}
         </div>
       </div>

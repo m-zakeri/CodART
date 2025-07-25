@@ -28,7 +28,8 @@ import io
 from datetime import datetime
 from minio import Minio
 from typing import Dict, Any
-from torchrl.data import Bounded, BoundedTensorSpec, CompositeSpec, UnboundedContinuousTensorSpec
+from torchrl.data import CompositeSpec
+from torchrl.data.tensor_specs import BoundedTensorSpec, UnboundedContinuousTensorSpec
 
 
 class RefactoringSequenceEnvironment(EnvBase):
@@ -46,10 +47,14 @@ class RefactoringSequenceEnvironment(EnvBase):
             seed=None,
             project_name: str = "",
             version_id: str = "",
-            project_path: str = ""
+            project_path: str = "",
+            original_project_name: str = ""
     ):
         super().__init__(device=device, batch_size=[1])
         self.project_name = project_name
+        # Use project_name as default if original_project_name is not provided
+        if not original_project_name:
+            original_project_name = project_name
         if device is None:
             device = "cuda" if torch.cuda.is_available() else "cpu"
         self.device = device
@@ -65,7 +70,8 @@ class RefactoringSequenceEnvironment(EnvBase):
             lower_band=lower_band,
             upper_band=upper_bound,
             population_size=population_size,
-            project_path=project_path
+            project_path=project_path,
+            original_project_name=original_project_name
         )
         self._make_spec(action=self.generator.generate_an_action())
         if seed is None:
@@ -232,84 +238,6 @@ class RefactoringSequenceEnvironment(EnvBase):
 
         return TensorDict(base_dict, batch_size=[1])
 
-    def _step(self, tensordict_or_action):
-        """
-        Execute a step in the environment with minimalist TensorDict structure.
-        """
-        logger.debug(f"Starting _step with batch_size: {self.batch_size}")
-
-        # Convert TensorDict to RefactoringOperation if needed
-        if isinstance(tensordict_or_action, (TensorDict, TensorDictBase)):
-            action = self._create_refactoring_from_tensordict(tensordict_or_action)
-        else:
-            action = tensordict_or_action
-
-        try:
-            logger.debug(f"Executing refactoring: {action.get_refactoring().name}")
-            raw_success = action.execute()
-            success = self._handle_refactoring_result(raw_success)
-
-        except Exception as e:
-            logger.error(f"Error executing refactoring: {e}", exc_info=True)
-            success = False
-
-        # Only update the understand database if refactoring was successful
-        if success:
-            try:
-                update_understand_database(udb_path=self.udb_path)
-            except Exception as e:
-                logger.error(f"Error updating understand database: {e}")
-
-        # Calculate reward
-        if success:
-            try:
-                reward = self.reward()
-                if isinstance(reward, np.ndarray):
-                    reward = torch.tensor(reward, dtype=torch.float32, device=self.device)
-                    reward = reward.reshape(1, self.n_obj)
-            except Exception as e:
-                logger.error(f"Error calculating reward: {e}")
-                reward = torch.full((1, self.n_obj), 0.0, dtype=torch.float32, device=self.device)
-        else:
-            reward = torch.full((1, self.n_obj), -1.0, dtype=torch.float32, device=self.device)
-
-        # Create minimalist output
-        out = TensorDict({
-            "refactoring": torch.tensor([self._get_refactoring_id(action)], dtype=torch.float32, device=self.device),
-            "refactoring_type": torch.tensor([self._get_refactoring_id(action)], dtype=torch.float32,
-                                             device=self.device),
-            "success": torch.tensor([success], dtype=torch.bool, device=self.device),
-            "reward": reward,
-            "done": torch.tensor([False], dtype=torch.bool, device=self.device),  # Episode continues
-        }, batch_size=[1])
-
-        logger.debug(f"Step output keys: {out.keys()}")
-        return out
-
-    def _reset(self, tensordict=None):
-        """
-        Reset the environment with minimalist TensorDict structure
-        """
-        # Generate an action
-        action = self.generator.generate_an_action()
-        if action is None or action.is_empty():
-            action = self.generator.generate_an_action()
-
-        try:
-            update_understand_database(udb_path=self.udb_path)
-        except Exception as e:
-            logger.error(f"Error updating understand database in reset: {e}")
-
-        # Create minimalist reset output (no reward or done in reset)
-        out = TensorDict({
-            "refactoring": torch.tensor([self._get_refactoring_id(action)], dtype=torch.float32, device=self.device),
-            "refactoring_type": torch.tensor([self._get_refactoring_id(action)], dtype=torch.float32,
-                                             device=self.device),
-            "success": torch.tensor([True], dtype=torch.bool, device=self.device),  # Reset is always successful
-        }, batch_size=[1])
-
-        logger.debug(f"Reset output keys: {out.keys()}")
-        return out
 
     def _get_refactoring_id(self, action):
         """Helper method to get refactoring ID"""
@@ -333,10 +261,9 @@ class RefactoringSequenceEnvironment(EnvBase):
         """
         Create consistent specs that match the TensorDict structure - Fixed version
         """
-        print(f"self.batch_size: {self.batch_size}")
+        logger.debug(f"self.batch_size: {self.batch_size}")
 
         # Create observation spec that matches _step and _reset output
-        # Use only the essential keys to avoid collisions
         self.observation_spec = CompositeSpec({
             "refactoring": UnboundedContinuousTensorSpec(
                 shape=self.batch_size,
@@ -367,12 +294,103 @@ class RefactoringSequenceEnvironment(EnvBase):
             device=self.device
         )
 
-        # Create reward spec
+        # Create reward spec with correct multi-objective shape
         self.reward_spec = UnboundedContinuousTensorSpec(
             shape=(*self.batch_size, self.n_obj),
             dtype=torch.float32,
             device=self.device
         )
+
+        logger.info(f"Specs created - obs: {self.observation_spec.shape}, "
+                    f"action: {self.action_spec.shape}, reward: {self.reward_spec.shape}")
+
+    def _step(self, tensordict_or_action):
+        """
+        Execute a step in the environment with improved error handling.
+        """
+        logger.debug(f"Starting _step with batch_size: {self.batch_size}")
+
+        # Convert TensorDict to RefactoringOperation if needed
+        if isinstance(tensordict_or_action, (TensorDict, TensorDictBase)):
+            action = self._create_refactoring_from_tensordict(tensordict_or_action)
+        else:
+            action = tensordict_or_action
+
+        try:
+            logger.debug(f"Executing refactoring: {action.get_refactoring().name}")
+            raw_success = action.execute()
+            success = self._handle_refactoring_result(raw_success)
+
+        except Exception as e:
+            logger.error(f"Error executing refactoring: {e}", exc_info=True)
+            success = False
+
+        # Only update the understand database if refactoring was successful
+        if success:
+            try:
+                update_understand_database(udb_path=self.udb_path)
+            except Exception as e:
+                logger.error(f"Error updating understand database: {e}")
+
+        # Calculate reward with proper error handling
+        if success:
+            try:
+                reward_array = self.reward_function()
+                if isinstance(reward_array, np.ndarray):
+                    # Ensure proper shape [batch_size, n_obj]
+                    if len(reward_array.shape) == 2 and reward_array.shape[0] == 1:
+                        reward = torch.tensor(reward_array, dtype=torch.float32, device=self.device)
+                    else:
+                        reward_flat = reward_array.flatten()[:self.n_obj]
+                        reward = torch.tensor(reward_flat, dtype=torch.float32, device=self.device).unsqueeze(0)
+                else:
+                    reward = torch.full((1, self.n_obj), 0.0, dtype=torch.float32, device=self.device)
+            except Exception as e:
+                logger.error(f"Error calculating reward: {e}")
+                reward = torch.full((1, self.n_obj), 0.0, dtype=torch.float32, device=self.device)
+        else:
+            reward = torch.full((1, self.n_obj), -1.0, dtype=torch.float32, device=self.device)
+
+        # Create output TensorDict with consistent structure
+        out = TensorDict({
+            "refactoring": torch.tensor([self._get_refactoring_id(action)], dtype=torch.float32, device=self.device),
+            "refactoring_type": torch.tensor([self._get_refactoring_id(action)], dtype=torch.float32,
+                                             device=self.device),
+            "success": torch.tensor([success], dtype=torch.bool, device=self.device),
+            "reward": reward,
+            "done": torch.tensor([False], dtype=torch.bool, device=self.device),
+            "terminated": torch.tensor([False], dtype=torch.bool, device=self.device),
+        }, batch_size=self.batch_size)
+
+        logger.debug(f"Step output keys: {out.keys()}, shapes: {[(k, v.shape) for k, v in out.items()]}")
+        return out
+
+    def _reset(self, tensordict=None):
+        """
+        Reset the environment with consistent TensorDict structure
+        """
+        logger.debug("Starting environment reset")
+
+        # Generate an action for initialization
+        action = self.generator.generate_an_action()
+        if action is None or action.is_empty():
+            action = self.generator.generate_an_action()
+
+        try:
+            update_understand_database(udb_path=self.udb_path)
+        except Exception as e:
+            logger.error(f"Error updating understand database in reset: {e}")
+
+        # Create reset output with consistent structure
+        out = TensorDict({
+            "refactoring": torch.tensor([self._get_refactoring_id(action)], dtype=torch.float32, device=self.device),
+            "refactoring_type": torch.tensor([self._get_refactoring_id(action)], dtype=torch.float32,
+                                             device=self.device),
+            "success": torch.tensor([True], dtype=torch.bool, device=self.device),  # Reset is always successful
+        }, batch_size=self.batch_size)
+
+        logger.debug(f"Reset output keys: {out.keys()}, shapes: {[(k, v.shape) for k, v in out.items()]}")
+        return out
 
     def reward(self):
         """Get reward as properly shaped tensor"""

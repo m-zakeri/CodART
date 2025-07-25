@@ -80,6 +80,10 @@ cd /app
 
 # Start Celery worker in background
 echo "Starting Celery worker..."
+# Run Celery worker as root to access Understand license
+echo "Running Celery worker as root for Understand access..."
+# Suppress the root user warning by setting CELERY_SUPPRESS_ROOT_USER_WARNING
+export CELERY_SUPPRESS_ROOT_USER_WARNING=1
 celery -A application.celery_workers.ml_training_task worker --loglevel=info -Q celery,ml_training,ml_evaluation &
 
 # Start the API server in foreground

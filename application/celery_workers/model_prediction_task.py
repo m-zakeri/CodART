@@ -68,7 +68,7 @@ def predict_refactoring_sequence_task(self,
         project_config = config_manager.get_project_specific_config(project_name)
 
         if not project_config:
-            raise Exception(f"Project {project_name} not found in configuration")
+            raise ValueError(f"Project {project_name} not found in configuration")
 
         env_config = project_config['env_config']
         minio_config = project_config['minio_config']
@@ -167,7 +167,7 @@ def predict_refactoring_sequence_task(self,
             }
         )
 
-        raise Exception(error_message)
+        raise
 
 
 @app.task(bind=True, name='ml_training_tasks.load_model')
@@ -185,7 +185,7 @@ def load_model_task(self, project_name: str, checkpoint_path: Optional[str] = No
         project_config = config_manager.get_project_specific_config(project_name)
 
         if not project_config:
-            raise Exception(f"Project {project_name} not found")
+            raise ValueError(f"Project {project_name} not found")
 
         minio_config = project_config['minio_config']
 
@@ -213,7 +213,7 @@ def load_model_task(self, project_name: str, checkpoint_path: Optional[str] = No
     except Exception as e:
         error_message = f"Model loading failed: {str(e)}"
         logger.error(f"Model loading task {task_id} failed: {error_message}")
-        raise Exception(error_message)
+        raise
 
 
 def load_model_from_minio(project_name: str, minio_config: Dict[str, Any], checkpoint_path: Optional[str] = None) -> \
@@ -246,7 +246,7 @@ Dict[str, Any]:
             checkpoint_path = find_latest_checkpoint(minio_client, bucket_name, project_name)
 
         if not checkpoint_path:
-            raise Exception(f"No model checkpoints found for project {project_name}")
+            raise FileNotFoundError(f"No model checkpoints found for project {project_name}")
 
         logger.info(f"Loading model from: {checkpoint_path}")
 
@@ -265,7 +265,7 @@ Dict[str, Any]:
         env_config = checkpoint.get('env_config', {})
 
         if not policy_state_dict:
-            raise Exception("Policy state dict not found in checkpoint")
+            raise KeyError("Policy state dict not found in checkpoint")
 
         # Get model metadata
         model_metadata = {
@@ -286,7 +286,7 @@ Dict[str, Any]:
 
     except Exception as e:
         logger.error(f"Failed to load model from MinIO: {e}")
-        raise Exception(f"Model loading failed: {str(e)}")
+        raise
 
 
 def find_latest_checkpoint(minio_client: Minio, bucket_name: str, project_name: str) -> Optional[str]:
@@ -439,7 +439,7 @@ def generate_refactoring_sequence(env: 'RefactoringSequenceEnvironment',
 
     except Exception as e:
         logger.error(f"Failed to generate refactoring sequence: {e}")
-        raise Exception(f"Prediction generation failed: {str(e)}")
+        raise
 
 
 def extract_refactoring_parameters(action) -> Dict[str, Any]:
@@ -573,4 +573,4 @@ def compare_models_task(project_name: str,
 
     except Exception as e:
         logger.error(f"Model comparison task failed: {e}")
-        raise Exception(f"Model comparison failed: {str(e)}")
+        raise

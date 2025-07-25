@@ -109,6 +109,21 @@ class PredictionResponse(BaseModel):
     timestamp: str
 
 
+class ResumeTrainingRequest(BaseModel):
+    project_name: str = Field(..., description="Name of the project")
+    checkpoint_path: Optional[str] = Field(None, description="Specific checkpoint to resume from")
+    fine_tune: bool = Field(False, description="Whether to fine-tune on new project data")
+    new_env_config: Optional[EnvironmentConfig] = Field(None, description="New environment config for fine-tuning")
+    training_options: Optional[TrainingOptions] = Field(None, description="Override training options")
+
+
+class CheckpointListResponse(BaseModel):
+    project_name: str
+    available_checkpoints: List[str]
+    latest_checkpoint: Optional[str]
+    total_checkpoints: int
+
+
 # =============================================================================
 # TRAINING ENDPOINTS (Fixed and Enhanced)
 # =============================================================================
@@ -593,6 +608,289 @@ async def get_training_results(project_name: str):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get training results: {str(e)}")
+
+
+# =============================================================================
+# RESUME/FINE-TUNING ENDPOINTS (NEW)
+# =============================================================================
+
+@router.post("/resume", response_model=TrainingResponse)
+async def resume_training(request: ResumeTrainingRequest):
+    """
+    Resume training from a checkpoint or fine-tune on new project data.
+    """
+    try:
+        if get_integrated_config_manager is None:
+            raise HTTPException(status_code=500, detail="Configuration system not available")
+
+        config_manager = get_integrated_config_manager()
+
+        # Get base project configuration
+        base_project_config = config_manager.get_project_specific_config(request.project_name)
+        if not base_project_config:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Project {request.project_name} not found in Redis"
+            )
+
+        # Prepare configuration for resumed/fine-tuned training
+        env_config = base_project_config['env_config'].copy()
+        minio_config = base_project_config['minio_config']
+        training_options = base_project_config['training_config'].copy()
+
+        # Override with new environment config if provided (for fine-tuning)
+        if request.new_env_config:
+            env_config.update(request.new_env_config.dict(exclude_unset=True))
+
+        # Override training options if provided
+        if request.training_options:
+            training_options.update(request.training_options.dict(exclude_unset=True))
+
+        # Add resume/fine-tune specific parameters
+        training_options.update({
+            'resume_from_checkpoint': True,
+            'checkpoint_path': request.checkpoint_path,
+            'fine_tune': request.fine_tune
+        })
+
+        # Create unique project name for resumed/fine-tuned training
+        suffix = "finetune" if request.fine_tune else "resumed"
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        env_config['project_name'] = f"{request.project_name}_{suffix}_{timestamp}"
+
+        # Start the training task
+        task = train_refactoring_model.delay(
+            env_config=env_config,
+            minio_config=minio_config,
+            training_options=training_options
+        )
+
+        # Store task info in Redis
+        redis_client = config_manager.redis_client
+        redis_client.hset(
+            f"training_task:{task.id}",
+            mapping={
+                'project_name': request.project_name,
+                'resumed_project_name': env_config['project_name'],
+                'task_id': task.id,
+                'status': 'PENDING',
+                'type': 'fine_tune' if request.fine_tune else 'resume',
+                'base_checkpoint': request.checkpoint_path or 'latest',
+                'created_at': datetime.now().isoformat(),
+                'config': json.dumps({
+                    'env_config': env_config,
+                    'minio_config': minio_config,
+                    'training_options': training_options
+                })
+            }
+        )
+
+        redis_client.sadd(f"project:{request.project_name}:training_tasks", task.id)
+
+        message = f"Fine-tuning started" if request.fine_tune else f"Training resumed"
+        if request.checkpoint_path:
+            message += f" from checkpoint: {request.checkpoint_path}"
+
+        return TrainingResponse(
+            task_id=task.id,
+            status="PENDING",
+            message=message,
+            timestamp=datetime.now().isoformat()
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to resume/fine-tune training: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to start resumed training: {str(e)}")
+
+
+@router.get("/checkpoints/{project_name}", response_model=CheckpointListResponse)
+async def list_project_checkpoints(project_name: str):
+    """
+    List all available checkpoints for a project.
+    """
+    try:
+        if get_integrated_config_manager is None:
+            raise HTTPException(status_code=500, detail="Configuration system not available")
+
+        config_manager = get_integrated_config_manager()
+        minio_config = config_manager.get_minio_config()
+
+        from minio import Minio
+
+        # Create MinIO client
+        minio_client = Minio(
+            endpoint=minio_config['endpoint'],
+            access_key=minio_config['access_key'],
+            secret_key=minio_config['secret_key'],
+            secure=minio_config.get('secure', False)
+        )
+
+        # List checkpoints for the project
+        prefix = f"{project_name}/checkpoints/"
+        objects = minio_client.list_objects(
+            minio_config['results_bucket'],
+            prefix=prefix,
+            recursive=True
+        )
+
+        checkpoints = []
+        for obj in objects:
+            if obj.object_name.endswith('.pth'):
+                checkpoints.append(obj.object_name)
+
+        # Sort checkpoints (latest first)
+        checkpoints.sort(reverse=True)
+
+        # Determine latest checkpoint
+        latest_checkpoint = None
+        for checkpoint in checkpoints:
+            if 'final' in checkpoint:
+                latest_checkpoint = checkpoint
+                break
+        if not latest_checkpoint and checkpoints:
+            latest_checkpoint = checkpoints[0]
+
+        return CheckpointListResponse(
+            project_name=project_name,
+            available_checkpoints=checkpoints,
+            latest_checkpoint=latest_checkpoint,
+            total_checkpoints=len(checkpoints)
+        )
+
+    except Exception as e:
+        logger.error(f"Failed to list checkpoints for {project_name}: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to list checkpoints: {str(e)}")
+
+
+@router.post("/stop/{task_id}")
+async def stop_training(task_id: str, save_checkpoint: bool = True):
+    """
+    Stop a running training task gracefully, optionally saving a checkpoint.
+    """
+    try:
+        # Get task result to check if it's running
+        result = AsyncResult(task_id, app=app)
+        
+        if result.status not in ['PENDING', 'PROGRESS']:
+            return {
+                "task_id": task_id,
+                "status": result.status,
+                "message": f"Task is already {result.status.lower()}",
+                "timestamp": datetime.now().isoformat()
+            }
+
+        # Send graceful stop signal to task
+        # This will be handled by the training loop to save checkpoint before stopping
+        if save_checkpoint:
+            app.control.revoke(task_id, terminate=False)  # Soft termination
+            message = "Training stopped gracefully with checkpoint saved"
+        else:
+            app.control.revoke(task_id, terminate=True)   # Hard termination
+            message = "Training stopped immediately"
+
+        # Update task metadata if using Redis
+        if get_integrated_config_manager:
+            try:
+                config_manager = get_integrated_config_manager()
+                redis_client = config_manager.redis_client
+                
+                # Update task status in Redis
+                if redis_client.exists(f"training_task:{task_id}"):
+                    redis_client.hset(
+                        f"training_task:{task_id}",
+                        "status", "STOPPED",
+                        "stopped_at", datetime.now().isoformat()
+                    )
+            except Exception as redis_e:
+                logger.warning(f"Failed to update Redis status: {redis_e}")
+
+        return {
+            "task_id": task_id,
+            "status": "STOPPED",
+            "message": message,
+            "checkpoint_saved": save_checkpoint,
+            "timestamp": datetime.now().isoformat()
+        }
+
+    except Exception as e:
+        logger.error(f"Failed to stop task {task_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to stop task: {str(e)}")
+
+
+@router.post("/checkpoints/{project_name}/cleanup")
+async def cleanup_old_checkpoints(project_name: str, keep_latest: int = 5):
+    """
+    Clean up old checkpoints for a project, keeping only the latest N checkpoints.
+    """
+    try:
+        if get_integrated_config_manager is None:
+            raise HTTPException(status_code=500, detail="Configuration system not available")
+
+        config_manager = get_integrated_config_manager()
+        minio_config = config_manager.get_minio_config()
+
+        from minio import Minio
+
+        # Create MinIO client
+        minio_client = Minio(
+            endpoint=minio_config['endpoint'],
+            access_key=minio_config['access_key'],
+            secret_key=minio_config['secret_key'],
+            secure=minio_config.get('secure', False)
+        )
+
+        # List all checkpoints for the project
+        prefix = f"{project_name}/checkpoints/"
+        objects = list(minio_client.list_objects(
+            minio_config['results_bucket'],
+            prefix=prefix,
+            recursive=True
+        ))
+
+        # Filter only .pth files and sort by modification time
+        checkpoints = [obj for obj in objects if obj.object_name.endswith('.pth')]
+        checkpoints.sort(key=lambda x: x.last_modified, reverse=True)
+
+        # Keep the latest N checkpoints and 'final' checkpoints
+        to_keep = []
+        to_delete = []
+
+        final_checkpoints = [cp for cp in checkpoints if 'final' in cp.object_name]
+        other_checkpoints = [cp for cp in checkpoints if 'final' not in cp.object_name]
+
+        # Always keep final checkpoints
+        to_keep.extend(final_checkpoints)
+        
+        # Keep latest N non-final checkpoints
+        to_keep.extend(other_checkpoints[:keep_latest])
+        
+        # Mark the rest for deletion
+        to_delete.extend(other_checkpoints[keep_latest:])
+
+        # Delete old checkpoints
+        deleted_count = 0
+        for checkpoint in to_delete:
+            try:
+                minio_client.remove_object(minio_config['results_bucket'], checkpoint.object_name)
+                deleted_count += 1
+                logger.info(f"Deleted checkpoint: {checkpoint.object_name}")
+            except Exception as e:
+                logger.warning(f"Failed to delete checkpoint {checkpoint.object_name}: {e}")
+
+        return {
+            "project_name": project_name,
+            "total_checkpoints": len(checkpoints),
+            "kept_checkpoints": len(to_keep),
+            "deleted_checkpoints": deleted_count,
+            "cleanup_policy": f"keep_latest_{keep_latest}",
+            "timestamp": datetime.now().isoformat()
+        }
+
+    except Exception as e:
+        logger.error(f"Failed to cleanup checkpoints for {project_name}: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to cleanup checkpoints: {str(e)}")
 
 
 @router.get("/health")

@@ -34,8 +34,63 @@ def git_restore(project_dir:str=""):
         None
 
     """
-    subprocess.Popen(["git", "restore", "."], cwd=project_dir, stdout=open(os.devnull, 'wb')).wait()
-    subprocess.Popen(["git", "clean", "-f", "-d"], cwd=project_dir, stdout=open(os.devnull, 'wb')).wait()
+    # Check if directory is a git repository
+    if not os.path.isdir(project_dir):
+        logger.warning(f"Project directory does not exist: {project_dir}")
+        return
+    
+    # Look for git repository in current directory or subdirectories
+    actual_project_dir = project_dir
+    git_dir = os.path.join(project_dir, '.git')
+    
+    if not os.path.isdir(git_dir):
+        # Check if there are subdirectories that might contain the git repository
+        subdirs = [d for d in os.listdir(project_dir) 
+                  if os.path.isdir(os.path.join(project_dir, d)) and not d.startswith('.')]
+        
+        git_found = False
+        for subdir in subdirs:
+            subdir_path = os.path.join(project_dir, subdir)
+            subdir_git = os.path.join(subdir_path, '.git')
+            if os.path.isdir(subdir_git):
+                actual_project_dir = subdir_path
+                git_dir = subdir_git
+                git_found = True
+                logger.info(f"Found git repository in subdirectory: {actual_project_dir}")
+                break
+        
+        if not git_found:
+            logger.warning(f"Directory is not a git repository: {project_dir}")
+            logger.info(f"Initializing git repository in {project_dir}")
+            try:
+                # Add safe directory configuration to avoid dubious ownership errors
+                subprocess.run(["git", "config", "--global", "--add", "safe.directory", project_dir], 
+                             check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                # Initialize git repository
+                subprocess.run(["git", "init"], cwd=project_dir, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                # Add all files
+                subprocess.run(["git", "add", "."], cwd=project_dir, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                # Create initial commit
+                subprocess.run(["git", "commit", "-m", "Initial commit"], cwd=project_dir, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                logger.info(f"Git repository initialized successfully in {project_dir}")
+                actual_project_dir = project_dir
+            except subprocess.CalledProcessError as e:
+                logger.error(f"Failed to initialize git repository in {project_dir}: {e}")
+                return
+        else:
+            # Also add safe directory for found repositories to avoid dubious ownership
+            try:
+                subprocess.run(["git", "config", "--global", "--add", "safe.directory", actual_project_dir], 
+                             check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            except Exception as e:
+                logger.debug(f"Could not add safe directory config: {e}")
+    
+    try:
+        subprocess.Popen(["git", "restore", "."], cwd=actual_project_dir, stdout=open(os.devnull, 'wb')).wait()
+        subprocess.Popen(["git", "clean", "-f", "-d"], cwd=actual_project_dir, stdout=open(os.devnull, 'wb')).wait()
+        logger.debug(f"Git restore completed successfully for {actual_project_dir}")
+    except Exception as e:
+        logger.error(f"Git restore failed for {actual_project_dir}: {e}")
 
 
 def create_understand_database(project_dir: str = None, db_dir: str = None):

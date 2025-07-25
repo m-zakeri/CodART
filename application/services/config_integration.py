@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class IntegratedConfigManager:
     """
     Integrated configuration manager that works with your existing setup:
-    - Reads from codart/learner/tests/test_reinforcement/conf.py
+    - Reads from INI configuration files (config.ini)
     - Uses your Redis infrastructure
     - Integrates with Docker environment variables
     """
@@ -35,9 +35,8 @@ class IntegratedConfigManager:
 
     def _load_configurations(self):
         """Load configuration from multiple sources"""
-        # Load from your existing conf.py file
+        # Load only INI configuration files - skip Python files
         config_paths = [
-            "codart/learner/tests/test_reinforcement/conf.py",  # Your existing config
             "config.ini",  # Root config
             "/app/config.ini",  # Docker container config
             os.path.expanduser("~/.codart/config.ini"),  # User config
@@ -46,8 +45,12 @@ class IntegratedConfigManager:
         for path in config_paths:
             if os.path.exists(path):
                 try:
-                    self.config_parser.read(path)
-                    logger.info(f"Loaded configuration from {path}")
+                    # Only read INI files with ConfigParser
+                    if path.endswith('.ini'):
+                        self.config_parser.read(path)
+                        logger.info(f"Loaded configuration from {path}")
+                    else:
+                        logger.debug(f"Skipping non-INI file: {path}")
                 except Exception as e:
                     logger.warning(f"Failed to load config from {path}: {e}")
 
