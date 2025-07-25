@@ -27,55 +27,60 @@ with Diagram("CodART System Architecture", show=False, filename="codart_system_a
     # User Interface Layer
     with Cluster("User Interface"):
         users = Users("Users")
-        ui = React("React UI\n(Port 3000)")
+        ui = React("React UI\n(Port 3000)\nnginx reverse proxy")
     
-    # API Gateway Layer  
-    with Cluster("API Gateway"):
-        nginx = ALB("Nginx Proxy\n(Port 80)")
+    # API Layer  
+    with Cluster("API Service (Privileged Container)"):
         api = Fastapi("FastAPI Server\n(Port 8000)")
+        celery_worker = Python("Celery Worker\n(Background Tasks)")
+        api_server = Server("API Server\n(uvicorn)")
     
-    # Application Services Layer
-    with Cluster("Application Services"):
-        with Cluster("API Container (Privileged)"):
-            celery_worker = Python("Celery Worker\n(ML Training)")
-            api_server = Server("API Server\n(uvicorn)")
-            scitools = Java("SciTools Understand\n(Code Analysis)")
-            pmd = Java("PMD 7.11.0\n(Code Smell Detection)")
+    # Code Analysis Layer
+    with Cluster("Code Analysis Tools"):
+        scitools = Java("SciTools Understand\n(Code Parsing & Metrics)")
+        pmd = Java("PMD 7.11.0\n(Code Smell Detection)")
+        antlr_parser = Server("ANTLR4 Parser\n(JavaParserLabeled)")
+        speedy_parser = Server("Speedy Parser\n(C++ Backend - Optional)")
+        
+    # Machine Learning Layer
+    with Cluster("ML & Testability Models"):
+        testability_models = Python("Testability Prediction\n(RandomForest, GradientBoosting)")
+        ml_pipeline = Python("ML Training Pipeline\n(PyTorch, TensorDict)")
+        rl_environment = Python("RL Environment\n(PPO Algorithm)")
             
-        with Cluster("External License"):
-            licensing = Firewall("SciTools License\n(licensing.scitools.com)")
+    # External Services
+    with Cluster("External Dependencies"):
+        licensing = Firewall("SciTools License\n(licensing.scitools.com)")
     
-    # Quality Analysis Layer
-    with Cluster("Quality Analysis"):
-        testability_models = Spark("Testability ML Models\n(7 Model Types)")
-        pmd_rules = Storage("PMD Custom Rules\n(XML Configuration)")
+    # Quality Analysis Storage
+    with Cluster("Analysis Artifacts"):
+        pmd_rules = Storage("PMD Custom Rules\n(/app/pmd/rules/custom.xml)")
         smell_reports = Storage("Code Smell Reports\n(CSV Format)")
+        antlr_grammars = Storage("ANTLR Grammars\n(JavaParserLabeled.g4)")
     
-    # Message Queue & Cache Layer
-    with Cluster("Message & Cache Layer"):
-        rabbitmq = Rabbitmq("Rabbitmq\n(Message Broker)")
-        redis = Redis("Redis\n(Result Backend)")
+    # Infrastructure Services
+    with Cluster("Infrastructure Services"):
+        rabbitmq = Rabbitmq("RabbitMQ\n(Task Queue)")
+        redis = Redis("Redis\n(Task Results)")
+        minio = S3("MinIO\n(Model Storage)")
     
-    # Storage Layer
-    with Cluster("Storage Layer"):
-        minio = S3("MinIO\n(Object Storage)")
-        volumes = Storage("Docker Volumes\n(Persistent Data)")
-    
-    # Docker Infrastructure Layer
+    # Docker Infrastructure
     with Cluster("Docker Infrastructure"):
         with Cluster("Networks"):
             internal_net = Storage("Internal Network\n(Bridge)")
             default_net = Storage("Default Network\n(Bridge)")
         
         with Cluster("Persistent Volumes"):
-            vol_projects = Storage("Projects Volume\n(/opt/projects)")
-            vol_und_dbs = Storage("UDB Volume\n(/opt/understand_dbs)")
-            vol_csv_pmd = Storage("CSV Reports\n(/opt/csv_reports)")
-            vol_scitools = Storage("SciTools Config\n(/root/.config)")
+            vol_projects = Storage("projects\n(/opt/projects)")
+            vol_und_dbs = Storage("und_dbs\n(/opt/understand_dbs)")
+            vol_csv_pmd = Storage("csv_pmd\n(/opt/csv_reports)")
+            vol_scitools_config = Storage("scitools_root_config\n(/root/.config/SciTools)")
+            vol_scitools_api = Storage("scitools_python_api\n(/root/.local/share/SciTools)")
+            minio_storage = Storage("minio_storage\n(/data)")
+            redis_data = Storage("redis_data\n(/data)")
     
     # Data Flow Connections
-    users >> ui >> nginx >> api
-    nginx >> ui
+    users >> ui >> api
     api >> api_server
     api_server >> celery_worker
     celery_worker >> rabbitmq
@@ -83,15 +88,23 @@ with Diagram("CodART System Architecture", show=False, filename="codart_system_a
     celery_worker >> scitools
     celery_worker >> pmd
     celery_worker >> minio
-    api_server >> vol_projects
-    api_server >> vol_und_dbs
+    celery_worker >> testability_models
+    celery_worker >> ml_pipeline
     scitools >> licensing
     
     # Quality Analysis Flows
     pmd >> pmd_rules
     pmd >> smell_reports >> minio
-    celery_worker >> testability_models
     testability_models >> minio
+    ml_pipeline >> rl_environment
+    rl_environment >> minio
+    
+    # Storage Connections
+    api_server >> vol_projects
+    api_server >> vol_und_dbs
+    scitools >> vol_scitools_config
+    minio >> minio_storage
+    redis >> redis_data
 
 # Create the Reinforcement Learning Architecture diagram
 with Diagram("CodART Reinforcement Learning Architecture", show=False, filename="codart_rl_arch", direction="TB"):
