@@ -348,16 +348,3 @@ def main(udb_path: str, children_classes: list, method_name: str, *args, **kwarg
 
     return True
 
-
-# Tests
-if __name__ == '__main__':
-    udb_path_ = "D:/IdeaProjects/JSON20201115/JSON20201115.und"
-    children_class_ = ['XMLTokener', 'HTTPTokener']
-    moved_method_ = "nextToken"
-    main(
-        udb_path=udb_path_,
-        children_classes=children_class_,
-        method_name=moved_method_
-    )
-
-

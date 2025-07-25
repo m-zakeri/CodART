@@ -5,14 +5,14 @@
 When subclasses grow and get developed separately, identical (or nearly identical) fields and methods appear.
 Pull up field refactoring removes the repetitive field from subclasses and moves it to a superclass.
 
-## Pre and Post Conditions
+## Pre- and Post-Conditions
 
 ### Pre Conditions:
 1. There should exist a corresponding child and parent in the project.
 
 2. The field that should be pulled up must be valid.
 
-3. The user must enter the package's name, class's name and the fields that need to be removed.
+3. The duplicated field in children's classes and its class and package should be identified.
 
 ### Post Conditions:
 1. The changed field's usages and callings will also change respectively.
@@ -26,8 +26,139 @@ Pull up field refactoring removes the repetitive field from subclasses and moves
 __version__ = '0.2.0'
 __author__ = 'Morteza Zakeri'
 
+# import shutil
+import os
+# from codart.utility.directory_utils import git_restore
 from codart import symbol_table
 from codart.config import logger, PROJECT_PATH
+from antlr4 import FileStream, CommonTokenStream, ParseTreeWalker
+from antlr4.InputStream import InputStream
+from codart.gen.JavaParserListener import JavaParserListener
+from codart.gen.JavaParserVisitor import JavaParserVisitor
+from codart.gen.JavaLexer import JavaLexer
+from codart.gen.JavaParser import JavaParser
+
+
+class PullUpFieldIdentification:
+    """
+
+        This  class identifies duplicated fields in children's class and
+        provides information for calling pull up field refactoring to
+        pull up duplicated fields to a common super class.
+
+    """
+    def __init__(self, directory_path):
+        self.directory_path = directory_path
+        self.package_map = {}
+        self.field_signatures = {}
+
+    class PackageExtractor(JavaParserListener):
+        def __init__(self):
+            self.package_name = None
+
+        def enterPackageDeclaration(self, ctx):
+            """
+            Capture the package declaration from the parse tree.
+            """
+            self.package_name = ctx.qualifiedName().getText()
+
+    def extract_packages(self):
+        """
+        Extract package declarations from all Java files in the directory.
+        """
+        for root, _, files in os.walk(self.directory_path):
+            for file in files:
+                if file.endswith(".java"):
+                    file_path = os.path.join(root, file)
+                    try:
+                        input_stream = FileStream(file_path, encoding="utf-8")
+                        lexer = JavaLexer(input_stream)
+                        token_stream = CommonTokenStream(lexer)
+                        parser = JavaParser(token_stream)
+                        tree = parser.compilationUnit()
+
+                        extractor = self.PackageExtractor()
+                        walker = ParseTreeWalker()
+                        walker.walk(extractor, tree)
+
+                        self.package_map[file_path] = extractor.package_name or "default"
+                    except Exception as e:
+                        print(f"Error processing file {file_path}: {e}")
+
+    class FieldVisitor(JavaParserVisitor):
+        def __init__(self):
+            self.fields = []  # List to store field details
+            self.current_class = None  # Track the current class name
+
+        def visitClassDeclaration(self, ctx):
+            """
+            Visit class declarations to track the current class.
+            """
+            self.current_class = ctx.IDENTIFIER().getText()  # Set the current class name
+            self.visitChildren(ctx)  # Process fields in the class
+            self.current_class = None  # Reset class name after leaving the class
+
+        def visitFieldDeclaration(self, ctx):
+            """
+            Visit field declarations and extract field information.
+            """
+            field_type = ctx.typeType().getText()  # Get the field type
+            variable_declarators = ctx.variableDeclarators().variableDeclarator()
+            for declarator in variable_declarators:
+                field_name = declarator.variableDeclaratorId().getText()  # Get the field name
+                self.fields.append((field_type, field_name, self.current_class))
+            return self.visitChildren(ctx)
+
+    def extract_fields(self, file_path):
+        """
+        Parse a Java file to extract field declarations.
+        """
+        with open(file_path, 'r', encoding='utf-8') as file:
+            content = file.read()
+
+        input_stream = InputStream(content)
+        lexer = JavaLexer(input_stream)
+        token_stream = CommonTokenStream(lexer)
+        parser = JavaParser(token_stream)
+
+        tree = parser.compilationUnit()
+        visitor = self.FieldVisitor()
+        visitor.visit(tree)
+        return visitor.fields
+
+    def find_duplicate_fields(self):
+        """
+        Identify duplicate fields across classes in the directory.
+        """
+        duplicate_fields = []
+
+        self.extract_packages()
+
+        for root, _, files in os.walk(self.directory_path):
+            for file_name in files:
+                if file_name.endswith(".java"):
+                    file_path = os.path.join(root, file_name)
+                    fields = self.extract_fields(file_path)
+
+                    for field_type, field_name, class_name in fields:
+                        signature = f"{field_type} {field_name}"
+                        package_name = self.package_map.get(file_path, "default")
+                        if signature in self.field_signatures:
+                            self.field_signatures[signature].append((class_name, package_name))
+                        else:
+                            self.field_signatures[signature] = [(class_name, package_name)]
+
+        for signature, class_info in self.field_signatures.items():
+            if len(class_info) > 1:
+                field_name = signature.split(" ")[1]
+                duplicate_fields.append((field_name, class_info))
+
+        for field_name, class_info in duplicate_fields:
+            print(f"'{field_name}' is duplicated in:")
+            for class_name, package_name in class_info:
+                print(f"Package: {package_name}, Class: {class_name}")
+
+        return duplicate_fields
 
 
 class PullUpFieldRefactoring:
@@ -44,7 +175,8 @@ class PullUpFieldRefactoring:
                  package_name: str,
                  class_name: str,
                  field_name: str,
-                 filename_mapping=lambda x: (x[:-5] if x.endswith(".java") else x) + ".java"):
+                 filename_mapping=lambda x: (x[:-5] if x.endswith(".java") else x) +
+                 ".java", temp_dir="refactored_files"):
         """
 
         Args:
@@ -70,10 +202,23 @@ class PullUpFieldRefactoring:
         self.class_name = class_name
         self.field_name = field_name
         self.filename_mapping = filename_mapping
+        self.temp_dir = temp_dir
+
+    # def copy_files(self):
+    #     """Create a copy of original files in a temporary directory."""
+    #     if not os.path.exists(self.temp_dir):
+    #         os.makedirs(self.temp_dir)
+    #
+    #     for filename in self.source_filenames:
+    #         # Copy each file to the temporary directory
+    #         shutil.copy(filename, self.temp_dir)
 
     def do_refactor(self):
+        # First, copy files
+        # self.copy_files()
         program = symbol_table.get_program(self.source_filenames, print_status=False)
         # print(program.packages)
+
         if (
                 self.package_name not in program.packages
                 or self.class_name not in program.packages[self.package_name].classes
@@ -196,11 +341,15 @@ class PullUpFieldRefactoring:
 
         # Todo: check for multilevel inheritance recursively.
         # if _class.superclass_name is not None:
-        #     PullUpFieldRefactoring(self.source_filenames, self.package_name, _class.superclass_name, "id").do_refactor()
+        # PullUpFieldRefactoring(self.source_filenames, self.package_name, _class.superclass_name, "id").do_refactor()
         return True
 
+    # def get_copied_filenames(self):
+    #     """Returns the list of copied filenames."""
+    #     return [os.path.join(self.temp_dir, f) for f in os.listdir(self.temp_dir) if f.endswith(".java")]
 
-def main(project_dir: str, package_name: str, children_class: str, field_name: str, *args, **kwargs):
+
+def main(project_dir: str, package_name: str, children_class: str, field_name: str):
     """
 
 
@@ -211,9 +360,14 @@ def main(project_dir: str, package_name: str, children_class: str, field_name: s
         symbol_table.get_filenames_in_dir(project_dir),
         package_name,
         children_class,
-        field_name
+        field_name,
+        temp_dir=project_dir + "/refactored"
         # lambda x: "tests/pullup_field_ant/" + x[len(ant_dir):]
     ).do_refactor()
+    if result:
+        print(f"Successfully pulled up field '{field_name}'.")
+    else:
+        print(f"Failed to pull up field '{field_name}'.")
     # print(f"Success pull-up field {field_name}" if result else f"Cannot  pull-up field {field_name}")
     return result
 
@@ -260,7 +414,22 @@ def test3():
     )
 
 
+def pull_up_field(path: str):
+    identifier = PullUpFieldIdentification(directory_path=path)
+    duplicate_fields = identifier.find_duplicate_fields()
+    # git_restore(project_dir=path)
+    for field_name, class_info in duplicate_fields:
+        """
+        Perform refactoring to pull up a duplicated field to a common superclass.
+        """
+        print(f"Refactoring field '{field_name}' from the following classes to a common superclass:")
+        for class_name, package_name in class_info:
+            print(f"Package: {package_name}, Class: {class_name}")
+            main(project_dir=path, package_name=package_name, children_class=class_name, field_name=field_name)
+
+
 if __name__ == "__main__":
     # test1()
     # test2()
-    test3()
+    # test3()
+    pull_up_field(path="C:/Users/98910/Desktop/test")
