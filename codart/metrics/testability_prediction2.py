@@ -228,6 +228,7 @@ class TestabilityMetrics:
         class_lexicon_metrics_dict.update({'NumberOfNewStatements': new_count})
         class_lexicon_metrics_dict.update({'NumberOfSuperStatements': super_count})
 
+        # print('class lexicon metrics dict', len(class_lexicon_metrics_dict), class_lexicon_metrics_dict)
         return class_lexicon_metrics_dict
 
     @classmethod
@@ -400,7 +401,6 @@ class TestabilityModel:
         df.to_csv(log_path, index=False)
 
 
-# # API
 def main(project_db_path, initial_value=1.0, verbose=False, log_path=None):
     """
 
@@ -414,10 +414,3 @@ def main(project_db_path, initial_value=1.0, verbose=False, log_path=None):
     )
     testability_ = TestabilityModel().inference(df_predict_data=df, verbose=verbose, log_path=log_path)
     return round(testability_ / initial_value, 5)
-#
-#
-# # Test module
-# if __name__ == '__main__':
-#     print(f"UDB path: {config.UDB_PATH}")
-#     for i in range(0, 1):
-#         print('mean testability2 normalize by 1\t', main(config.UDB_PATH, initial_value=1.0, verbose=False))

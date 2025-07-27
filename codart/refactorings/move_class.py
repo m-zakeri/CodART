@@ -19,6 +19,7 @@ __version__ = '0.1.0'
 __author__ = 'Morteza Zakeri'
 
 import os
+os.add_dll_directory("C:\\Program Files\\SciTools\\bin\\pc-win64")
 
 try:
     import understand as und
@@ -95,21 +96,12 @@ class UpdateImportsListener(JavaParserLabeledListener):
 
 
 class MoveClassAPI:
-    """
-
-
-    """
-
-    def __init__(self, udb_path: str, source_package: str, target_package: str, class_name: str):
-        """
-
-
-        """
-
+    def __init__(self, udb_path: str, source_package: str, target_package: str, class_name: str, project_path: str):
         self.udb_path = udb_path
         self.source_package = source_package
         self.target_package = target_package
         self.class_name = class_name
+        self.project_path = os.path.normpath(project_path)
 
         self.source_package_dir = None
         self.target_package_dir = None
@@ -120,41 +112,46 @@ class MoveClassAPI:
 
     def check_preconditions(self) -> bool:
         if self.source_package == self.target_package:
-            config.logger.error("Source and target packages are same.")
+            print("Error: Source and target packages are the same.")
             return False
 
         if self.source_package == ROOT_PACKAGE or self.target_package == ROOT_PACKAGE:
-            config.logger.error("Can not move package to/from root package.")
+            print("Error: Cannot move package to/from root package.")
             return False
 
         # Get package directories
         source_package_dir, target_package_dir = self.get_package_directories()
         if source_package_dir is None or target_package_dir is None:
-            config.logger.error("Package entity does not exists.")
+            print("Error: Package does not exist.")
             return False
 
-        if config.PROJECT_PATH not in target_package_dir:
-            config.logger.error(f"Target package address {target_package_dir} cannot be resolved.")
+        # Normalize paths for comparison
+        source_package_dir = os.path.normpath(source_package_dir)
+        target_package_dir = os.path.normpath(target_package_dir)
+
+        # Check if project_path is a parent directory of the package directories
+        if not target_package_dir.startswith(self.project_path):
+            print(f"Error: Target package path {target_package_dir} cannot be resolved.")
             return False
 
-        if config.PROJECT_PATH not in source_package_dir:
-            config.logger.error(f"Source package address {source_package_dir} cannot be resolved.")
+        if not source_package_dir.startswith(self.project_path):
+            print(f"Error: Source package path {source_package_dir} cannot be resolved.")
             return False
 
         class_full_path = os.path.join(source_package_dir, f"{self.class_name}.java")
         if not os.path.exists(class_full_path):
-            config.logger.error(f'Class "{self.class_name}" does not exists in source package "{source_package_dir}" ')
+            print(f'Error: Class "{self.class_name}" does not exist in source package "{source_package_dir}".')
             return False
 
         # Get class directory
         class_path, class_content, usages = self.get_class_info()
         if class_path is None or class_content is None:
-            config.logger.error("Class entity does not exists.")
+            print("Error: Class does not exist.")
             return False
 
         class_new_path = os.path.join(target_package_dir, f"{self.class_name}.java")
         if os.path.exists(class_new_path):
-            config.logger.error("Class already exists in target package.")
+            print("Error: Class already exists in target package.")
             return False
 
         self.source_package_dir = source_package_dir
@@ -165,7 +162,6 @@ class MoveClassAPI:
         self._class_new_path = class_new_path
 
         return True
-
     def get_package_directories(self):
         db = und.open(self.udb_path)
         source_package_path = None
@@ -245,39 +241,34 @@ class MoveClassAPI:
         return True
 
 
-def main(udb_path: str, source_package: str, target_package: str, class_name: str, *args, **kwargs):
+def main(udb_path: str, source_package: str, target_package: str, class_name: str, project_path: str, *args, **kwargs):
     """
-
     The main API for Move Class refactoring
-
     """
-    move_class = MoveClassAPI(udb_path, source_package, target_package, class_name)
+    move_class = MoveClassAPI(udb_path, source_package, target_package, class_name, project_path)
     res = move_class.do_refactor()
     return res
 
 
 # Tests
-def test1():
-    res = main(
-        udb_path=config.UDB_PATH,
-        class_name="GanttLanguage",
-        source_package="net.sourceforge.ganttproject.language",
-        target_package="net.sourceforge.ganttproject.gui.about",  # "(Unnamed_Package)"
-    )
-    print(res)
-    assert res
-
-
-def test2():
-    res = main(
-        udb_path=config.UDB_PATH,
-        class_name="ColorConvertion",
-        source_package="net.sourceforge.ganttproject.util",
-        target_package="net.sourceforge.ganttproject.io",  # "(Unnamed_Package)"
-    )
-    print(res)
-    assert res
+# def test2():
+#     res = main(
+#         udb_path="C:/Users/Lenovo/Desktop/sample_project/sample_project.und",
+#         project_path="C:/Users/Lenovo/Desktop/sample_project",
+#         class_name="HelperClass",
+#         source_package="net.example.utils",
+#         target_package="net.example.main"
+#     )
+#     print(res)
+#     assert res
 
 
 if __name__ == '__main__':
-    test2()
+    main(
+        udb_path="C:/Users/Lenovo/Desktop/sample_project/sample_project.und",
+        project_path="C:/Users/Lenovo/Desktop/sample_project",
+        class_name="HelperClass",
+        source_package="net.example.utils",
+        target_package="net.example.main"
+        # C:\Users\Lenovo\Desktop\sample_project\net\example\main
+    )
