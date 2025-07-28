@@ -325,7 +325,7 @@ class JCodeOdorMetric:
         :param class_entity: Target class entity for computing fanin
         :return: fain: The FanIn of the class
         """
-        method_list = UnderstandUtility.get_method_of_class_java(db=db, class_name=class_entity.longname())
+        method_list = UnderstandUtility.get_method_of_class_java2(db=db, class_name=class_entity.longname())
         fanin = 0
         for method_entity in method_list:
             method_fanin = method_entity.metric(['CountInput'])['CountInput']
@@ -336,7 +336,7 @@ class JCodeOdorMetric:
         return fanin
 
     def FANOUT(self, db, class_entity) -> int:
-        method_list = UnderstandUtility.get_method_of_class_java(db=db, class_name=class_entity.longname())
+        method_list = UnderstandUtility.get_method_of_class_java2(db=db, class_name=class_entity.longname())
         fanout = 0
         for method_entity in method_list:
             method_fanout = method_entity.metric(['CountOutput'])['CountOutput']

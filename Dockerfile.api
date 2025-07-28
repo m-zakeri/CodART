@@ -1,0 +1,27 @@
+FROM base:v1.0.0
+
+WORKDIR /app
+
+RUN useradd -ms /bin/bash y && \
+    echo "root:toor" | chpasswd
+
+USER root
+
+RUN mkdir -p /opt/projects /opt/understand_dbs && \
+    chown -R root:root /opt/projects /opt/understand_dbs
+
+COPY scitools /app/scitools/
+COPY activate_license.sh /app/activate_license.sh
+COPY cr-keygen-linux-amd64 /app/cr-keygen-linux-amd64
+COPY application /app/application
+COPY codart /app/codart
+COPY pmd /app/pmd
+COPY config.ini /app/config.ini
+COPY start.sh /app/start.sh
+
+RUN chmod 755 /app/scitools /app/cr-keygen-linux-amd64 /app/activate_license.sh /app/start.sh && \
+    chown -R root:root /app/scitools /app/cr-keygen-linux-amd64 /app/activate_license.sh /app/start.sh
+
+EXPOSE 8000
+
+CMD ["/app/start.sh"]

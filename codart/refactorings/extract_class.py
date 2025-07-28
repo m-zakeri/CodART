@@ -40,8 +40,7 @@ from antlr4.TokenStreamRewriter import TokenStreamRewriter
 from codart.gen.JavaLexer import JavaLexer
 from codart.gen.JavaParserLabeled import JavaParserLabeled
 from codart.gen.JavaParserLabeledListener import JavaParserLabeledListener
-
-from codart.config import logger
+from codart.learner.sbr_initializer.utils.utility import logger, config
 
 
 class DependencyPreConditionListener(JavaParserLabeledListener):
@@ -587,7 +586,8 @@ def get_java_files(directory):
                 yield os.path.join(root, file), file
 
 
-def main(udb_path, file_path, source_class, moved_fields, moved_methods, *args, **kwargs):
+def main(udb_path, file_path, source_class, moved_fields, moved_methods,project_dir , *args, **kwargs):
+    from codart.utility.directory_utils import git_restore
     new_class = f"{source_class}Extracted"
     new_file_path = os.path.join(Path(file_path).parent, f"{new_class}.java")
 
@@ -595,9 +595,20 @@ def main(udb_path, file_path, source_class, moved_fields, moved_methods, *args, 
         logger.error(f'The source class "{source_class}" is nested in {file_path}')
         return False
 
+    # In main() function of extract_class.py, modify line 611-616:
     if os.path.exists(new_file_path):
         logger.error(f'The new class "{new_file_path}" already exist.')
-        return False
+        # Add additional log to track what's returned
+        logger.debug(f"Attempting to remove existing file: {new_file_path}")
+        try:
+            git_restore(project_dir=project_dir)
+            logger.info(f"Successfully restore : {project_dir}")
+        except Exception as e:
+            logger.error(f"Failed to restore existing project {project_dir} : {str(e)}")
+            # Make sure you're returning exactly False, not None
+            result = False
+            logger.debug(f"Returning {result} from main() due to project exists")
+            return result
 
     eca = ExtractClassAPI(
         udb_path=udb_path,
@@ -618,11 +629,11 @@ def main(udb_path, file_path, source_class, moved_fields, moved_methods, *args, 
 
 
 # Tests
-if __name__ == "__main__":
-    main(
-        udb_path="D:/Dev/JavaSample/JavaSample/JavaSample.und",
-        file_path="D:/Dev/JavaSample/JavaSample/src/extract_class/Person.java",
-        source_class="Person",
-        moved_fields=['officeAreaCode', 'officeNumber', ],
-        moved_methods=['getTelephoneNumber', ],
-    )
+# if __name__ == "__main__":
+#     main(
+#         udb_path="D:/Dev/JavaSample/JavaSample/JavaSample.und",
+#         file_path="D:/Dev/JavaSample/JavaSample/src/extract_class/Person.java",
+#         source_class="Person",
+#         moved_fields=['officeAreaCode', 'officeNumber', ],
+#         moved_methods=['getTelephoneNumber', ],
+#     )

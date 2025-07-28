@@ -12,7 +12,7 @@ Model 6: MLPRegressor
 
 ## Datasets
 Dataset	Applied preprocessing	Number of metrics
-DS1: (default)	Simple classes elimination, data classes elimination, outliers elimination, and metric standardization	262
+_DS1: (default)	Simple classes elimination, data classes elimination, outliers elimination, and metric standardization	262
 DS2:	DS1 + Feature selection	20
 DS3:	DS1 + Context vector elimination	194
 DS4:	DS1 + Context vector elimination and lexical metrics elimination 	177
@@ -35,7 +35,6 @@ __version__ = '0.7.3'
 __author__ = 'Morteza Zakeri'
 
 import os
-import math
 import datetime
 
 import pandas as pd
@@ -44,25 +43,33 @@ from joblib import dump, load
 
 from sklearn.metrics import *
 from sklearn.preprocessing import QuantileTransformer
-from sklearn.inspection import permutation_importance
 from sklearn.neural_network import MLPRegressor
 from sklearn import linear_model, feature_selection
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import ShuffleSplit, GridSearchCV
-from sklearn import tree, preprocessing
+from sklearn import tree
 from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor, HistGradientBoostingRegressor
 from sklearn.ensemble import VotingRegressor
+from sklearn.metrics import mean_squared_error, mean_absolute_error, median_absolute_error, r2_score
+import math
 
 
 class Regression(object):
     def __init__(self, df_path: str = None, feature_selection_mode=False):
         self.df = pd.read_csv(df_path, delimiter=',', index_col=False)
+
+        self.df.dropna(inplace=True)
+
         self.X_train1, self.X_test1, self.y_train, self.y_test = train_test_split(
             self.df.iloc[:, 1:-1],
             self.df.iloc[:, -1],
             test_size=0.10,
             random_state=117,
         )
+
+        # Check for NaN in target variable
+        if self.y_train.isna().sum() > 0:
+            raise ValueError("Training target contains NaN values, please clean your data.")
 
         # ---------------------------------------
         # -- Feature selection (For DS2)
@@ -109,8 +116,9 @@ class Regression(object):
         df['explained_variance_score_variance_weighted'] = [explained_variance_score(y_true, y_pred,
                                                                                      multioutput='variance_weighted')]
         df['mean_absolute_error'] = [mean_absolute_error(y_true, y_pred)]
-        df['mean_squared_error_MSE'] = [mean_squared_error(y_true, y_pred)]
-        df['mean_squared_error_RMSE'] = [mean_squared_error(y_true, y_pred, squared=False)]
+        df['mean_squared_error'] = [mean_squared_error(y_true, y_pred)]
+        mse = mean_squared_error(y_true, y_pred)
+        df['root_mean_squared_error'] = [math.sqrt(mse)]
         df['median_absolute_error'] = [median_absolute_error(y_true, y_pred)]
 
         if min(y_pred) >= 0:
@@ -125,12 +133,19 @@ class Regression(object):
 
         df.to_csv(model_path[:-7] + '_evaluation_metrics_R1.csv', index=True, index_label='Row')
 
-    def regress(self, model_path: str = None, model_number: int = None):
+    # Add these modifications to the Regression class in codart.metrics.testability_learning
+
+    def regress(self, model_path=None, model_number=None, return_model=False):
         """
         Train testability prediction on different model
-        :param model_path:
-        :param model_number: 1: DTR, 2: RFR, 3: GBR, 4: HGBR, 5: SGDR, 6: MLPR,
-        :return:
+
+        Args:
+            model_path (str, optional): Path to save the model. If None, model is not saved to file.
+            model_number (int): 1: DTR, 2: RFR, 3: GBR, 4: HGBR, 5: SGDR, 6: MLPR
+            return_model (bool): Whether to return the trained model
+
+        Returns:
+            If return_model is True, returns the trained model object
         """
         if model_number == 1:
             regressor = tree.DecisionTreeRegressor(random_state=23, )
@@ -194,42 +209,102 @@ class Regression(object):
         print('Fitting model number', model_number)
         clf.fit(X=self.X_train, y=self.y_train)
 
-        print('Writing grid search result ...')
-        df = pd.DataFrame(clf.cv_results_, )
-        df.to_csv(model_path[:-7] + '_grid_search_cv_results.csv', index=False)
-        df = pd.DataFrame()
-        print('Best parameters set found on development set:', clf.best_params_)
-        df['best_parameters_development_set'] = [clf.best_params_]
-        print('Best classifier score on development set:', clf.best_score_)
-        df['best_score_development_set'] = [clf.best_score_]
-        print('best classifier score on test set:', clf.score(self.X_test, self.y_test))
-        df['best_score_test_set:'] = [clf.score(self.X_test, self.y_test)]
-        df.to_csv(model_path[:-7] + '_grid_search_cv_results_best.csv', index=False)
+        # Save evaluation results if model_path is provided
+        if model_path:
+            output_dir = os.path.dirname(model_path)
+            if output_dir:  # Only create if there's an actual directory path
+                os.makedirs(output_dir, exist_ok=True)
+
+            print('Writing grid search result ...')
+            df = pd.DataFrame(clf.cv_results_, )
+            df.to_csv(model_path[:-7] + '_grid_search_cv_results.csv', index=False)
+            df = pd.DataFrame()
+            print('Best parameters set found on development set:', clf.best_params_)
+            df['best_parameters_development_set'] = [clf.best_params_]
+            print('Best classifier score on development set:', clf.best_score_)
+            df['best_score_development_set'] = [clf.best_score_]
+            print('best classifier score on test set:', clf.score(self.X_test, self.y_test))
+            df['best_score_test_set:'] = [clf.score(self.X_test, self.y_test)]
+            df.to_csv(model_path[:-7] + '_grid_search_cv_results_best.csv', index=False)
 
         # Save and evaluate the best obtained model
-        print('Writing evaluation result ...')
         clf = clf.best_estimator_
-        y_true, y_pred = self.y_test, clf.predict(self.X_test)
-        dump(clf, model_path)
-        self.evaluate_model(model=clf, model_path=model_path)
-        print('=' * 50)
 
-    def vote(self, model_path=None, dataset_number=1):
-        # Trained regressors
-        reg1 = load(r'sklearn_models7/HGBR1_DS{0}.joblib'.format(dataset_number))
-        reg2 = load(r'sklearn_models7/RFR1_DS{0}.joblib'.format(dataset_number))
-        reg3 = load(r'sklearn_models7/MLPR1_DS{0}.joblib'.format(dataset_number))
-        # reg4 = load(r'sklearn_models7/SGDR1_DS1.joblib')
+        # Save to file if model_path is provided
+        if model_path:
+            print('Writing evaluation result ...')
+            dump(clf, model_path)
+            self.evaluate_model(model=clf, model_path=model_path)
+            print('=' * 50)
+
+        # Return the model if requested
+        if return_model:
+            return clf
+
+    def vote(self, model_path=None, dataset_number=1, models_dict=None, return_model=False):
+        """
+        Create a voting regressor from previously trained models
+
+        Args:
+            model_path (str, optional): Path to save the voting regressor
+            dataset_number (int): Dataset number
+            models_dict (dict, optional): Dictionary of pre-trained models
+            return_model (bool): Whether to return the trained voting regressor
+
+        Returns:
+            If return_model is True, returns the trained voting regressor
+        """
+        from sklearn.ensemble import VotingRegressor
+
+        if models_dict is None:
+            # Load models from files (original method)
+            try:
+                rfr_path = f"sklearn_models{dataset_number}/RFR1_DS{dataset_number}.joblib"
+                hgbr_path = f"sklearn_models{dataset_number}/HGBR1_DS{dataset_number}.joblib"
+                mlpr_path = f"sklearn_models{dataset_number}/MLPR1_DS{dataset_number}.joblib"
+
+                rfr = joblib.load(rfr_path)
+                hgbr = joblib.load(hgbr_path)
+                mlpr = joblib.load(mlpr_path)
+            except FileNotFoundError as e:
+                raise FileNotFoundError(f"Could not find one of the model files: {e}")
+        else:
+            # Use provided models from memory
+            rfr = models_dict.get(f"RFR1_DS{dataset_number}")
+            hgbr = models_dict.get(f"HGBR1_DS{dataset_number}")
+            mlpr = models_dict.get(f"MLPR1_DS{dataset_number}")
+
+            if not all([rfr, hgbr, mlpr]):
+                missing = []
+                if not rfr: missing.append("RFR1")
+                if not hgbr: missing.append("HGBR1")
+                if not mlpr: missing.append("MLPR1")
+                raise ValueError(f"Missing required models in models_dict: {', '.join(missing)}")
+
+        # Create the voting regressor
         ereg = VotingRegressor(
-            [('HGBR1_DS{0}'.format(dataset_number), reg1),
-             ('RFR1_DS{0}'.format(dataset_number), reg2),
-             ('MLPR1_DS{0}'.format(dataset_number), reg3)],
+            [('HGBR1_DS{0}'.format(dataset_number), hgbr),
+             ('RFR1_DS{0}'.format(dataset_number), rfr),
+             ('MLPR1_DS{0}'.format(dataset_number), mlpr)],
             weights=[3. / 6., 2. / 6., 1. / 6.]
         )
-        ereg.fit(self.X_train, self.y_train)
-        dump(ereg, model_path)
-        self.evaluate_model(model=ereg, model_path=model_path)
 
+        # Train the voting regressor
+        ereg.fit(self.X_train, self.y_train)
+
+        # Save and evaluate if model_path is provided
+        if model_path:
+            # Ensure directory exists if specified
+            output_dir = os.path.dirname(model_path)
+            if output_dir:  # Only create if there's an actual directory path
+                os.makedirs(output_dir, exist_ok=True)
+
+            dump(ereg, model_path)
+            self.evaluate_model(model=ereg, model_path=model_path)
+
+        # Return the model if requested
+        if return_model:
+            return ereg
 
 def train_dateset_g7(ds_number=0):
     """
@@ -253,28 +328,31 @@ def train_dateset_g7(ds_number=0):
         reg = Regression(df_path=r'data_model/DS07610.csv')
     elif ds_number == 7:
         reg = Regression(df_path=r'data_model/DS07710.csv')
+    elif ds_number == 8:
+        reg = Regression(df_path=r'learner_testability/data_model/DS_ALL_METRICS_JFLEX.csv')
+    elif ds_number == 9:
+        reg = Regression(df_path=r'learner_testability/data_model/DS_EVO_METRICS_JFLEX.csv')
 
     if reg is None:
         return
 
     # reg.regress(model_path=r'sklearn_models7/DTR1_DS1.joblib', model_number=1)
-    reg.regress(model_path=f'sklearn_models7/RFR1_DS{ds_number}.joblib', model_number=2)
+    reg.regress(model_path=f'sklearn_models{ds_number}/RFR1_DS{ds_number}.joblib', model_number=2)
     # reg.regress(model_path=f'sklearn_models7/GBR1_DS{ds_number}.joblib', model_number=3)
-    reg.regress(model_path=f'sklearn_models7/HGBR1_DS{ds_number}.joblib', model_number=4)
+    reg.regress(model_path=f'sklearn_models{ds_number}/HGBR1_DS{ds_number}.joblib', model_number=4)
     # reg.regress(model_path=f'sklearn_models7/SGDR1_DS{ds_number}.joblib', model_number=5)
-    reg.regress(model_path=f'sklearn_models7/MLPR1_DS{ds_number}.joblib', model_number=6)
-    reg.vote(model_path=f'sklearn_models7/VR1_DS{ds_number}.joblib', dataset_number=ds_number)
+    reg.regress(model_path=f'sklearn_models{ds_number}/MLPR1_DS{ds_number}.joblib', model_number=6)
+    reg.vote(model_path=f'sklearn_models{ds_number}/VR1_DS{ds_number}.joblib', dataset_number=ds_number)
 
 
 def create_testability_dataset_with_only_important_metrics():
     """
-    Create DS#6 (DS07610)
-    For use in Mr Esmaeili project
-    Select only top 15 important testability features
-    :return:
+    1 : create_testability_dataset_with_only_important_metrics
+    2 : create_testability_dataset_with_only_10_important_metrics
+    DS<method_tag>RL<version:1><version:1><version:1>.csv
     """
-    df_path = r'data_model/DS07012.csv'
-    df_important_metrics_path = r'data_model/DS07610.csv'
+    df_path = r'data_model/DS1RL100.csv'
+    df_important_metrics_path = r'data_model/DS1RL100.csv'
     df = pd.read_csv(df_path, delimiter=',', index_col=False)
     df_imp = pd.DataFrame()
     df_imp['Class'] = df['Class']  # 0
@@ -299,23 +377,37 @@ def create_testability_dataset_with_only_important_metrics():
 
 
 def create_testability_dataset_with_only_10_important_metrics():
-    df_path = r'data_model/DS07610.csv'
-    df_new_path = r'data_model/DS07710.csv'
+    """
+    1 : create_testability_dataset_with_only_important_metrics
+    2 : create_testability_dataset_with_only_10_important_metrics
+    DS<method_tag>RL<version:1><version:1><version:1>.csv
+    """
+    df_path = r'data_model/DS1RL100.csv'
+    df_new_path = r'data_model/DS2RL100.csv'
     df = pd.read_csv(df_path, delimiter=',', index_col=False)
-    df.drop(columns=['CSORD_CountDeclClassMethod', 'CSLEX_NumberOfNewStatements',
-                     'CSLEX_NumberOfReturnAndPrintStatements', 'CSORD_NumberOfClassConstructors',
+    df.drop(columns=['CSORD_CountDeclClassMethod',
+                     'CSLEX_NumberOfNewStatements',
+                     'CSLEX_NumberOfReturnAndPrintStatements',
+                     'CSORD_NumberOfClassConstructors',
                      'PK_CountDeclClassMethod'], inplace=True)
     df.to_csv(df_new_path, index=False)
 
 
-def main():
-    train_dateset_g7(ds_number=7)
-    # create_testability_dataset_with_only_important_metrics()
-    # create_testability_dataset_with_only_10_important_metrics()
-
-
-# -----------------------------------------------
-if __name__ == '__main__':
-    print(datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), '\t Program Start ...')
-    main()
-    print(datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'), '\t Program End ...')
+# def main():
+#     train_dateset_g7(ds_number=8)
+#     train_dateset_g7(ds_number=9)
+#     # create_testability_dataset_with_only_important_metrics()
+#     # create_testability_dataset_with_only_10_important_metrics()
+#
+#
+# # -----------------------------------------------
+# if __name__ == '__main__':
+#     start = datetime.datetime.now()  # Store as a datetime object
+#     print(start.strftime('%Y-%m-%d_%H-%M-%S'), '\t Program Start ...')
+#     main()
+#     end = datetime.datetime.now()  # Store as a datetime object
+#     print(end.strftime('%Y-%m-%d_%H-%M-%S'), '\t Program End ...')
+#
+#     # Calculate the process time
+#     process_time = end - start  # This will be a timedelta object
+#     print(f"Process time: {process_time}")

@@ -1,27 +1,10 @@
-"""
-
-To extract compile time and runtime data from evo-suite dataset
-Version 0.3.0
-- Project metric computation has been omitted.
-
-To be used in CodART project
-
-"""
-
-__version__ = '0.4.0'
-__author__ = 'Morteza'
-
-import sys
 import os
 from collections import Counter
 import warnings
-
 import math
-
 import pandas as pd
 import numpy as np
 from scipy import stats
-
 from sklearn import preprocessing
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import f_classif
@@ -29,84 +12,48 @@ from sklearn.decomposition import PCA
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import LocalOutlierFactor
 from imblearn.combine import SMOTEENN, SMOTETomek
-
-# https://scitools.com/support/python-api/
-# Python 3.8 and newer require the user add a call to os.add_dll_directory(“SciTools/bin/“
-# os.add_dll_directory('C:/Program Files/SciTools/bin/pc-win64')
-# sys.path.insert(0, 'D:/program files/scitools/bin/pc-win64/python')
 try:
     import understand
 except ModuleNotFoundError:
-    # Error handling
     pass
-
 from . import metrics_names
-from metrics_coverability import UnderstandUtility
+from codart.metrics.metrics_coverability import UnderstandUtility
 from codart.metrics.metrics_jcode_odor import JCodeOdorMetric
-
-
 def check_compute_metrics_by_class_list(project_name: str = None, database=None, class_list=None,
                                         csv_path=None):
     class_entities = PreProcess.read_project_classes(project_name=project_name, db=database, df=class_list, )
     print('Number of classes in {0}: {1}'.format(project_name, len(class_entities)))
-
     columns = ['Project', 'NumberOfClass']
     columns.extend(TestabilityMetrics.get_all_metrics_names())
-
     dummy_data = [0 for i in range(0, len(columns) - 2)]
     dummy_data.insert(0, project_name)
     dummy_data.insert(1, len(class_entities))
-
     df = pd.DataFrame(data=[dummy_data], columns=columns)
-    # print(df)
-    # print(columns)
     df.to_csv(csv_path + project_name + '.csv', index=False, )
 
-
 class TestabilityMetrics:
-    """
-
-    """
-
     @classmethod
     def get_class_ordinary_metrics_names(cls) -> list:
         return metrics_names.class_ordinary_metrics_names
-
     @classmethod
     def get_class_lexicon_metrics_names(cls) -> list:
         return metrics_names.class_lexicon_metrics_names
-
     @classmethod
     def get_package_metrics_names(cls) -> list:
         return metrics_names.package_metrics_names
-
     @classmethod
     def get_project_metrics_names(cls) -> list:
         return metrics_names.project_metrics_names
-
     @classmethod
     def get_all_metrics_names(cls) -> list:
         metrics = list()
-        # print('project_metrics number: ', len(TestabilityMetrics.get_project_metrics_names()))
-        # for metric_name in TestabilityMetrics.get_project_metrics_names():
-        #     metrics.append('PJ_' + metric_name)
-
-        # print('package_metrics number: ', len(TestabilityMetrics.get_package_metrics_names()))
         for metric_name in TestabilityMetrics.get_package_metrics_names():
             metrics.append('PK_' + metric_name)
-
-        # SOOTI is now corrected.
-        # print('class_lexicon_metrics number: ', len(TestabilityMetrics.get_class_lexicon_metrics_names()))
         for metric_name in TestabilityMetrics.get_class_lexicon_metrics_names():
             metrics.append('CSLEX_' + metric_name)
-
-        # print('class_ordinary_metrics number: ', len(TestabilityMetrics.get_class_ordinary_metrics_names()))
         for metric_name in TestabilityMetrics.get_class_ordinary_metrics_names():
             metrics.append('CSORD_' + metric_name)
-
-        # print('All available metrics: {0}'.format(len(metrics)))
         return metrics
-
     @classmethod
     def get_all_primary_metrics_names(cls) -> list:
         primary_metrics_names = list()
@@ -122,44 +69,24 @@ class TestabilityMetrics:
 
     @classmethod
     def compute_java_class_metrics2(cls, db=None, entity=None):
-        """
-        Strategy #2: Take a list of all classes and search for target class
-        Which strategy is used for our final setting? I do not know!
-
-        :param db:
-        :param entity:
-        :return:
-        """
-
-        # 1. Understand built-in class metrics
+        method_list = UnderstandUtility.get_method_of_class_java2(db=db, class_name=entity.longname())
+        if method_list is None or not isinstance(method_list, list) or len(method_list) == 0:
+            warnings.warn('No methods found for class "{}". Check if the class is valid or methods are defined.'.format(
+                entity.longname()))
+            return {}  # Return an empty dict or handle as necessary
         class_metrics = entity.metric(entity.metrics())
-        # print('number of metrics for class "{0}": {1}, and metrics: {2}'.format(entity.longname(),
-        #                                                                         len(class_metrics), class_metrics), )
-
-        # for i, metric in enumerate(class_metrics.keys()):
-        #     print(i + 1, ': ', metric, class_metrics[metric])
-        # print(class_metrics['AvgCyclomatic'])
-
-        # 2. Systematically created metrics
         j_code_odor_metric = JCodeOdorMetric()
         method_list = UnderstandUtility.get_method_of_class_java2(db=db, class_name=entity.longname())
-
         if method_list is None:
             raise TypeError('method_list is none for class "{}"'.format(entity.longname()))
-
-        # 2.1 CSCC
         class_cyclomatic_list = list()
         class_cyclomatic_namm_list = list()
-
         class_cyclomatic_strict_list = list()
         class_cyclomatic_strict_namm_list = list()
-
         class_cyclomatic_modified_list = list()
         class_cyclomatic_modified_namm_list = list()
-
         class_essential_list = list()
         class_essential_namm_list = list()
-
         for method in method_list:
             class_cyclomatic_list.append(method.metric(['Cyclomatic'])['Cyclomatic'])
             class_cyclomatic_strict_list.append(method.metric(['CyclomaticStrict'])['CyclomaticStrict'])
@@ -170,93 +97,47 @@ class TestabilityMetrics:
                 class_cyclomatic_strict_namm_list.append(method.metric(['CyclomaticStrict'])['CyclomaticStrict'])
                 class_cyclomatic_modified_namm_list.append(method.metric(['CyclomaticModified'])['CyclomaticModified'])
                 class_essential_namm_list.append(method.metric(['Essential'])['Essential'])
-
         cls.remove_none_from_lists([class_cyclomatic_list, class_cyclomatic_namm_list,
                                     class_cyclomatic_strict_list, class_cyclomatic_strict_namm_list,
                                     class_cyclomatic_modified_list, class_cyclomatic_modified_namm_list,
                                     class_essential_list, class_essential_namm_list])
-
-        # CSCC
-        # 2.1.13
         class_metrics.update({'MinCyclomatic': min(class_cyclomatic_list)})
-        # 2.1.14
         class_metrics.update({'MinCyclomaticStrict': min(class_cyclomatic_strict_list)})
-        # 2.1.15
         class_metrics.update({'MinCyclomaticModified': min(class_cyclomatic_modified_list)})
-        # 2.1.16
         class_metrics.update({'MinEssential': min(class_essential_list)})
-
-        # 2.1.17
         class_metrics.update({'SDCyclomatic': np.std(class_cyclomatic_list)})
-        # 2.1.18
         class_metrics.update({'SDCyclomaticStrict': np.std(class_cyclomatic_strict_list)})
-        # 2.1.19
         class_metrics.update({'SDCyclomaticModified': np.std(class_cyclomatic_modified_list)})
-        # 2.1.20
         class_metrics.update({'SDEssential': np.std(class_essential_list)})
-
         class_metrics.update({'LogCyclomatic': math.log10(sum(class_cyclomatic_list) + 1)})
         class_metrics.update({'LogCyclomaticStrict': math.log10(sum(class_cyclomatic_strict_list) + 1)})
         class_metrics.update({'LogCyclomaticModified': math.log10(sum(class_cyclomatic_modified_list) + 1)})
         class_metrics.update({'LogEssential': math.log10(sum(class_essential_list) + 1)})
-
-        # CSCCNAMM
-        # 2.1.21
         class_metrics.update({'SumCyclomaticNAMM': sum(class_cyclomatic_namm_list)})
-        # 2.1.22
         class_metrics.update({'SumCyclomaticStrictNAMM': sum(class_cyclomatic_strict_namm_list)})
-        # 2.1.23
         class_metrics.update({'SumCyclomaticModifiedNAMM': sum(class_cyclomatic_modified_namm_list)})
-        # 2.1.24
         class_metrics.update({'SumEssentialNAMM': sum(class_essential_namm_list)})
-
-        # 2.1.25
         class_metrics.update({'MaxCyclomaticNAMM': max(class_cyclomatic_namm_list)})
-        # 2.1.26
         class_metrics.update({'MaxCyclomaticStrictNAMM': max(class_cyclomatic_strict_namm_list)})
-        # 2.1.27
         class_metrics.update({'MaxCyclomaticModifiedNAMM': max(class_cyclomatic_modified_namm_list)})
-        # 2.1.28
         class_metrics.update({'MaxEssentialNAMM': max(class_essential_namm_list)})
-
-        # 2.1.29
         class_metrics.update({'AvgCyclomaticNAMM': sum(class_cyclomatic_namm_list) / len(class_cyclomatic_namm_list)})
-        # 2.1.30
         class_metrics.update({'AvgCyclomaticStrictNAMM': sum(class_cyclomatic_strict_namm_list) / len(
             class_cyclomatic_strict_namm_list)})
-        # 2.1.31
         class_metrics.update({'AvgCyclomaticModifiedNAMM': sum(class_cyclomatic_modified_namm_list) / len(
             class_cyclomatic_modified_namm_list)})
-        # 2.1.32
         class_metrics.update({'AvgEssentialNAMM': sum(class_essential_namm_list) / len(class_essential_namm_list)})
-
-        # 2.1.33
         class_metrics.update({'MinCyclomaticNAMM': min(class_cyclomatic_namm_list)})
-        # 2.1.34
         class_metrics.update({'MinCyclomaticStrictNAMM': min(class_cyclomatic_strict_namm_list)})
-        # 2.1.35
         class_metrics.update({'MinCyclomaticModifiedNAMM': min(class_cyclomatic_modified_namm_list)})
-        # 2.1.36
         class_metrics.update({'MinEssentialNAMM': min(class_essential_namm_list)})
-
-        # 2.1.37
         class_metrics.update({'SDCyclomaticNAMM': np.std(class_cyclomatic_namm_list)})
-        # 2.1.38
         class_metrics.update({'SDCyclomaticStrictNAMM': np.std(class_cyclomatic_strict_namm_list)})
-        # 2.1.39
         class_metrics.update({'SDCyclomaticModifiedNAMM': np.std(class_cyclomatic_modified_namm_list)})
-        # 2.1.40
         class_metrics.update({'SDEssentialNAMM': np.std(class_essential_namm_list)})
-
-        # 2.2 CSNOP (10)
-        #
         parameters_length_list = list()
         parameters_length_namm_list = list()
-        # number_of_parameters = 0
-        # print('method list', len(method_list))
         for method in method_list:
-            # if method.library() != "Standard":
-            # print('method params', method.longname(), '-->', method.parameters())
             params = method.parameters().split(',')
             if len(params) == 1:
                 if params[0] == ' ' or params[0] == '' or params[0] is None:
@@ -265,7 +146,6 @@ class TestabilityMetrics:
                     parameters_length_list.append(1)
             else:
                 parameters_length_list.append(len(params))
-
             if not j_code_odor_metric.is_accesor_or_mutator(method_entity=method):
                 if len(params) == 1:
                     if params[0] == ' ' or params[0] == '' or params[0] is None:
@@ -274,42 +154,21 @@ class TestabilityMetrics:
                         parameters_length_namm_list.append(1)
                 else:
                     parameters_length_namm_list.append(len(params))
-
         cls.remove_none_from_lists([parameters_length_list, parameters_length_namm_list])
-
-        # print('number of parameters', number_of_parameters)
-        # CSNOP
-        # 2.2.1
         class_metrics.update({'SumCSNOP': sum(parameters_length_list)})
-        # 2.2.2
         class_metrics.update({'MaxCSNOP': max(parameters_length_list)})
-        # 2.2.3
         class_metrics.update({'MinCSNOP': min(parameters_length_list)})
-        # 2.2.4
         class_metrics.update({'AvgCSNOP': sum(parameters_length_list) / len(parameters_length_list)})
-        # 2.2.5
         class_metrics.update({'SDCSNOP': np.std(parameters_length_list)})
-
-        # CSNOP_NAMM
-        # 2.2.6
         class_metrics.update({'SumCSNOPNAMM': sum(parameters_length_namm_list)})
-        # 2.2.7
         class_metrics.update({'MaxCSNOPNAMM': max(parameters_length_namm_list)})
-        # 2.2.8
         class_metrics.update({'MinCSNOPNAMM': min(parameters_length_namm_list)})
-        # 2.2.9
         class_metrics.update({'AvgCSNOPNAMM': sum(parameters_length_namm_list) / len(parameters_length_namm_list)})
-        # 2.2.10
         class_metrics.update({'SDCSNOPNAMM': np.std(parameters_length_namm_list)})
-
-        # 2.3 SCLOC (30)
-        #
         line_of_code_list = list()
         line_of_code_namm_list = list()
-
         line_of_code_decl_list = list()
         line_of_code_decl_namm_list = list()
-
         line_of_code_exe_list = list()
         line_of_code_exe_namm_list = list()
         for method in method_list:
@@ -320,96 +179,45 @@ class TestabilityMetrics:
                 line_of_code_namm_list.append(method.metric(['CountLineCode'])['CountLineCode'])
                 line_of_code_decl_namm_list.append(method.metric(['CountLineCodeDecl'])['CountLineCodeDecl'])
                 line_of_code_exe_namm_list.append(method.metric(['CountLineCodeExe'])['CountLineCodeExe'])
-
         cls.remove_none_from_lists([line_of_code_list, line_of_code_namm_list,
                                     line_of_code_decl_list, line_of_code_decl_namm_list,
                                     line_of_code_exe_list, line_of_code_exe_namm_list])
-        # CSLOC_All
-        # 2.3.5
         class_metrics.update({'AvgLineCodeDecl': sum(line_of_code_decl_list) / len(line_of_code_decl_list)})
-        # 2.3.6
         class_metrics.update({'AvgLineCodeExe': sum(line_of_code_exe_list) / len(line_of_code_exe_list)})
-
-        # 2.3.7
         class_metrics.update({'MaxLineCode': max(line_of_code_list)})
-        # 2.3.8
         class_metrics.update({'MaxLineCodeDecl': max(line_of_code_decl_list)})
-        # 2.3.9
         class_metrics.update({'MaxLineCodeExe': max(line_of_code_exe_list)})
-
-        # 2.3.10
         class_metrics.update({'MinLineCode': min(line_of_code_list)})
-        # 2.3.11
         class_metrics.update({'MinLineCodeDecl': min(line_of_code_decl_list)})
-        # 2.3.12
         class_metrics.update({'MinLineCodeExe': min(line_of_code_exe_list)})
-
-        # 2.3.13
         class_metrics.update({'SDLineCode': np.std(line_of_code_list)})
-        # 2.3.14
         class_metrics.update({'SDLineCodeDecl': np.std(line_of_code_decl_list)})
-        # 2.3.15
         class_metrics.update({'SDLineCodeExe': np.std(line_of_code_exe_list)})
-
         class_metrics.update({'LogLineCode': math.log10(sum(line_of_code_list) + 1)})
         class_metrics.update({'LogLineCodeDecl': math.log10(sum(line_of_code_decl_list) + 1)})
         class_metrics.update({'LogLineCodeExe': math.log10(sum(line_of_code_exe_list) + 1)})
-
-        # CSLOC_NAMM
-        # 2.3.16
         class_metrics.update({'CountLineCodeNAMM': sum(line_of_code_namm_list)})
-        # 2.3.17
         class_metrics.update({'CountLineCodeDeclNAMM': sum(line_of_code_decl_namm_list)})
-
-        # print('!@#', sum(line_of_code_decl_namm_list))
-        # quit()
-
-        # 2.3.18
         class_metrics.update({'CountLineCodeExeNAMM': sum(line_of_code_exe_namm_list)})
-
-        # 2.3.19
         class_metrics.update({'AvgLineCodeNAMM': sum(line_of_code_namm_list) / len(line_of_code_namm_list)})
-        # 2.3.20
         class_metrics.update(
             {'AvgLineCodeDeclNAMM': sum(line_of_code_decl_namm_list) / len(line_of_code_decl_namm_list)})
-        # 2.3.21
         class_metrics.update({'AvgLineCodeExeNAMM': sum(line_of_code_exe_namm_list) / len(line_of_code_exe_namm_list)})
-
-        # 2.3.22
         class_metrics.update({'MaxLineCodeNAMM': max(line_of_code_namm_list)})
-        # 2.3.23
         class_metrics.update({'MaxLineCodeDeclNAMM': max(line_of_code_decl_namm_list)})
-        # 2.3.24
         class_metrics.update({'MaxLineCodeExeNAMM': max(line_of_code_exe_namm_list)})
-
-        # 2.3.25
         class_metrics.update({'MinLineCodeNAMM': min(line_of_code_namm_list)})
-        # 2.3.26
         class_metrics.update({'MinLineCodeDeclNAMM': min(line_of_code_decl_namm_list)})
-        # 2.3.27
         class_metrics.update({'MinLineCodeExeNAMM': min(line_of_code_exe_namm_list)})
-
-        # 2.3.28
         class_metrics.update({'SDLineCodeNAMM': np.std(line_of_code_namm_list)})
-        # 2.3.29
         class_metrics.update({'SDLineCodeDeclNAMM': np.std(line_of_code_decl_namm_list)})
-        # print('!@#', np.std(line_of_code_decl_namm_list))
-        # quit()
-        # 2.3.30
         class_metrics.update({'SDLineCodeExeNAMM': np.std(line_of_code_exe_namm_list)})
-
-        # ----------------------------------------------------------------
-        # 2.4 CSNOST (3-->30)
-        # To be completed in future work
         number_of_stmt_list = list()
         number_of_stmt_namm_list = list()
-
         number_of_stmt_decl_list = list()
         number_of_stmt_decl_namm_list = list()
-
         number_of_stmt_exe_list = list()
         number_of_stmt_exe_namm_list = list()
-
         for method in method_list:
             number_of_stmt_list.append(method.metric(['CountStmt'])['CountStmt'])
             number_of_stmt_decl_list.append(method.metric(['CountStmtDecl'])['CountStmtDecl'])
@@ -418,24 +226,14 @@ class TestabilityMetrics:
                 number_of_stmt_namm_list.append(method.metric(['CountStmt'])['CountStmt'])
                 number_of_stmt_decl_namm_list.append(method.metric(['CountStmtDecl'])['CountStmtDecl'])
                 number_of_stmt_exe_namm_list.append(method.metric(['CountStmtExe'])['CountStmtExe'])
-
         cls.remove_none_from_lists([number_of_stmt_list, number_of_stmt_namm_list,
                                     number_of_stmt_decl_list, number_of_stmt_decl_namm_list,
                                     number_of_stmt_exe_list, number_of_stmt_exe_namm_list])
-
-        # CSNOST_All
-        # 2.4.4
         class_metrics.update({'AvgStmt': sum(number_of_stmt_list) / len(number_of_stmt_list)})
-        # 2.4.5
         class_metrics.update({'AvgStmtDecl': sum(number_of_stmt_decl_list) / len(number_of_stmt_decl_list)})
-        # 2.4.6
         class_metrics.update({'AvgStmtExe': sum(number_of_stmt_exe_list) / len(number_of_stmt_exe_list)})
-
-        # 2.4.7
         class_metrics.update({'MaxStmt': max(number_of_stmt_list)})
-        # 2.4.8
         class_metrics.update({'MaxStmtDecl': max(number_of_stmt_decl_list)})
-        # 2.4.9
         class_metrics.update({'MaxStmtExe': max(number_of_stmt_exe_list)})
 
         # 2.4.10
@@ -612,11 +410,12 @@ class TestabilityMetrics:
         dots_count = 0
 
         try:
-            # print('ec', entity.parent().id())
-            # source_file_entity = db.ent_from_id(entity.parent().id())
+            print('ec', entity.parent().id())
+            source_file_entity = db.ent_from_id(entity.parent().id())
 
-            # print('file', type(source_file_entity), source_file_entity.longname())
-            for lexeme in entity.lexer(show_inactive=False):
+            print('file', type(source_file_entity), source_file_entity.longname())
+            print('file', source_file_entity.longname())
+            for lexeme in entity.lexer():
                 # print(lexeme.text(), ': ', lexeme.token())
                 tokens_list.append(lexeme.text())
                 if lexeme.token() == 'Identifier':
@@ -1068,21 +867,31 @@ class PreProcess:
 
     @classmethod
     def read_project_classes(cls, project_name: str = None, db=None, df: pd.DataFrame = None):
-        df1 = df.loc[df.Project == project_name]
+        # Check type of df and convert it to DataFrame
+        if isinstance(df, list):
+            df = pd.DataFrame(df)
+
+        # Check if the DataFrame contains the 'Class' column
+        # print(df.head())
+        if 'Class' not in df.columns:
+            raise ValueError('The DataFrame does not contain a "Class" column.')
+
         class_entities = list()
-        for index, row in df1.iterrows():
+
+        # Use the existing class names directly from the DataFrame
+        for index, row in df.iterrows():
+            class_name = row['Class']
             # Find relevant class entity
-            class_entity_ = UnderstandUtility.get_class_entity_by_name(db=db, class_name=row['Class'])
+            class_entity_ = UnderstandUtility.get_class_entity_by_name(db=db, class_name=class_name)
             if class_entity_ is not None:
                 method_list = UnderstandUtility.get_method_of_class_java2(db=db, class_entity=class_entity_)
                 if method_list is not None:
                     class_entities.append(class_entity_)
                 else:
-                    # We do not need a class without any method!
-                    warnings.warn('Requested class with name "{0}" does not have any method!'.format(row['Class']))
+                    warnings.warn('Requested class with name "{0}" does not have any method!'.format(class_name))
             else:
-                # if class not found it may be an enum, or interface so we simply ignore it for metric computation
-                warnings.warn('Requested class with name "{0}" was not found int the project!'.format(row['Class']))
+                warnings.warn('Requested class with name "{0}" was not found in the project!'.format(class_name))
+
         return class_entities
 
     @classmethod
@@ -1131,57 +940,55 @@ class PreProcess:
 
     @classmethod
     def compute_metrics_by_class_list(cls, project_name: str = None, database=None, class_list=None, csv_path=None):
-        all_class_metrics_value = list()
+        all_class_metrics_value = []
 
-        # print('Calculating project metrics')
-        # project_metrics_dict = TestabilityMetrics.compute_java_project_metrics(db=database)
-        # if project_metrics_dict is None:
-        #     raise TypeError('No project metrics for project {} was found!'.format(project_name))
+        class_entities = cls.read_project_classes(project_name=project_name, db=database, df=class_list)
 
-        class_entities = cls.read_project_classes(project_name=project_name, db=database, df=class_list, )
         for class_entity in class_entities:
             one_class_metrics_value = [class_entity.longname()]
-            # print('Calculating package metrics')
+
+            # Handle package metrics
             package_metrics_dict = TestabilityMetrics.compute_java_package_metrics(db=database,
                                                                                    class_name=class_entity.longname())
             if package_metrics_dict is None:
-                raise TypeError('No package metric for item {} was found'.format(class_entity.longname()))
+                warnings.warn('No package metric for item {} was found.'.format(class_entity.longname()))
+                one_class_metrics_value.extend([None] * len(TestabilityMetrics.get_package_metrics_names()))
+            else:
+                for metric_name in TestabilityMetrics.get_package_metrics_names():
+                    one_class_metrics_value.append(package_metrics_dict.get(metric_name, None))
 
-            # print('Calculating class lexicon metrics')
+            # Handle class lexicon metrics
             class_lexicon_metrics_dict = TestabilityMetrics.compute_java_class_metrics_lexicon(db=database,
                                                                                                entity=class_entity)
             if class_lexicon_metrics_dict is None:
-                raise TypeError('No class lexicon metric for item {} was found'.format(class_entity.longname()))
+                warnings.warn('No class lexicon metric for item {} was found.'.format(class_entity.longname()))
+                one_class_metrics_value.extend([None] * len(TestabilityMetrics.get_class_lexicon_metrics_names()))
+            else:
+                for metric_name in TestabilityMetrics.get_class_lexicon_metrics_names():
+                    one_class_metrics_value.append(class_lexicon_metrics_dict.get(metric_name, None))
 
-            # print('Calculating class ordinary metrics')
+            # Handle class ordinary metrics
             class_ordinary_metrics_dict = TestabilityMetrics.compute_java_class_metrics2(db=database,
                                                                                          entity=class_entity)
             if class_ordinary_metrics_dict is None:
-                raise TypeError('No class ordinary metric for item {} was found'.format(class_entity.longname()))
+                warnings.warn('No class ordinary metric for item {} was found.'.format(class_entity.longname()))
+                one_class_metrics_value.extend([None] * len(TestabilityMetrics.get_class_ordinary_metrics_names()))
+            else:
+                for metric_name in TestabilityMetrics.get_class_ordinary_metrics_names():
+                    one_class_metrics_value.append(class_ordinary_metrics_dict.get(metric_name, None))
 
-            # Write project_metrics_dict
-            # for metric_name in TestabilityMetrics.get_project_metrics_names():
-            #     one_class_metrics_value.append(project_metrics_dict[metric_name])
-
-            # Write package_metrics_dict
-            for metric_name in TestabilityMetrics.get_package_metrics_names():
-                one_class_metrics_value.append(package_metrics_dict[metric_name])
-
-            # Write class_lexicon_metrics_dict
-            for metric_name in TestabilityMetrics.get_class_lexicon_metrics_names():
-                one_class_metrics_value.append(class_lexicon_metrics_dict[metric_name])
-
-            # Write class_ordinary_metrics_dict
-            for metric_name in TestabilityMetrics.get_class_ordinary_metrics_names():
-                one_class_metrics_value.append(class_ordinary_metrics_dict[metric_name])
-
+            # Collect all metrics for this class
             all_class_metrics_value.append(one_class_metrics_value)
 
+        # Prepare DataFrame
         columns = ['Class']
         columns.extend(TestabilityMetrics.get_all_metrics_names())
         df = pd.DataFrame(data=all_class_metrics_value, columns=columns)
+
+        # Save DataFrame to CSV
         print('df for class {0} with shape {1}'.format(project_name, df.shape))
-        df.to_csv(csv_path + project_name + '.csv', index=False)
+        return df
+
 
     # -------------------------------------------
     @classmethod
@@ -2093,18 +1900,11 @@ class PreProcess:
         df = pd.read_csv(path,
                          delimiter=',',
                          index_col=False,
-                         # usecols=[0,2]
                          )
-        print('df shape', df.shape)
-
         context_vector_names = [i for i in df.columns if 'PJ_' in i]
         context_vector_names.extend([i for i in df.columns if 'PK_' in i])
         context_vector_names.extend([i for i in df.columns if 'CSLEX_' in i])
-
-        print('len context vector and lexicon metrics', len(context_vector_names))
-
         df = df.drop(columns=context_vector_names)
-        print(df.shape)
         df.to_csv(path_new, index=False)
 
     @classmethod
@@ -2112,64 +1912,40 @@ class PreProcess:
         df = pd.read_csv(path,
                          delimiter=',',
                          index_col=False,
-                         # usecols=[0,2]
                          )
-
-        print('df shape', df.shape)
-
-        # New for version 0.3.0
-        # We include only primary metrics set in outlier removing process
-        # Remove systematically generated metrics from data frame
         all_names = set(TestabilityMetrics.get_all_metrics_names())
         primary_names = set(TestabilityMetrics.get_all_primary_metrics_names())
-        print('all_names', len(all_names))
-        print('primary_names', len(primary_names))
         systematically_generated_metric_list = all_names.difference(primary_names)
-        print(systematically_generated_metric_list)
-        print('len systematically_generated_metric_list', len(systematically_generated_metric_list))
-
-        # systematically_generated_metric_list = [i for i in systematically_generated_metric_list if 'Min' not in i]
-        # print('len systematically_generated_metric_list',
-        #       len(systematically_generated_metric_list))
         systematically_generated_metric_list.remove('CSORD_NumberOfClassInItsFile')
         df = df.drop(columns=list(systematically_generated_metric_list))
-
-        print(df.shape)
         df.to_csv(path_new, index=False)
-
-    # -------------------------------------------
     @classmethod
     def add_testability_values(cls, path):
         pd.options.display.max_colwidth = 1000
         df = pd.read_csv(path,
                          delimiter=',',
                          index_col=False,
-                         # usecols=[0,2]
                          )
-        # print(type(df))
         df.columns = [column.replace(' ', '_') for column in df.columns]
-        # testability_labels = {'VeryLow': 10, 'Low': 30, 'Mean': 50, 'High': 70, 'VeryHigh': 90}
-        # testability_labels = {'VeryLow': 0, 'Low': 0, 'Mean': 0, 'High': 1, 'VeryHigh': 1}
         testability_labels = {'VeryLow': 'NonTestable', 'Low': 'NonTestable', 'Mean': 'NonTestable', 'High': 'Testable',
                               'VeryHigh': 'Testable'}
         df.Testability = [testability_labels[item] for item in df.Testability]
-
-        print(df)
         df.to_csv(r'es_complete_dataset_all_1_0_6_without_test_93col_discretize_91col_15417_outlier_removed_binary.csv',
                   index=False)
 
     @classmethod
     def prepared_model_input_for_inference(cls, csv_path, csv_new_path):
         df = pd.read_csv(csv_path, delimiter=',', index_col=False)
-        # df['NumberOfMethod'] = df['CSORD_CountDeclInstanceMethod'] + df['CSORD_CountDeclClassMethod']
         cls.remove_dataclasses(csv_path, csv_new_path)
 
 
+
+
 # Test this module
-if __name__ == '__main__':
-    db_path = r'sf110_without_test/104_vuze.udb'
-    # db = understand.open(db_path)
-    # TestabilityMetrics.compute_java_package_metrics(db=db, class_name='org.eclipse.swt.widgets.Tree2')
-    # TestabilityMetrics.compute_java_package_metrics(db=db, class_name='org.gudy.azureus2.platform.macosx.access.jnilib.OSXAccess')
-    # class_entity = UnderstandUtility.get_class_entity_by_name(db=db, class_name='org.gudy.azureus2.platform.macosx.access.jnilib.OSXAccess')
-    # TestabilityMetrics.compute_java_class_metrics2(db=db, entity=class_entity)
+# if __name__ == '__main__':
+#     db_path = r'sf110_without_test/104_vuze.udb'
+#     db = understand.open(db_path)
+#     TestabilityMetrics.compute_java_package_metrics(db=db, class_name='org.eclipse.swt.widgets.Tree2')
+#     TestabilityMetrics.compute_java_package_metrics(db=db, class_name='org.gudy.azureus2.platform.macosx.access.jnilib.OSXAccess')
+#     class_entity = UnderstandUtility.get_class_entity_by_name(db=db, class_name='org.gudy.azureus2.platform.macosx.access.jnilib.OSXAccess')
+#     TestabilityMetrics.compute_java_class_metrics2(db=db, entity=class_entity)

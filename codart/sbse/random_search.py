@@ -8,16 +8,10 @@ __author__ = 'Morteza Zakeri'
 
 
 import random
-
 from initialize import RandomInitialization
 from codart.metrics.qmood import DesignQualityAttributes
 from codart.utility.directory_utils import update_understand_database, git_restore
 from codart.config import *
-
-# udb_path = "D:\Dev\ganttproject\ganttproject.udb"
-# project_dir = "D:\Dev\ganttproject"
-udb_path = "D:\Dev\JavaSample\JavaSample1.udb"
-project_dir = "D:\Dev\JavaSample"
 
 rand_init = RandomInitialization(
         udb_path=udb_path,

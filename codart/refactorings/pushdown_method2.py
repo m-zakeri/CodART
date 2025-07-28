@@ -29,8 +29,7 @@ from codart.gen.JavaParserLabeled import JavaParserLabeled
 from codart.gen.JavaParserLabeledListener import JavaParserLabeledListener
 
 from codart.symbol_table import parse_and_walk
-from codart import config
-
+from codart.learner.sbr_initializer.utils.utility import logger, config
 
 class CutMethodListener(JavaParserLabeledListener):
     """
@@ -169,7 +168,7 @@ def main(udb_path, source_package, source_class, method_name, target_classes: li
     source_class_ent = None
 
     if len(source_class_ents) == 0:
-        config.logger.error(f"Cannot find source class: {source_class}")
+        print(f"Cannot find source class: {source_class}")
         db.close()
         return False
     else:
@@ -178,13 +177,13 @@ def main(udb_path, source_package, source_class, method_name, target_classes: li
                 source_class_ent = ent
                 break
     if source_class_ent is None:
-        config.logger.error(f"Cannot find source class: {source_class}")
+        print(f"Cannot find source class: {source_class}")
         db.close()
         return False
 
     method_ent = db.lookup(f"{source_package}.{source_class}.{method_name}", "Method")
     if len(method_ent) == 0:
-        config.logger.error(f"Cannot find method to pushdown: {method_name}")
+        print(f"Cannot find method to pushdown: {method_name}")
         db.close()
         return False
     else:
@@ -192,7 +191,7 @@ def main(udb_path, source_package, source_class, method_name, target_classes: li
 
     for ref in source_class_ent.refs("extendBy"):
         if ref.ent().simplename() not in target_classes:
-            config.logger.error("Target classes are not children classes")
+            print("Target classes are not children classes")
             db.close()
             return False
         target_class_ents.append(ref.ent())
@@ -201,7 +200,7 @@ def main(udb_path, source_package, source_class, method_name, target_classes: li
         if ref.file().simplename().split(".")[0] in target_classes:
             continue
         else:
-            config.logger.error("Method has dependencies.")
+            print("Method has dependencies.")
             db.close()
             return False
 
@@ -227,14 +226,14 @@ def main(udb_path, source_package, source_class, method_name, target_classes: li
             debug=False
         )
     db.close()
-
-
-# Tests
-if __name__ == '__main__':
-    main(
-        udb_path="D:\Dev\JavaSample\JavaSample\JavaSample.und",
-        source_class="Person",
-        source_package="target_package",
-        method_name="runTest",
-        target_classes=["PersonChild"]
-    )
+#
+#
+# # Tests
+# if __name__ == '__main__':
+#     main(
+#         udb_path="D:\Dev\JavaSample\JavaSample\JavaSample.und",
+#         source_class="Person",
+#         source_package="target_package",
+#         method_name="runTest",
+#         target_classes=["PersonChild"]
+#     )

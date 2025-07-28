@@ -26,17 +26,33 @@ import os
 import pandas as pd
 import joblib
 from joblib import Parallel, delayed
-
 import understand as und
-
-from codart import config
+from codart.learner.sbr_initializer.utils.utility import logger, config
 from codart.metrics import metrics_names
 from codart.metrics.metrics_coverability import UnderstandUtility
+from application.services.minio_model_loader import MinioModelLoader
 
-# scaler1 = joblib.load(os.path.join(os.path.dirname(__file__), 'data_model/DS07510.joblib'))
-# model5 = joblib.load(os.path.join(os.path.dirname(__file__), 'data_model/VR1_DS5.joblib'))
-# model_branch = joblib.load(os.path.join(os.path.dirname(__file__), 'sklearn_models6/VR6_DS5_branch.joblib'))
-# model_line = joblib.load(os.path.join(os.path.dirname(__file__), 'sklearn_models6/VR6_DS5_line.joblib'))
+
+
+# scaler1 = joblib.load(config['MODEL_PATHS']['scaler1_path'])
+# model5 = joblib.load(config['MODEL_PATHS']['model5_path'])
+# model_branch = joblib.load(config['MODEL_PATHS']['model_branch_path'])
+# model_line = joblib.load(config['MODEL_PATHS']['model_line_path'])
+
+
+loader = MinioModelLoader(
+    minio_endpoint=os.getenv('MINIO_ENDPOINT', 'minio:9000'),
+    minio_access_key=os.getenv('MINIO_ACCESS_KEY', 'minioadmin'),
+    minio_secret_key=os.getenv('MINIO_SECRET_KEY', 'minioadmin'),
+    bucket_name='metrics',
+    dataset_number=0
+)
+
+# Load models from MinIO
+scaler = loader.load_model('RFR1')  # Scaler is saved with RFR1
+model = loader.load_model('HGBR1')  # Main model
+model_branch = loader.load_model('MLPR1')  # Branch coverage model
+model_line = loader.load_model('VR1')  # Line coverage model
 
 
 class TestabilityMetrics:
@@ -61,31 +77,21 @@ class TestabilityMetrics:
     @classmethod
     def get_all_metrics_names(cls) -> list:
         metrics = list()
-        # print('project_metrics number: ', len(TestabilityMetrics.get_project_metrics_names()))
-        # for metric_name in TestabilityMetrics.get_project_metrics_names():
-        #     metrics.append('PJ_' + metric_name)
 
-        # print('package_metrics number: ', len(TestabilityMetrics.get_package_metrics_names()))
         for metric_name in TestabilityMetrics.get_package_metrics_names():
             metrics.append('PK_' + metric_name)
 
-        # SOOTI is now corrected.
-        # print('class_lexicon_metrics number: ', len(TestabilityMetrics.get_class_lexicon_metrics_names()))
         for metric_name in TestabilityMetrics.get_class_lexicon_metrics_names():
             metrics.append('CSLEX_' + metric_name)
 
-        # print('class_ordinary_metrics number: ', len(TestabilityMetrics.get_class_ordinary_metrics_names()))
         for metric_name in TestabilityMetrics.get_class_ordinary_metrics_names():
             metrics.append('CSORD_' + metric_name)
 
-        # print('All available metrics: {0}'.format(len(metrics)))
         return metrics
 
     @classmethod
     def get_all_primary_metrics_names(cls) -> list:
         primary_metrics_names = list()
-        # for metric_name in metrics.metrics_names.project_metrics_names_primary:
-        #     primary_metrics_names.append('PJ_' + metric_name)
         for metric_name in metrics_names.package_metrics_names_primary:
             primary_metrics_names.append('PK_' + metric_name)
         for metric_name in metrics_names.class_lexicon_metrics_names:
@@ -104,15 +110,12 @@ class TestabilityMetrics:
         class_name = entity.longname()
         class_name_list = class_name.split('.')[:-1]
         package_name = '.'.join(class_name_list)
-        # print('package_name string', package_name)
         package_list = db.lookup(package_name + '$', 'Package')
         if package_list is None:
             return None
         if len(package_list) == 0:  # if len != 1 return None!
             return None
         package = package_list[0]
-        # print('kind:', package.kind())
-        # print('Computing package metrics for class: "{0}" in package: "{1}"'.format(class_name, package.longname()))
 
         metric_list = ['CountLineCode', 'CountStmt', 'CountDeclClassMethod', 'CountDeclClassVariable',
                        'CountDeclInstanceMethod', 'CountDeclInstanceVariable', 'CountDeclClass', 'CountDeclFile',
@@ -121,7 +124,6 @@ class TestabilityMetrics:
         package_metrics = package.metric(metric_list)
         classes_and_interfaces_list = package.ents('Contain', 'Java Type ~Unknown ~Unresolved ~Jar ~Library')
 
-        # PKNOMNAMM: Package number of not accessor or mutator methods
         pk_accessor_and_mutator_methods_list = list()
         for type_entity in classes_and_interfaces_list:
             pk_accessor_and_mutator_methods_list.append(UnderstandUtility.NOMAMM(type_entity))
@@ -133,7 +135,6 @@ class TestabilityMetrics:
         package_metrics.update({'PKNOI': pknoi})
         package_metrics.update({'PKNOAC': pknoac})
 
-        # print('package metrics', len(package_metrics), package_metrics)
         return package_metrics
 
     @classmethod
@@ -174,7 +175,6 @@ class TestabilityMetrics:
         super_count_kw_list = ['super']
 
         dots_count = 0
-        # print(entity.longname())
         lexeme = entity.lexer(show_inactive=False).first()
         while lexeme is not None:
             tokens_list.append(lexeme.text())
@@ -250,7 +250,6 @@ class TestabilityMetrics:
 
         method_list = UnderstandUtility.get_method_of_class_java2(db=db, class_name=entity.longname())
         if method_list is None:
-            # raise TypeError('method_list is none for class "{}"'.format(entity.longname()))
             print('method_list is none for class "{}"'.format(entity.longname()))
             return None
 
@@ -285,11 +284,8 @@ class TestabilityMetrics:
         class_metrics.update({'DAC': UnderstandUtility.get_data_abstraction_coupling(db=db, class_entity=entity)})
         class_metrics.update({'NumberOfMethodCalls': UnderstandUtility.number_of_method_call(class_entity=entity)})
 
-        # Visibility metrics
-        # Understand built-in metrics plus one custom metric.
         class_metrics.update({'CSNOAMM': UnderstandUtility.NOMAMM(class_entity=entity)})
 
-        # Inheritance metrics
         class_metrics.update({'NIM': UnderstandUtility.NIM(class_name=entity)})
         class_metrics.update({'NMO': UnderstandUtility.NMO(class_name=entity)})
 
@@ -310,45 +306,10 @@ class TestabilityMetrics:
         class_metrics.update({'NumberOfMethods': class_metrics['CountDeclInstanceMethod'] +
                                                  class_metrics['CountDeclClassMethod']})
 
-        # print('class metrics', len(class_metrics), class_metrics)
         return class_metrics
 
 
-def do(class_entity_long_name, project_db_path):
-    import understand as und
-    db = und.open(project_db_path)
-    class_entity = UnderstandUtility.get_class_entity_by_name(class_name=class_entity_long_name, db=db)
-    one_class_metrics_value = [class_entity.longname()]
 
-    # print('Calculating package metrics')
-    package_metrics_dict = TestabilityMetrics.compute_java_package_metrics(db=db, entity=class_entity)
-    if package_metrics_dict is None or len(package_metrics_dict) == 0:
-        return None
-
-    # print('Calculating class lexicon metrics')
-    class_lexicon_metrics_dict = TestabilityMetrics.compute_java_class_metrics_lexicon(entity=class_entity)
-    if class_lexicon_metrics_dict is None or len(class_lexicon_metrics_dict) == 0:
-        return None
-
-    # print('Calculating class ordinary metrics')
-    class_ordinary_metrics_dict = TestabilityMetrics.compute_java_class_metrics2(db=db, entity=class_entity)
-    if class_ordinary_metrics_dict is None or len(class_ordinary_metrics_dict) == 0:
-        return None
-
-    one_class_metrics_value.extend([package_metrics_dict[metric_name] for
-                                    metric_name in TestabilityMetrics.get_package_metrics_names()])
-
-    one_class_metrics_value.extend([class_lexicon_metrics_dict[metric_name] for
-                                    metric_name in TestabilityMetrics.get_class_lexicon_metrics_names()])
-
-    one_class_metrics_value.extend([class_ordinary_metrics_dict[metric_name] for
-                                    metric_name in TestabilityMetrics.get_class_ordinary_metrics_names()])
-
-    db.close()
-    del db
-    # print(one_class_metrics_value)
-    # quit()
-    return one_class_metrics_value
 
 
 # ------------------------------------------------------------------------
@@ -427,20 +388,19 @@ class TestabilityModel:
     def export_class_testability_values(cls, df=None, log_path=None):
         if log_path is None:
             log_path = os.path.join(
-                config.PROJECT_LOG_DIR,
-                f'classes_testability2_for_problem_{config.PROBLEM}.csv')
-        config.logger.info(log_path)
-        config.logger.info(f'count classes testability2\t {df["PredictedTestability"].count()}')
-        config.logger.info(f'minimum testability2\t {df["PredictedTestability"].min()}')
-        config.logger.info(f'maximum testability2\t {df["PredictedTestability"].max()}')
-        config.logger.info(f'variance testability2\t {df["PredictedTestability"].var()}')
-        config.logger.info(f'sum classes testability2\t, {df["PredictedTestability"].sum()}')
-        config.logger.info('-' * 50)
+                config["Config"]["PROJECT_LOG_DIR"],
+                f'classes_testability2_for_problem_{config["Config"]["PROBLEM"]}.csv')
+        logger.info(log_path)
+        logger.info(f'count classes testability2\t {df["PredictedTestability"].count()}')
+        logger.info(f'minimum testability2\t {df["PredictedTestability"].min()}')
+        logger.info(f'maximum testability2\t {df["PredictedTestability"].max()}')
+        logger.info(f'variance testability2\t {df["PredictedTestability"].var()}')
+        logger.info(f'sum classes testability2\t, {df["PredictedTestability"].sum()}')
+        logger.info('-' * 50)
 
         df.to_csv(log_path, index=False)
 
 
-# API
 def main(project_db_path, initial_value=1.0, verbose=False, log_path=None):
     """
 
@@ -450,19 +410,7 @@ def main(project_db_path, initial_value=1.0, verbose=False, log_path=None):
 
     df = PreProcess().compute_metrics_by_class_list(
         project_db_path,
-        n_jobs=0  # n_job must be set to number of CPU cores, use zero for non-parallel computing of metrics
+        n_jobs=0
     )
     testability_ = TestabilityModel().inference(df_predict_data=df, verbose=verbose, log_path=log_path)
-    # print('testability=', testability_)
     return round(testability_ / initial_value, 5)
-
-
-# Test module
-if __name__ == '__main__':
-    # project_path_ = r'../benchmark_projects/ganttproject/biz.ganttproject.core/biz.ganttproject.core.und'  # T=0.5253
-    # project_path_ = r'../benchmark_projects/JSON/JSON.und'  # T=0.4531
-    # project_path_ = r'D:/IdeaProjects/JSON20201115/JSON20201115.und'  # T=0.4749
-    # project_path_ = r'D:/IdeaProjects/jvlt-1.3.2/src.und'  # T=0.3997
-    print(f"UDB path: {config.UDB_PATH}")
-    for i in range(0, 1):
-        print('mean testability2 normalize by 1\t', main(config.UDB_PATH, initial_value=1.0, verbose=False))

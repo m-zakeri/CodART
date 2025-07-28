@@ -28,7 +28,7 @@ try:
 except ImportError as e:
     print(e)
 
-from sklearn.experimental import enable_hist_gradient_boosting  # noqa
+from sklearn.ensemble import HistGradientBoostingClassifier, HistGradientBoostingRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import QuantileTransformer
 
@@ -561,7 +561,29 @@ class TestabilityMetrics:
         :param entity:
         :return:
         """
-        class_lexicon_metrics_dict = dict()
+        default_metrics = {
+            'NumberOfTokens': 0,
+            'NumberOfUniqueTokens': 0,
+            'NumberOfIdentifies': 0,
+            'NumberOfUniqueIdentifiers': 0,
+            'NumberOfKeywords': 0,
+            'NumberOfUniqueKeywords': 0,
+            'NumberOfOperatorsWithoutAssignments': 0,
+            'NumberOfAssignments': 0,
+            'NumberOfUniqueOperators': 0,
+            'NumberOfDots': 0,
+            'NumberOfSemicolons': 0,
+            'NumberOfReturnAndPrintStatements': 0,
+            'NumberOfConditionalJumpStatements': 0,
+            'NumberOfUnConditionalJumpStatements': 0,
+            'NumberOfExceptionStatements': 0,
+            'NumberOfNewStatements': 0,
+            'NumberOfSuperStatements': 0
+        }
+
+        if not entity:
+            print("No entity provided")
+            return default_metrics
 
         # for ib in entity.ib():
         #     print('entity ib', ib)
@@ -593,66 +615,63 @@ class TestabilityMetrics:
         dots_count = 0
 
         try:
-            # print('ec', entity.parent().id())
-            # source_file_entity = db.ent_from_id(entity.parent().id())
-
-            # print('file', type(source_file_entity), source_file_entity.longname())
-            for lexeme in entity.lexer(show_inactive=False):
-                # print(lexeme.text(), ': ', lexeme.token())
-                tokens_list.append(lexeme.text())
-                if lexeme.token() == 'Identifier':
-                    identifiers_list.append(lexeme.text())
-                if lexeme.token() == 'Keyword':
-                    keywords_list.append(lexeme.text())
-                if lexeme.token() == 'Operator':
-                    operators_list.append(lexeme.text())
-                if lexeme.text() in return_and_print_kw_list:
-                    return_and_print_count += 1
-                if lexeme.text() in condition_kw_list:
-                    condition_count += 1
-                if lexeme.text() in uncondition_kw_list:
-                    uncondition_count += 1
-                if lexeme.text() in exception_kw_list:
-                    exception_count += 1
-                if lexeme.text() in new_count_kw_list:
-                    new_count += 1
-                if lexeme.text() in super_count_kw_list:
-                    super_count += 1
-                if lexeme.text() == '.':
-                    dots_count += 1
-        except:
+            for en in entity.ents("File"):
+                for lexeme in en.lexer():
+                    tokens_list.append(lexeme.text())
+                    if lexeme.token() == 'Identifier':
+                        identifiers_list.append(lexeme.text())
+                    if lexeme.token() == 'Keyword':
+                        keywords_list.append(lexeme.text())
+                    if lexeme.token() == 'Operator':
+                        operators_list.append(lexeme.text())
+                    if lexeme.text() in return_and_print_kw_list:
+                        return_and_print_count += 1
+                    if lexeme.text() in condition_kw_list:
+                        condition_count += 1
+                    if lexeme.text() in uncondition_kw_list:
+                        uncondition_count += 1
+                    if lexeme.text() in exception_kw_list:
+                        exception_count += 1
+                    if lexeme.text() in new_count_kw_list:
+                        new_count += 1
+                    if lexeme.text() in super_count_kw_list:
+                        super_count += 1
+                    if lexeme.text() == '.':
+                        dots_count += 1
+        except Exception as e:
+            print('exception', e)
             raise RuntimeError('Error in computing class lexical metrics for class "{0}"'.format(entity.longname()))
 
         number_of_assignments = operators_list.count('=')
         number_of_operators_without_assignments = len(operators_list) - number_of_assignments
         number_of_unique_operators = len(set(list(filter('='.__ne__, operators_list))))
 
-        class_lexicon_metrics_dict.update({'NumberOfTokens': len(tokens_list)})
-        class_lexicon_metrics_dict.update({'NumberOfUniqueTokens': len(set(tokens_list))})
+        default_metrics.update({'NumberOfTokens': len(tokens_list)})
+        default_metrics.update({'NumberOfUniqueTokens': len(set(tokens_list))})
 
-        class_lexicon_metrics_dict.update({'NumberOfIdentifies': len(identifiers_list)})
-        class_lexicon_metrics_dict.update({'NumberOfUniqueIdentifiers': len(set(identifiers_list))})
+        default_metrics.update({'NumberOfIdentifies': len(identifiers_list)})
+        default_metrics.update({'NumberOfUniqueIdentifiers': len(set(identifiers_list))})
 
-        class_lexicon_metrics_dict.update({'NumberOfKeywords': len(keywords_list)})
-        class_lexicon_metrics_dict.update({'NumberOfUniqueKeywords': len(set(keywords_list))})
+        default_metrics.update({'NumberOfKeywords': len(keywords_list)})
+        default_metrics.update({'NumberOfUniqueKeywords': len(set(keywords_list))})
 
-        class_lexicon_metrics_dict.update(
+        default_metrics.update(
             {'NumberOfOperatorsWithoutAssignments': number_of_operators_without_assignments})
-        class_lexicon_metrics_dict.update({'NumberOfAssignments': number_of_assignments})
-        class_lexicon_metrics_dict.update({'NumberOfUniqueOperators': number_of_unique_operators})
+        default_metrics.update({'NumberOfAssignments': number_of_assignments})
+        default_metrics.update({'NumberOfUniqueOperators': number_of_unique_operators})
 
-        class_lexicon_metrics_dict.update({'NumberOfDots': dots_count})
-        class_lexicon_metrics_dict.update({'NumberOfSemicolons': entity.metric(['CountSemicolon'])['CountSemicolon']})
+        default_metrics.update({'NumberOfDots': dots_count})
+        default_metrics.update({'NumberOfSemicolons': entity.metric(['CountSemicolon'])['CountSemicolon']})
 
-        class_lexicon_metrics_dict.update({'NumberOfReturnAndPrintStatements': return_and_print_count})
-        class_lexicon_metrics_dict.update({'NumberOfConditionalJumpStatements': condition_count})
-        class_lexicon_metrics_dict.update({'NumberOfUnConditionalJumpStatements': uncondition_count})
-        class_lexicon_metrics_dict.update({'NumberOfExceptionStatements': exception_count})
-        class_lexicon_metrics_dict.update({'NumberOfNewStatements': new_count})
-        class_lexicon_metrics_dict.update({'NumberOfSuperStatements': super_count})
+        default_metrics.update({'NumberOfReturnAndPrintStatements': return_and_print_count})
+        default_metrics.update({'NumberOfConditionalJumpStatements': condition_count})
+        default_metrics.update({'NumberOfUnConditionalJumpStatements': uncondition_count})
+        default_metrics.update({'NumberOfExceptionStatements': exception_count})
+        default_metrics.update({'NumberOfNewStatements': new_count})
+        default_metrics.update({'NumberOfSuperStatements': super_count})
 
         # print('Class lexicon metrics:', class_lexicon_metrics_dict)
-        return class_lexicon_metrics_dict
+        return default_metrics
 
     @classmethod
     def compute_java_package_metrics(cls, db=None, class_name: str = None):
@@ -990,49 +1009,7 @@ class TestabilityMetrics:
             #         raise ValueError('Required data for systematic metric computation is not enough!')
 
 
-def do(class_entity_long_name, project_path):
-    import understand as und
-    db = und.open(project_path)
 
-    class_entity = UnderstandUtility.get_class_entity_by_name(class_name=class_entity_long_name, db=db)
-    one_class_metrics_value = [class_entity.longname()]
-    # print('Calculating package metrics')
-    package_metrics_dict = TestabilityMetrics.compute_java_package_metrics(db=db,
-                                                                           class_name=class_entity.longname())
-    if package_metrics_dict is None:
-        # raise TypeError('No package metric for item {} was found'.format(class_entity.longname()))
-        return
-    # print('Calculating class lexicon metrics')
-    class_lexicon_metrics_dict = TestabilityMetrics.compute_java_class_metrics_lexicon(db=db,
-                                                                                       entity=class_entity)
-    if class_lexicon_metrics_dict is None:
-        # raise TypeError('No class lexicon metric for item {} was found'.format(class_entity.longname()))
-        return
-    # print('Calculating class ordinary metrics')
-    class_ordinary_metrics_dict = TestabilityMetrics.compute_java_class_metrics2(db=db,
-                                                                                 entity=class_entity)
-    if class_ordinary_metrics_dict is None:
-        # raise TypeError('No class ordinary metric for item {} was found'.format(class_entity.longname()))
-        return
-
-    # Write project_metrics_dict
-    # for metric_name in TestabilityMetrics.get_project_metrics_names():
-    #     one_class_metrics_value.append(project_metrics_dict[metric_name])
-
-    # Write package_metrics_dict
-    for metric_name in TestabilityMetrics.get_package_metrics_names():
-        one_class_metrics_value.append(package_metrics_dict[metric_name])
-
-    # Write class_lexicon_metrics_dict
-    for metric_name in TestabilityMetrics.get_class_lexicon_metrics_names():
-        one_class_metrics_value.append(class_lexicon_metrics_dict[metric_name])
-
-    # Write class_ordinary_metrics_dict
-    for metric_name in TestabilityMetrics.get_class_ordinary_metrics_names():
-        one_class_metrics_value.append(class_ordinary_metrics_dict[metric_name])
-
-    db.close()
-    return one_class_metrics_value
 
 
 # ------------------------------------------------------------------------
@@ -1112,12 +1089,25 @@ class PreProcess:
         db = und.open(project_path)
         class_list = cls.extract_project_classes(db=db)
         db.close()
+        # Check if the class_list is empty
+        if not class_list:
+            raise ValueError('No classes found in the project. Please check the project path.')
 
-        res = Parallel(n_jobs=n_jobs, )(
-            delayed(do)(class_entity_long_name, project_path) for class_entity_long_name in class_list
-        )
-        res = list(filter(None, res))
+        # Use Parallel to compute metrics
+        try:
+            res = Parallel(n_jobs=n_jobs)(
+                delayed(cls.do)(class_entity_long_name, project_path) for class_entity_long_name in class_list
+            )
+            # Filter out None results from the computation
+            res = list(filter(None, res))
 
+            # If res is empty after filtering, warn or handle accordingly
+            if not res:
+                raise Warning('All computations returned None. Please check the input data.')
+
+        except Exception as e:
+            print(f"An error occurred during parallel processing: {e}")
+            return pd.DataFrame()  # Return an empty DataFrame or handle accordingl
         columns = ['Class']
         columns.extend(TestabilityMetrics.get_all_metrics_names())
         df = pd.DataFrame(data=res, columns=columns)
@@ -1169,6 +1159,57 @@ class PreProcess:
         # df.to_csv(result_csv, index=False)
         database_.close()
         return df
+
+    @classmethod
+    def do(cls, class_entity_long_name, project_path):
+        import understand as und
+        db = und.open(project_path)
+        try:
+            class_entity = UnderstandUtility.get_class_entity_by_name(class_name=class_entity_long_name, db=db)
+            one_class_metrics_value = [class_entity.longname()]
+            # print('Calculating package metrics')
+            package_metrics_dict = TestabilityMetrics.compute_java_package_metrics(db=db,
+                                                                                   class_name=class_entity.longname())
+
+            if package_metrics_dict is None:
+                # raise TypeError('No package metric for item {} was found'.format(class_entity.longname()))
+                return
+            # print('Calculating class lexicon metrics')
+            class_lexicon_metrics_dict = TestabilityMetrics.compute_java_class_metrics_lexicon(db=db,
+                                                                                               entity=class_entity)
+
+            if class_lexicon_metrics_dict is None:
+                # raise TypeError('No class lexicon metric for item {} was found'.format(class_entity.longname()))
+                return
+            # print('Calculating class ordinary metrics')
+            class_ordinary_metrics_dict = TestabilityMetrics.compute_java_class_metrics2(db=db,
+                                                                                         entity=class_entity)
+            if class_ordinary_metrics_dict is None:
+                # raise TypeError('No class ordinary metric for item {} was found'.format(class_entity.longname()))
+                return
+
+            # Write project_metrics_dict
+            # for metric_name in TestabilityMetrics.get_project_metrics_names():
+            #     one_class_metrics_value.append(project_metrics_dict[metric_name])
+
+            # Write package_metrics_dict
+            for metric_name in TestabilityMetrics.get_package_metrics_names():
+                one_class_metrics_value.append(package_metrics_dict[metric_name])
+
+            # Write class_lexicon_metrics_dict
+            for metric_name in TestabilityMetrics.get_class_lexicon_metrics_names():
+                one_class_metrics_value.append(class_lexicon_metrics_dict[metric_name])
+
+            # Write class_ordinary_metrics_dict
+            for metric_name in TestabilityMetrics.get_class_ordinary_metrics_names():
+                one_class_metrics_value.append(class_ordinary_metrics_dict[metric_name])
+
+            db.close()
+            return one_class_metrics_value
+        except Exception as e:
+            db.close()
+            print(f"An error occurred during parallel processing: {e}")
+
 
 
 class TestabilityModel(object):
@@ -1227,26 +1268,26 @@ class TestabilityModel(object):
         return df_new['PredictedTestability'].mean()
 
 
-# Test driver
-def main(project_path, initial_value=1.0):
-    """
-    A demo of using testability_prediction module to measure testability quality attribute with machine learning
-    """
-    # db = und.open(project_path)
-    p = PreProcess()
-    # classes_longnames_list = p.extract_project_classes(db=db)
-    df = p.compute_metrics_by_class_list(project_path, n_jobs=7)  # n_job must be set to number of CPU cores
-    # db.close()
-    model = TestabilityModel(df_path=r'data_model/DS07012.csv')
-    testability_ = model.inference(model_path='/data_model/VR1_DS1.joblib', df_predict_data=df)
-    # print('testability=', testability_)
-    return testability_ / initial_value
-
-
-# Test module
-if __name__ == '__main__':
-    # project_path_ = r'../benchmark_projects/ganttproject/biz.ganttproject.core/biz.ganttproject.core.und'  # T=0.5253
-    # project_path_ = r'../benchmark_projects/JSON/JSON.und'  # T=0.4531
-    # project_path_ = r'D:/IdeaProjects/JSON20201115/JSON20201115.und'  # T=0.4749
-    project_path_ = r'D:/IdeaProjects/jvlt-1.3.2/src.und'  # T=0.4212
-    print(main(project_path_))
+# # Test driver
+# def main(project_path, initial_value=1.0):
+#     """
+#     A demo of using testability_prediction module to measure testability quality attribute with machine learning
+#     """
+#     # db = und.open(project_path)
+#     p = PreProcess()
+#     # classes_longnames_list = p.extract_project_classes(db=db)
+#     df = p.compute_metrics_by_class_list(project_path, n_jobs=7)  # n_job must be set to number of CPU cores
+#     # db.close()
+#     model = TestabilityModel(df_path=r'data_model/DS07012.csv')
+#     testability_ = model.inference(model_path='/data_model/VR1_DS1.joblib', df_predict_data=df)
+#     # print('testability=', testability_)
+#     return testability_ / initial_value
+#
+#
+# # Test module
+# if __name__ == '__main__':
+#     # project_path_ = r'../benchmark_projects/ganttproject/biz.ganttproject.core/biz.ganttproject.core.und'  # T=0.5253
+#     # project_path_ = r'../benchmark_projects/JSON/JSON.und'  # T=0.4531
+#     # project_path_ = r'D:/IdeaProjects/JSON20201115/JSON20201115.und'  # T=0.4749
+#     project_path_ = r'D:/IdeaProjects/jvlt-1.3.2/src.und'  # T=0.4212
+#     print(main(project_path_))

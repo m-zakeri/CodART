@@ -1,0 +1,181 @@
+version: '3.9'
+
+networks:
+  internal:
+    driver: bridge
+    internal: true
+  default:
+    driver: bridge
+
+services:
+  minio:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_storage:/data
+    networks:
+      - default
+      - internal
+
+  redis:
+    image: redis:alpine
+    hostname: redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - default
+      - internal
+
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - default
+      - internal
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  python-base:
+    image: python-base:v1.0.0
+    build:
+      context: .
+      dockerfile: Dockerfile.python-base
+    networks:
+      - default
+      - internal
+
+  base:
+    image: base:v1.0.0
+    build:
+      context: .
+      dockerfile: Dockerfile.base
+    depends_on:
+      - python-base
+    networks:
+      - default
+      - internal
+
+
+  ui:
+    image: ml-platform-ui:v1.0.0
+    build:
+      context: ./ui
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - api
+    networks:
+      - default
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost" ]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  api:
+    image: application:v1.0.0
+    privileged: true
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    extra_hosts:
+      - "licensing.scitools.com:127.0.0.1"
+      - "stats.scitools.com:127.0.0.1"
+    volumes:
+      - scitools_root_config:/root/.config/SciTools
+      - scitools_python_api:/root/.local/share/SciTools/Understand
+      - und_dbs:/opt/understand_dbs
+      - projects:/opt/projects
+      - csv_pmd:/opt/csv_reports
+    devices:
+      - /dev/dri:/dev/dri
+    ipc: host
+    hostname: root
+    mac_address: 02:42:ac:11:00:02
+    shm_size: 8g
+    mem_limit: 12g
+    restart: unless-stopped
+    cap_add:
+      - SYS_PTRACE
+      - SYS_RESOURCE
+    security_opt:
+      - seccomp=unconfined
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    ports:
+      - "8000:8000"
+    environment:
+      # Application environment variables
+      - INSTALLDIR=/app/
+      - PROJECTS_BASE_DIR=/opt/projects
+      - DB_BASE_DIR=/opt/understand_dbs
+      - HOSTNAME=api
+      - XDG_RUNTIME_DIR=/tmp/runtime-root
+
+      # Understand license environment variables
+      - STIDOSUTILDIR=/root/.config/SciTools
+      - STIHOME=/app/scitools
+      - STILICENSE=/root/.config/SciTools/License.conf
+      - UNDERSTAND_API_LICENSE=/root/.local/share/SciTools/Understand/python_api.cfg
+
+      # Path environment variables
+      - PATH=/app/scitools/bin/linux64:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      - PYTHONPATH=/app:/app/scitools/bin/linux64/Python
+      - LD_LIBRARY_PATH=/app/scitools/bin/linux64
+
+      # Qt environment variables
+      - QT_QPA_PLATFORM=offscreen
+      - QT_DEBUG_PLUGINS=0
+      - QT_NO_SSL=1
+      - QT_MUTEX_WAIT_TIME=0
+
+      # External service connections
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=00jFBl7n9Jn0ex0XL7m1
+      - MINIO_SECRET_KEY=kYfujzkdSGjXKLN9oQhPDIVgRUaZRijvj1yaXmIZ
+      - MINIO_CODESMELLS_BUCKET=code-smells
+      - REDIS_CLIENT_NAME=redis
+      - REDIS_PASSWORD=redis
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - minio
+      - rabbitmq
+      - redis
+      - base
+    networks:
+      - default
+      - internal
+
+volumes:
+  minio_storage:
+  redis_data:
+  und_dbs:
+  projects:
+  csv_pmd:
+  scitools_root_config:
+  scitools_python_api:

@@ -1,0 +1,24 @@
+<ruleset name="Custom Rules"
+    xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+
+    <description>
+        My custom rules
+    </description>
+    <rule ref="category/java/design.xml/GodClass" />
+    <rule ref="category/java/design.xml/LawOfDemeter" />
+    <rule ref="category/java/design.xml/UselessOverridingMethod" />
+    <rule ref="category/java/design.xml/CognitiveComplexity" />
+    <rule ref="category/java/design.xml/CyclomaticComplexity" />
+    <rule ref="category/java/design.xml/NPathComplexity" />
+    <rule ref="category/java/design.xml/NcssCount" />
+    <rule ref="category/java/design.xml/ExcessivePublicCount" />
+    <rule ref="category/java/design.xml/TooManyMethods" />
+    <rule ref="category/java/bestpractices.xml/LooseCoupling" />
+    <rule ref="category/java/codestyle.xml/UnnecessaryModifier" />
+    <rule ref="category/java/errorprone.xml/ProperLogger" />
+    <rule ref="category/java/errorprone.xml/AvoidInstanceofChecksInCatchClause" />
+    <rule ref="category/java/bestpractices.xml/UnusedPrivateMethod" />
+</ruleset>
+

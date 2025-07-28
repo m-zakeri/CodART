@@ -1,0 +1,13 @@
+/venv
+.github
+.idea
+README.md
+node_modules
+npm-debug.log
+build
+.git
+.gitignore
+README.md
+.env
+.DS_Store
+.vscode

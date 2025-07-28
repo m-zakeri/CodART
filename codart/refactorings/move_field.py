@@ -31,7 +31,9 @@ try:
 except ImportError as e:
     print(e)
 
-from codart.config import logger
+from codart.learner.sbr_initializer.utils.utility import logger, config
+
+# from codart.config import logger
 
 # logging.basicConfig(level=logging.DEBUG)
 # logger = logging.getLogger(__file__)
@@ -264,12 +266,12 @@ def main(source_class: str, source_package: str, target_class: str, target_packa
 
 
 # Tests
-if __name__ == '__main__':
-    main(
-        source_class="Source",
-        source_package="my_package",
-        target_class="TargetNew",
-        target_package="your_package",
-        field_name="number3",
-        udb_path="D:\Dev\JavaSample\JavaSample1.udb"
-    )
+# if __name__ == '__main__':
+#     main(
+#         source_class="Source",
+#         source_package="my_package",
+#         target_class="TargetNew",
+#         target_package="your_package",
+#         field_name="number3",
+#         udb_path="D:\Dev\JavaSample\JavaSample1.udb"
+#     )
